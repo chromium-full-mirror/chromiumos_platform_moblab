@@ -2,6 +2,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {RunSuiteComponent} from './run-suite.component';
 import {WidgetsModule} from '../widgets/widgets.module';
+import {MaterialModule} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -13,6 +14,7 @@ import {WidgetsModule} from '../widgets/widgets.module';
   providers: [
   ],
   imports: [
+    MaterialModule.forRoot(),
     CommonModule,
     WidgetsModule,
   ]

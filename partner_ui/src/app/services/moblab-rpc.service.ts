@@ -21,7 +21,7 @@ export class MoblabRpcService {
 
     // TODO(haddowk) mock out the RPC service for UI developement rather than using a local server.
     //return this.http.post("http://" + window.location.hostname + "/afe/server/rpc/", content,
-    return this.http.post("http://" + "100.96.49.106" + "/afe/server/rpc/", content,
+    return this.http.post("http://" + "100.96.49.226" + "/afe/server/rpc/", content,
       {headers: headers, method: RequestMethod.Post, withCredentials: true})
     .map((res:Response) => res.json().result)
     .catch((error: any) => {
@@ -35,6 +35,10 @@ export class MoblabRpcService {
 
   getBuilds(board: string): Observable<string> {
     return this.sendRpcCall("get_builds_for_board", {"board_name": board});
+  }
+
+  getFirmwareBuilds(board: string): Observable<string> {
+    return this.sendRpcCall("get_firmware_for_board", {"board_name": board});
   }
 
   getPools(): Observable<string> {

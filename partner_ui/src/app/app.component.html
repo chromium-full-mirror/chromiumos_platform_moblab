@@ -1,3 +1,55 @@
-<h1>Moblab</h1>
-<run-suite>Loading....</run-suite>
+<div [class.dark-theme]="isDarkTheme">
+  <md-toolbar color="primary">
+    <span>
+      <md-icon class="icon-20">pets</md-icon>
+      Moblab
+    </span>
+    <md-menu #appMenu="mdMenu">
+      <button md-menu-item> Settings </button>
+      <button md-menu-item> Help </button>
+    </md-menu>
+
+    <button md-icon-button [mdMenuTriggerFor]="appMenu">
+      <md-icon>more_vert</md-icon>
+    </button>
+  </md-toolbar>
+  <md-sidenav-container class="sidenav-container">
+    <md-sidenav mode="side" opened="true">
+      <md-list>
+        <md-list-item></md-list-item>
+        <md-list-item>
+          <button md-button class="sidenav-button"(click)="toShow = 'configuration'">Configuration</button>
+        </md-list-item>
+        <md-list-item>
+          <button md-button class="sidenav-button" (click)="toShow = 'advancedsettings'">Advanced Settings</button>
+        </md-list-item>
+        <md-list-item>
+          <button md-button class="sidenav-button" (click)="toShow = 'managedut'">Manage DUT's</button>
+        </md-list-item>
+        <md-list-item>
+          <button md-button class="sidenav-button" (click)="toShow = 'runsuite'">Run Suite</button>
+        </md-list-item>
+      </md-list>
+
+    </md-sidenav>
+    <div [ngSwitch]="toShow">
+      <md-card *ngSwitchCase="'configuration'">
+        <configuration>Loading....</configuration>
+      </md-card>
+      <md-card *ngSwitchCase="'advancedsettings'">
+        <advanced-settings>Loading....</advanced-settings>
+      </md-card>
+      <md-card *ngSwitchCase="'managedut'">
+        <manage-dut>Loading....</manage-dut>
+      </md-card>
+      <md-card *ngSwitchCase="'runsuite'">
+        <run-suite>Loading....</run-suite>
+      </md-card>
+      <md-card *ngSwitchDefault>
+        <h1> Something went wrong</h1>
+        AAAAAAAA{{toShow}}AAAAAAAAAA
+      </md-card>
+    </div>
+  </md-sidenav-container>
+</div>
 
