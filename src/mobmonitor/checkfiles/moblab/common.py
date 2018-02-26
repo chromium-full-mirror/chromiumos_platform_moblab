@@ -15,7 +15,8 @@ BOTO_PATH = '/home/moblab/.boto'
 #
 # disk_check constants.
 #
-DISK_SIZE_BYTES = 32000000000
+# 100GB
+DISK_SIZE_BYTES = 100 * 1024 * 1024 * 1024
 
 MOBLAB_LABEL = 'MOBLAB-STORAGE'
 
@@ -23,7 +24,7 @@ STATEFUL_MOUNTPOINT = '/mnt/stateful_partition'
 MOBLAB_MOUNTPOINT = '/mnt/moblab'
 MOBLAB_FILESYSTEM = 'ext4'
 
-DISK_FREE_THRESHOLD_PERCENT = 0.1
+DISK_FREE_THRESHOLD_PERCENT = 0.3
 
 #
 # Networking constants.

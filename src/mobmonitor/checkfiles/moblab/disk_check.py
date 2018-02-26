@@ -14,6 +14,19 @@ import common
 from util import osutils
 from system import systeminfo
 
+class DISK_DEVICE_CODES:
+    OK = 0
+    NO_STATEFUL_PARTITION = -1
+    NO_USB = -2
+    USB_INCORRECT_LABEL = -3
+    USB_INCORRECT_FORMAT = -4
+    USB_INCORRECT_MOUNT = -5
+    TOTAL_STORAGE_TOO_SMALL = -6
+
+class DISK_SPACE_CODES:
+    OK = 0
+    INSUFFICIENT_FREE_SPACE = -1
+
 
 class DiskDevices(object):
   """Verifies that disks on moblab are set up correctly."""
@@ -23,6 +36,8 @@ class DiskDevices(object):
   def __init__(self):
     self.diskinfo = systeminfo.GetDisk(self.DISK_INFO_VALID_SEC)
     self.useable_usbs = []
+    self.stateful_partition = None
+    self.moblab_storage_usb = None
 
   def CheckStateful(self):
     """Helper check function for verifying the stateful partition.
@@ -30,7 +45,6 @@ class DiskDevices(object):
     Returns:
       0 if a sufficient stateful partition is exists.
       -1 if no devices are found to be mounted at STATEFUL_MOUNTPOINT.
-      -2 if the stateful partition is too small.
     """
     diskpart = None
     for part in self.diskinfo.DiskPartitions():
@@ -38,37 +52,27 @@ class DiskDevices(object):
         diskpart = part
 
     if not diskpart:
-      return -1
+      return DISK_DEVICE_CODES.NO_STATEFUL_PARTITION
 
-    diskusage = self.diskinfo.DiskUsage(diskpart.mountpoint)
-    if diskusage.total < common.DISK_SIZE_BYTES:
-      return -2
-
-    return 0
+    self.stateful_partition = self.diskinfo.DiskUsage(diskpart.mountpoint)
+    return DISK_DEVICE_CODES.OK
 
   def CheckUsb(self):
     """Helper check function for verifying an adequate USB drive exists.
 
-    Returns:
-      0 if a sufficient USB drive is exists.
-      -3 if no USB devices are found on the system.
-      -4 if no USB device is found to be of the appropriate size.
-      -5 if no USB device is found to be appropriately labelled.
-      -6 if no USB device is found to be formatted correctly.
-      -7 if no USB device is found to be mounted correctly.
+    Returns: A DISK_DEVICE_CODES value
+     OK if a sufficient USB drive is exists.
+     NO_USB if no USB devices are found on the system.
+     USB_INCORRECT_LABEL if no USB device is found to be appropriately labelled.
+     USB_INCORRECT_FORMAT if no USB device is found to be formatted correctly.
+     USB_INCORRECT_MOUNT if no USB device is found to be mounted correctly.
     """
     # Get a list of all usb block devices.
     usbs = [db for db in self.diskinfo.BlockDevices()
             if any(x.startswith('usb') for x in db.ids)]
 
     if not usbs:
-      return -3
-
-    # Get all well-sized usb block devices.
-    usbs = [usb for usb in usbs if usb.size >= common.DISK_SIZE_BYTES]
-
-    if not usbs:
-      return -4
+      return DISK_DEVICE_CODES.NO_USB
 
     # Get all well-labelled usb block devices.
     self.useable_usbs = copy.copy(usbs)
@@ -76,7 +80,7 @@ class DiskDevices(object):
             if any(x == common.MOBLAB_LABEL for x in usb.labels)]
 
     if not usbs:
-      return -5
+      return DISK_DEVICE_CODES.USB_INCORRECT_LABEL
 
     # Get all usbs formatted with the correct filesystem.
     self.useable_usbs = copy.copy(usbs)
@@ -89,10 +93,10 @@ class DiskDevices(object):
         usbs.append(usb)
 
     if not usbs:
-      return -6
+      return DISK_DEVICE_CODES.USB_INCORRECT_FORMAT
 
     # Get a list of mounts on this system and check if we have a usb
-    # mounted in the correctly.
+    # mounted correctly.
     self.useable_usbs = copy.copy(usbs)
     mounts = self.diskinfo.DiskPartitions()
     usbs = [usb for usb in usbs
@@ -101,25 +105,27 @@ class DiskDevices(object):
                    for x in mounts)]
 
     if not usbs:
-      return -7
+      return DISK_DEVICE_CODES.USB_INCORRECT_MOUNT
 
     # Looks like an adequate usb device exists!
-    return 0
+    self.moblab_storage_usb = usbs[0]
+    return DISK_DEVICE_CODES.OK
 
   def Check(self):
     """Verifies that disk devices are setup correctly on this moblab.
 
-    Appropriate storage space may be satisfied by one of the following
+    Appropriate storage space may be satisfied by the following
     conditions:
 
       (1) A partition exists that is:
             (i)   mounted at /mnt/stateful_partition
-            (ii)  >32GB in size
 
-      (2) A USB drive exists that is:
+      (2) A USB drive (optionally) exists that is:
             (i)   mounted at /mnt/moblab
             (ii)  labelled MOBLAB-STORAGE
-            (iii) >32GB in size
+
+      (3) USB + stateful_partition storage is > 100GB
+            (i)   If there is no USB, stateful_partition must be > 100GB
 
     Returns:
       0 if this moblab has appropriate disk space.
@@ -127,27 +133,40 @@ class DiskDevices(object):
     stateful_check = self.CheckStateful()
     usb_check = self.CheckUsb()
 
-    if any(not x for x in [stateful_check, usb_check]):
-      return 0
+    # usb and stateful detected, check that total storage meets requirements
+    if (stateful_check == DISK_DEVICE_CODES.OK and
+            usb_check == DISK_DEVICE_CODES.OK):
+        total_storage = (self.stateful_partition.total +
+                self.moblab_storage_usb.size)
+        return (DISK_DEVICE_CODES.OK if total_storage >= common.DISK_SIZE_BYTES
+                else DISK_DEVICE_CODES.TOTAL_STORAGE_TOO_SMALL)
 
-    if -3 == usb_check:
-      return stateful_check
+    # no usb, stateful partition alone must meet total storage requirements
+    elif (stateful_check == DISK_DEVICE_CODES.OK and
+            usb_check == DISK_DEVICE_CODES.NO_USB):
+        return (DISK_DEVICE_CODES.OK
+                if self.stateful_partition.total >= common.DISK_SIZE_BYTES
+                else DISK_DEVICE_CODES.TOTAL_STORAGE_TOO_SMALL)
 
-    return usb_check
+    elif stateful_check != DISK_DEVICE_CODES.OK:
+        return stateful_check
+
+    elif usb_check != DISK_DEVICE_CODES.OK:
+        return usb_check
+
+    else:
+        return DISK_DEVICE_CODES.OK
 
   def Diagnose(self, errcode):
-    if -1 == errcode:
+    if DISK_DEVICE_CODES.NO_STATEFUL_PARTITION == errcode:
       return ('Critical error. No stateful partition was detected.', [])
 
-    elif -2 == errcode or -3 == errcode:
-      return ('Moblab internal storage is too small. Please insert'
-              ' a USB drive that is at least 32GB in size.', [])
+    elif DISK_DEVICE_CODES.TOTAL_STORAGE_TOO_SMALL == errcode:
+      return ('Total storage is too small.'
+              ' Please insert a USB drive so that total storage'
+              ' is greater than 100GB.', [])
 
-    elif -4 == errcode:
-      return ('All detected USB drives are too small. Please insert'
-              ' a USB drive that is at least 32GB in size.', [])
-
-    elif -5 == errcode:
+    elif DISK_DEVICE_CODES.USB_INCORRECT_LABEL == errcode:
       return ('USB drive is not correctly labelled.'
               ' Please review the setup instructions and label'
               ' your USB drive. For more information please see'
@@ -155,7 +174,7 @@ class DiskDevices(object):
               'setup#TOC-Formatting-External-Storage-for-MobLab',
               [])
 
-    elif -6 == errcode:
+    elif DISK_DEVICE_CODES.USB_INCORRECT_FORMAT == errcode:
       return ('USB drive is not formatted correctly.'
               ' Please review the setup instructions and format'
               ' your USB drive. For more information please see'
@@ -163,7 +182,7 @@ class DiskDevices(object):
               'setup#TOC-Formatting-External-Storage-for-MobLab',
               [])
 
-    elif -7 == errcode:
+    elif DISK_DEVICE_CODES.USB_INCORRECT_MOUNT == errcode:
       usb = self.useable_usbs[0]
       return ('USB drive is not mounted correctly.',
               [moblab_actions.MountUsbWrapper(usb.device)])
@@ -182,23 +201,25 @@ class DiskSpace(object):
   def Check(self):
     """Verifies that moblab has enough free disk space.
 
-    Returns:
-      0 if moblab has a sufficient amount of remaining disk space.
-      -1 if the moblab has <DISK_FREE_THRESHOLD_PERCENT free disk space
-        on either the moblab or stateful partition.
+    Returns: DISK_SPACE_CODES
+      OK if moblab has a sufficient amount of remaining disk space.
+      INSUFFICIENT_FREE_SPACE if the moblab has
+        <DISK_FREE_THRESHOLD_PERCENT free disk space on either the moblab or
+        stateful partition.
     """
     partitions = [common.MOBLAB_MOUNTPOINT, common.STATEFUL_MOUNTPOINT]
     for part in partitions:
       diskusage = self.diskinfo.DiskUsage(part)
-      free = 1 - diskusage.percent_used / 100
+      free = 1 - diskusage.percent_used / 100.0
       if free < common.DISK_FREE_THRESHOLD_PERCENT:
-        return -1
+        return DISK_SPACE_CODES.INSUFFICIENT_FREE_SPACE
 
-    return 0
+    return DISK_SPACE_CODES.OK
 
   def Diagnose(self, errcode):
-    if -1 == errcode:
+    if DISK_SPACE_CODES.INSUFFICIENT_FREE_SPACE == errcode:
       return ('Moblab has less than %s percent free disk space. Please'
+              ' add more USB storage or'
               ' free space to ensure proper functioning of your'
               ' moblab.' % int(common.DISK_FREE_THRESHOLD_PERCENT * 100),
               [moblab_actions.ClearOldDbRecords, moblab_actions.ClearLogs])
