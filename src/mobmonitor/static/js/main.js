@@ -24,6 +24,7 @@ $(document).ready(function() {
 
   // Setup the repair action buttons
   $(document).on('click', '.run-repair-action', function() {
+    var button = $(this);
     // Retrieve the service and action for this repair button.
     var action = $(this).attr('action');
     var healthcheck = $(this).closest('.healthcheck-info').attr('hcname');
@@ -39,9 +40,12 @@ $(document).ready(function() {
 
     function repairServiceCallback(response) {
       $('#healthStatusDisplay').healthDisplay('markStale', response.service);
+      button.prop('disabled', false);
+      alert('Action ' + action + ' complete');
     }
 
     rpcActionInfo(service, healthcheck, action, function(response) {
+      button.prop('disabled', true);
       if (isEmpty(response.args) && isEmpty(response.kwargs)) {
         rpcRepairService(service, healthcheck, action,
                          [], {}, repairServiceCallback);
