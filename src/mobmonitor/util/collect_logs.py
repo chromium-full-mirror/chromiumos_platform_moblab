@@ -23,7 +23,9 @@ LOG_DIRS = {
     'messages': '/var/log/messages',
     'mysql': '/var/log/mysql',
     'servod': '/var/log/servod.log',
-    'scheduler': '/usr/local/autotest/logs/scheduler.latest'
+    'scheduler': '/usr/local/autotest/logs/scheduler.latest',
+    'bootup': '/var/log/bootup',
+    'mobmonitor': '/var/log/mobmonitor'
 }
 
 def remove_old_tarballs():
@@ -47,12 +49,9 @@ def collect_logs():
       else:
         shutil.copyfile(path, os.path.join(tempdir, name))
 
-    #cmd = ['mobmoncli', 'GetStatus']
-    #cros_build_lib.RunCommand(
-    #    cmd,
-    #    log_stdout_to_file=os.path.join(tempdir, 'mobmonitor_getstatus')
-    #)
-    #TODO mattmallett crbug.com/815013
+    status_file = os.path.join(tempdir, 'mobmonitor_getstatus')
+    status = osutils.run_command([
+            'curl', 'http://localhost:9991/GetStatus', '-o', status_file])
   finally:
     tarball = '%s.tgz' % tempdir
     osutils.create_tarball(tarball, tempdir)
