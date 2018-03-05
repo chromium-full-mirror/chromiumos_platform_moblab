@@ -45,6 +45,17 @@ def UpstartRunning(service):
 
   return False
 
+def MoblabBooting():
+    """ Test if moblab is still booting, and some services haven't come up yet.
+    Checks that moblab-bootup-status-init is running. This is killed when
+    essential services have attempted to start.
+
+    Returns:
+      True if the moblab is still booting
+    """
+
+    return UpstartRunning('moblab-bootup-status-init')
+
 
 def ServiceRunning(service):
   """Test if |service| is running on moblab.
@@ -74,18 +85,25 @@ class UpstartServiceRunning(object):
     Returns:
       0 if all SERVICES is running.
       -(i+1) if SERVICE with index i is not running.
+      i+1 if SERVICE with index i is not running, but moblab is still booting.
     """
     LOGGER.info('Checking services: %s', self.SERVICES)
+    booting = MoblabBooting()
     for i, x in enumerate(self.SERVICES):
       if not UpstartRunning(x):
-        return -(i+1)
+        return i+1 if booting else -(i+1)
 
     return 0
 
   def Diagnose(self, errcode):
     if errcode and self.SERVICES:
-      index = -1*errcode - 1
+      index = -1*errcode - 1 if errcode < 0 else errcode - 1
       service = self.SERVICES[index]
+
+      if errcode > 0:
+        return ('Essential moblab service "%s" has not started yet.'
+                ' Moblab is still booting.' % service, [])
+
       return ('Essential moblab service "%s" is not running.'
               ' Please launch the service.' % service,
               [moblab_actions.LaunchUpstartServiceWrapper(service)])
