@@ -155,5 +155,29 @@ class TestListBlockDevices(unittest.TestCase):
 
         self.assertEqual(len(devices), 3)
 
+class TestListConnectedDutIps(unittest.TestCase):
+    IP_N_OUT = ('192.168.231.119 dev lxcbr0  INCOMPLETE\n'
+        '100.127.28.13 dev eth0 lladdr 10:7b:44:5a:d4:7c STALE\n'
+        '192.168.231.100 dev lxcbr0 lladdr 60:38:e0:e3:10:f5 DELAY\n'
+        '192.168.231.101 dev lxcbr0 lladdr a0:ce:c8:11:28:33 REACHABLE\n'
+    )
+
+    PING_OUT = ('PING 192.168.231.100 (192.168.231.100) 56(84) bytes of data.\n'
+        '64 bytes from 192.168.231.100: icmp_seq=1 ttl=64 time=0.844 ms\n\n'
+        '--- 192.168.231.100 ping statistics ---\n'
+        '1 packets transmitted, 1 received, 0% packet loss, time 0ms\n'
+        'rtt min/avg/max/mdev = 0.844/0.844/0.844/0.000 ms')
+
+    @mock.patch('osutils.run_command')
+    def test_list_connected_dut_ips(self, MockRunCommand):
+
+        osutils.run_command.side_effect = [self.IP_N_OUT, self.PING_OUT]
+
+        expected = ['192.168.231.100', '192.168.231.101']
+        result = osutils.list_connected_dut_ips()
+
+        self.assertEquals(expected, result)
+
+
 if __name__ == '__main__':
     unittest.main()

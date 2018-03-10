@@ -157,3 +157,37 @@ def list_block_devices():
         devices.append(BlockDevice(**d))
 
     return devices
+
+
+def list_connected_dut_ips():
+    """List duts by ip currently connected to test subnet
+
+    Returns:
+        A list of connected ips on the test subnet
+    """
+
+    # regex to search an ip n reachable or cached line such as
+    # 192.168.231.100 dev lxcbr0 lladdr 60:38:e0:e3:10:f5 STALE
+    # grabs ip, state
+    # note this will not match an 'INCOMPLETE' line that indicates
+    # no network connection
+    regex = re.compile('^(192\.168\.231\.1\d\d)\sdev\s\S+\slladdr\s\S+\s(\S+)')
+
+    duts = []
+    ip_n_output = run_command(['ip', 'n']).strip()
+    for line in ip_n_output.splitlines():
+        match = regex.search(line)
+        if match is not None:
+            ip = match.group(1)
+            state = match.group(2)
+            if state == 'REACHABLE':
+                duts.append(ip)
+            else:
+                # a stale record, ping the ip to be sure it is reachable
+                cmd = ['ping', '-c', '1', '-W', '1', ip]
+                ping_output = run_command(cmd, error_code_ok=True)
+                if (ping_output is not None and
+                        '64 bytes from %s' % ip in ping_output):
+                    duts.append(ip)
+
+    return duts
