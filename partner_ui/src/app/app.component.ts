@@ -10,7 +10,7 @@ export class AppComponent {
   @Input() toShow: string;
 
   ngOnInit() {
-    this.toShow = "runsuite";
+    this.toShow = "configuration";
   }
 }
 

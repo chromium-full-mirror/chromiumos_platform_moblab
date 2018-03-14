@@ -1,0 +1,81 @@
+<content md-content>
+  <md-card>
+    <md-card-header>Configuration Information</md-card-header>
+    <md-card-content layout-padding>
+      <form #formRef="ngForm" (ngSubmit)="onSubmit(formRef.value)">
+        <md-list>
+          <div class="listrow" flex-direction="row">
+            <md-list-item>
+
+              <md-input-container class="configuration-input">
+                <input md-input required placeholder="Boto Key ID" [(ngModel)]="botoKeyId" name="botoKeyId" #botoKeyIdRef="ngModel">
+              </md-input-container>
+
+
+              <md-input-container class="configuration-input">
+                <input md-input type="password" required password placeholder="Boto Key Secret" [(ngModel)]="botoKeySecret"
+                       name="botoKeySecret">
+              </md-input-container>
+            </md-list-item>
+          </div>
+          <md-list-item>
+            <md-input-container>
+              <input md-input required class="configuration-input" placeholder="Image Storage Bucket URL"
+                     [(ngModel)]="imageStorageUrl" name="imageStorageUrl">
+            </md-input-container>
+            <a href={{imageStorageLink}} target="_blank">releases link</a>
+            <a href={{resultsStorageLink}} target="_blank">results link</a>
+          </md-list-item>
+          <md-list-item>
+            <md-checkbox [(ngModel)]="cloudNotificationEnabled" class="configuration-input"
+                         name="cloudNotificationEnabled">Cloud Notification Enabled
+            </md-checkbox>
+            <md-input-container class="configuration-input">
+              <input md-input  placeholder="Cloud Notification Topic"
+                     [(ngModel)]="cloudNotificationTopic" name="cloudNotificationTopic"
+                     [disabled]="!cloudNotificationEnabled"
+                     #cloudNotificationTopicRef>
+            </md-input-container>
+          </md-list-item>
+          <md-list-item>
+
+
+          </md-list-item>
+          <md-list-item>
+            <button md-raised-button color="primary"
+                    [disabled]="formRef.pristine"
+                    type="submit">Submit Changes</button>
+          </md-list-item>
+        </md-list>
+      </form>
+    </md-card-content>
+  </md-card>
+
+
+
+  <div><p></p></div>
+  <md-card>
+    <md-card-header>Network Information</md-card-header>
+    <md-card-content>
+      <table>
+        <tr><td>Server IP:</td><td>{{serverIp}}</td></tr>
+        <tr><td>Connected to Internet:</td><td>{{isConnectedToInternet}}</td></tr>
+      </table>
+    </md-card-content>
+  </md-card>
+  <div><p></p></div>
+
+
+  <md-card>
+    <md-card-header>Moblab Information</md-card-header>
+    <md-card-content>
+      <table>
+        <tr><td>Version:</td><td>{{moblabVersion}}</td></tr>
+        <tr><td>Track:</td><td>{{moblabTrack}}</td></tr>
+        <tr><td>Description:</td><td>{{moblabDescription}}</td></tr>
+        <tr><td>Moblab Id:</td><td>{{moblabId}}</td></tr>
+        <tr><td>Moblab Mac Address:</td><td>{{moblabMacAddress}}</td></tr>
+      </table>
+    </md-card-content>
+  </md-card>
+</content>

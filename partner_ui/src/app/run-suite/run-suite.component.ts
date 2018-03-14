@@ -4,6 +4,7 @@ import {MoblabRpcService} from '../services/services.module';
 @Component({
   selector: 'run-suite',
   template: `
+    <md-card>
     <md-list>
           <moblab-selector
             #boardSelector
@@ -47,6 +48,7 @@ import {MoblabRpcService} from '../services/services.module';
           </moblab-selector>
     <button md-raised-button color="primary" disabled #runSuiteButton (click)="onRunSuite()">Run Suite</button>
     </md-list>
+    </md-card>
     `,
 })
 
