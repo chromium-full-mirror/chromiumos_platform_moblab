@@ -1,0 +1,24 @@
+<mat-card class="check-card" *ngFor="let healthCheck of healthChecks">
+  <h2>{{healthCheck.service}}</h2>
+  <p class="check-health {{healthCheck.health}}">
+    {{getHealthCheckLabel(healthCheck)}}
+  </p>
+
+  <p *ngIf="healthCheck.errors.length > 0" class="divider">errors</p>
+  <ul *ngIf="healthCheck.errors.length > 0" class="failed-checks">
+    <li *ngFor="let failedCheck of healthCheck.errors">
+      <p class="check-name">{{failedCheck.name}}</p>
+      <p class="check-reason">{{failedCheck.description}}</p>
+      <mob-actions [actions]="getActionsForCheck(healthCheck, failedCheck.name)">
+      </mob-actions>
+    </li>
+  </ul>
+
+  <p *ngIf="healthCheck.warnings.length > 0" class="divider">warnings</p>
+  <ul *ngIf="healthCheck.warnings.length > 0" class="failed-checks">
+    <li *ngFor="let failedCheck of healthCheck.warnings">
+      <p class="check-name">{{failedCheck.name}}</p>
+      <p class="check-reason">{{failedCheck.description}}</p>
+    </li>
+  </ul>
+</mat-card>

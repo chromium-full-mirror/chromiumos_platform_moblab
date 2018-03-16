@@ -1,0 +1,14 @@
+{
+  "/GetStatus": {
+    "target": "http://localhost:9999",
+    "secure": false
+  },
+  "/ActionInfo": {
+    "target": "http://localhost:9999",
+    "secure": false
+  },
+  "/RepairService": {
+    "target": "http://localhost:9999",
+    "secure": false
+  }
+}

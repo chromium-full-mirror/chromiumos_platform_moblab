@@ -1,0 +1,7 @@
+<div *ngIf="actions" class="actions">
+  <button *ngFor="let action of actions" mat-raised-button color="primary"
+          (click)="onActionClick(action)"
+          [disabled]="actionRunning[action.action]">
+    {{action.action}}
+  </button>
+</div>

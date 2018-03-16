@@ -1,0 +1,70 @@
+@mixin subtext {
+  font-size: .9em;
+  color: rgba(0,0,0,.5);
+}
+
+.check-card {
+  margin-bottom: 30px;
+
+  h2 {
+    margin: 0;
+    font-weight: normal;
+  }
+
+  p.check-health {
+    @include subtext;
+    margin: 0;
+    padding-left: 20px;
+    position: relative;
+
+    &::before {
+      content: "";
+      height: 12px;
+      width: 12px;
+      background-color: black;
+      display: inline-block;
+      position: absolute;
+      left: 2px;
+      top: 5px;
+      border-radius: 100px;
+    }
+
+    &.healthy::before {
+      background-color: limegreen;
+    }
+    &.unhealthy::before {
+      background-color: red;
+    }
+    &.warning::before {
+      background-color: gold;
+    }
+  }
+
+  .divider {
+    @include subtext;
+    border-top: 1px rgba(0,0,0,.14) solid;
+    margin: 0;
+    margin-top: 20px;
+    margin-bottom: -5px;
+  }
+  .failed-checks {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+    margin-top: 20px;
+
+    > li {
+      margin: 0;
+      margin-top: 20px;
+
+      > p {
+        margin: 0;
+      }
+    }
+
+    .check-name {
+      font-weight: bold;
+    }
+
+  }
+}
