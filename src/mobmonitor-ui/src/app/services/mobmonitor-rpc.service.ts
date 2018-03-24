@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
+import { Subscription } from 'rxjs/Subscription';
 import { multicast } from 'rxjs/operators';
 import { interval } from 'rxjs/observable/interval';
 
@@ -11,22 +12,27 @@ import { ActionInfo } from '../shared/action-info';
 import { RepairServiceInfo } from '../shared/repair-service-info';
 
 @Injectable()
-export class MobmonitorRpcService {
+export class MobmonitorRpcService implements OnDestroy {
 
   private getStatusSubject: Subject<Array<HealthCheck>>;
   private repairing: boolean;
+  private intervalSub: Subscription;
 
   constructor(private http: HttpClient) {
     // create a singleton that polls for updates to status
     // all components that need the status will be pushed
     // updates and not need to issue extra HTTP requests
     this.getStatusSubject = new Subject<Array<HealthCheck>>();
-    interval(1000).subscribe(() => {
+    this.intervalSub = interval(1000).subscribe(() => {
       if (this.repairing) { return; }
       this.http.get('/GetStatus').subscribe(data => {
         this.getStatusSubject.next(this.handleGetStatus(data));
       });
     });
+  }
+
+  ngOnDestroy() {
+    this.intervalSub.unsubscribe();
   }
 
   getStatus(): Observable<Array<HealthCheck>> {
@@ -79,7 +85,7 @@ export class MobmonitorRpcService {
           action: action.action,
           args: [],
           kwargs: {}
-          //TODO (mattmallett@ crbug.com/824884)
+          // TODO (mattmallett@ crbug.com/824884)
         };
         this.repairService(repairServiceInfo).subscribe(() => {
           this.repairing = false;

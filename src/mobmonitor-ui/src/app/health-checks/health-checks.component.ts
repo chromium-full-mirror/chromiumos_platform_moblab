@@ -47,6 +47,7 @@ export class HealthChecksComponent implements OnInit {
       }
       return actions;
     }
+    return [];
   }
 
 }

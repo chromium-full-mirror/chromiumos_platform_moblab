@@ -14,7 +14,8 @@ import { RepairServiceInfo } from '../shared/repair-service-info';
 export class ActionsComponent implements OnInit {
 
   @Input()
-  private actions: Action[];
+  actions: Action[];
+
   private actionRunning;
 
   constructor(private rpc: MobmonitorRpcService, public snackBar: MatSnackBar) { }
