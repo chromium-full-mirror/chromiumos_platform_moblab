@@ -46,7 +46,7 @@ SERVICE_STATUS = collections.namedtuple('service_status',
                                         ['service', 'health', 'healthchecks'])
 
 ACTION_INFO = collections.namedtuple('action_info',
-                                     ['action', 'info', 'args', 'kwargs'])
+                                     ['action', 'info', 'params'])
 
 
 class CollectionError(Exception):
@@ -64,7 +64,7 @@ def MapHealthcheckStatusToDict(hcstatus):
   """
   return {'name': hcstatus.name, 'health': hcstatus.health,
           'description': hcstatus.description,
-          'actions': [a.__name__ for a in hcstatus.actions]}
+          'actions': [a.action for a in hcstatus.actions]}
 
 
 def MapServiceStatusToDict(status):
@@ -84,7 +84,7 @@ def MapServiceStatusToDict(status):
 
 def MapActionInfoToDict(actioninfo):
   return {'action': actioninfo.action, 'info': actioninfo.info,
-          'args': actioninfo.args, 'kwargs': actioninfo.kwargs}
+          'params': actioninfo.params}
 
 
 def isHealthcheckHealthy(hcstatus):
@@ -408,58 +408,41 @@ class CheckFileManager(object):
       An ACTION_INFO named tuple which has the following fields:
         action: A string. The given |action| string.
         info: A string. The docstring of |action|.
-        args: A list of strings. The positional arguments for |action|.
-        kwargs: A dictionary representing the default keyword arguments
-          for |action|. The keys will be the kwarg names and the values
-          will be the default arguments.
+        params: A dictionary representing parameters the |action| needs,
+          along with a description of that argument.
     """
     status = self.service_states.get(service, None)
     if not status:
-      return ACTION_INFO(action, 'Service not recognized.', [], {})
+      return ACTION_INFO(action, 'Service not recognized.', {})
     elif isServiceHealthy(status):
-      return ACTION_INFO(action, 'Service is healthy.', [], {})
+      return ACTION_INFO(action, 'Service is healthy.', {})
 
     hc = [x for x in status.healthchecks if x.name == healthcheck]
     if not hc:
-      return ACTION_INFO(action, 'Healthcheck not recognized.', [], {})
+      return ACTION_INFO(action, 'Healthcheck not recognized.', {})
     hc = hc[0]
     if isHealthcheckHealthy(hc):
-      return ACTION_INFO(action, 'Healthcheck is healthy.', [], {})
+      return ACTION_INFO(action, 'Healthcheck is healthy.', {})
 
     func = None
     for a in hc.actions:
-      if a.__name__ == action:
+      if a.action == action:
         func = a
         break
 
     if func is None:
-      return ACTION_INFO(action, 'Action not recognized.', [], {})
+      return ACTION_INFO(action, 'Action not recognized.', {})
 
-    # Collect information on the repair action.
-    argspec = inspect.getargspec(func)
-    func_args = argspec.args or []
-    func_args = [x for x in func_args if x not in ['self', 'cls']]
-    func_defaults = argspec.defaults or {}
+    return ACTION_INFO(action, func.info, func.param_info)
 
-    num_args = len(func_args)
-    num_defaults = len(func_defaults)
-
-    args = func_args[:num_args-num_defaults]
-    kwargs = dict(zip(func_args[num_args-num_defaults:], func_defaults))
-
-    info = func.__doc__
-
-    return ACTION_INFO(action, info, args, kwargs)
-
-  def RepairService(self, service, healthcheck, action, args, kwargs):
+  def RepairService(self, service, healthcheck, action, params):
     """Execute the repair action on the specified service.
 
     Args:
       service: The name of the service to be repaired.
       healthcheck: The particular healthcheck we are repairing.
       action: The name of the action to execute.
-      args: A list of positional arguments for the given repair action.
-      kwargs: A dictionary of keyword arguments for the given repair action.
+      params: A dictionary of parameters for the given action
 
     Returns:
       The same return value of GetStatus(service).
@@ -480,14 +463,14 @@ class CheckFileManager(object):
     # Get the repair action from the healthcheck.
     repair_func = None
     for a in hc.actions:
-      if a.__name__ == action:
+      if a.action == action:
         repair_func = a
         break
 
     # TODO (msartori): Implement crbug.com/503373
     if repair_func is not None:
       try:
-        repair_func(*args, **kwargs)
+        repair_func.run(params)
 
         # Update the service status and return.
         # While actions are 'service-centric' from the perspective of the

@@ -29,11 +29,13 @@ export class ActionsComponent implements OnInit {
 
   onActionClick(action: Action) {
     this.actionRunning[action.action] = true;
-    this.rpc.runAction(action).subscribe(() => {
-      this.actionRunning[action.action] = false;
-      this.snackBar.open(`Action ${action.action} complete`, 'OK', {
-        duration: 2000
-      });
+    this.rpc.runAction(action).subscribe(actionWasRun => {
+      if (actionWasRun) {
+        this.actionRunning[action.action] = false;
+        this.snackBar.open(`Action ${action.action} complete`, 'OK', {
+          duration: 2000
+        });
+      }
     });
   }
 

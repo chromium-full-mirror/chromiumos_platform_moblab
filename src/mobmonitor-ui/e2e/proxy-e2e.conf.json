@@ -10,5 +10,9 @@
   "/RepairService": {
     "target": "http://localhost:3000",
     "secure": false
+  },
+  "/CollectLogs": {
+    "target": "http://localhost:3000",
+    "secure": false
   }
 }

@@ -185,7 +185,7 @@ class DiskDevices(object):
     elif DISK_DEVICE_CODES.USB_INCORRECT_MOUNT == errcode:
       usb = self.useable_usbs[0]
       return ('USB drive is not mounted correctly.',
-              [moblab_actions.MountUsbWrapper(usb.device)])
+              [moblab_actions.MountUsb(usb.device)])
 
     return ('Unknown error reached with error code: %s' % errcode, [])
 
@@ -222,6 +222,6 @@ class DiskSpace(object):
               ' add more USB storage or'
               ' free space to ensure proper functioning of your'
               ' moblab.' % int(common.DISK_FREE_THRESHOLD_PERCENT * 100),
-              [moblab_actions.ClearOldDbRecords, moblab_actions.ClearLogs])
+              [moblab_actions.ClearOldDbRecords(), moblab_actions.ClearLogs()])
 
     return ('Unknown error reached with error code: %s' % errcode, [])

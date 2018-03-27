@@ -102,8 +102,16 @@ Repair actions are used to repair or improve the health state of a service. The
 appropriate repair actions to take are returned in a health check's Diagnose
 method.
 
-Repair actions are functions and can be defined anywhere in the service check
-package.
+Repair actions classes that have the following properties
+  action - Name for this action
+  info - Some informational text for this action
+  param_info - Dictionary outlining any parameters for the function and a
+    description of the parameter
+
+  def run(self, params) - function that is invoked to run the action
+
+  note this is a class, so you can include any additional properties in the
+  constructor
 
 It is suggested that repair actions are defined in files ending in 'actions.py'
 which are imported by health check files.
@@ -148,14 +156,17 @@ The 'myservice_check.py' file should look like the following:
 
       def Diagnose(self, errcode):
         if -1 == errcode:
-          return ('Key file is missing.' [repair_actions.InstallKeyFile])
+          return ('Key file is missing.' [repair_actions.InstallKeyFile()])
 
         return ('Unknown failure.', [])
 
 
 And the 'repair_actions.py' file should look like:
 
+    class InstallKeyFile:
+      action='Install Key File'
+      info = """Install the key file"""
+      param_info = {'param1': 'this param is very important'}
 
-    def InstallKeyFile(**kwargs):
-      """Installs the key file."""
-      ...
+      def run(self, params):
+        # install the key file

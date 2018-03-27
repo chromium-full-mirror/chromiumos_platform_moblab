@@ -28,11 +28,38 @@ describe('mobmonitor-ui App', () => {
 
   it('should run actions', () => {
     page.navigateTo();
-    const actionButton = page.getActionButton();
+    const actionButton = page.getActionButton('action-testAction');
     expect(actionButton.getText()).toEqual('testAction');
 
     actionButton.click();
     const snackBar = page.getSnackbarButton();
     snackBar.click();
+  });
+
+  it('should run actions with params', () => {
+    page.navigateTo();
+    page.getActionButton('action-testActionWithParams').click();
+    page.fillParam('testParam', 'abc123');
+    page.submitParamDialogButton().click();
+    page.getSnackbarButton().click();
+  });
+
+  it('should cancel an action with params', () => {
+    page.navigateTo();
+    page.getActionButton('action-testActionWithParams').click();
+    page.cancelParamDialogButton().click();
+  });
+
+  it('should disable param dialog submit until form filled out', () => {
+    page.navigateTo();
+    page.getActionButton('action-testActionWithParams').click();
+    expect(page.submitParamDialogButton().isEnabled()).toBe(false);
+    page.fillParam('testParam', 'abc123');
+    expect(page.submitParamDialogButton().isEnabled()).toBe(true);
+  });
+
+  it('should download logs', () => {
+    page.navigateTo();
+    page.downloadLogsButton().click();
   });
 });

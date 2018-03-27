@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>{{data.action}}</h2>
+<mat-dialog-content>
+  <p>{{data.info}}</p>
+  <form #paramsForm="ngForm" (ngSubmit)="undefined">
+    <div *ngFor="let param of paramDefinitions" class="input-container">
+      <label>{{param.name}}</label>
+      <mat-form-field>
+        <input matInput placeholder="{{param.info}}"
+               [(ngModel)]="params[param.name]"
+               name="{{param.name}}" required
+               id="param-testParam">
+        <mat-error>
+          {{param.name}} is <strong>required</strong>
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [disabled]="!paramsForm.form.valid" (click)="runAction()">
+    Run Action
+  </button>
+</mat-dialog-actions>

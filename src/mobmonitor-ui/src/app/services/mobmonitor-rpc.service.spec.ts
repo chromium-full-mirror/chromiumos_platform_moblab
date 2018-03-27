@@ -1,6 +1,8 @@
 import { TestBed, inject, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { defer } from 'rxjs/observable/defer';
+import { of } from 'rxjs/observable/of';
+import { MatDialog } from '@angular/material';
 
 import { MobmonitorRpcService } from './mobmonitor-rpc.service';
 import { HealthCheck } from '../shared/health-check';
@@ -11,6 +13,7 @@ import { ActionInfo } from '../shared/action-info';
 describe('MobmonitorRpcService', () => {
   let rpc: MobmonitorRpcService;
   let httpSpy: jasmine.SpyObj<HttpClient>;
+  let dialogSpy: jasmine.SpyObj<MatDialog>;
 
   function asyncData<T>(data: T) {
     return defer(() => Promise.resolve(data));
@@ -18,17 +21,23 @@ describe('MobmonitorRpcService', () => {
 
   beforeEach(() => {
 
-    const spy = jasmine.createSpyObj('HttpClient', ['get', 'post']);
-
     TestBed.configureTestingModule({
       providers: [
         MobmonitorRpcService,
-        {provide: HttpClient, useValue: spy}
+        {
+          provide: HttpClient,
+          useValue: jasmine.createSpyObj('HttpClient', ['get', 'post'])
+        },
+        {
+          provide: MatDialog,
+          useValue: jasmine.createSpyObj('MatDialog', ['open'])
+        }
       ]
     });
 
     rpc = TestBed.get(MobmonitorRpcService);
     httpSpy = TestBed.get(HttpClient);
+    dialogSpy = TestBed.get(MatDialog);
   });
 
   it('should be created', () => {
@@ -49,7 +58,7 @@ describe('MobmonitorRpcService', () => {
 
     // need to create an instance inside of the fakeAsync zone
     // so that the mock timing works correctly
-    const fakeAsyncRpc = new MobmonitorRpcService(httpSpy);
+    const fakeAsyncRpc = new MobmonitorRpcService(httpSpy, dialogSpy);
     let response;
     const sub = fakeAsyncRpc.getStatus().subscribe((value) => {
       response = value;
@@ -88,7 +97,7 @@ describe('MobmonitorRpcService', () => {
     ];
     httpSpy.get.and.returnValue(asyncData(warningResponse));
 
-    const fakeAsyncRpc = new MobmonitorRpcService(httpSpy);
+    const fakeAsyncRpc = new MobmonitorRpcService(httpSpy, dialogSpy);
     let response;
     const sub = fakeAsyncRpc.getStatus().subscribe((value) => {
       response = value;
@@ -129,7 +138,7 @@ describe('MobmonitorRpcService', () => {
     ];
     httpSpy.get.and.returnValue(asyncData(unhealthyResponse));
 
-    const fakeAsyncRpc = new MobmonitorRpcService(httpSpy);
+    const fakeAsyncRpc = new MobmonitorRpcService(httpSpy, dialogSpy);
     let response;
     const sub = fakeAsyncRpc.getStatus().subscribe((value) => {
       response = value;
@@ -154,23 +163,80 @@ describe('MobmonitorRpcService', () => {
   }));
 
   it('should run action', () => {
-    const testAction = {
+    const testAction: Action = {
       action: 'testAction',
       service: 'testService',
       healthCheck: 'testCheck'
     };
 
-    const testActionInfo = {
+    const testActionInfo: ActionInfo = {
       action: 'testAction',
       info: 'some info about this action',
-      args: [],
-      kwargs: {}
+      params: {}
     };
 
     httpSpy.get.and.returnValue(asyncData(testActionInfo));
     httpSpy.post.and.returnValue(asyncData({}));
 
-    rpc.runAction(testAction);
+    rpc.runAction(testAction).subscribe(didRun => {
+      expect(didRun).toEqual(true);
+    });
+  });
+
+  it('should run action with params', () => {
+    const testAction: Action = {
+      action: 'testAction',
+      service: 'testService',
+      healthCheck: 'testCheck'
+    };
+
+    const testActionInfo: ActionInfo = {
+      action: 'testAction',
+      info: 'some info about this action',
+      params: {'testparam': 'some info about param'}
+    };
+
+    httpSpy.get.and.returnValue(asyncData(testActionInfo));
+    httpSpy.post.and.returnValue(asyncData({}));
+
+    const mockDialogRef = {
+      afterClosed: () => {
+        return of({'testparam': 'testvalue'});
+      }
+    };
+    dialogSpy.open.and.returnValue(mockDialogRef);
+
+    rpc.runAction(testAction).subscribe(didRun => {
+      expect(didRun).toEqual(true);
+    });
+  });
+
+  it('should not run action if required params not given', () => {
+    const testAction: Action = {
+      action: 'testAction',
+      service: 'testService',
+      healthCheck: 'testCheck'
+    };
+
+    const testActionInfo: ActionInfo = {
+      action: 'testAction',
+      info: 'some info about this action',
+      params: {'testparam': 'some info about param'}
+    };
+
+    httpSpy.get.and.returnValue(asyncData(testActionInfo));
+    httpSpy.post.and.returnValue(asyncData({}));
+
+    const mockDialogRef = {
+      afterClosed: () => {
+        return of(undefined);
+      }
+    };
+    dialogSpy.open.and.returnValue(mockDialogRef);
+
+    rpc.runAction(testAction).subscribe(didRun => {
+      expect(didRun).toEqual(false);
+    });
   });
 
 

@@ -10,5 +10,9 @@
   "/RepairService": {
     "target": "http://localhost:9999",
     "secure": false
+  },
+  "/CollectLogs": {
+    "target": "http://localhost:9999",
+    "secure": false
   }
 }

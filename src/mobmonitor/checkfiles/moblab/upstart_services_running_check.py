@@ -106,7 +106,7 @@ class UpstartServiceRunning(object):
 
       return ('Essential moblab service "%s" is not running.'
               ' Please launch the service.' % service,
-              [moblab_actions.LaunchUpstartServiceWrapper(service)])
+              [moblab_actions.LaunchUpstartService(service)])
 
     return ('Unknown error reached with error code: %s' % errcode, [])
 

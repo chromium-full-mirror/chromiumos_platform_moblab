@@ -14,67 +14,83 @@ import re
 from util import osutils
 
 
+class AbstractAction:
+
+    action = 'AbstractAction'
+    info = """An abstract action that needs to be implemented
+    """
+    param_info = {}
+
+    def run(self, params):
+        pass
+
 #
 # Disk actions.
 #
-def MountUsbWrapper(device):
-  """Wrapper for mounting USB devices.
+class MountUsb(AbstractAction):
+    action = 'Mount USB'
+    info = """Mount the USB device."""
+    param_info = {}
 
-  Args:
-    device: The name of USB device we wish to mount.
-  """
-  def MountUsb():
-    """Mount the USB device."""
-    # Unmount |device| as it may already be mounted in the wrong location.
-    osutils.sudo_run_command(['umount', device], error_code_ok=True)
+    def __init__(self, device):
+        self.device = device
 
-    # Mount |device| in the correct location.
-    cmd = ['mount', device, common.MOBLAB_MOUNTPOINT, '-o', 'exec,dev,nosuid']
-    osutils.sudo_run_command(cmd)
+    def run(self, params):
+        # Unmount |device| as it may already be mounted in the wrong location.
+        osutils.sudo_run_command(
+                ['umount', self.device], error_code_ok=True)
 
-  return MountUsb
-
-
-def ClearOldDbRecords(date):
-  """Delete older database records.
-
-  Args:
-    date: Must be in the format 'yyyy-mm-dd'. We keep records that are
-      newer than the given date.
-  """
-  cmd = ['/usr/local/autotest/contrib/db_cleanup.py', date]
-  osutils.sudo_run_command(cmd)
+        # Mount |device| in the correct location.
+        cmd = ['mount', self.device, common.MOBLAB_MOUNTPOINT, '-o',
+                'exec,dev,nosuid']
+        osutils.sudo_run_command(cmd)
 
 
-def ClearLogs():
-  """Deletes old log files."""
-  logdir = '/var/log'
-  oldlog = r'^.*\.[0-9]+$'
+class ClearOldDbRecords(AbstractAction):
+    action = 'Clear Old DB Records'
+    info = """Delete older database records."""
+    param_info = {
+        'date': ("Format 'yyyy-mm-dd'. "
+                 'We keep records that are newer than the given date.')
+    }
 
-  files_to_remove = []
+    def run(self, params):
+        cmd = ['/usr/local/autotest/contrib/db_cleanup.py', params['date']]
+        osutils.sudo_run_command(cmd)
 
-  for curdir, _, files in os.walk(logdir):
-    for f in files:
-      if re.match(oldlog, f):
-        files_to_remove.append(os.path.join(curdir, f))
 
-  if files_to_remove:
-    cmd = ['rm'] + files_to_remove
-    osutils.sudo_run_command(cmd)
+class ClearLogs(AbstractAction):
+    action = 'Clear Logs'
+    info = """Deletes old log files."""
+    param_info = {}
+
+    def run(self, params):
+        logdir = '/var/log'
+        oldlog = r'^.*\.[0-9]+$'
+
+        files_to_remove = []
+
+        for curdir, _, files in os.walk(logdir):
+          for f in files:
+            if re.match(oldlog, f):
+              files_to_remove.append(os.path.join(curdir, f))
+
+        if files_to_remove:
+          cmd = ['rm'] + files_to_remove
+          osutils.sudo_run_command(cmd)
 
 
 #
 # Upstart service actions.
 #
-def LaunchUpstartServiceWrapper(service):
-  """Wrapper for bringing up an upstart job.
+class LaunchUpstartService(AbstractAction):
+    action = 'Launch Upstart Service'
+    info = """Launch the upstart service."""
+    param_info = {}
 
-  Args:
-    service: The name of service we are trying to start.
-  """
-  def LaunchUpstartService():
-    """Launch the upstart service."""
-    cmd = ['start', service]
-    osutils.sudo_run_command(cmd)
+    def __init__(self, service):
+        self.service = service
 
-  return LaunchUpstartService
+    def run(self, params):
+        cmd = ['start', self.service]
+        osutils.sudo_run_command(cmd)

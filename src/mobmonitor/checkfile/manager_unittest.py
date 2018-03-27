@@ -59,11 +59,25 @@ class TestHealthCheckUnhealthy(object):
   def Diagnose(self, errcode):
     """Stub Diagnose."""
     if errcode == -1:
-      return ('Stub Error.', [self.Repair])
+      return ('Stub Error.', [self.Repair()])
     return ('Unknown Error.', [])
 
-  def Repair(self):
-    self.x = 0
+  class Repair():
+    action='Repair'
+
+    def run(self, params):
+      pass
+
+class RepairUnhealthyCheck():
+    action='Repair'
+    info='Repair Info'
+    param_info={}
+
+    def __init__(self, healthCheck):
+      self.healthCheck = healthCheck
+
+    def run(self, params):
+      self.healthCheck.x = 0
 
 
 class TestHealthCheckMultipleActions(object):
@@ -79,26 +93,24 @@ class TestHealthCheckMultipleActions(object):
   def Diagnose(self, errcode):
     """Stub Diagnose."""
     if errcode == -1:
-      return ('Stub Error.', [self.NoParams, self.PositionalParams,
-                              self.DefaultParams, self.MixedParams])
+      return ('Stub Error.', [self.NoParams(), self.Params()])
     return ('Unknown Error.', [])
 
-  def NoParams(self):
-    """NoParams Action."""
-    self.x = 0
+  class NoParams():
+    action='NoParams'
+    info="""NoParams Action."""
+    param_info={}
+    def run(self, params):
+        pass
 
   # pylint: disable=unused-argument
-  def PositionalParams(self, x, y, z):
-    """PositionalParams Action."""
-    self.x = 0
-
-  def DefaultParams(self, x=1, y=2, z=3):
-    """DefaultParams Action."""
-    self.x = 0
-
-  def MixedParams(self, x, y, z=1):
-    """MixedParams Action."""
-    self.x = 0
+  class Params():
+    action='Params'
+    info="""Params Action."""
+    param_info={'x':'y'}
+    def run(self, params):
+        pass
+    # self.x = 0
   # pylint: enable=unused-argument
 
 
@@ -131,8 +143,13 @@ class TestHealthCheckBroken(object):
     raise ValueError()
 
 
-def TestAction():
-  return True
+class TestAction:
+    action = 'TestAction'
+    info = """Just a test."""
+    param_info = {}
+
+    def run(self, params):
+        return true
 
 
 TEST_SERVICE_NAME = 'test-service'
@@ -201,11 +218,21 @@ class AnotherNotAHealthCheck(object):
 '''
 
 ACTION_FILE = '''
-def TestAction():
-  return True
+class TestAction:
+    action = 'TestAction'
+    info = """Just a test."""
+    param_info = {}
 
-def AnotherAction():
-  return False
+    def run(self, params):
+        return true
+
+class AnotherAction:
+    action = 'AnotherAction'
+    info = """Just a test."""
+    param_info = {}
+
+    def run(self, params):
+        return false
 '''
 
 
@@ -243,24 +270,30 @@ class RunCommand(threading.Thread):
 class CheckFileManagerHelperTest(unittest.TestCase):
   """Unittests for CheckFileManager helper functions."""
 
+  class CfmTestAction:
+      action='test'
+      info='testinfo'
+      param_info={}
+      def run(self, params):
+          pass
+
   def testMapHealthcheckStatusToDict(self):
     """Test mapping a manager.HEALTHCHECK_STATUS to a dict."""
-    def _func():
-      pass
 
-    status = manager.HEALTHCHECK_STATUS('test', False, 'desc', [_func])
+
+    status = manager.HEALTHCHECK_STATUS(
+            'test', False, 'desc', [self.CfmTestAction()])
     expect = {'name': 'test', 'health': False, 'description': 'desc',
-              'actions': ['_func']}
+              'actions': ['test']}
     self.assertEquals(expect, manager.MapHealthcheckStatusToDict(status))
 
   def testMapServiceStatusToDict(self):
     """Test mapping a manager.SERVICE_STATUS to a dict."""
-    def _func():
-      pass
 
-    hcstatus = manager.HEALTHCHECK_STATUS('test', False, 'desc', [_func])
+    hcstatus = manager.HEALTHCHECK_STATUS(
+            'test', False, 'desc', [self.CfmTestAction()])
     hcexpect = {'name': 'test', 'health': False, 'description': 'desc',
-                'actions': ['_func']}
+                'actions': ['test']}
     status = manager.SERVICE_STATUS('test-service', False, [hcstatus])
     expect = {'service': 'test-service', 'health': False,
               'healthchecks': [hcexpect]}
@@ -268,9 +301,8 @@ class CheckFileManagerHelperTest(unittest.TestCase):
 
   def testMapActionInfoToDict(self):
     """Test mapping a manager.ACTION_INFO to a dict."""
-    actioninfo = manager.ACTION_INFO('test', 'test', [1], {'a': 1})
-    expect = {'action': 'test', 'info': 'test', 'args': [1],
-              'kwargs': {'a': 1}}
+    actioninfo = manager.ACTION_INFO('test', 'test', {'a': 1})
+    expect = {'action': 'test', 'info': 'test', 'params': {'a': 1}}
     self.assertEquals(expect, manager.MapActionInfoToDict(actioninfo))
 
   def testIsHealthcheckHealthy(self):
@@ -335,8 +367,14 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     testhc = TestHealthCheckUnhealthy()
     desc, actions = testhc.Diagnose(testhc.Check())
     expected = manager.HEALTHCHECK_STATUS(hcname, False, desc, actions)
-    self.assertEquals(expected,
-                      manager.DetermineHealthcheckStatus(hcname, testhc))
+    result = manager.DetermineHealthcheckStatus(hcname, testhc)
+    self.assertEquals(expected.actions[0].action, result.actions[0].action)
+    # can't compare instances of the action objects very easily with
+    # assertEquals, it tries to compare pointers
+    # just compare the names
+    self.assertEquals(expected.name, result.name)
+    self.assertEquals(expected.health, result.health)
+    self.assertEquals(expected.description, result.description)
 
   def testDetermineHealthcheckStatusQuasihealth(self):
     """Test DetermineHealthcheckStatus on a quasi-healthy check."""
@@ -738,7 +776,7 @@ class CheckFileManagerTest(unittest.TestCase):
     self.assertEquals(healthy_status, cfm.RepairService(TEST_SERVICE_NAME,
                                                         'HealthcheckName',
                                                         'RepairFuncName',
-                                                        [], {}))
+                                                        {}))
 
   def testRepairServiceNonExistent(self):
     """Test the RepairService RPC when the service does not exist."""
@@ -748,7 +786,7 @@ class CheckFileManagerTest(unittest.TestCase):
 
     expected = manager.SERVICE_STATUS(TEST_SERVICE_NAME, False, [])
     result = cfm.RepairService(TEST_SERVICE_NAME, 'DummyHealthcheck',
-                               'DummyAction', [], {})
+                               'DummyAction', {})
     self.assertEquals(expected, result)
 
   def testRepairServiceInvalidAction(self):
@@ -770,7 +808,7 @@ class CheckFileManagerTest(unittest.TestCase):
     self.assertEquals(1, len(status.healthchecks))
 
     status = cfm.RepairService(TEST_SERVICE_NAME, hcobj.__class__.__name__,
-                               'Blah', [], {})
+                               'Blah', {})
     self.assertFalse(status.health)
     self.assertEquals(1, len(status.healthchecks))
 
@@ -793,7 +831,7 @@ class CheckFileManagerTest(unittest.TestCase):
     self.assertEquals(1, len(status.healthchecks))
 
     status = cfm.RepairService(TEST_SERVICE_NAME, hcobj.__class__.__name__,
-                               'Repair', [1, 2, 3], {})
+                               'Repair', {})
     self.assertFalse(status.health)
     self.assertEquals(1, len(status.healthchecks))
 
@@ -808,7 +846,8 @@ class CheckFileManagerTest(unittest.TestCase):
     unhealthy_status = manager.SERVICE_STATUS(
         TEST_SERVICE_NAME, False,
         [manager.HEALTHCHECK_STATUS(hcobj.__class__.__name__,
-                                    False, 'Always fails', [hcobj.Repair])])
+                                    False, 'Always fails',
+                                    [RepairUnhealthyCheck(hcobj)])])
     cfm.service_states[TEST_SERVICE_NAME] = unhealthy_status
 
     status = cfm.GetStatus(TEST_SERVICE_NAME)
@@ -817,8 +856,8 @@ class CheckFileManagerTest(unittest.TestCase):
 
     status = cfm.RepairService(TEST_SERVICE_NAME,
                                hcobj.__class__.__name__,
-                               hcobj.Repair.__name__,
-                               [], {})
+                               'Repair',
+                               {})
     self.assertTrue(status.health)
     self.assertEquals(0, len(status.healthchecks))
 
@@ -828,8 +867,7 @@ class CheckFileManagerTest(unittest.TestCase):
 
     self.assertFalse(TEST_SERVICE_NAME in cfm.service_states)
 
-    expect = manager.ACTION_INFO('test', 'Service not recognized.',
-                                 [], {})
+    expect = manager.ACTION_INFO('test', 'Service not recognized.', {})
     result = cfm.ActionInfo(TEST_SERVICE_NAME, 'test', 'test')
     self.assertEquals(expect, result)
 
@@ -840,8 +878,7 @@ class CheckFileManagerTest(unittest.TestCase):
     healthy_status = manager.SERVICE_STATUS(TEST_SERVICE_NAME, True, [])
     cfm.service_states[TEST_SERVICE_NAME] = healthy_status
 
-    expect = manager.ACTION_INFO('test', 'Service is healthy.',
-                                 [], {})
+    expect = manager.ACTION_INFO('test', 'Service is healthy.', {})
     result = cfm.ActionInfo(TEST_SERVICE_NAME, 'test', 'test')
     self.assertEquals(expect, result)
 
@@ -859,7 +896,7 @@ class CheckFileManagerTest(unittest.TestCase):
                                     False, 'Always fails', [hcobj.Repair])])
     cfm.service_states[TEST_SERVICE_NAME] = unhealthy_status
 
-    expect = manager.ACTION_INFO('test', 'Action not recognized.', [], {})
+    expect = manager.ACTION_INFO('test', 'Action not recognized.', {})
     result = cfm.ActionInfo(TEST_SERVICE_NAME, hcobj.__class__.__name__,
                             'test')
     self.assertEquals(expect, result)
@@ -870,8 +907,7 @@ class CheckFileManagerTest(unittest.TestCase):
 
     hcobj = TestHealthCheckMultipleActions()
     hcname = hcobj.__class__.__name__
-    actions = [hcobj.NoParams, hcobj.PositionalParams, hcobj.DefaultParams,
-               hcobj.MixedParams]
+    actions = [hcobj.NoParams, hcobj.Params]
 
     cfm.service_checks[TEST_SERVICE_NAME] = {hcname: (TEST_MTIME, hcobj)}
 
@@ -881,29 +917,15 @@ class CheckFileManagerTest(unittest.TestCase):
     cfm.service_states[TEST_SERVICE_NAME] = unhealthy_status
 
     # Test ActionInfo when the action has no parameters.
-    expect = manager.ACTION_INFO('NoParams', 'NoParams Action.', [], {})
+    expect = manager.ACTION_INFO('NoParams', 'NoParams Action.', {})
     self.assertEquals(expect,
                       cfm.ActionInfo(TEST_SERVICE_NAME, hcname, 'NoParams'))
 
-    # Test ActionInfo when the action has only positional parameters.
-    expect = manager.ACTION_INFO('PositionalParams', 'PositionalParams Action.',
-                                 ['x', 'y', 'z'], {})
-    self.assertEquals(expect,
-                      cfm.ActionInfo(TEST_SERVICE_NAME,
-                                     hcname, 'PositionalParams'))
-
-    # Test ActionInfo when the action has only default parameters.
-    expect = manager.ACTION_INFO('DefaultParams', 'DefaultParams Action.',
-                                 [], {'x': 1, 'y': 2, 'z': 3})
-    self.assertEquals(expect,
-                      cfm.ActionInfo(TEST_SERVICE_NAME,
-                                     hcname, 'DefaultParams'))
-
     # Test ActionInfo when the action has positional and default parameters.
-    expect = manager.ACTION_INFO('MixedParams', 'MixedParams Action.',
-                                 ['x', 'y'], {'z': 1})
+    expect = manager.ACTION_INFO('Params', 'Params Action.',
+                                 {'x': 'y'})
     self.assertEquals(expect, cfm.ActionInfo(TEST_SERVICE_NAME,
-                                             hcname, 'MixedParams'))
+                                             hcname, 'Params'))
 
 if __name__ == '__main__':
     unittest.main()

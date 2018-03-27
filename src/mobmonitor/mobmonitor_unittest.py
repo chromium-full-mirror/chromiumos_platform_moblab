@@ -64,7 +64,7 @@ class MobMonitorRootTest(unittest.TestCase):
           manager.SERVICE_STATUS('service2', False, [failed_check])]
       mock_checkfile_manager.service_statuses = service_statuses
 
-      action_info = manager.ACTION_INFO('DummyAction', '', ['x'], {})
+      action_info = manager.ACTION_INFO('DummyAction', '', {'x': 'x'})
       mock_checkfile_manager.action_info = action_info
 
       mock_checkfile_manager.GetServiceList.return_value = [
@@ -128,7 +128,7 @@ class MobMonitorRootTest(unittest.TestCase):
     cfm = self.mock_checkfile_manager
     root = mobmonitor.MobMonitorRoot(cfm, staticdir=self.staticdir)
 
-    expect = {'action': 'DummyAction', 'info': '', 'args': ['x'], 'kwargs': {}}
+    expect = {'action': 'DummyAction', 'info': '', 'params': {'x': 'x'}}
     self.assertEquals(expect,
                       json.loads(root.ActionInfo('service2',
                                                  'dummy_healthcheck',
@@ -142,14 +142,12 @@ class MobMonitorRootTest(unittest.TestCase):
     status = cfm.service_statuses[0]
     expect = {'service': status.service, 'health': status.health,
               'healthchecks': []}
-    string_args = '[1, 2]'
-    string_kwargs = '{"a": 1}'
+    string_params = '{"a":1}'
     self.assertEquals(expect,
                       json.loads(root.RepairService('dummy_service',
                                                     'dummy_healthcheck',
                                                     'dummy_action',
-                                                    string_args,
-                                                    string_kwargs)))
+                                                    string_params)))
 
 if __name__ == '__main__':
     unittest.main()
