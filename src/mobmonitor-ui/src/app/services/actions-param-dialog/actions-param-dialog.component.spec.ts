@@ -19,7 +19,7 @@ class MatErrorStubComponent {}
 
 // tslint:disable-next-line
 @Component({selector: 'mat-dialog-actions', template: '<ng-content></ng-content>'})
-class MatDialogActionsSubComponent {}
+class MatDialogActionsStubComponent {}
 
 describe('ActionsParamDialogComponent', () => {
   let component: ActionsParamDialogComponent;
@@ -33,7 +33,7 @@ describe('ActionsParamDialogComponent', () => {
         MatDialogStubComponent,
         MatFormFieldStubComponent,
         MatErrorStubComponent,
-        MatDialogActionsSubComponent
+        MatDialogActionsStubComponent
       ],
       imports : [
         FormsModule

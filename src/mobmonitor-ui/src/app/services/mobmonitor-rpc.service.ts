@@ -3,16 +3,17 @@ import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
-import { multicast } from 'rxjs/operators';
-import { interval } from 'rxjs/observable/interval';
+import { timer } from 'rxjs/observable/timer';
+import 'rxjs/add/operator/catch';
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
+import { Subscriber } from 'rxjs/Subscriber';
 import { MatDialog } from '@angular/material';
-
 import { HealthCheck } from '../shared/health-check';
 import { Action } from '../shared/action';
 import { ActionInfo } from '../shared/action-info';
 import { RepairServiceInfo } from '../shared/repair-service-info';
 import { ActionsParamDialogComponent } from './actions-param-dialog/actions-param-dialog.component';
-import { Subscriber } from 'rxjs/Subscriber';
+import { MobmonitorError, wrapError } from '../shared/mobmonitor-error';
 
 @Injectable()
 export class MobmonitorRpcService implements OnDestroy {
@@ -24,24 +25,30 @@ export class MobmonitorRpcService implements OnDestroy {
   // should go out. mainly used to prevent UI from repainting and messing up
   // UX
   private repairing: boolean;
-  private intervalSub: Subscription;
+  private timerSub: Subscription;
 
   constructor(private http: HttpClient, public dialog: MatDialog) {
     // create a singleton that polls for updates to status
     // all components that need the status will be pushed
     // updates and not need to issue extra HTTP requests
     this.getStatusSubject = new Subject<Array<HealthCheck>>();
-    this.intervalSub = interval(1000).subscribe(() => {
+    this.timerSub = timer(50, 1000).subscribe(() => {
       if (this.repairing) { return; }
-      this.http.get('/GetStatus').subscribe(data => {
-        this.getStatusSubject.next(this.handleGetStatus(data));
-      });
+      this.http.get('/GetStatus')
+        .subscribe(data => {
+          this.getStatusSubject.next(this.handleGetStatus(data));
+        },
+        error => {
+          // emitting an error will kill the subject and make it unable
+          // to emit any new events if the connection is re-established
+          // so just handle the error on the subscriber side by detecting
+          // a time delta
+        });
     });
   }
 
-
   ngOnDestroy() {
-    this.intervalSub.unsubscribe();
+    this.timerSub.unsubscribe();
   }
 
   /**
@@ -53,6 +60,7 @@ export class MobmonitorRpcService implements OnDestroy {
   getStatus(): Observable<Array<HealthCheck>> {
     return this.getStatusSubject.asObservable();
   }
+
 
   /**
   formats an http GetStatus response into a HealthCheck object
@@ -114,6 +122,10 @@ export class MobmonitorRpcService implements OnDestroy {
         } else {
           this.runActionWithoutParams(action, actionInfo, observer);
         }
+      },
+      error => {
+        this.repairing = false;
+        observer.error(wrapError(error, 'Failed to gather action info'));
       });
     });
 
@@ -147,10 +159,15 @@ export class MobmonitorRpcService implements OnDestroy {
           this.repairing = false;
           observer.next(true);
         });
+      // user did not finish the form
       } else {
         this.repairing = false;
         observer.next(false);
       }
+    },
+    error => {
+      this.repairing = false;
+      observer.error(wrapError(error, 'Failed to repair service'));
     });
   }
 
@@ -173,6 +190,10 @@ export class MobmonitorRpcService implements OnDestroy {
     this.repairService(repairServiceInfo).subscribe(() => {
       this.repairing = false;
       observer.next(true);
+    },
+    error => {
+      this.repairing = false;
+      observer.error(wrapError(error, 'Failed to repair service'));
     });
   }
 

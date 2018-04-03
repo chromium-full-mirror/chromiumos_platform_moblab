@@ -17,10 +17,18 @@ export class HealthChecksComponent implements OnInit {
 
   ngOnInit() {
     this.rpc.getStatus().subscribe(
-      value => this.healthChecks = value
+      value => this.healthChecks = value,
+      error => {} // can't really do anything with the error
+      // the app component will notify user of lost connection
     );
   }
 
+  /**
+  Get the label that will be printed for a given healthcheck status
+
+  @param healthCheck the healthcheck to get a label for
+  @return a label for the current status of the healthcheck
+  */
   getHealthCheckLabel(healthCheck: HealthCheck): string {
     switch (healthCheck.health) {
       case 'unhealthy':
@@ -33,6 +41,14 @@ export class HealthChecksComponent implements OnInit {
     }
   }
 
+  /**
+  Construct an array of action objects from the healthcheck
+
+  @param healthCheck the healthcheck to extract actions from
+  @param checkName the specific check to extract actions for, this is the
+    Action.healthCheck value
+  @return an array of Actions that are available for the specified check
+  */
   getActionsForCheck(healthCheck: HealthCheck, checkName: string): Action[] {
     const check = healthCheck.errors.filter(c => c.name === checkName)[0];
 

@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>{{data.message}}</h2>
+<mat-dialog-content>
+  <p>Error Body</p>
+  <textarea id="error-body-text" readonly value="{{bodyText}}"></textarea>
+  <p>Stack Trace</p>
+  <textarea id="error-stacktrace" readonly value="{{data.stacktrace}}"></textarea>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>OK</button>
+</mat-dialog-actions>

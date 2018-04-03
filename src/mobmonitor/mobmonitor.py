@@ -42,7 +42,8 @@ class MobMonitorRoot(object):
   @cherrypy.expose
   def index(self):
     """Presents a welcome message."""
-    return open(os.path.join(self.staticdir, 'templates', 'index.html'))
+    raise cherrypy.HTTPRedirect('/static/index.html')
+
 
   @cherrypy.expose
   def GetServiceList(self):

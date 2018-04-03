@@ -2,9 +2,12 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material';
 import { of } from 'rxjs/observable/of';
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
 import { MobmonitorRpcService } from '../services/mobmonitor-rpc.service';
 import { ActionsComponent } from './actions.component';
+import { ErrorDisplayService } from '../services/error-display.service';
+import { wrapError } from '../shared/mobmonitor-error';
 
 
 describe('ActionsComponent', () => {
@@ -14,13 +17,16 @@ describe('ActionsComponent', () => {
   beforeEach(async(() => {
     const rpcSpy = jasmine.createSpyObj('MobmonitorRpcService', ['runAction']);
     const snackSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+    const errorSpy = jasmine.createSpyObj(
+        'ErrorDisplayService', ['openErrorDialog']);
     TestBed.configureTestingModule({
       declarations: [
         ActionsComponent
       ],
       providers: [
         {provide: MobmonitorRpcService, useValue: rpcSpy},
-        {provide: MatSnackBar, useValue: snackSpy}
+        {provide: MatSnackBar, useValue: snackSpy},
+        {provide: ErrorDisplayService, useValue: errorSpy}
       ]
     })
     .compileComponents();
@@ -57,5 +63,19 @@ describe('ActionsComponent', () => {
 
     expect(rpc.runAction.calls.count()).toBe(1);
     expect(snackBar.open.calls.count()).toBe(1);
+  });
+
+  it('should show an error on failed action', () => {
+    const rpc = <jasmine.SpyObj<MobmonitorRpcService>> fixture.debugElement.injector.get(MobmonitorRpcService);
+    const errorDialog = <jasmine.SpyObj<ErrorDisplayService>> fixture.debugElement.injector.get(ErrorDisplayService);
+
+    rpc.runAction.and.returnValue(
+        new ErrorObservable(wrapError({fail: true}, 'This is bad')));
+
+    const button = fixture.debugElement.query(By.css('button'));
+    button.triggerEventHandler('click', null);
+
+    expect(rpc.runAction.calls.count()).toBe(1);
+    expect(errorDialog.openErrorDialog.calls.count()).toBe(1);
   });
 });

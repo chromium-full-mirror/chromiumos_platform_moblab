@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 
 import { MobmonitorRpcService } from '../services/mobmonitor-rpc.service';
+import { ErrorDisplayService } from '../services/error-display.service';
 import { Action } from '../shared/action';
 import { ActionInfo } from '../shared/action-info';
 import { RepairServiceInfo } from '../shared/repair-service-info';
@@ -18,7 +19,8 @@ export class ActionsComponent implements OnInit {
 
   private actionRunning;
 
-  constructor(private rpc: MobmonitorRpcService, public snackBar: MatSnackBar) { }
+  constructor(private rpc: MobmonitorRpcService, public snackBar: MatSnackBar,
+      private errorDisplay: ErrorDisplayService) { }
 
   ngOnInit() {
     this.actionRunning = {};
@@ -29,14 +31,19 @@ export class ActionsComponent implements OnInit {
 
   onActionClick(action: Action) {
     this.actionRunning[action.action] = true;
-    this.rpc.runAction(action).subscribe(actionWasRun => {
-      if (actionWasRun) {
+    this.rpc.runAction(action).subscribe(
+      actionWasRun => {
+        if (actionWasRun) {
+          this.actionRunning[action.action] = false;
+          this.snackBar.open(`Action ${action.action} complete`, 'OK', {
+            duration: 2000
+          });
+        }
+      },
+      error => {
+        this.errorDisplay.openErrorDialog(error);
         this.actionRunning[action.action] = false;
-        this.snackBar.open(`Action ${action.action} complete`, 'OK', {
-          duration: 2000
-        });
-      }
-    });
+      });
   }
 
 }

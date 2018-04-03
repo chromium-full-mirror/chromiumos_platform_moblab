@@ -8,6 +8,7 @@ import { MobmonitorRpcService } from './mobmonitor-rpc.service';
 import { HealthCheck } from '../shared/health-check';
 import { Action } from '../shared/action';
 import { ActionInfo } from '../shared/action-info';
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
 
 describe('MobmonitorRpcService', () => {
@@ -162,6 +163,21 @@ describe('MobmonitorRpcService', () => {
     fakeAsyncRpc.ngOnDestroy();
   }));
 
+  it('should get status not die on http error', fakeAsync(() => {
+    httpSpy.get.and.returnValue(new ErrorObservable('http fail'));
+
+    const fakeAsyncRpc = new MobmonitorRpcService(httpSpy, dialogSpy);
+    let response;
+    const sub = fakeAsyncRpc.getStatus().subscribe((value) => {
+      response = value;
+    });
+
+    tick(1000);
+
+    sub.unsubscribe();
+    fakeAsyncRpc.ngOnDestroy();
+  }));
+
   it('should run action', () => {
     const testAction: Action = {
       action: 'testAction',
@@ -239,5 +255,23 @@ describe('MobmonitorRpcService', () => {
     });
   });
 
+  it('should error on fail get action info', () => {
+    const testAction: Action = {
+      action: 'testAction',
+      service: 'testService',
+      healthCheck: 'testCheck'
+    };
+
+    httpSpy.get.and.returnValue(new ErrorObservable({fail: true}));
+    httpSpy.post.and.returnValue(asyncData({}));
+
+    rpc.runAction(testAction).subscribe(
+      didRun => {},
+      error => {
+        expect(error.message).toEqual('Failed to gather action info');
+        expect(error.body).toEqual({fail: true});
+      }
+    );
+  });
 
 });

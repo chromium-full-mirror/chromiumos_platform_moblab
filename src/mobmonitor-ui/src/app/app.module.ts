@@ -9,8 +9,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 import { HealthChecksComponent } from './health-checks/health-checks.component';
 import { MobmonitorRpcService } from './services/mobmonitor-rpc.service';
+import { ErrorDisplayService } from './services/error-display.service';
 import { ActionsComponent } from './actions/actions.component';
 import { ActionsParamDialogComponent } from './services/actions-param-dialog/actions-param-dialog.component';
+import { ErrorDisplayDialogComponent } from './services/error-display-dialog/error-display-dialog.component';
 
 
 @NgModule({
@@ -18,7 +20,8 @@ import { ActionsParamDialogComponent } from './services/actions-param-dialog/act
     AppComponent,
     HealthChecksComponent,
     ActionsComponent,
-    ActionsParamDialogComponent
+    ActionsParamDialogComponent,
+    ErrorDisplayDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -33,9 +36,13 @@ import { ActionsParamDialogComponent } from './services/actions-param-dialog/act
     BrowserAnimationsModule
   ],
   entryComponents: [
-    ActionsParamDialogComponent
+    ActionsParamDialogComponent,
+    ErrorDisplayDialogComponent
   ],
-  providers: [MobmonitorRpcService],
+  providers: [
+    MobmonitorRpcService,
+    ErrorDisplayService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
