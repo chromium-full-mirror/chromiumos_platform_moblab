@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -82,11 +82,29 @@ class MobMonitorRootTest(unittest.TestCase):
 
       return mock_checkfile_manager
 
+  def _mock_diagnostic_manager(self):
+    mock_diagnostic_manager = mock.MagicMock()
+    diagnostic_checks = [{
+      'category': 'test category',
+      'checks': [{
+        'name': 'test check',
+        'description': 'test check'
+      }]
+    }]
+
+    check_result = 'test diagnostic result'
+
+    mock_diagnostic_manager.list_diagnostic_checks.return_value = \
+        diagnostic_checks
+    mock_diagnostic_manager.run_diagnostic_check.return_value = check_result
+
+    return mock_diagnostic_manager
 
   def setUp(self):
     """Setup directories expected by the Mob* Monitor."""
     self.staticdir = self.STATICDIR
     self.mock_checkfile_manager = self._mock_checkfile_manager()
+    self.mock_diagnostic_manager = self._mock_diagnostic_manager()
 
     patch_os = mock.patch('mobmonitor.os')
     self.addCleanup(patch_os.stop)
@@ -94,23 +112,26 @@ class MobMonitorRootTest(unittest.TestCase):
 
     self.mock_os.path.exists.return_value = True
 
+    self.root = mobmonitor.MobMonitorRoot(
+        self.mock_checkfile_manager, self.mock_diagnostic_manager,
+        staticdir=self.staticdir)
+
 
   def testGetServiceList(self):
     """Test the GetServiceList RPC."""
     cfm = self.mock_checkfile_manager
-    root = mobmonitor.MobMonitorRoot(cfm, staticdir=self.staticdir)
-    self.assertEqual(cfm.GetServiceList(), json.loads(root.GetServiceList()))
+    self.assertEqual(cfm.GetServiceList(),
+        json.loads(self.root.GetServiceList()))
 
   def testGetStatus(self):
     """Test the GetStatus RPC."""
     cfm = self.mock_checkfile_manager
-    root = mobmonitor.MobMonitorRoot(cfm, staticdir=self.staticdir)
 
     # Test the result for a single service.
     status = cfm.service_statuses[0]
     expect = {'service': status.service, 'health': status.health,
               'healthchecks': []}
-    self.assertEquals([expect], json.loads(root.GetStatus(status.service)))
+    self.assertEquals([expect], json.loads(self.root.GetStatus(status.service)))
 
     # Test the result for multiple services.
     status1, status2 = cfm.service_statuses
@@ -121,33 +142,46 @@ class MobMonitorRootTest(unittest.TestCase):
                'healthchecks': [{'name': check.name, 'health': check.health,
                                  'description': check.description,
                                  'actions': []}]}]
-    self.assertEquals(expect, json.loads(root.GetStatus()))
+    self.assertEquals(expect, json.loads(self.root.GetStatus()))
 
   def testActionInfo(self):
     """Test the ActionInfo RPC."""
     cfm = self.mock_checkfile_manager
-    root = mobmonitor.MobMonitorRoot(cfm, staticdir=self.staticdir)
 
     expect = {'action': 'DummyAction', 'info': '', 'params': {'x': 'x'}}
     self.assertEquals(expect,
-                      json.loads(root.ActionInfo('service2',
+                      json.loads(self.root.ActionInfo('service2',
                                                  'dummy_healthcheck',
                                                  'DummyAction')))
 
   def testRepairService(self):
     """Test the RepairService RPC."""
     cfm = self.mock_checkfile_manager
-    root = mobmonitor.MobMonitorRoot(cfm, staticdir=self.staticdir)
 
     status = cfm.service_statuses[0]
     expect = {'service': status.service, 'health': status.health,
               'healthchecks': []}
     string_params = '{"a":1}'
     self.assertEquals(expect,
-                      json.loads(root.RepairService('dummy_service',
+                      json.loads(self.root.RepairService('dummy_service',
                                                     'dummy_healthcheck',
                                                     'dummy_action',
                                                     string_params)))
+
+  def testListDiagnosticChecks(self):
+    """Test the ListDiagnosticChecks RPC."""
+    expect = self.mock_diagnostic_manager.list_diagnostic_checks()
+    self.assertEquals(expect,
+        json.loads(self.root.ListDiagnosticChecks()))
+
+  def testRunDiagnosticCheck(self):
+    """Test the RunDiagnosticCheck RPC."""
+    expect = {
+      'result': 'test diagnostic result'
+    }
+    self.assertEquals(expect,
+        json.loads(self.root.RunDiagnosticCheck('testcategory', 'testname')))
+
 
 if __name__ == '__main__':
     unittest.main()

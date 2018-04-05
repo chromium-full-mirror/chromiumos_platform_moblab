@@ -14,6 +14,10 @@ import { ActionInfo } from '../shared/action-info';
 import { RepairServiceInfo } from '../shared/repair-service-info';
 import { ActionsParamDialogComponent } from './actions-param-dialog/actions-param-dialog.component';
 import { MobmonitorError, wrapError } from '../shared/mobmonitor-error';
+import { Diagnostic } from '../shared/diagnostic';
+import { DiagnosticResult } from '../shared/diagnostic-result';
+import { RunDiagnosticParams } from '../shared/run-diagnostic-params';
+
 
 @Injectable()
 export class MobmonitorRpcService implements OnDestroy {
@@ -25,10 +29,32 @@ export class MobmonitorRpcService implements OnDestroy {
   // should go out. mainly used to prevent UI from repainting and messing up
   // UX
   private repairing: boolean;
+  // subscription to the timer observable, we need to clean it up if
+  // the service is destroyed
   private timerSub: Subscription;
 
-  constructor(private http: HttpClient, public dialog: MatDialog) {
-    // create a singleton that polls for updates to status
+  constructor(private http: HttpClient, public dialog: MatDialog) {}
+
+  ngOnDestroy() {
+    this.timerSub.unsubscribe();
+  }
+
+  /**
+  Get an observable that intermittently emits new health check updates
+
+  @return observable that emits an array of updated healthchecks every
+    1000ms
+  */
+  getStatus(): Observable<Array<HealthCheck>> {
+    if (!this.getStatusSubject) {
+      this.initGetStatusTimer();
+    }
+    return this.getStatusSubject.asObservable();
+  }
+
+  // only initialize this timer on demand
+  private initGetStatusTimer() {
+    // create a singleton that polls for updates to status.
     // all components that need the status will be pushed
     // updates and not need to issue extra HTTP requests
     this.getStatusSubject = new Subject<Array<HealthCheck>>();
@@ -46,21 +72,6 @@ export class MobmonitorRpcService implements OnDestroy {
         });
     });
   }
-
-  ngOnDestroy() {
-    this.timerSub.unsubscribe();
-  }
-
-  /**
-  Get an observable that intermittently emits new health check updates
-
-  @return observable that emits an array of updated healthchecks every
-    1000ms
-  */
-  getStatus(): Observable<Array<HealthCheck>> {
-    return this.getStatusSubject.asObservable();
-  }
-
 
   /**
   formats an http GetStatus response into a HealthCheck object
@@ -226,6 +237,33 @@ export class MobmonitorRpcService implements OnDestroy {
       .set('params', JSON.stringify(repairServiceInfo.params));
     const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
     return this.http.post('/RepairService', params.toString(), {headers});
+  }
+
+  /**
+  Run http request to list all available diagnostics
+
+  @return observable that resolves to a list of supported Diagnostics
+  */
+  listDiagnostics(): Observable<Diagnostic[]> {
+    return this.http.get<Diagnostic[]>('/ListDiagnosticChecks').catch(err => {
+      return new ErrorObservable(wrapError(err, 'Failed to list diagnostics'));
+    });
+  }
+
+  /**
+  Run http request to run a diagnostic
+  @param diagnosticParams params indicating which diagnostic to run
+  @return observable resolving to a DiagnosticResult containing the data gathered from the diagnostic
+  */
+  runDiagnostic(diagnosticParams: RunDiagnosticParams): Observable<DiagnosticResult> {
+    const params = new HttpParams()
+      .set('category', diagnosticParams.category)
+      .set('name', diagnosticParams.name);
+    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
+    return this.http.post<DiagnosticResult>('/RunDiagnosticCheck', params.toString(), {headers})
+      .catch(err => {
+        return new ErrorObservable(wrapError(err, 'Failed to run diagnostic')) ;
+      });
   }
 
 }

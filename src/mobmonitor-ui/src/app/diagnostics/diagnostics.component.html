@@ -1,0 +1,37 @@
+<mat-card class="check-card" *ngFor="let diagnostic of diagnostics">
+  <h2>{{diagnostic.category}}</h2>
+  <p class="check-health diagnostic">diagnostic</p>
+
+  <ul class="checks">
+    <li *ngFor="let diagnosticCheck of diagnostic.checks">
+      <p class="check-name">{{diagnosticCheck.name}}</p>
+      <p class="check-reason">{{diagnosticCheck.description}}</p>
+
+      <button mat-raised-button color="primary"
+        id="{{getButtonId(diagnostic.category, diagnosticCheck.name)}}"
+        (click)="runDiagnostic(diagnostic.category, diagnosticCheck.name)"
+        [disabled]="isDiagnosticRunning(diagnostic.category, diagnosticCheck.name)">
+        Run Diagnostic
+      </button>
+
+      <mat-progress-bar mode="indeterminate"
+        *ngIf="isDiagnosticRunning(diagnostic.category, diagnosticCheck.name)">
+      </mat-progress-bar>
+      <mat-form-field
+        *ngIf="getDiagnosticResult(diagnostic.category, diagnosticCheck.name)">
+        <label>results</label>
+        <label class="toggle" (click)="toggleResult(diagnostic.category, diagnosticCheck.name)">
+          [{{getToggleResultText(diagnostic.category, diagnosticCheck.name)}}]
+        </label>
+        <textarea
+          matInput matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="10"
+          value="{{getDiagnosticResult(diagnostic.category, diagnosticCheck.name)}}"
+          [hidden]="isResultHidden(diagnostic.category, diagnosticCheck.name)"
+          disabled>
+        </textarea>
+      </mat-form-field>
+
+    </li>
+  </ul>
+
+</mat-card>

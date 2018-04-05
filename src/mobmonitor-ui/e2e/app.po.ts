@@ -1,4 +1,4 @@
-import { browser, by, element, until } from 'protractor';
+import { browser, by, element, until, protractor } from 'protractor';
 
 export class AppPage {
   navigateTo() {
@@ -52,5 +52,21 @@ export class AppPage {
     const locator = by.partialLinkText('Download Logs');
     browser.wait(until.elementLocated(locator));
     return element(locator);
+  }
+
+  getDiagnosticButton(id) {
+    const locator = by.id(id);
+    browser.wait(until.elementLocated(locator));
+    return element(locator);
+  }
+
+  getResultTextarea() {
+    const locator = by.css('textarea');
+    browser.wait(until.elementLocated(locator));
+    return element(locator);
+  }
+
+  toggleResultTextarea() {
+    element(by.css('label.toggle')).click();
   }
 }

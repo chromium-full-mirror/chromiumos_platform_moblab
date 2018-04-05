@@ -9,6 +9,9 @@ import { MobmonitorRpcService } from './services/mobmonitor-rpc.service';
 @Component({selector: 'mob-health-checks', template: ''})
 class HealthChecksStubComponent {}
 
+@Component({selector: 'mob-diagnostics', template: ''})
+class DiagnosticsStubComponent {}
+
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
@@ -19,7 +22,8 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         AppComponent,
-        HealthChecksStubComponent
+        HealthChecksStubComponent,
+        DiagnosticsStubComponent
       ],
       providers: [
         {provide: MobmonitorRpcService, useValue: rpcSpy}

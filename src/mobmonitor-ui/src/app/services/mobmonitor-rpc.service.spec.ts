@@ -2,13 +2,16 @@ import { TestBed, inject, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { defer } from 'rxjs/observable/defer';
 import { of } from 'rxjs/observable/of';
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { MatDialog } from '@angular/material';
 
 import { MobmonitorRpcService } from './mobmonitor-rpc.service';
 import { HealthCheck } from '../shared/health-check';
 import { Action } from '../shared/action';
 import { ActionInfo } from '../shared/action-info';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
+import { Diagnostic } from '../shared/diagnostic';
+import { DiagnosticResult } from '../shared/diagnostic-result';
+import { RunDiagnosticParams } from '../shared/run-diagnostic-params';
 
 
 describe('MobmonitorRpcService', () => {
@@ -263,12 +266,71 @@ describe('MobmonitorRpcService', () => {
     };
 
     httpSpy.get.and.returnValue(new ErrorObservable({fail: true}));
-    httpSpy.post.and.returnValue(asyncData({}));
+    httpSpy.post.and.returnValue(of({}));
 
     rpc.runAction(testAction).subscribe(
       didRun => {},
       error => {
         expect(error.message).toEqual('Failed to gather action info');
+        expect(error.body).toEqual({fail: true});
+      }
+    );
+  });
+
+  it('should list diagnostics', () => {
+    const testDiagnostics: Diagnostic[] = [
+      {
+        category: 'test category',
+        checks: [{
+          name: 'test check',
+          description: 'a test diagnostic'
+        }]
+      }
+    ];
+    httpSpy.get.and.returnValue(of(testDiagnostics));
+
+    rpc.listDiagnostics().subscribe(diagnostics => {
+      expect(diagnostics).toEqual(testDiagnostics);
+    });
+  });
+
+  it('should error on fail list diagnostics', () => {
+    httpSpy.get.and.returnValue(new ErrorObservable({fail: true}));
+    rpc.listDiagnostics().subscribe(
+      result => {},
+      error => {
+        expect(error.message).toEqual('Failed to list diagnostics');
+        expect(error.body).toEqual({fail: true});
+      }
+    );
+  });
+
+  it('should run diagnostics', () => {
+    const testParams: RunDiagnosticParams = {
+      category: 'test category',
+      name: 'test check name'
+    };
+    const testResults: DiagnosticResult = {
+      result: `It's a boy.`
+    };
+    httpSpy.post.and.returnValue(of(testResults));
+
+    rpc.runDiagnostic(testParams).subscribe(result => {
+      expect(result).toEqual(testResults);
+    });
+  });
+
+  it('should error on fail run diagnostic', () => {
+    const testParams: RunDiagnosticParams = {
+      category: 'test category',
+      name: 'test check name'
+    };
+    httpSpy.post.and.returnValue(new ErrorObservable({fail: true}));
+
+    rpc.runDiagnostic(testParams).subscribe(
+      result => {},
+      error => {
+        expect(error.message).toEqual('Failed to run diagnostic');
         expect(error.body).toEqual({fail: true});
       }
     );

@@ -14,5 +14,13 @@
   "/CollectLogs": {
     "target": "http://localhost:3000",
     "secure": false
+  },
+  "/ListDiagnosticChecks": {
+    "target": "http://localhost:3000",
+    "secure": false
+  },
+  "/RunDiagnosticCheck": {
+    "target": "http://localhost:3000",
+    "secure": false
   }
 }

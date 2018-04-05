@@ -58,6 +58,15 @@ describe('mobmonitor-ui App', () => {
     expect(page.submitParamDialogButton().isEnabled()).toBe(true);
   });
 
+  it('should run diagnostics', () => {
+    page.navigateTo();
+    page.getDiagnosticButton('diagnostic-test-category-1-test-check-1').click();
+    page.getSnackbarButton().click();
+    const textarea = page.getResultTextarea();
+    expect(textarea.getAttribute('value'))
+      .toContain('you have run a diagnostic, congratulations');
+  });
+
   it('should download logs', () => {
     page.navigateTo();
     page.downloadLogsButton().click();

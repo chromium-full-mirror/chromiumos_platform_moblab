@@ -3,7 +3,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule, MatButtonModule, MatProgressSpinnerModule,
-         MatSnackBarModule, MatDialogModule, MatInputModule } from '@angular/material';
+         MatSnackBarModule, MatDialogModule, MatInputModule,
+         MatProgressBarModule } from '@angular/material';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
@@ -13,6 +14,7 @@ import { ErrorDisplayService } from './services/error-display.service';
 import { ActionsComponent } from './actions/actions.component';
 import { ActionsParamDialogComponent } from './services/actions-param-dialog/actions-param-dialog.component';
 import { ErrorDisplayDialogComponent } from './services/error-display-dialog/error-display-dialog.component';
+import { DiagnosticsComponent } from './diagnostics/diagnostics.component';
 
 
 @NgModule({
@@ -21,7 +23,8 @@ import { ErrorDisplayDialogComponent } from './services/error-display-dialog/err
     HealthChecksComponent,
     ActionsComponent,
     ActionsParamDialogComponent,
-    ErrorDisplayDialogComponent
+    ErrorDisplayDialogComponent,
+    DiagnosticsComponent
   ],
   imports: [
     BrowserModule,
@@ -33,6 +36,7 @@ import { ErrorDisplayDialogComponent } from './services/error-display-dialog/err
     MatSnackBarModule,
     MatDialogModule,
     MatInputModule,
+    MatProgressBarModule,
     BrowserAnimationsModule
   ],
   entryComponents: [

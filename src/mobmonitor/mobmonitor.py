@@ -19,6 +19,7 @@ import argparse
 from cherrypy.lib.static import serve_file
 from checkfile import manager
 from util import collect_logs
+import diagnostic_checks.manager
 
 
 STATICDIR = '/usr/local/moblab/mobmonitor/static/'
@@ -32,12 +33,14 @@ LOGFILE_COUNT = 10
 class MobMonitorRoot(object):
   """The central object supporting the Mob* Monitor web interface."""
 
-  def __init__(self, checkfile_manager, staticdir=STATICDIR):
+  def __init__(self, checkfile_manager, diagnostic_manager,
+      staticdir=STATICDIR):
     if not os.path.exists(staticdir):
       raise IOError('Static directory does not exist: %s' % staticdir)
 
     self.staticdir = staticdir
     self.checkfile_manager = checkfile_manager
+    self.diagnostic_manager = diagnostic_manager
 
   @cherrypy.expose
   def index(self):
@@ -118,6 +121,43 @@ class MobMonitorRoot(object):
     return serve_file(tarfile, 'application/x-download',
                       'attachment', os.path.basename(tarfile))
 
+  @cherrypy.expose
+  def ListDiagnosticChecks(self):
+    """List available diagnostics.
+
+    Returns:
+      A list of available diagnostics in the format
+      [
+        {
+          category: a category or subsystem of checks
+          checks: [
+            {
+              name: name of this diagnostic
+              description: a short description
+            }
+          ]
+        }
+      ]
+    """
+    return json.dumps(self.diagnostic_manager.list_diagnostic_checks())
+
+  @cherrypy.expose
+  def RunDiagnosticCheck(self, category, name):
+    """Runs the specified diagnostic check and returns the results
+
+    Args:
+      category: The category the check is under
+      name: The name of the diagnostic check
+    Returns:
+      results of the diagnostic check in the format
+      {
+        result: a freeform text field containing diagnostic resutls
+      }
+    """
+    return json.dumps({
+      'result': self.diagnostic_manager.run_diagnostic_check(category, name)
+    })
+
 
 def SetupLogging(logdir):
   logging.basicConfig(
@@ -186,7 +226,10 @@ def main(argv):
 
   # Setup the mobmonitor
   checkfile_manager = manager.CheckFileManager(checkdir=options.checkdir)
-  mobmonitor = MobMonitorRoot(checkfile_manager, staticdir=options.staticdir)
+  diagnostic_manager = diagnostic_checks.manager.DiagnosticCheckManager()
+  diagnostic_manager.init_checks()
+  mobmonitor = MobMonitorRoot(checkfile_manager, diagnostic_manager,
+      staticdir=options.staticdir)
 
   # Start the checkfile collection and execution background task.
   checkfile_manager.StartCollectionExecution()

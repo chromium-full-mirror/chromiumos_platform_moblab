@@ -5,7 +5,7 @@
   </p>
 
   <p *ngIf="healthCheck.errors.length > 0" class="divider">errors</p>
-  <ul *ngIf="healthCheck.errors.length > 0" class="failed-checks">
+  <ul *ngIf="healthCheck.errors.length > 0" class="checks">
     <li *ngFor="let failedCheck of healthCheck.errors">
       <p class="check-name">{{failedCheck.name}}</p>
       <p class="check-reason">{{failedCheck.description}}</p>
@@ -15,7 +15,7 @@
   </ul>
 
   <p *ngIf="healthCheck.warnings.length > 0" class="divider">warnings</p>
-  <ul *ngIf="healthCheck.warnings.length > 0" class="failed-checks">
+  <ul *ngIf="healthCheck.warnings.length > 0" class="checks">
     <li *ngFor="let failedCheck of healthCheck.warnings">
       <p class="check-name">{{failedCheck.name}}</p>
       <p class="check-reason">{{failedCheck.description}}</p>

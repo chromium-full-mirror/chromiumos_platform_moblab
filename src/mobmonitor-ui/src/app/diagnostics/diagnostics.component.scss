@@ -1,0 +1,35 @@
+@import '~sass/text';
+@import '~sass/check-card';
+
+.check-card p.check-health {
+  &.diagnostic::before {
+    background-color: #673ab7;
+  }
+}
+button {
+  display: inline-block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+
+ul.checks > li {
+  transition: 0.2s linear;
+}
+
+mat-form-field {
+  width: 100%;
+
+  label {
+    @include subtext;
+
+    &.toggle {
+      float: right;
+      cursor: pointer;
+    }
+  }
+
+  textarea {
+    color: black;
+  }
+}
