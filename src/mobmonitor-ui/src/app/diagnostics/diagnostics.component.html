@@ -24,7 +24,7 @@
           [{{getToggleResultText(diagnostic.category, diagnosticCheck.name)}}]
         </label>
         <textarea
-          matInput matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="10"
+          matInput matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="50"
           value="{{getDiagnosticResult(diagnostic.category, diagnosticCheck.name)}}"
           [hidden]="isResultHidden(diagnostic.category, diagnosticCheck.name)"
           disabled>

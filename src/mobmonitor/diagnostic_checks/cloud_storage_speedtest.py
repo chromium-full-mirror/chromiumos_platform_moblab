@@ -23,9 +23,9 @@ class CloudStorageSpeedTest(AbstractDiagnosticCheck):
     SHADOW_CONFIG = '/usr/local/autotest/shadow_config.ini'
     GSUTIL_USER = 'moblab'
 
-    category = 'Cloud storage'
+    category = 'Cloud Storage'
 
-    name = 'Speed test'
+    name = 'Speed Test'
 
     description = ('Test the speed of the connection between the moblab and the'
     ' cloud storage bucket')

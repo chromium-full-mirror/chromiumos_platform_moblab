@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 from cloud_storage_speedtest import CloudStorageSpeedTest
+from disk_info import DiskInfo
 from diagnostic_error import DiagnosticError
 
 class DiagnosticCheckManager:
@@ -25,7 +26,8 @@ class DiagnosticCheckManager:
     # The list of diagnostic checks to provide
     # All checks must inherit from AbstractDiagnosticCheck
     CHECKS = [
-        CloudStorageSpeedTest
+        CloudStorageSpeedTest,
+        DiskInfo
     ]
 
     def __init__(self):

@@ -19,7 +19,7 @@ class RunCommandError(subprocess.CalledProcessError):
     def __init__(self, returncode, cmd):
         super(RunCommandError, self).__init__(returncode, cmd)
 
-def run_command(cmd, error_code_ok=False, log=False):
+def run_command(cmd, error_code_ok=False, log=False, shell=False):
     """Run a command.
 
     Args:
@@ -33,7 +33,7 @@ def run_command(cmd, error_code_ok=False, log=False):
         string containing the stdout of the output, None if no output
     """
     try:
-        output = subprocess.check_output(cmd)
+        output = subprocess.check_output(cmd, shell=shell)
         if log:
             LOGGER.info(' '.join(cmd))
             LOGGER.info(output)
@@ -45,7 +45,7 @@ def run_command(cmd, error_code_ok=False, log=False):
         if not error_code_ok:
             raise RunCommandError(e.returncode, e.cmd)
 
-def sudo_run_command(cmd, user='root', error_code_ok=False):
+def sudo_run_command(cmd, user='root', error_code_ok=False, shell=False):
     """Run a command via sudo. All calls are logged.
 
     Args:
@@ -60,7 +60,8 @@ def sudo_run_command(cmd, user='root', error_code_ok=False):
         sudo_cmd = ['sudo'] + cmd
     else:
         sudo_cmd = ['sudo', '-u', user] + cmd
-    return run_command(sudo_cmd, log=True, error_code_ok=error_code_ok)
+    return run_command(sudo_cmd, log=True, error_code_ok=error_code_ok,
+            shell=shell)
 
 def create_tarball(tarball_name, directory):
     """Creates a gzipped tar archive

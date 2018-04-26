@@ -35,7 +35,7 @@ class TestSudoRunCommand(unittest.TestCase):
 
         self.assertEqual(output, 'test')
         osutils.subprocess.check_output.assert_called_with(
-            ['sudo', 'echo', 'hello'])
+            ['sudo', 'echo', 'hello'], shell=False)
         osutils.LOGGER.info.assert_any_call('sudo echo hello')
 
     @mock.patch('osutils.LOGGER')
@@ -46,7 +46,7 @@ class TestSudoRunCommand(unittest.TestCase):
 
         self.assertEqual(output, 'test')
         osutils.subprocess.check_output.assert_called_with(
-            ['sudo', '-u', 'moblab', 'echo', 'hello'])
+            ['sudo', '-u', 'moblab', 'echo', 'hello'], shell=False)
         osutils.LOGGER.info.assert_any_call('sudo -u moblab echo hello')
 
 class TestCreateTarball(unittest.TestCase):
@@ -91,7 +91,7 @@ class TestRmDir(unittest.TestCase):
         osutils.rm_dir('rm/this/old/dir', sudo=True)
         osutils.run_command.assert_called_with(
             ['sudo', 'rm', '-r', '--', 'rm/this/old/dir'],
-            log=True, error_code_ok=False)
+            log=True, error_code_ok=False, shell=False)
 
     @mock.patch('osutils.shutil')
     @mock.patch('osutils.run_command')
@@ -103,7 +103,7 @@ class TestRmDir(unittest.TestCase):
         osutils.os.path.exists.return_value = False
         osutils.run_command.assert_called_with(
             ['sudo', 'rm', '-rf', '--', 'rm/this/old/dir'],
-            log=True, error_code_ok=False)
+            log=True, error_code_ok=False, shell=False)
 
     @mock.patch('osutils.shutil')
     @mock.patch('osutils.run_command')
