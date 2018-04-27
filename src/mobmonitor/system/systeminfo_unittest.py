@@ -359,37 +359,37 @@ class DiskTest(unittest.TestCase):
 
     self.assertEquals(disk.BlockDevices(device), data)
 
-  # TODO mattmallett crbug.com/815014
-  # re-write this test so that it doesn't rely on chromite
-  # @mock.patch('systeminfo.osutils')
-  # def testBlockDevice(self, MockOsUtils):
-  #   """Test block device info when there is no record or a record is stale."""
-  #   disk = self._CreateDisk(1)
-  #
-  #   mock_device = '/dev/sda1'
-  #   mock_size = 12345678987654321
-  #   mock_ids = ['ata-ST1000DM003-1ER162_Z4Y3WQDB-part1']
-  #   mock_labels = ['BOOT-PARTITION']
-  #   mock_lsblk = 'NAME="sda1" RM="0" TYPE="part" SIZE="%s"' % mock_size
-  #
-  #   # self.StartPatcher(mock.patch('chromite.lib.osutils.ResolveSymlink'))
-  #   systeminfo.osutils.ResolveSymlink.return_value = '/dev/sda1'
-  #
-  #   with cros_build_lib_unittest.RunCommandMock() as rc_mock:
-  #     rc_mock.AddCmdResult(
-  #         partial_mock.In(systeminfo.SYSTEMFILE_DEV_DISKBY['ids']),
-  #         output='\n'.join(mock_ids))
-  #     rc_mock.AddCmdResult(
-  #         partial_mock.In(systeminfo.SYSTEMFILE_DEV_DISKBY['labels']),
-  #         output='\n'.join(mock_labels))
-  #     rc_mock.AddCmdResult(partial_mock.In('lsblk'), output=mock_lsblk)
-  #
-  #     mock_blockdevice = [systeminfo.RESOURCE_BLOCKDEVICE(mock_device,
-  #                                                         mock_size,
-  #                                                         mock_ids,
-  #                                                         mock_labels)]
-  #
-  #     self.assertEquals(disk.BlockDevices(mock_device), mock_blockdevice)
+  @mock.patch('systeminfo.osutils')
+  def testBlockDevice(self, MockOsUtils):
+    """Test block device info when there is no record or a record is stale."""
+    disk = self._CreateDisk(1)
+
+    mock_device = '/dev/sda1'
+    mock_size = 12345678987654321
+    mock_ids = ['ata-ST1000DM003-1ER162_Z4Y3WQDB-part1']
+    mock_labels = ['BOOT-PARTITION']
+
+    keys = ['NAME', 'RM', 'TYPE', 'SIZE']
+    BlockDevice = collections.namedtuple('BlockDevice', keys)
+    mock_lsblk = BlockDevice('sda1', 'RM', 'TYPE', mock_size)
+    systeminfo.osutils.list_block_devices.return_value = [mock_lsblk]
+
+    systeminfo.osutils.resolve_symlink.return_value = '/dev/sda1'
+
+    def side_effect(*args, **kwargs):
+      cmd = args[0]
+      if systeminfo.SYSTEMFILE_DEV_DISKBY['ids'] in cmd:
+        return '\n'.join(mock_ids)
+      if systeminfo.SYSTEMFILE_DEV_DISKBY['labels'] in cmd:
+        return '\n'.join(mock_labels)
+    systeminfo.osutils.run_command.side_effect = side_effect
+
+    mock_blockdevice = [systeminfo.RESOURCE_BLOCKDEVICE(mock_device,
+                                                        mock_size,
+                                                        mock_ids,
+                                                        mock_labels)]
+
+    self.assertEquals(disk.BlockDevices(mock_device), mock_blockdevice)
 
 
 class Cpu(unittest.TestCase):
