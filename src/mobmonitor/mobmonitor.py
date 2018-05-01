@@ -21,7 +21,7 @@ from checkfile import manager
 from util import collect_logs
 
 
-STATICDIR = '/usr/local/moblab/mobmonitor/static/'
+STATICDIR = '/etc/moblab/mobmonitor/static/'
 
 LOGDIR = '/var/log/mobmonitor/'
 LOGFILE = 'mobmonitor.log'
@@ -138,7 +138,7 @@ def ParseArguments(argv):
   parser = argparse.ArgumentParser(description=__doc__)
 
   parser.add_argument('-d', '--checkdir',
-                      default='/usr/local/moblab/mobmonitor/checkfiles/',
+                      default='/etc/moblab/mobmonitor/checkfiles/',
                       help='The Mob* Monitor checkfile directory.')
   parser.add_argument('-p', '--port', type=int, default=9991,
                       help='The Mob* Monitor port.')

@@ -39,7 +39,7 @@ CHECK_INTERVAL_DEFAULT_SEC = 10
 HEALTH_CHECK_DEFAULT_ATTRIBUTES = {
     'CHECK_INTERVAL_SEC': CHECK_INTERVAL_DEFAULT_SEC}
 
-CHECKFILE_DIR = '/usr/local/moblab/mobmonitor/checkfiles/'
+CHECKFILE_DIR = '/etc/moblab/mobmonitor/checkfiles/'
 CHECKFILE_ENDING = '_check.py'
 
 SERVICE_STATUS = collections.namedtuple('service_status',
