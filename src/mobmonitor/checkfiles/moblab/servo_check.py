@@ -9,7 +9,7 @@ from __future__ import print_function
 from util import osutils
 
 SERVO_VID = '18d1'
-SERVO_PID = '5002'
+SERVO_PID = ['5002', '501b']
 
 
 class ServoExists(object):
@@ -23,11 +23,12 @@ class ServoExists(object):
       1 if a Servo device could not be found.
     """
     cmd = ['lsusb']
-    servo_id = '%s:%s' % (SERVO_VID, SERVO_PID)
     usbs = osutils.sudo_run_command(cmd).strip()
-    for usb in usbs.split('\n'):
-      if servo_id in usb:
-        return 0
+    for pid in SERVO_PID:
+      servo_id = '%s:%s' % (SERVO_VID, pid)
+      for usb in usbs.split('\n'):
+        if servo_id in usb:
+          return 0
     return 1
 
   def Diagnose(self, errcode):
