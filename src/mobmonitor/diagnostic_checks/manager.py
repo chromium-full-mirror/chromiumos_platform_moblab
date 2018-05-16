@@ -3,8 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import logging
+LOGGER = logging.getLogger(__name__)
+
 from cloud_storage_speedtest import CloudStorageSpeedTest
 from disk_info import DiskInfo
+from base_container_clone import BaseContainerClone
+from repair_base_container import RepairBaseContainer
 from diagnostic_error import DiagnosticError
 
 class DiagnosticCheckManager:
@@ -27,7 +32,9 @@ class DiagnosticCheckManager:
     # All checks must inherit from AbstractDiagnosticCheck
     CHECKS = [
         CloudStorageSpeedTest,
-        DiskInfo
+        DiskInfo,
+        BaseContainerClone,
+        RepairBaseContainer
     ]
 
     def __init__(self):
@@ -94,9 +101,13 @@ class DiagnosticCheckManager:
             DiagnosticError if the check is not found, or encounters an error
         """
         try:
+            LOGGER.info('running diagnostic %s %s' % (category, name))
             check = self.diagnostic_checks[category][name]
             if check is None:
                 raise DiagnosticError('Check not found')
             return check.run()
         except KeyError:
             raise DiagnosticError('Check not found')
+        except DiagnosticError as e:
+            LOGGER.error('failed to run diagnostic check: %s', str(e))
+            raise e

@@ -86,8 +86,8 @@ A health check is a python object that implements the following interface:
 
 Health checks can (optionally) also define the following attributes:
 
-  - CHECK_INTERVAL: Defines the interval (in seconds) between health check
-                    executions. This defaults to 30 seconds if not defined.
+  - CHECK_INTERVAL_SEC: Defines the interval (in seconds) between health check
+                    executions. This defaults to 10 seconds if not defined.
 
 
 A check file may contain as many health checks as the writer feels is

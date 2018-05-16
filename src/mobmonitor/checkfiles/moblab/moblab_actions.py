@@ -94,3 +94,16 @@ class LaunchUpstartService(AbstractAction):
     def run(self, params):
         cmd = ['start', self.service]
         osutils.sudo_run_command(cmd)
+
+
+class RepairBaseContainer(AbstractAction):
+    action = 'Repair Base Container'
+    info = """Redownload and reinstall the base lxc container (about 400MB)"""
+    param_info = {}
+
+    def run(self, params):
+        rebuild_container = \
+                ['python', '/usr/local/autotest/site_utils/lxc.py', '-s', '-f']
+        osutils.sudo_run_command(rebuild_container)
+        init = ['start', 'moblab-base-container-init']
+        osutils.sudo_run_command(init)

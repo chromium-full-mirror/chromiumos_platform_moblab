@@ -8,14 +8,10 @@ from __future__ import print_function
 
 import netifaces
 import os
-import ConfigParser
 
 from util import osutils
+from util import config
 
-
-GLOBAL_CONFIG = '/usr/local/autotest/global_config.ini'
-MOBLAB_CONFIG = '/usr/local/autotest/moblab_config.ini'
-SHADOW_CONFIG = '/usr/local/autotest/shadow_config.ini'
 
 GSUTIL_TIMEOUT_SEC = 5
 GSUTIL_USER = 'moblab'
@@ -84,21 +80,8 @@ class GsBucket(object):
       -2 if the configuration files did not contain the appropriate
         information.
     """
-    config_files = [GLOBAL_CONFIG, MOBLAB_CONFIG, SHADOW_CONFIG]
-    for f in config_files:
-      if not os.path.exists(f):
-        return -1
 
-    config = ConfigParser.ConfigParser()
-    config.read(config_files)
-
-    gs_url = None
-
-    for section in config.sections():
-      for option, value in config.items(section):
-        if 'image_storage_server' == option:
-          gs_url = value
-          break
+    gs_url = config.Config().get('image_storage_server')
 
     if not (gs_url and self.BucketReachable(gs_url)):
       self.bucket = gs_url

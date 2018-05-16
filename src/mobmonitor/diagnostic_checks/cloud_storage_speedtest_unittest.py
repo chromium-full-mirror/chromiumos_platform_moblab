@@ -13,30 +13,6 @@ import diagnostic_error
 
 class TestCloudStorageSpeedTest(unittest.TestCase):
 
-    def setUp(self):
-        config_patch = mock.patch('cloud_storage_speedtest.ConfigParser')
-        config_patch.start()
-        config_mock = mock.MagicMock()
-        config_mock.sections.return_value = [1]
-        config_mock.items.return_value = \
-                [('image_storage_server', 'gs://bucket/')]
-        cloud_storage_speedtest.ConfigParser.ConfigParser.return_value = \
-                config_mock
-
-        self.config_mock = config_mock
-
-    def testGetBucketUrl(self):
-        expect = 'gs://bucket/'
-        speed_test = cloud_storage_speedtest.CloudStorageSpeedTest()
-        result = speed_test._get_bucket_url()
-        self.assertEqual(expect, result)
-
-    def testMissingGetBucketUrl(self):
-        self.config_mock.items.return_value = [('something', 'not bucket')]
-        speed_test = cloud_storage_speedtest.CloudStorageSpeedTest()
-        result = speed_test._get_bucket_url()
-        self.assertEqual(None, result)
-
     def testProcessResults(self):
         # test 10mbps down 5mbps up
         data = """{

@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import ConfigParser
 import json
 import sys
 
@@ -11,6 +10,7 @@ sys.path.append('..')
 from abstract_diagnostic_check import AbstractDiagnosticCheck
 from diagnostic_error import DiagnosticError
 from util import osutils
+from util import config
 
 class CloudStorageSpeedTest(AbstractDiagnosticCheck):
     """
@@ -18,9 +18,6 @@ class CloudStorageSpeedTest(AbstractDiagnosticCheck):
     moblab and the configured gs bucket
     """
 
-    GLOBAL_CONFIG = '/usr/local/autotest/global_config.ini'
-    MOBLAB_CONFIG = '/usr/local/autotest/moblab_config.ini'
-    SHADOW_CONFIG = '/usr/local/autotest/shadow_config.ini'
     GSUTIL_USER = 'moblab'
 
     category = 'Cloud Storage'
@@ -29,19 +26,6 @@ class CloudStorageSpeedTest(AbstractDiagnosticCheck):
 
     description = ('Test the speed of the connection between the moblab and the'
     ' cloud storage bucket')
-
-    def _get_bucket_url(self):
-        # load the bucket location from moblab config
-        # TODO haddowk/mattmallett refactor this to use the "autotest"
-        #   interface when that work is completed
-        config = ConfigParser.ConfigParser()
-        config.read(
-            [self.GLOBAL_CONFIG, self.MOBLAB_CONFIG, self.SHADOW_CONFIG])
-        for section in config.sections():
-            for option, value in config.items(section):
-                if 'image_storage_server' == option:
-                    return value
-        return None
 
     def _process_results(self, data):
         # search through the results json file to get the throughput numbers
@@ -59,7 +43,7 @@ class CloudStorageSpeedTest(AbstractDiagnosticCheck):
 
 
     def run(self):
-        bucket_url = self._get_bucket_url()
+        bucket_url = config.Config().get('image_storage_server')
         if bucket_url is None:
             raise DiagnosticError('Bucket URL is not configured')
 
