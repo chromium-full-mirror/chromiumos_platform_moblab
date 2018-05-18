@@ -31,7 +31,7 @@ function generate_package_install_script() {
   sudo apt-get -y update
   sudo apt-get -y upgrade
   # Install the required packages
-  sudo apt-get -y install "${PACKAGES}"
+  sudo apt-get -y install ${PACKAGES}
   # Install the google cloud sdk
   export CLOUD_SDK_REPO="cloud-sdk-\$(lsb_release -c -s)"
   curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
@@ -66,17 +66,10 @@ function create_new_empty_container() {
     -- -d "${DISTRIBUTION}" -r "${REVISION}" -a "${ARCH}"
 
   # Set up the networking for the container on moblab
-  local network_config="lxc.net.0.type = veth\n\
-lxc.net.0.flags = up\n\
-lxc.net.0.link = lxcbr0\n\
-lxc.net.0.hwaddr = 00:16:3e:0a:31:c2"
+  local network_config="lxc.net.0.type = veth\nlxc.net.0.flags = up\nlxc.net.0.link = lxcbr0\nlxc.net.0.hwaddr = 00:16:3e:0a:31:c2"
 
-  sudo sed -E s#"^lxc.rootfs.path = dir.*$"#\
-"lxc.rootfs.path = dir:/mnt/moblab/containers/${CONTAINER_NAME}/rootfs\n"#\
--i "${DIRECTORY}/${CONTAINER_NAME}/config"
-  sudo sed -E s#"^lxc.net.0.type.*$"#\
-"${network_config}"#\
--i "${DIRECTORY}/${CONTAINER_NAME}/config"
+  sudo sed -E s#"^lxc.rootfs.path = dir.*$"#"lxc.rootfs.path = dir:/mnt/moblab/containers/${CONTAINER_NAME}/rootfs\n"# -i "${DIRECTORY}/${CONTAINER_NAME}/config"
+  sudo sed -E s#"^lxc.net.0.type.*$"#"${network_config}"# -i "${DIRECTORY}/${CONTAINER_NAME}/config"
 
   # Install a script that will setup the container on the moblab.
   rm /tmp/container_install_script
