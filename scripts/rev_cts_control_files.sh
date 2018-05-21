@@ -23,11 +23,12 @@ CHEETS_PRIVATE_LOCATION="${THIRD_PARTY}"/autotest-tests-cheets/server/site_tests
 # Sync the two repos that matter
 cd "${CHEETS_PRIVATE_LOCATION}"
 repo sync .
-cd "${AUTO_TEST_LOCATION}"/cheets_CTS_N
-repo sync .
 
 #Start a new repo branch
+cd "${AUTO_TEST_LOCATION}"/cheets_CTS_N
 repo start uprev_"${CTS_VERSION}"
+repo sync .
+
 
 # Set up path so it can access adb and aapt
 # TODO - follow the href in
@@ -40,7 +41,8 @@ PATH=${PATH}:/tmp/platform-tools
 
 # Remove / Move all the existing control files - except for the
 # control.tradefed-run-collect-tests-only
-rm control.*.C*;rm *vm-tests-tf
+rm -f control.*.C*
+rm -f *vm-tests-tf
 
 # Generate the new control files
 "${CHEETS_PRIVATE_LOCATION}"/cheets_CTS_N/generate_controlfiles.py \
