@@ -20,6 +20,9 @@ class CloudStorageSpeedTest(AbstractDiagnosticCheck):
 
     GSUTIL_USER = 'moblab'
 
+    FAILURE_MESSAGE_TEMPLATE = (
+        'Moblab is not configured to access Google Storage\n%s')
+
     category = 'Cloud Storage'
 
     name = 'Speed Test'
@@ -45,12 +48,21 @@ class CloudStorageSpeedTest(AbstractDiagnosticCheck):
     def run(self):
         bucket_url = config.Config().get('image_storage_server')
         if bucket_url is None:
-            raise DiagnosticError('Bucket URL is not configured')
+            return self.FAILURE_MESSAGE_TEMPLATE % 'No bucket is set'
+
+        # test that the boto configuration is correct before running speedtest
+        ls_cmd = ['gsutil', 'ls', '-b', bucket_url]
+        try:
+            osutils.sudo_run_command(ls_cmd, user=self.GSUTIL_USER)
+        except osutils.RunCommandError:
+            return (self.FAILURE_MESSAGE_TEMPLATE %
+                "Can't connect with bucket " + bucket_url)
 
         output_file = '/tmp/perfdiag_output.json'
-        cmd = ['gsutil', 'perfdiag', '-s' '1M', '-o', output_file, bucket_url]
+        perf_cmd = [
+            'gsutil', 'perfdiag', '-s' '1M', '-o', output_file, bucket_url]
         try:
-            osutils.sudo_run_command(cmd, user=self.GSUTIL_USER)
+            osutils.sudo_run_command(perf_cmd, user=self.GSUTIL_USER)
         except osutils.RunCommandError:
             raise DiagnosticError('Failed to run gsutil perfdiag command')
 
