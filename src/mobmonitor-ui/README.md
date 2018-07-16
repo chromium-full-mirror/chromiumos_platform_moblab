@@ -4,8 +4,8 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Installing nodejs
 
-You will need nodejs locally to build and run the app. The easiest way to get
-nodejs is nvm.
+You will need nodejs locally to build and run the app. node v6.11.5 is already installed in the
+chroot via the cros sdk. If you don't have node, the easiest way to get it is nvm.
 
 Install [nvm](https://github.com/creationix/nvm#install-script)
 ```
@@ -19,7 +19,7 @@ nvm i v6.11.5
 
 Install angular cli
 ```
-npm i -g @angular/cli
+npm i -g @angular/cli@1.7.3
 ```
 
 Install local node modules
