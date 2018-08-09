@@ -152,7 +152,7 @@ def list_block_devices():
     devices = []
     for line in output.splitlines():
         d = {}
-        for k, v in re.findall(r'(\S+?)=\"(.+?)\"', line):
+        for k, v in re.findall(r'(\S+?)=\"(\w*?)\"', line):
             d[k] = v
 
         devices.append(BlockDevice(**d))
