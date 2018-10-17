@@ -55,7 +55,7 @@ rm -f control.*.G*
 
 # Edit cheets_GTS.py,
 # Change the _PARTNER_GTS_LOCATION  to have the correct version of the GTS zip
-sed -E s#"^_PARTNER_GTS_LOCATION = .*$"#"_PARTNER_GTS_LOCATION = '${GTS_FILE}'"# -i $(pwd)/"cheets_GTS.py"
+sed -E s#"^_PARTNER_GTS_LOCATION = _PARTNER_GTS_BUCKET \+ .*$"#"_PARTNER_GTS_LOCATION = _PARTNER_GTS_BUCKET \+ 'gts-${GTS_VERSION}.zip'"# -i $(pwd)/"cheets_GTS.py"
 
 git add . -A
 
@@ -67,5 +67,5 @@ TEST=None
 BUG=b:68021674
 EOF
 
-repo upload . --verify -d
+repo upload . --verify
 

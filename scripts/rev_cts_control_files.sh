@@ -65,5 +65,4 @@ TEST=None
 BUG=b:68778082
 EOF
 
-repo upload . --verify -d
-
+repo upload . --verify
