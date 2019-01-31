@@ -1,0 +1,16 @@
+*~
+\#*
+.\#*
+*.o
+*.pyc
+*.orig
+*.rej
+*.swp
+*.tar
+*.gz
+.DS_Store
+.vscode
+
+/.cache/
+/.coverage
+/node_modules
