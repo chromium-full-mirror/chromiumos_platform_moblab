@@ -34,8 +34,7 @@ repo sync .
 # TODO - follow the href in
 # https://dl.google.com/android/repository/platform-tools-latest-linux.zip
 # to get the latest platform tools version
-curl https://dl.google.com/android/repository/platform-tools_r27.0.1-linux.zip \
-  -o /tmp/platform-tools_r27.0.1-linux.zip
+wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip -P /tmp
 unzip -o /tmp/platform-tools_r27.0.1-linux.zip -d /tmp
 PATH=${PATH}:/tmp/platform-tools
 
@@ -47,7 +46,8 @@ rm -f *vm-tests-tf
 # Generate the new control files
 "${CHEETS_PRIVATE_LOCATION}"/cheets_CTS_N/generate_controlfiles.py \
   "${ARM_FILE}" \
-  "${X86_FILE}"
+  "${X86_FILE}" \
+  --is_public
 
 # Edit cheets_CTS_N.py,
 # Change the _CTS_URI dict to have the correct version of the CTS zip
@@ -65,4 +65,4 @@ TEST=None
 BUG=b:68778082
 EOF
 
-repo upload . --verify
+repo upload . --verify --wip
