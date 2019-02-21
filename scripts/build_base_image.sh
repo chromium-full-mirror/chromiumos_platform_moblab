@@ -20,7 +20,8 @@ ARCH="amd64"
 MOBLAB_IP_ADDRESS="${2}"
 MOBLAB_DIRECTORY="/mnt/moblab/containers"
 
-PACKAGES="wget curl python2.7 unzip rsync openjdk-8-jdk"
+PACKAGES="wget curl python2.7 unzip rsync openjdk-8-jdk python-lxml \
+          python-numpy"
 
 function generate_package_install_script() {
   read -r -d '' PACKAGE_INSTALL_SCRIPT << EOM
@@ -81,7 +82,7 @@ function create_new_empty_container() {
 
   # Tar up the newly created container preserving permissions
   cd "${DIRECTORY}" || exit
-  sudo tar -czpf "${CONTAINER_NAME}".tar "${CONTAINER_NAME}"
+  sudo tar -cJpf "${CONTAINER_NAME}".tar "${CONTAINER_NAME}"
 }
 
 function copy_container_to_moblab() {
@@ -96,7 +97,7 @@ function start_container_and_run_install_script() {
 }
 
 function retrieve_container_from_moblab() {
-  sudo rm -rf "${DIRECTORY}/${CONTAINER_NAME}.tar.zx"
+  sudo rm -rf "${DIRECTORY}/${CONTAINER_NAME}.tar.xz"
   scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
   moblab@"${MOBLAB_IP_ADDRESS}"\
 :/mnt/moblab/containers/"${CONTAINER_NAME}".tar.xz .
