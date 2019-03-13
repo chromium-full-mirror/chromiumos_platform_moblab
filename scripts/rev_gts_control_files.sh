@@ -15,7 +15,7 @@ set -e
 GTS_VERSION="${1}"
 GTS_BINARY="${2}"
 GTS_BUCKET_LOCATION="gs://chromeos-partner-gts/"
-GTS_FILE="${GTS_BUCKET_LOCATION}"gts-"${GTS_VERSION}".zip
+GTS_FILE="${GTS_BUCKET_LOCATION}"android-gts-"${GTS_VERSION}".zip
 
 gsutil cp "${GTS_BINARY}"  gs://chromeos-partner-gts/
 LAST_GTS_BINARY=$(gsutil ls -r gs://chromeos-partner-gts/ | tail -1)
@@ -41,8 +41,7 @@ repo sync .
 # TODO - follow the href in
 # https://dl.google.com/android/repository/platform-tools-latest-linux.zip
 # to get the latest platform tools version
-curl https://dl.google.com/android/repository/platform-tools_r27.0.1-linux.zip \
-  -o /tmp/platform-tools_r27.0.1-linux.zip
+wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip -P /tmp
 unzip -o /tmp/platform-tools_r27.0.1-linux.zip -d /tmp
 PATH=${PATH}:/tmp/platform-tools
 
@@ -51,7 +50,8 @@ PATH=${PATH}:/tmp/platform-tools
 rm -f control.*.G*
 
 # Generate the new control files
-"${CHEETS_PRIVATE_LOCATION}"/cheets_GTS/generate_controlfiles.py "${GTS_FILE}"
+"${CHEETS_PRIVATE_LOCATION}"/cheets_GTS/generate_controlfiles.py \
+    "${GTS_FILE}" --is_public
 
 # Edit cheets_GTS.py,
 # Change the _PARTNER_GTS_LOCATION  to have the correct version of the GTS zip
