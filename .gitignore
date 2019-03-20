@@ -13,4 +13,8 @@
 
 /.cache/
 /.coverage
-/node_modules
+*node_modules
+*_pb2*py
+*.idea/
+*pb*.ts
+*pb*.js
