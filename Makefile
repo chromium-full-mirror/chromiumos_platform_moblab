@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-SUBDIRS := upstart_init tools mobmonitor mobmonitor-ui
+SUBDIRS := upstart-scripts tools mobmonitor mobmonitor-ui
 
 INSTALL_SUBDIRS = $(SUBDIRS)
 
