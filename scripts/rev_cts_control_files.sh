@@ -31,11 +31,8 @@ repo sync .
 
 
 # Set up path so it can access adb and aapt
-# TODO - follow the href in
-# https://dl.google.com/android/repository/platform-tools-latest-linux.zip
-# to get the latest platform tools version
 wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip -P /tmp
-unzip -o /tmp/platform-tools_r27.0.1-linux.zip -d /tmp
+unzip -o /tmp/platform-tools-latest-linux.zip -d /tmp
 PATH=${PATH}:/tmp/platform-tools
 
 # Remove / Move all the existing control files - except for the
