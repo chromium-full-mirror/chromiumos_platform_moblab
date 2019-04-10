@@ -65,4 +65,9 @@ class MoblabConfigConnector(object):
 
     def get_remote_task_scheduler_tick_delay(self):
         """Return the number of mins task scheduler waits between attempts."""
-        return self.get("REMOTE_TASK_SCHEDULER", "tick_interval", 30)
+        return int(self.get("REMOTE_TASK_SCHEDULER", "tick_interval", 30))
+
+    def get_test_wifi_ap_and_password(self):
+        ap_name = self.get('MOBLAB', 'wifi_dut_ap_name', default=None)
+        ap_pass = self.get('MOBLAB', 'wifi_dut_ap_pass', default='')
+        return (ap_name, ap_pass)

@@ -6,7 +6,12 @@
 from __future__ import print_function
 
 import json
-from chromite.lib import cros_logging as logging
+
+try:
+    from chromite.lib import cros_logging as logging
+except ImportError:
+    # pylint: disable=cros-logging-import
+    import logging
 
 import requests
 
@@ -38,7 +43,14 @@ class AFEConnector(object):
 
         logging.debug("%s %s", rpc_url, data)
         try:
-            return requests.post(rpc_url, data=data)
+            response = requests.post(rpc_url, data=data)
+            error = self.decode_response(response, "error")
+            if error:
+                logging.error("AFE RPC called %s failed with error %s", rpc_url,
+                              error)
+            logging.debug("%s %s", response.text, response.content)
+
+            return response
         except requests.exceptions.RequestException as e:
             logging.error(e)
 
@@ -126,4 +138,4 @@ class AFEConnector(object):
             "test_args": test_args
         }
         response = self.send_rpc_command("run_suite", params)
-        logging.debug(response)
+        logging.info(response)
