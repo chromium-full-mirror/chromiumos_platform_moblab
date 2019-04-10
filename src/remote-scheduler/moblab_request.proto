@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package MoblabRequests;
+
+// Common to all requests.
+message MoblabRequest {
+  string unique_id = 1;
+  string board = 2;
+  string model = 3;
+  int32 priority = 4;
+  int32 min_duts = 5;
+  int64 expires_at_sec_utc = 6;
+}
+
+// Run a suite
+message MoblabSuiteRunRequest {
+  MoblabRequest base = 1;
+  string suite = 2;
+  string build = 3;
+  string suite_args = 4;
+  string test_args = 5;
+}
+
+// Run a list of CTS/GTS tests
+message MoblabCtsTestRunRequest {
+  MoblabRequest base = 1;
+  string suite = 2;
+  string build = 3;
+  repeated string test_name = 9;
+}
+
+message MoblabRequests {
+  repeated MoblabSuiteRunRequest suite_requests = 1;
+  repeated MoblabCtsTestRunRequest cts_test_requests = 2;
+}
