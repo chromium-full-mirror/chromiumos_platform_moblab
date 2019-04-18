@@ -167,10 +167,16 @@ class MoblabTestScheduler(object):
         Args:
             level (int): One of the predefined logging levels, e.g loging.DEBUG
         """
-        root = logging.getLogger()
-        root.setLevel(level)
-        logging.basicConfig(
-            filename='/var/log/moblab_remote_schedule.log', level=level)
+        logging.getLogger().handlers = []
+        logging.getLogger().setLevel(level)
+        fh = logging.FileHandler('/var/log/moblab_remote_schedule.log')
+        fh.setLevel(level)
+        # create formatter and add it to the handlers
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        logging.getLogger().addHandler(fh)
+
 
     def parse_arguments(self, argv):
         """Creates the argument parser."""
@@ -200,12 +206,14 @@ class MoblabTestScheduler(object):
         is_enabled = self.config_connector.is_remote_task_scheduler_enabled()
         delay_mins = self.config_connector.get_remote_task_scheduler_tick_delay(
         )
+        debug_enabled = self.config_connector.is_remote_task_debug_enabled()
 
         options = self.parse_arguments(argv)
 
         logging_severity = logging.INFO
-        if options.verbose:
-            self.setup_logging(logging_severity)
+        if options.verbose or debug_enabled:
+            logging_severity = logging.DEBUG
+        self.setup_logging(logging_severity)
 
         if not is_enabled:
             logging.info("The scheduler is not enabled")
