@@ -71,3 +71,6 @@ class MoblabConfigConnector(object):
         ap_name = self.get('MOBLAB', 'wifi_dut_ap_name', default=None)
         ap_pass = self.get('MOBLAB', 'wifi_dut_ap_pass', default='')
         return (ap_name, ap_pass)
+
+    def is_remote_task_debug_enabled(self):
+        return self.get("REMOTE_TASK_SCHEDULER", "debug_enabled", default=False)
