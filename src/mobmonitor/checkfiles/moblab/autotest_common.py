@@ -21,7 +21,7 @@ def InCrOSDevice():
     return False
   with open('/etc/lsb-release') as f:
     lsb_release = f.read()
-  return re.match(r'^CHROMEOS_RELEASE', lsb_release, re.MULTILINE) is not None
+  return 'CHROMEOS_RELEASE' in lsb_release
 
 
 def import_autotest():
