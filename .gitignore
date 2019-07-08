@@ -18,3 +18,4 @@
 *.idea/
 *pb*.ts
 *pb*.js
+.vscode/*

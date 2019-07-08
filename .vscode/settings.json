@@ -1,0 +1,69 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.pythonPath": "/usr/bin/python",
+    "python.formatting.provider": "yapf",
+    "python.formatting.yapfArgs": ["--style", "{indent_width: 4, based_on_style: chromium, column_limit: 80, allow_split_before_dict_value: false, each_dict_entry_on_separate_line: false, indent_dictionary_value: false}"],
+    "autoDocstring.docstringFormat":"google",
+    "trailing-spaces.trimOnSave": true,
+    "python.linting.pylintArgs": ["--rcfile", "/mnt/builddrive/tot/src/platform/moblab/pylintrc"],
+    "python.linting.pylintPath": "/usr/local/google/home/haddowk/depot_tools/pylint",
+    "python.linting.pylintUseMinimalCheckers":false,
+    "python.linting.pylintCategorySeverity.refactor": "Warning",
+    "python.unitTest.unittestEnabled": true,
+    "python.unitTest.pyTestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false,
+    "python.unitTest.unittestArgs": [
+        "-v",
+        "-s",
+        "/mnt/builddrive/tot/src/platform/moblab/src/",
+        "-p",
+        "*_unittest.py"
+     ],
+
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.pyc": {"when": "$(basename).py"},
+    },
+    "editor.rulers": [
+        80
+    ],
+    "cSpell.words": [
+        "moblabrpc",
+        "pb"
+    ],
+
+    "cSpell.enabledLanguageIds": [
+        "asciidoc",
+        "c",
+        "cpp",
+        "csharp",
+        "css",
+        "go",
+        "handlebars",
+        "html",
+        "jade",
+        "javascript",
+        "javascriptreact",
+        "json",
+        "latex",
+        "less",
+        "markdown",
+        "php",
+        "plaintext",
+        "proto3",
+        "pub",
+        "python",
+        "restructuredtext",
+        "rust",
+        "scss",
+        "text",
+        "typescript",
+        "typescriptreact",
+        "yml"
+    ]
+}
