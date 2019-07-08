@@ -10,19 +10,20 @@
 # 3) ./build_base_image.sh <base_image_version_number> <ip of moblab>
 
 set -x
+set -e
 
 DIRECTORY=$(pwd)
 CONTAINER_NAME="moblab_base_${1}"
 DISTRIBUTION="ubuntu"
-REVISION="xenial"
+REVISION="bionic"
 ARCH="amd64"
 
 MOBLAB_IP_ADDRESS="${2}"
 MOBLAB_DIRECTORY="/mnt/moblab/containers"
 
-PACKAGES="wget curl python2.7 unzip rsync openjdk-8-jdk python-lxml \
-          python-numpy"
-
+PACKAGES="wget curl python2.7 unzip rsync openjdk-8-jre \
+          gnupg lsb-release "
+PYTHON_PACKAGES="lxml numpy crcmod"
 function generate_package_install_script() {
   read -r -d '' PACKAGE_INSTALL_SCRIPT << EOM
   set -x
@@ -40,7 +41,19 @@ function generate_package_install_script() {
   echo "deb http://packages.cloud.google.com/apt \$CLOUD_SDK_REPO main" | \
     sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
   sudo apt-get -y update
-  sudo apt-get -y install google-cloud-sdk
+  sudo apt-get --no-install-recommends -y install google-cloud-sdk
+  apt-get -y autoremove
+  apt-get -y autoclean
+  apt-get -y clean
+  rm -rf /var/lib/apt/lists
+  gsutil -v
+  export PAGER=/bin/more
+  nmcli
+  nmcli con mod 'Wired connection 1' ipv4.dns '8.8.8.8 1.1.1.1 8.8.4.4 1.0.0.1'
+  wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+  python2.7 /tmp/get-pip.py --target /usr/lib/python2.7/dist-packages
+  python2.7 -m pip install --upgrade pip setuptools wheel ${PYTHON_PACKAGES}\
+    --target /usr/lib/python2.7/dist-packages
 EOM
 }
 
@@ -60,17 +73,25 @@ function generate_container_control_script() {
 EOM
 }
 
+# This is just for documentation - it will not run in chroot, run outside
+# and then use the output inside chroot.
+function initial_setup() {
+  go get -d -v github.com/lxc/distrobuilder ||
+  cd "${HOME}/go/src/github.com/lxc/distrobuilder"
+  make
+  cd -
+  sudo $HOME/go/bin/distrobuilder build-lxc ubuntu.yaml
+}
+
 function create_new_empty_container() {
   # Create a new empty container using a lxc templates
   sudo rm -rf "${DIRECTORY}/${CONTAINER_NAME}"
-  sudo lxc-create -P "${DIRECTORY}" -t download -n "${CONTAINER_NAME}" \
-    -- -d "${DISTRIBUTION}" -r "${REVISION}" -a "${ARCH}"
+  sudo lxc-create -P "${DIRECTORY}" -t local -n "${CONTAINER_NAME}" -- -m ./meta.tar.xz -f ./rootfs.tar.xz
 
   # Set up the networking for the container on moblab
   local network_config="lxc.net.0.type = veth\nlxc.net.0.flags = up\nlxc.net.0.link = lxcbr0\nlxc.net.0.hwaddr = 00:16:3e:0a:31:c2"
 
-  sudo sed -E s#"^lxc.rootfs.path = dir.*$"#"lxc.rootfs.path = dir:/mnt/moblab/containers/${CONTAINER_NAME}/rootfs\n"# -i "${DIRECTORY}/${CONTAINER_NAME}/config"
-  sudo sed -E s#"^lxc.net.0.type.*$"#"${network_config}"# -i "${DIRECTORY}/${CONTAINER_NAME}/config"
+  sudo sed -E s#"^lxc.rootfs.path =.*"#"lxc.rootfs.path = dir:/mnt/moblab/containers/${CONTAINER_NAME}/rootfs"#g -i "${DIRECTORY}/${CONTAINER_NAME}/config"
 
   # Install a script that will setup the container on the moblab.
   rm /tmp/container_install_script
@@ -103,7 +124,7 @@ function retrieve_container_from_moblab() {
 :/mnt/moblab/containers/"${CONTAINER_NAME}".tar.xz .
 }
 
-
+initial_setup
 # Generate a new empty continer in a chroot you can not create new containers
 # on moblab due /etc being RO filesystem
 generate_package_install_script
