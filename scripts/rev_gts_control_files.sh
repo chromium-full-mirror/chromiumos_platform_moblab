@@ -15,17 +15,17 @@ set -e
 GTS_VERSION="${1}"
 GTS_BINARY="${2}"
 GTS_BUCKET_LOCATION="gs://chromeos-partner-gts/"
-GTS_FILE="${GTS_BUCKET_LOCATION}"android-gts-"${GTS_VERSION}".zip
+GTS_FILE="${GTS_BUCKET_LOCATION}"gts-"${GTS_VERSION}".zip
 
-gsutil cp "${GTS_BINARY}"  gs://chromeos-partner-gts/
-LAST_GTS_BINARY=$(gsutil ls -r gs://chromeos-partner-gts/ | tail -1)
+#gsutil cp "${GTS_BINARY}"  gs://chromeos-partner-gts/
+LAST_GTS_BINARY=$(gsutil ls -r gs://chromeos-partner-gts/gts-6* | tail -1)
 rm -f update_acl_setting
 gsutil acl get "${LAST_GTS_BINARY}" > update_acl_setting
 gsutil acl set update_acl_setting "${GTS_FILE}"
 
 THIRD_PARTY="${HOME}"/trunk/src/third_party
 AUTO_TEST_LOCATION="${THIRD_PARTY}"/autotest/files/server/site_tests
-CHEETS_PRIVATE_LOCATION="${THIRD_PARTY}"/autotest-tests-cheets/server/site_tests
+CHEETS_LOCATION="${THIRD_PARTY}"/autotest/files/server/site_tests
 
 # Sync the two repos that matter
 cd "${CHEETS_PRIVATE_LOCATION}"
@@ -44,10 +44,10 @@ PATH=${PATH}:/tmp/platform-tools
 
 # Remove / Move all the existing control files - except for the
 # control.tradefed-run-collect-tests-only
-rm -f control.*.G*
+rm -f control.G*
 
 # Generate the new control files
-"${CHEETS_PRIVATE_LOCATION}"/cheets_GTS/generate_controlfiles.py \
+"${CHEETS_LOCATION}"/cheets_GTS/generate_controlfiles.py \
     "${GTS_FILE}" --is_public
 
 # Edit cheets_GTS.py,
