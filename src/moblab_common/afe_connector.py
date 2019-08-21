@@ -17,7 +17,7 @@ except ImportError:
 import requests
 
 
-MOBLAB_RPC_SERVER = 'localhost:6010'
+MOBLAB_RPC_SERVER = 'localhost:80'
 
 
 class AFEConnector(object):

@@ -9,9 +9,10 @@ from __future__ import print_function
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import exceptions
 
+from moblab_common import versioned_upload
+
 import moblab_request_pb2
 import run_suite_request
-import versioned_upload
 
 try:
     from chromite.lib import cros_logging as logging
@@ -56,7 +57,7 @@ class MoblabRemoteRequests(object):
             serialized_proto = blob.download_as_string()
         except exceptions.NotFound as e:
             logging.debug(e)
-            logging.error("No request list found in %s", blob.path)
+            logging.error('No request list found in %s', blob.path)
             return False
 
         requests = moblab_request_pb2.MoblabRequests()
@@ -130,7 +131,7 @@ class MoblabRemoteRequests(object):
         Returns:
             string: A line for each request.
         """
-        output = "Requests:\n"
+        output = 'Requests:\n'
         for request in self.requests:
-            output += "%s\n" % request
+            output += '%s\n' % request
         return output

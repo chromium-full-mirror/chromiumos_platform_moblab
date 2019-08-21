@@ -22,17 +22,18 @@ from google.cloud import exceptions as cloud_exceptions, storage
 # pylint: disable=no-name-in-module, import-error
 from google.auth import exceptions as auth_exceptions
 
-import afe_connector
-import config_connector
-import devserver_connector
+from moblab_common import afe_connector
+from moblab_common import config_connector
+from moblab_common import devserver_connector
+from moblab_common import versioned_upload
+
 import remote_requests
-import versioned_upload
 import scheduler_common
 
 from chromite.lib import cros_logging as logging
 
-os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS",
-                      "/home/moblab/.service_account.json")
+os.environ.setdefault('GOOGLE_APPLICATION_CREDENTIALS',
+                      '/home/moblab/.service_account.json')
 
 
 class MoblabTestScheduler(object):
@@ -46,10 +47,10 @@ class MoblabTestScheduler(object):
             self.afe_connector)
         self.requests = remote_requests.MoblabRemoteRequests()
         self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
-        logging.info("Using bucket: %s", self.moblab_bucket_name)
+        logging.info('Using bucket: %s', self.moblab_bucket_name)
         self.devserver_connector = devserver_connector.DevserverConnector(
             self.moblab_bucket_name)
-        self.moblab_id = open(os.environ["HOME"] + "/.moblab_id").readlines()
+        self.moblab_id = open(os.environ['HOME'] + '/.moblab_id').readlines()
 
     def get_executed_commands(self):
         """Get the list of commands that have already been executed.
@@ -76,13 +77,13 @@ class MoblabTestScheduler(object):
         Returns:
             bool: True if the lock was successfully obtained otherwise false.
         """
-        logging.debug("Obtaining lock %s" % request.unique_id)
+        logging.debug('Obtaining lock %s' % request.unique_id)
         blob = self.storage_client.bucket(self.moblab_bucket_name).blob(
-            "%s/%s" % (scheduler_common.SCHEDULE_DIR, request.unique_id))
+            '%s/%s' % (scheduler_common.SCHEDULE_DIR, request.unique_id))
         if blob.exists():
-            logging.debug("Lock already %s exists" % request.unique_id)
+            logging.debug('Lock already %s exists' % request.unique_id)
             return False
-        contents = "Lock date %s\nRequest %s\nMoblab Id: %s" % (
+        contents = 'Lock date %s\nRequest %s\nMoblab Id: %s' % (
             datetime.datetime.utcnow(), request, self.moblab_id)
         try:
             versioned_upload.upload_from_string(blob, contents, 0)
@@ -104,22 +105,22 @@ class MoblabTestScheduler(object):
         hosts = self.afe_connector.get_connected_devices()
         for host in hosts:
             if host['status'] != 'Ready' or host['locked']:
-                logging.debug("Host not ready or locked")
+                logging.debug('Host not ready or locked')
                 continue
             labels = host['labels']
 
             board = None
             model = None
             for label in labels:
-                if label.startswith("model:"):
-                    model = label.split(":")[1]
+                if label.startswith('model:'):
+                    model = label.split(':')[1]
                     continue
-                if label.startswith("board:"):
-                    board = label.split(":")[1]
+                if label.startswith('board:'):
+                    board = label.split(':')[1]
                     continue
             if not model:
                 model = board
-            identifier = "%s.%s" % (board, model)
+            identifier = '%s.%s' % (board, model)
             available_hosts[identifier] += 1
         logging.debug(available_hosts)
         return available_hosts
@@ -142,7 +143,7 @@ class MoblabTestScheduler(object):
 
         def has_been_executed(executed, request):
             if request.unique_id in executed:
-                logging.debug("Rejecting request %s as executed",
+                logging.debug('Rejecting request %s as executed',
                               request.unique_id)
                 return False
             return True
@@ -216,31 +217,31 @@ class MoblabTestScheduler(object):
         self.setup_logging(logging_severity)
 
         if not is_enabled:
-            logging.info("The scheduler is not enabled")
+            logging.info('The scheduler is not enabled')
             return False
 
-        logging.info("Starting scheduler: tick delay: %s" % delay_mins)
+        logging.info('Starting scheduler: tick delay: %s' % delay_mins)
 
         while True:
             request = self.get_next_command_to_run()
             if request:
                 if self.obtain_lock(request):
-                    logging.info("Executing request. %s", request.unique_id)
+                    logging.info('Executing request. %s', request.unique_id)
                     #TODO - return an enum SUCCESS/FAIL/RETRY.
                     request.execute(self.devserver_connector,
                                     self.afe_connector)
             else:
-                logging.debug("No requests to run.")
+                logging.debug('No requests to run.')
             if options.single_run:
                 break
-            logging.debug("Sleeping for %d mins", delay_mins)
+            logging.debug('Sleeping for %d mins', delay_mins)
             time.sleep(delay_mins * 60)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
         scheduler = MoblabTestScheduler()
     except auth_exceptions.DefaultCredentialsError as e:
-        logging.exception("Failed to start remote scheduler, %s", str(e))
+        logging.exception('Failed to start remote scheduler, %s', str(e))
         sys.exit(0)
     scheduler.execute_remote_commands(sys.argv[1:])
