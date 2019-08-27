@@ -1,0 +1,36 @@
+@import '../../theme.scss';
+
+
+mat-sidenav-container {
+  min-height: 600px;
+}
+
+mat-toolbar {
+  min-height: 60px;
+}
+
+.moblab-logo-icon {
+  transform: scale(2.3);
+  vertical-align: middle;
+  align-content: center;
+}
+
+.problem-icon {
+  color: yellow;
+  vertical-align: middle
+}
+
+.feedback-icon {
+  vertical-align: middle;
+  align: right;
+}
+
+
+.toolbar-title {
+  font-size: 34px;
+  font-weight: 350;
+}
+
+.moblab-sidebar-icon {
+  padding-right: 10px;
+}

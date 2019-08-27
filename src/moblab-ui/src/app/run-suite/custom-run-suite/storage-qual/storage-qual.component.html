@@ -1,0 +1,15 @@
+
+<mat-card>
+
+
+<app-moblab-runtest-selector></app-moblab-runtest-selector>
+<button
+mat-raised-button
+color="primary"
+[disabled]="runSuiteButtonEnabled"
+#runSuiteButton
+(click)="onRunSuite()"
+>
+Run Suite
+</button>
+</mat-card>

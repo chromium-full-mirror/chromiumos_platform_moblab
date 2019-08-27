@@ -1,0 +1,26 @@
+
+  <app-moblab-selector
+    #modelSelector
+    [title]="'Select model:'"
+    [placeholder]="['Pick from available model']"
+    [options]="models"
+    [isShown]="modelSelectorEnabled"
+    (update)="modelChanged($event.value, $event.index)"
+  >
+  </app-moblab-selector>
+
+  <app-moblab-build-selector
+    #buildSelector
+    (update)="buildChanged($event.value)"
+  >
+  </app-moblab-build-selector>
+
+  <app-moblab-selector
+    #poolSelector
+    [title]="'Pool (Optional):'"
+    [placeholder]="['Select a pool']"
+    [options]="pools"
+    [isShown]="poolSelectorEnabled"
+    (update)="poolChanged($event.value, $event.index)"
+  >
+  </app-moblab-selector>

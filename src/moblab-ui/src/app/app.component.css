@@ -1,0 +1,18 @@
+.sidenav-container {
+  min-height: 800px;
+}
+
+.sidenav-container mat-sidenav {
+  min-width: 200px;
+
+}
+
+.sidenav-container .mat-sidenav-content,
+.sidenav-container mat-sidenav {
+  display: flex;
+}
+
+mat-toolbar {
+  display: flex;
+}
+

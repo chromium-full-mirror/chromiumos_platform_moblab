@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700,400italic&amp;subset=latin-ext');
+@import url('https://fonts.googleapis.com/css?family=Helvetica+Neue:300,400,500,700,400italic&amp;subset=latin-ext');
+@import '~@angular/material/theming';
+
+
+$general-typography: mat-typography-config(
+  $font-family: '"Open Sans", "Helvetica Neue", sans-serif',
+  $body-2:        mat-typography-level(14px, 24px, 600)
+);
+
+
+$secondary-typography: mat-typography-config(
+  $font-family: 'Roboto, sans-serif'
+);
+
+
+// Be sure that you only ever include this mixin once!
+@include mat-core($general-typography);
+
+
+$sans-display-family: 'Google Sans Display, "Helvetica Neue", sans-serif';
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$primary: mat-palette($mat-blue, 700, A100, A400);
+$accent:  mat-palette($mat-indigo, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$warn:    mat-palette($mat-red);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$theme: mat-light-theme($primary, $accent, $warn);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($theme);

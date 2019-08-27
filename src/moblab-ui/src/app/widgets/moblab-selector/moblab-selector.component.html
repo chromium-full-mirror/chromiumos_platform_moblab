@@ -1,0 +1,13 @@
+<div class=moblab-selector>
+    <label class="moblab-selector-label"> {{ title }} </label>
+    <mat-select
+      placeholder="{{ placeholder }}"
+      [(ngModel)]="selectedValue"
+      (ngModelChange)="onChange($event)"
+      >
+      <mat-option *ngFor="let option of _options" [value]="option">{{
+        option
+      }}</mat-option>
+    </mat-select>
+</div>
+

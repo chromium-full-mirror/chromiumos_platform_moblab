@@ -1,0 +1,7 @@
+@import '../../../theme.scss';
+
+.moblab-selector {
+    color: mat-color($primary, default);
+    width: 300px;
+    margin: 10px;
+}

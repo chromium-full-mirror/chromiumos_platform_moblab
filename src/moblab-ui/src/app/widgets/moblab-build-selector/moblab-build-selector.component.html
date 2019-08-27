@@ -1,0 +1,29 @@
+<app-moblab-selector
+  #boardSelector
+  [title]="'Select board:'"
+  [placeholder]="['Pick from available boards']"
+  [options]="boards"
+  [isShown]="boardsPickerActive"
+  (update)="boardChanged($event.value, $event.index)"
+>
+</app-moblab-selector>
+
+<app-moblab-selector
+  #milestoneSelector
+  [title]="'Select milestone:'"
+  [placeholder]="['Pick from available milestones']"
+  [options]="milestones"
+  [isShown]="milestonesPickerActive"
+  (update)="milestoneChanged($event.value, $event.index)"
+>
+</app-moblab-selector>
+
+<app-moblab-selector
+  #buildSelector
+  [title]="'Select build:'"
+  [placeholder]="['Pick from available builds']"
+  [options]="builds"
+  [isShown]="buildsPickerActive"
+  (update)="buildChanged($event.value, $event.index)"
+>
+</app-moblab-selector>

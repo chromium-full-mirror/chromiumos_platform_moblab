@@ -1,0 +1,62 @@
+<div fxLayout="column">
+  <mat-toolbar fxFlex="15" color="primary" opened="true" #topToolbar>
+    <div class="toolbar-button">
+      <button mat-button (click)="mainSideNav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="space-around center">
+      <div class="toolbar-icon" fxFlex="20">
+        <mat-icon class="moblab-logo-icon" svgIcon="moblab"></mat-icon>
+      </div>
+      <div class="toolbar-title" fxFlex="30">
+        Moblab
+      </div>
+      <!-- <div class="toolbar-item" fxFlex="40">
+        Page Information Here
+        <mat-icon class="problem-icon">report_problem</mat-icon>
+      </div> -->
+      <div><mat-icon class="feedback-icon" feedback (send)="onSend($event)">feedback</mat-icon></div>
+    </div>
+  </mat-toolbar>
+
+  <mat-sidenav-container fxFlex="90" class="sidenav-container">
+    <mat-sidenav #mainSideNav mode="side" opened="true">
+      <mat-nav-list>
+        <a *ngFor="let tab of navTabsAboveRun" mat-list-item class="sidebar-items" routerLink="{{ tab.route }}"
+          routerLinkActive="active-route" [routerLinkActiveOptions]="{ exact: true }">
+          <mat-icon class="moblab-sidebar-icon">{{ tab.icon }} </mat-icon> {{ tab.label }}
+        </a>
+
+        <mat-list-item class="sidebar-items" [matMenuTriggerFor]="menu">
+          <mat-icon class="moblab-sidebar-icon">unfold_more</mat-icon>
+          <a>Run Tests</a>
+        </mat-list-item>
+        <mat-menu #menu="matMenu">
+          <button *ngFor="let test of testMenuOptions" mat-menu-item routerLink="{{ test.route }}">
+            {{ test.label }}
+          </button>
+        </mat-menu>
+        <a *ngFor="let tab of navTabsBelowRun" mat-list-item class="sidebar-items" routerLink="{{ tab.route }}"
+          routerLinkActive="active-route" [routerLinkActiveOptions]="{ exact: true }">
+          <mat-icon class="moblab-sidebar-icon">{{ tab.icon }} </mat-icon> {{ tab.label }}
+        </a>
+
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content fxFlex="100">
+      <mat-list>
+        <mat-list-item>
+          <mat-icon>report_problem</mat-icon>{{ appErrorMessage }}
+          <button mat-raised-button color="primary">See More</button>
+          <button mat-raised-button color="accent">Dismiss</button>
+        </mat-list-item>
+        <mat-list-item>
+          <mat-icon>info</mat-icon>{{ appErrorMessage }}
+          <button mat-raised-button color="primary">Dismiss</button>
+        </mat-list-item>
+      </mat-list>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

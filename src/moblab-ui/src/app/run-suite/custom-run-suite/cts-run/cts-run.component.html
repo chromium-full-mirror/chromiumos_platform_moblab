@@ -1,0 +1,16 @@
+<mat-card>
+  <mat-tab-group #androidGroup>
+    <mat-tab label={{androidConfig.label}} *ngFor="let androidConfig of androidConfigurations;">
+      <app-moblab-runtest-selector
+      (update)="modelBoardPoolSelected($event)">
+      </app-moblab-runtest-selector>
+      <app-moblab-selector #suiteSelector [title]="'Select suite:'" [placeholder]="['Pick from available suites']"
+        [options]="getSuiteLabelList(androidConfig)" [isShown]="true" (update)="suiteChanged($event.value, $event.index)">
+      </app-moblab-selector>
+
+    </mat-tab>
+  </mat-tab-group>
+  <button mat-raised-button color="primary" [disabled]="runSuiteButtonDisabled" #runSuiteButton (click)="onRunSuite()">
+    Run Suite
+  </button>
+</mat-card>
