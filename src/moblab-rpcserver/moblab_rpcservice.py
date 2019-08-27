@@ -1,0 +1,177 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+# Copyright 2019 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+from __future__ import print_function
+
+import re
+
+from chromite.lib import cros_logging as logging
+
+from moblab_common import afe_connector
+from moblab_common import config_connector
+from moblab_common import devserver_connector
+
+import build_connector
+import dut_connector
+
+_DEFAULT_SUITE_TIMEOUT_MINS = 1440
+_SUITE_TIMEOUT_MAP = {
+    'hardware_storagequal': 40320,
+    'hardware_storagequal_quick': 40320
+}
+
+
+class MoblabRpcError(Exception):
+    pass
+
+
+class MoblabLogic(object):
+    model_re = re.compile(r'^model:(.*)')
+    board_re = re.compile(r'^board:(.*)')
+    pool_re = re.compile(r'^pool:(.*)')
+
+    def __init__(self):
+        self.afe_connector = afe_connector.AFEConnector()
+        self.config_connector = config_connector.MoblabConfigConnector(
+            self.afe_connector)
+        self.setup_devserver_connector()
+        self.dut_connector = dut_connector.MoblabDUTConnector()
+
+    def setup_devserver_connector(self):
+        self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
+        logging.info("Using bucket: %s", self.moblab_bucket_name)
+        self.devserver_connector = devserver_connector.DevserverConnector(
+            self.moblab_bucket_name)
+        self.build_connector = build_connector.MoblabBuildConnector(
+            self.moblab_bucket_name)
+
+    def extract_model_from_labels(self, labels):
+        return self.extract_from_labels(self.model_re, labels)
+
+    def extract_board_from_labels(self, labels):
+        return self.extract_from_labels(self.board_re, labels)
+
+    def extract_pool_from_labels(self, labels):
+        return self.extract_from_labels(self.pool_re, labels)
+
+    def extract_from_labels(self, rexp, labels):
+        result = [
+            m.group(1) for m in [rexp.match(label) for label in labels] if m
+        ]
+        return list(set(result))
+
+    def get_connected_devices(self):
+        return self.dut_connector.get_connected_duts()
+
+    def run_suite_storage_qual(self,
+                               board,
+                               build,
+                               suite,
+                               model=None,
+                               pool=None,
+                               bug_id=None,
+                               part_id=None):
+        suite_args = {}
+        if bug_id:
+            suite_args['bug_id'] = bug_id
+        if part_id:
+            suite_args['part_id'] = part_id
+        suite_args['bug_id'] = bug_id or ''
+        suite_args['part_id'] = part_id or ''
+
+    def run_suite_memory_qual(self,
+                              board,
+                              build,
+                              suite,
+                              model=None,
+                              pool=None,
+                              bug_id=None,
+                              part_id=None):
+        pass
+
+    def run_cts_suite(self,
+                      board,
+                      build,
+                      suite,
+                      model,
+                      pool=None,
+                      autotest_tests=None):
+        test_args = {}
+        ap_name, ap_pass = self.config_connector.get_test_wifi_ap_and_password()
+        test_args['ssid'] = ap_name
+        test_args['wifipass'] = ap_pass
+
+        suite_args = {}
+        if autotest_tests:
+            suite_args['tests'] = [test.strip() for test in autotest_tests]
+
+        return self.run_suite(
+            board,
+            build,
+            suite,
+            model,
+            pool,
+            suite_args=suite_args,
+            test_args=test_args)
+
+    def run_suite_faft(
+            self,
+            board,
+            build,
+            suite,
+            model=None,
+            pool=None,
+            ro_firmware=None,
+            rw_firmware=None,
+    ):
+        builds = {}
+        if rw_firmware:
+            builds['fwrw-version'] = rw_firmware
+        if ro_firmware:
+            builds['fwro-version'] = ro_firmware
+
+    def run_suite(self,
+                  board,
+                  build,
+                  suite,
+                  model=None,
+                  pool=None,
+                  suite_args=None,
+                  test_args=None,
+                  suite_timeout_mins=_DEFAULT_SUITE_TIMEOUT_MINS,
+                  extra_builds={}):
+
+        builds = {'cros-version': build}
+        builds.update(extra_builds)
+
+        # TODO(mattmallett b/92031054) Standardize bug id, part id passing for memory/storage qual
+        processed_suite_args = dict()
+        processed_test_args = dict()
+
+        # set processed_suite_args to None instead of empty dict when there is no
+        # argument in processed_suite_args
+        if len(processed_suite_args) == 0:
+            processed_suite_args = None
+
+        if test_args:
+            try:
+                processed_test_args['args'] = [test_args]
+                for line in test_args.split('\n'):
+                    key, value = line.strip().split('=')
+                    processed_test_args[key] = value
+            except:
+                raise MoblabRpcError('Could not parse test args.')
+
+        return self.afe_connector.run_suite(
+            board,
+            build,
+            builds,
+            suite,
+            suite_timeout_mins,
+            pool,
+            model,
+            suite_args=processed_suite_args,
+            test_args=processed_test_args)

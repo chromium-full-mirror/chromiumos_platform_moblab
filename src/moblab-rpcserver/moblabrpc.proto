@@ -1,0 +1,98 @@
+
+syntax = "proto3";
+
+package moblab;
+
+service MoblabRpcService {
+  // Run a test suite
+  rpc run_suite (RunSuiteRequest) returns (RunSuiteResponse) {}
+  rpc run_cts_suite (RunCtsSuiteRequest) returns (RunCtsSuiteResponse) {}
+
+  rpc list_connected_duts (ListConnectedDutsRequest) returns (ListConnectedDutsResponse) {}
+  rpc list_boards (ListBoardsRequest) returns (ListBoardsResponse) {}
+  rpc list_milestones (ListMilestonesRequest) returns (ListMilestonesResponse) {}
+  rpc list_builds (ListBuildsRequest) returns (ListBuildsResponse) {}
+  rpc list_models (ListModelsRequest) returns (ListModelsResponse) {}
+  rpc list_pools (ListPoolsRequest) returns (ListPoolsResponse) {}
+}
+
+message JobInfo {
+  string name = 1;
+  int64 id = 2;
+  string owner = 3;
+  int64 priority = 4;
+  string status = 5;
+}
+
+message RunSuiteRequest {
+  string name = 1;
+}
+message RunSuiteResponse {
+  string message = 1;
+}
+
+message RunCtsSuiteRequest {
+  string suite = 1;
+  string board = 2;
+  string build = 3;
+  string model = 4;
+  string pool = 5;
+  repeated string autotest_tests = 6;
+  repeated string tradefed_tests = 7;
+}
+message RunCtsSuiteResponse {
+  string message = 1;
+}
+
+message ConnectedDutInfo {
+  string name = 1;
+  string ip = 2;
+  string mac_addr = 3;
+  string status = 4;
+  repeated string boards = 5;
+  repeated string models  = 6;
+  bool is_enrolled = 7;
+  bool is_locked = 8;
+  string lock_reason = 9;
+  repeated string labels = 10;
+  repeated string attributes= 11;
+  repeated string pools= 12;
+}
+message ListConnectedDutsRequest {
+}
+message ListConnectedDutsResponse {
+  repeated ConnectedDutInfo duts = 1;
+}
+
+message ListBoardsRequest {
+}
+message ListBoardsResponse {
+  repeated string boards = 1;
+}
+
+message ListMilestonesRequest {
+  string board = 1;
+}
+message ListMilestonesResponse {
+  repeated string milestones = 1;
+}
+
+message ListBuildsRequest {
+  string board = 1;
+  string milestone = 2;
+}
+message ListBuildsResponse {
+  repeated string builds = 1;
+}
+
+message ListModelsRequest {
+}
+message ListModelsResponse {
+  repeated string models = 1;
+}
+
+message ListPoolsRequest {
+}
+message ListPoolsResponse {
+  repeated string pools = 1;
+}
