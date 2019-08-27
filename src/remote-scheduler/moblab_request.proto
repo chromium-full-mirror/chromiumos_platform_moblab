@@ -10,6 +10,7 @@ message MoblabRequest {
   int32 priority = 4;
   int32 min_duts = 5;
   int64 expires_at_sec_utc = 6;
+  string pubsub_message_id = 7;
 }
 
 // Run a suite

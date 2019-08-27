@@ -18,7 +18,7 @@ except ImportError:
     import logging
 
 
-class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
+class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
     """Encapsulates all the information required to run a suite on moblab."""
 
     def __init__(self,
@@ -32,6 +32,7 @@ class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
                  model=None,
                  test_args='',
                  expires_at_sec_utc=None,
+                 pubsub_message_id=None,
                  proto=None):
         """Class constructor.
 
@@ -74,8 +75,10 @@ class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
             test_args = proto.test_args
             expires_at_sec_utc = proto.base.expires_at_sec_utc
             model = proto.base.model
+            pubsub_message_id = proto.base.pubsub_message_id
 
-        super(MoblabSuiteRunRequest, self).__init__(unique_id)
+        super(MoblabSuiteRunRequestWrapper, self).__init__(unique_id)
+
         self.board = board
         self.build = build
         self.priority = priority
@@ -85,6 +88,7 @@ class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
         self.model = model
         self.test_args = test_args
         self.expires_at_sec_utc = expires_at_sec_utc
+        self.pubsub_message_id = pubsub_message_id
 
         if not self.model:
             self.model = self.board
@@ -97,8 +101,8 @@ class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
         """
 
         return (
-            "unique_id=%s, build=%s, board=%s, suite=%s, model=%s, priority=%s,"
-            " min_duts=%s" % (self.unique_id, self.build, self.board,
+            'unique_id=%s, build=%s, board=%s, suite=%s, model=%s, priority=%s,'
+            ' min_duts=%s' % (self.unique_id, self.build, self.board,
                               self.suite, self.model, self.priority,
                               self.min_duts))
 
@@ -108,7 +112,6 @@ class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
         Args:
             proto (object): Proto object to copy the data into.
         """
-
         proto.base.unique_id = self.unique_id
         proto.build = self.build
         proto.base.board = self.board
@@ -116,6 +119,8 @@ class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
         proto.suite = self.suite
         proto.base.min_duts = self.min_duts
         proto.base.expires_at_sec_utc = self.expires_at_sec_utc
+        if self.pubsub_message_id:
+            proto.base.pubsub_message_id = self.pubsub_message_id
         if self.model:
             proto.base.model = self.model
         if self.suite_args:
@@ -135,13 +140,14 @@ class MoblabSuiteRunRequest(remote_request.MoblabRemoteRequest):
             currently capable of running the request.
         """
 
-        board_model = "%s.%s" % (self.board, self.model)
+        board_model = '%s.%s' % (self.board, self.model)
         if board_model not in attached_boards.keys():
-            logging.debug("No attached boards for %s", board_model)
+            logging.debug('No attached boards for %s', board_model)
             return False
 
         if self.min_duts and self.min_duts > attached_boards[board_model]:
-            logging.info("Not enough DUT's board: %s attached: %d required: %d",
+            logging.info(('Not enough DUT\'s board: %s attached: %d'
+                          ' required: %d'),
                          board_model, attached_boards[board_model],
                          self.min_duts)
             return False

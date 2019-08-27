@@ -65,7 +65,8 @@ class MoblabRemoteRequests(object):
 
         for suite_request in requests.suite_requests:
             self.requests.append(
-                run_suite_request.MoblabSuiteRunRequest(proto=suite_request))
+                run_suite_request.MoblabSuiteRunRequestWrapper(
+                    proto=suite_request))
         return True
 
     def save_requests_to_gcs(self, blob):
@@ -76,7 +77,8 @@ class MoblabRemoteRequests(object):
         """
         requests = moblab_request_pb2.MoblabRequests()
         for request in self.requests:
-            if isinstance(request, run_suite_request.MoblabSuiteRunRequest):
+            if isinstance(request,
+                          run_suite_request.MoblabSuiteRunRequestWrapper):
                 proto = requests.suite_requests.add()
             else:
                 raise UnknownRequestType(request)
