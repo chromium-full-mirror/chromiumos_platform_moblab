@@ -12,6 +12,7 @@ all:
 		-I="." \
 		--python_out=":${PROTO_OUT_DIR}" \
 		--grpc_python_out=":${PROTO_OUT_DIR}" \
+		--plugin=protoc-gen-grpc_python=/usr/bin/grpc_python_plugin \
 		"moblabrpc.proto" || die
 
 install:
