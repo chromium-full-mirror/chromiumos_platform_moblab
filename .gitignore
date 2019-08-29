@@ -19,3 +19,6 @@
 *pb*.ts
 *pb*.js
 .vscode/*
+.env
+.angulardoc.json
+*dist/
