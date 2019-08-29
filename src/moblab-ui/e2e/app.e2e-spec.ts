@@ -1,10 +1,10 @@
-import { MoblabPartnerUiPage } from './app.po';
+import { TestingPage } from './app.po';
 
-describe('moblab-partner-ui App', function() {
-  let page: MoblabPartnerUiPage;
+describe('testing App', function() {
+  let page: TestingPage;
 
   beforeEach(() => {
-    page = new MoblabPartnerUiPage();
+    page = new TestingPage();
   });
 
   it('should display message saying app works', () => {

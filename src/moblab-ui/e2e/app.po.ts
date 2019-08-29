@@ -1,6 +1,6 @@
 import { browser, element, by } from 'protractor';
 
-export class MoblabPartnerUiPage {
+export class TestingPage {
   navigateTo() {
     return browser.get('/');
   }
