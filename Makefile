@@ -7,13 +7,12 @@ SUBDIRS := upstart-scripts \
 	   mobmonitor \
 	   mobmonitor-ui \
 	   remote-scheduler \
-	   moblab-rpcserver
-
-INSTALL_SUBDIRS = $(SUBDIRS)
+	   moblab-rpcserver \
+	   moblab-ui
 
 all:
 	for dir in $(SUBDIRS); do \
-                $(MAKE) -C src/$$dir || exit 1; \
+                $(MAKE) -C src/$$dir all || exit 1; \
         done
 
 install:
