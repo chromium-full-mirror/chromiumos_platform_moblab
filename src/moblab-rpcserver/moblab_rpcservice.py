@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -8,14 +7,12 @@ from __future__ import print_function
 
 import re
 
+import build_connector
+import dut_connector
 from chromite.lib import cros_logging as logging
-
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
-
-import build_connector
-import dut_connector
 
 _DEFAULT_SUITE_TIMEOUT_MINS = 1440
 _SUITE_TIMEOUT_MAP = {
@@ -42,7 +39,7 @@ class MoblabLogic(object):
 
     def setup_devserver_connector(self):
         self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
-        logging.info("Using bucket: %s", self.moblab_bucket_name)
+        logging.info('Using bucket: %s', self.moblab_bucket_name)
         self.devserver_connector = devserver_connector.DevserverConnector(
             self.moblab_bucket_name)
         self.build_connector = build_connector.MoblabBuildConnector(

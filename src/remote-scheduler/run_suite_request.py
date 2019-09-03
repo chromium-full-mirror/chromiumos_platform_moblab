@@ -146,10 +146,9 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
             return False
 
         if self.min_duts and self.min_duts > attached_boards[board_model]:
-            logging.info(('Not enough DUT\'s board: %s attached: %d'
-                          ' required: %d'),
-                         board_model, attached_boards[board_model],
-                         self.min_duts)
+            logging.info(('Not enough DUTs board: %s attached: %d'
+                          ' required: %d'), board_model,
+                         attached_boards[board_model], self.min_duts)
             return False
 
         #TODO(haddowk) move the check that the build can be staged to here.

@@ -5,8 +5,12 @@
 """Interface to the AFE RPC server for all moblab code."""
 from __future__ import print_function
 
+from chromite.lib import cros_logging as logging
+
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import storage
+# pylint: disable=no-name-in-module, import-error
+from google.auth import exceptions as auth_exceptions
 
 
 class MoblabBuildConnectorException(Exception):
@@ -18,12 +22,16 @@ class MoblabBuildConnector(object):
 
     def __init__(self, moblab_bucket_name, storage_client=None):
         if not moblab_bucket_name:
-            raise MoblabBuildConnectorException("Missing bucket name")
+            raise MoblabBuildConnectorException('Missing bucket name')
         self.moblab_bucket_name = moblab_bucket_name
         if storage_client:
             self.storage_client = storage_client
         else:
-            self.storage_client = storage.Client()
+            try:
+                self.storage_client = storage.Client()
+            except auth_exceptions.DefaultCredentialsError as e:
+                logging.exception(e)
+                raise MoblabBuildConnectorException('Invalid Credentials')
 
     def get_partial_object_path(self, prefix, delimiter):
         blob_itr = self.storage_client.bucket(
@@ -34,18 +42,18 @@ class MoblabBuildConnector(object):
         return [partial_path for partial_path in blob_itr.prefixes]
 
     def get_boards_available(self):
-        possible_boards = self.get_partial_object_path(None, "/")
+        possible_boards = self.get_partial_object_path(None, '/')
         possible_boards = [
-            board for board in possible_boards if board.endswith("-release/")
+            board for board in possible_boards if board.endswith('-release/')
         ]
-        return [board[:-len("-release/")] for board in possible_boards]
+        return [board[:-len('-release/')] for board in possible_boards]
 
     def get_milestones_available(self, board):
-        prefix = "%s-release/R" % board
-        milestones = self.get_partial_object_path(prefix, "-")
+        prefix = '%s-release/R' % board
+        milestones = self.get_partial_object_path(prefix, '-')
         return [milestone[len(prefix) - 1:-1] for milestone in milestones]
 
     def get_builds_for_milestone(self, board, milestone):
-        prefix = "%s-release/%s-" % (board, milestone)
-        builds = self.get_partial_object_path(prefix, "/")
+        prefix = '%s-release/%s-' % (board, milestone)
+        builds = self.get_partial_object_path(prefix, '/')
         return [build[len(prefix):-1] for build in builds]

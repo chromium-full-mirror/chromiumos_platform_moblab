@@ -15,8 +15,8 @@ except ImportError:
 # pylint: disable=no-name-in-module, import-error, wrong-import-order
 from google.cloud import exceptions as cloud_exceptions
 
-SCHEDULE_FILENAME = "scheduled_suites.data"
-SCHEDULE_DIR = "scheduled_builds"
+SCHEDULE_FILENAME = 'scheduled_suites.data'
+SCHEDULE_DIR = 'scheduled_builds'
 
 
 def get_executed_commands(storage_client,
@@ -64,5 +64,5 @@ def get_executed_contents(storage_client,
             search for the marker files for executed commands.
     """
     blob = storage_client.bucket(bucket_name).blob(
-        "%s/%s" % (schedule_dir, unique_id))
+        '%s/%s' % (schedule_dir, unique_id))
     return blob.download_as_string()

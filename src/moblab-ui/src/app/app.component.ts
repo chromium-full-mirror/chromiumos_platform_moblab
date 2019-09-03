@@ -23,12 +23,4 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     console.log("Starting app....");
   }
-
-  // getButtonColor(buttonName) {
-  //   if (buttonName === this.toShow) {
-  //      return("primary");
-  //   } else {
-  //     return("");
-  //   }
-  // }
 }

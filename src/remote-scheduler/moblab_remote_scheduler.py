@@ -178,7 +178,6 @@ class MoblabTestScheduler(object):
         fh.setFormatter(formatter)
         logging.getLogger().addHandler(fh)
 
-
     def parse_arguments(self, argv):
         """Creates the argument parser."""
         parser = argparse.ArgumentParser(description=__doc__)

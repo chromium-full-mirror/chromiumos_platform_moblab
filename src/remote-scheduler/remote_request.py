@@ -2,13 +2,13 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Base class for all moblab remote request implementations."""
 
 from __future__ import print_function
 
 import uuid
 import sys
+
 
 class MoblabRemoteRequest(object):
     """Abstract base class for all moblab remote requests."""

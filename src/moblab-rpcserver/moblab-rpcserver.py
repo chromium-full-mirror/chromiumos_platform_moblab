@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -47,8 +47,12 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         logging.info('Using bucket: %s', self.moblab_bucket_name)
         self.devserver_connector = devserver_connector.DevserverConnector(
             self.moblab_bucket_name)
-        self.build_connector = build_connector.MoblabBuildConnector(
-            self.moblab_bucket_name)
+        try:
+            self.build_connector = build_connector.MoblabBuildConnector(
+                self.moblab_bucket_name)
+        except build_connector.MoblabBuildConnectorException as e:
+            logging.info(e)
+            self.build_connector = None
 
     def run_suite(self, request, _context):
         return moblabrpc_pb2.RunSuiteResponse(
@@ -81,6 +85,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 is_enrolled=True,
                 labels=host.get('labels', []),
                 attributes=host.get('attributes', []))
+            dut_infos.append(dut)
         for host in potential_hosts:
             dut = moblabrpc_pb2.ConnectedDutInfo(
                 name=host['platform'],
@@ -93,6 +98,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 is_enrolled=False,
                 labels=[],
                 attributes=[])
+        dut_infos.append(dut)
         response.duts.extend(dut_infos)
         return response
 
@@ -138,13 +144,15 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
 
-    moblabrpc_pb2_grpc.add_MoblabRpcServiceServicer_to_server(
-        MoblabRpcService(), server)
-    server.add_insecure_port('[::]:6002')
-    server.start()
     try:
+        moblabrpc_pb2_grpc.add_MoblabRpcServiceServicer_to_server(
+            MoblabRpcService(), server)
+        server.add_insecure_port('[::]:6002')
+        server.start()
         while True:
             time.sleep(60 * 60 * 24)
+    except build_connector.MoblabBuildConnectorException:
+        pass
     except KeyboardInterrupt:
         server.stop(0)
 

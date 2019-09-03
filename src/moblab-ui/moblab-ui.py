@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -7,11 +7,12 @@
 
 from __future__ import print_function
 
-import cherrypy
+import argparse
+import logging.handlers as loghandler
 import os
 import sys
-import logging.handlers
-import argparse
+
+import cherrypy
 
 from chromite.lib import cros_logging as logging
 
@@ -45,7 +46,7 @@ def SetupLogging(logdir):
         datefmt='%Y-%m-%d %H:%M',
         filename=os.path.join(logdir, LOGFILE),
         filemode='w')
-    rotate = logging.handlers.RotatingFileHandler(
+    rotate = loghandler.RotatingFileHandler(
         os.path.join(logdir, LOGFILE),
         maxBytes=LOGFILE_SIZE_BYTES,
         backupCount=LOGFILE_COUNT)
@@ -92,19 +93,8 @@ def main(argv):
     })
 
     mobuiappconfig = {
-        '/': {
-            'tools.staticdir.root': options.staticdir
-        },
-        '/static': {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': ''
-        },
-        '/static/css': {
-            'tools.staticdir.dir': 'css'
-        },
-        '/static/js': {
-            'tools.staticdir.dir': 'js'
-        }
+        '/': {'tools.staticdir.root': options.staticdir},
+        '/static': {'tools.staticdir.on': True, 'tools.staticdir.dir': ''},
     }
 
     # Setup the moblab-ui

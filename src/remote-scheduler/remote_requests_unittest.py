@@ -32,11 +32,12 @@ class TestRemoteRequest(remote_request.MoblabRemoteRequest):
         pass
 
     def __str__(self):
-        return "Unique ID: %s" % self.unique_id
+        return 'Unique ID: %s' % self.unique_id
 
 
 class MoblabRemoteRequestsTest(unittest.TestCase):
     """Unit tests for MoblabRemoteRequests."""
+
     def setUp(self):
         self.test_requests = remote_requests.MoblabRemoteRequests()
 
@@ -52,8 +53,8 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
     @mock.patch('chromite.lib.cros_logging.error')
     def test_load_requests_from_gcs_fails(self, mock_error_log):
         test_blob = mock.Mock()
-        test_blob.path = "test path"
-        test_exception = remote_requests.exceptions.NotFound("Testing")
+        test_blob.path = 'test path'
+        test_exception = remote_requests.exceptions.NotFound('Testing')
         test_blob.download_as_string.side_effect = test_exception
 
         self.test_requests.load_requests_from_gcs(test_blob)
@@ -70,12 +71,12 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         mock_requests.suite_requests = [
             moblab_request_pb2.MoblabSuiteRunRequest()
         ]
-        test_blob.download_as_string.return_value = "Test string"
+        test_blob.download_as_string.return_value = 'Test string'
 
         self.test_requests.load_requests_from_gcs(test_blob)
 
         test_blob.download_as_string.assert_called_once()
-        mock_requests.ParseFromString.assert_called_once_with("Test string")
+        mock_requests.ParseFromString.assert_called_once_with('Test string')
         self.assertEqual(1, len(self.test_requests.requests))
 
     @mock.patch('moblab_request_pb2.MoblabRequests')
@@ -147,7 +148,7 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         self.test_requests.add_request(TestRemoteRequest(1))
         self.test_requests.add_request(TestRemoteRequest(2))
 
-        self.assertEqual("Requests:\nUnique ID: 1\nUnique ID: 2\n",
+        self.assertEqual('Requests:\nUnique ID: 1\nUnique ID: 2\n',
                          str(self.test_requests))
 
 

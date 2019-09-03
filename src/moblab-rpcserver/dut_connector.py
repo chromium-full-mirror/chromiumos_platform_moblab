@@ -5,27 +5,29 @@
 """Interface to the AFE RPC server for all moblab code."""
 from __future__ import print_function
 
+import json
+import re
+import subprocess
+
 from pssh.clients import ParallelSSHClient
 
-import subprocess
-import re
-import json
-
 FIND_DUT_CMD = [
-    "sudo /usr/sbin/fping -g 192.168.231.100 192.168.231.150 -c 10 -p 1 -i 1 -q"
+    'sudo /usr/sbin/fping -g 192.168.231.100 192.168.231.150 -c 10 -p 1 -i 1 -q'
 ]
 
 SUBNET_DUT_SEARCH_RE = (r'(?P<ip>192\.168\.231\.1[0-1][0-9]) : '
-                        'xmt\/rcv\/%loss = [0-9]+\/[0-9]+\/0%.*')
+                        r'xmt\/rcv\/%loss = [0-9]+\/[0-9]+\/0%.*')
 
 
 class MoblabDUTConnectorException(Exception):
     pass
 
 
-#ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master" | awk -F ':' '{gsub(/ /, "", $2); print $2}'
+#ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master"
+#            | awk -F ':' '{gsub(/ /, "", $2); print $2}'
 
-#inf=$(ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master" | awk -F ':' '{gsub(/ /, "", $2); print $2}')
+#inf=$(ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master" |
+#       awk -F ':' '{gsub(/ /, "", $2); print $2}')
 #mac=$( cat /sys/class/net/${inf}/address)
 #echo $inf $mac
 
@@ -55,7 +57,7 @@ class MoblabDUTConnector(object):
             self.hosts,
             pool_size=20,
             user='root',
-            pkey="/home/moblab/.ssh/mobbase_id_rsa")
+            pkey='/home/moblab/.ssh/mobbase_id_rsa')
         command_results = []
         output = client.run_command(command)
         for host, host_output in output.items():
@@ -84,7 +86,8 @@ class MoblabDUTConnector(object):
 
     def get_connected_dut_firmware(self):
         command_results = self.run_command_on_connected_dut(
-            'timeout 2 crossystem fwid; echo "";chromeos-firmwareupdate --manifest'
+            ('timeout 2 crossystem fwid; echo "";'
+             'chromeos-firmwareupdate --manifest')
         )
 
         def get_rw_firmware(command_output):
