@@ -39,7 +39,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         self.afe_connector = afe_connector.AFEConnector()
         self.config_connector = config_connector.MoblabConfigConnector(
             self.afe_connector)
-        self.service = moblab_rpcservice.MoblabLogic()
+        self.service = moblab_rpcservice.MoblabService()
         self.setup_devserver_connector()
 
     def setup_devserver_connector(self):
@@ -66,40 +66,24 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def list_connected_duts(self, _request, _context):
-        afe_hosts = self.afe_connector.get_connected_devices()
-        potential_hosts = self.service.get_connected_devices()
         response = moblabrpc_pb2.ListConnectedDutsResponse()
-        dut_infos = []
-        for host in afe_hosts:
-            dut = moblabrpc_pb2.ConnectedDutInfo(
-                name=host['platform'],
-                ip=host['hostname'],
+        duts = self.service.list_duts()
+        for dut in duts:
+            dut_info = moblabrpc_pb2.ConnectedDutInfo(
+                name=dut.get('platform', ''),
+                ip=dut.get('hostname', ''),
                 mac_addr='',
                 models=self.service.extract_model_from_labels(
-                    host.get('labels', [])),
+                    dut.get('labels', [])),
                 boards=self.service.extract_board_from_labels(
-                    host.get('labels', [])),
+                    dut.get('labels', [])),
                 pools=self.service.extract_pool_from_labels(
-                    host.get('labels', [])),
-                status=host['status'],
+                    dut.get('labels', [])),
+                status=dut['status'],
                 is_enrolled=True,
-                labels=host.get('labels', []),
-                attributes=host.get('attributes', []))
-            dut_infos.append(dut)
-        for host in potential_hosts:
-            dut = moblabrpc_pb2.ConnectedDutInfo(
-                name=host['platform'],
-                ip=host['hostname'],
-                mac_addr='',
-                models=[],
-                boards=[],
-                pools=[],
-                status='Not enrolled',
-                is_enrolled=False,
-                labels=[],
-                attributes=[])
-        dut_infos.append(dut)
-        response.duts.extend(dut_infos)
+                labels=dut.get('labels', []),
+                attributes=dut.get('attributes', []))
+            response.duts.extend([dut_info])
         return response
 
     def list_test_jobs(self, request, context):
@@ -138,6 +122,28 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             models.extend(
                 self.service.extract_model_from_labels(host.get('labels', [])))
         response = moblabrpc_pb2.ListModelsResponse(models=models)
+        return response
+
+    def enroll_duts(self, request, _context):
+        self.service.enroll_duts(request.ips)
+        response = moblabrpc_pb2.EnrollDutsResponse()
+        return response
+
+    def unenroll_duts(self, request, _context):
+        self.service.unenroll_duts(request.ips)
+        response = moblabrpc_pb2.EnrollDutsResponse()
+        return response
+
+    def list_connected_duts_firmware(self, _request, _context):
+        duts = self.service.list_connected_duts_firmware()
+        response = moblabrpc_pb2.ListConnectedDutsFirmwareResponse()
+        for dut in duts:
+            dut_firmware_info = moblabrpc_pb2.ConnectedDutFirmwareInfo(
+                ip=dut[0],
+                current_firmware=dut[1],
+                update_firmware=dut[2],
+            )
+            response.duts.extend([dut_firmware_info])
         return response
 
 

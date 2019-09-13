@@ -34,6 +34,8 @@ import { WidgetsModule } from './widgets/widgets.module';
 import { MobmonitorComponent } from './mobmonitor/mobmonitor.component';
 import { MobmonitorPipe } from './mobmonitor/mobmonitor.component';
 import { FeedbackModule } from 'ng-feedback';
+import { MatSelectModule } from '@angular/material/select';
+import { PipesModule } from './pipes/pipes.module';
 
 @NgModule({
    declarations: [
@@ -73,7 +75,9 @@ import { FeedbackModule } from 'ng-feedback';
       FormsModule,
       RunSuiteModule,
       MatChipsModule,
-      FeedbackModule
+      FeedbackModule,
+      MatSelectModule,
+      PipesModule,
    ],
    exports: [
       WidgetsModule,
@@ -82,7 +86,7 @@ import { FeedbackModule } from 'ng-feedback';
       MatCardModule,
       MatTableModule,
       MatMenuModule,
-      RunSuiteModule
+      RunSuiteModule,
    ],
    bootstrap: [
       AppComponent

@@ -14,6 +14,10 @@ service MoblabRpcService {
   rpc list_builds (ListBuildsRequest) returns (ListBuildsResponse) {}
   rpc list_models (ListModelsRequest) returns (ListModelsResponse) {}
   rpc list_pools (ListPoolsRequest) returns (ListPoolsResponse) {}
+  rpc enroll_duts (EnrollDutsRequest) returns (EnrollDutsResponse) {}
+  rpc unenroll_duts (EnrollDutsRequest) returns (EnrollDutsResponse) {}
+
+  rpc list_connected_duts_firmware(ListConnectedDutsFirmwareRequest) returns (ListConnectedDutsFirmwareResponse) {}
 }
 
 message JobInfo {
@@ -95,4 +99,24 @@ message ListPoolsRequest {
 }
 message ListPoolsResponse {
   repeated string pools = 1;
+}
+
+message EnrollDutsRequest {
+  repeated string ips = 1;
+}
+
+message EnrollDutsResponse {
+}
+
+message ListConnectedDutsFirmwareRequest {
+}
+
+message ConnectedDutFirmwareInfo {
+  string ip = 1;
+  string current_firmware = 2;
+  string update_firmware = 3;
+}
+
+message ListConnectedDutsFirmwareResponse {
+  repeated ConnectedDutFirmwareInfo duts = 1;
 }

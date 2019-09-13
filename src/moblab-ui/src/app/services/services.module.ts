@@ -1,6 +1,8 @@
-import {NgModule} from '@angular/core';;
+import {NgModule} from '@angular/core';
 import {HttpModule} from '@angular/http';
 import { MoblabGrpcService } from './moblab-grpc.service';
+import { GlobalInfoService } from './global-ui-settings.service';
+import { Feature } from './global-ui-settings.service';
 
 @NgModule({
   imports: [
@@ -13,12 +15,15 @@ export class ServicesModule {
     return {
       ngModule: ServicesModule,
       providers: [
-        { provide: MoblabGrpcService, useClass: MoblabGrpcService }
+        { provide: MoblabGrpcService, useClass: MoblabGrpcService },
+        { provide: GlobalInfoService, useClass: GlobalInfoService }
         ]
     };
   }
 }
 
 export {
-  MoblabGrpcService
+  MoblabGrpcService,
+  GlobalInfoService,
+  Feature,
 };

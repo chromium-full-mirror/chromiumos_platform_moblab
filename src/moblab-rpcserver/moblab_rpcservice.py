@@ -25,7 +25,7 @@ class MoblabRpcError(Exception):
     pass
 
 
-class MoblabLogic(object):
+class MoblabService(object):
     model_re = re.compile(r'^model:(.*)')
     board_re = re.compile(r'^board:(.*)')
     pool_re = re.compile(r'^pool:(.*)')
@@ -61,7 +61,37 @@ class MoblabLogic(object):
         return list(set(result))
 
     def get_connected_devices(self):
-        return self.dut_connector.get_connected_duts()
+        self.dut_connector.find_duts()
+        connected_duts = self.dut_connector.get_connected_duts()
+        afe_formatted_duts = []
+        for dut in connected_duts:
+            afe_formatted_duts.append({
+                'ip': dut[0],
+                'labels': ['model:' + dut[1]]
+            })
+        return afe_formatted_duts
+
+    def list_duts(self):
+        afe_hosts = self.afe_connector.get_connected_devices()
+        logging.error(afe_hosts)
+        potential_hosts = self.get_connected_devices()
+        logging.error(potential_hosts)
+        connected_ips = []
+        connected_duts = []
+
+        for dut in afe_hosts:
+            dut['enrolled'] = True
+            connected_ips.append(dut['hostname'])
+            connected_duts.append(dut)
+
+        for dut in potential_hosts:
+            if dut['ip'] not in connected_ips:
+                dut['hostname'] = dut['ip']
+                dut['enrolled'] = False
+                dut['status'] = 'Not Enrolled'
+                connected_duts.append(dut)
+
+        return connected_duts
 
     def run_suite_storage_qual(self,
                                board,
@@ -172,3 +202,13 @@ class MoblabLogic(object):
             model,
             suite_args=processed_suite_args,
             test_args=processed_test_args)
+
+    def enroll_duts(self, ip_addresses):
+        self.afe_connector.enroll_duts(ip_addresses)
+
+    def unenroll_duts(self, ip_addresses):
+        self.afe_connector.unenroll_duts(ip_addresses)
+
+    def list_connected_duts_firmware(self):
+        duts = self.dut_connector.list_connected_duts_firmware()
+        return duts

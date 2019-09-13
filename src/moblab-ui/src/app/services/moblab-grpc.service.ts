@@ -1,6 +1,6 @@
-import * as grpcWeb from "grpc-web";
+import * as grpcWeb from 'grpc-web';
 
-import { MoblabRpcServiceClient } from "./moblabrpc_grpc_web_pb";
+import { MoblabRpcServiceClient } from './moblabrpc_grpc_web_pb';
 import {
   RunSuiteRequest,
   RunSuiteResponse,
@@ -18,17 +18,21 @@ import {
   ListPoolsRequest,
   ListPoolsResponse,
   RunCtsSuiteRequest,
-  RunCtsSuiteResponse
-} from "./moblabrpc_pb";
+  RunCtsSuiteResponse,
+  EnrollDutsRequest,
+  EnrollDutsResponse,
+  ListConnectedDutsFirmwareResponse,
+  ConnectedDutFirmwareInfo
+} from './moblabrpc_pb';
 
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class MoblabGrpcService {
   moblabRpcService = new MoblabRpcServiceClient(
-    "http://localhost:6001",
+    'http://localhost:6001',
     null,
     null
   );
@@ -45,7 +49,7 @@ export class MoblabGrpcService {
     // });
 
     // call.on('data', (response: Response) => { console.log(response.getMessage()); callback(response.getMessage());});
-    callback("Hello");
+    callback('Hello');
   }
 
   runCtsSuite(build: string, board: string, model: string, suite: string, pool: string, autotest_tests: string, tradefed_tests: string) {
@@ -63,7 +67,7 @@ export class MoblabGrpcService {
       }
     );
 
-    call.on("data", (response: RunCtsSuiteResponse) => {
+    call.on('data', (response: RunCtsSuiteResponse) => {
       console.log(response.getMessage());
     });
   }
@@ -79,7 +83,7 @@ export class MoblabGrpcService {
       }
     );
 
-    call.on("data", (response: ListConnectedDutsResponse) => {
+    call.on('data', (response: ListConnectedDutsResponse) => {
       callback(response.getDutsList());
     });
   }
@@ -95,7 +99,7 @@ export class MoblabGrpcService {
         console.log(err);
       }
     );
-    call.on("data", (response: ListBoardsResponse) => {
+    call.on('data', (response: ListBoardsResponse) => {
       console.log(response); callback(response.getBoardsList());
     });
   }
@@ -111,7 +115,7 @@ export class MoblabGrpcService {
         console.log(err);
       }
     );
-    call.on("data", (response: ListMilestonesResponse) => {
+    call.on('data', (response: ListMilestonesResponse) => {
       callback(response.getMilestonesList());
     });
   }
@@ -128,13 +132,13 @@ export class MoblabGrpcService {
         console.log(err);
       }
     );
-    call.on("data", (response: ListBuildsResponse) => {
+    call.on('data', (response: ListBuildsResponse) => {
       callback(response.getBuildsList());
     });
   }
 
   listModels(callback: (x: string[]) => void) {
-    const request = new ListModelsRequest();;
+    const request = new ListModelsRequest();
 
     const call = this.moblabRpcService.list_models(
       request,
@@ -143,7 +147,7 @@ export class MoblabGrpcService {
         console.log(err);
       }
     );
-    call.on("data", (response: ListModelsResponse) => {
+    call.on('data', (response: ListModelsResponse) => {
       callback(response.getModelsList());
     });
   }
@@ -158,9 +162,56 @@ export class MoblabGrpcService {
         console.log(err);
       }
     );
-    call.on("data", (response: ListPoolsResponse) => {
+    call.on('data', (response: ListPoolsResponse) => {
       callback(response.getPoolsList());
     });
   }
+
+  enrollDuts(ips: string[], callback: () => void) {
+    const request = new EnrollDutsRequest();
+    request.setIpsList(ips)
+    const call = this.moblabRpcService.enroll_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: EnrollDutsResponse) => {
+        console.log(err);
+      }
+    );
+    call.on('data', (response: EnrollDutsResponse) => {
+      callback();
+    });
+  }
+
+  unenrollDuts(ips: string[], callback: () => void) {
+    const request = new EnrollDutsRequest();
+    request.setIpsList(ips)
+    const call = this.moblabRpcService.unenroll_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: EnrollDutsResponse) => {
+        console.log(err);
+      }
+    );
+    call.on('data', (response: EnrollDutsResponse) => {
+      callback();
+    });
+  }
+
+  listConnectedDutsFirmware (callback: (x: ConnectedDutFirmwareInfo[]) => void) {
+    const request = new ListConnectedDutsRequest();
+
+    const call = this.moblabRpcService.list_connected_duts_firmware(
+      request,
+      {},
+      (err: grpcWeb.Error, response: ListConnectedDutsFirmwareResponse) => {
+        console.log(err);
+      }
+    );
+    call.on('data', (response: ListConnectedDutsFirmwareResponse) => {
+      console.log(response);
+      callback(response.getDutsList());
+    });
+  }
+
 
 }

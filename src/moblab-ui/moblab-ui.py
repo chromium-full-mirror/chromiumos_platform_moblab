@@ -95,6 +95,7 @@ def main(argv):
     mobuiappconfig = {
         '/': {'tools.staticdir.root': options.staticdir},
         '/static': {'tools.staticdir.on': True, 'tools.staticdir.dir': ''},
+        '/static/assets': {'tools.staticdir.dir': 'assets'},
     }
 
     # Setup the moblab-ui

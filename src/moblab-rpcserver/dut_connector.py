@@ -9,6 +9,8 @@ import json
 import re
 import subprocess
 
+from chromite.lib import cros_logging as logging
+
 from pssh.clients import ParallelSSHClient
 
 FIND_DUT_CMD = [
@@ -76,19 +78,21 @@ class MoblabDUTConnector(object):
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_dut(
-            'timeout 2 cat /etc/lsb-release; ifconfig eth0 | grep ether')
+            'timeout 2 mosys platform model')
 
-        def is_dut_connected((host, host_output)):
-            return (host, 'CHROMEOS_RELEASE_APPID' in host_output)
+        def is_dut_connected(output):
+            return output != None
 
-        return [(host, is_dut_connected(output))
+        def extract_model(output):
+            return output[0] if len(output) > 0 else 'Unknown'
+
+        return [(host, extract_model(output), is_dut_connected(output))
                 for (host, output) in command_results]
 
     def get_connected_dut_firmware(self):
         command_results = self.run_command_on_connected_dut(
             ('timeout 2 crossystem fwid; echo "";'
-             'chromeos-firmwareupdate --manifest')
-        )
+             'chromeos-firmwareupdate --manifest'))
 
         def get_rw_firmware(command_output):
             json_data = json.loads(''.join(command_output))

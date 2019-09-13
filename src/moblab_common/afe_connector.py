@@ -7,6 +7,8 @@ from __future__ import print_function
 
 import json
 import sys
+import subprocess
+import multiprocessing
 
 try:
     from chromite.lib import cros_logging as logging
@@ -16,8 +18,13 @@ except ImportError:
 
 import requests
 
-
 MOBLAB_RPC_SERVER = 'localhost:80'
+
+
+def enroll_dut(ip_address):
+    cmd = '/usr/local/autotest/cli/atest host create %s' % ip_address
+    logging.error(cmd)
+    subprocess.call(cmd, shell=True)
 
 
 class AFEConnector(object):
@@ -154,3 +161,19 @@ class AFEConnector(object):
         self.afe_connector.run_suite()
         logging.info(response)
         return response.text
+
+    def enroll_duts(self, ip_addresses):
+        p = multiprocessing.Pool(20)
+        p.map(enroll_dut, ip_addresses)
+        p.close()
+        p.join()
+
+    def unenroll_duts(self, ip_addresses):
+        hosts = self.get_connected_devices()
+        for host in hosts:
+            hostname = host.get('hostname')
+            params = {'id': host.get('id')}
+            logging.error(params)
+            if hostname in ip_addresses:
+                response = self.send_rpc_command('delete_host', params)
+            logging.error(response)

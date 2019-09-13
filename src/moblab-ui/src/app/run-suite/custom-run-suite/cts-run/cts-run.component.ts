@@ -1,17 +1,17 @@
-import { MoblabGrpcService } from "./../../../services/moblab-grpc.service";
-import { Component, ViewChild, OnInit } from "@angular/core";
-import { of } from "rxjs";
+import { MoblabGrpcService } from './../../../services/moblab-grpc.service';
+import { Component, ViewChild, OnInit } from '@angular/core';
 
 @Component({
-  selector: "app-cts-run",
-  templateUrl: "./cts-run.component.html",
-  styleUrls: ["./cts-run.component.scss"]
+  selector: 'app-cts-run',
+  templateUrl: './cts-run.component.html',
+  styleUrls: ['./cts-run.component.scss']
 })
 export class CtsRunComponent {
-  constructor(private moblabRpcService: MoblabGrpcService) {}
 
-  @ViewChild("runSuiteButton") runSuiteButton;
-  @ViewChild("androidGroup") androidGroup;
+  @ViewChild('runSuiteButton') runSuiteButton;
+  @ViewChild('androidGroup') androidGroup;
+
+  constructor(private moblabGrpcService: MoblabGrpcService) {}
 
   runSuiteButtonDisabled = true;
   selectedBuild: string;
@@ -21,17 +21,17 @@ export class CtsRunComponent {
 
   androidConfigurations = [
     {
-      label: "Android N",
+      label: 'Android N',
       suites: [
-        { label: "CTS", suiteName: "cts_N" },
-        { label: "GTS", suiteName: "gts" }
+        { label: 'CTS', suiteName: 'cts_N' },
+        { label: 'GTS', suiteName: 'gts' }
       ]
     },
     {
-      label: "Android P",
+      label: 'Android P',
       suites: [
-        { label: "CTS", suiteName: "cts_P" },
-        { label: "GTS", suiteName: "gts" }
+        { label: 'CTS', suiteName: 'cts_P' },
+        { label: 'GTS', suiteName: 'gts' }
       ]
     }
   ];
@@ -71,14 +71,14 @@ export class CtsRunComponent {
   onRunSuite() {
     console.log();
     console.log(this.androidConfigurations[this.androidGroup.selectedIndex]);
-    this.moblabRpcService.runCtsSuite(
+    this.moblabGrpcService.runCtsSuite(
       this.selectedBuild,
-      "board",
+      'board',
       this.selectedModel,
       this.selectedSuiteLabel,
       this.selectedSuiteLabel,
-      "",
-      ""
+      '',
+      ''
     );
   }
 }
