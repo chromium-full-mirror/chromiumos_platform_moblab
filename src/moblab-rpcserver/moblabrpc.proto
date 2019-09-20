@@ -1,4 +1,3 @@
-
 syntax = "proto3";
 
 package moblab;
@@ -14,10 +13,12 @@ service MoblabRpcService {
   rpc list_builds (ListBuildsRequest) returns (ListBuildsResponse) {}
   rpc list_models (ListModelsRequest) returns (ListModelsResponse) {}
   rpc list_pools (ListPoolsRequest) returns (ListPoolsResponse) {}
+
   rpc enroll_duts (EnrollDutsRequest) returns (EnrollDutsResponse) {}
   rpc unenroll_duts (EnrollDutsRequest) returns (EnrollDutsResponse) {}
 
   rpc list_connected_duts_firmware(ListConnectedDutsFirmwareRequest) returns (ListConnectedDutsFirmwareResponse) {}
+  rpc update_duts_firmware(UpdateDutsFirmwareRequest) returns (UpdateDutsFirmwareResponse) {}
 }
 
 message JobInfo {
@@ -120,3 +121,11 @@ message ConnectedDutFirmwareInfo {
 message ListConnectedDutsFirmwareResponse {
   repeated ConnectedDutFirmwareInfo duts = 1;
 }
+
+message UpdateDutsFirmwareRequest {
+  repeated string ips = 1;
+}
+
+message UpdateDutsFirmwareResponse {
+}
+

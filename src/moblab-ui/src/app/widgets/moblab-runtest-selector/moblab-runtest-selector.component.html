@@ -5,7 +5,7 @@
     [placeholder]="['Pick from available model']"
     [options]="models"
     [isShown]="modelSelectorEnabled"
-    (update)="modelChanged($event.value, $event.index)"
+    (update)="modelChanged($event.value)"
   >
   </app-moblab-selector>
 
@@ -21,6 +21,7 @@
     [placeholder]="['Select a pool']"
     [options]="pools"
     [isShown]="poolSelectorEnabled"
-    (update)="poolChanged($event.value, $event.index)"
+    [autoselect]="false"
+    (update)="poolChanged($event.value)"
   >
   </app-moblab-selector>

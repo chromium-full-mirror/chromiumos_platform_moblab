@@ -1,19 +1,17 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
+import {DebugElement} from '@angular/core';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 
-import { MobmonitorComponent } from './mobmonitor.component';
+import {MobmonitorComponent} from './mobmonitor.component';
 
 describe('MobmonitorComponent', () => {
   let component: MobmonitorComponent;
   let fixture: ComponentFixture<MobmonitorComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ MobmonitorComponent ]
-    })
-    .compileComponents();
+    TestBed.configureTestingModule({declarations: [MobmonitorComponent]})
+        .compileComponents();
   }));
 
   beforeEach(() => {

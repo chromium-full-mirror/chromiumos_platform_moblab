@@ -1,19 +1,18 @@
-import { Component, OnInit, ViewChild, Output, EventEmitter } from "@angular/core";
-import { MoblabGrpcService } from "./../../services/moblab-grpc.service";
+import {Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+
+import {MoblabGrpcService} from './../../services/moblab-grpc.service';
 
 @Component({
-  selector: "app-moblab-runtest-selector",
-  templateUrl: "./moblab-runtest-selector.component.html",
-  styleUrls: ["./moblab-runtest-selector.component.scss"]
+  selector: 'app-moblab-runtest-selector',
+  templateUrl: './moblab-runtest-selector.component.html',
+  styleUrls: ['./moblab-runtest-selector.component.scss']
 })
 export class MoblabRuntestSelectorComponent implements OnInit {
-  @ViewChild("modelSelector") modelSelector;
-  @ViewChild("buildSelector") buildSelector;
-  @ViewChild("poolSelector") poolSelector;
+  @ViewChild('modelSelector') modelSelector;
+  @ViewChild('buildSelector') buildSelector;
+  @ViewChild('poolSelector') poolSelector;
 
   @Output() update = new EventEmitter();
-
-  constructor(private moblabRpcService: MoblabGrpcService) {}
 
   private selectedModel: string;
   private selectedBuild: string;
@@ -23,6 +22,8 @@ export class MoblabRuntestSelectorComponent implements OnInit {
   modelSelectorEnabled = true;
   pools: string[] = [];
   poolSelectorEnabled = false;
+
+  constructor(private moblabRpcService: MoblabGrpcService) {}
 
   ngOnInit() {
     this.moblabRpcService.listModels((boards: string[]) => {
@@ -35,7 +36,7 @@ export class MoblabRuntestSelectorComponent implements OnInit {
     this.modelSelectorEnabled = true;
   }
 
-  modelChanged(model: string, placeholder) {
+  modelChanged(model: string) {
     this.selectedModel = model;
     this.buildSelector.start();
   }
@@ -45,12 +46,7 @@ export class MoblabRuntestSelectorComponent implements OnInit {
     this.moblabRpcService.listPools((pools: string[]) => {
       this.updatePools(pools);
     });
-    console.log("Emitting");
-    console.log({ model: this.selectedModel,
-      build: this.selectedBuild });
-    this.update.emit({ model: this.selectedModel,
-                       build: this.selectedBuild }
-                     );
+    this.update.emit({model: this.selectedModel, build: this.selectedBuild});
   }
 
   updatePools(newPools: string[]) {
@@ -58,8 +54,8 @@ export class MoblabRuntestSelectorComponent implements OnInit {
     this.poolSelectorEnabled = true;
   }
 
-  poolChanged(pool: string, placeholder) {
+  poolChanged(pool: string) {
     this.selectedPool = pool;
-    this.update.emit({ pool: this.selectedPool } );
+    this.update.emit({pool: this.selectedPool});
   }
 }

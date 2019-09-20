@@ -1,5 +1,6 @@
-import { MoblabGrpcService } from './../../../services/moblab-grpc.service';
-import { Component, ViewChild, OnInit } from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
+
+import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 
 @Component({
   selector: 'app-cts-run',
@@ -7,34 +8,38 @@ import { Component, ViewChild, OnInit } from '@angular/core';
   styleUrls: ['./cts-run.component.scss']
 })
 export class CtsRunComponent {
-
   @ViewChild('runSuiteButton') runSuiteButton;
   @ViewChild('androidGroup') androidGroup;
-
-  constructor(private moblabGrpcService: MoblabGrpcService) {}
 
   runSuiteButtonDisabled = true;
   selectedBuild: string;
   selectedModel: string;
   selectedPool: string;
   selectedSuiteLabel: string;
+  selectedSuiteIndex = 0;
 
   androidConfigurations = [
     {
       label: 'Android N',
-      suites: [
-        { label: 'CTS', suiteName: 'cts_N' },
-        { label: 'GTS', suiteName: 'gts' }
-      ]
+      suites:
+          [
+            {label: 'CTS', suiteName: 'cts_N'},
+            {label: 'GTS', suiteName: 'gts'}
+          ]
     },
     {
       label: 'Android P',
-      suites: [
-        { label: 'CTS', suiteName: 'cts_P' },
-        { label: 'GTS', suiteName: 'gts' }
-      ]
+      suites:
+          [
+            {label: 'CTS', suiteName: 'cts_P'},
+            {label: 'GTS', suiteName: 'gts'}
+          ]
     }
   ];
+
+  constructor(private moblabGrpcService: MoblabGrpcService) {}
+
+  selectedIndex = 0;
 
   modelBoardPoolSelected(event) {
     if (event.build) {
@@ -63,22 +68,16 @@ export class CtsRunComponent {
     return androidConfig.suites.map(this.getSuiteLabel);
   }
 
-  suiteChanged(selectedSuite: string, index: string) {
+  suiteChanged(selectedSuite: string) {
     this.selectedSuiteLabel = selectedSuite;
     this.runSuiteButtonDisabled = false;
   }
 
   onRunSuite() {
-    console.log();
-    console.log(this.androidConfigurations[this.androidGroup.selectedIndex]);
+    var suite = this.androidConfigurations[this.selectedIndex]['suites'][this.selectedSuiteIndex]['suiteName'];
+
     this.moblabGrpcService.runCtsSuite(
-      this.selectedBuild,
-      'board',
-      this.selectedModel,
-      this.selectedSuiteLabel,
-      this.selectedSuiteLabel,
-      '',
-      ''
-    );
+        this.selectedBuild, 'board', this.selectedModel,
+        suite, '', '', '');
   }
 }

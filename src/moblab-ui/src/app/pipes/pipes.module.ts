@@ -1,17 +1,17 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LabelListToStringPipe } from './label-list-to-string.pipe';
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+
+import {LabelListToStringPipe} from './label-list-to-string.pipe';
 
 @NgModule({
-   imports: [
-      CommonModule,
+  imports: [
+    CommonModule,
 
-   ],
-   declarations:[
-     LabelListToStringPipe,
-   ],
-   exports: [
-    LabelListToStringPipe
-   ]
+  ],
+  declarations: [
+    LabelListToStringPipe,
+  ],
+  exports: [LabelListToStringPipe]
 })
-export class PipesModule { }
+export class PipesModule {
+}

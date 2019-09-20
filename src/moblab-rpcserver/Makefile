@@ -19,4 +19,3 @@ install:
 	install -t ${DESTDIR}etc/moblab/moblab-rpcserver -D ${PROTO_OUT_DIR}/*
 	ls *.py | grep -v _unittest | grep -v _pb2.py | \
 		xargs -i install -t ${DESTDIR}etc/moblab/moblab-rpcserver {}
-

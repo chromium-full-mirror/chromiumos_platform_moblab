@@ -1,19 +1,17 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
+import {DebugElement} from '@angular/core';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 
-import { PowerComponent } from './power.component';
+import {PowerComponent} from './power.component';
 
 describe('PowerComponent', () => {
   let component: PowerComponent;
   let fixture: ComponentFixture<PowerComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ PowerComponent ]
-    })
-    .compileComponents();
+    TestBed.configureTestingModule({declarations: [PowerComponent]})
+        .compileComponents();
   }));
 
   beforeEach(() => {

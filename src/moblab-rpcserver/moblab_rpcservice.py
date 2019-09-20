@@ -174,23 +174,25 @@ class MoblabService(object):
         builds = {'cros-version': build}
         builds.update(extra_builds)
 
-        # TODO(mattmallett b/92031054) Standardize bug id, part id passing for memory/storage qual
+        # TODO(mattmallett b/92031054) Standardize bug id, part id passing
+        # for memory/storage qual
         processed_suite_args = dict()
         processed_test_args = dict()
 
-        # set processed_suite_args to None instead of empty dict when there is no
-        # argument in processed_suite_args
+        # set processed_suite_args to None instead of empty dict when there
+        # is no argument in processed_suite_args
         if len(processed_suite_args) == 0:
             processed_suite_args = None
 
-        if test_args:
-            try:
-                processed_test_args['args'] = [test_args]
-                for line in test_args.split('\n'):
-                    key, value = line.strip().split('=')
-                    processed_test_args[key] = value
-            except:
-                raise MoblabRpcError('Could not parse test args.')
+        logging.debug('Test args %s', test_args)
+        #if test_args:
+        #    try:
+        #        processed_test_args['args'] = [test_args]
+        ##        for line in test_args.split('\n'):
+        #            key, value = line.strip().split('=')
+        #            processed_test_args[key] = value
+        #    except:
+        #        raise MoblabRpcError('Could not parse test args.')
 
         return self.afe_connector.run_suite(
             board,
@@ -201,7 +203,7 @@ class MoblabService(object):
             pool,
             model,
             suite_args=processed_suite_args,
-            test_args=processed_test_args)
+            test_args=test_args)
 
     def enroll_duts(self, ip_addresses):
         self.afe_connector.enroll_duts(ip_addresses)
@@ -210,5 +212,23 @@ class MoblabService(object):
         self.afe_connector.unenroll_duts(ip_addresses)
 
     def list_connected_duts_firmware(self):
-        duts = self.dut_connector.list_connected_duts_firmware()
+        duts = self.dut_connector.get_connected_dut_firmware()
         return duts
+
+    def update_duts_firmware(self, ip_addresses):
+        self.dut_connector.update_firmware(ip_addresses)
+
+    def list_available_boards(self):
+        # Get the intersection of boards available to this moblab and
+        # the boards on the devices connected.
+        available_boards = self.build_connector.get_boards_available()
+        connected_boards = self.list_boards()
+        return list(set(available_boards).intersection(connected_boards))
+
+    def list_boards(self):
+        afe_hosts = self.afe_connector.get_connected_devices()
+        boards = []
+        for host in afe_hosts:
+            boards.extend(
+                self.service.extract_board_from_labels(host.get('board', [])))
+        return boards

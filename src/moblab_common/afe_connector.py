@@ -158,7 +158,6 @@ class AFEConnector(object):
         }
         response = self.send_rpc_command('create_suite_job', params)
 
-        self.afe_connector.run_suite()
         logging.info(response)
         return response.text
 

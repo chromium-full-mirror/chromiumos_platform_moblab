@@ -1,17 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 
 @Component({
-  selector: 'mob-storage-qual',
+  selector: 'app-mob-storage-qual',
   templateUrl: './storage-qual.component.html',
   styleUrls: ['./storage-qual.component.scss']
 })
 export class StorageQualComponent {
-
-  constructor() { }
-
   runSuiteButtonEnabled: boolean;
 
-  onRunSuite() {
-  }
+  constructor() {}
 
+  onRunSuite() {}
 }

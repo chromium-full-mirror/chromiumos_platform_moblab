@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { MoblabGrpcService } from './moblab-grpc.service';
+import {MoblabGrpcService} from './moblab-grpc.service';
 
 describe('MoblabGrpcService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));

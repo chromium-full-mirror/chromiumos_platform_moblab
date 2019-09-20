@@ -1,12 +1,13 @@
-import {NgModule} from '@angular/core';
-import {MoblabSelectorComponent} from './moblab-selector/moblab-selector.component';
-import {MoblabBuildSelectorComponent} from './moblab-build-selector/moblab-build-selector.component';
 import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
+import {MatCardModule} from '@angular/material/card';
 import {MatListModule} from '@angular/material/list';
-import { MoblabRuntestSelectorComponent } from './moblab-runtest-selector/moblab-runtest-selector.component';
-import { MatCardModule } from '@angular/material/card';
+import {MatSelectModule} from '@angular/material/select';
+
+import {MoblabBuildSelectorComponent} from './moblab-build-selector/moblab-build-selector.component';
+import {MoblabRuntestSelectorComponent} from './moblab-runtest-selector/moblab-runtest-selector.component';
+import {MoblabSelectorComponent} from './moblab-selector/moblab-selector.component';
 
 @NgModule({
   declarations: [
@@ -15,18 +16,13 @@ import { MatCardModule } from '@angular/material/card';
     MoblabRuntestSelectorComponent,
   ],
   exports: [
-    MoblabSelectorComponent,
-    MoblabBuildSelectorComponent,
+    MoblabSelectorComponent, MoblabBuildSelectorComponent,
     MoblabRuntestSelectorComponent
   ],
   imports: [
-    FormsModule,
-    CommonModule,
-    MatSelectModule,
-    MatListModule,
-    MatCardModule
+    FormsModule, CommonModule, MatSelectModule, MatListModule, MatCardModule
   ]
 })
 
-export class WidgetsModule { }
-
+export class WidgetsModule {
+}

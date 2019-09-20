@@ -12,7 +12,10 @@ copy_modules:
 copy_src: copy_modules
 	cp -r * ${T}
 
-compile_proto: copy_src
+clean_proto:
+	rm -f ${T}/src/app/services/moblabrpc*pb*
+
+compile_proto: copy_src clean_proto
 	protoc \
                 -I="${S}/src/moblab-rpcserver" \
 		--js_out=import_style=commonjs:${T}/src/app/services \

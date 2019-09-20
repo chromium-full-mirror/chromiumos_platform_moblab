@@ -1,16 +1,14 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ViewJobsComponent } from './view-jobs.component';
+import {ViewJobsComponent} from './view-jobs.component';
 
 describe('ViewJobsComponent', () => {
   let component: ViewJobsComponent;
   let fixture: ComponentFixture<ViewJobsComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ ViewJobsComponent ]
-    })
-    .compileComponents();
+    TestBed.configureTestingModule({declarations: [ViewJobsComponent]})
+        .compileComponents();
   }));
 
   beforeEach(() => {

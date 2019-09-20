@@ -170,7 +170,7 @@ class MoblabTestScheduler(object):
         """
         logging.getLogger().handlers = []
         logging.getLogger().setLevel(level)
-        fh = logging.FileHandler('/var/log/moblab_remote_schedule.log')
+        fh = logging.FileHandler('/var/log/moblab/moblab_remote_schedule.log')
         fh.setLevel(level)
         # create formatter and add it to the handlers
         formatter = logging.Formatter(

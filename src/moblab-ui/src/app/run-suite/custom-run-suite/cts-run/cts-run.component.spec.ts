@@ -1,16 +1,14 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { CtsRunComponent } from './cts-run.component';
+import {CtsRunComponent} from './cts-run.component';
 
 describe('CtsRunComponent', () => {
   let component: CtsRunComponent;
   let fixture: ComponentFixture<CtsRunComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ CtsRunComponent ]
-    })
-    .compileComponents();
+    TestBed.configureTestingModule({declarations: [CtsRunComponent]})
+        .compileComponents();
   }));
 
   beforeEach(() => {

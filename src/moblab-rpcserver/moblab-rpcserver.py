@@ -6,7 +6,9 @@
 
 from __future__ import print_function
 
+import argparse
 import re
+import sys
 import os
 import time
 from concurrent import futures
@@ -90,8 +92,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         pass
 
     def list_boards(self, _request, _context):
-        response = moblabrpc_pb2.ListBoardsResponse(
-            boards=self.build_connector.get_boards_available())
+        response = moblabrpc_pb2.ListBoardsResponse(self.service.list_boards())
         return response
 
     def list_milestones(self, request, _context):
@@ -146,8 +147,45 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             response.duts.extend([dut_firmware_info])
         return response
 
+    def update_duts_firmware(self, request, _context):
+        self.service.update_duts_firmware(request.ips)
+        response = moblabrpc_pb2.UpdateDutsFirmwareResponse()
+        return response
+
+
+def setup_logging(level):
+    """Enable the correct level of logging.
+
+    Args:
+        level (int): One of the predefined logging levels, e.g loging.DEBUG
+    """
+    logging.getLogger().handlers = []
+    logging.getLogger().setLevel(level)
+    fh = logging.FileHandler('/var/log/moblab/moblab_rpc.log')
+    fh.setLevel(level)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logging.getLogger().addHandler(fh)
+
+
+def parse_arguments(argv):
+    """Creates the argument parser."""
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument(
+        '-v', '--verbose', action='store_true', help='Turn on debug logging.')
+    return parser.parse_args(argv)
+
 
 def serve():
+    options = parse_arguments(sys.argv[1:])
+    logging_severity = logging.INFO
+    if options.verbose:
+        logging_severity = logging.DEBUG
+    setup_logging(logging_severity)
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
 
     try:

@@ -1,33 +1,29 @@
-import { LayoutModule } from '@angular/cdk/layout';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import {
-  MatButtonModule,
-  MatIconModule,
-  MatListModule,
-  MatSidenavModule,
-  MatToolbarModule,
-} from '@angular/material';
+import {LayoutModule} from '@angular/cdk/layout';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatToolbarModule,} from '@angular/material';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
-import { AppSidebarComponent } from './app-sidebar.component';
+import {AppSidebarComponent} from './app-sidebar.component';
 
 describe('AppSidebarComponent', () => {
   let component: AppSidebarComponent;
   let fixture: ComponentFixture<AppSidebarComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [AppSidebarComponent],
-      imports: [
-        NoopAnimationsModule,
-        LayoutModule,
-        MatButtonModule,
-        MatIconModule,
-        MatListModule,
-        MatSidenavModule,
-        MatToolbarModule,
-      ]
-    }).compileComponents();
+    TestBed
+        .configureTestingModule({
+          declarations: [AppSidebarComponent],
+          imports: [
+            NoopAnimationsModule,
+            LayoutModule,
+            MatButtonModule,
+            MatIconModule,
+            MatListModule,
+            MatSidenavModule,
+            MatToolbarModule,
+          ]
+        })
+        .compileComponents();
   }));
 
   beforeEach(() => {

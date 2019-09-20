@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { GlobalInfoService } from 'app/services/services.module';
-import { Feature } from 'app/services/services.module';
+import {Component, OnInit} from '@angular/core';
+import {GlobalInfoService} from 'app/services/services.module';
+import {Feature} from 'app/services/services.module';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,52 +17,40 @@ export class AppSidebarComponent implements OnInit {
   constructor(private globalInfo: GlobalInfoService) {
     this.globalInfo = globalInfo;
 
-    this.addSidebarEntry(Feature.VIEW_JOBS, this.navTabsAboveRun, {
-      route: '/view_jobs',
-      label: 'View Jobs',
-      icon: 'visibility'
-    });
+    this.addSidebarEntry(
+        Feature.VIEW_JOBS, this.navTabsAboveRun,
+        {route: '/view_jobs', label: 'View Jobs', icon: 'visibility'});
 
-    this.addSidebarEntry(Feature.RUN_CTS, this.navTestRunMenuOptions, {
-      route: '/run_tests/cts',
-      label: 'Android Qualification'
-    });
-    this.addSidebarEntry(Feature.RUN_STORAGE_QUAL, this.navTestRunMenuOptions, {
-      route: '/run_tests/storagequal',
-      label: 'Storage Qualification'
-    });
-    this.addSidebarEntry(Feature.RUN_MEMORY_QUAL, this.navTestRunMenuOptions, {
-      route: '/run_tests/memoryqual',
-      label: 'Memory Qualification'
-    });
-    this.addSidebarEntry(Feature.RUN_BOARD_QUAL, this.navTestRunMenuOptions, {
-      route: '/run_tests/bvt',
-      label: 'Board Qualification'
-    });
-    this.addSidebarEntry(Feature.RUN_POWER, this.navTestRunMenuOptions, {
-      route: '/run_tests/power',
-      label: 'Power'
-    });
-    this.addSidebarEntry(Feature.RUN_TESTS, this.navTestRunMenuOptions, {
-      route: '/run_tests/other',
-      label: 'Run Suite'
-    });
+    this.addSidebarEntry(
+        Feature.RUN_CTS, this.navTestRunMenuOptions,
+        {route: '/run_tests/cts', label: 'Android Qualification'});
+    this.addSidebarEntry(
+        Feature.RUN_STORAGE_QUAL, this.navTestRunMenuOptions,
+        {route: '/run_tests/storagequal', label: 'Storage Qualification'});
+    this.addSidebarEntry(
+        Feature.RUN_MEMORY_QUAL, this.navTestRunMenuOptions,
+        {route: '/run_tests/memoryqual', label: 'Memory Qualification'});
+    this.addSidebarEntry(
+        Feature.RUN_BOARD_QUAL, this.navTestRunMenuOptions,
+        {route: '/run_tests/bvt', label: 'Board Qualification'});
+    this.addSidebarEntry(
+        Feature.RUN_POWER, this.navTestRunMenuOptions,
+        {route: '/run_tests/power', label: 'Power'});
+    this.addSidebarEntry(
+        Feature.RUN_TESTS, this.navTestRunMenuOptions,
+        {route: '/run_tests/other', label: 'Run Suite'});
 
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabsBelowRun, {
       route: '/manage_dut',
       label: 'Manage DUT\'s',
       icon: 'laptop_chromebook'
     });
-    this.addSidebarEntry(Feature.SYSTEM_CONFIGURATION, this.navTabsBelowRun, {
-      route: '/config',
-      label: 'Configuration',
-      icon: 'settings'
-    });
-    this.addSidebarEntry(Feature.MOBMONITOR, this.navTabsBelowRun, {
-      route: '/mobmonitor',
-      label: 'Mobmonitor',
-      icon: 'security'
-    });
+    this.addSidebarEntry(
+        Feature.SYSTEM_CONFIGURATION, this.navTabsBelowRun,
+        {route: '/config', label: 'Configuration', icon: 'settings'});
+    this.addSidebarEntry(
+        Feature.MOBMONITOR, this.navTabsBelowRun,
+        {route: '/mobmonitor', label: 'Mobmonitor', icon: 'security'});
     this.addSidebarEntry(Feature.ADVANCED_SETTINGS, this.navTabsBelowRun, {
       route: '/advanced',
       label: 'Advanced Settings',
@@ -73,11 +61,9 @@ export class AppSidebarComponent implements OnInit {
       label: 'Report Problem',
       icon: 'bug_report'
     });
-    this.addSidebarEntry(Feature.DOCUMENTATION, this.navTabsBelowRun, {
-      route: '/documentation',
-      label: 'Documentation',
-      icon: 'help'
-    });
+    this.addSidebarEntry(
+        Feature.DOCUMENTATION, this.navTabsBelowRun,
+        {route: '/documentation', label: 'Documentation', icon: 'help'});
   }
 
   getErrors() {
