@@ -4,7 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Test script that generates remote commands for the moblab to execute.
+"""CLI that makes it easier to interact with remote commands."""
 
 from __future__ import print_function
 
@@ -27,7 +27,7 @@ os.environ.setdefault('GOOGLE_APPLICATION_CREDENTIALS',
 
 
 class MoblabRemoteSchedulerCLI(object):
-
+    """Remote command CLI."""
     def __init__(self, moblab_bucket_name):
         self.moblab_bucket_name = moblab_bucket_name
         self.storage_client = storage.Client()
@@ -37,7 +37,7 @@ class MoblabRemoteSchedulerCLI(object):
         self.executed = None
 
     def create_runsuite_command(self, board, model, suite, build, priority=2):
-        suite_request = run_suite_request.MoblabSuiteRunRequest(
+        suite_request = run_suite_request.MoblabSuiteRunRequestWrapper(
             board=board,
             build=build,
             model=model,
@@ -90,7 +90,7 @@ class MoblabRemoteSchedulerCLI(object):
             print('%d: %s' % (i, option))
             i += 1
         sels = input(question + ': ')
-        if isinstance(sels) == int:
+        if isinstance(sels, int):
             return [options[sels]]
         selected_opts = []
         for sel in sels:
@@ -102,6 +102,7 @@ class MoblabRemoteSchedulerCLI(object):
             board.split('-')[0]
             for board in self.build_connector.get_boards_available()
         ]
+        boards = list(set(boards))
         selected_boards = self.get_input_from_list(boards,
                                                    'Pick a board number ')
 
@@ -147,7 +148,9 @@ class MoblabRemoteSchedulerCLI(object):
                     'alan', 'basking', 'bigdaddy', 'electro', 'pyro', 'reef',
                     'sand', 'snappy'
                 ],
-                'sarien': ['arcada', 'arcada_signed', 'sarien'],
+                'sarien': [
+                    'arcada', 'arcada_signed', 'sarien', 'sarien_signed'
+                ],
                 'scarlet': ['dru', 'druwl', 'dumo', 'overkill'],
                 'scarlet-arcnext': ['dru', 'druwl', 'dumo'],
                 'soraka': ['soraka']
