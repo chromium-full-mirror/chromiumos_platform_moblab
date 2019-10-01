@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-run-suite',
-  templateUrl: './run-suite.component.html',
+  template: '<router-outlet></router-outlet>',
   styleUrls: ['../app.component.css'],
 })
 

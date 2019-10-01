@@ -3,5 +3,10 @@
 		{
 			"path": "/mnt/thirddrive/tot2/src/platform/moblab"
 		}
-	]
+	],
+	"settings": {
+		"files.exclude": {
+			"**/node_modules": true
+		}
+	}
 }

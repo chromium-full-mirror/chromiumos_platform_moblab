@@ -13,36 +13,37 @@ export class MoblabBuildSelectorComponent {
 
   @Output() update = new EventEmitter();
 
-  boards: string[] = [];
-  boardsPickerActive = false;
+  buildTargets: string[] = [];
+  buildTargetsPickerActive = false;
   milestones: string[] = [];
   milestonesPickerActive = false;
-  builds: string[] = [];
-  buildsPickerActive = false;
+  buildVersions: string[] = [];
+  buildVersionsPickerActive = false;
 
-  private boardName = '';
+  private buildTargetName = '';
   private milestone = '';
-  private buildName = '';
+  private buildVersionName = '';
   // TODO(haddowk) Allow tryjobs and other build types.
   buildType = 'release';
   constructor(private moblabGrpcService: MoblabGrpcService) {}
 
   start(): void {
-    this.moblabGrpcService.listBoards((boards: string[]) => {
-      this.updateBoards(boards);
+    this.moblabGrpcService.listBuildTargets((buildTarget: string[]) => {
+      this.updateBuildTargets(buildTarget);
     });
   }
 
-  updateBoards(newBoards: string[]) {
-    this.boards = newBoards;
-    this.boardsPickerActive = true;
+  updateBuildTargets(newBuildTargets: string[]) {
+    this.buildTargets = newBuildTargets;
+    this.buildTargetsPickerActive = true;
   }
 
-  boardChanged(boardName): void {
-    this.boardName = boardName;
-    this.moblabGrpcService.listMilestones(boardName, (milestones: string[]) => {
+  buildTargetChanged(newBuildTarget): void {
+    this.buildTargetName = newBuildTarget;
+    this.moblabGrpcService.listMilestones(this.buildTargetName, (milestones: string[]) => {
       this.updateMilestones(milestones);
     });
+    this.update.emit({board: this.buildTargetName});
   }
 
   updateMilestones(newMilestones: string[]) {
@@ -50,27 +51,26 @@ export class MoblabBuildSelectorComponent {
     this.milestonesPickerActive = true;
   }
 
-  milestoneChanged(milestone): void {
-    console.log(milestone);
-    this.milestone = milestone;
-    this.moblabGrpcService.listBuilds(
-        this.boardName, milestone, (builds: string[]) => {
-          this.builds = builds;
+  milestoneChanged(newMilestone): void {
+    this.milestone = newMilestone;
+    this.moblabGrpcService.listBuildVersions(
+        this.buildTargetName, this.milestone, (builds: string[]) => {
+          this.buildVersions = builds;
         });
   }
 
-  updateBuilds(newBuilds: string[]) {
-    this.builds = newBuilds;
-    this.buildsPickerActive = true;
+  updateBuildVersions(newBuildVersions: string[]) {
+    this.buildVersions = newBuildVersions;
+    this.buildVersionsPickerActive = true;
   }
 
-  buildChanged(buildName): void {
-    this.buildName = buildName;
-    this.update.emit({value: this.getBuildFormattedString()});
+  buildVersionChanged(newBuildVersion): void {
+    this.buildVersionName = newBuildVersion;
+    this.update.emit({build: this.getBuildFormattedString()});
   }
 
   getBuildFormattedString(): string {
-    return `${this.boardName}-${this.buildType}/${this.milestone}-${
-        this.buildName}`;
+    return `${this.buildTargetName}-${this.buildType}/${this.milestone}-${
+        this.buildVersionName}`;
   }
 }

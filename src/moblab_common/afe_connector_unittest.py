@@ -78,8 +78,12 @@ class AFEConnectorTest(unittest.TestCase):
         mock_decode_response.assert_called_once()
         self.assertDictEqual({
             'AUTOTEST_WEB': {
-                'host': 'localhost', 'database': 'chromeos_autotest_db'
-            }, 'HOSTS': {'default_protection': 'NO_PROTECTION'}
+                'host': 'localhost',
+                'database': 'chromeos_autotest_db'
+            },
+            'HOSTS': {
+                'default_protection': 'NO_PROTECTION'
+            }
         }, result)
 
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')
@@ -107,11 +111,14 @@ class AFEConnectorTest(unittest.TestCase):
             test_args='test_test_args')
         mock_send_rpc_command.assert_called_once_with(
             'run_suite', {
-                'test_args': 'test_test_args', 'suite_args': 'test_suite_args',
-                'board': 'test_board', 'suite': 'test_suite',
+                'test_args': 'test_test_args',
+                'suite_args': 'test_suite_args',
+                'board': 'test_board',
+                'suite': 'test_suite',
                 'model': 'test_model',
                 'build': 'test_board-test_build/test_build'
             })
+
 
 if __name__ == '__main__':
     unittest.main()

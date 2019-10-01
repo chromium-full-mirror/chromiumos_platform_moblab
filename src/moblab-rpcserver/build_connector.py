@@ -30,7 +30,7 @@ class MoblabBuildConnector(object):
             try:
                 self.storage_client = storage.Client()
             except auth_exceptions.DefaultCredentialsError as e:
-                logging.exception(e)
+                logging.info('No credentials loaded')
                 raise MoblabBuildConnectorException('Invalid Credentials')
 
     def get_partial_object_path(self, prefix, delimiter):

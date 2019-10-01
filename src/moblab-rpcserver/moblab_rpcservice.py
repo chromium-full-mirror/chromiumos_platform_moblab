@@ -27,7 +27,7 @@ class MoblabRpcError(Exception):
 
 class MoblabService(object):
     model_re = re.compile(r'^model:(.*)')
-    board_re = re.compile(r'^board:(.*)')
+    build_target_re = re.compile(r'^board:(.*)')
     pool_re = re.compile(r'^pool:(.*)')
 
     def __init__(self):
@@ -42,14 +42,17 @@ class MoblabService(object):
         logging.info('Using bucket: %s', self.moblab_bucket_name)
         self.devserver_connector = devserver_connector.DevserverConnector(
             self.moblab_bucket_name)
-        self.build_connector = build_connector.MoblabBuildConnector(
-            self.moblab_bucket_name)
+        try:
+            self.build_connector = build_connector.MoblabBuildConnector(
+                self.moblab_bucket_name)
+        except build_connector.MoblabBuildConnectorException as e:
+            self.build_connector = None
 
     def extract_model_from_labels(self, labels):
         return self.extract_from_labels(self.model_re, labels)
 
-    def extract_board_from_labels(self, labels):
-        return self.extract_from_labels(self.board_re, labels)
+    def extract_build_target_from_labels(self, labels):
+        return self.extract_from_labels(self.build_target_re, labels)
 
     def extract_pool_from_labels(self, labels):
         return self.extract_from_labels(self.pool_re, labels)
@@ -67,15 +70,14 @@ class MoblabService(object):
         for dut in connected_duts:
             afe_formatted_duts.append({
                 'ip': dut[0],
-                'labels': ['model:' + dut[1]]
+                'labels': ['model:' + dut[1]],
+                'error': dut[3]
             })
         return afe_formatted_duts
 
     def list_duts(self):
         afe_hosts = self.afe_connector.get_connected_devices()
-        logging.error(afe_hosts)
         potential_hosts = self.get_connected_devices()
-        logging.error(potential_hosts)
         connected_ips = []
         connected_duts = []
 
@@ -89,13 +91,14 @@ class MoblabService(object):
                 dut['hostname'] = dut['ip']
                 dut['enrolled'] = False
                 dut['status'] = 'Not Enrolled'
+                dut['error'] = dut['error']
                 connected_duts.append(dut)
 
         return connected_duts
 
     def run_suite_storage_qual(self,
-                               board,
-                               build,
+                               build_target,
+                               build_version,
                                suite,
                                model=None,
                                pool=None,
@@ -110,8 +113,8 @@ class MoblabService(object):
         suite_args['part_id'] = part_id or ''
 
     def run_suite_memory_qual(self,
-                              board,
-                              build,
+                              build_target,
+                              build_version,
                               suite,
                               model=None,
                               pool=None,
@@ -120,8 +123,8 @@ class MoblabService(object):
         pass
 
     def run_cts_suite(self,
-                      board,
-                      build,
+                      build_target,
+                      build_version,
                       suite,
                       model,
                       pool=None,
@@ -133,11 +136,13 @@ class MoblabService(object):
 
         suite_args = {}
         if autotest_tests:
-            suite_args['tests'] = [test.strip() for test in autotest_tests]
+            suite_args['tests'] = [
+                test.strip() for test in autotest_tests.split(',')
+            ]
 
         return self.run_suite(
-            board,
-            build,
+            build_target,
+            build_version,
             suite,
             model,
             pool,
@@ -146,33 +151,33 @@ class MoblabService(object):
 
     def run_suite_faft(
             self,
-            board,
-            build,
+            build_target,
+            build_version,
             suite,
             model=None,
             pool=None,
             ro_firmware=None,
             rw_firmware=None,
     ):
-        builds = {}
+        build_versions = {}
         if rw_firmware:
-            builds['fwrw-version'] = rw_firmware
+            build_versions['fwrw-version'] = rw_firmware
         if ro_firmware:
-            builds['fwro-version'] = ro_firmware
+            build_versions['fwro-version'] = ro_firmware
 
     def run_suite(self,
-                  board,
-                  build,
+                  build_target,
+                  build_version,
                   suite,
                   model=None,
                   pool=None,
                   suite_args=None,
                   test_args=None,
                   suite_timeout_mins=_DEFAULT_SUITE_TIMEOUT_MINS,
-                  extra_builds={}):
+                  extra_build_versions={}):
 
-        builds = {'cros-version': build}
-        builds.update(extra_builds)
+        build_versions = {'cros-version': build}
+        build_versions.update(extra_build_versions)
 
         # TODO(mattmallett b/92031054) Standardize bug id, part id passing
         # for memory/storage qual
@@ -195,9 +200,9 @@ class MoblabService(object):
         #        raise MoblabRpcError('Could not parse test args.')
 
         return self.afe_connector.run_suite(
-            board,
-            build,
-            builds,
+            build_target,
+            build_version,
+            build_versions,
             suite,
             suite_timeout_mins,
             pool,
@@ -218,17 +223,19 @@ class MoblabService(object):
     def update_duts_firmware(self, ip_addresses):
         self.dut_connector.update_firmware(ip_addresses)
 
-    def list_available_boards(self):
-        # Get the intersection of boards available to this moblab and
-        # the boards on the devices connected.
-        available_boards = self.build_connector.get_boards_available()
-        connected_boards = self.list_boards()
-        return list(set(available_boards).intersection(connected_boards))
+    def list_usable_build_targets(self):
+        # Get the intersection of build_target available to this moblab and
+        # the build_target on the devices connected.
+        available_build_targets = \
+            self.build_connector.get_build_targets_available()
+        connected_build_targets = self.list_connected_dut_build_targets()
+        return list(
+            set(available_build_targets).intersection(connected_build_targets))
 
-    def list_boards(self):
+    def list_connected_dut_build_targets(self):
         afe_hosts = self.afe_connector.get_connected_devices()
-        boards = []
+        build_targets = []
         for host in afe_hosts:
-            boards.extend(
-                self.service.extract_board_from_labels(host.get('board', [])))
-        return boards
+            build_targets.extend(
+                self.extract_build_target_from_labels(host.get('labels', [])))
+        return build_targets

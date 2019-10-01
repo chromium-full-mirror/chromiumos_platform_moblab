@@ -48,8 +48,11 @@ class AFEConnector(object):
             params = {}
 
         rpc_url = ('http://%s/afe/server/rpc/' % MOBLAB_RPC_SERVER)
-        data = self.json_encoder.encode(
-            {'id': 0, 'method': method, 'params': [params]})
+        data = self.json_encoder.encode({
+            'id': 0,
+            'method': method,
+            'params': [params]
+        })
 
         logging.debug('%s %s', rpc_url, data)
         try:
@@ -149,11 +152,18 @@ class AFEConnector(object):
         """
 
         params = {
-            'board': board, 'builds': builds, 'name': suite, 'pool': pool,
-            'run_prod_code': False, 'test_source_build': build,
-            'wait_for_results': True, 'suite_args': suite_args,
-            'test_args': test_args, 'job_retry': True,
-            'max_retries': sys.maxint, 'model': model,
+            'board': board,
+            'builds': builds,
+            'name': suite,
+            'pool': pool,
+            'run_prod_code': False,
+            'test_source_build': build,
+            'wait_for_results': True,
+            'suite_args': suite_args,
+            'test_args': test_args,
+            'job_retry': True,
+            'max_retries': sys.maxint,
+            'model': model,
             'timeout_mins': suite_timeout_mins,
             'max_runtime_mins': suite_timeout_mins
         }

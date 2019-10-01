@@ -28,7 +28,6 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppSidebarComponent} from './app-sidebar/app-sidebar.component';
 import {AppComponent} from './app.component';
 import {ConfigurationComponent} from './configuration/configuration.component';
-import {ManageDutsComponent} from './manage-duts/manage-duts.component';
 import {ManageDutsModule} from './manage-duts/manage-duts.module';
 import {MobmonitorComponent} from './mobmonitor/mobmonitor.component';
 import {MobmonitorPipe} from './mobmonitor/mobmonitor.component';
@@ -80,7 +79,8 @@ import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings
       FeedbackModule,
       MatSelectModule,
       PipesModule,
-      ManageDutsModule
+      ManageDutsModule,
+      RunSuiteModule
    ],
    exports: [
       WidgetsModule,

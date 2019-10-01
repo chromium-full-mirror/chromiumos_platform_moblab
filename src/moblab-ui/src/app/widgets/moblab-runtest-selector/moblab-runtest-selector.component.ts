@@ -41,12 +41,18 @@ export class MoblabRuntestSelectorComponent implements OnInit {
     this.buildSelector.start();
   }
 
-  buildChanged(selectedBuild: string) {
-    this.selectedBuild = selectedBuild;
-    this.moblabRpcService.listPools((pools: string[]) => {
-      this.updatePools(pools);
-    });
-    this.update.emit({model: this.selectedModel, build: this.selectedBuild});
+  buildChanged(event) {
+    if (event.build) {
+      this.selectedBuild = event.build;
+      this.moblabRpcService.listPools((pools: string[]) => {
+        this.updatePools(pools);
+      });
+      this.update.emit({model: this.selectedModel, build: this.selectedBuild});
+    }
+    if (event.board) {
+      this.update.emit({board: event.board});
+    }
+
   }
 
   updatePools(newPools: string[]) {

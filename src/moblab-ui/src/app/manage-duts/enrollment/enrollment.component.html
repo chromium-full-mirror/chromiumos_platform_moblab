@@ -1,31 +1,41 @@
 <mat-card>
-  <button mat-raised-button color="primary" (click)="enrollSelected()">
-    Enroll Selected
-  </button>
-  <button mat-raised-button (click)="unenrollSelected()">
-    Unenroll Selected
-  </button>
-  <mat-checkbox [checked]="filterLabels" (change)="toggleFilterLabels()">
-    Filter labels</mat-checkbox
-  >
+  <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+    <div fxFlex="15%">
+      <button mat-raised-button color="primary" (click)="enrollSelected()">
+        Enroll Selected
+      </button>
+    </div>
+    <div fxFlex="15%">
+      <button mat-raised-button (click)="unenrollSelected()">
+        Unenroll Selected
+      </button>
+    </div>
+    <div fxFlex="15%">
+      <mat-checkbox
+        class="filter-cb"
+        [checked]="filterLabels"
+        (change)="toggleFilterLabels()"
+      >
+        Filter labels</mat-checkbox
+      >
+    </div>
+  </div>
 </mat-card>
 
 <mat-card>
-  <table mat-table [dataSource]="duts">
+  <mat-table [dataSource]="duts" matSort >
     <ng-container matColumnDef="select">
       <th width="10%" mat-header-cell *matHeaderCellDef>
-        <mat-form-field>
-          <mat-select [(ngModel)]="selectValue">
-            <mat-option value="Select">Select...</mat-option>
-            <mat-option value="None">None</mat-option>
-            <mat-option value="All">All</mat-option>
-            <mat-option value="UnEnrolled">UnEnrolled</mat-option>
-            <mat-option value="Enrolled">Enrolled</mat-option>
-          </mat-select>
-        </mat-form-field>
+        <app-table-header-selector
+          class="select-cb"
+          [options]="selectOptions"
+          (update)="selectionChanged($event)"
+        ></app-table-header-selector>
       </th>
+
       <td mat-cell *matCellDef="let row">
         <mat-checkbox
+          class="select-cb"
           (click)="$event.stopPropagation()"
           (change)="$event ? selection.toggle(row) : null"
           [checked]="selection.isSelected(row)"
@@ -35,33 +45,40 @@
     </ng-container>
 
     <ng-container matColumnDef="name">
-      <th th width="10%" mat-header-cell *matHeaderCellDef>Name</th>
+      <th th width="10%" mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
       <td mat-cell *matCellDef="let element">{{ element.getIp() }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="board">
-      <th th width="10%" mat-header-cell *matHeaderCellDef>Board</th>
-      <td mat-cell *matCellDef="let element">{{ element.getBoardsList() }}</td>
+    <ng-container matColumnDef="buildtarget">
+      <th th width="10%" mat-header-cell mat-sort-header *matHeaderCellDef>
+        Build Target
+      </th>
+      <td mat-cell *matCellDef="let element">{{ element.getBuildTargetsList() }}</td>
     </ng-container>
 
     <ng-container matColumnDef="model">
-      <th th width="10%" mat-header-cell *matHeaderCellDef>Model</th>
+      <th th width="10%" mat-header-cell mat-sort-header *matHeaderCellDef>Model</th>
       <td mat-cell *matCellDef="let element">{{ element.getModelsList() }}</td>
     </ng-container>
 
     <ng-container matColumnDef="status">
-      <th th width="10%" mat-header-cell *matHeaderCellDef>Status</th>
+      <th th width="10%" mat-header-cell mat-sort-header *matHeaderCellDef>Status</th>
       <td mat-cell *matCellDef="let element">{{ element.getStatus() }}</td>
     </ng-container>
 
     <ng-container matColumnDef="labels">
       <th width="40%" mat-header-cell *matHeaderCellDef>Labels</th>
       <td mat-cell *matCellDef="let element">
-        {{ element.getLabelsList() | labelListToString: labelFilterList }}
+        <div *ngIf="!element.getError(); else elseBlock">
+          {{ element.getLabelsList() | labelListToString: labelFilterList }}
+        </div>
+        <ng-template #elseBlock
+          >{{ element.getError() }} </ng-template
+        >
       </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
+  </mat-table>
 </mat-card>

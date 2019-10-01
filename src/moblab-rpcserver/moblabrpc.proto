@@ -8,9 +8,9 @@ service MoblabRpcService {
   rpc run_cts_suite (RunCtsSuiteRequest) returns (RunCtsSuiteResponse) {}
 
   rpc list_connected_duts (ListConnectedDutsRequest) returns (ListConnectedDutsResponse) {}
-  rpc list_boards (ListBoardsRequest) returns (ListBoardsResponse) {}
+  rpc list_build_targets (ListBuildTargetsRequest) returns (ListBuildTargetsResponse) {}
   rpc list_milestones (ListMilestonesRequest) returns (ListMilestonesResponse) {}
-  rpc list_builds (ListBuildsRequest) returns (ListBuildsResponse) {}
+  rpc list_build_versions (ListBuildVersionsRequest) returns (ListBuildVersionsResponse) {}
   rpc list_models (ListModelsRequest) returns (ListModelsResponse) {}
   rpc list_pools (ListPoolsRequest) returns (ListPoolsResponse) {}
 
@@ -38,8 +38,8 @@ message RunSuiteResponse {
 
 message RunCtsSuiteRequest {
   string suite = 1;
-  string board = 2;
-  string build = 3;
+  string build_target = 2;
+  string build_version = 3;
   string model = 4;
   string pool = 5;
   repeated string autotest_tests = 6;
@@ -54,7 +54,7 @@ message ConnectedDutInfo {
   string ip = 2;
   string mac_addr = 3;
   string status = 4;
-  repeated string boards = 5;
+  repeated string build_targets = 5;
   repeated string models  = 6;
   bool is_enrolled = 7;
   bool is_locked = 8;
@@ -62,6 +62,7 @@ message ConnectedDutInfo {
   repeated string labels = 10;
   repeated string attributes= 11;
   repeated string pools= 12;
+  string error = 13;
 }
 message ListConnectedDutsRequest {
 }
@@ -69,25 +70,25 @@ message ListConnectedDutsResponse {
   repeated ConnectedDutInfo duts = 1;
 }
 
-message ListBoardsRequest {
+message ListBuildTargetsRequest {
 }
-message ListBoardsResponse {
-  repeated string boards = 1;
+message ListBuildTargetsResponse {
+  repeated string build_targets = 1;
 }
 
 message ListMilestonesRequest {
-  string board = 1;
+  string build_target = 1;
 }
 message ListMilestonesResponse {
   repeated string milestones = 1;
 }
 
-message ListBuildsRequest {
-  string board = 1;
+message ListBuildVersionsRequest {
+  string build_target = 1;
   string milestone = 2;
 }
-message ListBuildsResponse {
-  repeated string builds = 1;
+message ListBuildVersionsResponse {
+  repeated string build_versions = 1;
 }
 
 message ListModelsRequest {

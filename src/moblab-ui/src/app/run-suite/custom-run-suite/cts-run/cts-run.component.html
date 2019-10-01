@@ -1,16 +1,53 @@
 <mat-card>
   <mat-tab-group [(selectedIndex)]="selectedIndex" #androidGroup>
-    <mat-tab label={{androidConfig.label}} *ngFor="let androidConfig of androidConfigurations;">
-      <app-moblab-runtest-selector
-      (update)="modelBoardPoolSelected($event)">
+    <mat-tab
+      label="{{ androidConfig.label }}"
+      *ngFor="let androidConfig of letterConfigs"
+    >
+      <app-moblab-runtest-selector (update)="modelBoardPoolSelected($event)">
       </app-moblab-runtest-selector>
-      <app-moblab-selector #suiteSelector [title]="'Select suite:'" [placeholder]="['Pick from available suites']"
-        [options]="getSuiteLabelList(androidConfig)" [isShown]="true" (update)="suiteChanged($event.value, $event.index)">
+      <app-moblab-selector
+        #suiteSelector
+        [title]="'Select suite:'"
+        [placeholder]="['Pick from available suites']"
+        [options]="getSuiteLabelList(androidConfig)"
+        [isShown]="true"
+        (update)="suiteChanged($event.value)"
+      >
       </app-moblab-selector>
-
+      <mat-form-field class="ff" appearance="standard">
+        <mat-label>Limit to just these modules (Optional)</mat-label>
+        <textarea
+          class="modulecsvlist"
+          type="text"
+          matInput
+          rows="10"
+          cols="80"
+          [(ngModel)]="moduleCsvList"
+          placeholder=""
+        ></textarea>
+        <mat-hint>Modules should be comma separated</mat-hint>
+        <button
+          mat-button
+          *ngIf="moduleCsvList"
+          matSuffix
+          mat-icon-button
+          aria-label="Clear"
+          (click)="value = ''"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
     </mat-tab>
   </mat-tab-group>
-  <button mat-raised-button color="primary" [disabled]="runSuiteButtonDisabled" #runSuiteButton (click)="onRunSuite()">
+  <div><br></div>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="runSuiteButtonDisabled"
+    #runSuiteButton
+    (click)="onRunSuite()"
+  >
     Run Suite
   </button>
 </mat-card>

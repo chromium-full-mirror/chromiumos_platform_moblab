@@ -14,6 +14,7 @@ import cachetools
 from chromite.lib import cros_logging as logging
 
 from pssh.clients import ParallelSSHClient
+from pssh.exceptions import ConnectionErrorException
 
 FIND_DUT_CMD = [
     'sudo /usr/sbin/fping -g 192.168.231.100 192.168.231.150 -c 10 -p 1 -i 1 -q'
@@ -55,7 +56,7 @@ class MoblabDUTConnector(object):
     def find_duts(self):
         self.connected_ip_addresses = []
         process = subprocess.Popen(
-            FIND_DUT_CMD, stderr=subprocess.PIPE, shell=True)
+            FIND_DUT_CMD, stderr=subprocess.PIPE, shell=True, close_fds=False)
         _, fping_result = process.communicate()
         for line in fping_result.splitlines():
             match = re.match(SUBNET_DUT_SEARCH_RE, line)
@@ -71,21 +72,32 @@ class MoblabDUTConnector(object):
         for (ip, mac_address) in self.get_all_connected_mac():
             self.connected_duts[ip] = DUTInfo(ip, mac_address)
 
-    def run_command_on_connected_duts(self, command):
+    def run_command_on_connected_duts(self, command, timeout=300):
         if not self.connected_ip_addresses:
             self.find_duts()
-        return self.run_command_on_ips(command, self.connected_ip_addresses)
+        return self.run_command_on_ips(command, self.connected_ip_addresses,
+                                       timeout)
 
-    def run_command_on_ips(self, command, ip_addresses):
+    def run_command_on_ips(self, command, ip_addresses, timeout=300):
         client = ParallelSSHClient(
             ip_addresses,
             pool_size=20,
             user='root',
+            num_retries=1,
+            timeout=5,
             pkey='/home/moblab/.ssh/mobbase_id_rsa')
         command_results = []
-        output = client.run_command(command)
+
+        output = client.run_command(command, stop_on_errors=False, timeout=5)
+
         for ip, host_output in output.items():
-            command_results.append((ip, [line for line in host_output.stdout]))
+            stdout = ''
+            if host_output.stdout:
+                stdout = [line for line in host_output.stdout]
+            stderr = ''
+            if host_output.exception:
+                stderr = host_output.exception[0] % host_output.exception[1:]
+            command_results.append((ip, stdout, stderr))
         logging.info('Running command %s on %s resulted in %s', command,
                      ip_addresses, command_results)
         return command_results
@@ -101,16 +113,18 @@ class MoblabDUTConnector(object):
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
-            'timeout 2 mosys platform model')
+            'timeout 2 mosys platform model', timeout=20)
 
         def is_dut_connected(output):
-            return output != None
+            if output:
+                return output != None
+            return False
 
         def extract_model(output):
             return output[0] if len(output) > 0 else 'Unknown'
 
-        return [(host, extract_model(output), is_dut_connected(output))
-                for (host, output) in command_results]
+        return [(host, extract_model(stdout), is_dut_connected(stdout), stderr)
+                for (host, stdout, stderr) in command_results]
 
     def get_connected_dut_firmware(self):
         command_results = self.run_command_on_connected_duts(

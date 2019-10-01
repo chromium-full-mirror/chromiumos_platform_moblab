@@ -18,7 +18,7 @@ from chromite.lib import cros_logging as logging
 
 STATICDIR = '/etc/moblab/moblab-ui/static/'
 
-LOGDIR = '/var/log/moblab-ui/'
+LOGDIR = '/var/log/moblab/'
 LOGFILE = 'moblab-ui.log'
 LOGFILE_SIZE_BYTES = 1024 * 1024
 LOGFILE_COUNT = 10
@@ -45,7 +45,7 @@ def SetupLogging(logdir):
         format='%(asctime)s:%(name)s:%(levelname)-8s %(message)s',
         datefmt='%Y-%m-%d %H:%M',
         filename=os.path.join(logdir, LOGFILE),
-        filemode='w')
+        filemode='w+')
     rotate = loghandler.RotatingFileHandler(
         os.path.join(logdir, LOGFILE),
         maxBytes=LOGFILE_SIZE_BYTES,
@@ -93,9 +93,16 @@ def main(argv):
     })
 
     mobuiappconfig = {
-        '/': {'tools.staticdir.root': options.staticdir},
-        '/static': {'tools.staticdir.on': True, 'tools.staticdir.dir': ''},
-        '/static/assets': {'tools.staticdir.dir': 'assets'},
+        '/': {
+            'tools.staticdir.root': options.staticdir
+        },
+        '/static': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': ''
+        },
+        '/static/assets': {
+            'tools.staticdir.dir': 'assets'
+        },
     }
 
     # Setup the moblab-ui

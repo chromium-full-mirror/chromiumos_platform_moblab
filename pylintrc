@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 [MASTER]
+init-hook='import sys; import os; sys.path.append(os.environ["HOME"] + "/trunk/src/platform/moblab/src"); sys.path.append("/usr/lib64/python2.7/site-packages/")'
 
 # Specify a configuration file.
 #rcfile=
@@ -25,6 +26,9 @@
 # usually to register additional checkers.
 load-plugins=chromite.cli.cros.lint
 
+string-quote = single-avoid-escape
+triple-quote = double
+docstring-quote = double
 
 [MESSAGES CONTROL]
 
@@ -110,7 +114,6 @@ max-line-length=80
 # tab).
 # CHANGE: Use "  " instead.
 indent-string='    '
-
 
 [TYPECHECK]
 

@@ -26,7 +26,9 @@ class MoblabConfigConnector(unittest.TestCase):
 
     def test_get_success(self):
         self.mock_afe_connector.get_config_values.return_value = {
-            'testingsection': {'testingkey': 'testingresult'}
+            'testingsection': {
+                'testingkey': 'testingresult'
+            }
         }
         value = self.connector.get('testingsection', 'testingkey')
         self.assertEqual('testingresult', value)
@@ -38,21 +40,27 @@ class MoblabConfigConnector(unittest.TestCase):
 
     def test_get_missingsection(self):
         self.mock_afe_connector.get_config_values.return_value = {
-            'testingsection': {'testingkey': 'testingresult'}
+            'testingsection': {
+                'testingkey': 'testingresult'
+            }
         }
         value = self.connector.get('missingtestingsection', 'testingkey')
         self.assertEqual(None, value)
 
     def test_get_missingkey(self):
         self.mock_afe_connector.get_config_values.return_value = {
-            'testingsection': {'testingkey': 'testingresult'}
+            'testingsection': {
+                'testingkey': 'testingresult'
+            }
         }
         value = self.connector.get('testingsection', 'missingtestingkey')
         self.assertEqual(None, value)
 
     def test_get_forced(self):
         self.mock_afe_connector.get_config_values.return_value = {
-            'testingsection': {'testingkey': 'testingresult'}
+            'testingsection': {
+                'testingkey': 'testingresult'
+            }
         }
         value = self.connector.get('testingsection', 'testingkey')
         self.assertEqual('testingresult', value)

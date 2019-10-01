@@ -1,9 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 
 @Component({
-  selector: 'app-manage-duts',
-  templateUrl: './manage-duts.component.html',
-  styleUrls: ['./manage-duts.component.css']
+  selector: "app-manage-duts",
+  templateUrl: "./manage-duts.component.html",
+  styleUrls: []
 })
 export class ManageDutsComponent implements OnInit {
   selectedTabIndex = 0;

@@ -3,7 +3,6 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """CLI that makes it easier to interact with remote commands."""
 
 from __future__ import print_function
@@ -28,6 +27,7 @@ os.environ.setdefault('GOOGLE_APPLICATION_CREDENTIALS',
 
 class MoblabRemoteSchedulerCLI(object):
     """Remote command CLI."""
+
     def __init__(self, moblab_bucket_name):
         self.moblab_bucket_name = moblab_bucket_name
         self.storage_client = storage.Client()
