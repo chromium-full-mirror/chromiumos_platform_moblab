@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import json
 import sys
+import httplib
 import subprocess
 import multiprocessing
 
@@ -63,13 +64,13 @@ class AFEConnector(object):
         except requests.exceptions.RequestException as e:
             logging.error(e)
 
-    def decode_response(self, response, key, expected_code=200):
+    def decode_response(self, response, key, expected_code=httplib.OK):
         """Get a specific value from the return of an afe call.
 
         Args:
             response (string): json formatted data.
             key (string): they key of the data to retrieve.
-            expected_code (int, optional): Defaults to 200. [description]
+            expected_code (int, optional): Defaults to httplib.OK. [description]
 
         Returns:
             dict: {} if the AFE server returned an error else a map k,v

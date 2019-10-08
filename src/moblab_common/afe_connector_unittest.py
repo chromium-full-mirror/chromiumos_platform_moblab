@@ -6,9 +6,12 @@
 
 from __future__ import print_function
 
+import httplib
 import unittest
-import afe_connector
+
 import mock
+
+import afe_connector
 
 
 class AFEConnectorTest(unittest.TestCase):
@@ -41,21 +44,21 @@ class AFEConnectorTest(unittest.TestCase):
     def test_decode_response(self):
         response = mock.Mock()
         response.text = '{"error": null, "result": [1], "id": 0}'
-        response.status_code = 200
+        response.status_code = httplib.OK
 
         self.assertEqual([1], self.afe_conn.decode_response(response, 'result'))
 
     def test_decode_response_bad_code(self):
         response = mock.Mock()
         response.text = '{"error": null, "result": [1], "id": 0}'
-        response.status_code = 302
+        response.status_code = httplib.FOUND
 
         self.assertEqual({}, self.afe_conn.decode_response(response, 'result'))
 
     def test_decode_response_no_response(self):
         response = mock.Mock()
         response.text = None
-        response.status_code = 302
+        response.status_code = httplib.FOUND
 
         self.assertEqual({}, self.afe_conn.decode_response(response, 'result'))
 
