@@ -5,9 +5,9 @@
 """Interface to the AFE RPC server for all moblab code."""
 from __future__ import print_function
 
+import httplib
 import json
 import sys
-import httplib
 import subprocess
 import multiprocessing
 
@@ -120,6 +120,35 @@ class AFEConnector(object):
         """
 
         response = self.send_rpc_command('get_hosts')
+        return self.decode_response(response, 'result')
+
+    def get_jobs(self, id_list):
+        """Get attributes of the jobs specified.
+
+        Args:
+            id_list: A list of job id to be retrieved.
+
+        Returns:
+            A list of dict. The key, value of the dict is the job attribute
+            name and the value.
+        """
+        assert isinstance(id_list, list)
+        response = self.send_rpc_command('get_jobs', {'id__in': id_list})
+        return self.decode_response(response, 'result')
+
+    def get_special_tasks(self, id_list):
+        """Get attributes of the special tasks specified.
+
+        Args:
+            id_list: A list of special task id to be retrieved.
+
+        Returns:
+            A list of dict. The key, value of the dict is the special task
+            attribute name and the value.
+        """
+        assert isinstance(id_list, list)
+        response = self.send_rpc_command('get_special_tasks',
+                                         {'id__in': id_list})
         return self.decode_response(response, 'result')
 
     def run_suite(self,

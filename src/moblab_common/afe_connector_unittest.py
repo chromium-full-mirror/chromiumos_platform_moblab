@@ -7,6 +7,7 @@
 from __future__ import print_function
 
 import httplib
+import json
 import unittest
 
 import mock
@@ -97,6 +98,38 @@ class AFEConnectorTest(unittest.TestCase):
         mock_send_rpc_command.assert_called_once_with('get_hosts')
         mock_decode_response.assert_called_once()
         self.assertEqual('Testing', result)
+
+    @mock.patch('afe_connector.AFEConnector.send_rpc_command')
+    def test_get_jobs(self, mock_send_rpc_command):
+        jobs_id = [1, 2]
+        jobs_dict = [
+            {'id': 1, 'name': 'job1'},
+            {'id': 2, 'name': 'job2'},
+        ]
+        mock_send_rpc_command.return_value = mock.MagicMock(
+            status_code=httplib.OK, text=json.dumps({'result': jobs_dict}))
+
+        result = self.afe_conn.get_jobs(jobs_id)
+
+        mock_send_rpc_command.assert_called_once_with(
+            'get_jobs', {'id__in': jobs_id})
+        self.assertEqual(jobs_dict, result)
+
+    @mock.patch('afe_connector.AFEConnector.send_rpc_command')
+    def test_get_special_tasks(self, mock_send_rpc_command):
+        tasks_id = [1, 2]
+        tasks_dict = [
+            {'id': 1, 'name': 'task1'},
+            {'id': 2, 'name': 'task2'},
+        ]
+        mock_send_rpc_command.return_value = mock.MagicMock(
+            status_code=httplib.OK, text=json.dumps({'result': tasks_dict}))
+
+        result = self.afe_conn.get_special_tasks(tasks_id)
+
+        mock_send_rpc_command.assert_called_once_with(
+            'get_special_tasks', {'id__in': tasks_id})
+        self.assertEqual(tasks_dict, result)
 
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')
     def test_run_suite(self, mock_send_rpc_command):
