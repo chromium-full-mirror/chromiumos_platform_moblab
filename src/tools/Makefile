@@ -5,5 +5,5 @@
 all:
 
 install:
-	install -t ${DESTDIR}autotest/site_utils/ -D *.py
+	install -t ${DESTDIR}etc/moblab/tools/ -D *.py
 
