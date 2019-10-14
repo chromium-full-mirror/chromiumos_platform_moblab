@@ -19,14 +19,9 @@ service MoblabRpcService {
 
   rpc list_connected_duts_firmware(ListConnectedDutsFirmwareRequest) returns (ListConnectedDutsFirmwareResponse) {}
   rpc update_duts_firmware(UpdateDutsFirmwareRequest) returns (UpdateDutsFirmwareResponse) {}
-}
 
-message JobInfo {
-  string name = 1;
-  int64 id = 2;
-  string owner = 3;
-  int64 priority = 4;
-  string status = 5;
+  rpc get_num_jobs(GetNumJobsRequest) returns (GetNumJobsResponse)  {}
+  rpc get_jobs(GetJobsRequest) returns (GetJobsResponse)  {}
 }
 
 message RunSuiteRequest {
@@ -45,6 +40,7 @@ message RunCtsSuiteRequest {
   repeated string autotest_tests = 6;
   repeated string tradefed_tests = 7;
 }
+
 message RunCtsSuiteResponse {
   string message = 1;
 }
@@ -128,5 +124,46 @@ message UpdateDutsFirmwareRequest {
 }
 
 message UpdateDutsFirmwareResponse {
+}
+
+message GetNumJobsRequest {
+}
+
+message GetNumJobsResponse {
+  int64 num_jobs = 1;
+}
+
+message Job {
+  int64 job_id = 1;
+  string name = 2;
+  enum Priority {
+    DEFAULT = 0;
+    URGENT = 1;
+    HIGH = 2;
+    LOW = 3;
+  }
+  Priority priority = 3;
+  int64 created_time_sec_utc = 4;
+  int64 start_time_sec_utc = 5;
+  int64 finished_time_sec_utc = 6;
+  enum JobStatus {
+    CREATED = 0;
+    QUEUED = 1;
+    PROVISIONING = 2;
+    RUNNING = 3;
+    SUCCESS = 4;
+    FAILED = 5;
+    TIMED_OUT = 6;
+    ABORTED = 7;
+  }
+  JobStatus status = 7;
+  int64 parent_job_id = 8;
+}
+
+message GetJobsRequest {
+}
+
+message GetJobsResponse {
+  repeated Job jobs = 1;
 }
 
