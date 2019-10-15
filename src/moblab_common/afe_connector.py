@@ -122,7 +122,13 @@ class AFEConnector(object):
         response = self.send_rpc_command('get_hosts')
         return self.decode_response(response, 'result')
 
-    def get_jobs(self, id_list):
+    def get_num_jobs(self):
+        params = {}
+        response = self.send_rpc_command('get_num_jobs', params)
+        logging.error(response)
+        return self.decode_response(response, 'result')
+
+    def get_jobs(self, id_list=None):
         """Get attributes of the jobs specified.
 
         Args:
@@ -132,8 +138,18 @@ class AFEConnector(object):
             A list of dict. The key, value of the dict is the job attribute
             name and the value.
         """
-        assert isinstance(id_list, list)
-        response = self.send_rpc_command('get_jobs', {'id__in': id_list})
+        params = {
+            'not_yet_run': True,
+            'running': True,
+            'finished': True,
+            'suite': True,
+            'sub': True,
+            'standalone': True
+        }
+        if id_list:
+            assert isinstance(id_list, list)
+            params['id_list'] = id_list
+        response = self.send_rpc_command('get_jobs', params)
         return self.decode_response(response, 'result')
 
     def get_special_tasks(self, id_list):
