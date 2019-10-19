@@ -7,4 +7,9 @@
 # Run tests for moblab test results uploader.
 
 set -eu
-exec /usr/bin/python3 -m pytest tests/ "$@"
+
+readonly home_dir=$(dirname -- "$(readlink -e -- "$0")")
+readonly moblab_common_dir=$(cd "${home_dir}"/..; pwd)
+export PYTHONPATH="${moblab_common_dir}":"${home_dir}"
+exec vpython3 -vpython-spec "${home_dir}"/.vpython -m pytest \
+    "${home_dir}"/tests/ "$@"
