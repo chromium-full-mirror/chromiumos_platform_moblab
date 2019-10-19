@@ -10,6 +10,8 @@ from __future__ import print_function
 
 import argparse
 import datetime
+# pylint: disable=cros-logging-import
+import logging
 import logging.handlers as logging_handlers
 import sys
 

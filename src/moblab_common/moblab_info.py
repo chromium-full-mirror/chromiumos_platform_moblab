@@ -7,10 +7,11 @@
 
 from __future__ import print_function
 
+# pylint: disable=cros-logging-import
+import logging
 import subprocess
 import uuid
 
-from chromite.lib import cros_logging as logging
 from moblab_common import lock_util
 
 
