@@ -5,7 +5,10 @@
 """Interface to the AFE RPC server for all moblab code."""
 from __future__ import print_function
 
-from chromite.lib import cros_logging as logging
+try:
+    from chromite.lib import cros_logging as logging
+except ImportError:
+    import logging
 
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import storage

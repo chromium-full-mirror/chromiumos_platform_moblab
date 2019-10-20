@@ -7,7 +7,11 @@
 from __future__ import print_function
 
 import requests
-from chromite.lib import cros_logging as logging
+
+try:
+    from chromite.lib import cros_logging as logging
+except ImportError:
+    import logging
 
 DEV_SERVER = 'localhost:8080'
 

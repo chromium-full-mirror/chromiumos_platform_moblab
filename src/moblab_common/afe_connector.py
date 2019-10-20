@@ -5,11 +5,9 @@
 """Interface to the AFE RPC server for all moblab code."""
 from __future__ import print_function
 
-# TODO(guocb): Remove this try except after migration to python 3.
-try:
-    import httplib  # python 2
-except ImportError:
-    import http.client as httplib  # python 3
+import future
+
+import http.client
 import json
 import sys
 import subprocess
@@ -70,13 +68,13 @@ class AFEConnector(object):
         except requests.exceptions.RequestException as e:
             logging.error(e)
 
-    def decode_response(self, response, key, expected_code=httplib.OK):
+    def decode_response(self, response, key, expected_code=http.client.OK):
         """Get a specific value from the return of an afe call.
 
         Args:
             response (string): json formatted data.
             key (string): they key of the data to retrieve.
-            expected_code (int, optional): Defaults to httplib.OK. [description]
+            expected_code (int, optional): Defaults to http.client.OK. [description]
 
         Returns:
             dict: {} if the AFE server returned an error else a map k,v

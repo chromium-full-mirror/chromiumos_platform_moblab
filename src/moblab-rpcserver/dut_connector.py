@@ -11,7 +11,10 @@ import subprocess
 
 import cachetools
 
-from chromite.lib import cros_logging as logging
+try:
+    from chromite.lib import cros_logging as logging
+except ImportError:
+    import logging
 
 from pssh.clients import ParallelSSHClient
 from pssh.exceptions import ConnectionErrorException
