@@ -10,6 +10,8 @@ import argparse
 import re
 import sys
 import os
+import datetime
+from dateutil.tz import tzlocal
 import time
 from concurrent import futures
 
@@ -24,7 +26,10 @@ import moblab_rpcservice
 import moblabrpc_pb2
 # pylint: disable=import-error
 import moblabrpc_pb2_grpc
-from chromite.lib import cros_logging as logging
+try:
+    from chromite.lib import cros_logging as logging
+except ImportError:
+    import logging
 
 model_re = re.compile(r'^model:(.*)')
 pool_re = re.compile(r'^pool:(.*)')
@@ -155,6 +160,32 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def update_duts_firmware(self, request, _context):
         self.service.update_duts_firmware(request.ips)
         response = moblabrpc_pb2.UpdateDutsFirmwareResponse()
+        return response
+
+    def get_num_jobs(self, request, _context):
+        num_jobs = self.service.get_num_jobs()
+        response = moblabrpc_pb2.GetNumJobsResponse(num_jobs=num_jobs)
+        return response
+
+    def convert_timestamp_to_utc_secs(self, ts):
+        dt_ts = datetime.datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
+        dt_ts.replace(tzinfo=tzlocal())
+        #TODO(haddowk) converty to UTC timezone
+        return int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds())
+
+    def get_jobs(self, request, _context):
+        jobs = self.service.get_jobs()
+
+        response = moblabrpc_pb2.GetJobsResponse()
+        for job in jobs:
+            job_proto = moblabrpc_pb2.Job(
+                job_id=job.get('id', -1),
+                name=job.get('name', 'Name not found'),
+                priority=job.get('priority', 0),
+                created_time_sec_utc=self.convert_timestamp_to_utc_secs(
+                    job['created_on']),
+                parent_job_id=job.get('parent_job', -1))
+            response.jobs.extend([job_proto])
         return response
 
 

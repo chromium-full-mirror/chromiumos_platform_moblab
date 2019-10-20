@@ -9,7 +9,10 @@ import re
 
 import build_connector
 import dut_connector
-from chromite.lib import cros_logging as logging
+try:
+    from chromite.lib import cros_logging as logging
+except ImportError:
+    import logging
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
@@ -239,3 +242,9 @@ class MoblabService(object):
             build_targets.extend(
                 self.extract_build_target_from_labels(host.get('labels', [])))
         return build_targets
+
+    def get_num_jobs(self):
+        return self.afe_connector.get_num_jobs()
+
+    def get_jobs(self):
+        return self.afe_connector.get_jobs()
