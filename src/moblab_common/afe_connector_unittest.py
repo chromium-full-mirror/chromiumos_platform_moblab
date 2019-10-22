@@ -6,11 +6,19 @@
 
 from __future__ import print_function
 
-import httplib
+# TODO(guocb): Remove this try except after migration to python 3.
+try:
+    import httplib  # python 2
+except ImportError:
+    import http.client as httplib  # python 3
 import json
 import unittest
 
-import mock
+# TODO(guocb): Remove this try except after migration to python 3.
+try:
+    import mock
+except ImportError:
+    from unittest import mock
 
 import afe_connector
 
@@ -130,6 +138,18 @@ class AFEConnectorTest(unittest.TestCase):
         mock_send_rpc_command.assert_called_once_with(
             'get_special_tasks', {'id__in': tasks_id})
         self.assertEqual(tasks_dict, result)
+
+    @mock.patch('afe_connector.AFEConnector.send_rpc_command')
+    def test_get_host_queue_entries(self, mock_send_rpc_command):
+        job_id = 1
+        hqes = [{'key1': 'value1'}, {'key2': 'value2'}]
+        mock_send_rpc_command.return_value = mock.MagicMock(
+            status_code=httplib.OK, text=json.dumps({'result': hqes}))
+        result = self.afe_conn.get_host_queue_entries(job_id)
+
+        mock_send_rpc_command.assert_called_once_with(
+            'get_host_queue_entries', {'id': job_id})
+        self.assertEqual(hqes, result)
 
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')
     def test_run_suite(self, mock_send_rpc_command):

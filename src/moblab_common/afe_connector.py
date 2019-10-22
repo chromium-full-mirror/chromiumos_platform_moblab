@@ -5,7 +5,11 @@
 """Interface to the AFE RPC server for all moblab code."""
 from __future__ import print_function
 
-import httplib
+# TODO(guocb): Remove this try except after migration to python 3.
+try:
+    import httplib  # python 2
+except ImportError:
+    import http.client as httplib  # python 3
 import json
 import sys
 import subprocess
@@ -14,8 +18,7 @@ import multiprocessing
 try:
     from chromite.lib import cros_logging as logging
 except ImportError:
-    # pylint: disable=cros-logging-import
-    import logging
+    import logging  # pylint: disable=cros-logging-import
 
 import requests
 
@@ -165,6 +168,19 @@ class AFEConnector(object):
         assert isinstance(id_list, list)
         response = self.send_rpc_command('get_special_tasks',
                                          {'id__in': id_list})
+        return self.decode_response(response, 'result')
+
+    def get_host_queue_entries(self, job_id):
+        """Get attributes of all HQE of given id.
+
+        Args:
+            job_id: The job id which HQEs associated with.
+
+        Returns:
+            A list of dict. The dict is the information about the HQE.
+        """
+        response = self.send_rpc_command('get_host_queue_entries',
+                                         {'id': job_id})
         return self.decode_response(response, 'result')
 
     def run_suite(self,
