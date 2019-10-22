@@ -1,4 +1,4 @@
-python_version: "3.6"
+python_version: "3.7"
 
 wheel: <
   name: "infra/python/wheels/appdirs-py2_py3"

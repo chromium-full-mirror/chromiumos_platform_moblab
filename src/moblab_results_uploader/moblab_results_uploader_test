@@ -11,5 +11,5 @@ set -eu
 readonly home_dir=$(dirname -- "$(readlink -e -- "$0")")
 readonly moblab_common_dir=$(cd "${home_dir}"/..; pwd)
 export PYTHONPATH="${moblab_common_dir}":"${home_dir}"
-exec vpython3 -vpython-spec "${home_dir}"/.vpython -m pytest \
-    "${home_dir}"/tests/ "$@"
+cd "${home_dir}"
+exec vpython3 -vpython-spec .vpython -m pytest tests/ "$@"
