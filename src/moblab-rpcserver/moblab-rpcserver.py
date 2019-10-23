@@ -187,7 +187,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                         job['created_on']),
                     parent_job_id=job.get('parent_job', -1))
                 response.jobs.extend([job_proto])
-       return response
+        return response
 
 
 def setup_logging(level):
