@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,29 +7,138 @@
 
 from __future__ import print_function
 
+import asyncio
 import argparse
+import collections
 import datetime
-# pylint: disable=cros-logging-import
-import logging
 import logging.handlers as logging_handlers
+import logging  # pylint: disable=cros-logging-import
+import pathlib
 import sys
 
-from chromite.lib import cros_logging as logging
+import autotest_result
+
 
 _LOG_FILE_BACKUP_COUNT = 14
+_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+
 _DEFAULT_UPLOAD_TIMEOUT = datetime.timedelta(days=3)
 _DEFAULT_MIN_AGE_TO_UPLOAD = datetime.timedelta(days=0)
 _DEFAULT_MIN_AGE_TO_PRUNE = datetime.timedelta(days=7)
 
+_TEST_RESULT_REGISTRY = []
 
-def run():
-    """Main logic to scan, upload and prune the test results."""
-    logging.info('Start to scan, upload and prune test results.')
+_RUN_INTERVAL = datetime.timedelta(minutes=1)
+
+
+class TestResultRegisteryEntry(collections.namedtuple(
+    'TestResultRegisteryEntry', ['root_dir', 'classes'])):
+    """TestResultRegisteryEntry is used to register test results.
+
+    Args:
+        root_dir: An object of pathlib.Path to represent the root directory of
+            tests results. Take Autotest as an example, the root directory can
+            be pathlib.Path('/usr/local/autotest/results').
+        classes: A list of classes which to create objects based on directories.
+    """
+
+
+_TEST_RESULT_REGISTRY.append(
+    # Register for Autotest.
+    TestResultRegisteryEntry(
+        root_dir=autotest_result.ROOT_DIR,
+        classes=[
+            autotest_result.AutotestTestJob,
+            autotest_result.AutotestHostTask
+        ]
+    )
+)
+
+
+async def enumerate_test_results(test_result_registry, *, next_step):
+    """Enumerate all test results registered."""
+    for registry_entry in test_result_registry:
+        for cls in registry_entry.classes:
+            root_dir = registry_entry.root_dir
+            for d in root_dir.glob(cls.GLOB_PATTERN):
+                test_result = cls(root_dir=root_dir,
+                                  relative_path=d.relative_to(root_dir))
+                # TODO(guocb) Check if it's uploading or uploaded.
+                await next_step(test_result)
+                _LOGGER.info('Found a test result: %s', test_result)
+
+
+async def upload_test_reuslt(test_result):
+    """Upload method placeholder, do nothing for now."""
+    _LOGGER.info('Uploading the result: %s', test_result)
+    print('Uploading %s' % test_result)
+    await asyncio.sleep(1)
+    _LOGGER.info('Uploading done: %s', test_result)
+    print('Done: %s' % test_result)
+
+
+async def try_upload_test_result(queue, timeout):
+    """Get test result from `queue` and process it with `timeout`.
+
+    Args:
+        queue: An asyncio.Queue object to save all jobs.
+        timeout: A datetime.timedelta object of timeout for each directory."""
+    while True:
+        test_result = await queue.get()
+        if not test_result:
+            _LOGGER.info('Exiting the results processing.')
+            break
+        _LOGGER.info('Processing %s', test_result)
+        try:
+            await asyncio.wait_for(upload_test_reuslt(test_result),
+                                   timeout.total_seconds())
+        except asyncio.TimeoutError:
+            _LOGGER.warning('Timed out when uploading %s', test_result)
+        queue.task_done()
+
+
+async def async_run(args, registry):
+    """Run the producers and consumers asynchronously."""
+    queue = asyncio.Queue()
+
+    consumer = asyncio.ensure_future(
+        try_upload_test_result(queue, args.upload_timeout)
+    )
+    while True:
+        await enumerate_test_results(registry, next_step=queue.put)
+        await queue.join()
+        if args.once:
+            break
+        await asyncio.sleep(_RUN_INTERVAL.total_seconds())
+
+    consumer.cancel()
+
+
+def run(args, test_result_registry=None):
+    """Main logic to scan, upload and prune the test results.
+
+    Args:
+        args: The command line arguments specified.
+        test_result_registry: A list of TestResultRegisteryEntry which has
+            needed test result directory information.
+    """
+    _LOGGER.debug('arguments: %s', args)
+    _LOGGER.info('Start to scan, upload and prune test results.')
+
+    registry = test_result_registry or _TEST_RESULT_REGISTRY
+    loop = asyncio.get_event_loop()
+
+    try:
+        loop.run_until_complete(async_run(args, registry))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.close()
 
 
 def test_file_filter():
     """Test the file filter specified and list filtered result."""
-    logging.info('Start to test the file filter.')
+    _LOGGER.info('Start to test the file filter.')
 
 
 def logging_file_type(logfile_path):
@@ -84,23 +192,25 @@ def add_arguments_for_subcommand_run(parent_parser):
         '--gs-bucket', required=True,
         help='The Google Storage Bucket to upload (without "gs://" prefix).'
     )
+
     parser.add_argument(
-        '--timeout-days', type=lambda x: datetime.timedelta(days=int(x)),
-        default=_DEFAULT_UPLOAD_TIMEOUT,
-        help='The timeout time in days to give up the uploading '
+        '--timeout-days', type=lambda x: datetime.timedelta(days=float(x)),
+        default=_DEFAULT_UPLOAD_TIMEOUT, dest='upload_timeout',
+        help='The timeout time in days (can be a float number) to give up the '
+        'uploading (default: %(default)s).'
+    )
+    parser.add_argument(
+        '--min-age-to-upload', type=lambda x: datetime.timedelta(days=float(x)),
+        default=_DEFAULT_MIN_AGE_TO_UPLOAD,
+        help='Minimum job age in days (can be a float number) before a result '
+        'can be uploaded, but not removed from local storage '
         '(default: %(default)s).'
     )
     parser.add_argument(
-        '--min-age-to-upload', type=lambda x: datetime.timedelta(days=int(x)),
-        default=_DEFAULT_MIN_AGE_TO_UPLOAD,
-        help='Minimum job age in days before a result can be uploaded, but '
-        'not removed from local storage (default: %(default)s).'
-    )
-    parser.add_argument(
-        '--min-age-to-prune', type=lambda x: datetime.timedelta(days=int(x)),
+        '--min-age-to-prune', type=lambda x: datetime.timedelta(days=float(x)),
         default=_DEFAULT_MIN_AGE_TO_PRUNE,
-        help='Minimum job age in days before a result can be removed from '
-        'local storage (default: %(default)s).'
+        help='Minimum job age in days (can be a float number) before a result '
+        'can be removed from local storage (default: %(default)s).'
     )
     parser.set_defaults(func=run)
 
@@ -152,7 +262,7 @@ def main(argv):
     """Main entry of the service."""
     args = parse_args(argv)
     setup_logging(args.log_handler)
-    args.func()
+    args.func(args)
 
 
 if __name__ == '__main__':
