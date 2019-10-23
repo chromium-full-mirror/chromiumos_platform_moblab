@@ -177,16 +177,17 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         jobs = self.service.get_jobs()
 
         response = moblabrpc_pb2.GetJobsResponse()
-        for job in jobs:
-            job_proto = moblabrpc_pb2.Job(
-                job_id=job.get('id', -1),
-                name=job.get('name', 'Name not found'),
-                priority=job.get('priority', 0),
-                created_time_sec_utc=self.convert_timestamp_to_utc_secs(
-                    job['created_on']),
-                parent_job_id=job.get('parent_job', -1))
-            response.jobs.extend([job_proto])
-        return response
+        if jobs:
+            for job in jobs:
+                job_proto = moblabrpc_pb2.Job(
+                    job_id=job.get('id', -1),
+                    name=job.get('name', 'Name not found'),
+                    priority=job.get('priority', 0),
+                    created_time_sec_utc=self.convert_timestamp_to_utc_secs(
+                        job['created_on']),
+                    parent_job_id=job.get('parent_job', -1))
+                response.jobs.extend([job_proto])
+       return response
 
 
 def setup_logging(level):

@@ -87,11 +87,11 @@ class MoblabDUTConnector(object):
             pool_size=20,
             user='root',
             num_retries=1,
-            timeout=5,
+            timeout=10,
             pkey='/home/moblab/.ssh/mobbase_id_rsa')
         command_results = []
 
-        output = client.run_command(command, stop_on_errors=False, timeout=5)
+        output = client.run_command(command, stop_on_errors=False, timeout=10)
 
         for ip, host_output in output.items():
             stdout = ''
@@ -116,7 +116,7 @@ class MoblabDUTConnector(object):
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
-            'timeout 2 mosys platform model', timeout=20)
+            'timeout 10 mosys platform model', timeout=20)
 
         def is_dut_connected(output):
             if output:
@@ -131,7 +131,7 @@ class MoblabDUTConnector(object):
 
     def get_connected_dut_firmware(self):
         command_results = self.run_command_on_connected_duts(
-            ('timeout 2 crossystem fwid; echo "";'
+            ('timeout 10 crossystem fwid; echo "";'
              'chromeos-firmwareupdate --manifest'))
 
         def get_rw_firmware(command_output):
