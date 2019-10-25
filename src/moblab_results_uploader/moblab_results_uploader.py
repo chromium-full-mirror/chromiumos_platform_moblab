@@ -14,6 +14,7 @@ import datetime
 import logging.handlers as logging_handlers
 import logging  # pylint: disable=cros-logging-import
 import pathlib
+import shutil
 import sys
 
 import autotest_result
@@ -29,6 +30,8 @@ _DEFAULT_MIN_AGE_TO_PRUNE = datetime.timedelta(days=7)
 _TEST_RESULT_REGISTRY = []
 
 _RUN_INTERVAL = datetime.timedelta(minutes=1)
+
+_TEST_RESULT_STATE_FILE = '.uploader_status'
 
 
 class TestResultRegisteryEntry(collections.namedtuple(
@@ -74,7 +77,7 @@ async def upload_test_reuslt(test_result):
     print('Uploading %s' % test_result)
     await asyncio.sleep(1)
     _LOGGER.info('Uploading done: %s', test_result)
-    print('Done: %s' % test_result)
+    print('Uploading done: %s' % test_result)
 
 
 async def try_upload_test_result(queue, timeout):
@@ -88,24 +91,55 @@ async def try_upload_test_result(queue, timeout):
         if not test_result:
             _LOGGER.info('Exiting the results processing.')
             break
-        _LOGGER.info('Processing %s', test_result)
+        _LOGGER.info('Try to upload %s', test_result)
         try:
             await asyncio.wait_for(upload_test_reuslt(test_result),
                                    timeout.total_seconds())
-        except asyncio.TimeoutError:
-            _LOGGER.warning('Timed out when uploading %s', test_result)
+        except (asyncio.TimeoutError, KeyboardInterrupt) as err:
+            _LOGGER.error(
+                'Error occurs when uploading %s: %s', test_result, err)
+            if err is KeyboardInterrupt:
+                raise err
         queue.task_done()
 
 
-async def async_run(args, registry):
-    """Run the producers and consumers asynchronously."""
+async def prune_test_result(test_result):
+    """Check the `test_result` and try to prune it if we should."""
+    # Remove all other files/directories first, and remove the marker file
+    # last.
+    # TODO(guocb) Run in a thread executor to avoid freeze event loop.
+    _LOGGER.debug('Removing test result %s', test_result)
+    for d in test_result.abs_path.iterdir():
+        if d.is_dir():  # Remove all subdirectories.
+            shutil.rmtree(d)
+        elif d.name != _TEST_RESULT_STATE_FILE:
+            # Remove all files except the marker.
+            d.unlink()
+    shutil.rmtree(test_result.abs_path)
+    _LOGGER.debug('Removing done: %s', test_result)
+
+
+async def async_prune(args, registry):
+    """Scan and prune all UPLOADED or EXPIRED test results."""
+    to_prune = prune_test_result
+
+    while True:
+        await enumerate_test_results(registry, next_step=to_prune)
+        if args.once:
+            break
+        await asyncio.sleep(_RUN_INTERVAL.total_seconds())
+
+
+async def async_upload(args, registry):
+    """Scan and upload all READY test results."""
     queue = asyncio.Queue()
 
+    to_upload = queue.put
     consumer = asyncio.ensure_future(
         try_upload_test_result(queue, args.upload_timeout)
     )
     while True:
-        await enumerate_test_results(registry, next_step=queue.put)
+        await enumerate_test_results(registry, next_step=to_upload)
         await queue.join()
         if args.once:
             break
@@ -129,7 +163,8 @@ def run(args, test_result_registry=None):
     loop = asyncio.get_event_loop()
 
     try:
-        loop.run_until_complete(async_run(args, registry))
+        loop.run_until_complete(asyncio.gather(async_upload(args, registry),
+                                               async_prune(args, registry)))
     except KeyboardInterrupt:
         pass
     finally:
