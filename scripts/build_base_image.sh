@@ -21,11 +21,11 @@ ARCH="amd64"
 MOBLAB_IP_ADDRESS="${2}"
 MOBLAB_DIRECTORY="/mnt/moblab/containers"
 
-PACKAGES="wget curl python2.7 unzip rsync openjdk-8-jre \
+PACKAGES="wget curl python unzip rsync \
           gnupg lsb-release "
 PYTHON_PACKAGES="lxml numpy crcmod"
 function generate_package_install_script() {
-  read -r -d '' PACKAGE_INSTALL_SCRIPT << EOM
+PACKAGE_INSTALL_SCRIPT="$(cat <<-EOF
   set -x
   # Wait for the networking to come up.
   sleep 60
@@ -50,15 +50,26 @@ function generate_package_install_script() {
   export PAGER=/bin/more
   nmcli
   nmcli con mod 'Wired connection 1' ipv4.dns '8.8.8.8 1.1.1.1 8.8.4.4 1.0.0.1'
+  # Install the official pip - jetstream install packages on the fly.
   wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
   python2.7 /tmp/get-pip.py --target /usr/lib/python2.7/dist-packages
   python2.7 -m pip install --upgrade pip setuptools wheel ${PYTHON_PACKAGES}\
     --target /usr/lib/python2.7/dist-packages
-EOM
+  # Java
+  wget https://download.java.net/java/GA/jdk9/9.0.4/binaries/openjdk-9.0.4_linux-x64_bin.tar.gz
+  tar xvf openjdk-9.0.4_linux-x64_bin.tar.gz
+  update-alternatives --install /usr/bin/java java /jdk-9.0.4/bin/java 200000
+  update-alternatives --config java
+  wget https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz
+  cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/
+  rm -rf jdk-13.0.1
+  rm -rf *.gz
+EOF
+)"
 }
 
 function generate_container_control_script() {
-  read -r -d '' CONTAINER_INIT_SCRIPT << EOM
+CONTAINER_INIT_SCRIPT="$(cat <<-EOF
   cd "${MOBLAB_DIRECTORY}"
   sudo lxc-stop -P "${MOBLAB_DIRECTORY}" -n ${CONTAINER_NAME}
   sudo rm -rf "${CONTAINER_NAME}"
@@ -70,11 +81,11 @@ function generate_container_control_script() {
     -- /usr/local/bin/container_install_script.sh
   sudo lxc-stop -P "${MOBLAB_DIRECTORY}" -n "${CONTAINER_NAME}"
   sudo tar -cJpf "${CONTAINER_NAME}".tar.xz "${CONTAINER_NAME}"
-EOM
+EOF
+)"
+
 }
 
-# This is just for documentation - it will not run in chroot, run outside
-# and then use the output inside chroot.
 function initial_setup() {
   go get -d -v github.com/lxc/distrobuilder ||
   cd "${HOME}/go/src/github.com/lxc/distrobuilder"
@@ -92,6 +103,7 @@ function create_new_empty_container() {
   local network_config="lxc.net.0.type = veth\nlxc.net.0.flags = up\nlxc.net.0.link = lxcbr0\nlxc.net.0.hwaddr = 00:16:3e:0a:31:c2"
 
   sudo sed -E s#"^lxc.rootfs.path =.*"#"lxc.rootfs.path = dir:/mnt/moblab/containers/${CONTAINER_NAME}/rootfs"#g -i "${DIRECTORY}/${CONTAINER_NAME}/config"
+  sudo sed -E s#"^lxc.net.0.type = empty"##g -i "${DIRECTORY}/${CONTAINER_NAME}/config"
 
   # Install a script that will setup the container on the moblab.
   rm /tmp/container_install_script
