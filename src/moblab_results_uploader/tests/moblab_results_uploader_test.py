@@ -16,6 +16,7 @@ import unittest
 from unittest import mock
 
 import autotest_result
+import test_result_registry
 import moblab_results_uploader
 
 
@@ -77,7 +78,7 @@ class RestultUploaderTest(unittest.TestCase):
         m_afe.get_special_tasks.side_effect = afe_get_task_side_effect
 
         registry = [
-            moblab_results_uploader.TestResultRegisteryEntry(
+            test_result_registry.TestResultRegisteryEntry(
                 root_dir=self.root_dir,
                 classes=[
                     autotest_result.AutotestTestJob,
