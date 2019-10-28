@@ -15,9 +15,11 @@ import logging  # pylint: disable=cros-logging-import
 import pathlib
 import shutil
 import sys
+import yaml
 
 import autotest_result
 import test_result_registry as test_result_registry_module
+import try_file_filter_cmd
 
 
 _LOG_FILE_BACKUP_COUNT = 14
@@ -145,11 +147,6 @@ def run(args, test_result_registry=None):
         loop.close()
 
 
-def test_file_filter():
-    """Test the file filter specified and list filtered result."""
-    _LOGGER.info('Start to test the file filter.')
-
-
 def logging_file_type(logfile_path):
     """Wrap the input file path as a logging handler object."""
     try:
@@ -182,9 +179,15 @@ def results_filter_type(config_file_path):
     """Load the results filter configuration."""
     try:
         with open(config_file_path) as config_file:
-            return yaml.load(config_file, Loader=yaml.FullLoader)
+            filters = yaml.load(config_file, Loader=yaml.FullLoader)
     except (PermissionError, FileNotFoundError) as err:
         raise argparse.ArgumentTypeError(str(err))
+
+    try:
+        result_file_filter.filters_sanity_check(filters)
+    except result_file_filter.FilterConfigError as err:
+        raise argparse.ArgumentTypeError(str(err))
+    return filters
 
 
 def add_arguments_for_subcommand_run(parent_parser):
@@ -230,23 +233,8 @@ def add_arguments_for_subcommand_run(parent_parser):
         help='Minimum job age in days (can be a float number) before a result '
         'can be removed from local storage (default: %(default)s).'
     )
+
     parser.set_defaults(func=run)
-
-
-def add_arguments_for_subcommand_test_filter(parent_parser):
-    """Add arguments for subcommand 'run'.
-
-    Args:
-        parent_parser: The argparse.ArgumentParser object to add arguments.
-    """
-    parser = parent_parser.add_parser(
-        'test_filter', help='Test the file filter.')
-    # TODO(guocb) add arguments for test_filter subcommand.
-    parser.add_argument(
-        '-d', '--dir',
-        help='The directory to test the file filter.'
-    )
-    parser.set_defaults(func=test_file_filter)
 
 
 def parse_args(argv):
@@ -257,13 +245,20 @@ def parse_args(argv):
         type=logging_file_type, dest='log_handler',
         help='The log file path. Default is stdout.'
     )
+    parser.add_argument(
+        '-f', '--uploading-filter-config-file',
+        type=results_filter_type, dest='uploading_filter_config', default={},
+        metavar='UPLOADING_FILTER_CONFIG_FILE',
+        help='The path of a YAML file which configures the uploading filters '
+        'for different test suites.'
+    )
 
     subparsers = parser.add_subparsers(
         title='Subcommands',
         help='Subcommands supported. One and only one of them can be used.')
 
     add_arguments_for_subcommand_run(subparsers)
-    add_arguments_for_subcommand_test_filter(subparsers)
+    try_file_filter_cmd.add_arguments(subparsers)
 
     args = parser.parse_args(argv)
 
@@ -280,8 +275,8 @@ def main(argv):
     """Main entry of the service."""
     args = parse_args(argv)
     setup_logging(args.log_handler)
-    args.func(args)
+    return args.func(args)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
