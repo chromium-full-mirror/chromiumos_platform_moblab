@@ -12,4 +12,4 @@ readonly home_dir=$(dirname -- "$(readlink -e -- "$0")")
 readonly moblab_common_dir=$(cd "${home_dir}"/..; pwd)
 export PYTHONPATH="${moblab_common_dir}":"${home_dir}"
 cd "${home_dir}"
-exec vpython3 -vpython-spec .vpython -m pytest tests/ "$@"
+exec python3 -m pytest tests/ "$@"
