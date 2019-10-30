@@ -61,6 +61,7 @@ PACKAGE_INSTALL_SCRIPT="$(cat <<-EOF
   update-alternatives --install /usr/bin/java java /jdk-9.0.4/bin/java 200000
   update-alternatives --config java
   wget https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz
+  tar xvf openjdk-13.0.1_linux-x64_bin.tar.gz
   cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/
   rm -rf jdk-13.0.1
   rm -rf *.gz
