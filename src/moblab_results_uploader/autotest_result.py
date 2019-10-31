@@ -33,9 +33,12 @@ def _query_speical_task_finished_time(id_):
                 'Failed to query AFE special task {}'.format(id_)
             )
 
-        result = result[0]
-        yield datetime.datetime.strptime(result['time_finished'],
-                                         _TIMESTAMP_FORMAT)
+        time_finished_str = result[0].get('time_finished')
+        if time_finished_str:
+            yield datetime.datetime.strptime(time_finished_str,
+                                             _TIMESTAMP_FORMAT)
+        else:
+            yield None
 
 
 def _query_job_finished_time(id_):

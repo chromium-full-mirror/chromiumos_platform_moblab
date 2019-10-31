@@ -37,7 +37,7 @@ def afe_get_jobs_side_effect(id_list):
         if '{}-'.format(id_) in job:
             if not finished_time:
                 return [{}]
-            return [{'time_finished': finished_time}]
+            return [{'created_on': finished_time}]
     return [{}]
 
 
@@ -47,7 +47,7 @@ def afe_get_task_side_effect(id_list):
         if '{}-'.format(id_) in job:
             if not finished_time:
                 return [{}]
-            return [{'created_on': finished_time}]
+            return [{'time_finished': finished_time}]
     return [{}]
 
 
