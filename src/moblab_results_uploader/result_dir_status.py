@@ -48,6 +48,14 @@ async def _write_status(test_result, status):
         f.write(status.name)
 
 
+async def mark_uploading_result(test_result, *, succeeded):
+    """Change the test result status according to uploading result."""
+    with lock_util.file_lock(test_result.abs_path / _MARKER_LOCK_FILE,
+                             exclusive=True):
+        await _write_status(test_result,
+                            Status.UPLOADED if succeeded else Status.NOT_READY)
+
+
 class ResultStatusChecker(processing_step.ProcessStep):
     """A class to check current test result status for uploading."""
 
