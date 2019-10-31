@@ -14,6 +14,8 @@ In this file, we add below customized command line options:
 
 from __future__ import print_function
 
+import asynctest
+
 import pytest
 
 
@@ -39,6 +41,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if 'network' in item.keywords:
             item.add_marker(skip_network_tests)
+
+
+@pytest.fixture
+def next_step():
+    return asynctest.mock.CoroutineMock()
 
 
 @pytest.fixture

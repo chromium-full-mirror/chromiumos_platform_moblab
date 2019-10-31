@@ -6,17 +6,14 @@
 """Test cases for `result_file_filter`."""
 from __future__ import print_function
 
-
 import asyncio
 import pathlib
-import yaml
-
 from asynctest import mock
 
 import pytest
+import yaml
 
 import result_file_filter
-
 
 _MOCK_FILE_SYSTEM = [
     ('/root/result', ('dir1', 'dir2', 'empty', 'debug'), ('file1', 'file2')),
@@ -43,11 +40,6 @@ _FILTER_CONFIG = '''
 @pytest.fixture
 def filter_config():
     return yaml.load(_FILTER_CONFIG, Loader=yaml.FullLoader)
-
-
-@pytest.fixture
-def next_step():
-    return mock.CoroutineMock()
 
 
 def _count_total_file():
