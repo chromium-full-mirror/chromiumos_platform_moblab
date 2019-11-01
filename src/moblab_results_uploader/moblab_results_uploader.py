@@ -16,13 +16,13 @@ import os
 import pathlib
 import shutil
 import sys
+
 import yaml
 
 import autotest_result
+import cmd_try_file_filter
 import gs_api_wrapper
 import test_result_registry as test_result_registry_module
-import try_file_filter_cmd
-
 
 _LOG_FILE_BACKUP_COUNT = 14
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
@@ -282,7 +282,7 @@ def parse_args(argv):
         help='Subcommands supported. One and only one of them can be used.')
 
     add_arguments_for_subcommand_run(subparsers)
-    try_file_filter_cmd.add_arguments(subparsers)
+    cmd_try_file_filter.add_arguments(subparsers)
 
     args = parser.parse_args(argv)
 

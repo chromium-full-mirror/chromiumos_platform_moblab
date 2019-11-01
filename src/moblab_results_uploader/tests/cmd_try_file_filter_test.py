@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Test cases for module `try_file_filter_cmd`."""
+"""Test cases for module `cmd_try_file_filter`."""
 
 from __future__ import print_function
 
@@ -15,7 +15,7 @@ from unittest import mock
 import pytest
 
 import test_result_registry
-import try_file_filter_cmd
+import cmd_try_file_filter
 
 _TEST_RESULT_CLS = mock.Mock(GLOB_PATTERN='hosts/*-*')
 test_result_registry.REGISTRY = [
@@ -30,25 +30,25 @@ def test_add_argument():
     """Test for command line options processing."""
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
-    try_file_filter_cmd.add_arguments(subparsers)
-    args = parser.parse_args([try_file_filter_cmd.SUB_COMMAND_NAME, '-d', '.'])
+    cmd_try_file_filter.add_arguments(subparsers)
+    args = parser.parse_args([cmd_try_file_filter.SUB_COMMAND_NAME, '-d', '.'])
     assert args.dir.is_dir()
     assert args.dir.is_absolute()
 
     with pytest.raises(SystemExit):
         args = parser.parse_args(
-            [try_file_filter_cmd.SUB_COMMAND_NAME, '-d', 'some_nonexist_path'])
+            [cmd_try_file_filter.SUB_COMMAND_NAME, '-d', 'some_nonexist_path'])
 
 
 def test_try_file_filter_cmd_wrong_input():
     """Test for returning error when input dir isn't a test result dir."""
     args = mock.Mock(dir=pathlib.Path('/path/to/results/123-moblab'))
 
-    assert try_file_filter_cmd.try_file_filter(args) != 0
+    assert cmd_try_file_filter.try_file_filter(args) != 0
 
     args = mock.Mock(dir=pathlib.Path('/root/not-a-test-dir'))
 
-    assert try_file_filter_cmd.try_file_filter(args) != 0
+    assert cmd_try_file_filter.try_file_filter(args) != 0
 
 @mock.patch('os.walk')
 def test_try_file_filter_cmd(m_walk):
@@ -67,10 +67,10 @@ def test_try_file_filter_cmd(m_walk):
     test_result.abs_path = pathlib.Path(test_result_dir)
 
     asyncio.set_event_loop(asyncio.new_event_loop())
-    with mock.patch('try_file_filter_cmd._get_file_size') as m_get_size:
+    with mock.patch('cmd_try_file_filter._get_file_size') as m_get_size:
         m_get_size.return_value = 1024
-        with mock.patch('try_file_filter_cmd.print', create=True) as m_print:
-            try_file_filter_cmd.try_file_filter(args)
+        with mock.patch('cmd_try_file_filter.print', create=True) as m_print:
+            cmd_try_file_filter.try_file_filter(args)
             m_print.assert_any_call(pathlib.PosixPath('file1'))
             m_print.assert_any_call(pathlib.PosixPath('file2'))
             m_print.assert_any_call(summary)
