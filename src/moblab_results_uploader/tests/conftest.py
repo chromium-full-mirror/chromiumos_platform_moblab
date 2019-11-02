@@ -18,6 +18,8 @@ import asynctest
 
 import pytest
 
+from autotest_result import tko_pb2
+
 
 def pytest_addoption(parser):
     parser.addoption('--network', action='store_true', default=False,
@@ -56,3 +58,14 @@ def gs_bucket(request):
 @pytest.fixture
 def credentials_file(request):
     return request.config.getoption('--credentials-file')
+
+
+@pytest.fixture
+def job_serialize_CTS():
+    j = tko_pb2.Job()
+    j.suite = 'cts_P'
+    j.dir = j.user = j.label = j.tag = j.machine = j.machine_owner = ''
+    j.machine_group = j.aborted_by = ''
+    j.started_time = j.finished_time = j.aborted_on = j.queued_time = 0
+    j.afe_job_id = '1'
+    return j.SerializeToString()

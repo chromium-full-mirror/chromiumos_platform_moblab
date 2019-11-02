@@ -92,9 +92,9 @@ class AutotestTestJobTest(unittest.TestCase):
         m_get_jobs.return_value = [{'created_on': '2020-01-01 00:00:00'}]
         m_get_hqes.return_value = []
 
-        task = autotest_result.AutotestTestJob(
+        job = autotest_result.AutotestTestJob(
             root_dir='.', relative_path='123-moblab')
-        self.assertEqual(task.finished_time,
+        self.assertEqual(job.finished_time,
                          datetime.datetime(2020, 1, 1))
 
     @mock.patch.object(afe_connector.AFEConnector, 'get_jobs')
@@ -107,7 +107,23 @@ class AutotestTestJobTest(unittest.TestCase):
             {'finished_on': '2020-01-01 11:00:00'},
         ]
 
-        task = autotest_result.AutotestTestJob(
+        job = autotest_result.AutotestTestJob(
             root_dir='.', relative_path='123-moblab')
-        self.assertEqual(task.finished_time,
+        self.assertEqual(job.finished_time,
                          datetime.datetime(2020, 1, 1, 12))
+
+
+def test_get_test_result_suite_name(job_serialize_CTS):
+    job = autotest_result.AutotestTestJob(
+        root_dir='.', relative_path='123-moblab')
+    assert job.suite_name == ''
+
+    job = autotest_result.AutotestTestJob(
+        root_dir='.', relative_path='123-moblab')
+    with mock.patch('autotest_result.AutotestTestJob.abs_path',
+                    new_callable=mock.PropertyMock) as m_abs_path:
+        job_info = mock.Mock()
+        with mock.patch.object(job_info, 'open',
+                               mock.mock_open(read_data=job_serialize_CTS)):
+            m_abs_path.return_value.glob.return_value = [job_info]
+            assert job.suite_name == 'cts_P'

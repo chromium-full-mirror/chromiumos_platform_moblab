@@ -61,12 +61,11 @@ async def test_list_all_files(m_walk, next_step):
 @mock.patch('os.walk')
 async def test_filter_files(m_walk, filter_config, next_step):
     m_walk.return_value = _MOCK_FILE_SYSTEM
-    test_result = mock.Mock(abs_path='/root/result', succeeded=True)
+    test_result = mock.Mock(abs_path='/root/result', succeeded=True,
+                            suite_name='suite1')
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step)
-    with mock.patch('result_file_filter._get_test_suite',
-                    return_value='suite1'):
-        await filter.filter_files(test_result)
+    await filter.filter_files(test_result)
 
     # 2 files in debug directory.
     assert next_step.await_count == _count_total_file() - 2
@@ -77,12 +76,11 @@ async def test_filter_files(m_walk, filter_config, next_step):
 async def test_filter_files_not_in_config(m_walk, filter_config, next_step):
     """Test filtering of a suite not configured in config file."""
     m_walk.return_value = _MOCK_FILE_SYSTEM
-    test_result = mock.Mock(abs_path='/root/result')
+    test_result = mock.Mock(abs_path='/root/result',
+                            suite_name='suite_not_configured')
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step)
-    with mock.patch('result_file_filter._get_test_suite',
-                    return_value='suite_not_configured'):
-        await filter.filter_files(test_result)
+    await filter.filter_files(test_result)
 
     # We don't filter suite that not configured.
     assert next_step.await_count == _count_total_file()
@@ -93,12 +91,10 @@ async def test_filter_files_not_in_config(m_walk, filter_config, next_step):
 async def test_filter_files_overlap(m_walk, filter_config, next_step):
     """Test filter configuration that has overlap in INCLUDE and EXCLUDE."""
     m_walk.return_value = _MOCK_FILE_SYSTEM
-    test_result = mock.Mock(abs_path='/root/result')
+    test_result = mock.Mock(abs_path='/root/result', suite_name='suite2')
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step)
-    with mock.patch('result_file_filter._get_test_suite',
-                    return_value='suite2'):
-        await filter.filter_files(test_result)
+    await filter.filter_files(test_result)
 
     assert next_step.await_count == 1
 
@@ -108,12 +104,11 @@ async def test_filter_files_overlap(m_walk, filter_config, next_step):
 async def test_filter_files_failed_test(m_walk, filter_config, next_step):
     """Test that we don't filter failed test result directory."""
     m_walk.return_value = _MOCK_FILE_SYSTEM
-    test_result = mock.Mock(abs_path='/root/result', succeeded=False)
+    test_result = mock.Mock(abs_path='/root/result', succeeded=False,
+                            suite_name='suite2')
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step)
-    with mock.patch('result_file_filter._get_test_suite',
-                    return_value='suite2'):
-        await filter.filter_files(test_result)
+    await filter.filter_files(test_result)
 
     assert next_step.await_count == _count_total_file()
 
@@ -123,13 +118,12 @@ async def test_filter_files_failed_test(m_walk, filter_config, next_step):
 async def test_filter_files_by_force(m_walk, filter_config, next_step):
     """Test that we don't check succeeded flag when filter by force."""
     m_walk.return_value = _MOCK_FILE_SYSTEM
-    test_result = mock.Mock(abs_path='/root/result', succeeded=False)
+    test_result = mock.Mock(abs_path='/root/result', succeeded=False,
+                            suite_name='suite2')
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step,
                                                  force=True)
-    with mock.patch('result_file_filter._get_test_suite',
-                    return_value='suite2'):
-        await filter.filter_files(test_result)
+    await filter.filter_files(test_result)
 
     assert next_step.await_count == 1
 

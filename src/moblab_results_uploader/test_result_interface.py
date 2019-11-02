@@ -18,7 +18,7 @@ class TestResult(abc.ABC):
     GLOB_PATTERN = '*'
 
     def __init__(self, *, description, root_dir, relative_path):
-        """Constrcutor of the class.
+        """Constructor of the class.
 
         Args:
             description: A description of the test result directory, e.g.
@@ -74,3 +74,9 @@ class TestResult(abc.ABC):
             with problems, or None when not finished yet.
         """
         raise NotImplementedError('TestResult.succeeded')
+
+    @property
+    @abc.abstractmethod
+    def suite_name(self):
+        """Return the suite name of the test."""
+        raise NotImplementedError('TestResult.suite_name')
