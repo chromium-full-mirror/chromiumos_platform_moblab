@@ -31,13 +31,11 @@ def _logging_file_type(logfile_path):
             backupCount=_LOG_FILE_BACKUP_COUNT)
     # TODO (guocb) remove below pylint pragma once `cros lint` upgrade to
     # python 3.
-    # pylint: disable=undefined-variable
-    except (PermissionError, FileNotFoundError) as err:
-        # pylint: enable=undefined-variable
+    except PermissionError as err:   # pylint: disable=undefined-variable
         raise argparse.ArgumentTypeError(str(err))
 
 
-def setup_logging(handler):
+def _setup_logging(handler):
     """Set up logging.
 
     Args:
@@ -66,7 +64,7 @@ def _results_filter_type(config_file_path):
     return filters
 
 
-def parse_args(argv):
+def _parse_args(argv):
     """Parse the command line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -76,7 +74,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         '-f', '--uploading-filter-config-file',
-        type=_results_filter_type, dest='uploading_filter_config', default={},
+        type=_results_filter_type, dest='uploading_filter_config', default=[],
         metavar='UPLOADING_FILTER_CONFIG_FILE',
         help='The path of a YAML file which configures the uploading filters '
         'for different test suites.'
@@ -102,8 +100,8 @@ def parse_args(argv):
 
 def main(argv):
     """Main entry of the service."""
-    args = parse_args(argv)
-    setup_logging(args.log_handler)
+    args = _parse_args(argv)
+    _setup_logging(args.log_handler)
     return args.func(args)
 
 
