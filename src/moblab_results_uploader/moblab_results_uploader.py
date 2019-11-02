@@ -9,7 +9,6 @@ from __future__ import print_function
 
 import asyncio
 import argparse
-import collections
 import datetime
 import logging.handlers as logging_handlers
 import logging  # pylint: disable=cros-logging-import
@@ -18,6 +17,7 @@ import shutil
 import sys
 
 import autotest_result
+import test_result_registry as test_result_registry_module
 
 
 _LOG_FILE_BACKUP_COUNT = 14
@@ -27,35 +27,9 @@ _DEFAULT_UPLOAD_TIMEOUT = datetime.timedelta(days=3)
 _DEFAULT_MIN_AGE_TO_UPLOAD = datetime.timedelta(days=0)
 _DEFAULT_MIN_AGE_TO_PRUNE = datetime.timedelta(days=7)
 
-_TEST_RESULT_REGISTRY = []
-
 _RUN_INTERVAL = datetime.timedelta(minutes=1)
 
 _TEST_RESULT_STATE_FILE = '.uploader_status'
-
-
-class TestResultRegisteryEntry(collections.namedtuple(
-    'TestResultRegisteryEntry', ['root_dir', 'classes'])):
-    """TestResultRegisteryEntry is used to register test results.
-
-    Args:
-        root_dir: An object of pathlib.Path to represent the root directory of
-            tests results. Take Autotest as an example, the root directory can
-            be pathlib.Path('/usr/local/autotest/results').
-        classes: A list of classes which to create objects based on directories.
-    """
-
-
-_TEST_RESULT_REGISTRY.append(
-    # Register for Autotest.
-    TestResultRegisteryEntry(
-        root_dir=autotest_result.ROOT_DIR,
-        classes=[
-            autotest_result.AutotestTestJob,
-            autotest_result.AutotestHostTask
-        ]
-    )
-)
 
 
 async def enumerate_test_results(test_result_registry, *, next_step):
@@ -159,7 +133,7 @@ def run(args, test_result_registry=None):
     _LOGGER.debug('arguments: %s', args)
     _LOGGER.info('Start to scan, upload and prune test results.')
 
-    registry = test_result_registry or _TEST_RESULT_REGISTRY
+    registry = test_result_registry or test_result_registry_module.REGISTRY
     loop = asyncio.get_event_loop()
 
     try:
