@@ -32,14 +32,15 @@ from __future__ import print_function
 
 import asyncio
 import collections
+import fnmatch
 import logging
 import os
-import re
 import pathlib
+import re
+
 import yaml
 
 import processing_step
-
 
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
 
@@ -124,6 +125,7 @@ class ResultFileFilter(processing_step.ProcessStep):
 
     We only filter files when the test result succeeded.
     """
+
     def __init__(self, *, next_step=None, filter_config=None, force=False):
         """Constructor.
 
@@ -141,13 +143,13 @@ class ResultFileFilter(processing_step.ProcessStep):
     async def _filter(self, result_file):
         """Check the file path with predefined filter patterns."""
         for pattern in self._applicable_filter.get(_KEY_INCLUDE, ['*']):
-            if result_file.relative_path.match(pattern):
+            if fnmatch.fnmatch(str(result_file.relative_path), pattern):
                 break
         else:
             return
 
         for pattern in self._applicable_filter.get(_KEY_EXCLUDE, []):
-            if result_file.relative_path.match(pattern):
+            if fnmatch.fnmatch(str(result_file.relative_path), pattern):
                 return
 
         await self._next_step(result_file)

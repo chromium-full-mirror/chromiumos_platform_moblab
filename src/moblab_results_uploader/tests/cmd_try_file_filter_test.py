@@ -57,8 +57,8 @@ def test_try_file_filter_cmd(m_walk):
     filter_config = [
         {'suite_name_regex': '.*'}
     ]
-    summary = ('Filtering result: {file_count} files: {file_size} bytes '
-               '=> {file_count} files: {file_size} bytes'.format(
+    summary = ('Filtering result: {file_count} files: {file_size} bytes => '
+               '{file_count} files: {file_size} bytes. 0% space saved!'.format(
                    file_count=2, file_size=2048))
     args = mock.Mock(dir=pathlib.Path(test_result_dir),
                      uploading_filter_config=filter_config,
