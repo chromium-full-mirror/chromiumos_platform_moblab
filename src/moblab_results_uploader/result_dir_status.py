@@ -64,7 +64,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
         self._min_age_to_prune = min_age_to_prune
         self._next_step = next_step
 
-    def _check_latest_status(self, test_result):
+    def _check_latest_status(self, test_result, previous_status):
         # check test_result finished time to determine the status.
         try:
             finished_time = test_result.finished_time
@@ -83,7 +83,10 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if age > self._min_age_to_prune:
             return Status.EXPIRED
 
-        return Status.UPLOADING
+        if previous_status == Status.NOT_READY:
+            return Status.UPLOADING
+        else:
+            return previous_status
 
     async def check(self, test_result):
         """Check current status and upload the test result if OK.
@@ -97,16 +100,21 @@ class ResultStatusChecker(processing_step.ProcessStep):
         time according to the finished time to see if it is ready for UPLOADING
         or has EXPIRED.
         """
-        with lock_util.file_lock(test_result.abs_path / _MARKER_LOCK_FILE,
-                                 exclusive=True):
-            previous_status = await _load_status(test_result)
-            current_status = previous_status
-            if previous_status not in [Status.EXPIRED, Status.UPLOADING]:
-                _LOGGER.debug('Check the latest status of %s', test_result)
-                current_status = self._check_latest_status(test_result)
+        try:
+            with lock_util.file_lock(test_result.abs_path / _MARKER_LOCK_FILE,
+                                     exclusive=True):
+                previous_status = await _load_status(test_result)
+                current_status = previous_status
+                if previous_status not in [Status.EXPIRED, Status.UPLOADING]:
+                    _LOGGER.debug('Check the latest status of %s', test_result)
+                    current_status = self._check_latest_status(test_result,
+                                                               previous_status)
 
-            if previous_status != current_status:
-                await _write_status(test_result, current_status)
+                if previous_status != current_status:
+                    await _write_status(test_result, current_status)
+        except FileNotFoundError:
+            # The directory may be pruned just before checking.
+            return
 
         if current_status in [Status.EXPIRED, Status.UPLOADING]:
             await self._next_step(ResultAndStatus(status=current_status,
