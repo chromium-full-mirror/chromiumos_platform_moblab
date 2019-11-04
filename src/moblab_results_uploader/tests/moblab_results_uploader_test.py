@@ -8,22 +8,32 @@
 from __future__ import print_function
 
 import asyncio
+import collections
 import datetime
+import enum
+import functools
 import pathlib
+import re
 import shutil
 import tempfile
 import unittest
 from unittest import mock
 
+import pytest
+
 import autotest_result
 import cmd_run
 import moblab_results_uploader
+import result_dir_status
 import test_result_registry
 
 _EXPIRED = result_dir_status.Status.EXPIRED
 _UPLOADED = result_dir_status.Status.UPLOADED
 _UPLOADING = result_dir_status.Status.UPLOADING
 _CTS = 'cts_P'
+_FILTER_CONFIG = [
+    {'suite_name_regex': 'cts', 'exclude': ['*/debug/*']}
+]
 
 TYPE = enum.Enum('TYPE', ['JOB', 'TASK'])
 FakeDir = collections.namedtuple(
@@ -43,144 +53,202 @@ _DIRECTORIES = [
     # Incomplete but expired results. Will be removed.
     FakeDir(14, TYPE.JOB, '2020-01-01 01:40:00', 'GOOD', _UPLOADED, ''),
     FakeDir(15, TYPE.TASK, '2020-01-01 01:40:00', 'GOOD', _UPLOADED, ''),
+    # Incomplete and expired results. Will be removed.
+    # FIXME
+    # FakeDir(16, TYPE.JOB, '2020-01-01 01:40:00', 'GOOD', _UPLOADING, ''),
+    # FakeDir(17, TYPE.TASK, '2020-01-01 01:40:00', 'GOOD', _UPLOADING, ''),
     # Incomplete and not expired yet results. Will be uploaded.
     FakeDir(20, TYPE.JOB, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, ''),
-    FakeDir(21, TYPE.JOB, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, _CTS,),
-    FakeDir(22, TYPE.TASK, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, ''),
+    FakeDir(21, TYPE.TASK, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, ''),
+    FakeDir(22, TYPE.JOB, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, _CTS),
+    FakeDir(23, TYPE.TASK, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, ''),
+    FakeDir(24, TYPE.JOB, '2020-01-06 01:40:00', 'FAIL', _UPLOADING, _CTS),
+    FakeDir(25, TYPE.TASK, '2020-01-06 01:40:00', 'ABORT', _UPLOADING, ''),
     # Uploaded and not expired results. Will not touch.
     FakeDir(30, TYPE.JOB, '2020-01-06 00:40:00', 'GOOD', _UPLOADED, ''),
     FakeDir(31, TYPE.TASK, '2020-01-06 00:40:00', 'GOOD', _UPLOADED, ''),
     # Still running results. Will not touch.
-    FakeDir(32, TYPE.JOB, None, None, None, None,),
-    FakeDir(33, TYPE.TASK, None, None, None, None),
+    FakeDir(42, TYPE.JOB, None, None, None, None,),
+    FakeDir(43, TYPE.TASK, None, None, None, None),
+    # TODO(guocb) Add testing for timing out.
 ]
 
 
-def afe_get_jobs_side_effect(id_list):
+def get_finished_time(id_list, *, query_type):
     id_ = id_list[0]
-    for job, (finished_time, _) in _JOB_RESULT_DIR:
-        if '{}-'.format(id_) in job:
-            if not finished_time:
-                return [{}]
-            return [{'created_on': finished_time}]
+    key = 'created_on' if query_type == TYPE.JOB else 'time_finished'
+    for result_dir_obj in _DIRECTORIES:
+        if int(id_) == result_dir_obj.id and result_dir_obj.finished_time:
+            return [{key: result_dir_obj.finished_time}]
+
     return [{}]
 
 
-def afe_get_task_side_effect(id_list):
-    id_ = id_list[0]
-    for job, (finished_time, _) in _TASK_RESULT_DIR:
-        if '{}-'.format(id_) in job:
-            if not finished_time:
-                return [{}]
-            return [{'time_finished': finished_time}]
-    return [{}]
-
-
-def prepare_dir(dir_name, status_line):
-    dir_name.mkdir(parents=True, exist_ok=True)
-    for subdir in ('debug', 'sysinfo'):
-        (dir_name / subdir).mkdir(exist_ok=True)
+def prepare_dir(root_dir, result_dir_obj, job_serialize_CTS):
+    if result_dir_obj.type == TYPE.JOB:
+        result_dir = root_dir / '{}-moblab/foo'.format(result_dir_obj.id)
+        top_dir = result_dir.parent
+    else:
+        result_dir = root_dir / 'hosts/foo/{}-task'.format(result_dir_obj.id)
+        top_dir = result_dir
+    result_dir.mkdir(parents=True, exist_ok=True)
+    for subdir in ('.', 'debug', 'sysinfo'):
+        (result_dir / subdir).mkdir(exist_ok=True)
         for f in ('file1', 'file2', 'file3'):
-            with (dir_name / subdir / f).open('w') as fd:
+            with (result_dir / subdir / f).open('w') as fd:
                 fd.write('some test\ndata.')
 
-    if status_line:
+    if result_dir_obj.status_dot_log:
         # Create fake status.log.
         # pylint: disable=protected-access
-        with (dir_name / autotest_result._STATUS_LOG).open('w') as f:
-            f.write(status_line)
+        with (result_dir / autotest_result._STATUS_LOG).open('w') as f:
+            f.write('END {}'.format(result_dir_obj.status_dot_log))
 
     if result_dir_obj.uploading_status:
-        with (result_dir / result_dir_status.MARKER_FILE).open('w') as f:
+        with (top_dir / result_dir_status.MARKER_FILE).open('w') as f:
             f.write(result_dir_obj.uploading_status.name)
 
-class RestultUploaderTest(unittest.TestCase):
-    """Unit test case for `test_result_uploader`."""
+    if result_dir_obj.type == TYPE.JOB:
+        with (result_dir / autotest_result._JOB_INFO).open('wb') as f:
+            if result_dir_obj.suite_name == _CTS:
+                f.write(job_serialize_CTS)
 
-    def setUp(self):
-        """Create a temp dir and some mock directories."""
-        self.root_dir = pathlib.Path(tempfile.mkdtemp())
-        for d, (_, status) in _JOB_RESULT_DIR + _TASK_RESULT_DIR:
-            prepare_dir(self.root_dir / d, status)
+            else:
+                f.write(b'')
 
-    def tearDown(self):
-        """Remove the test directory."""
-        shutil.rmtree(self.root_dir, ignore_errors=True)
 
-    @mock.patch('cmd_run.add_arguments', new=mock.Mock)
-    @mock.patch('cmd_try_file_filter.add_arguments', new=mock.Mock)
-    def test_main__no_subcommand(self):
-        with self.assertRaises(SystemExit):
-            moblab_results_uploader.main([])
+@pytest.yield_fixture
+def temp_root_dir(job_serialize_CTS):
+    """Create a temp dir and some mock directories."""
+    root_dir = pathlib.Path(tempfile.mkdtemp())
+    for result_dir_obj in _DIRECTORIES:
+        prepare_dir(root_dir, result_dir_obj, job_serialize_CTS)
+    yield root_dir
+    shutil.rmtree(root_dir, ignore_errors=True)
 
-    @mock.patch('cmd_run.add_arguments', new=mock.Mock)
-    @mock.patch('cmd_try_file_filter.add_arguments', new=mock.Mock)
-    @mock.patch('moblab_results_uploader.hasattr', new=mock.Mock)
-    def test_main__logger_file_option(self):
-        with self.assertRaises(AttributeError):
-            moblab_results_uploader.main(
-                ['-l', '/tmp/moblab_result_uploader.log'])
 
-        with self.assertRaises(SystemExit):
-            moblab_results_uploader.main(
-                ['-l', '/cannot-create-log-here'])
+@mock.patch('cmd_run.add_arguments', new=mock.Mock)
+@mock.patch('cmd_try_file_filter.add_arguments', new=mock.Mock)
+def test_main__no_subcommand():
+    with pytest.raises(SystemExit):
+        moblab_results_uploader.main([])
 
-    @mock.patch('cmd_run.add_arguments', new=mock.Mock)
-    @mock.patch('cmd_try_file_filter.add_arguments', new=mock.Mock)
-    @mock.patch('moblab_results_uploader.hasattr', new=mock.Mock)
-    def test_main__config_filter_option(self):
-        with self.assertRaises(AttributeError):
-            moblab_results_uploader.main([])
 
-        with self.assertRaises(SystemExit):
-            moblab_results_uploader.main(['-f', '/non-exist-file'])
+@mock.patch('cmd_run.add_arguments', new=mock.Mock)
+@mock.patch('cmd_try_file_filter.add_arguments', new=mock.Mock)
+@mock.patch('moblab_results_uploader.hasattr', new=mock.Mock)
+def test_main__logger_file_option():
+    with pytest.raises(AttributeError):
+        moblab_results_uploader.main(
+            ['-l', '/tmp/moblab_result_uploader.log'])
 
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            with self.assertRaises(AttributeError):
-                tmp_file.write(b'---\n')
-                tmp_file.seek(0)
-                moblab_results_uploader.main(['-f', tmp_file.name])
+    with pytest.raises(SystemExit):
+        moblab_results_uploader.main(
+            ['-l', '/cannot-create-log-here'])
 
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            with self.assertRaises(SystemExit):
-                tmp_file.write(b'---\n- abc: def\n')
-                tmp_file.seek(0)
-                moblab_results_uploader.main(['-f', tmp_file.name])
 
-    @mock.patch('google.cloud.storage.Client')
-    @mock.patch('moblab_common.afe_connector.AFEConnector')
-    @mock.patch.object(datetime, 'datetime', wraps=datetime.datetime)
-    def test_run_once(self, m_datetime, m_AFE, m_gs_api):
-        afe = m_AFE.return_value
-        afe.get_jobs.side_effect = afe_get_jobs_side_effect
-        afe.get_special_tasks.side_effect = afe_get_task_side_effect
-        afe.get_host_queue_entries.return_value = None
+@mock.patch('cmd_run.add_arguments', new=mock.Mock)
+@mock.patch('cmd_try_file_filter.add_arguments', new=mock.Mock)
+@mock.patch('moblab_results_uploader.hasattr', new=mock.Mock)
+def test_main__config_filter_option():
+    with pytest.raises(AttributeError):
+        moblab_results_uploader.main([])
 
-        m_datetime.now.return_value = datetime.datetime(2020, 1, 10)
+    with pytest.raises(SystemExit):
+        moblab_results_uploader.main(['-f', '/non-exist-file'])
 
-        args = mock.Mock(once=True, credentials_file='cred', jobs=3,
-                         min_age_to_upload=datetime.timedelta(days=1),
-                         min_age_to_prune=datetime.timedelta(days=7),
-                         uploading_filter_config=[])
-        args.upload_timeout = datetime.timedelta(days=3)
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        with pytest.raises(AttributeError):
+            tmp_file.write(b'---\n')
+            tmp_file.seek(0)
+            moblab_results_uploader.main(['-f', tmp_file.name])
 
-        registry = [
-            test_result_registry.TestResultRegisteryEntry(
-                root_dir=self.root_dir,
-                classes=[
-                    autotest_result.AutotestTestJob,
-                    autotest_result.AutotestHostTask
-                ]
-            )
-        ]
-        asyncio.set_event_loop(asyncio.new_event_loop())
-        cmd_run.run(args, test_result_registry=registry)
-        print(m_gs_api.return_value.get_bucket.return_value.blob.call_args_list)
-        # All dir with id in [10, 20) should be removed.
-        assert [d for d in self.root_dir.glob('1*-moblab')] == []
-        assert [d for d in self.root_dir.glob('hosts/foo/1*-task')] == []
-        # All dir with id in [20,) should be left on disk.
-        assert [d for d in self.root_dir.glob('2*-moblab')] != []
-        assert [d for d in self.root_dir.glob('3*-moblab')] != []
-        assert [d for d in self.root_dir.glob('hosts/foo/2*-task')] != []
-        assert [d for d in self.root_dir.glob('hosts/foo/3*-task')] != []
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        with pytest.raises(SystemExit):
+            tmp_file.write(b'---\n- abc: def\n')
+            tmp_file.seek(0)
+            moblab_results_uploader.main(['-f', tmp_file.name])
+
+
+@pytest.yield_fixture
+def afe():
+    with mock.patch('moblab_common.afe_connector.AFEConnector') as m_AFE:
+        _afe = m_AFE.return_value
+        _afe.get_jobs.side_effect = functools.partial(get_finished_time,
+                                                      query_type=TYPE.JOB)
+        _afe.get_special_tasks.side_effect = functools.partial(
+            get_finished_time, query_type=TYPE.TASK)
+        _afe.get_host_queue_entries.return_value = None
+        yield _afe
+
+
+def build_registry(temp_root_dir):
+    return [
+        test_result_registry.TestResultRegisteryEntry(
+            root_dir=temp_root_dir,
+            classes=[
+                autotest_result.AutotestTestJob,
+                autotest_result.AutotestHostTask
+            ]
+        )
+    ]
+
+
+@mock.patch('google.cloud.storage.Client')
+@mock.patch.object(datetime, 'datetime', wraps=datetime.datetime)
+def test_run_once(m_datetime, m_gs_api, afe, temp_root_dir):
+    m_datetime.now.return_value = datetime.datetime(2020, 1, 10)
+
+    args = mock.Mock(once=True, credentials_file='cred', jobs=3,
+                     min_age_to_upload=datetime.timedelta(days=1),
+                     min_age_to_prune=datetime.timedelta(days=7),
+                     upload_timeout=datetime.timedelta(days=3),
+                     uploading_filter_config=_FILTER_CONFIG)
+
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    cmd_run.run(args, test_result_registry=build_registry(temp_root_dir))
+
+    blob = m_gs_api.return_value.get_bucket.return_value.blob
+    uploaded_files = [call[0][0] for call in blob.call_args_list]
+    for f in uploaded_files:
+        assert re.match(
+            r'results/[^/]+/[0-9a-f]{32}/(2\d-moblab|hosts/foo/2\d-task)/.*',
+            f
+        )
+        # The job of 22 are CTS and succeeded, so no debug data uploaded.
+        assert not re.match(
+            r'results/[^/]+/[0-9a-f]{32}/22-moblab/foo/debug/', f)
+
+    # The job of 24 are CTS but failed, so all files will be uploaded.
+    assert [f for f in uploaded_files if re.match(
+        r'results/[^/]+/[0-9a-f]{32}/24-moblab/foo/debug', f
+    )]
+
+    # All dir with id in [10, 20) should be removed.
+    assert [d for d in temp_root_dir.glob('1*-moblab')] == []
+    assert [d for d in temp_root_dir.glob('hosts/foo/1*-task')] == []
+    # All dir with id in [20,) should be left on disk.
+    for id_ in ['2*', '3*', '4*']:
+        assert list(temp_root_dir.glob('{}-moblab'.format(id_))) != []
+        assert list(temp_root_dir.glob(
+            'hosts/foo/{}-task'.format(id_))) != []
+
+
+@pytest.mark.network
+@mock.patch.object(datetime, 'datetime', wraps=datetime.datetime)
+def test_integration_test(m_datetime, afe, temp_root_dir, gs_bucket,
+                          credentials_file):
+    m_datetime.now.return_value = datetime.datetime(2020, 1, 10)
+
+    args = mock.Mock(
+        once=True, gs_bucket=gs_bucket, credentials_file=credentials_file,
+        jobs=3, uploading_filter_config=_FILTER_CONFIG,
+        min_age_to_upload=datetime.timedelta(days=1),
+        min_age_to_prune=datetime.timedelta(days=7),
+        upload_timeout=datetime.timedelta(days=3)
+    )
+
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    cmd_run.run(args, test_result_registry=build_registry(temp_root_dir))
+
+    # TODO(guocb) Automatically verify the uploaded results.
