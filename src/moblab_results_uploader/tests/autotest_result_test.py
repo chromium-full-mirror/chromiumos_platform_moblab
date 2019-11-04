@@ -60,11 +60,15 @@ class AutotestHostTaskTest(unittest.TestCase):
             self.assertFalse(self.task.succeeded)
 
         # Exit status is GOOD
-        with mock.patch('autotest_result.open',
-                        mock.mock_open(read_data='BEGIN\nEND GOOD FOO\n')):
-            task = autotest_result.AutotestHostTask(
-                root_dir='.', relative_path='hosts/foo/123-task')
-            self.assertTrue(task.succeeded)
+        task = autotest_result.AutotestHostTask(
+            root_dir='.', relative_path='hosts/foo/123-task')
+        with mock.patch('autotest_result.AutotestHostTask.abs_path',
+                        new_callable=mock.PropertyMock) as m_abs_path:
+            status_log = mock.Mock()
+            m_abs_path.return_value.glob.return_value = [status_log]
+            with mock.patch.object(status_log, 'open',
+                                   mock.mock_open(read_data='END GOOD YEAH!')):
+                self.assertTrue(task.succeeded)
 
 
 class AutotestTestJobTest(unittest.TestCase):
