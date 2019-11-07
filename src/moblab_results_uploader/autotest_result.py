@@ -14,8 +14,9 @@ import pathlib
 import re
 import sys
 
-import test_result_interface
 from moblab_common import afe_connector
+
+import test_result_interface
 
 _AUTOTEST_ROOT = pathlib.Path('/usr/local/autotest')
 ROOT_DIR = _AUTOTEST_ROOT / 'results'
@@ -168,6 +169,11 @@ class AutotestHostTask(_AutotestResult):
 
         self._id = m.group('id')
         self._afe_query = _query_speical_task_finished_time(m.group('afe_id'))
+
+    @property
+    def pubsub_when_uploaded(self):
+        """Don't pubsub event when upload an Autotest special task result."""
+        return False
 
 
 class AutotestTestJob(_AutotestResult):

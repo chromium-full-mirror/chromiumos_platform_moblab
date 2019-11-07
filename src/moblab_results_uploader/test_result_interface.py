@@ -80,3 +80,8 @@ class TestResult(abc.ABC):
     def suite_name(self):
         """Return the suite name of the test."""
         raise NotImplementedError('TestResult.suite_name')
+
+    @property
+    def pubsub_when_uploaded(self):
+        """Send a pubsub event when uploaded to GS."""
+        return False

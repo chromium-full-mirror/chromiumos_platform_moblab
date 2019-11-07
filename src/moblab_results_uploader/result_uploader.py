@@ -12,22 +12,31 @@ import logging  # pylint: disable=cros-logging-import
 import os
 import pathlib
 
+from moblab_common import moblab_info
+from moblab_common import pubsub_client
+
 import processing_step
 import result_dir_status
-from moblab_common import moblab_info
 
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_SERIAL_NUMBER = moblab_info.get_serial_number()
+_MOBLAB_ID = moblab_info.get_or_create_id()
+_GS_BUCKET_ROOT = 'results'
 
-UploadResult = collections.namedtuple('UploadResult',
-                                      ['test_result', 'uploaded'])
+
+class UploadResult(collections.namedtuple(
+    'UploadResult', ['test_result', 'test_result_gs_path'])):
+    @property
+    def uploaded(self):
+        return self.test_result_gs_path != ''
 
 
 class Uploader(processing_step.ProcessStep):
-    """A class to upload a directory to GS parallelly."""
+    """A class to upload a directory to GS in parallel."""
     # We use this queue to allow parallel files uploading.
 
     def __init__(self, *, timeout, gs_api, next_step=None):
-        """Constructor
+        """Constructor.
 
         Args:
             timeout: The timeout for uploading each directory in type of
@@ -40,28 +49,29 @@ class Uploader(processing_step.ProcessStep):
         super().__init__(next_step=next_step)
         self._gs_api = gs_api
         self._timeout = timeout
-        self._gs_path_prefix = os.path.join(
-            'results', moblab_info.get_serial_number(),
-            moblab_info.get_or_create_id()
-        )
+        self._gs_path_prefix = os.path.join(_GS_BUCKET_ROOT, _SERIAL_NUMBER,
+                                            _MOBLAB_ID)
         self.uploading_queue = asyncio.Queue(maxsize=10)
 
     async def try_upload_dir(self, test_result):
-        """Try to upload a directory with timeeout checking."""
+        """Try to upload a directory with timeout checking."""
         _LOGGER.info('Try to upload dir %s', test_result)
-        uploaded = False
+        # The GS path of uploaded test result.
+        test_result_gs_path = ''
         try:
             await self._next_step(test_result)
             await asyncio.wait_for(self.uploading_queue.join(),
                                    self._timeout.total_seconds())
-            uploaded = True
+            test_result_gs_path = os.path.join(self._gs_path_prefix,
+                                               test_result.name)
         except (asyncio.TimeoutError, KeyboardInterrupt) as err:
             _LOGGER.error(
                 'Error occurs when uploading %s: %s', test_result, type(err))
             if err is KeyboardInterrupt:
                 raise err
 
-        return UploadResult(test_result=test_result, uploaded=uploaded)
+        return UploadResult(test_result=test_result,
+                            test_result_gs_path=test_result_gs_path)
 
     async def upload_files(self):
         """Upload files in the queue to GS in background."""
@@ -82,15 +92,40 @@ class Uploader(processing_step.ProcessStep):
                                           remote_name=remote_name)
 
 
-async def notify_pubsub(upload_result):
-    """Notify Pubsub that the result has been uploaded."""
-    if upload_result.uploaded:
-        # TODO(guocb) Notify pubsub here.
-        pass
-    return upload_result
+class PostUploading(object):
+    """Processing after uploading, e.g. pubsub, report failures, etc."""
 
+    def __init__(self, gs_bucket):
+        self._gs_bucket = gs_bucket
 
-async def mark_uploading_result(upload_result):
-    """Change test result dir status marker according to uploading result."""
-    return await result_dir_status.mark_uploading_result(
-        upload_result.test_result, succeeded=upload_result.uploaded)
+    async def process(self, upload_result):
+        """Process the upload result and run post actions accordingly.
+
+        When uploading failed, we record the failure in a report.
+
+        When uploading succeeded, we send a pubsub event. We then update the
+        status file according to the event sending result.
+
+        For some test result, e.g. AutotestHostTask, we don't want to send
+        pubsub event in this case, so just update status file directly
+        according to the uploading result.
+        """
+        test_result = upload_result.test_result
+        if not upload_result.uploaded:
+            # TODO(guocb) Report failures.
+            return
+
+        if not test_result.pubsub_when_uploaded:
+            return await result_dir_status.mark_uploading_result(
+                test_result, succeeded=upload_result.uploaded)
+
+        loop = asyncio.get_event_loop()
+        console_client = pubsub_client.PubSubBasedClient()
+        posted = await loop.run_in_executor(
+            None, console_client.send_test_job_offloaded_message,
+            os.path.join('gs://', self._gs_bucket,
+                         upload_result.test_result_gs_path),
+            _SERIAL_NUMBER, _MOBLAB_ID)
+
+        return await result_dir_status.mark_uploading_result(
+            test_result, succeeded=posted)

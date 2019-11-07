@@ -195,11 +195,13 @@ def build_registry(temp_root_dir):
 
 
 @mock.patch('google.cloud.storage.Client')
+@mock.patch('google.cloud.pubsub_v1.PublisherClient')
 @mock.patch.object(datetime, 'datetime', wraps=datetime.datetime)
-def test_run_once(m_datetime, m_gs_api, afe, temp_root_dir):
+def test_run_once(m_datetime, m_pubsub, m_gs_api, afe, temp_root_dir):
     m_datetime.now.return_value = datetime.datetime(2020, 1, 10)
 
     args = mock.Mock(once=True, credentials_file='cred', jobs=3,
+                     gs_bucket='test_bucket',
                      min_age_to_upload=datetime.timedelta(days=1),
                      min_age_to_prune=datetime.timedelta(days=7),
                      upload_timeout=datetime.timedelta(days=3),
@@ -208,11 +210,22 @@ def test_run_once(m_datetime, m_gs_api, afe, temp_root_dir):
     asyncio.set_event_loop(asyncio.new_event_loop())
     cmd_run.run(args, test_result_registry=build_registry(temp_root_dir))
 
+    gs_prefix_pattern = 'results/[^/]+/[0-9a-f]{32}'
+    # Verify PubSub events.
+    m_publish = m_pubsub.return_value.publish
+    published_gs_path = [call[1]['gcs_uri'] for call in
+                         m_publish.call_args_list]
+    for path in published_gs_path:
+        assert re.match(
+            r'gs://{}/{}/2\d-moblab$'.format(args.gs_bucket, gs_prefix_pattern),
+            path)
+
+    # Verify files uploaded.
     blob = m_gs_api.return_value.get_bucket.return_value.blob
     uploaded_files = [call[0][0] for call in blob.call_args_list]
     for f in uploaded_files:
         assert re.match(
-            r'results/[^/]+/[0-9a-f]{32}/(2\d-moblab|hosts/foo/2\d-task)/.*',
+            r'{}/(2\d-moblab|hosts/foo/2\d-task)/.*'.format(gs_prefix_pattern),
             f
         )
         # The job of 22 are CTS and succeeded, so no debug data uploaded.
