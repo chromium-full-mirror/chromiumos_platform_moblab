@@ -85,3 +85,8 @@ class TestResult(abc.ABC):
     def pubsub_when_uploaded(self):
         """Send a pubsub event when uploaded to GS."""
         return False
+
+    @property
+    def skip_uploading_when_succeeded(self):
+        """Skip the uploading when the result succeeded."""
+        return False

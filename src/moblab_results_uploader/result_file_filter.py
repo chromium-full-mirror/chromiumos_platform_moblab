@@ -155,6 +155,9 @@ class ResultFileFilter(processing_step.ProcessStep):
 
     async def filter_files(self, test_result):
         """Filter files of `test_result` according to predefined filters."""
+        if test_result.succeeded and test_result.skip_uploading_when_succeeded:
+            return
+
         self._applicable_filter = _get_filter_by_suite(self._filters_config,
                                                        test_result.suite_name)
 
