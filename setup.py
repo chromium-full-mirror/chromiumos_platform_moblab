@@ -18,5 +18,5 @@ setup(
     ],
     scripts=[
         'scripts/replay_pubsub.py',
-        'tools/create-moblab-id.py',
+        'src/tools/create-moblab-id.py',
     ])
