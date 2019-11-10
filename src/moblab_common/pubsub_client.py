@@ -6,8 +6,8 @@
 
 from __future__ import print_function
 
-import logging  # pylint: disable=cros-logging-import
 import base64
+import logging  # pylint: disable=cros-logging-import
 
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import pubsub_v1
@@ -23,7 +23,7 @@ LEGACY_ATTR_GCS_URI = 'gcs_uri'
 LEGACY_ATTR_MOBLAB_MAC = 'moblab_mac_address'
 LEGACY_ATTR_MOBLAB_ID = 'moblab_id'
 # the message data for new test result notification.
-LEGACY_TEST_OFFLOAD_MESSAGE = 'NEW_TEST_RESULT'
+LEGACY_TEST_OFFLOAD_MESSAGE = b'NEW_TEST_RESULT'
 
 
 class PubSubException(Exception):
