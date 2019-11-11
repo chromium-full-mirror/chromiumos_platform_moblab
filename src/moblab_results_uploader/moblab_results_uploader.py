@@ -178,6 +178,15 @@ def setup_logging(handler):
     logger.addHandler(handler)
 
 
+def results_filter_type(config_file_path):
+    """Load the results filter configuration."""
+    try:
+        with open(config_file_path) as config_file:
+            return yaml.load(config_file, Loader=yaml.FullLoader)
+    except (PermissionError, FileNotFoundError) as err:
+        raise argparse.ArgumentTypeError(str(err))
+
+
 def add_arguments_for_subcommand_run(parent_parser):
     """Add arguments for subcommand 'run'.
 
