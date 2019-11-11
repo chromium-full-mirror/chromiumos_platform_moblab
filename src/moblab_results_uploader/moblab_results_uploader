@@ -7,4 +7,4 @@
 
 set -eu
 
-exec /usr/bin/python3 ${0}.py "$@"
+exec python3 "${0}".py "$@"
