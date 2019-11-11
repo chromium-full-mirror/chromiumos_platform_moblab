@@ -8,6 +8,7 @@ SUBDIRS := upstart-scripts \
 	   mobmonitor-ui \
 	   remote-scheduler \
 	   moblab-rpcserver \
+	   moblab_results_uploader \
 	   moblab-ui
 
 all:

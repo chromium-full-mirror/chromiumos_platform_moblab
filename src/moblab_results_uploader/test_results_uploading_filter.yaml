@@ -1,0 +1,24 @@
+# Copyright 2019 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The filter is defined in syntax of:
+#     - suite_name_regex: SUITE_NAME_REGEX
+#       include:
+#           - FILE_OR_DIR_GLOB_PATTERN
+#           - ...
+#       exclude:
+#           - FILE_OR_DIR_GLOB_PATTERN
+#           - ...
+#
+# For example:
+# ---
+# - suite_name_regex: ^cts|^gts
+#   exclude:
+#     - '*/debug/*'
+#     - '*/sysinfo/*'
+#     - '*/cheets*/debug/*'
+#     - '*/cheets*/dummy_Pass/*'
+#     - '*/cheets*/sysinfo/*'
+
+---
