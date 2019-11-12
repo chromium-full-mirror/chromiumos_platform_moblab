@@ -52,19 +52,21 @@ async def _enumerate_test_results(test_result_registry, *, next_step):
 
 async def _prune_test_result(test_result):
     """Check the `test_result` and try to prune it if we should."""
-    # Remove all other files/directories first, and remove the marker file
-    # last.
+    # Remove all other files/directories first, and then remove the marker file
+    # at last.
     _LOGGER.debug('Removing test result %s', test_result)
-    loop = asyncio.get_event_loop()
     rm_tasks = []
     for d in test_result.abs_path.iterdir():
-        if d.is_dir():  # Remove all subdirectories.
-            rm_tasks.append(loop.run_in_executor(None, shutil.rmtree, d))
-        elif d.name != result_dir_status.MARKER_FILE:
-            # Remove all files except the marker.
-            rm_tasks.append(loop.run_in_executor(None, d.unlink))
-    await asyncio.wait(rm_tasks)
-    await loop.run_in_executor(None, shutil.rmtree, test_result.abs_path)
+        if d.name == result_dir_status.MARKER_FILE:
+            continue
+        # Some files/dirs may owned by root, so remove them with sudo.
+        process = await asyncio.create_subprocess_exec('sudo', 'rm', '-rf',
+                                                       str(d))
+        rm_tasks.append(process.wait())
+    await asyncio.gather(*rm_tasks)
+    process = await asyncio.create_subprocess_exec('sudo', 'rm', '-rf',
+                                                   str(test_result.abs_path))
+    await process.wait()
     _LOGGER.debug('Removing done: %s', test_result)
 
 
