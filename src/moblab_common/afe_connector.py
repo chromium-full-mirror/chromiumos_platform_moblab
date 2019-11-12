@@ -143,13 +143,10 @@ class AFEConnector(object):
             'not_yet_run': True,
             'running': True,
             'finished': True,
-            'suite': True,
-            'sub': True,
-            'standalone': True
         }
         if id_list:
             assert isinstance(id_list, list)
-            params['id_list'] = id_list
+            params['id__in'] = id_list
         response = self.send_rpc_command('get_jobs', params)
         return self.decode_response(response, 'result')
 
