@@ -12,12 +12,14 @@ import argparse
 import datetime
 import logging.handlers as logging_handlers
 import logging  # pylint: disable=cros-logging-import
+import os
 import pathlib
 import shutil
 import sys
 import yaml
 
 import autotest_result
+import gs_api_wrapper
 import test_result_registry as test_result_registry_module
 import try_file_filter_cmd
 
@@ -147,6 +149,19 @@ def run(args, test_result_registry=None):
         loop.close()
 
 
+def accessible_file_type(file_path):
+    """Check if input is an accessible file."""
+    if not file_path:
+        raise argparse.ArgumentTypeError('No value specified.')
+
+    try:
+        with open(file_path):
+            pass
+        return file_path
+    except (FileNotFoundError, PermissionError) as err:
+        raise argparse.ArgumentTypeError(err)
+
+
 def logging_file_type(logfile_path):
     """Wrap the input file path as a logging handler object."""
     try:
@@ -212,6 +227,15 @@ def add_arguments_for_subcommand_run(parent_parser):
     parser.add_argument(
         '--gs-bucket', required=True,
         help='The Google Storage Bucket to upload (without "gs://" prefix).'
+    )
+
+    parser.add_argument(
+        '--credentials-file',
+        default=os.environ.get(gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS, ''),
+        type=accessible_file_type,
+        help='Google cloud application credentials file. Default is the value '
+        'of environment variable {}, i.e. "%(default)s".'.format(
+            gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS)
     )
 
     parser.add_argument(
