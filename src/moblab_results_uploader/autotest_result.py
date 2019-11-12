@@ -113,7 +113,7 @@ class _AutotestResult(test_result_interface.TestResult):
             return self._succeeded
 
         succeeded = []
-        for status_log in self.abs_path.glob('*/{}'.format(_STATUS_LOG)):
+        for status_log in self.abs_path.glob('**/{}'.format(_STATUS_LOG)):
             try:
                 with status_log.open() as f:
                     for line in f:
