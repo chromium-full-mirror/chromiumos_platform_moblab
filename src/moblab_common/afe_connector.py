@@ -103,7 +103,7 @@ class AFEConnector(object):
         if not raw_result:
             return result
 
-        for k, v in raw_result.iteritems():
+        for k, v in raw_result.items():
             try:
                 result[k] = dict(v)
             except ValueError:
