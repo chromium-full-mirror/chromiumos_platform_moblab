@@ -36,6 +36,11 @@ _DEFAULT_MIN_AGE_TO_PRUNE = datetime.timedelta(days=7)
 
 _RUN_INTERVAL = datetime.timedelta(minutes=1)
 
+# We cache all live test result objects in a dictionary. The key is the abs
+# path of it. We only remove them from the cache when they are removed from
+# disk.
+_TEST_RESULT_CACHE = {}
+
 
 async def _enumerate_test_results(test_result_registry, *, next_step):
     """Enumerate all test results registered."""
@@ -45,10 +50,10 @@ async def _enumerate_test_results(test_result_registry, *, next_step):
             for d in root_dir.glob(cls.GLOB_PATTERN):
                 test_result = cls(root_dir=root_dir,
                                   relative_path=d.relative_to(root_dir))
-                await next_step(test_result)
-                _LOGGER.info('Found a test result: %s', test_result)
-
-    return None
+                _LOGGER.info('Found %s', test_result)
+                await next_step(
+                    _TEST_RESULT_CACHE.setdefault(test_result.abs_path,
+                                                  test_result))
 
 
 async def _prune_test_result(test_result):
@@ -68,6 +73,7 @@ async def _prune_test_result(test_result):
     process = await asyncio.create_subprocess_exec('sudo', 'rm', '-rf',
                                                    str(test_result.abs_path))
     await process.wait()
+    del _TEST_RESULT_CACHE[test_result.abs_path]
     _LOGGER.debug('Removing done: %s', test_result)
 
 
