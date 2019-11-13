@@ -72,6 +72,7 @@
     "karma-cli": "^2.0.0",
     "karma-jasmine": "^2.0.1",
     "karma-remap-istanbul": "^0.6.0",
+    "karma-spec-reporter": "0.0.32",
     "madge": "^3.4.4",
     "protractor": "~5.4.1",
     "rxjs": "^6.5.2",
