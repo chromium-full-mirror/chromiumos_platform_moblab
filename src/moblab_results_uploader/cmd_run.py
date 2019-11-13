@@ -16,6 +16,9 @@ import shutil
 
 import yaml
 
+from moblab_common import afe_connector
+from moblab_common import config_connector
+
 import gs_api_wrapper
 import processing_step
 import result_dir_status
@@ -162,8 +165,11 @@ def add_arguments(parent_parser):
         help='Allow N jobs run simultaneously to work.'
     )
     parser.add_argument(
-        '--gs-bucket', required=True,
-        help='The Google Storage Bucket to upload (without "gs://" prefix).'
+        '--gs-bucket',
+        default=config_connector.MoblabConfigConnector(
+            afe_connector.AFEConnector()).get_cloud_bucket(),
+        help='The Google Storage Bucket to upload (without "gs://" prefix). '
+        'Default is reading from Autotest config file, i.e. %(default)s'
     )
 
     parser.add_argument(
@@ -206,6 +212,9 @@ def run(args, test_result_registry=None):
         test_result_registry: A list of TestResultRegisteryEntry which has
             needed test result directory information.
     """
+    if not args.gs_bucket:
+        _LOGGER.error('GS Bucket not specified.')
+        return
     _LOGGER.debug('arguments: %s', args)
     _LOGGER.info('Start to scan, upload and prune test results.')
 
