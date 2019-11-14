@@ -71,3 +71,31 @@ async def test_upload_dir__timeout():
 
     result = await uploader.try_upload_dir(test_result)
     assert result.uploaded is False
+
+
+@pytest.mark.asyncio
+@mock.patch('moblab_common.lock_util.file_lock')
+@mock.patch('moblab_common.pubsub_client.PubSubBasedClient')
+async def test_post_uploading(m_pubsub, m_lock):
+    post_uploading = result_uploader.PostUploading('test_bucket')
+    test_result = mock.Mock(pubsub_when_uploaded=True,
+                            abs_path=pathlib.Path('/abs/path/to/test'))
+    upload_result = mock.Mock(test_result=test_result,
+                              test_result_gs_path='gs/path/to/file')
+    with mock.patch('pathlib.Path.open') as m_open:
+        await post_uploading.process(upload_result)
+        assert m_open.called
+        assert m_pubsub.called
+
+
+@pytest.mark.asyncio
+@mock.patch('moblab_common.pubsub_client.PubSubBasedClient')
+async def test_post_uploading__dryrun(m_pubsub):
+    post_uploading = result_uploader.PostUploading('test_bucket', dry_run=True)
+    test_result = mock.Mock(pubsub_when_uploaded=True)
+    upload_result = mock.Mock(test_result=test_result,
+                              test_result_gs_path='gs/path/to/file')
+    with mock.patch('os.path.join') as os_path_join:
+        await post_uploading.process(upload_result)
+        assert not m_pubsub.called
+        assert os_path_join.called

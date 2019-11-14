@@ -14,7 +14,6 @@ import logging  # pylint: disable=cros-logging-import
 import os
 import pathlib
 import shutil
-
 import yaml
 
 from moblab_common import afe_connector
@@ -56,11 +55,15 @@ async def _enumerate_test_results(test_result_registry, *, next_step):
                                                   test_result))
 
 
-async def _prune_test_result(test_result):
+async def _prune_test_result(dry_run, test_result):
     """Check the `test_result` and try to prune it if we should."""
     # Remove all other files/directories first, and then remove the marker file
     # at last.
     _LOGGER.debug('Removing test result %s', test_result)
+    if dry_run:
+        _LOGGER.debug('DRYRUN: Removed: %s', test_result)
+        return
+
     rm_tasks = []
     for d in test_result.abs_path.iterdir():
         if d.name == result_dir_status.MARKER_FILE:
@@ -74,7 +77,7 @@ async def _prune_test_result(test_result):
                                                    str(test_result.abs_path))
     await process.wait()
     del _TEST_RESULT_CACHE[test_result.abs_path]
-    _LOGGER.debug('Removing done: %s', test_result)
+    _LOGGER.debug('Removed: %s', test_result)
 
 
 async def _async_prune(args, registry):
@@ -89,7 +92,8 @@ async def _async_prune(args, registry):
     # Steps needed to prune a result directory:
     # check status -> for each EXPIRED directories -> prune it.
     status_checker.next_step = status_filter.filter
-    status_filter.next_step = _prune_test_result
+    status_filter.next_step = functools.partial(_prune_test_result,
+                                                args.dry_run)
 
     while True:
         await _enumerate_test_results(registry, next_step=status_checker.check)
@@ -126,7 +130,7 @@ async def _async_upload(args, registry):
     file_filter.next_step = uploader.uploading_queue.put
 
     consumers = [
-        asyncio.ensure_future(uploader.upload_files())
+        asyncio.ensure_future(uploader.upload_files(args.dry_run))
         for _ in range(args.jobs)
     ]
     while True:
@@ -228,6 +232,9 @@ def post_parse_args(arg_parser, args):
 
     delattr(args, 'credentials_file')
     delattr(args, 'gs_bucket')
+
+    if args.dry_run:  # It makes no sense to dry run a daemon, so just run once.
+        args.once = True
 
 
 def run(args, test_result_registry=None):
