@@ -16,6 +16,7 @@ import unittest
 from unittest import mock
 
 import autotest_result
+import cmd_run
 import moblab_results_uploader
 import test_result_registry
 
@@ -87,4 +88,4 @@ class RestultUploaderTest(unittest.TestCase):
             )
         ]
         asyncio.set_event_loop(asyncio.new_event_loop())
-        moblab_results_uploader.run(args, test_result_registry=registry)
+        cmd_run.run(args, test_result_registry=registry)

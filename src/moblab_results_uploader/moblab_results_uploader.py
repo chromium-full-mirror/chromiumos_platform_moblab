@@ -7,159 +7,21 @@
 
 from __future__ import print_function
 
-import asyncio
 import argparse
-import datetime
-import logging.handlers as logging_handlers
+import asyncio
 import logging  # pylint: disable=cros-logging-import
-import os
+import logging.handlers as logging_handlers
 import pathlib
-import shutil
 import sys
 
 import yaml
 
-import autotest_result
+import cmd_run
 import cmd_try_file_filter
-import gs_api_wrapper
-import test_result_registry as test_result_registry_module
+import result_file_filter
 
 _LOG_FILE_BACKUP_COUNT = 14
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
-
-_DEFAULT_UPLOAD_TIMEOUT = datetime.timedelta(days=3)
-_DEFAULT_MIN_AGE_TO_UPLOAD = datetime.timedelta(days=0)
-_DEFAULT_MIN_AGE_TO_PRUNE = datetime.timedelta(days=7)
-
-_RUN_INTERVAL = datetime.timedelta(minutes=1)
-
-_TEST_RESULT_STATE_FILE = '.uploader_status'
-
-
-async def enumerate_test_results(test_result_registry, *, next_step):
-    """Enumerate all test results registered."""
-    for registry_entry in test_result_registry:
-        for cls in registry_entry.classes:
-            root_dir = registry_entry.root_dir
-            for d in root_dir.glob(cls.GLOB_PATTERN):
-                test_result = cls(root_dir=root_dir,
-                                  relative_path=d.relative_to(root_dir))
-                # TODO(guocb) Check if it's uploading or uploaded.
-                await next_step(test_result)
-                _LOGGER.info('Found a test result: %s', test_result)
-
-
-async def upload_test_reuslt(test_result):
-    """Upload method placeholder, do nothing for now."""
-    _LOGGER.info('Uploading the result: %s', test_result)
-    print('Uploading %s' % test_result)
-    await asyncio.sleep(1)
-    _LOGGER.info('Uploading done: %s', test_result)
-    print('Uploading done: %s' % test_result)
-
-
-async def try_upload_test_result(queue, timeout):
-    """Get test result from `queue` and process it with `timeout`.
-
-    Args:
-        queue: An asyncio.Queue object to save all jobs.
-        timeout: A datetime.timedelta object of timeout for each directory."""
-    while True:
-        test_result = await queue.get()
-        if not test_result:
-            _LOGGER.info('Exiting the results processing.')
-            break
-        _LOGGER.info('Try to upload %s', test_result)
-        try:
-            await asyncio.wait_for(upload_test_reuslt(test_result),
-                                   timeout.total_seconds())
-        except (asyncio.TimeoutError, KeyboardInterrupt) as err:
-            _LOGGER.error(
-                'Error occurs when uploading %s: %s', test_result, err)
-            if err is KeyboardInterrupt:
-                raise err
-        queue.task_done()
-
-
-async def prune_test_result(test_result):
-    """Check the `test_result` and try to prune it if we should."""
-    # Remove all other files/directories first, and remove the marker file
-    # last.
-    # TODO(guocb) Run in a thread executor to avoid freeze event loop.
-    _LOGGER.debug('Removing test result %s', test_result)
-    for d in test_result.abs_path.iterdir():
-        if d.is_dir():  # Remove all subdirectories.
-            shutil.rmtree(d)
-        elif d.name != _TEST_RESULT_STATE_FILE:
-            # Remove all files except the marker.
-            d.unlink()
-    shutil.rmtree(test_result.abs_path)
-    _LOGGER.debug('Removing done: %s', test_result)
-
-
-async def async_prune(args, registry):
-    """Scan and prune all UPLOADED or EXPIRED test results."""
-    to_prune = prune_test_result
-
-    while True:
-        await enumerate_test_results(registry, next_step=to_prune)
-        if args.once:
-            break
-        await asyncio.sleep(_RUN_INTERVAL.total_seconds())
-
-
-async def async_upload(args, registry):
-    """Scan and upload all READY test results."""
-    queue = asyncio.Queue()
-
-    to_upload = queue.put
-    consumer = asyncio.ensure_future(
-        try_upload_test_result(queue, args.upload_timeout)
-    )
-    while True:
-        await enumerate_test_results(registry, next_step=to_upload)
-        await queue.join()
-        if args.once:
-            break
-        await asyncio.sleep(_RUN_INTERVAL.total_seconds())
-
-    consumer.cancel()
-
-
-def run(args, test_result_registry=None):
-    """Main logic to scan, upload and prune the test results.
-
-    Args:
-        args: The command line arguments specified.
-        test_result_registry: A list of TestResultRegisteryEntry which has
-            needed test result directory information.
-    """
-    _LOGGER.debug('arguments: %s', args)
-    _LOGGER.info('Start to scan, upload and prune test results.')
-
-    registry = test_result_registry or test_result_registry_module.REGISTRY
-    loop = asyncio.get_event_loop()
-
-    try:
-        loop.run_until_complete(asyncio.gather(async_upload(args, registry),
-                                               async_prune(args, registry)))
-    except KeyboardInterrupt:
-        pass
-    finally:
-        loop.close()
-
-
-def accessible_file_type(file_path):
-    """Check if input is an accessible file."""
-    if not file_path:
-        raise argparse.ArgumentTypeError('No value specified.')
-
-    try:
-        with open(file_path):
-            pass
-        return file_path
-    except (FileNotFoundError, PermissionError) as err:
-        raise argparse.ArgumentTypeError(err)
 
 
 def logging_file_type(logfile_path):
@@ -205,62 +67,6 @@ def results_filter_type(config_file_path):
     return filters
 
 
-def add_arguments_for_subcommand_run(parent_parser):
-    """Add arguments for subcommand 'run'.
-
-    Args:
-        parent_parser: The argparse.ArgumentParser object to add arguments.
-    """
-    parser = parent_parser.add_parser(
-        'run', help='Scan, upload and prune the test result directories.')
-    parser.add_argument(
-        '--once', action='store_true', help='Just run once and exit.')
-    parser.add_argument(
-        '-n', '--dry-run', action='store_true',
-        help='Dry run mode: just print out directories processed. Only valid '
-        'when specified with option --once.'
-    )
-    parser.add_argument(
-        '-j', '--jobs', type=int, default=1,
-        help='Allow N jobs run simultaneously to work.'
-    )
-    parser.add_argument(
-        '--gs-bucket', required=True,
-        help='The Google Storage Bucket to upload (without "gs://" prefix).'
-    )
-
-    parser.add_argument(
-        '--credentials-file',
-        default=os.environ.get(gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS, ''),
-        type=accessible_file_type,
-        help='Google cloud application credentials file. Default is the value '
-        'of environment variable {}, i.e. "%(default)s".'.format(
-            gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS)
-    )
-
-    parser.add_argument(
-        '--timeout-days', type=lambda x: datetime.timedelta(days=float(x)),
-        default=_DEFAULT_UPLOAD_TIMEOUT, dest='upload_timeout',
-        help='The timeout time in days (can be a float number) to give up the '
-        'uploading (default: %(default)s).'
-    )
-    parser.add_argument(
-        '--min-age-to-upload', type=lambda x: datetime.timedelta(days=float(x)),
-        default=_DEFAULT_MIN_AGE_TO_UPLOAD,
-        help='Minimum job age in days (can be a float number) before a result '
-        'can be uploaded, but not removed from local storage '
-        '(default: %(default)s).'
-    )
-    parser.add_argument(
-        '--min-age-to-prune', type=lambda x: datetime.timedelta(days=float(x)),
-        default=_DEFAULT_MIN_AGE_TO_PRUNE,
-        help='Minimum job age in days (can be a float number) before a result '
-        'can be removed from local storage (default: %(default)s).'
-    )
-
-    parser.set_defaults(func=run)
-
-
 def parse_args(argv):
     """Parse the command line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -281,7 +87,7 @@ def parse_args(argv):
         title='Subcommands',
         help='Subcommands supported. One and only one of them can be used.')
 
-    add_arguments_for_subcommand_run(subparsers)
+    cmd_run.add_arguments(subparsers)
     cmd_try_file_filter.add_arguments(subparsers)
 
     args = parser.parse_args(argv)
