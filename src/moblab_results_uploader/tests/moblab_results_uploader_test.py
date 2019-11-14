@@ -7,18 +7,17 @@
 
 from __future__ import print_function
 
+import asyncio
 import datetime
 import pathlib
 import shutil
 import tempfile
 import unittest
-
 from unittest import mock
 
 import autotest_result
-import test_result_registry
 import moblab_results_uploader
-
+import test_result_registry
 
 _JOB_RESULT_DIR = [
     ('10-moblab', ('2020-01-01 00:00:00', 'END FAIL')),
@@ -53,6 +52,7 @@ def afe_get_task_side_effect(id_list):
 
 class RestultUploaderTest(unittest.TestCase):
     """Unit test case for `test_result_uploader`."""
+
     def setUp(self):
         """Create a temp dir and some mock directories."""
         self.root_dir = pathlib.Path(tempfile.mkdtemp())
@@ -86,4 +86,5 @@ class RestultUploaderTest(unittest.TestCase):
                 ]
             )
         ]
+        asyncio.set_event_loop(asyncio.new_event_loop())
         moblab_results_uploader.run(args, test_result_registry=registry)
