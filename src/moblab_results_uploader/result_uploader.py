@@ -12,6 +12,8 @@ import logging  # pylint: disable=cros-logging-import
 import os
 import pathlib
 
+from concurrent import futures
+
 from moblab_common import moblab_info
 from moblab_common import pubsub_client
 
@@ -73,16 +75,17 @@ class Uploader(processing_step.ProcessStep):
         return UploadResult(test_result=test_result,
                             test_result_gs_path=test_result_gs_path)
 
-    async def upload_files(self, dry_run=False):
+    async def upload_files(self, jobs, dry_run=False):
         """Upload files in the queue to GS in background."""
         loop = asyncio.get_event_loop()
+        executor = futures.ThreadPoolExecutor(max_workers=jobs)
         while True:
             f = await self.uploading_queue.get()
             if dry_run:
-                _LOGGER.debug('DRYRUN: Uploaded: %s', f)
+                _LOGGER.debug('DRYRUN: Uploading %s', f)
             else:
-                await loop.run_in_executor(None, self._upload_file, f)
-                _LOGGER.debug('Uploaded: %s', f)
+                _LOGGER.debug('Uploading %s', f)
+                await loop.run_in_executor(executor, self._upload_file, f)
             self.uploading_queue.task_done()
 
     def _upload_file(self, result_file):
