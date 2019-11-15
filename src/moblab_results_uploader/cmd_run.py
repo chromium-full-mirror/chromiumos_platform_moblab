@@ -214,10 +214,10 @@ def add_arguments(parent_parser):
 
     parser.set_defaults(
         func=run,
-        post_parse_args=functools.partial(post_parse_args, parser))
+        post_parse_args=functools.partial(_post_parse_args, parser))
 
 
-def post_parse_args(arg_parser, args):
+def _post_parse_args(arg_parser, args):
     """massage input arguments."""
     _LOGGER.debug('Input arguments: %s', args)
     if not args.gs_bucket:
