@@ -181,8 +181,10 @@ def try_file_filter(args):
     filtered_file_count = file_counter.sum
     filtered_file_size = file_size_counter.sum
 
-    print('Filtering result: {} files: {} bytes => {} files: {} bytes'.format(
-        total_file_count, total_file_size,
-        filtered_file_count, filtered_file_size
-    ))
+    print('Filtering result: {} files: {} bytes => {} files: {} bytes. {:.0%} '
+          'space saved!'.format(
+              total_file_count, total_file_size,
+              filtered_file_count, filtered_file_size,
+              1 - float(filtered_file_size) / total_file_size
+          ))
     return 0

@@ -39,7 +39,7 @@ _FILTER_CONFIG = '''
 
 @pytest.fixture
 def filter_config():
-    return yaml.load(_FILTER_CONFIG, Loader=yaml.FullLoader)
+    return yaml.load(_FILTER_CONFIG, Loader=yaml.BaseLoader)
 
 
 def _count_total_file():
