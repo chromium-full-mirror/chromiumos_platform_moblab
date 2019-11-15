@@ -111,17 +111,21 @@ class _AutotestResult(test_result_interface.TestResult):
         if self._succeeded is not None:
             return self._succeeded
 
-        try:
-            with open(self.abs_path / _STATUS_LOG) as f:
-                for line in f:
-                    if not line.startswith('END '):
-                        continue
-                    exit_status = line.split(maxsplit=2)[1]
-                    self._succeeded = (exit_status == 'GOOD')
-                    return self._succeeded
+        succeeded = []
+        for status_log in self.abs_path.glob('*/{}'.format(_STATUS_LOG)):
+            try:
+                with status_log.open() as f:
+                    for line in f:
+                        if not line.startswith('END '):
+                            continue
+                        exit_status = line.split(maxsplit=2)[1]
+                        succeeded.append(exit_status == 'GOOD')
 
-        except (FileNotFoundError, IndexError):
-            return None
+            except (FileNotFoundError, PermissionError, IndexError):
+                return None
+
+            self._succeeded = all(succeeded)
+            return self._succeeded
 
     @property
     def suite_name(self):
