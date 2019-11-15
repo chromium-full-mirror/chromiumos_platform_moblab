@@ -16,10 +16,6 @@ import result_uploader
 
 
 @pytest.mark.asyncio
-@mock.patch('moblab_common.moblab_info.get_or_create_id',
-            new=mock.Mock(return_value='moblab_id'))
-@mock.patch('moblab_common.moblab_info.get_serial_number',
-            new=mock.Mock(return_value='moblab_sn'))
 async def test_upload_files():
     gs_api = mock.Mock()
     uploader = result_uploader.Uploader(timeout=None, gs_api=gs_api)
@@ -41,10 +37,6 @@ async def test_upload_files():
 
 
 @pytest.mark.asyncio
-@mock.patch('moblab_common.moblab_info.get_or_create_id',
-            new=mock.Mock(return_value='moblab_id'))
-@mock.patch('moblab_common.moblab_info.get_serial_number',
-            new=mock.Mock(return_value='moblab_sn'))
 async def test_upload_dir__succeed():
     gs_api = mock.Mock()
 
@@ -63,10 +55,6 @@ async def test_upload_dir__succeed():
 
 
 @pytest.mark.asyncio
-@mock.patch('moblab_common.moblab_info.get_or_create_id',
-            new=mock.Mock(return_value='moblab_id'))
-@mock.patch('moblab_common.moblab_info.get_serial_number',
-            new=mock.Mock(return_value='moblab_sn'))
 async def test_upload_dir__timeout():
     gs_api = mock.Mock()
 

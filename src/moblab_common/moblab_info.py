@@ -9,13 +9,14 @@ from __future__ import print_function
 
 # pylint: disable=cros-logging-import
 import logging
+import os
 import subprocess
 import uuid
 
 from moblab_common import lock_util
 
 
-_ID_FILE_PATH = '/home/moblab/.moblab_id'
+_ID_FILE_PATH = os.path.expanduser('~/.moblab_id')
 _ID_FILE_LOCK_PATH = '%s.lock' % _ID_FILE_PATH
 
 
@@ -64,7 +65,8 @@ def get_serial_number():
     """
     for vpd_key in [_VPD_KEY_SERIAL_NUMBER, _VPD_KEY_ETH_MAC]:
         try:
-            cmd_result = subprocess.check_output(['sudo', 'vpd', '-g', vpd_key])
+            cmd_result = subprocess.check_output(['sudo', '--non-interactive',
+                                                  'vpd', '-g', vpd_key])
             return cmd_result
         except subprocess.CalledProcessError as err:
             logging.error(str(err))
