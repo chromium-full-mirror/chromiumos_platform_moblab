@@ -73,14 +73,16 @@ class Uploader(processing_step.ProcessStep):
         return UploadResult(test_result=test_result,
                             test_result_gs_path=test_result_gs_path)
 
-    async def upload_files(self):
+    async def upload_files(self, dry_run=False):
         """Upload files in the queue to GS in background."""
         loop = asyncio.get_event_loop()
         while True:
             f = await self.uploading_queue.get()
-            _LOGGER.debug('Uploading %s', f)
-            await loop.run_in_executor(None, self._upload_file, f)
-            _LOGGER.debug('Done: %s', f)
+            if dry_run:
+                _LOGGER.debug('DRYRUN: Uploaded: %s', f)
+            else:
+                await loop.run_in_executor(None, self._upload_file, f)
+                _LOGGER.debug('Uploaded: %s', f)
             self.uploading_queue.task_done()
 
     def _upload_file(self, result_file):
@@ -95,8 +97,19 @@ class Uploader(processing_step.ProcessStep):
 class PostUploading(object):
     """Processing after uploading, e.g. pubsub, report failures, etc."""
 
-    def __init__(self, gs_bucket):
+    def __init__(self, gs_bucket, dry_run=False):
         self._gs_bucket = gs_bucket
+        if dry_run:
+            self.process = self._dry_process
+
+    async def _dry_process(self, upload_result):
+        test_result = upload_result.test_result
+        if not test_result.pubsub_when_uploaded:
+            return
+
+        _LOGGER.debug('DRYRUN: publishing message: %s',
+                      os.path.join('gs://', self._gs_bucket,
+                                   upload_result.test_result_gs_path))
 
     async def process(self, upload_result):
         """Process the upload result and run post actions accordingly.

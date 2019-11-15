@@ -203,7 +203,7 @@ def test_run_once(m_datetime, m_pubsub, m_gs_api, afe, temp_root_dir):
 
     gs_api = gs_api_wrapper.GsApiWrapper(gs_bucket='test_bucket',
                                          credentials_file='cred')
-    args = mock.Mock(once=True, gs_api=gs_api, jobs=3,
+    args = mock.Mock(once=True, gs_api=gs_api, jobs=3, dry_run=False,
                      min_age_to_upload=datetime.timedelta(days=1),
                      min_age_to_prune=datetime.timedelta(days=7),
                      upload_timeout=datetime.timedelta(days=3),
