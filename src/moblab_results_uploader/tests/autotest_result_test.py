@@ -9,17 +9,16 @@ from __future__ import print_function
 
 import datetime
 import unittest
-
 from unittest import mock  # pylint:disable=no-name-in-module
-
-from moblab_common import afe_connector
 
 import autotest_result
 import test_result_interface
+from moblab_common import afe_connector
 
 
 class AutotestHostTaskTest(unittest.TestCase):
     """Test cases for AutotestHostTask."""
+
     def setUp(self):
         self.task = autotest_result.AutotestHostTask(
             root_dir='.', relative_path='hosts/foo/123-task')
@@ -70,6 +69,7 @@ class AutotestHostTaskTest(unittest.TestCase):
 
 class AutotestTestJobTest(unittest.TestCase):
     """Test cases for AutotestTestJob."""
+
     def test_id(self):
         """Test for getting id of Autotest test job."""
         r = autotest_result.AutotestTestJob(
@@ -87,8 +87,8 @@ class AutotestTestJobTest(unittest.TestCase):
 
     @mock.patch.object(afe_connector.AFEConnector, 'get_jobs')
     @mock.patch.object(afe_connector.AFEConnector, 'get_host_queue_entries')
-    def test_hostless_job_finished_time(self, m_get_hqes, m_get_jobs):
-        """Test for getting finished time for a hostless job."""
+    def test_job_finished_time__no_hqe(self, m_get_hqes, m_get_jobs):
+        """Test for getting finished time for a job w/o HQE."""
         m_get_jobs.return_value = [{'created_on': '2020-01-01 00:00:00'}]
         m_get_hqes.return_value = []
 
@@ -99,8 +99,8 @@ class AutotestTestJobTest(unittest.TestCase):
 
     @mock.patch.object(afe_connector.AFEConnector, 'get_jobs')
     @mock.patch.object(afe_connector.AFEConnector, 'get_host_queue_entries')
-    def test_device_job_finished_time(self, m_get_hqes, m_get_jobs):
-        """Test for getting finished time for a hostless job."""
+    def test_job_finished_time__with_hqe(self, m_get_hqes, m_get_jobs):
+        """Test for getting finished time for a job with HQE."""
         m_get_jobs.return_value = [{'created_on': '2020-01-01 00:00:00'}]
         m_get_hqes.return_value = [
             {'finished_on': '2020-01-01 12:00:00'},

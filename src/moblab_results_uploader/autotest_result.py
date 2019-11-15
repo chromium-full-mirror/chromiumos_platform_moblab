@@ -65,13 +65,21 @@ def _query_job_finished_time(id_):
         result = result[0]
         hqes = afe.get_host_queue_entries(id_)
         if not hqes:  # For data inconsistency.
-            yield datetime.datetime.strptime(result['created_on'],
-                                             _TIMESTAMP_FORMAT)
+            create_on_str = result.get('created_on')
+            if create_on_str:
+                yield datetime.datetime.strptime(create_on_str,
+                                                 _TIMESTAMP_FORMAT)
+            else:
+                yield None
+            continue
 
-        finished_time = max([datetime.datetime.strptime(hqe['finished_on'],
-                                                        _TIMESTAMP_FORMAT)
-                             for hqe in hqes])
-        yield finished_time
+        hqes_finished_time = [datetime.datetime.strptime(hqe.get('finished_on'),
+                                                         _TIMESTAMP_FORMAT)
+                              for hqe in hqes if hqe.get('finished_on')]
+        if hqes_finished_time:
+            yield max(hqes_finished_time)
+        else:
+            yield None
 
 
 class _AutotestResult(test_result_interface.TestResult):
