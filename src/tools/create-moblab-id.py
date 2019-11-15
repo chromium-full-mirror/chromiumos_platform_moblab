@@ -15,12 +15,9 @@ import pwd
 
 from moblab_common import moblab_info
 
-MOBLAB_USER = "moblab"
-MOBLAB_GROUP = "moblab"
-MOBLAB_ID_FILENAME = "/home/moblab/.moblab_id"
 
 if __name__ == '__main__':
     moblab_info.get_or_create_id()
-    uid = pwd.getpwnam(MOBLAB_USER).pw_uid
-    gid = grp.getgrnam(MOBLAB_GROUP).gr_gid
-    os.chown(MOBLAB_ID_FILENAME, uid, gid)
+    uid = pwd.getpwnam(moblab_info.MOBLAB_USER).pw_uid
+    gid = grp.getgrnam(moblab_info.MOBLAB_GROUP).gr_gid
+    os.chown(moblab_info.MOBLAB_ID_FILENAME, uid, gid)

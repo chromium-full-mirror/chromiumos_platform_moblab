@@ -9,15 +9,16 @@ from __future__ import print_function
 
 # pylint: disable=cros-logging-import
 import logging
-import os
 import subprocess
 import uuid
 
 from moblab_common import lock_util
 
 
-_ID_FILE_PATH = os.path.expanduser('~/.moblab_id')
-_ID_FILE_LOCK_PATH = '%s.lock' % _ID_FILE_PATH
+MOBLAB_USER = 'moblab'
+MOBLAB_GROUP = 'moblab'
+MOBLAB_ID_FILENAME = '/home/moblab/.moblab_id'
+_ID_FILE_LOCK_PATH = '%s.lock' % MOBLAB_ID_FILENAME
 
 
 # TODO(guocb): Remove get_moblab_id() and get_moblab_serialnumber() completely
@@ -33,20 +34,20 @@ def get_or_create_id():
         The moblab random id.
     """
     try:
-        with open(_ID_FILE_PATH) as id_file:
+        with open(MOBLAB_ID_FILENAME) as id_file:
             random_id = id_file.read()
     except IOError:
         with lock_util.file_lock(_ID_FILE_LOCK_PATH, exclusive=True,
                                  timeout_seconds=1):
             # Check again to see if another process just created it.
             try:
-                with open(_ID_FILE_PATH) as id_file:
+                with open(MOBLAB_ID_FILENAME) as id_file:
                     return id_file.read()
             except IOError:
                 pass
 
             random_id = uuid.uuid1().hex
-            with open(_ID_FILE_PATH, 'w') as id_file:
+            with open(MOBLAB_ID_FILENAME, 'w') as id_file:
                 id_file.write(random_id)
 
     return random_id
