@@ -9,6 +9,7 @@ from __future__ import print_function
 import argparse
 import asyncio
 import datetime
+import functools
 import logging  # pylint: disable=cros-logging-import
 import os
 import pathlib
@@ -101,8 +102,7 @@ async def _async_upload(args, registry):
         result_dir_status.Status.UPLOADING)
     uploader = result_uploader.Uploader(
         timeout=args.upload_timeout,
-        gs_api=gs_api_wrapper.GsApiWrapper(
-            args.gs_bucket, args.credentials_file))
+        gs_api=args.gs_api)
     file_filter = result_file_filter.ResultFileFilter(
         filter_config=args.uploading_filter_config)
 
@@ -110,7 +110,7 @@ async def _async_upload(args, registry):
     # get status -> for each ready directory -> list all files -> apply file
     # filter -> put to uploading queue -> wait queue joining -> post uploading
     # processing.
-    post_uploading = result_uploader.PostUploading(args.gs_bucket)
+    post_uploading = result_uploader.PostUploading(args.gs_api.bucket_name)
     status_checker.next_step = status_filter.filter
     status_filter.next_step = processing_step.DataProcessFlow(
         uploader.try_upload_dir,
@@ -203,7 +203,25 @@ def add_arguments(parent_parser):
         'can be removed from local storage (default: %(default)s).'
     )
 
-    parser.set_defaults(func=run)
+    parser.set_defaults(
+        func=run,
+        post_parse_args=functools.partial(post_parse_args, parser))
+
+
+def post_parse_args(arg_parser, args):
+    """massage input arguments."""
+    _LOGGER.debug('Input arguments: %s', args)
+    if not args.gs_bucket:
+        arg_parser.error('GS Bucket not specified.')
+
+    try:
+        args.gs_api = gs_api_wrapper.GsApiWrapper(args.gs_bucket,
+                                                  args.credentials_file)
+    except gs_api_wrapper.GsAccessError as err:
+        arg_parser.error(str(err))
+
+    delattr(args, 'credentials_file')
+    delattr(args, 'gs_bucket')
 
 
 def run(args, test_result_registry=None):
@@ -214,10 +232,6 @@ def run(args, test_result_registry=None):
         test_result_registry: A list of TestResultRegisteryEntry which has
             needed test result directory information.
     """
-    if not args.gs_bucket:
-        _LOGGER.error('GS Bucket not specified.')
-        return
-    _LOGGER.debug('arguments: %s', args)
     _LOGGER.info('Start to scan, upload and prune test results.')
 
     registry = test_result_registry or test_result_registry_module.REGISTRY

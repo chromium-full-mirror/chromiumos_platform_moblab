@@ -23,6 +23,7 @@ import pytest
 
 import autotest_result
 import cmd_run
+import gs_api_wrapper
 import moblab_results_uploader
 import result_dir_status
 import test_result_registry
@@ -200,8 +201,9 @@ def build_registry(temp_root_dir):
 def test_run_once(m_datetime, m_pubsub, m_gs_api, afe, temp_root_dir):
     m_datetime.now.return_value = datetime.datetime(2020, 1, 10)
 
-    args = mock.Mock(once=True, credentials_file='cred', jobs=3,
-                     gs_bucket='test_bucket',
+    gs_api = gs_api_wrapper.GsApiWrapper(gs_bucket='test_bucket',
+                                         credentials_file='cred')
+    args = mock.Mock(once=True, gs_api=gs_api, jobs=3,
                      min_age_to_upload=datetime.timedelta(days=1),
                      min_age_to_prune=datetime.timedelta(days=7),
                      upload_timeout=datetime.timedelta(days=3),

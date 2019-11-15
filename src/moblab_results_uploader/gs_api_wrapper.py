@@ -67,9 +67,14 @@ class GsApiWrapper(object):
             gs_bucket: The Google Storage bucket name, without 'gs://' prefix.
             credentials_file: The path of the credentials file.
         """
+        self._bucket_name = gs_bucket
         self._gs_bucket = _get_gs_bucket(gs_bucket, credentials_file)
 
     def upload_from_filename(self, *, local_name, remote_name):
         """Upload the file `local_name` to GS as a blob named `remote_name`."""
         blob = self._gs_bucket.blob(remote_name)
         blob.upload_from_filename(str(local_name))
+
+    @property
+    def bucket_name(self):
+        return self._bucket_name

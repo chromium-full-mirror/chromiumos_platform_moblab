@@ -64,6 +64,7 @@ def _results_filter_type(config_file_path):
     return filters
 
 
+# pylint: disable=inconsistent-return-statements
 def _parse_args(argv):
     """Parse the command line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -89,13 +90,14 @@ def _parse_args(argv):
 
     args = parser.parse_args(argv)
 
+    if hasattr(args, 'post_parse_args'):
+        args.post_parse_args(args)
+
     # TODO(guocb) Use 'required' flag of argparse after upgrade to Python 3.7.
     if hasattr(args, 'func'):
         return args
 
-    print('Please specify one of the subcommands.', file=sys.stderr, end='\n\n')
-    parser.print_help()
-    sys.exit(1)
+    parser.error('Please specify one of the subcommands.')
 
 
 def main(argv):
