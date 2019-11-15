@@ -67,7 +67,7 @@ def get_serial_number():
         try:
             cmd_result = subprocess.check_output(['sudo', '--non-interactive',
                                                   'vpd', '-g', vpd_key])
-            return cmd_result
+            return cmd_result.decode('ascii')
         except subprocess.CalledProcessError as err:
             logging.error(str(err))
             logging.info(vpd_key)
