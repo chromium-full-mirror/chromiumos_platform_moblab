@@ -62,7 +62,8 @@ async def test_list_all_files(m_walk, next_step):
 async def test_filter_files(m_walk, filter_config, next_step):
     m_walk.return_value = _MOCK_FILE_SYSTEM
     test_result = mock.Mock(abs_path='/root/result', succeeded=True,
-                            suite_name='suite1')
+                            suite_name='suite1',
+                            skip_uploading_when_succeeded=False)
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step)
     await filter.filter_files(test_result)
@@ -77,7 +78,8 @@ async def test_filter_files_not_in_config(m_walk, filter_config, next_step):
     """Test filtering of a suite not configured in config file."""
     m_walk.return_value = _MOCK_FILE_SYSTEM
     test_result = mock.Mock(abs_path='/root/result',
-                            suite_name='suite_not_configured')
+                            suite_name='suite_not_configured',
+                            skip_uploading_when_succeeded=False)
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step)
     await filter.filter_files(test_result)
@@ -91,7 +93,8 @@ async def test_filter_files_not_in_config(m_walk, filter_config, next_step):
 async def test_filter_files_overlap(m_walk, filter_config, next_step):
     """Test filter configuration that has overlap in INCLUDE and EXCLUDE."""
     m_walk.return_value = _MOCK_FILE_SYSTEM
-    test_result = mock.Mock(abs_path='/root/result', suite_name='suite2')
+    test_result = mock.Mock(abs_path='/root/result', suite_name='suite2',
+                            skip_uploading_when_succeeded=False)
     filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
                                                  next_step=next_step)
     await filter.filter_files(test_result)
@@ -111,6 +114,21 @@ async def test_filter_files_failed_test(m_walk, filter_config, next_step):
     await filter.filter_files(test_result)
 
     assert next_step.await_count == _count_total_file()
+
+
+@pytest.mark.asyncio
+@mock.patch('os.walk')
+async def test_filter_files__skip_uploading(m_walk, filter_config, next_step):
+    """Test that we don't filter failed test result directory."""
+    m_walk.return_value = _MOCK_FILE_SYSTEM
+    test_result = mock.Mock(abs_path='/root/result', succeeded=True,
+                            suite_name='suite2',
+                            skip_uploading_when_succeeded=True)
+    filter = result_file_filter.ResultFileFilter(filter_config=filter_config,
+                                                 next_step=next_step)
+    await filter.filter_files(test_result)
+
+    assert next_step.await_count == 0
 
 
 @pytest.mark.asyncio

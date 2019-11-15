@@ -66,6 +66,7 @@ def test_try_file_filter_cmd(m_walk):
     test_result = _TEST_RESULT_CLS.return_value
     test_result.abs_path = pathlib.Path(test_result_dir)
     test_result.suite_name = 'cts_P'
+    test_result.skip_uploading_when_succeeded = False
 
     asyncio.set_event_loop(asyncio.new_event_loop())
     with mock.patch('cmd_try_file_filter._get_file_size') as m_get_size:

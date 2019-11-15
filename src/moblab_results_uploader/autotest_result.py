@@ -175,6 +175,11 @@ class AutotestHostTask(_AutotestResult):
         """Don't pubsub event when upload an Autotest special task result."""
         return False
 
+    @property
+    def skip_uploading_when_succeeded(self):
+        """Don't upload the task directory when it succeeded."""
+        return True
+
 
 class AutotestTestJob(_AutotestResult):
     """A class to represent autotest test job."""
