@@ -2,8 +2,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule } from '@angular/forms';
+import {
+  MatCheckboxModule,
+  MatSelectModule
+} from "@angular/material";
+
 
 import { TableHeaderSelectorComponent } from './table-header-selector.component';
+import { MoblabSelectorComponent } from '../moblab-selector/moblab-selector.component';
 
 describe('TableHeaderSelectorComponent', () => {
   let component: TableHeaderSelectorComponent;
@@ -11,7 +19,13 @@ describe('TableHeaderSelectorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableHeaderSelectorComponent ]
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        MatCheckboxModule,
+        MatSelectModule,
+      ],
+      declarations: [ TableHeaderSelectorComponent, MoblabSelectorComponent ]
     })
     .compileComponents();
   }));

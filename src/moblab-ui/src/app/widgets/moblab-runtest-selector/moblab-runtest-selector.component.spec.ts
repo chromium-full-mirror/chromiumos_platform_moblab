@@ -1,9 +1,13 @@
 /* tslint:disable:no-unused-variable */
-import {DebugElement} from '@angular/core';
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
+import { async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from "@angular/material/select";
 
-import {MoblabRuntestSelectorComponent} from './moblab-runtest-selector.component';
+import { MoblabBuildSelectorComponent } from '../moblab-build-selector/moblab-build-selector.component';
+import { MoblabRuntestSelectorComponent } from './moblab-runtest-selector.component';
+import { MoblabSelectorComponent } from '../moblab-selector/moblab-selector.component';
 
 describe('MoblabRuntestSelectorComponent', () => {
   let component: MoblabRuntestSelectorComponent;
@@ -12,7 +16,13 @@ describe('MoblabRuntestSelectorComponent', () => {
   beforeEach(async(() => {
     TestBed
         .configureTestingModule(
-            {declarations: [MoblabRuntestSelectorComponent]})
+            {
+              imports: [FormsModule, MatSelectModule],
+              declarations: [
+                MoblabBuildSelectorComponent,
+                MoblabRuntestSelectorComponent,
+                MoblabSelectorComponent,
+              ]})
         .compileComponents();
   }));
 
