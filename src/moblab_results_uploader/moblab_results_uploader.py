@@ -24,7 +24,7 @@ _LOG_FILE_BACKUP_COUNT = 14
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
 
 
-def logging_file_type(logfile_path):
+def _logging_file_type(logfile_path):
     """Wrap the input file path as a logging handler object."""
     try:
         return logging_handlers.TimedRotatingFileHandler(
@@ -52,7 +52,7 @@ def setup_logging(handler):
     logger.addHandler(handler)
 
 
-def results_filter_type(config_file_path):
+def _results_filter_type(config_file_path):
     """Load the results filter configuration."""
     try:
         with open(config_file_path) as config_file:
@@ -72,12 +72,12 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         '-l', '--log-file', default=logging.StreamHandler(sys.stdout),
-        type=logging_file_type, dest='log_handler',
+        type=_logging_file_type, dest='log_handler',
         help='The log file path. Default is stdout.'
     )
     parser.add_argument(
         '-f', '--uploading-filter-config-file',
-        type=results_filter_type, dest='uploading_filter_config', default={},
+        type=_results_filter_type, dest='uploading_filter_config', default={},
         metavar='UPLOADING_FILTER_CONFIG_FILE',
         help='The path of a YAML file which configures the uploading filters '
         'for different test suites.'
