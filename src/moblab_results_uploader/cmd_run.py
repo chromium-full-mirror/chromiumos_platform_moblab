@@ -110,7 +110,7 @@ async def _async_upload(args, registry):
         min_age_to_prune=args.min_age_to_prune
     )
     status_filter = result_dir_status.StatusFilter(
-        result_dir_status.Status.UPLOADING)
+        result_dir_status.Status.READY)
     uploader = result_uploader.Uploader(
         timeout=args.upload_timeout,
         gs_api=args.gs_api)

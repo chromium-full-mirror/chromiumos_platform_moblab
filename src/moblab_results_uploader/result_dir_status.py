@@ -21,7 +21,8 @@ _MARKER_LOCK_FILE = '.uploader_status.lock'
 _LOGGER = logging.getLogger(__name__)
 
 
-Status = enum.Enum('Status', ['NOT_READY', 'UPLOADING', 'UPLOADED', 'EXPIRED'])
+Status = enum.Enum('Status', ['NOT_READY', 'READY', 'UPLOADING', 'UPLOADED',
+                              'EXPIRED'])
 ResultAndStatus = collections.namedtuple('ResultAndStatus',
                                          ['status', 'test_result'])
 
@@ -29,8 +30,7 @@ ResultAndStatus = collections.namedtuple('ResultAndStatus',
 async def _load_status(test_result):
     """Load status of the `test_result` from status file."""
     try:
-        with (test_result.abs_path / MARKER_FILE).open() as f:
-            status_str = f.read()
+        status_str = (test_result.abs_path / MARKER_FILE).read_text()
     except FileNotFoundError:
         return Status.NOT_READY
     for status in Status:
@@ -43,9 +43,20 @@ async def _load_status(test_result):
 async def _write_status(test_result, status):
     """Write new `status` to status file of the `test_result_state`."""
     _LOGGER.debug('change status of %s to %s', test_result, status)
-    with (test_result.abs_path / MARKER_FILE).open('w') as f:
-        f.write(status.name)
+    (test_result.abs_path / MARKER_FILE).write_text(status.name)
 
+
+async def mark_uploading_started(test_result):
+    """Change the test result status to UPLOADING."""
+    with lock_util.file_lock(test_result.abs_path / _MARKER_LOCK_FILE,
+                             exclusive=True):
+        previous_status = await _load_status(test_result)
+        # Should have been expired, so skip the uploading.
+        if previous_status != Status.READY:
+            return False
+
+        await _write_status(test_result, Status.UPLOADING)
+        return True
 
 async def mark_uploading_result(test_result, *, succeeded):
     """Change the test result status according to uploading result."""
@@ -83,7 +94,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
             return Status.EXPIRED
 
         if previous_status == Status.NOT_READY:
-            return Status.UPLOADING
+            return Status.READY
         else:
             return previous_status
 
@@ -115,7 +126,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
             # The directory may be pruned just before checking.
             return
 
-        if current_status in [Status.EXPIRED, Status.UPLOADING]:
+        if current_status in [Status.EXPIRED, Status.READY]:
             await self._next_step(ResultAndStatus(status=current_status,
                                                   test_result=test_result))
 

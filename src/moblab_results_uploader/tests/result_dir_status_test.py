@@ -102,10 +102,10 @@ async def test_checker__finished_and_expired(m_open, m_lock, next_step,
 @pytest.mark.asyncio
 @mock.patch('moblab_common.lock_util.file_lock')
 async def test_checker__to_expired(m_lock, next_step, status_checker):
-    for status in [result_dir_status.Status.UPLOADING,
+    for status in [result_dir_status.Status.READY,
                    result_dir_status.Status.UPLOADED]:
-        with mock.patch('pathlib.Path.open',
-                        mock.mock_open(read_data=status.name), create=True):
+        with mock.patch('pathlib.Path') as m_path:
+            m_path.return_value.read_text.return_value = status.name
             now = _FINISHED_TIME + _MIN_AGE_TO_PRUNE + _HALF_DAY
 
             test_result = mock.Mock(finished_time=_FINISHED_TIME,

@@ -56,6 +56,9 @@ class Uploader(processing_step.ProcessStep):
 
     async def try_upload_dir(self, test_result):
         """Try to upload a directory with timeout checking."""
+        if not await result_dir_status.mark_uploading_started(test_result):
+            _LOGGER.info('%s is expired, so skip the uploading.', test_result)
+            return
         _LOGGER.info('Try to upload dir %s', test_result)
         # The GS path of uploaded test result.
         test_result_gs_path = ''
