@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 """This module defines some common utils for processing the test results."""
 
-from __future__ import absolute_import
-from __future__ import division
 from __future__ import print_function
 
 
@@ -17,6 +15,7 @@ class ProcessStep(object):
     creating the processing step coroutine.
     But in generally, inheriting from this class can bring better readability.
     """
+
     def __init__(self, *, next_step=None):
         """Constructor.
 
@@ -29,3 +28,21 @@ class ProcessStep(object):
         self._next_step = new_step
 
     next_step = property(None, next_step)
+
+
+class DataProcessFlow(object):
+    """A data process flow.
+
+    The instance of this class calls all registered data process components one
+    by one. The processing result of each component is passed to the next
+    component as the input.
+    """
+
+    def __init__(self, *steps):
+        self._steps = steps
+
+    async def __call__(self, data):
+        for step in self._steps:
+            data = await step(data)
+
+        return data
