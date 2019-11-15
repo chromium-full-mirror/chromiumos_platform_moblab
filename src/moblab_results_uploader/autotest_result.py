@@ -12,15 +12,27 @@ import logging  # pylint: disable=cros-logging-import
 import os
 import pathlib
 import re
+import sys
 
 import test_result_interface
 from moblab_common import afe_connector
 
-ROOT_DIR = pathlib.Path('/usr/local/autotest/results')
+_AUTOTEST_ROOT = pathlib.Path('/usr/local/autotest')
+ROOT_DIR = _AUTOTEST_ROOT / 'results'
 
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
 _TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
 _STATUS_LOG = 'status.log'
+_JOB_INFO = 'job.serialize'
+
+# Add Autotest TKO directory to sys.path and import library to parse
+# job.serialize.
+sys.path.append(str(_AUTOTEST_ROOT))
+try:
+    from tko import tko_pb2
+except ImportError:
+    tko_pb2 = None
+sys.path.pop()
 
 
 def _query_speical_task_finished_time(id_):
@@ -72,6 +84,7 @@ class _AutotestResult(test_result_interface.TestResult):
         self._finished_time = None
         self._succeeded = None
         self._afe_query = None
+        self._suite_name = None
 
     @property
     def id(self):
@@ -101,6 +114,31 @@ class _AutotestResult(test_result_interface.TestResult):
 
         except (FileNotFoundError, IndexError):
             return None
+
+    @property
+    def suite_name(self):
+        if self._suite_name:
+            return self._suite_name
+
+        if not tko_pb2:
+            return ''
+
+        job = tko_pb2.Job()
+        for host_job_info in self.abs_path.glob('*/{}'.format(_JOB_INFO)):
+            # Just parse the 1st job.serialize file we found. The suite name
+            # is same for all host directory of each test.
+            try:
+                with host_job_info.open('rb') as f:
+                    data = f.read()
+            except (FileNotFoundError, PermissionError) as err:
+                _LOGGER.warning("Can't parse %s: %s", _JOB_INFO, err)
+                return ''
+
+            job.ParseFromString(data)
+            self._suite_name = job.suite
+            return self._suite_name
+
+        return ''
 
 
 class AutotestHostTask(_AutotestResult):

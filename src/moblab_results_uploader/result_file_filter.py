@@ -69,16 +69,11 @@ _KEY_INCLUDE = 'include'
 _KEY_EXCLUDE = 'exclude'
 
 
-def _get_test_suite(test_result):
-    """Get the test suite name of `test_result`, e.g. cts_P, etc."""
-    # FIXME (guocb) parse job.serial to get the suite name.
-    suite = 'cts_P'
-    _LOGGER.debug('The suite of %s is %s', test_result, suite)
-    return suite
-
-
 def _get_filter_by_suite(filters, suite_name):
     """Get the filter config for `suite_name` form `filters`."""
+    if not suite_name:
+        return None
+
     for filter in filters:
         regex = filter[_KEY_SUITE_NAME_REGEX]
         if re.match(regex, suite_name):
@@ -160,13 +155,12 @@ class ResultFileFilter(processing_step.ProcessStep):
 
     async def filter_files(self, test_result):
         """Filter files of `test_result` according to predefined filters."""
-        suite_name = _get_test_suite(test_result)
         self._applicable_filter = _get_filter_by_suite(self._filters_config,
-                                                       suite_name)
+                                                       test_result.suite_name)
 
         if not self._applicable_filter:
             _LOGGER.info('No filter found for %s (%s). List all files then.',
-                         test_result, suite_name)
+                         test_result, test_result.suite_name)
             await _list_all_files(test_result, next_step=self._next_step)
             return
 
