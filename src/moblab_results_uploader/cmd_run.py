@@ -101,15 +101,15 @@ async def _async_upload(args, registry):
     file_filter = result_file_filter.ResultFileFilter(
         filter_config=args.uploading_filter_config)
 
-    # TODO(guocb) The processing flow is:
+    # The processing flow is:
     # get status -> for each ready directory -> list all files -> apply file
-    # filter -> put to uploading queue -> wait queue joining -> mark upload
-    # result.
+    # filter -> put to uploading queue -> wait queue joining -> post uploading
+    # processing.
+    post_uploading = result_uploader.PostUploading(args.gs_bucket)
     status_checker.next_step = status_filter.filter
     status_filter.next_step = processing_step.DataProcessFlow(
         uploader.try_upload_dir,
-        result_uploader.notify_pubsub,
-        result_uploader.mark_uploading_result
+        post_uploading.process,
     )
     uploader.next_step = file_filter.filter_files
     file_filter.next_step = uploader.uploading_queue.put
