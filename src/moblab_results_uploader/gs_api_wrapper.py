@@ -72,6 +72,11 @@ class GsApiWrapper(object):
 
     def upload_from_filename(self, *, local_name, remote_name):
         """Upload the file `local_name` to GS as a blob named `remote_name`."""
+        # We just upload regular files.
+        if not local_name.is_file():
+            return
+        if local_name.is_symlink():
+            return
         blob = self._gs_bucket.blob(remote_name)
         blob.upload_from_filename(str(local_name))
 
