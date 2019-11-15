@@ -21,7 +21,7 @@ import test_result_interface
 _AUTOTEST_ROOT = pathlib.Path('/usr/local/autotest')
 ROOT_DIR = _AUTOTEST_ROOT / 'results'
 
-_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_LOGGER = logging.getLogger(__name__)
 _TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
 _STATUS_LOG = 'status.log'
 _JOB_INFO = 'job.serialize'

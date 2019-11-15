@@ -10,7 +10,6 @@ import asyncio
 import collections
 import logging  # pylint: disable=cros-logging-import
 import os
-import pathlib
 
 from concurrent import futures
 
@@ -20,7 +19,7 @@ from moblab_common import pubsub_client
 import processing_step
 import result_dir_status
 
-_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_LOGGER = logging.getLogger(__name__)
 _SERIAL_NUMBER = moblab_info.get_serial_number()
 _MOBLAB_ID = moblab_info.get_or_create_id()
 _GS_BUCKET_ROOT = 'results'

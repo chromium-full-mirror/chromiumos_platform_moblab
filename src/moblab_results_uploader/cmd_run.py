@@ -12,7 +12,6 @@ import datetime
 import functools
 import logging  # pylint: disable=cros-logging-import
 import os
-import pathlib
 import shutil
 import yaml
 
@@ -27,7 +26,7 @@ import result_uploader
 import test_result_registry as test_result_registry_module
 
 SUB_COMMAND_NAME = 'run'
-_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_UPLOAD_TIMEOUT = datetime.timedelta(days=3)
 _DEFAULT_MIN_AGE_TO_UPLOAD = datetime.timedelta(days=0)

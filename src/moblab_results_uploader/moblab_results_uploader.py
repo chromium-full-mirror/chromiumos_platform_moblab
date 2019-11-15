@@ -45,9 +45,13 @@ def _setup_logging(handler):
     logger.setLevel(logging.DEBUG)
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s'))
-    logger.addHandler(handler)
+        '%(asctime)s %(name)s %(levelname)s: %(message)s'))
+    # Some code runs before this function may have created some handler and we
+    # don't want them.
+    logger.handlers = [handler]
 
+    logging.getLogger('requests').setLevel(logging.WARNING)
+    logging.getLogger('moblab_common').setLevel(logging.WARNING)
 
 def _results_filter_type(config_file_path):
     """Load the results filter configuration."""
