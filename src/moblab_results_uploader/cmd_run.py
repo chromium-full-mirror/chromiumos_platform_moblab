@@ -120,20 +120,17 @@ async def _async_upload(args, registry):
 
     # The processing flow is:
     # get status -> for each ready directory -> list all files -> apply file
-    # filter -> put to uploading queue -> wait queue joining -> post uploading
-    # processing.
-    post_uploading = result_uploader.PostUploading(args.gs_api.bucket_name,
-                                                   args.dry_run)
+    # filter -> put to uploading queue -> wait queue joining.
     status_checker.next_step = status_filter.filter
-    status_filter.next_step = processing_step.DataProcessFlow(
-        uploader.try_upload_dir,
-        post_uploading.process,
-    )
+    status_filter.next_step = uploader.try_upload_dir
     uploader.next_step = file_filter.filter_files
     file_filter.next_step = uploader.uploading_queue.put
 
     consumer = asyncio.ensure_future(uploader.upload_files(args.jobs,
                                                            args.dry_run))
+
+    uploader.uploading_context = result_uploader.UploadingContext(
+        gs_bucket=args.gs_api.bucket_name, dry_run=args.dry_run)
     while True:
         async for test_result in _enumerate_test_results(registry):
             await status_checker.check(test_result)

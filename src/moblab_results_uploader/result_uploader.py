@@ -25,11 +25,8 @@ _MOBLAB_ID = moblab_info.get_or_create_id()
 _GS_BUCKET_ROOT = 'results'
 
 
-class UploadResult(collections.namedtuple(
-    'UploadResult', ['test_result', 'test_result_gs_path'])):
-    @property
-    def uploaded(self):
-        return self.test_result_gs_path != ''
+class _TestResultExpiredError(Exception):
+    """An error raised when a dir is expired before uploading."""
 
 
 class Uploader(processing_step.ProcessStep):
@@ -52,13 +49,23 @@ class Uploader(processing_step.ProcessStep):
         self._timeout = timeout
         self._gs_path_prefix = os.path.join(_GS_BUCKET_ROOT, _SERIAL_NUMBER,
                                             _MOBLAB_ID)
+        self._uploading_context = None
         self.uploading_queue = asyncio.Queue(maxsize=10)
 
+    def uploading_context(self, ctx):
+        self._uploading_context = ctx
+
+    uploading_context = property(None, uploading_context)
+
     async def try_upload_dir(self, test_result):
+        try:
+            async with self._uploading_context(test_result) as ctx:
+                ctx.gs_path = await self._try_upload_dir(test_result)
+        except _TestResultExpiredError as err:
+            _LOGGER.info(err)
+
+    async def _try_upload_dir(self, test_result):
         """Try to upload a directory with timeout checking."""
-        if not await result_dir_status.mark_uploading_started(test_result):
-            _LOGGER.info('%s is expired, so skip the uploading.', test_result)
-            return
         _LOGGER.info('Try to upload dir %s', test_result)
         # The GS path of uploaded test result.
         test_result_gs_path = ''
@@ -74,8 +81,7 @@ class Uploader(processing_step.ProcessStep):
             if err is KeyboardInterrupt:
                 raise err
 
-        return UploadResult(test_result=test_result,
-                            test_result_gs_path=test_result_gs_path)
+        return test_result_gs_path
 
     async def upload_files(self, jobs=1, dry_run=False):
         """Upload files in the queue to GS in background."""
@@ -99,51 +105,55 @@ class Uploader(processing_step.ProcessStep):
                                           remote_name=remote_name)
 
 
-class PostUploading(object):
-    """Processing after uploading, e.g. pubsub, report failures, etc."""
+class UploadingContext(object):
+    """Docstring for UploadingContext. """
 
-    def __init__(self, gs_bucket, dry_run=False):
+    def __init__(self, *, gs_bucket, dry_run):
+        self._test_result = None
         self._gs_bucket = gs_bucket
-        if dry_run:
-            self.process = self._dry_process
+        self.gs_path = None
+        self._dry_run = dry_run
 
-    async def _dry_process(self, upload_result):
-        test_result = upload_result.test_result
-        if not test_result.pubsub_when_uploaded:
-            return
+    def __call__(self, test_result):
+        self._test_result = test_result
+        return self
 
-        _LOGGER.debug('DRYRUN: publishing message: %s',
-                      os.path.join('gs://', self._gs_bucket,
-                                   upload_result.test_result_gs_path))
+    @property
+    def uploaded(self):
+        return bool(self.gs_path)
 
-    async def process(self, upload_result):
-        """Process the upload result and run post actions accordingly.
+    async def __aenter__(self):
+        if self._dry_run:
+            return self
 
-        When uploading failed, we record the failure in a report.
+        if not await result_dir_status.mark_uploading_started(
+            self._test_result):
+            raise _TestResultExpiredError(
+                '%s is expired. Skip the uploading.', self._test_result)
+        return self
 
-        When uploading succeeded, we send a pubsub event. We then update the
-        status file according to the event sending result.
-
-        For some test result, e.g. AutotestHostTask, we don't want to send
-        pubsub event in this case, so just update status file directly
-        according to the uploading result.
-        """
-        test_result = upload_result.test_result
-        if not upload_result.uploaded:
+    async def __aexit__(self, exc_type, exc, tb):
+        if not self.uploaded:
             # TODO(guocb) Report failures.
             return
 
-        if not test_result.pubsub_when_uploaded:
+        if self._dry_run:
+            if self._test_result.pubsub_when_uploaded:
+                _LOGGER.debug('DRYRUN: publishing message: %s',
+                              os.path.join('gs://', self._gs_bucket,
+                                           self.gs_path))
+            return
+
+        if not self._test_result.pubsub_when_uploaded:
             return await result_dir_status.mark_uploading_result(
-                test_result, succeeded=upload_result.uploaded)
+                self._test_result, succeeded=self.uploaded)
 
         loop = asyncio.get_event_loop()
         console_client = pubsub_client.PubSubBasedClient()
         posted = await loop.run_in_executor(
             None, console_client.send_test_job_offloaded_message,
-            os.path.join('gs://', self._gs_bucket,
-                         upload_result.test_result_gs_path),
+            os.path.join('gs://', self._gs_bucket, self.gs_path),
             _SERIAL_NUMBER, _MOBLAB_ID)
 
         return await result_dir_status.mark_uploading_result(
-            test_result, succeeded=posted)
+            self._test_result, succeeded=posted)
