@@ -108,11 +108,12 @@ class Uploader(processing_step.ProcessStep):
 class UploadingContext(object):
     """Docstring for UploadingContext. """
 
-    def __init__(self, *, gs_bucket, dry_run):
+    def __init__(self, *, gs_bucket, dry_run, resume_aborted=False):
         self._test_result = None
         self._gs_bucket = gs_bucket
         self.gs_path = None
         self._dry_run = dry_run
+        self._resume_aborted = resume_aborted
 
     def __call__(self, test_result):
         self._test_result = test_result
@@ -123,6 +124,9 @@ class UploadingContext(object):
         return bool(self.gs_path)
 
     async def __aenter__(self):
+        if self._resume_aborted:
+            return self
+
         if self._dry_run:
             return self
 

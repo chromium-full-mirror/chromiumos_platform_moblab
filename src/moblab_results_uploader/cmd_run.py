@@ -104,33 +104,65 @@ async def _async_prune(args, registry):
         await asyncio.sleep(_RUN_INTERVAL.total_seconds())
 
 
+async def _resume_aborted_uploading(args, registry, status_checker, uploader):
+    """Resume the uploading of last run.
+
+    This script indented to be run as a daemon. When the daemon interrupted for
+    any reason, it aborts the current uploading job and leave it in UPLOADING
+    status. When restart the daemon, we resume it and eventually change the
+    state to allow future processing (pruning, or re-uploading).
+
+    This is only for one time before we start the main loop.
+    """
+    # We hook up a status filter which only interests in directories UPLOADING
+    # state, and an uploading context which doesn't change directory status
+    # before uploading.
+    uploader.uploading_context = result_uploader.UploadingContext(
+        gs_bucket=args.gs_api.bucket_name, dry_run=args.dry_run,
+        resume_aborted=True)
+    status_filter = result_dir_status.StatusFilter(
+        result_dir_status.Status.UPLOADING)
+    status_checker.next_step = status_filter.filter
+    status_filter.next_step = uploader.try_upload_dir
+
+    _LOGGER.info('First scan for aborted uploading jobs.')
+    async for test_result in _enumerate_test_results(registry):
+        await status_checker.get_last_status(test_result)
+
+
 async def _async_upload(args, registry):
     """Scan and upload all 'READY' test results."""
     status_checker = result_dir_status.ResultStatusChecker(
         min_age_to_upload=args.min_age_to_upload,
         min_age_to_prune=args.min_age_to_prune
     )
-    status_filter = result_dir_status.StatusFilter(
-        result_dir_status.Status.READY)
     uploader = result_uploader.Uploader(
         timeout=args.upload_timeout,
         gs_api=args.gs_api)
     file_filter = result_file_filter.ResultFileFilter(
         filter_config=args.uploading_filter_config)
-
-    # The processing flow is:
-    # get status -> for each ready directory -> list all files -> apply file
-    # filter -> put to uploading queue -> wait queue joining.
-    status_checker.next_step = status_filter.filter
-    status_filter.next_step = uploader.try_upload_dir
     uploader.next_step = file_filter.filter_files
     file_filter.next_step = uploader.uploading_queue.put
 
     consumer = asyncio.ensure_future(uploader.upload_files(args.jobs,
                                                            args.dry_run))
 
+    # Finish unfinished jobs of last run.
+    await _resume_aborted_uploading(args, registry, status_checker, uploader)
+
+    # Then start the main loop.
+    # We hook up a new status filter which only interests in directories in
+    # READY state, and a new uploading context which changes directory state to
+    # UPLOADING before uploading.
+    status_filter = result_dir_status.StatusFilter(
+        result_dir_status.Status.READY)
+    status_checker.next_step = status_filter.filter
+    status_filter.next_step = uploader.try_upload_dir
+
     uploader.uploading_context = result_uploader.UploadingContext(
-        gs_bucket=args.gs_api.bucket_name, dry_run=args.dry_run)
+        gs_bucket=args.gs_api.bucket_name, dry_run=args.dry_run,
+        resume_aborted=False)
+    _LOGGER.info('Main uploading scan loop started.')
     while True:
         async for test_result in _enumerate_test_results(registry):
             await status_checker.check(test_result)

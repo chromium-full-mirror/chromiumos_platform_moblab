@@ -126,9 +126,15 @@ class ResultStatusChecker(processing_step.ProcessStep):
             # The directory may be pruned just before checking.
             return
 
-        if current_status in [Status.EXPIRED, Status.READY]:
+        if current_status in [Status.EXPIRED, Status.READY, Status.UPLOADING]:
             await self._next_step(ResultAndStatus(status=current_status,
                                                   test_result=test_result))
+
+    async def get_last_status(self, test_result):
+        """Run next step with 'last' (may out of date) directory status."""
+        last_status = await _load_status(test_result)
+        await self._next_step(ResultAndStatus(status=last_status,
+                                              test_result=test_result))
 
 
 class StatusFilter(processing_step.ProcessStep):
