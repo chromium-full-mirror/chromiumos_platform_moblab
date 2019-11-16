@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import pathlib
 import tempfile
 import unittest
 
@@ -22,7 +23,7 @@ def test_uploading_blob(gs_bucket, credentials_file):
     with tempfile.NamedTemporaryFile() as f:
         f.write(b'Some test data.\n')
         f.seek(0)
-        gs.upload_from_filename(local_name=f.name, remote_name=f.name)
+        gs.upload_from_filename(local_name=pathlib.Path(f.name), remote_name=f.name)
 
 
 class GsApiWrapperTest(unittest.TestCase):
