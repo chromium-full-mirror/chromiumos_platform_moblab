@@ -120,7 +120,8 @@ async def _async_upload(args, registry):
     # get status -> for each ready directory -> list all files -> apply file
     # filter -> put to uploading queue -> wait queue joining -> post uploading
     # processing.
-    post_uploading = result_uploader.PostUploading(args.gs_api.bucket_name)
+    post_uploading = result_uploader.PostUploading(args.gs_api.bucket_name,
+                                                   args.dry_run)
     status_checker.next_step = status_filter.filter
     status_filter.next_step = processing_step.DataProcessFlow(
         uploader.try_upload_dir,
@@ -129,18 +130,15 @@ async def _async_upload(args, registry):
     uploader.next_step = file_filter.filter_files
     file_filter.next_step = uploader.uploading_queue.put
 
-    consumers = [
-        asyncio.ensure_future(uploader.upload_files(args.dry_run))
-        for _ in range(args.jobs)
-    ]
+    consumer = asyncio.ensure_future(uploader.upload_files(args.jobs,
+                                                           args.dry_run))
     while True:
         await _enumerate_test_results(registry, next_step=status_checker.check)
         if args.once:
             break
         await asyncio.sleep(_RUN_INTERVAL.total_seconds())
 
-    for consumer in consumers:
-        consumer.cancel()
+    consumer.cancel()
 
 
 def _accessible_file_type(file_path):
