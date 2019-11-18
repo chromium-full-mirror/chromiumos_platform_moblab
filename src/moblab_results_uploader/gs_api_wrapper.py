@@ -12,14 +12,13 @@ from __future__ import print_function
 
 import logging  # pylint: disable=cros-logging-import
 import os
-import pathlib
 
 from google.cloud import exceptions as gcp_exceptions
 from google.cloud import storage as gs
 
 
 ENV_GOOGLE_APP_CREDENTIALS = 'GOOGLE_APPLICATION_CREDENTIALS'
-_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_LOGGER = logging.getLogger(__name__)
 
 
 class GsAccessError(Exception):

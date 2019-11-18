@@ -42,7 +42,7 @@ import yaml
 
 import processing_step
 
-_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_LOGGER = logging.getLogger(__name__)
 
 
 class ResultFile(collections.namedtuple('ResultFile', ['test_result',

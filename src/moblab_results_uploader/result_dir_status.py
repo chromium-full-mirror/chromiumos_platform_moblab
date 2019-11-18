@@ -10,7 +10,6 @@ import collections
 import datetime
 import enum
 import logging
-import pathlib
 
 import processing_step
 import test_result_interface
@@ -19,7 +18,7 @@ from moblab_common import lock_util
 MARKER_FILE = '.uploader_status'
 _MARKER_LOCK_FILE = '.uploader_status.lock'
 
-_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_LOGGER = logging.getLogger(__name__)
 
 
 Status = enum.Enum('Status', ['NOT_READY', 'UPLOADING', 'UPLOADED', 'EXPIRED'])

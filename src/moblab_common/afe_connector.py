@@ -21,11 +21,12 @@ except ImportError:
 import requests
 
 MOBLAB_RPC_SERVER = 'localhost:80'
+_LOGGER = logging.getLogger(__name__)
 
 
 def enroll_dut(ip_address):
     cmd = '/usr/local/autotest/cli/atest host create %s' % ip_address
-    logging.error(cmd)
+    _LOGGER.error(cmd)
     subprocess.call(cmd, shell=True)
 
 
@@ -55,18 +56,18 @@ class AFEConnector(object):
             'params': [params]
         })
 
-        logging.debug('%s %s', rpc_url, data)
+        _LOGGER.debug('%s %s', rpc_url, data)
         try:
             response = requests.post(rpc_url, data=data)
             error = self.decode_response(response, 'error')
             if error:
-                logging.error('AFE RPC called %s failed with error %s', rpc_url,
+                _LOGGER.error('AFE RPC called %s failed with error %s', rpc_url,
                               error)
-            logging.debug('%s %s', response.text, response.content)
+            _LOGGER.debug('%s %s', response.text, response.content)
 
             return response
         except requests.exceptions.RequestException as e:
-            logging.error(e)
+            _LOGGER.error(e)
 
     def decode_response(self, response, key, expected_code=http.client.OK):
         """Get a specific value from the return of an afe call.
@@ -85,7 +86,7 @@ class AFEConnector(object):
             if response:
                 # TODO(haddowk): Figure out how to return a useful error
                 # message.
-                logging.error('AFE RPC Failed %s', response.get('error', ''))
+                _LOGGER.error('AFE RPC Failed %s', response.get('error', ''))
             return {}
         return self.json_decoder.decode(response.text)[key]
 
@@ -107,7 +108,7 @@ class AFEConnector(object):
             try:
                 result[k] = dict(v)
             except ValueError:
-                logging.error('Error getting config values key: %s value: %s',
+                _LOGGER.error('Error getting config values key: %s value: %s',
                               k, v)
 
         return result
@@ -126,7 +127,7 @@ class AFEConnector(object):
     def get_num_jobs(self):
         params = {}
         response = self.send_rpc_command('get_num_jobs', params)
-        logging.error(response)
+        _LOGGER.error(response)
         return self.decode_response(response, 'result')
 
     def get_jobs(self, id_list=None):
@@ -225,7 +226,7 @@ class AFEConnector(object):
         }
         response = self.send_rpc_command('create_suite_job', params)
 
-        logging.info(response)
+        _LOGGER.info(response)
         return response.text
 
     def enroll_duts(self, ip_addresses):
@@ -239,7 +240,7 @@ class AFEConnector(object):
         for host in hosts:
             hostname = host.get('hostname')
             params = {'id': host.get('id')}
-            logging.error(params)
+            _LOGGER.error(params)
             if hostname in ip_addresses:
                 response = self.send_rpc_command('delete_host', params)
-            logging.error(response)
+            _LOGGER.error(response)
