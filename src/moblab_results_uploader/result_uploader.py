@@ -74,7 +74,7 @@ class Uploader(processing_step.ProcessStep):
         return UploadResult(test_result=test_result,
                             test_result_gs_path=test_result_gs_path)
 
-    async def upload_files(self, jobs, dry_run=False):
+    async def upload_files(self, jobs=1, dry_run=False):
         """Upload files in the queue to GS in background."""
         loop = asyncio.get_event_loop()
         executor = futures.ThreadPoolExecutor(max_workers=jobs)
