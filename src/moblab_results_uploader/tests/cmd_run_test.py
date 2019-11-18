@@ -10,6 +10,8 @@ import argparse
 import os
 import tempfile
 
+from unittest import mock
+
 import pytest
 
 import cmd_run
@@ -39,3 +41,19 @@ def test_arg_parsing():
              '--credentials-file', tmp_file.name]
         )
         assert args.credentials_file == tmp_file.name
+
+        args = parser.parse_args(
+            [cmd_run.SUB_COMMAND_NAME, '--gs-bucket', 'test',
+             '--credentials-file', tmp_file.name, '--dry-run'])
+        with mock.patch('gs_api_wrapper.GsApiWrapper') as m_gs_api:
+            m_gs_api.side_effect = gs_api_wrapper.GsAccessError
+            with pytest.raises(SystemExit):
+                args.post_parse_args(args)
+
+            m_gs_api.side_effect = None
+            args.post_parse_args(args)
+            assert args.gs_api is not None
+            assert not hasattr(args, 'gs_bucket')
+            assert not hasattr(args, 'credentials_file')
+
+            assert args.once  # Set by --dry-run option implicitly.
