@@ -28,21 +28,3 @@ class ProcessStep(object):
         self._next_step = new_step
 
     next_step = property(None, next_step)
-
-
-class DataProcessFlow(object):
-    """A data process flow.
-
-    The instance of this class calls all registered data process components one
-    by one. The processing result of each component is passed to the next
-    component as the input.
-    """
-
-    def __init__(self, *steps):
-        self._steps = steps
-
-    async def __call__(self, data):
-        for step in self._steps:
-            data = await step(data)
-
-        return data
