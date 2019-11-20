@@ -37,6 +37,8 @@ async def test_upload_files():
 
 
 @pytest.mark.asyncio
+@mock.patch('moblab_common.lock_util.file_lock', new=mock.MagicMock())
+@mock.patch('pathlib.Path.write_text', new=mock.Mock())
 async def test_upload_dir__succeed():
     gs_api = mock.Mock()
 
@@ -50,11 +52,15 @@ async def test_upload_dir__succeed():
     test_result.name = '123-moblab'
     test_result.abs_path = pathlib.Path('/root/to/test/123-moblab')
 
-    result = await uploader.try_upload_dir(test_result)
+    with mock.patch('pathlib.Path.read_text') as m_read:
+        m_read.return_value = 'READY'
+        result = await uploader.try_upload_dir(test_result)
     assert result.uploaded is True
 
 
 @pytest.mark.asyncio
+@mock.patch('moblab_common.lock_util.file_lock', new=mock.MagicMock())
+@mock.patch('pathlib.Path.write_text', new=mock.Mock())
 async def test_upload_dir__timeout():
     gs_api = mock.Mock()
 
@@ -69,7 +75,9 @@ async def test_upload_dir__timeout():
     test_result.name = '123-moblab'
     test_result.abs_path = pathlib.Path('/root/to/test/123-moblab')
 
-    result = await uploader.try_upload_dir(test_result)
+    with mock.patch('pathlib.Path.read_text') as m_read:
+        m_read.return_value = 'READY'
+        result = await uploader.try_upload_dir(test_result)
     assert result.uploaded is False
 
 

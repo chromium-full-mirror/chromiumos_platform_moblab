@@ -31,6 +31,7 @@ import test_result_registry
 _EXPIRED = result_dir_status.Status.EXPIRED
 _UPLOADED = result_dir_status.Status.UPLOADED
 _UPLOADING = result_dir_status.Status.UPLOADING
+_READY = result_dir_status.Status.READY
 _CTS = 'cts_P'
 _FILTER_CONFIG = [
     {'suite_name_regex': 'cts', 'exclude': ['*/debug/*']}
@@ -59,12 +60,12 @@ _DIRECTORIES = [
     # FakeDir(16, TYPE.JOB, '2020-01-01 01:40:00', 'GOOD', _UPLOADING, ''),
     # FakeDir(17, TYPE.TASK, '2020-01-01 01:40:00', 'GOOD', _UPLOADING, ''),
     # Incomplete and not expired yet results. Will be uploaded.
-    FakeDir(20, TYPE.JOB, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, ''),
-    FakeDir(21, TYPE.TASK, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, ''),
-    FakeDir(22, TYPE.JOB, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, _CTS),
-    FakeDir(23, TYPE.TASK, '2020-01-06 01:40:00', 'GOOD', _UPLOADING, ''),
-    FakeDir(24, TYPE.JOB, '2020-01-06 01:40:00', 'FAIL', _UPLOADING, _CTS),
-    FakeDir(25, TYPE.TASK, '2020-01-06 01:40:00', 'ABORT', _UPLOADING, ''),
+    FakeDir(20, TYPE.JOB, '2020-01-06 01:40:00', 'GOOD', _READY, ''),
+    FakeDir(21, TYPE.TASK, '2020-01-06 01:40:00', 'GOOD', _READY, ''),
+    FakeDir(22, TYPE.JOB, '2020-01-06 01:40:00', 'GOOD', _READY, _CTS),
+    FakeDir(23, TYPE.TASK, '2020-01-06 01:40:00', 'GOOD', _READY, ''),
+    FakeDir(24, TYPE.JOB, '2020-01-06 01:40:00', 'FAIL', _READY, _CTS),
+    FakeDir(25, TYPE.TASK, '2020-01-06 01:40:00', 'ABORT', _READY, ''),
     # Uploaded and not expired results. Will not touch.
     FakeDir(30, TYPE.JOB, '2020-01-06 00:40:00', 'GOOD', _UPLOADED, ''),
     FakeDir(31, TYPE.TASK, '2020-01-06 00:40:00', 'GOOD', _UPLOADED, ''),
