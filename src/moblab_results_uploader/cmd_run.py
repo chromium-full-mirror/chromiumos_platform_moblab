@@ -40,8 +40,8 @@ _RUN_INTERVAL = datetime.timedelta(minutes=1)
 _TEST_RESULT_CACHE = {}
 
 
-async def _enumerate_test_results(test_result_registry, *, next_step):
-    """Enumerate all test results registered."""
+async def _enumerate_test_results(test_result_registry):
+    """Enumerate and yield all test results registered."""
     for registry_entry in test_result_registry:
         for cls in registry_entry.classes:
             root_dir = registry_entry.root_dir
@@ -51,9 +51,8 @@ async def _enumerate_test_results(test_result_registry, *, next_step):
                 _LOGGER.info('Found %s', test_result)
                 # Give other coroutine chance to run.
                 await asyncio.sleep(0.1)
-                await next_step(
-                    _TEST_RESULT_CACHE.setdefault(test_result.abs_path,
-                                                  test_result))
+                yield _TEST_RESULT_CACHE.setdefault(test_result.abs_path,
+                                                    test_result)
 
 
 async def _prune_test_result(dry_run, test_result):
@@ -97,7 +96,9 @@ async def _async_prune(args, registry):
                                                 args.dry_run)
 
     while True:
-        await _enumerate_test_results(registry, next_step=status_checker.check)
+        async for test_result in _enumerate_test_results(registry):
+            await status_checker.check(test_result)
+
         if args.once:
             break
         await asyncio.sleep(_RUN_INTERVAL.total_seconds())
@@ -134,7 +135,9 @@ async def _async_upload(args, registry):
     consumer = asyncio.ensure_future(uploader.upload_files(args.jobs,
                                                            args.dry_run))
     while True:
-        await _enumerate_test_results(registry, next_step=status_checker.check)
+        async for test_result in _enumerate_test_results(registry):
+            await status_checker.check(test_result)
+
         if args.once:
             break
         await asyncio.sleep(_RUN_INTERVAL.total_seconds())
