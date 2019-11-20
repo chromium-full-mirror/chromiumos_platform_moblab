@@ -34,7 +34,7 @@ import {MobmonitorPipe} from './mobmonitor/mobmonitor.component';
 import {PipesModule} from './pipes/pipes.module';
 import {RunSuiteModule} from './run-suite/run-suite.module';
 import {ServicesModule} from './services/services.module';
-import {ViewJobsComponent} from './view-jobs/view-jobs.component';
+import {ViewJobsModule} from './view-jobs/view-jobs.module';
 import {WidgetsModule} from './widgets/widgets.module';
 import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings.component';
 
@@ -42,7 +42,6 @@ import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings
    declarations: [
       AppComponent,
       AppSidebarComponent,
-      ViewJobsComponent,
       ConfigurationComponent,
       MobmonitorComponent,
       MobmonitorPipe,
@@ -80,7 +79,8 @@ import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings
       MatSelectModule,
       PipesModule,
       ManageDutsModule,
-      RunSuiteModule
+      RunSuiteModule,
+      ViewJobsModule
    ],
    exports: [
       WidgetsModule,

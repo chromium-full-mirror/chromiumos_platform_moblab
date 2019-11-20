@@ -1,0 +1,46 @@
+.table-checkbox {
+  padding-right: 25px;
+}
+
+.jobs-table {
+  width : 100%;
+  box-shadow:none;
+  margin-bottom:20px;
+}
+
+.mat-card {
+  box-shadow: none;
+  font-size: 14px;
+}
+
+.mat-row {
+  height: auto;
+}
+
+.mat-form-field {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.mat-cell {
+  padding: 5px 10px 5px 10px;
+}
+
+.mat-header-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.loading-spinner-wrapper {
+  width:100%;
+  margin-top:10px;
+  margin-bottom: 20px;
+  overflow:hidden;
+  display: inline-flex;
+}
+
+.mat-spinner {
+  /*centers spinner*/
+  left: 50%;
+  margin-left:-50px;
+}

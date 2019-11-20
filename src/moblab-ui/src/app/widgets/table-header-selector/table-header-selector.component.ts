@@ -1,12 +1,15 @@
 import { Component, OnInit, EventEmitter, Input, Output } from "@angular/core";
 import { emit } from "cluster";
 
+export const CHECKBOX_ID = 'inner-checkbox';
+
 @Component({
   selector: "app-table-header-selector",
   templateUrl: "./table-header-selector.component.html",
   styleUrls: ["./table-header-selector.component.scss"]
 })
 export class TableHeaderSelectorComponent implements OnInit {
+  checkboxId = CHECKBOX_ID;
   selectValue: string = undefined;
   checkboxState = false;
 
@@ -23,8 +26,8 @@ export class TableHeaderSelectorComponent implements OnInit {
     this.update.emit({ selection: this.selectValue });
     if (this.selectValue == this.standardOptions[0]) {
       this.checkboxState = true;
-    } else if (this.selectValue == this.standardOptions[0]) {
-      this.checkboxState == false;
+    } else if (this.selectValue == this.standardOptions[1]) {
+      this.checkboxState = false;
     } else {
       this.checkboxState = true;
     }
@@ -32,10 +35,19 @@ export class TableHeaderSelectorComponent implements OnInit {
   }
 
   checkboxChange() {
+    this.checkboxState = !this.checkboxState;
     this.update.emit({
       selection: this.checkboxState
         ? this.standardOptions[0]
         : this.standardOptions[1]
     });
+  }
+
+  setCheckboxState(checkboxState) {
+    this.checkboxState = checkboxState;
+  }
+
+  getCheckboxState() {
+    return this.checkboxState;
   }
 }

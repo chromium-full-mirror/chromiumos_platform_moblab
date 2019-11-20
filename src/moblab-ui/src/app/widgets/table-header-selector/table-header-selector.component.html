@@ -1,7 +1,8 @@
 <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="3px">
   <mat-checkbox
-    [(ngModel)]="checkboxState"
+    id = "{{checkboxId}}"
     (change)="checkboxChange()"
+    [checked]="getCheckboxState()"
   ></mat-checkbox>
   <mat-form-field>
     <mat-select [(ngModel)]="selectValue" (selectionChange)="selectionChange()">

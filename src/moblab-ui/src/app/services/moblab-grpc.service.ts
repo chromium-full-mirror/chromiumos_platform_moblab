@@ -7,6 +7,9 @@ import {
   ConnectedDutInfo,
   EnrollDutsRequest,
   EnrollDutsResponse,
+  GetJobsRequest,
+  GetJobsResponse,
+  Job,
   ListBuildTargetsRequest,
   ListBuildTargetsResponse,
   ListBuildVersionsRequest,
@@ -92,7 +95,23 @@ export class MoblabGrpcService {
     );
 
     call.on("data", (response: ListConnectedDutsResponse) => {
-      callback(response.getDutsList());
+      callback(
+        response.getDutsList()
+      );
+    });
+  }
+
+  getJobs(callback: (x: Job[]) => void) {
+    const request = new GetJobsRequest();
+    const call = this.moblabRpcService.get_jobs(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetJobsResponse) => {
+        console.log(err);
+      }
+    );
+    call.on("data", (response: GetJobsResponse) => {
+      callback([]);
     });
   }
 
