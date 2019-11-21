@@ -139,5 +139,21 @@ describe('ViewJobsComponent', () => {
     component.job_selections.select(component.jobs.data[1]);
     expect(component.getNumSelectedJobs() === 2).toBeTruthy();
   });
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////// Refresh tests ////////////////////////////////////////////////////
+  it ('refresh test', function(done) {
+    // @ts-ignore
+    expect(component.moblabGrpcService.getJobs).toHaveBeenCalledTimes(1);
+    const refreshButton = fixture.debugElement.nativeElement.querySelector('.job-refresh-button');
+    refreshButton.dispatchEvent(new Event('click'));
+    // @ts-ignore
+    expect(component.moblabGrpcService.getJobs).toHaveBeenCalledTimes(2);
+    setTimeout(function() {
+      // Because the RPC call to get jobs has been mocked out, we know it will 'return' in less than .5 sec, the check
+      // below is to ensure that jobs are not duplicated on refresh calls.
+      expect(component.getNumJobs() === NUM_MOCK_JOBS).toBeTruthy();
+      done();
+    }, 500);
+
+  })
 });

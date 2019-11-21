@@ -1,3 +1,7 @@
+<button class="job-refresh-button" matTooltip="Refresh" mat-icon-button (click)="refreshJobsList()">
+  <mat-icon>refresh</mat-icon>
+</button>
+
 <table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table mat-elevation-z8">
   <ng-container matColumnDef="job_checkboxes">
     <th mat-header-cell *matHeaderCellDef>

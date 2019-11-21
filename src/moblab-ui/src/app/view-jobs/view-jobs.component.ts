@@ -68,9 +68,13 @@ export class ViewJobsComponent implements OnInit {
       });
   }
 
+  refreshJobsList() {
+    this.jobs.data = [];
+    this.getJobsList();
+  }
+
   getJobsList() {
     this.loadingJobs = true;
-    this.jobs.data = Array();
     this.getNextPageJobs();
   }
 
