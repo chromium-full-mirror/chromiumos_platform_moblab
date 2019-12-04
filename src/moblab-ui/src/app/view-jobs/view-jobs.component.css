@@ -1,4 +1,4 @@
-.table-checkbox {
+.table-checkbox-col {
   padding-right: 25px;
 }
 
@@ -36,6 +36,28 @@
 
 .mat-cell {
   padding: 5px 10px 5px 10px;
+}
+
+/* Necessary for the expandable drop-downs. */
+.job-detail-row {
+  height: 0;
+}
+
+.job-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+.job-detail-text {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+/* The hidden job detail panels are also 'mat-cells', so without this override,
+   these 'hidden' panels would have padding even when in invisible mode. */
+.mat-column-expandedDetail {
+  padding: 0px;
 }
 
 .mat-header-cell {

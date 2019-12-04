@@ -1,9 +1,16 @@
 import {
-  Component,
-  OnInit,
-  HostListener,
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import {
   ChangeDetectorRef,
+  Component,
+  HostListener,
   OnDestroy,
+  OnInit,
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatTableDataSource} from '@angular/material';
@@ -88,6 +95,16 @@ class MultiFilter {
   selector: 'app-view-jobs',
   templateUrl: './view-jobs.component.html',
   styleUrls: ['./view-jobs.component.css'],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0px'})),
+      state('expanded', style({height: '*', minHeight: '100px'})),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
+    ]),
+  ],
 })
 export class ViewJobsComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [
@@ -104,6 +121,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
   jobs = new MatTableDataSource<Job>();
   job_selections = new SelectionModel<Job>(true, []);
   loadingJobs = false;
+
+  expandedElement: Job|null;
 
   filters = new MultiFilter(FILTER_PARAMETERS, this.jobs);
   jobId: string = JOB_ID;
@@ -202,6 +221,14 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
 
   getNumVisibleJobs() {
     return this.jobs.filteredData.length;
+  }
+
+  /*
+    Stops job detail expansion from happening when the user selects a job's
+    checkbox.
+  */
+  checkboxClick(e) {
+    e.stopPropagation();
   }
 
   getNumSelectedJobs() {

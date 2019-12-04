@@ -112,7 +112,7 @@ describe('ViewJobsComponent', () => {
     expect(component.getNumJobs()).toBe(createMockJobs().length);
   });
 
-  //////////////////////////////////////////////////// Checkbox tests
+  /* Checkbox tests */
   it('Verifying no jobs checked initially.', () => {
     expect(component.getNumSelectedJobs()).toBe(0);
   });
@@ -165,7 +165,7 @@ describe('ViewJobsComponent', () => {
     expect(component.getNumSelectedJobs()).toBe(2);
   });
 
-  //////////////////////////////////////////////////// Refresh tests
+  /* Refresh tests */
   it ('Testing that refresh successfully reloads data.', function(done) {
     // @ts-ignore
     expect(component.moblabGrpcService.getJobs)
@@ -188,7 +188,7 @@ describe('ViewJobsComponent', () => {
     }, 500);
   });
 
-  //////////////////////////////////////////////////// Filter tests
+  /* Filter tests */
 
   it('Testing start date lower and upper bound filters.', function () {
     // Setting up lower bound start filter to get rid of half of the jobs.
@@ -301,5 +301,87 @@ describe('ViewJobsComponent', () => {
 
     // verify that after refresh all jobs are visible again
     expect(component.getNumVisibleJobs()).toBe(component.getNumJobs());
+  });
+
+/* Row detail expand tests */
+
+  function getNumVisibleJobDetails() {
+    const detailRows =
+      fixture.debugElement.nativeElement.querySelectorAll(
+        '.job-detail-row'
+      );
+    let numVisible = 0;
+    for (const detailRow of detailRows) {
+      if (detailRow.offsetHeight > 2) {
+        ++numVisible;
+      }
+    }
+    return numVisible;
+  }
+
+  it('Test visibility of expanded detail row.', function(done) {
+    const jobDetailClickLayers =
+      fixture.debugElement.nativeElement.querySelectorAll(
+      '.job-detail-click-layer'
+    );
+
+    expect(component.expandedElement).toBeUndefined();
+    expect(getNumVisibleJobDetails()).toBe(0);
+
+    jobDetailClickLayers[0].dispatchEvent(new Event('click'));
+    fixture.detectChanges();
+
+    setTimeout(function() {
+      expect(component.expandedElement).toBeDefined();
+      expect(getNumVisibleJobDetails()).toBe(1);
+      done();
+    }, 250);
+  });
+
+  it('Test that row can be expanded and then collapsed again.', () => {
+    const jobDetailClickLayers =
+      fixture.debugElement.nativeElement.querySelectorAll(
+      '.job-detail-click-layer'
+    );
+
+    expect(component.expandedElement).toBeUndefined();
+
+    jobDetailClickLayers[0].dispatchEvent(new Event('click'));
+    expect(component.expandedElement).toBeDefined();
+
+    jobDetailClickLayers[0].dispatchEvent(new Event('click'));
+    expect(component.expandedElement).toBeNull();
+  });
+
+  it('Test that only one job detail is expanded at any given time.',
+    function(done) {
+    const jobDetailClickLayers =
+      fixture.debugElement.nativeElement.querySelectorAll(
+      '.job-detail-click-layer'
+    );
+
+    expect(component.expandedElement).toBeUndefined();
+    expect(getNumVisibleJobDetails()).toBe(0);
+
+    for (const clickLayer of jobDetailClickLayers) {
+      clickLayer.dispatchEvent(new Event('click'));
+    }
+    fixture.detectChanges();
+
+    setTimeout(function() {
+      expect(component.expandedElement).toBeDefined();
+      expect(getNumVisibleJobDetails()).toBe(1);
+      done();
+    }, 250);
+  });
+
+  it('Test that a checkbox click will not cause a row expand.', () => {
+    const tableCheckboxes =
+      fixture.debugElement.nativeElement.querySelectorAll(
+      '.mat-checkbox'
+    );
+    tableCheckboxes[0].dispatchEvent(new Event('click'));
+
+    expect(component.expandedElement).toBeUndefined();
   });
 });
