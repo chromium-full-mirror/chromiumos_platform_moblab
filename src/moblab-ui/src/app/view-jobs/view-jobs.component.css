@@ -2,6 +2,11 @@
   padding-right: 25px;
 }
 
+.time-filter-form-wrapper {
+  margin-left: 6%;
+  margin-right: 6%;
+}
+
 .job-refresh-button {
   float:right;
   margin-right:18px;
@@ -11,6 +16,8 @@
   width : 100%;
   box-shadow:none;
   margin-bottom:20px;
+  float: right;
+  margin-right: 18px;
 }
 
 .mat-card {
@@ -37,15 +44,15 @@
 }
 
 .loading-spinner-wrapper {
-  width:100%;
-  margin-top:10px;
+  width: 100%;
+  margin-top: 10px;
   margin-bottom: 20px;
-  overflow:hidden;
+  overflow: hidden;
   display: inline-flex;
 }
 
 .mat-spinner {
   /*centers spinner*/
   left: 50%;
-  margin-left:-50px;
+  margin-left: -50px;
 }

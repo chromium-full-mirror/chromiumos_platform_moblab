@@ -1,10 +1,16 @@
-import {Component, OnInit, HostListener, ChangeDetectorRef} from '@angular/core';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {
+  Component,
+  OnInit,
+  HostListener,
+  ChangeDetectorRef,
+  OnDestroy,
+} from '@angular/core';
+import {FormControl} from '@angular/forms';
 import {MatTableDataSource} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
 
-import { Job } from "app/services/moblabrpc_pb";
-import { MoblabGrpcService } from '../services/moblab-grpc.service';
+import {Job} from "app/services/moblabrpc_pb";
+import {MoblabGrpcService} from '../services/moblab-grpc.service';
 
 function createInvertedObj (obj) {
   const inverted_mappings = {};
@@ -14,59 +20,170 @@ function createInvertedObj (obj) {
   return inverted_mappings;
 }
 
+const INT_TO_JOBSTATUS = createInvertedObj(Job.JobStatus);
+const INT_TO_PRIORITY = createInvertedObj(Job.Priority);
+
+const JOB_NAME = 'name';
+const JOB_ID = 'id';
+const JOB_PRIORITY = 'priority';
+const JOB_STATUS = 'jobStatus';
+const JOB_START_TIME_FROM_FILTER = 'startTimeFromFilter';
+const JOB_START_TIME_TO_FILTER = 'startTimeToFilter';
+const FILTER_PARAMETERS = [
+  JOB_NAME,
+  JOB_ID,
+  JOB_PRIORITY,
+  JOB_STATUS,
+  JOB_START_TIME_FROM_FILTER,
+  JOB_START_TIME_TO_FILTER,
+];
+
+/*
+  For handling multiple filter forms without having to repeat logic per
+  FormControl.
+*/
+class MultiFilter {
+  formControls = {};
+  filterValues = {};
+  subscriptions = {};
+
+  constructor(private filterParameters: string[],
+              private jobsRef: MatTableDataSource<Job>) {
+    this.jobsRef = jobsRef;
+    for (const filterName of filterParameters) {
+      this.formControls[filterName] = new FormControl('');
+      this.filterValues[filterName] = '';
+      this.subscriptions[filterName] =
+        this.formControls[filterName].valueChanges.subscribe(
+        value => {
+          this.filterValues[filterName] = value;
+          this.jobsRef.filter = JSON.stringify(this.filterValues);
+        }
+      )
+    }
+  }
+
+  getFormControl(filterName) {
+    return this.formControls[filterName];
+  }
+
+  setJobsRef(jobsRef) {
+    this.jobsRef = jobsRef;
+  }
+
+  reset() {
+    for (const filterName in this.formControls) {
+      this.formControls[filterName].setValue('');
+    }
+  }
+
+  unsubscribeAll() {
+    for (const filterName in this.subscriptions) {
+      this.subscriptions[filterName].unsubscribe();
+    }
+  }
+}
+
 @Component({
   selector: 'app-view-jobs',
   templateUrl: './view-jobs.component.html',
   styleUrls: ['./view-jobs.component.css'],
 })
-export class ViewJobsComponent implements OnInit {
-  displayedColumns: string[] = ['job_checkboxes', 'job_id', 'name', 'priority', 'created_time_sec_utc', 'start_time_sec_utc', 'finished_time_sec_utc', 'job_status'];
+export class ViewJobsComponent implements OnInit, OnDestroy {
+  displayedColumns: string[] = [
+    'job_checkboxes',
+    'job_id',
+    'name',
+    'priority',
+    'created_time_sec_utc',
+    'start_time_sec_utc',
+    'finished_time_sec_utc',
+    'job_status',
+  ];
   jobSelectOptions: string[] = [];
   jobs = new MatTableDataSource<Job>();
   job_selections = new SelectionModel<Job>(true, []);
   loadingJobs = false;
-  constructor(private moblabGrpcService: MoblabGrpcService, private _snackBar: MatSnackBar, private ref: ChangeDetectorRef) {
+
+  filters = new MultiFilter(FILTER_PARAMETERS, this.jobs);
+  jobId: string = JOB_ID;
+  jobName: string = JOB_NAME;
+  jobPriority: string = JOB_PRIORITY;
+  jobStatus: string = JOB_STATUS;
+  jobStartTimeFromFilter: string = JOB_START_TIME_FROM_FILTER;
+  jobStartTimeToFilter: string = JOB_START_TIME_TO_FILTER;
+
+  priorityFilterOptions = [''].concat(Object.keys(Job.Priority));
+  jobStatusFilterOptions = [''].concat(Object.keys(Job.JobStatus));
+
+  filterFunction(data, filter) {
+    const searchTerms = JSON.parse(filter);
+    const startTimeFromFilterDate = new Date(searchTerms.startTimeFromFilter);
+    const startTimeToFilterDate = new Date(searchTerms.startTimeToFilter);
+    const jobStartTime = new Date(data.getStartTimeSecUtc());
+
+    return data.getJobId().toString().indexOf(
+        searchTerms.id.toLowerCase()) !== -1 &&
+      data.getName().toLowerCase().indexOf(
+        searchTerms.name.toLowerCase()) !== -1 &&
+      INT_TO_PRIORITY[data.getPriority()].indexOf(
+        searchTerms.priority) !== -1 &&
+      INT_TO_JOBSTATUS[data.getStatus()].indexOf(
+        searchTerms.jobStatus) !== -1 &&
+      (
+        isNaN(startTimeFromFilterDate.getTime()) ||
+        jobStartTime >= startTimeFromFilterDate
+      ) &&
+      (
+        isNaN(startTimeToFilterDate.getTime()) ||
+        jobStartTime <= startTimeToFilterDate
+      );
   }
+
+  constructor(
+    private readonly moblabGrpcService: MoblabGrpcService,
+    private changeDetectorRefs: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.getJobsList();
+  }
 
-    // Proto enums do not have the reverse mappings (e.g., 2 : 'STARTED', in addition to 'STARTED' : 2.
-    // This is problematic because job entries returned from rpc calls with status and priority
-    // encoded as numbers rather than strings.
-    // The two lines below modify the Job enums to have reverse mappings.
-    Object.assign(Job.JobStatus, createInvertedObj(Job.JobStatus));
-    Object.assign(Job.Priority, createInvertedObj(Job.Priority));
+  selectJob(element) {
+    this.job_selections.select(element);
   }
 
   selectionChanged(event) {
     if (event.selection === "All") {
-      this.jobs.data.forEach(this.selectJob, this);
+      this.jobs.filteredData.forEach(this.selectJob, this);
     } else if (event.selection === "None") {
       this.job_selections.clear();
     }
   }
 
   getStatusFromNum(statusNum) {
-    return Job.JobStatus[statusNum];
+    return INT_TO_JOBSTATUS[statusNum];
   }
 
   getPriorityFromNum(priorityNum) {
-    return Job.Priority[priorityNum];
+    return INT_TO_PRIORITY[priorityNum];
+  }
+
+  assignJobs(jobs) {
+    const data = this.jobs.data
+      ? [...this.jobs.data, ...jobs]
+      : jobs;
+    this.jobs = new MatTableDataSource(data);
+    this.filters.setJobsRef(this.jobs);
+    this.jobs.filterPredicate = this.filterFunction;
+    this.loadingJobs = false;
   }
 
   getNextPageJobs() {
     this.loadingJobs = true;
     this.moblabGrpcService.getJobs(
-      (jobs: Job[]) => {
-        // Appends returned jobs to existing jobs list, if jobs list already exists.
-        const data: Job[] = this.jobs.data
-          ? [...this.jobs.data, ...jobs]
-          : jobs;
-        this.jobs = new MatTableDataSource(data);
-        this.loadingJobs = false;
-      });
-  }
+      (jobs: Job[]) => this.assignJobs(jobs)
+    )};
 
   refreshJobsList() {
     this.jobs.data = [];
@@ -76,10 +193,15 @@ export class ViewJobsComponent implements OnInit {
   getJobsList() {
     this.loadingJobs = true;
     this.getNextPageJobs();
+    this.filters.reset();
   }
 
   getNumJobs() {
     return this.jobs.data.length;
+  }
+
+  getNumVisibleJobs() {
+    return this.jobs.filteredData.length;
   }
 
   getNumSelectedJobs() {
@@ -91,7 +213,7 @@ export class ViewJobsComponent implements OnInit {
     return numSelected === this.jobs.data.length;
   }
 
-  selectJob(element) {
-    this.job_selections.select(element);
+  ngOnDestroy(): void {
+    this.filters.unsubscribeAll();
   }
 }

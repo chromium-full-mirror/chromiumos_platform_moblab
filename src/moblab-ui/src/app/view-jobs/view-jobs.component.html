@@ -1,8 +1,35 @@
-<button class="job-refresh-button" matTooltip="Refresh" mat-icon-button (click)="refreshJobsList()">
+<div>
+  <div class="time-filter-form-wrapper">
+    <mat-card class="time_filters">
+      <b> Start Time </b>
+      <span> from: </span>
+      <mat-form-field class="filter" floatLabel="never">
+        <input id="startFromTimeInput" matInput
+               [formControl]="filters.getFormControl(jobStartTimeFromFilter)"
+               placeholder='yyyy-MM-dd HH:mm:ss'>
+      </mat-form-field>
+      <span> to: </span>
+      <mat-form-field class="filter" floatLabel="never">
+        <input id="startToTimeInput" matInput
+               [formControl]="filters.getFormControl(jobStartTimeToFilter)"
+               placeholder='yyyy-MM-dd HH:mm:ss'>
+      </mat-form-field>
+    </mat-card>
+    <mat-divider></mat-divider>
+  </div>
+</div>
+
+<button
+  class="job-refresh-button"
+  matTooltip="Refresh"
+  mat-icon-button
+  (click)="refreshJobsList()">
   <mat-icon>refresh</mat-icon>
 </button>
 
-<table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table mat-elevation-z8">
+<table mat-table [dataSource]="jobs"
+       multiTemplateDataRows
+       class="jobs-table mat-elevation-z8">
   <ng-container matColumnDef="job_checkboxes">
     <th mat-header-cell *matHeaderCellDef>
       <app-table-header-selector
@@ -14,7 +41,8 @@
     <td mat-cell *matCellDef="let element" class="table-checkbox">
       <mat-checkbox
         (change)="$event ? job_selections.toggle(element) : null"
-        [checked]="job_selections.hasValue() && job_selections.isSelected(element)">
+        [checked]="job_selections.hasValue() &&
+          job_selections.isSelected(element)">
       </mat-checkbox>
     </td>
   </ng-container>
@@ -22,20 +50,43 @@
   <ng-container matColumnDef="job_id">
     <th mat-header-cell *matHeaderCellDef>
       <div>Job ID</div>
+      <mat-form-field class="filter" floatLabel="never">
+        <input id="idInput"
+               matInput [formControl]="filters.getFormControl(jobId)">
+      </mat-form-field>
     </th>
-    <td mat-cell *matCellDef="let element"><span>{{element.getJobId()}}</span></td>
+    <td mat-cell *matCellDef="let element">
+      <span>{{element.getJobId()}}</span>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef>
       <div>Name</div>
+      <mat-form-field class="filter header-entry" floatLabel="never">
+        <input
+          id="nameInput"
+          matInput [formControl]="filters.getFormControl(jobName)">
+      </mat-form-field>
     </th>
-    <td mat-cell *matCellDef="let element"><span>{{element.getName()}}</span></td>
+    <td mat-cell *matCellDef="let element">
+      <span>{{element.getName()}}</span>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="priority">
     <th mat-header-cell *matHeaderCellDef>
       <div>Priority</div>
+      <mat-form-field>
+        <mat-select id="prioritySelector" class="filter"
+                    [formControl]="filters.getFormControl(jobPriority)">
+          <mat-option id="priorityOptions"
+                      *ngFor="let priorityOption of priorityFilterOptions"
+                      value="{{ priorityOption }}">
+            {{ priorityOption }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </th>
     <td mat-cell *matCellDef="let element">
       <span>{{getPriorityFromNum(element.getPriority())}}</span>
@@ -45,27 +96,41 @@
   <ng-container matColumnDef="created_time_sec_utc">
     <th mat-header-cell *matHeaderCellDef>Created Time</th>
     <td mat-cell *matCellDef="let element">
-      <span>{{element.getCreatedTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}</span>
+      <span>
+        {{element.getCreatedTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}
+      </span>
     </td>
   </ng-container>
 
   <ng-container matColumnDef="start_time_sec_utc">
     <th mat-header-cell *matHeaderCellDef>Start Time</th>
     <td mat-cell *matCellDef="let element">
-      <span>{{element.getStartTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}</span>
+      <span>
+        {{element.getStartTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}
+      </span>
     </td>
   </ng-container>
 
   <ng-container matColumnDef="finished_time_sec_utc">
     <th mat-header-cell *matHeaderCellDef>Finished Time</th>
     <td mat-cell *matCellDef="let element">
-      <span>{{element.getFinishedTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}</span>
+      <span>
+        {{element.getFinishedTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}
+      </span>
     </td>
   </ng-container>
 
   <ng-container matColumnDef="job_status">
     <th mat-header-cell *matHeaderCellDef>
       <div>Job Status</div>
+      <mat-form-field>
+        <mat-select id="jobStatusSelector" class="filter"
+                    [formControl]="filters.getFormControl(jobStatus)">
+          <mat-option *ngFor="let jobStatusOption of jobStatusFilterOptions"
+                      value="{{ jobStatusOption }}"> {{ jobStatusOption }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </th>
     <td mat-cell *matCellDef="let element">
       <span>{{getStatusFromNum(element.getStatus())}}</span>
@@ -73,7 +138,9 @@
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-  <tr mat-row *matRowDef="let element; columns: displayedColumns;" class="job-detail-row">
+  <tr mat-row
+      *matRowDef="let element; columns: displayedColumns;"
+      class="job-detail-row">
   </tr>
 </table>
 

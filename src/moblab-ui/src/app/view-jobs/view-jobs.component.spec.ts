@@ -16,36 +16,49 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
-import { WidgetsModule } from "../widgets/widgets.module";
+import { WidgetsModule } from '../widgets/widgets.module';
 import {By} from '@angular/platform-browser';
 
 import { Job } from '../services/moblabrpc_pb';
 import { ViewJobsComponent } from './view-jobs.component';
-import { CHECKBOX_ID } from '../widgets/table-header-selector/table-header-selector.component';
+import {
+  CHECKBOX_ID
+} from '../widgets/table-header-selector/table-header-selector.component';
 
-const NUM_MOCK_JOBS = 20;
+const NUM_NAMES = 2;
+const NUM_IDS = 2;
+const NUM_PRIORITIES = Object.keys(Job.Priority).length;
+const NUM_STATUS = Object.keys(Job.JobStatus).length;
 
-function mockJobs(numJobs) {
-  const arr = [];
-  // const numJobs = 20;
-  let lastTimestamp = Date.now();
-  // 50 hours
-  let timeOffset = 172800;
-  for (var i = 0; i < numJobs; i++) {
-    let mockJob = new Job();
-    mockJob.setJobId(i);
-    mockJob.setName('Job' + i.toString());
-    mockJob.setPriority((Math.floor(Math.random() * 100) % 4));
-    lastTimestamp = lastTimestamp + Math.floor(timeOffset * Math.random());
-    const startTimestamp = lastTimestamp + ( timeOffset * Math.random() / 20 );
-    const finishedTimestamp = startTimestamp + ( timeOffset * Math.random() / 5 );
-    mockJob.setCreatedTimeSecUtc(lastTimestamp);
-    mockJob.setStartTimeSecUtc(startTimestamp);
-    mockJob.setFinishedTimeSecUtc(finishedTimestamp);
-    mockJob.setStatus(Math.floor(i / ( numJobs / 7 )));
-    arr.push(mockJob);
+const BASELINE_TIME = Date.now();
+// one hour
+const TIME_OFFSET = 3600;
+
+function createMockJobs() {
+  const mockFilterJobs = [];
+  let running_timestamp = BASELINE_TIME;
+  for (let i = 0; i < NUM_NAMES; i++) {
+    for (let j = 0; j < NUM_IDS; j++) {
+      for (let k = 0; k < NUM_PRIORITIES; k++) {
+        for (let l = 0; l < NUM_STATUS; l++) {
+          running_timestamp += TIME_OFFSET
+          const startTimestamp = running_timestamp ;
+          running_timestamp += TIME_OFFSET
+          const finishedTimestamp = running_timestamp;
+          let mockJob = new Job();
+          mockJob.setName('Job' + i.toString());
+          mockJob.setJobId(j);
+          mockJob.setStartTimeSecUtc(startTimestamp);
+          mockJob.setCreatedTimeSecUtc(Date.now());
+          mockJob.setFinishedTimeSecUtc(finishedTimestamp);
+          mockJob.setPriority(k);
+          mockJob.setStatus(l);
+          mockFilterJobs.push(mockJob);
+        }
+      }
+    }
   }
-  return arr;
+  return mockFilterJobs;
 }
 
 describe('ViewJobsComponent', () => {
@@ -73,7 +86,7 @@ describe('ViewJobsComponent', () => {
           MatSortModule,
           MatTableModule,
           ReactiveFormsModule,
-          WidgetsModule
+          WidgetsModule,
         ],
         declarations: [
           ViewJobsComponent]})
@@ -84,76 +97,209 @@ describe('ViewJobsComponent', () => {
     fixture = TestBed.createComponent(ViewJobsComponent);
     component = fixture.componentInstance;
     // @ts-ignore
-    spyOn<any>(component.moblabGrpcService, 'getJobs').and.callFake(function() {
-              component.jobs.data = mockJobs(NUM_MOCK_JOBS);
-            });
-
+    spyOn<any>(component.moblabGrpcService, 'getJobs')
+      .and.callFake(function() {
+      component.assignJobs(createMockJobs());
+    });
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('Minimal, creation test.', () => {
     expect(component).toBeTruthy();
   });
 
-  it ('jobs loaded in', () => {
-    expect(component.getNumJobs() === NUM_MOCK_JOBS).toBeTruthy();
+  it ('Checking that jobs are loaded in.', () => {
+    expect(component.getNumJobs()).toBe(createMockJobs().length);
   });
 
-  //////////////////////////////////////////////////// Checkbox tests ////////////////////////////////////////////////////
-  it('no jobs checked initially', () => {
-    expect(component.getNumSelectedJobs() === 0).toBeTruthy();
+  //////////////////////////////////////////////////// Checkbox tests
+  it('Verifying no jobs checked initially.', () => {
+    expect(component.getNumSelectedJobs()).toBe(0);
   });
 
-  it ('check all then uncheck all', () => {
-    const selectJobsButton = fixture.debugElement.nativeElement.querySelector('#' + CHECKBOX_ID);
-    expect(component.getNumSelectedJobs() === 0).toBeTruthy();
+  it ('Checking all jobs then un-checking all jobs.',
+    () => {
+    const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
+      '#' + CHECKBOX_ID
+    );
+    expect(component.getNumSelectedJobs()).toBe(0);
     selectJobsButton.dispatchEvent(new Event('change'));
-    expect(component.getNumSelectedJobs() === NUM_MOCK_JOBS).toBeTruthy();
+
+    expect(component.getNumSelectedJobs()).toBe(component.getNumJobs());
+
     selectJobsButton.dispatchEvent(new Event('change'));
-    expect(component.getNumSelectedJobs() === 0).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(0);
   });
 
-  it ('check one job, then check all jobs', () => {
-    const selectJobsButton = fixture.debugElement.nativeElement.querySelector('#' + CHECKBOX_ID);
+  it ('Checking one job, then checking all jobs.', () => {
+    const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
+      '#' + CHECKBOX_ID
+    );
     component.job_selections.select(component.jobs.data[0]);
-    expect(component.getNumSelectedJobs() === 1).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(1);
     selectJobsButton.dispatchEvent(new Event('change'));
-    expect(component.getNumSelectedJobs() === NUM_MOCK_JOBS).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(component.getNumJobs());
   });
 
-  it ('check all jobs, then uncheck one job, then uncheck all jobs, then check all jobs', () => {
-    const selectJobsButton = fixture.debugElement.nativeElement.querySelector('#' + CHECKBOX_ID);
+  it ('Checking all jobs, then unchecking one job, then' +
+    ' unchecking all jobs, then re-checking all jobs.', () => {
+    const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
+      '#' + CHECKBOX_ID
+    );
     selectJobsButton.dispatchEvent(new Event('change'));
-    expect(component.getNumSelectedJobs() === NUM_MOCK_JOBS).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(component.getNumJobs());
     component.job_selections.deselect(component.jobs.data[0]);
-    expect(component.getNumSelectedJobs() === NUM_MOCK_JOBS - 1).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(
+      component.getNumJobs() - 1
+    );
     selectJobsButton.dispatchEvent(new Event('change'));
-    expect(component.getNumSelectedJobs() === 0).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(0);
     selectJobsButton.dispatchEvent(new Event('change'));
-    expect(component.getNumSelectedJobs() === NUM_MOCK_JOBS).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(component.getNumJobs());
   });
 
-  it ('multi single select', () => {
+  it ('Testing multiple single selections.', () => {
     component.job_selections.select(component.jobs.data[0]);
-    expect(component.getNumSelectedJobs() === 1).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(1);
     component.job_selections.select(component.jobs.data[1]);
-    expect(component.getNumSelectedJobs() === 2).toBeTruthy();
+    expect(component.getNumSelectedJobs()).toBe(2);
   });
 
-  //////////////////////////////////////////////////// Refresh tests ////////////////////////////////////////////////////
-  it ('refresh test', function(done) {
+  //////////////////////////////////////////////////// Refresh tests
+  it ('Testing that refresh successfully reloads data.', function(done) {
     // @ts-ignore
-    expect(component.moblabGrpcService.getJobs).toHaveBeenCalledTimes(1);
-    const refreshButton = fixture.debugElement.nativeElement.querySelector('.job-refresh-button');
+    expect(component.moblabGrpcService.getJobs)
+      .toHaveBeenCalledTimes(1);
+    const refreshButton = fixture.debugElement.nativeElement.querySelector(
+      '.job-refresh-button'
+    );
     refreshButton.dispatchEvent(new Event('click'));
     // @ts-ignore
-    expect(component.moblabGrpcService.getJobs).toHaveBeenCalledTimes(2);
+    expect(component.moblabGrpcService.getJobs)
+      .toHaveBeenCalledTimes(2);
     setTimeout(function() {
-      // Because the RPC call to get jobs has been mocked out, we know it will 'return' in less than .5 sec, the check
-      // below is to ensure that jobs are not duplicated on refresh calls.
-      expect(component.getNumJobs() === NUM_MOCK_JOBS).toBeTruthy();
+      /*
+        Because the RPC call to get jobs has been mocked out, we know it will
+        'return' in less than .5 sec, the check below is to ensure that jobs
+        are not duplicated on refresh calls.
+      */
+      expect(component.getNumJobs()).toBe(createMockJobs().length);
       done();
     }, 500);
+  });
 
-  })
+  //////////////////////////////////////////////////// Filter tests
+
+  it('Testing start date lower and upper bound filters.', function () {
+    // Setting up lower bound start filter to get rid of half of the jobs.
+    const startFromFilterInput =
+      fixture.debugElement.nativeElement.querySelector(
+      '#startFromTimeInput'
+    );
+    startFromFilterInput.value = new Date(
+      BASELINE_TIME + createMockJobs().length * TIME_OFFSET
+    ).toLocaleString();
+    startFromFilterInput.dispatchEvent(new Event('input'));
+    expect(component.getNumVisibleJobs()).toBe(
+      createMockJobs().length / 2
+    );
+
+    // Setting up upper bound as well, to let only one job through.
+    const startToFilterInput =
+      fixture.debugElement.nativeElement.querySelector(
+      '#startToTimeInput'
+    );
+    startToFilterInput.value = new Date(
+      BASELINE_TIME + (createMockJobs().length + 2) * TIME_OFFSET
+    ).toLocaleString();
+    startToFilterInput.dispatchEvent(new Event('input'));
+
+    expect(component.getNumVisibleJobs()).toBe(1);
+  });
+
+  it('Test that NaN dates do not have any filtering effect.', function () {
+    const startFromFilterInput =
+      fixture.debugElement.nativeElement.querySelector(
+        '#startFromTimeInput'
+      );
+    /*
+      Setting an input value start date filter that would filter out all jobs,
+      except a char is added to make the string malformed.
+    */
+    startFromFilterInput.value = new Date(
+      BASELINE_TIME + createMockJobs().length * TIME_OFFSET * 10
+    ).toLocaleString() + 'x';
+    startFromFilterInput.dispatchEvent(new Event('input'));
+
+    expect(component.getNumVisibleJobs()).toBe(createMockJobs().length);
+  });
+
+  /*
+    This test verifies that multiple filters work together correctly. The mock
+    jobs are set up to create one of each permutation across name, id, status
+    and priority. The idea of this test is that by incrementally setting
+    filters for each of these attributes, the number of visible jobs will each
+    time be reduced by a factor of n where n is the number of different
+    possible value of the attribute ( free text attributes name and id are only
+    given two possible values in the mock job creator ).
+  */
+  it('Verifying that multiple filters work together.', function () {
+    let expectedNumJobs = component.getNumJobs();
+
+    const nameFilterInput = fixture.debugElement.nativeElement.querySelector(
+      '#nameInput'
+    );
+    nameFilterInput.value = '0';
+    nameFilterInput.dispatchEvent(new Event('input'));
+
+    expectedNumJobs = expectedNumJobs / NUM_NAMES;
+    expect(component.getNumVisibleJobs()).toBe(expectedNumJobs);
+
+    const idFilterInput = fixture.debugElement.nativeElement.querySelector(
+      '#idInput'
+    );
+    idFilterInput.value = '0';
+    idFilterInput.dispatchEvent(new Event('input'));
+
+    expectedNumJobs = expectedNumJobs / NUM_IDS;
+    expect(component.getNumVisibleJobs()).toBe(expectedNumJobs);
+
+    /*
+      TO-DO: Figure out how to wire this change via an element event instead of
+      a component operation.
+      Tried: selectionChange dispatch on mat-select debugElement, didn't work.
+      Tried: change event dispatch on mat-select nativeElement, didn't work.
+    */
+    component.filters.getFormControl('priority').setValue('DEFAULT');
+
+    expectedNumJobs = expectedNumJobs / NUM_PRIORITIES;
+    expect(component.getNumVisibleJobs()).toBe(expectedNumJobs);
+
+    /*
+      TO-DO: Figure out how to wire this change via an element event instead of
+      component operation.
+    */
+    component.filters.getFormControl('jobStatus').setValue('RUNNING');
+
+    expect(component.getNumVisibleJobs()).toBe(1);
+  });
+
+  it('Verifiying that refresh clears filters.', function () {
+    // create a filter event that filters out all jobs.
+    const nameFilterInput = fixture.debugElement.nativeElement.querySelector(
+      '#nameInput'
+    );
+    nameFilterInput.value = 'This will not match with any jobs';
+    nameFilterInput.dispatchEvent(new Event('input'));
+
+    expect(component.getNumVisibleJobs()).toBe(0);
+
+    const refreshButton = fixture.debugElement.nativeElement.querySelector(
+      '.job-refresh-button'
+    );
+    refreshButton.dispatchEvent(new Event('click'));
+
+    // verify that after refresh all jobs are visible again
+    expect(component.getNumVisibleJobs()).toBe(component.getNumJobs());
+  });
 });
