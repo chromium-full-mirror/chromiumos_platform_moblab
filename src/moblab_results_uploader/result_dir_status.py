@@ -87,6 +87,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if not finished_time:
             return Status.NOT_READY
 
+        _LOGGER.debug('%s finsihed on %s', test_result, finished_time)
         age = datetime.datetime.now() - finished_time
         if age < self._min_age_to_upload:
             return Status.NOT_READY

@@ -61,18 +61,13 @@ def _query_job_finished_time(id_):
         result = afe.get_jobs([id_])
         if not result:
             raise test_result_interface.TestResultError(
-                'Failed to query AFE special task {}'.format(id_)
+                'Failed to query AFE job {}'.format(id_)
             )
         result = result[0]
         hqes = afe.get_host_queue_entries(id_)
-        if not hqes:  # For data inconsistency.
-            create_on_str = result.get('created_on')
-            if create_on_str:
-                yield datetime.datetime.strptime(create_on_str,
-                                                 _TIMESTAMP_FORMAT)
-            else:
-                yield None
-            continue
+        running_hqes = [hqe for hqe in hqes if not hqe.get('complete')]
+        if running_hqes:  # Test job is still running.
+            yield None
 
         hqes_finished_time = [datetime.datetime.strptime(hqe.get('finished_on'),
                                                          _TIMESTAMP_FORMAT)
@@ -80,7 +75,14 @@ def _query_job_finished_time(id_):
         if hqes_finished_time:
             yield max(hqes_finished_time)
         else:
-            yield None
+            # The value of 'finished_on' for failed/aborted HQE is NULL. So use
+            # the job creating time instead.
+            create_on_str = result.get('created_on')
+            if create_on_str:
+                yield datetime.datetime.strptime(create_on_str,
+                                                 _TIMESTAMP_FORMAT)
+            else:
+                yield None
 
 
 class _AutotestResult(test_result_interface.TestResult):
