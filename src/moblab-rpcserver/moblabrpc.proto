@@ -166,6 +166,8 @@ message Job {
 }
 
 message GetJobsRequest {
+  int64 query_start = 1;
+  int64 query_limit = 2;
 }
 
 message GetJobsResponse {

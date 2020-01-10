@@ -9,6 +9,8 @@ import {
   EnrollDutsResponse,
   GetJobsRequest,
   GetJobsResponse,
+  GetNumJobsRequest,
+  GetNumJobsResponse,
   Job,
   ListBuildTargetsRequest,
   ListBuildTargetsResponse,
@@ -101,17 +103,33 @@ export class MoblabGrpcService {
     });
   }
 
-  getJobs(callback: (x: Job[]) => void) {
+  getNumJobs(callback: (x: number) => void) {
+    const request = new GetNumJobsRequest();
+    const call = this.moblabRpcService.get_num_jobs(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetNumJobsResponse) => {
+        console.log('Failed get_num_jobs RPC call. Request: ', request, 'Response: ', err);
+      }
+    );
+    call.on('data', (response: GetNumJobsResponse) => {
+      callback(response.getNumJobs());
+    });
+  }
+
+  getJobs(queryStart: number, queryLimit: number, callback: (x: Job[]) => void) {
     const request = new GetJobsRequest();
+    request.setQueryStart(queryStart);
+    request.setQueryLimit(queryLimit);
     const call = this.moblabRpcService.get_jobs(
       request,
       {},
       (err: grpcWeb.Error, response: GetJobsResponse) => {
-        console.log(err);
+        console.log('Failed get_num_jobs RPC call. Request: ', request, 'Response: ', err);
       }
     );
-    call.on("data", (response: GetJobsResponse) => {
-      callback([]);
+    call.on('data', (response: GetJobsResponse) => {
+      callback(response.getJobsList())
     });
   }
 
