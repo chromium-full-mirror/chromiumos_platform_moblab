@@ -17,6 +17,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { CommonModule } from "@angular/common";
 
 import { ViewJobsComponent } from "./view-jobs.component";
@@ -36,6 +37,7 @@ import { WidgetsModule } from "../widgets/widgets.module";
     MatIconModule,
     MatInputModule,
     MatListModule,
+    MatPaginatorModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     MatSnackBarModule,

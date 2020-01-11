@@ -11,10 +11,16 @@ import {
   HostListener,
   OnDestroy,
   OnInit,
+  AfterViewInit,
+  AfterContentInit,
+  ViewChild,
 } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
-import {MatTableDataSource} from '@angular/material';
+import {
+  MatTableDataSource,
+  MatPaginator
+} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
 import {Job} from "app/services/moblabrpc_pb";
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
@@ -44,6 +50,8 @@ const FILTER_PARAMETERS = [
   JOB_START_TIME_FROM_FILTER,
   JOB_START_TIME_TO_FILTER,
 ];
+
+const START_PAGE_SIZE = 25;
 
 /*
   For handling multiple filter forms without having to repeat logic per
@@ -107,7 +115,8 @@ class MultiFilter {
   ],
   providers: [DatePipe]
 })
-export class ViewJobsComponent implements OnInit, OnDestroy {
+export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(MatPaginator) paginator: MatPaginator;
   displayedColumns: string[] = [
     'job_checkboxes',
     'job_id',
@@ -122,6 +131,7 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
   jobs = new MatTableDataSource<Job>();
   job_selections = new SelectionModel<Job>(true, []);
   loadingJobs = false;
+  numJobs = 0;
 
   expandedElement: Job|null;
 
@@ -132,6 +142,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
   jobStatus: string = JOB_STATUS;
   jobStartTimeFromFilter: string = JOB_START_TIME_FROM_FILTER;
   jobStartTimeToFilter: string = JOB_START_TIME_TO_FILTER;
+
+  pageSize: number = START_PAGE_SIZE;
 
   priorityFilterOptions = [''].concat(Object.keys(Job.Priority));
   jobStatusFilterOptions = [''].concat(Object.keys(Job.JobStatus));
@@ -167,9 +179,18 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.getNumJobs();
     this.getJobsList();
   }
 
+  ngAfterViewInit() {
+    this.paginator.page.subscribe(
+      () => this.getNextPageJobs(
+        this.paginator.pageIndex,
+        this.paginator.pageSize
+      )
+    );
+  }
   selectJob(element) {
     this.job_selections.select(element);
   }
@@ -191,13 +212,14 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
   }
 
   assignJobs(jobs) {
-    const data = this.jobs.data
-      ? [...this.jobs.data, ...jobs]
-      : jobs;
-    this.jobs = new MatTableDataSource(data);
+    this.jobs = new MatTableDataSource(jobs);
     this.filters.setJobsRef(this.jobs);
     this.jobs.filterPredicate = this.filterFunction;
     this.loadingJobs = false;
+  }
+
+  getNumJobs() {
+    this.moblabGrpcService.getNumJobs((numJobs: number) => { this.numJobs = numJobs; })
   }
 
   // Because timestamps may be returned in second, millisecond, or nanosecond
@@ -216,25 +238,16 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
     return this.datePipe.transform(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss')
   }
 
-  getNextPageJobs() {
+  getNextPageJobs(pageIndex, pageSize) {
     this.loadingJobs = true;
-    this.moblabGrpcService.getJobs(
+    this.moblabGrpcService.getJobs(pageIndex * pageSize, pageSize,
       (jobs: Job[]) => this.assignJobs(jobs)
     )};
 
-  refreshJobsList() {
-    this.jobs.data = [];
-    this.getJobsList();
-  }
-
   getJobsList() {
     this.loadingJobs = true;
-    this.getNextPageJobs();
+    this.getNextPageJobs(0, this.pageSize);
     this.filters.reset();
-  }
-
-  getNumJobs() {
-    return this.jobs.data.length;
   }
 
   getNumVisibleJobs() {

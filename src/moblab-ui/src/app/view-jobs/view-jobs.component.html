@@ -24,7 +24,7 @@
     class="job-refresh-button"
     matTooltip="Refresh"
     mat-icon-button
-    (click)="refreshJobsList()">
+    (click)="getJobsList()">
     <mat-icon>refresh</mat-icon>
   </button>
 
@@ -166,6 +166,13 @@
       class="job-detail-row">
     </tr>
   </table>
+
+  <div>
+    <mat-paginator [length]="numJobs"
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]=[10,25,100,1000]>
+    </mat-paginator>
+  </div>
 
   <div id="loading-overlay" *ngIf="loadingJobs">
     <div class="loading-spinner-wrapper">
