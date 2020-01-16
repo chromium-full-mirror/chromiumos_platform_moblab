@@ -163,13 +163,21 @@ class AFEConnectorTest(unittest.TestCase):
             suite_args='test_suite_args',
             test_args='test_test_args')
         mock_send_rpc_command.assert_called_once_with(
-            'run_suite', {
-                'test_args': 'test_test_args',
-                'suite_args': 'test_suite_args',
+            'create_suite_job', {
                 'board': 'test_board',
-                'suite': 'test_suite',
+                'builds': 'test_builds',
+                'job_retry': True,
+                'max_retries': 9223372036854775807,
+                'max_runtime_mins': 5,
                 'model': 'test_model',
-                'build': 'test_board-test_build/test_build'
+                'name': 'test_suite',
+                'pool': None,
+                'run_prod_code': False,
+                'suite_args': 'test_suite_args',
+                'test_args': 'test_test_args',
+                'test_source_build': 'test_build',
+                'timeout_mins': 5,
+                'wait_for_results': True
             })
 
 
