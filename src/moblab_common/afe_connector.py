@@ -130,21 +130,20 @@ class AFEConnector(object):
         _LOGGER.error(response)
         return self.decode_response(response, 'result')
 
-    def get_jobs(self, id_list=None):
-        """Get attributes of the jobs specified.
-
+    def get_jobs(self, id_list=None, job_state_filters={}):
+        """
+            Get attributes of the jobs specified.
         Args:
             id_list: A list of job id to be retrieved.
-
+            job_state_filters: A dictionary of job filter options (ex.
+                running : True).
         Returns:
             A list of dict. The key, value of the dict is the job attribute
             name and the value.
         """
-        params = {
-            'not_yet_run': True,
-            'running': True,
-            'finished': True,
-        }
+        params = {}
+        params.update(job_state_filters)
+
         if id_list:
             assert isinstance(id_list, list)
             params['id__in'] = id_list
