@@ -51,7 +51,7 @@ function createMockJobs() {
           mockJob.setStartTimeSecUtc(startTimestamp);
           mockJob.setCreatedTimeSecUtc(Date.now());
           mockJob.setFinishedTimeSecUtc(finishedTimestamp);
-          mockJob.setPriority(k);
+          mockJob.setPriority(k*10);
           mockJob.setStatus(l);
           mockFilterJobs.push(mockJob);
         }

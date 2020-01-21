@@ -137,10 +137,15 @@ message Job {
   int64 job_id = 1;
   string name = 2;
   enum Priority {
-    DEFAULT = 0;
-    URGENT = 1;
-    HIGH = 2;
-    LOW = 3;
+    NULL = 0;
+    WEEKLY = 10;
+    DAILY = 20;
+    POST_BUILD = 30;
+    DEFAULT = 40;
+    BUILD = 50;
+    PFQ = 60;
+    CQ = 70;
+    SUPER = 80;
   }
   Priority priority = 3;
   int64 created_time_sec_utc = 4;
