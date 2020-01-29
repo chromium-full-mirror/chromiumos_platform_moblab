@@ -13,6 +13,8 @@ import sys
 import subprocess
 import multiprocessing
 
+from datetime import datetime
+
 try:
     from chromite.lib import cros_logging as logging
 except ImportError:
@@ -124,13 +126,48 @@ class AFEConnector(object):
         response = self.send_rpc_command('get_hosts')
         return self.decode_response(response, 'result')
 
-    def get_num_jobs(self):
+    def get_num_jobs(self,id_filter=None, name_filter=None, created_time_lt=None,
+        created_time_gt=None, sub=False, suite=False, not_yet_run=False,
+        running=False, finished=False):
         params = {}
+
+        if id_filter:
+            params['id__icontains'] = id_filter
+        if name_filter:
+            params['name__icontains'] = name_filter
+        if created_time_lt:
+            params['created_on__lt'] = str(
+                datetime.utcfromtimestamp(created_time_lt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+            ))
+        if created_time_gt:
+            params['created_on__gt'] = str(
+                datetime.utcfromtimestamp(created_time_gt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+            ))
+        _LOGGER.error('getNumJobs params {}'.format(params))
+
+        if sub:
+            params['sub'] = 'true'
+        elif suite:
+            params['suite'] = 'true'
+
+        if not_yet_run:
+            params['not_yet_run'] = 'true'
+        elif running:
+            params['running'] = 'true'
+        elif finished:
+            params['finished'] = 'true'
+
         response = self.send_rpc_command('get_num_jobs', params)
         _LOGGER.error(response)
         return self.decode_response(response, 'result')
 
-    def get_jobs(self, id_list=None, job_state_filters={}):
+    def get_jobs(self, query_start, query_limit,
+        id_filter=None, name_filter=None, created_time_lt=None,
+        created_time_gt=None, sub=False, suite=False, not_yet_run=False,
+        running=False, finished=False
+        ):
         """
             Get attributes of the jobs specified.
         Args:
@@ -141,13 +178,47 @@ class AFEConnector(object):
             A list of dict. The key, value of the dict is the job attribute
             name and the value.
         """
-        params = {}
-        params.update(job_state_filters)
+        params = {
+            'query_start': query_start,
+            'query_limit': query_limit,
+        }
 
+        if id_filter:
+            params['id__icontains'] = id_filter
+        if name_filter:
+            params['name__icontains'] = name_filter
+        if created_time_lt:
+            params['created_on__lt'] = str(
+                datetime.utcfromtimestamp(created_time_lt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                ))
+        if created_time_gt:
+            params['created_on__gt'] = str(
+                datetime.utcfromtimestamp(created_time_gt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                ))
+
+        if sub:
+            params['sub'] = 'true'
+        elif suite:
+            params['suite'] = 'true'
+
+        if not_yet_run:
+            params['not_yet_run'] = 'true'
+        elif running:
+            params['running'] = 'true'
+        elif finished:
+            params['finished'] = 'true'
+
+        response = self.send_rpc_command('get_jobs_summary', params)
+        return self.decode_response(response, 'result')
+
+    def get_jobs_by_ids(self, id_list=None):
+        params = {}
         if id_list:
             assert isinstance(id_list, list)
             params['id__in'] = id_list
-        response = self.send_rpc_command('get_jobs', params)
+        response = self.send_rpc_command('get_jobs_summary', params)
         return self.decode_response(response, 'result')
 
     def get_special_tasks(self, id_list):

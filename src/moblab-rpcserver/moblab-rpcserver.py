@@ -163,7 +163,17 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def get_num_jobs(self, request, _context):
-        num_jobs = self.service.get_num_jobs()
+        num_jobs = self.service.get_num_jobs(
+            request.id_filter,
+            request.name_filter,
+            request.created_time_lt,
+            request.created_time_gt,
+            request.rel_filter == moblabrpc_pb2.Job.CHILD,
+            request.rel_filter == moblabrpc_pb2.Job.SUITE,
+            request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
+            request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS
+        )
         response = moblabrpc_pb2.GetNumJobsResponse(num_jobs=num_jobs)
         return response
 
@@ -173,8 +183,49 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         #TODO(haddowk) converty to UTC timezone
         return int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds())
 
+    def extract_status(self, job):
+        # "if there is more than one status count, error out"
+        if len(job.get('status_counts').keys()) != 1 or \
+            job.get('status_counts')[job.get('status_counts').keys()[0]] != 1:
+            logging.error('Encountered multiple status values for job {}'
+                          .format(job))
+            return moblabrpc_pb2.Job.STATUS_NOT_SET
+        status = job.get('status_counts').keys()[0]
+        if status == 'Queued':
+            return moblabrpc_pb2.Job.QUEUED
+        elif status == 'Provisioned':
+            return moblabrpc_pb2.Job.PROVISIONED
+        elif status == 'Running':
+            return moblabrpc_pb2.Job.RUNNING
+        elif status == 'Completed':
+            return moblabrpc_pb2.Job.SUCCESS
+        elif status == 'Failed':
+            return moblabrpc_pb2.Job.FAILED
+        elif status == 'Aborted':
+            return moblabrpc_pb2.Job.ABORTED
+        else:
+            logging.error(
+                'Encountered unexpected status "{}" for job {}'.format(
+                    status,
+                    job
+                )
+            )
+            return moblabrpc_pb2.Job.STATUS_NOT_SET
+
     def get_jobs(self, request, _context):
-        jobs = self.service.get_jobs()
+        jobs = self.service.get_jobs(
+            request.query_start,
+            request.query_limit,
+            request.id_filter,
+            request.name_filter,
+            request.created_time_lt,
+            request.created_time_gt,
+            request.rel_filter == moblabrpc_pb2.Job.CHILD,
+            request.rel_filter == moblabrpc_pb2.Job.SUITE,
+            request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
+            request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS
+        )
 
         response = moblabrpc_pb2.GetJobsResponse()
         if jobs:
@@ -185,7 +236,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     priority=job.get('priority', 0),
                     created_time_sec_utc=self.convert_timestamp_to_utc_secs(
                         job['created_on']),
-                    parent_job_id=job.get('parent_job', -1))
+                    parent_job_id=job.get('parent_job', -1),
+                    status=self.extract_status(job)
+                )
                 response.jobs.extend([job_proto])
         return response
 

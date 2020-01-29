@@ -243,8 +243,35 @@ class MoblabService(object):
                 self.extract_build_target_from_labels(host.get('labels', [])))
         return build_targets
 
-    def get_num_jobs(self):
-        return self.afe_connector.get_num_jobs()
+    def get_num_jobs(self, id_filter=None, name_filter=None,
+        created_time_lt=None, created_time_gt=None, sub=False, suite=False,
+        not_yet_run=False, running=False, finished=False):
+        return self.afe_connector.get_num_jobs(
+            id_filter,
+            name_filter,
+            created_time_lt,
+            created_time_gt,
+            sub,
+            suite,
+            not_yet_run,
+            running,
+            finished
+        )
 
-    def get_jobs(self):
-        return self.afe_connector.get_jobs()
+    def get_jobs(self, query_start, query_limit, id_filter=None,
+        name_filter=None, created_time_lt=None, created_time_gt=None,
+        sub=False, suite=False, not_yet_run=False, running=False,
+        finished=False):
+        return self.afe_connector.get_jobs(
+            query_start,
+            query_limit,
+            id_filter,
+            name_filter,
+            created_time_lt,
+            created_time_gt,
+            sub,
+            suite,
+            not_yet_run,
+            running,
+            finished
+        )

@@ -126,18 +126,10 @@ message UpdateDutsFirmwareRequest {
 message UpdateDutsFirmwareResponse {
 }
 
-message GetNumJobsRequest {
-}
-
-message GetNumJobsResponse {
-  int64 num_jobs = 1;
-}
 
 message Job {
-  int64 job_id = 1;
-  string name = 2;
   enum Priority {
-    NULL = 0;
+    PRIORITY_NOT_SET = 0;
     WEEKLY = 10;
     DAILY = 20;
     POST_BUILD = 30;
@@ -147,27 +139,64 @@ message Job {
     CQ = 70;
     SUPER = 80;
   }
+
+  enum Relationship {
+    RELATIONSHIP_NOT_SET = 0;
+    SUITE = 1;
+    CHILD = 2;
+  }
+
+  enum JobStatus {
+    STATUS_NOT_SET = 0;
+    CREATED = 1;
+    QUEUED = 2;
+    PROVISIONING = 3;
+    RUNNING = 4;
+    SUCCESS = 5;
+    FAILED = 6;
+    TIMED_OUT = 7;
+    ABORTED = 8;
+  }
+
+  enum QueueStatus {
+    QUEUE_STATUS_NOT_SET = 0;
+    QUEUED_JOBS = 1;
+    JOBS_RUNNING = 2;
+    FINISHED_JOBS = 3;
+  }
+
+  int32 job_id = 1;
+  string name = 2;
   Priority priority = 3;
   int64 created_time_sec_utc = 4;
   int64 start_time_sec_utc = 5;
   int64 finished_time_sec_utc = 6;
-  enum JobStatus {
-    CREATED = 0;
-    QUEUED = 1;
-    PROVISIONING = 2;
-    RUNNING = 3;
-    SUCCESS = 4;
-    FAILED = 5;
-    TIMED_OUT = 6;
-    ABORTED = 7;
-  }
   JobStatus status = 7;
-  int64 parent_job_id = 8;
+  int32 parent_job_id = 8;
+}
+
+message GetNumJobsRequest {
+  string id_filter = 3;
+  string name_filter = 4;
+  int64 created_time_lt = 5;
+  int64 created_time_gt = 6;
+  Job.QueueStatus status_filter = 7;
+  Job.Relationship rel_filter = 8;
+}
+
+message GetNumJobsResponse {
+  int32 num_jobs = 1;
 }
 
 message GetJobsRequest {
-  int64 query_start = 1;
-  int64 query_limit = 2;
+  int32 query_start = 1;
+  int32 query_limit = 2;
+  string id_filter = 3;
+  string name_filter = 4;
+  int64 created_time_lt = 5;
+  int64 created_time_gt = 6;
+  Job.QueueStatus status_filter = 7;
+  Job.Relationship rel_filter = 8;
 }
 
 message GetJobsResponse {

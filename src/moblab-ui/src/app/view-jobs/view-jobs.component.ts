@@ -158,10 +158,6 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
         searchTerms.id.toLowerCase()) !== -1 &&
       data.getName().toLowerCase().indexOf(
         searchTerms.name.toLowerCase()) !== -1 &&
-      INT_TO_PRIORITY[data.getPriority()].indexOf(
-        searchTerms.priority) !== -1 &&
-      INT_TO_JOBSTATUS[data.getStatus()].indexOf(
-        searchTerms.jobStatus) !== -1 &&
       (
         isNaN(startTimeFromFilterDate.getTime()) ||
         jobStartTime >= startTimeFromFilterDate
@@ -240,8 +236,10 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getNextPageJobs(pageIndex, pageSize) {
     this.loadingJobs = true;
-    this.moblabGrpcService.getJobs(pageIndex * pageSize, pageSize,
-      (jobs: Job[]) => this.assignJobs(jobs)
+    this.moblabGrpcService.getJobs(
+      (jobs: Job[]) => this.assignJobs(jobs),
+      pageIndex * pageSize,
+      pageSize,
     )};
 
   getJobsList() {

@@ -247,56 +247,6 @@ describe('ViewJobsComponent', () => {
       expect(component.getNumVisibleJobs()).toBe(createMockJobs().length);
     });
 
-    /*
-      This test verifies that multiple filters work together correctly. The mock
-      jobs are set up to create one of each permutation across name, id, status
-      and priority. The idea of this test is that by incrementally setting
-      filters for each of these attributes, the number of visible jobs will each
-      time be reduced by a factor of n where n is the number of different
-      possible value of the attribute ( free text attributes name and id are only
-      given two possible values in the mock job creator ).
-    */
-    it('Verifying that multiple filters work together.', function () {
-      let expectedNumJobs = component.getNumVisibleJobs();
-
-      const nameFilterInput = fixture.debugElement.nativeElement.querySelector(
-        '#nameInput'
-      );
-      nameFilterInput.value = '0';
-      nameFilterInput.dispatchEvent(new Event('input'));
-
-      expectedNumJobs = expectedNumJobs / NUM_NAMES;
-      expect(component.getNumVisibleJobs()).toBe(expectedNumJobs);
-
-      const idFilterInput = fixture.debugElement.nativeElement.querySelector(
-        '#idInput'
-      );
-      idFilterInput.value = '0';
-      idFilterInput.dispatchEvent(new Event('input'));
-
-      expectedNumJobs = expectedNumJobs / NUM_IDS;
-      expect(component.getNumVisibleJobs()).toBe(expectedNumJobs);
-
-      /*
-        TO-DO: Figure out how to wire this change via an element event instead of
-        a component operation.
-        Tried: selectionChange dispatch on mat-select debugElement, didn't work.
-        Tried: change event dispatch on mat-select nativeElement, didn't work.
-      */
-      component.filters.getFormControl('priority').setValue('DEFAULT');
-
-      expectedNumJobs = expectedNumJobs / NUM_PRIORITIES;
-      expect(component.getNumVisibleJobs()).toBe(expectedNumJobs);
-
-      /*
-        TO-DO: Figure out how to wire this change via an element event instead of
-        component operation.
-      */
-      component.filters.getFormControl('jobStatus').setValue('RUNNING');
-
-      expect(component.getNumVisibleJobs()).toBe(1);
-    });
-
     it('Verifiying that refresh clears filters.', function () {
       const initialNumVisibleJobs = component.getNumVisibleJobs();
       // create a filter event that filters out all jobs.
@@ -431,7 +381,7 @@ describe('ViewJobsComponent', () => {
       fixture = TestBed.createComponent(ViewJobsComponent);
       component = fixture.componentInstance;
       // @ts-ignore
-      getJobsSpy = spyOn<any>(component.moblabGrpcService, 'getJobs').and.callFake(function(pageIndex, pageSize) {
+      getJobsSpy = spyOn<any>(component.moblabGrpcService, 'getJobs').and.callFake(function(callback, pageIndex, pageSize) {
         const mockJobs = getRandomJobs(pageIndex, pageSize);
         component.assignJobs(mockJobs);
       });

@@ -103,8 +103,30 @@ export class MoblabGrpcService {
     });
   }
 
-  getNumJobs(callback: (x: number) => void) {
+  getNumJobs(callback: (x: number) => void,
+             id_filter?: string,
+             name_filter?: string, created_time_lt?: number, created_time_gt?: number,
+             status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship) {
     const request = new GetNumJobsRequest();
+    if (id_filter) {
+      request.setIdFilter(id_filter)
+    }
+    if (name_filter) {
+      request.setNameFilter(name_filter)
+    }
+    if (created_time_lt) {
+      request.setCreatedTimeLt(created_time_lt)
+    }
+    if (created_time_gt) {
+      request.setCreatedTimeLt(created_time_gt)
+    }
+    if (status_filter) {
+      request.setStatusFilter(status_filter)
+    }
+    if (rel_filter) {
+      request.setRelFilter(rel_filter)
+    }
+
     const call = this.moblabRpcService.get_num_jobs(
       request,
       {},
@@ -117,10 +139,34 @@ export class MoblabGrpcService {
     });
   }
 
-  getJobs(queryStart: number, queryLimit: number, callback: (x: Job[]) => void) {
+  getJobs(callback: (x: Job[]) => void,
+          queryStart: number, queryLimit: number, id_filter?: string,
+          name_filter?: string, created_time_lt?: number, created_time_gt?: number,
+          status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
+          ) {
+    console.log('inside get jobs')
     const request = new GetJobsRequest();
     request.setQueryStart(queryStart);
     request.setQueryLimit(queryLimit);
+    if (id_filter) {
+      request.setIdFilter(id_filter)
+    }
+    if (name_filter) {
+      request.setNameFilter(name_filter)
+    }
+    if (created_time_lt) {
+      request.setCreatedTimeLt(created_time_lt)
+    }
+    if (created_time_gt) {
+      request.setCreatedTimeLt(created_time_gt)
+    }
+    if (status_filter) {
+      request.setStatusFilter(status_filter)
+    }
+    if (rel_filter) {
+      request.setRelFilter(rel_filter)
+    }
+
     const call = this.moblabRpcService.get_jobs(
       request,
       {},

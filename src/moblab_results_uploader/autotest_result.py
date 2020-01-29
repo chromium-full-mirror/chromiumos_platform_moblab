@@ -58,7 +58,7 @@ def _query_job_finished_time(id_):
     """Query AFE with job id and yield the finished time."""
     afe = afe_connector.AFEConnector()
     while True:
-        result = afe.get_jobs([id_])
+        result = afe.get_jobs_by_ids([id_])
         if not result:
             raise test_result_interface.TestResultError(
                 'Failed to query AFE job {}'.format(id_)
