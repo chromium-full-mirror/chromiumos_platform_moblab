@@ -12,10 +12,10 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
+import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
 import {MatTableDataSource} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
-
 import {Job} from "app/services/moblabrpc_pb";
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 
@@ -105,6 +105,7 @@ class MultiFilter {
       ),
     ]),
   ],
+  providers: [DatePipe]
 })
 export class ViewJobsComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [
@@ -161,7 +162,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly moblabGrpcService: MoblabGrpcService,
-    private changeDetectorRefs: ChangeDetectorRef
+    private changeDetectorRefs: ChangeDetectorRef,
+    private datePipe: DatePipe
   ) {}
 
   ngOnInit() {
@@ -196,6 +198,22 @@ export class ViewJobsComponent implements OnInit, OnDestroy {
     this.filters.setJobsRef(this.jobs);
     this.jobs.filterPredicate = this.filterFunction;
     this.loadingJobs = false;
+  }
+
+  // Because timestamps may be returned in second, millisecond, or nanosecond
+  // granularity, but Angular expects timestamps in milliseconds.
+  normalizeTimestamp(timestamp) {
+    if (timestamp === 0) {
+      return 'N/A'
+    }
+
+    const digits_count = timestamp.toString().length
+    if (digits_count === 10) {
+      timestamp *= 1000
+    } else if (digits_count === 16) {
+      timestamp /= 1000
+    }
+    return this.datePipe.transform(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss')
   }
 
   getNextPageJobs() {

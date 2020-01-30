@@ -100,7 +100,7 @@
       <th mat-header-cell *matHeaderCellDef>Created Time</th>
       <td mat-cell *matCellDef="let element">
       <span>
-        {{element.getCreatedTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}
+        {{normalizeTimestamp(element.getCreatedTimeSecUtc())}}
       </span>
       </td>
     </ng-container>
@@ -109,7 +109,7 @@
       <th mat-header-cell *matHeaderCellDef>Start Time</th>
       <td mat-cell *matCellDef="let element">
       <span>
-        {{element.getStartTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}
+        {{normalizeTimestamp(element.getStartTimeSecUtc())}}
       </span>
       </td>
     </ng-container>
@@ -118,7 +118,7 @@
       <th mat-header-cell *matHeaderCellDef>Finished Time</th>
       <td mat-cell *matCellDef="let element">
       <span>
-        {{element.getFinishedTimeSecUtc() | date: 'yyyy-MM-dd HH:mm:ss'}}
+        {{normalizeTimestamp(element.getFinishedTimeSecUtc())}}
       </span>
       </td>
     </ng-container>
