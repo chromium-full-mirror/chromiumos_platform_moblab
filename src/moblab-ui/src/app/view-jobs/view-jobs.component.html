@@ -1,34 +1,89 @@
 <div id="root-container">
   <div>
     <div class="time-filter-form-wrapper">
-      <mat-card class="time_filters">
-        <b> Start Time </b>
-        <span> from: </span>
-        <mat-form-field class="filter" floatLabel="never">
-          <input id="startFromTimeInput" matInput
-                 [formControl]="filters.getFormControl(jobStartTimeFromFilter)"
-                 placeholder='yyyy-MM-dd HH:mm:ss'>
-        </mat-form-field>
-        <span> to: </span>
-        <mat-form-field class="filter" floatLabel="never">
-          <input id="startToTimeInput" matInput
-                 [formControl]="filters.getFormControl(jobStartTimeToFilter)"
-                 placeholder='yyyy-MM-dd HH:mm:ss'>
-        </mat-form-field>
-      </mat-card>
+      <div class="filter-box" style="border: 1px solid #ebebeb;">
+        <mat-card class="time_filters" style="padding:8px;">
+          <b> Start Time </b>
+          <span> from: </span>
+          <mat-form-field id="dateInputFormField" appearance="outline" class="filter"
+                          floatLabel="never">
+            <input id="startFromTimeInput" matInput
+                   [formControl]="filters.getFormControl(jobStartTimeFromFilter)"
+                   placeholder='yyyy-MM-dd HH:mm:ss'>
+            <mat-error
+              *ngIf="filters.getFormControl(jobStartTimeFromFilter).hasError('failedDateParse')">
+              Invalid datestring parsed.
+            </mat-error>
+            <mat-error
+              *ngIf="filters.getFormControl(jobStartTimeFromFilter).hasError('dateOutOfBounds')">
+              Date entered out of bounds.
+            </mat-error>
+          </mat-form-field>
+          <span> to: </span>
+          <mat-form-field id="dateInputFormField" appearance="outline" class="filter"
+                          floatLabel="never">
+            <input id="startToTimeInput" matInput
+                   [formControl]="filters.getFormControl(jobStartTimeToFilter)"
+                   placeholder='yyyy-MM-dd HH:mm:ss'>
+            <mat-error
+              *ngIf="filters.getFormControl(jobStartTimeToFilter).hasError('failedDateParse')">
+              Invalid datestring parsed.
+            </mat-error>
+            <mat-error
+              *ngIf="filters.getFormControl(jobStartTimeToFilter).hasError('dateOutOfBounds')">
+              Date entered out of bounds.
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field id="idInputFormField" appearance="outline" class="filter"
+                          floatLabel="never">
+            <mat-label> ID</mat-label>
+            <input id="idInput"
+                   matInput [formControl]="filters.getFormControl(jobId)">
+            <mat-error *ngIf="filters.getFormControl(jobId).hasError('notANonnegativeNumber')">
+              Not a number.
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="filter header-entry" floatLabel="never">
+            <mat-label>Name</mat-label>
+            <input
+              id="nameInput"
+              matInput [formControl]="filters.getFormControl(jobName)">
+          </mat-form-field>
+          <mat-form-field id="relationshipInputFormField" appearance="outline">
+            <mat-label>Parent/Child</mat-label>
+            <mat-select id="prioritySelector" class="filter"
+                        [formControl]="filters.getFormControl(jobRelationship)">
+              <mat-option id="priorityOptions"
+                          *ngFor="let relationshipOption of relationshipFilterOptions"
+                          value="{{ relationshipOption }}">
+                {{ relationshipOption }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field id="statusInputFormField" appearance="outline">
+            <mat-label>Queue Status</mat-label>
+            <mat-select id="queueStatusSelector" class="filter"
+                        [formControl]="filters.getFormControl(queueStatus)">
+              <mat-option *ngFor="let queueStatusOption of queueStatusFilterOptions"
+                          value="{{ queueStatusOption }}"> {{queueStatusOption}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button id="filter-button" mat-raised-button color="primary"
+                  [disabled]="this.filters.anyErrors()" (click)="filterSubmission()"> Filter
+          </button>
+          <button
+            class="job-refresh-button"
+            matTooltip="Refresh"
+            mat-icon-button
+            (click)="refreshJobs()">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </mat-card>
+      </div>
       <mat-divider></mat-divider>
     </div>
   </div>
-
-  <button
-    class="job-refresh-button"
-    matTooltip="Refresh"
-    mat-icon-button
-    (click)="getJobsList()">
-    <mat-icon>refresh</mat-icon>
-  </button>
-
-
   <table mat-table [dataSource]="jobs"
          multiTemplateDataRows
          class="jobs-table mat-elevation-z8">
@@ -53,10 +108,6 @@
     <ng-container matColumnDef="job_id">
       <th mat-header-cell *matHeaderCellDef>
         <div>Job ID</div>
-        <mat-form-field class="filter" floatLabel="never">
-          <input id="idInput"
-                 matInput [formControl]="filters.getFormControl(jobId)">
-        </mat-form-field>
       </th>
       <td mat-cell *matCellDef="let element">
         <span>{{element.getJobId()}}</span>
@@ -66,11 +117,6 @@
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>
         <div>Name</div>
-        <mat-form-field class="filter header-entry" floatLabel="never">
-          <input
-            id="nameInput"
-            matInput [formControl]="filters.getFormControl(jobName)">
-        </mat-form-field>
       </th>
       <td mat-cell *matCellDef="let element">
         <span>{{element.getName()}}</span>
@@ -80,16 +126,6 @@
     <ng-container matColumnDef="priority">
       <th mat-header-cell *matHeaderCellDef>
         <div>Priority</div>
-        <mat-form-field>
-          <mat-select id="prioritySelector" class="filter"
-                      [formControl]="filters.getFormControl(jobPriority)">
-            <mat-option id="priorityOptions"
-                        *ngFor="let priorityOption of priorityFilterOptions"
-                        value="{{ priorityOption }}">
-              {{ priorityOption }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
       </th>
       <td mat-cell *matCellDef="let element">
         <span>{{getPriorityFromNum(element.getPriority())}}</span>
@@ -126,14 +162,6 @@
     <ng-container matColumnDef="job_status">
       <th mat-header-cell *matHeaderCellDef>
         <div>Job Status</div>
-        <mat-form-field>
-          <mat-select id="jobStatusSelector" class="filter"
-                      [formControl]="filters.getFormControl(jobStatus)">
-            <mat-option *ngFor="let jobStatusOption of jobStatusFilterOptions"
-                        value="{{ jobStatusOption }}"> {{ jobStatusOption }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
       </th>
       <td mat-cell *matCellDef="let element">
         <span>{{getStatusFromNum(element.getStatus())}}</span>
@@ -153,7 +181,6 @@
         </div>
       </td>
     </ng-container>
-
     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
     <tr mat-row *matRowDef="let element; columns: displayedColumns;"
         class="job-detail-click-layer"

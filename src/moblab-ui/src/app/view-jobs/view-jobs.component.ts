@@ -22,7 +22,8 @@ import {
   MatPaginator
 } from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
-import {Job} from "app/services/moblabrpc_pb";
+
+import {Job} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 
 function createInvertedObj (obj) {
@@ -39,17 +40,46 @@ const INT_TO_PRIORITY = createInvertedObj(Job.Priority);
 const JOB_NAME = 'name';
 const JOB_ID = 'id';
 const JOB_PRIORITY = 'priority';
-const JOB_STATUS = 'jobStatus';
+const QUEUE_STATUS = 'queueStatus';
+const JOB_RELATIONSHIP = 'relationship';
 const JOB_START_TIME_FROM_FILTER = 'startTimeFromFilter';
 const JOB_START_TIME_TO_FILTER = 'startTimeToFilter';
 const FILTER_PARAMETERS = [
   JOB_NAME,
   JOB_ID,
   JOB_PRIORITY,
-  JOB_STATUS,
+  QUEUE_STATUS,
+  JOB_RELATIONSHIP,
   JOB_START_TIME_FROM_FILTER,
   JOB_START_TIME_TO_FILTER,
 ];
+const FILTER_VALIDATORS = {}
+
+FILTER_VALIDATORS[JOB_START_TIME_FROM_FILTER] = [forbiddenDateValidator]
+FILTER_VALIDATORS[JOB_START_TIME_TO_FILTER] = [forbiddenDateValidator]
+FILTER_VALIDATORS[JOB_ID] = [forbiddenIDValidator]
+
+export function forbiddenIDValidator(control) {
+  if (!control.value) {
+    return null;
+  }
+  const forbidden = !(new RegExp('^\\d+$').test(control.value));
+  return forbidden ? {'notANonnegativeNumber': {value: control.value}} : null;
+}
+
+export function forbiddenDateValidator(control) {
+  if (!control.value) {
+    return null;
+  }
+  const timestamp = new Date(control.value).getTime();
+  if (isNaN(timestamp)) {
+    return {'failedDateParse': {value: control.value}}
+  }
+  if (timestamp <= 0) {
+    return {'dateOutOfBounds': {value: control.value}}
+  }
+  return null
+}
 
 const START_PAGE_SIZE = 25;
 
@@ -57,24 +87,14 @@ const START_PAGE_SIZE = 25;
   For handling multiple filter forms without having to repeat logic per
   FormControl.
 */
-class MultiFilter {
+class MultiFilterForm {
   formControls = {};
-  filterValues = {};
-  subscriptions = {};
 
-  constructor(private filterParameters: string[],
-              private jobsRef: MatTableDataSource<Job>) {
-    this.jobsRef = jobsRef;
+  constructor(private filterParameters: string[]) {
     for (const filterName of filterParameters) {
-      this.formControls[filterName] = new FormControl('');
-      this.filterValues[filterName] = '';
-      this.subscriptions[filterName] =
-        this.formControls[filterName].valueChanges.subscribe(
-        value => {
-          this.filterValues[filterName] = value;
-          this.jobsRef.filter = JSON.stringify(this.filterValues);
-        }
-      )
+      this.formControls[filterName] = new FormControl(
+        '',
+        filterName in FILTER_VALIDATORS ? FILTER_VALIDATORS[filterName] : []);
     }
   }
 
@@ -82,19 +102,22 @@ class MultiFilter {
     return this.formControls[filterName];
   }
 
-  setJobsRef(jobsRef) {
-    this.jobsRef = jobsRef;
+  getFormValue(filterName) {
+    return this.getFormControl(filterName).value;
+  }
+
+  anyErrors() {
+    for (const filterName in this.formControls) {
+      if (this.getFormControl(filterName).errors) {
+        return true;
+      }
+    }
+    return false;
   }
 
   reset() {
     for (const filterName in this.formControls) {
       this.formControls[filterName].setValue('');
-    }
-  }
-
-  unsubscribeAll() {
-    for (const filterName in this.subscriptions) {
-      this.subscriptions[filterName].unsubscribe();
     }
   }
 }
@@ -132,59 +155,44 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
   job_selections = new SelectionModel<Job>(true, []);
   loadingJobs = false;
   numJobs = 0;
-
   expandedElement: Job|null;
 
-  filters = new MultiFilter(FILTER_PARAMETERS, this.jobs);
+  filters = new MultiFilterForm(FILTER_PARAMETERS);
   jobId: string = JOB_ID;
   jobName: string = JOB_NAME;
   jobPriority: string = JOB_PRIORITY;
-  jobStatus: string = JOB_STATUS;
+  queueStatus: string = QUEUE_STATUS;
+  jobRelationship: string = JOB_RELATIONSHIP;
   jobStartTimeFromFilter: string = JOB_START_TIME_FROM_FILTER;
   jobStartTimeToFilter: string = JOB_START_TIME_TO_FILTER;
 
   pageSize: number = START_PAGE_SIZE;
 
-  priorityFilterOptions = [''].concat(Object.keys(Job.Priority));
-  jobStatusFilterOptions = [''].concat(Object.keys(Job.JobStatus));
-
-  filterFunction(data, filter) {
-    const searchTerms = JSON.parse(filter);
-    const startTimeFromFilterDate = new Date(searchTerms.startTimeFromFilter);
-    const startTimeToFilterDate = new Date(searchTerms.startTimeToFilter);
-    const jobStartTime = new Date(data.getStartTimeSecUtc());
-
-    return data.getJobId().toString().indexOf(
-        searchTerms.id.toLowerCase()) !== -1 &&
-      data.getName().toLowerCase().indexOf(
-        searchTerms.name.toLowerCase()) !== -1 &&
-      (
-        isNaN(startTimeFromFilterDate.getTime()) ||
-        jobStartTime >= startTimeFromFilterDate
-      ) &&
-      (
-        isNaN(startTimeToFilterDate.getTime()) ||
-        jobStartTime <= startTimeToFilterDate
-      );
-  }
+  // Removing the first, default value of each enum ( which represent the 'unset'
+  // state.
+  relationshipFilterOptions = [''].concat(
+    Object.keys(Job.Relationship).slice(1)
+  );
+  queueStatusFilterOptions = [''].concat(
+    Object.keys(Job.QueueStatus).slice(1)
+  );
 
   constructor(
     private readonly moblabGrpcService: MoblabGrpcService,
     private changeDetectorRefs: ChangeDetectorRef,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
   ) {}
 
   ngOnInit() {
-    this.getNumJobs();
-    this.getJobsList();
+    this.moblabGrpcService.getNumJobs(
+      (numJobs: number) => { this.numJobs = numJobs; }
+      )
+    this.getNextPageJobs();
   }
 
   ngAfterViewInit() {
     this.paginator.page.subscribe(
-      () => this.getNextPageJobs(
-        this.paginator.pageIndex,
-        this.paginator.pageSize
-      )
+      () => this.getNextPageJobs()
     );
   }
   selectJob(element) {
@@ -199,23 +207,42 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  getPriorityFromNum(priorityNum) {
+    return INT_TO_PRIORITY[priorityNum];
+  }
   getStatusFromNum(statusNum) {
     return INT_TO_JOBSTATUS[statusNum];
   }
 
-  getPriorityFromNum(priorityNum) {
-    return INT_TO_PRIORITY[priorityNum];
-  }
-
   assignJobs(jobs) {
     this.jobs = new MatTableDataSource(jobs);
-    this.filters.setJobsRef(this.jobs);
-    this.jobs.filterPredicate = this.filterFunction;
     this.loadingJobs = false;
   }
 
-  getNumJobs() {
-    this.moblabGrpcService.getNumJobs((numJobs: number) => { this.numJobs = numJobs; })
+  resetPagination() {
+    if (this && this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+  }
+
+  convertToSecondsTimestamp(timestamp: number) {
+    if (isNaN(timestamp)) {
+      throw new Error(['Invalid timestamp', timestamp].join(' '))
+    }
+    return Number(timestamp.toString().substring(0, 10))
+  }
+
+  convertToMilisecondsTimestamp(timestamp){
+    if (isNaN(timestamp)) {
+      throw new Error(['Invalid timestamp', timestamp].join(' '))
+    }
+    const digits_count = timestamp.toString().length
+    if (digits_count === 10) {
+      timestamp *= 1000
+    } else if (digits_count === 16) {
+      timestamp /= 1000
+    }
+    return timestamp
   }
 
   // Because timestamps may be returned in second, millisecond, or nanosecond
@@ -225,31 +252,72 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
       return 'N/A'
     }
 
-    const digits_count = timestamp.toString().length
-    if (digits_count === 10) {
-      timestamp *= 1000
-    } else if (digits_count === 16) {
-      timestamp /= 1000
-    }
+    timestamp = this.convertToMilisecondsTimestamp(timestamp)
     return this.datePipe.transform(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss')
   }
 
-  getNextPageJobs(pageIndex, pageSize) {
+  datestringToTimestamp(datestring) {
+    const date = new Date(datestring);
+    return isNaN(date.getTime()) ?
+      undefined : this.convertToSecondsTimestamp(date.getTime()
+      )
+  }
+
+  filterSubmission() {
+    this.resetPagination();
+    this.getNextPageJobs()
+  }
+
+  refreshJobs() {
+    this.filters.reset();
+    this.resetPagination();
+    this.getNextPageJobs();
+  }
+
+  getNextPageJobs() {
     this.loadingJobs = true;
+
+    const job_id_filter = this.filters.getFormValue(JOB_ID);
+    const job_name_filter = this.filters.getFormValue(JOB_NAME);
+    const job_start_lt_filter = this.datestringToTimestamp(
+      this.filters.getFormValue(JOB_START_TIME_TO_FILTER)
+    );
+    const job_start_gt_filter = this.datestringToTimestamp(
+      this.filters.getFormValue(JOB_START_TIME_FROM_FILTER)
+    );
+    const job_queue_status_filter = this.filters.getFormValue(QUEUE_STATUS) ?
+      Number(Job.QueueStatus[this.filters.getFormValue(QUEUE_STATUS)]) : 0;
+    const job_relationship_filter =
+      this.filters.getFormValue(JOB_RELATIONSHIP) ?
+      Number(Job.Relationship[this.filters.getFormValue(JOB_RELATIONSHIP)]) : 0;
+
     this.moblabGrpcService.getJobs(
       (jobs: Job[]) => this.assignJobs(jobs),
-      pageIndex * pageSize,
-      pageSize,
-    )};
+      (this.paginator.pageIndex * this.paginator.pageSize) ?
+        this.paginator.pageIndex * this.paginator.pageSize : 0,
+      this.paginator.pageSize ?
+        this.paginator.pageSize : this.pageSize,
+      job_id_filter,
+      job_name_filter,
+      job_start_lt_filter,
+      job_start_gt_filter,
+      job_queue_status_filter,
+      job_relationship_filter
+    );
 
-  getJobsList() {
-    this.loadingJobs = true;
-    this.getNextPageJobs(0, this.pageSize);
-    this.filters.reset();
+    this.moblabGrpcService.getNumJobs(
+      (numJobs: number) => { this.numJobs = numJobs; },
+      job_id_filter,
+      job_name_filter,
+      job_start_lt_filter,
+      job_start_gt_filter,
+      job_queue_status_filter,
+      job_relationship_filter
+    )
   }
 
   getNumVisibleJobs() {
-    return this.jobs.filteredData.length;
+    return this.jobs.data.length;
   }
 
   /*
@@ -270,6 +338,6 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.filters.unsubscribeAll();
+    this.paginator.page.unsubscribe();
   }
 }

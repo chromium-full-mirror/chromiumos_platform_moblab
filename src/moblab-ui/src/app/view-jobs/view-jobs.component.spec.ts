@@ -31,13 +31,14 @@ const NUM_IDS = 2;
 const NUM_PRIORITIES = Object.keys(Job.Priority).length;
 const NUM_STATUS = Object.keys(Job.JobStatus).length;
 
-const BASELINE_TIME = Date.now();
+const BASELINE_TIME = Math.floor(Date.now() / 1000)
 // one hour
 const TIME_OFFSET = 3600;
 
 // Creates unique, mock jobs, each a different permutation. Useful for tests on
 // filtering.
-function createMockJobs() {
+function createMockJobs(id_filter?: string, name_filter?: string,
+                        created_time_lt?: number, created_time_gt?: number) {
   const mockFilterJobs = [];
   let running_timestamp = BASELINE_TIME;
   for (let i = 0; i < NUM_NAMES; i++) {
@@ -48,14 +49,28 @@ function createMockJobs() {
           const startTimestamp = running_timestamp ;
           running_timestamp += TIME_OFFSET
           const finishedTimestamp = running_timestamp;
-          let mockJob = new Job();
+          const mockJob = new Job();
           mockJob.setName('Job' + i.toString());
           mockJob.setJobId(j);
           mockJob.setStartTimeSecUtc(startTimestamp);
-          mockJob.setCreatedTimeSecUtc(Date.now());
+          mockJob.setCreatedTimeSecUtc(startTimestamp);
           mockJob.setFinishedTimeSecUtc(finishedTimestamp);
           mockJob.setPriority(k*10);
           mockJob.setStatus(l);
+          if (id_filter && !mockJob.getJobId().toString().includes(id_filter)) {
+            continue
+          }
+          if (name_filter && !mockJob.getName().includes(name_filter)) {
+            continue
+          }
+          if (created_time_lt &&
+            created_time_lt <= mockJob.getCreatedTimeSecUtc()) {
+            continue
+          }
+          if (created_time_gt &&
+            created_time_gt >= mockJob.getCreatedTimeSecUtc()) {
+            continue
+          }
           mockFilterJobs.push(mockJob);
         }
       }
@@ -106,8 +121,20 @@ describe('ViewJobsComponent', () => {
       component = fixture.componentInstance;
       // @ts-ignore
       getJobsSpy = spyOn<any>(component.moblabGrpcService, 'getJobs')
-        .and.callFake(function() {
-        component.assignJobs(createMockJobs());
+        .and.callFake(
+          function(
+            callback: (x: Job[]) => void,
+            queryStart: number,
+            queryLimit: number,
+            id_filter?: string,
+            name_filter?: string,
+            created_time_lt?: number,
+            created_time_gt?: number
+          ) {
+        component.assignJobs(
+          createMockJobs(
+            id_filter, name_filter, created_time_lt, created_time_gt
+          ));
       });
       // @ts-ignore
       getNumJobsSpy = spyOn<any>(component.moblabGrpcService, 'getNumJobs')
@@ -213,6 +240,10 @@ describe('ViewJobsComponent', () => {
         BASELINE_TIME + createMockJobs().length * TIME_OFFSET
       ).toLocaleString();
       startFromFilterInput.dispatchEvent(new Event('input'));
+      const filterButton = fixture.debugElement.nativeElement.querySelector(
+        '#filter-button'
+      );
+      filterButton.dispatchEvent(new Event('click'));
       expect(component.getNumVisibleJobs()).toBe(
         createMockJobs().length / 2
       );
@@ -226,11 +257,12 @@ describe('ViewJobsComponent', () => {
         BASELINE_TIME + (createMockJobs().length + 2) * TIME_OFFSET
       ).toLocaleString();
       startToFilterInput.dispatchEvent(new Event('input'));
+      filterButton.dispatchEvent(new Event('click'));
 
       expect(component.getNumVisibleJobs()).toBe(1);
     });
 
-    it('Test that NaN dates do not have any filtering effect.', function () {
+    it('Test2 that NaN dates do not have any filtering effect.', function () {
       const startFromFilterInput =
         fixture.debugElement.nativeElement.querySelector(
           '#startFromTimeInput'
@@ -247,7 +279,51 @@ describe('ViewJobsComponent', () => {
       expect(component.getNumVisibleJobs()).toBe(createMockJobs().length);
     });
 
-    it('Verifiying that refresh clears filters.', function () {
+    function setInputForm(formId, inputValue) {
+      const inputForm = fixture.debugElement.nativeElement.querySelector(
+        formId
+      )
+      inputForm.value = inputValue
+      inputForm.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    }
+
+    it('Verify invalid inputs disable filter submission.', function () {
+      const filterButton =
+        fixture.debugElement.nativeElement.querySelector(
+          '#filter-button'
+        );
+      const startToFilterInput =
+        fixture.debugElement.nativeElement.querySelector(
+          '#startToTimeInput'
+        );
+      const idInput =
+        fixture.debugElement.nativeElement.querySelector(
+          '#idInput'
+        );
+
+      expect(filterButton.disabled).toBeFalsy();
+
+      // Number that translates to less than 0 timestamp.
+      setInputForm('#startToTimeInput', '1000')
+      expect(filterButton.disabled).toBeTruthy();
+
+      setInputForm('#startToTimeInput', '')
+      expect(filterButton.disabled).toBeFalsy();
+
+      // String that cannot be parsed as a date.
+      setInputForm('#startToTimeInput', 'xxxx')
+      expect(filterButton.disabled).toBeTruthy();
+
+      setInputForm('#startToTimeInput', '')
+      expect(filterButton.disabled).toBeFalsy();
+
+      // ID input that is not a number.
+      setInputForm('#idInput', 'x')
+      expect(filterButton.disabled).toBeTruthy();
+    });
+
+    it('Verifying that refresh clears filters.', function () {
       const initialNumVisibleJobs = component.getNumVisibleJobs();
       // create a filter event that filters out all jobs.
       const nameFilterInput = fixture.debugElement.nativeElement.querySelector(
@@ -255,6 +331,10 @@ describe('ViewJobsComponent', () => {
       );
       nameFilterInput.value = 'This will not match with any jobs';
       nameFilterInput.dispatchEvent(new Event('input'));
+      const filterButton = fixture.debugElement.nativeElement.querySelector(
+        '#filter-button'
+      );
+      filterButton.dispatchEvent(new Event('click'));
 
       expect(component.getNumVisibleJobs()).toBe(0);
 
@@ -354,7 +434,14 @@ describe('ViewJobsComponent', () => {
 
     // Pagination tests need getJobs RPC calls to be mocked differently than
     // other unit tests.
-    function getRandomJobs(queryStart, queryLimit) {
+    function getRandomJobs(
+      queryStart,
+      queryLimit,
+      id_filter?: string,
+      name_filter?: string,
+      created_time_lt?: number,
+      created_time_gt?: number,
+    ) {
       const jobs = [];
       let lastTimestamp = Date.now();
       // 50 hours
@@ -371,7 +458,22 @@ describe('ViewJobsComponent', () => {
         mockJob.setCreatedTimeSecUtc(lastTimestamp);
         mockJob.setStartTimeSecUtc(startTimestamp);
         mockJob.setFinishedTimeSecUtc(finishedTimestamp);
-        mockJob.setStatus(Math.floor(Math.random() * 100) % 7 );
+        mockJob.setStatus((Math.floor(Math.random() * 100) % 7 ));
+
+        if (id_filter && !mockJob.getJobId().toString().includes(id_filter)) {
+          continue
+        }
+        if (name_filter && !mockJob.getName().includes(name_filter)) {
+          continue
+        }
+        if (created_time_lt &&
+          created_time_lt >= mockJob.getCreatedTimeSecUtc()) {
+          continue
+        }
+        if (created_time_gt &&
+          created_time_gt <= mockJob.getCreatedTimeSecUtc()) {
+          continue
+        }
         jobs.push(mockJob);
       }
       return jobs;
@@ -381,13 +483,26 @@ describe('ViewJobsComponent', () => {
       fixture = TestBed.createComponent(ViewJobsComponent);
       component = fixture.componentInstance;
       // @ts-ignore
-      getJobsSpy = spyOn<any>(component.moblabGrpcService, 'getJobs').and.callFake(function(callback, pageIndex, pageSize) {
-        const mockJobs = getRandomJobs(pageIndex, pageSize);
+      getJobsSpy = spyOn<any>(component.moblabGrpcService, 'getJobs')
+        .and.callFake(
+          function(callback: (x: Job[]) => void, queryStart: number,
+                   queryLimit: number, id_filter?: string,
+                   name_filter?: string, created_time_lt?: number,
+                   created_time_gt?: number) {
+        const mockJobs = getRandomJobs(
+          queryStart,
+          queryLimit,
+          id_filter,
+          name_filter,
+          created_time_lt,
+          created_time_gt
+        );
         component.assignJobs(mockJobs);
       });
 
       // @ts-ignore
-      getNumJobsSpy = spyOn<any>(component.moblabGrpcService, 'getNumJobs').and.callFake(function() {
+      getNumJobsSpy = spyOn<any>(component.moblabGrpcService, 'getNumJobs')
+        .and.callFake(function() {
           component.numJobs = MOCK_NUM_JOBS;
         });
       fixture.detectChanges();
@@ -424,7 +539,9 @@ describe('ViewJobsComponent', () => {
       // Going backwards in pages.
       for (let i = 0; i < MOCK_NUM_JOBS / component.paginator.pageSize - 2; i++) {
         pagePrevButton.dispatchEvent(new Event('click'));
-        expect(component.jobs.data.length).toBe(component.paginator.pageSize);
+        expect(
+          component.getNumVisibleJobs()
+        ).toBe(component.paginator.pageSize);
         fixture.detectChanges();
         expect(pageNextButton.disabled).toBe(false);
         expect(pagePrevButton.disabled).toBe(false);

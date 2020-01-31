@@ -7,9 +7,15 @@
   padding-right: 25px;
 }
 
+.filter-box {
+  grid-template-columns: 40px 50px auto 50px 40px;
+  grid-template-rows: 25% 100px auto;
+}
+
 .time-filter-form-wrapper {
-  margin-left: 6%;
-  margin-right: 6%;
+  margin-left: 3%;
+  margin-right: 3%;
+  width:94%;
 }
 
 .job-refresh-button {
@@ -18,12 +24,12 @@
 }
 
 .jobs-table {
-  width : 100%;
   box-shadow:none;
   margin-bottom:20px;
   float: right;
   margin-right: 18px;
   display: contents;
+  overflow: scroll;
 }
 
 .mat-card {
@@ -38,6 +44,26 @@
 .mat-form-field {
   padding-left: 5px;
   padding-right: 5px;
+}
+
+#idInputFormField {
+  width: 60px;
+}
+
+#dateInputFormField {
+  width: 180px;
+}
+
+#statusInputFormField {
+  width: 140px;
+}
+
+#relationshipInputFormField {
+  width: 100px;
+}
+
+.mat-form-field-infix {
+  border-top: 0px;
 }
 
 .mat-cell {
