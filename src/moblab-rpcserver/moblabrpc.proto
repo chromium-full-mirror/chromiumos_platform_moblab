@@ -22,6 +22,7 @@ service MoblabRpcService {
 
   rpc get_num_jobs(GetNumJobsRequest) returns (GetNumJobsResponse)  {}
   rpc get_jobs(GetJobsRequest) returns (GetJobsResponse)  {}
+  rpc get_job_details(GetJobDetailsRequest) returns (GetJobDetailsResponse)  {}
 }
 
 message RunSuiteRequest {
@@ -165,6 +166,17 @@ message Job {
     FINISHED_JOBS = 3;
   }
 
+  // NEXT_TAG = 8
+  message Execution {
+    string name = 1;
+    int32 job_id = 2;
+    int64 start_time_utc = 3;
+    int64 end_time_utc = 4;
+    int64 used_time = 5;
+    JobStatus status = 6;
+    string dut = 7;
+  }
+
   int32 job_id = 1;
   string name = 2;
   Priority priority = 3;
@@ -173,6 +185,14 @@ message Job {
   int64 finished_time_sec_utc = 6;
   JobStatus status = 7;
   int32 parent_job_id = 8;
+
+  // Parameters below are meant to only be defined in job details page.
+  string dependencies = 9;
+  string server_control_file = 10;
+  int64 timeout = 11;
+  int64 max_runtime = 12;
+  int32 test_retries = 13;
+  repeated Execution execution_history = 14;
 }
 
 message GetNumJobsRequest {
@@ -203,3 +223,10 @@ message GetJobsResponse {
   repeated Job jobs = 1;
 }
 
+message GetJobDetailsRequest {
+  string id = 1;
+}
+
+message GetJobDetailsResponse {
+  Job job_detail = 1;
+}

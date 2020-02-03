@@ -9,6 +9,8 @@ import {
   EnrollDutsResponse,
   GetJobsRequest,
   GetJobsResponse,
+  GetJobDetailsRequest,
+  GetJobDetailsResponse,
   GetNumJobsRequest,
   GetNumJobsResponse,
   Job,
@@ -176,6 +178,25 @@ export class MoblabGrpcService {
     );
     call.on('data', (response: GetJobsResponse) => {
       callback(response.getJobsList())
+    });
+  }
+
+  getJobDetails(callback: (x: Job) => void,
+                errorHandlingCallback: (errorMsg: string) => void,
+                id: string) {
+    const request = new GetJobDetailsRequest();
+    request.setId(id)
+
+    const call = this.moblabRpcService.get_job_details(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetJobDetailsResponse) => {
+        console.log('Failed get_job_details RPC call. Request: ', request, 'Response: ', err);
+        errorHandlingCallback(err.message)
+      }
+    );
+    call.on('data', (response: GetJobDetailsResponse) => {
+      callback(response.getJobDetail());
     });
   }
 
