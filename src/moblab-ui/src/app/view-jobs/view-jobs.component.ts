@@ -25,17 +25,9 @@ import {SelectionModel} from '@angular/cdk/collections';
 
 import {Job} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
-
-function createInvertedObj (obj) {
-  const inverted_mappings = {};
-  for (const key of Object.keys(obj)) {
-    inverted_mappings[obj[key]] = key;
-  }
-  return inverted_mappings;
-}
-
-const INT_TO_JOBSTATUS = createInvertedObj(Job.JobStatus);
-const INT_TO_PRIORITY = createInvertedObj(Job.Priority);
+import { INT_TO_PRIORITY, INT_TO_JOBSTATUS } from '../utils/proto_helpers';
+import { normalizeTimestamp, datestringToSecondsTimestamp } from '../utils/date';
+import { forbiddenDateValidator, forbiddenIDValidator } from '../utils/validators';
 
 const JOB_NAME = 'name';
 const JOB_ID = 'id';
@@ -58,28 +50,6 @@ const FILTER_VALIDATORS = {}
 FILTER_VALIDATORS[JOB_START_TIME_FROM_FILTER] = [forbiddenDateValidator]
 FILTER_VALIDATORS[JOB_START_TIME_TO_FILTER] = [forbiddenDateValidator]
 FILTER_VALIDATORS[JOB_ID] = [forbiddenIDValidator]
-
-export function forbiddenIDValidator(control) {
-  if (!control.value) {
-    return null;
-  }
-  const forbidden = !(new RegExp('^\\d+$').test(control.value));
-  return forbidden ? {'notANonnegativeNumber': {value: control.value}} : null;
-}
-
-export function forbiddenDateValidator(control) {
-  if (!control.value) {
-    return null;
-  }
-  const timestamp = new Date(control.value).getTime();
-  if (isNaN(timestamp)) {
-    return {'failedDateParse': {value: control.value}}
-  }
-  if (timestamp <= 0) {
-    return {'dateOutOfBounds': {value: control.value}}
-  }
-  return null
-}
 
 const START_PAGE_SIZE = 25;
 
@@ -166,6 +136,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
   jobStartTimeFromFilter: string = JOB_START_TIME_FROM_FILTER;
   jobStartTimeToFilter: string = JOB_START_TIME_TO_FILTER;
 
+  normalizeTimestamp = normalizeTimestamp;
+
   pageSize: number = START_PAGE_SIZE;
 
   // Removing the first, default value of each enum ( which represent the 'unset'
@@ -225,44 +197,6 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  convertToSecondsTimestamp(timestamp: number) {
-    if (isNaN(timestamp)) {
-      throw new Error(['Invalid timestamp', timestamp].join(' '))
-    }
-    return Number(timestamp.toString().substring(0, 10))
-  }
-
-  convertToMilisecondsTimestamp(timestamp){
-    if (isNaN(timestamp)) {
-      throw new Error(['Invalid timestamp', timestamp].join(' '))
-    }
-    const digits_count = timestamp.toString().length
-    if (digits_count === 10) {
-      timestamp *= 1000
-    } else if (digits_count === 16) {
-      timestamp /= 1000
-    }
-    return timestamp
-  }
-
-  // Because timestamps may be returned in second, millisecond, or nanosecond
-  // granularity, but Angular expects timestamps in milliseconds.
-  normalizeTimestamp(timestamp) {
-    if (timestamp === 0) {
-      return 'N/A'
-    }
-
-    timestamp = this.convertToMilisecondsTimestamp(timestamp)
-    return this.datePipe.transform(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss')
-  }
-
-  datestringToTimestamp(datestring) {
-    const date = new Date(datestring);
-    return isNaN(date.getTime()) ?
-      undefined : this.convertToSecondsTimestamp(date.getTime()
-      )
-  }
-
   filterSubmission() {
     this.resetPagination();
     this.getNextPageJobs()
@@ -279,10 +213,10 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const job_id_filter = this.filters.getFormValue(JOB_ID);
     const job_name_filter = this.filters.getFormValue(JOB_NAME);
-    const job_start_lt_filter = this.datestringToTimestamp(
+    const job_start_lt_filter = datestringToSecondsTimestamp(
       this.filters.getFormValue(JOB_START_TIME_TO_FILTER)
     );
-    const job_start_gt_filter = this.datestringToTimestamp(
+    const job_start_gt_filter = datestringToSecondsTimestamp(
       this.filters.getFormValue(JOB_START_TIME_FROM_FILTER)
     );
     const job_queue_status_filter = this.filters.getFormValue(QUEUE_STATUS) ?
