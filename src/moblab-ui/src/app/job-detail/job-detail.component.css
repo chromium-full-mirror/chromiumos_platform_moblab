@@ -1,0 +1,58 @@
+#job-detail-table-wrapper {
+  width: 80%;
+  max-width: 1500px;
+  min-height: 100px;
+}
+
+#job-detail-table {
+  width: 100%;
+  box-shadow: none !important;
+}
+
+#job-query-form {
+  padding-bottom: 5px;
+  color: rgba(0, 0, 0, 0.6);
+  font-family:Roboto, sans-serif;
+  display: inline-block;
+  padding-right:10px;
+}
+
+#job-not-found-label {
+  padding-top:40px;
+  padding-bottom:40px;
+  font-size:30px;
+  font-family:Roboto, sans-serif;
+  text-align: center;
+}
+
+#query-job-by-id-box {
+  width: 100px;
+  height: 50px;
+  padding-right: 10px;
+}
+
+#job-query-button {
+  height: 50px;
+}
+
+#control-file-view {
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+#loading-overlay {
+  background-color: #fafafa;
+  height: 100%;
+  opacity: .7;
+  position: absolute;
+  width: 90%;
+  z-index: 100;
+}
+
+.mat-expansion-panel {
+  box-shadow: none !important;
+}
+
+.expansion-panel-content {
+  width:100%;
+}
