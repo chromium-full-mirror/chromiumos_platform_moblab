@@ -2,14 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-SUBDIRS := upstart-scripts \
-           tools \
-	   mobmonitor \
-	   mobmonitor-ui \
-	   remote-scheduler \
-	   moblab-rpcserver \
-	   moblab_results_uploader \
-	   moblab-ui
+SUBDIRS := upstart-scripts
 
 all:
 	for dir in $(SUBDIRS); do \
