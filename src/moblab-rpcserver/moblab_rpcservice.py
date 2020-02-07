@@ -275,3 +275,9 @@ class MoblabService(object):
             running,
             finished
         )
+
+    def get_job_details(self, job_id):
+        return self.afe_connector.get_jobs_by_ids([job_id])
+
+    def get_job_history(self, job_id):
+        return self.afe_connector.get_job_history(job_id)

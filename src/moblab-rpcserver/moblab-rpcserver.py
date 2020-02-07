@@ -11,6 +11,7 @@ import re
 import sys
 import os
 import datetime
+import json
 from dateutil.tz import tzlocal
 import time
 from concurrent import futures
@@ -177,40 +178,46 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response = moblabrpc_pb2.GetNumJobsResponse(num_jobs=num_jobs)
         return response
 
-    def convert_timestamp_to_utc_secs(self, ts):
-        dt_ts = datetime.datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
-        dt_ts.replace(tzinfo=tzlocal())
-        #TODO(haddowk) converty to UTC timezone
-        return int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds())
+    def _convert_timestamp_to_utc_secs(self, ts):
+        if not ts:
+            return None
+        try:
+            dt_ts = datetime.datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
+            dt_ts.replace(tzinfo=tzlocal())
+            #TODO(haddowk) converty to UTC timezone
+            return int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds())
+        except (ValueError, TypeError) as e:
+            logging.error('Encountered an invalid string for conversion to' +
+                          ' timestamp: {}'.format(ts))
+            return None
 
-    def extract_status(self, job):
+    def _extract_status(self, status_str):
+        if status_str == 'Queued':
+            return moblabrpc_pb2.Job.QUEUED
+        elif status_str == 'Provisioned':
+            return moblabrpc_pb2.Job.PROVISIONED
+        elif status_str == 'Running':
+            return moblabrpc_pb2.Job.RUNNING
+        elif status_str == 'Completed':
+            return moblabrpc_pb2.Job.SUCCESS
+        elif status_str == 'Failed':
+            return moblabrpc_pb2.Job.FAILED
+        elif status_str == 'Aborted':
+            return moblabrpc_pb2.Job.ABORTED
+        else:
+            logging.error(
+                'Encountered unexpected status "{}"'.format(
+                    status_str))
+            return moblabrpc_pb2.Job.STATUS_NOT_SET
+
+    def _extract_status_from_count(self, job):
         # "if there is more than one status count, error out"
         if len(job.get('status_counts').keys()) != 1 or \
             job.get('status_counts')[job.get('status_counts').keys()[0]] != 1:
             logging.error('Encountered multiple status values for job {}'
                           .format(job))
             return moblabrpc_pb2.Job.STATUS_NOT_SET
-        status = job.get('status_counts').keys()[0]
-        if status == 'Queued':
-            return moblabrpc_pb2.Job.QUEUED
-        elif status == 'Provisioned':
-            return moblabrpc_pb2.Job.PROVISIONED
-        elif status == 'Running':
-            return moblabrpc_pb2.Job.RUNNING
-        elif status == 'Completed':
-            return moblabrpc_pb2.Job.SUCCESS
-        elif status == 'Failed':
-            return moblabrpc_pb2.Job.FAILED
-        elif status == 'Aborted':
-            return moblabrpc_pb2.Job.ABORTED
-        else:
-            logging.error(
-                'Encountered unexpected status "{}" for job {}'.format(
-                    status,
-                    job
-                )
-            )
-            return moblabrpc_pb2.Job.STATUS_NOT_SET
+        return self._extract_status(job.get('status_counts').keys()[0])
 
     def get_jobs(self, request, _context):
         jobs = self.service.get_jobs(
@@ -234,14 +241,72 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     job_id=job.get('id', -1),
                     name=job.get('name', 'Name not found'),
                     priority=job.get('priority', 0),
-                    created_time_sec_utc=self.convert_timestamp_to_utc_secs(
+                    created_time_sec_utc=self._convert_timestamp_to_utc_secs(
                         job['created_on']),
                     parent_job_id=job.get('parent_job', -1),
-                    status=self.extract_status(job)
+                    status=self._extract_status_from_count(job)
                 )
                 response.jobs.extend([job_proto])
         return response
 
+    def _convert_timedelta_to_miliseconds(self, minutes=None, seconds=None):
+        if not minutes and not seconds:
+            return None
+        try:
+            miliseconds = 0
+            if minutes:
+                miliseconds += int(minutes) * 60 * 1000
+            if seconds:
+                miliseconds += int(seconds) * 1000
+            return miliseconds
+        except ValueError:
+            logging.error('Got invalid timedelta values {} {}'.format(
+                minutes, seconds
+            ))
+            return None
+
+    def get_job_details(self, request, _context):
+        try:
+            job = self.service.get_job_details(request.id)[0]
+        except IndexError:
+            error_msg='Unable to find job with ID: {}'.format(request.id)
+            logging.error(error_msg)
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            _context.set_details(error_msg)
+        else:
+            execution_history = [moblabrpc_pb2.Job.Execution(
+                name=item.get('name', ''),
+                job_id=item.get('id', ''),
+                status=self._extract_status(item.get('status', None)),
+                start_time_utc=self._convert_timestamp_to_utc_secs(
+                    item.get('start_time', '')),
+                end_time_utc=self._convert_timestamp_to_utc_secs(
+                    item.get('end_time', '')),
+                used_time=self._convert_timedelta_to_miliseconds(
+                    seconds=item.get('time_used', '')),
+                dut=item.get('hostname', '')
+            ) for item in self.service.get_job_history(request.id)]
+
+            response = moblabrpc_pb2.GetJobDetailsResponse(
+                job_detail= moblabrpc_pb2.Job(
+                    job_id=job.get('id'),
+                    name=job.get('name', ''),
+                    priority=job.get('priority', 0),
+                    created_time_sec_utc=self._convert_timestamp_to_utc_secs(
+                        job.get('created_on', '')),
+                    parent_job_id=job.get('parent_job', None),
+                    status=self._extract_status_from_count(job),
+                    dependencies=job.get('dependencies', ''),
+                    server_control_file=job.get('control_file', ''),
+                    max_runtime=self._convert_timedelta_to_miliseconds(
+                        minutes=job.get('max_runtime_mins', '')),
+                    timeout=self._convert_timedelta_to_miliseconds(
+                        minutes=job.get('timeout_mins', '')),
+                    test_retries=job.get('test_retry', None),
+                    execution_history=execution_history
+                )
+            )
+        return response
 
 def setup_logging(level):
     """Enable the correct level of logging.

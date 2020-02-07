@@ -213,12 +213,19 @@ class AFEConnector(object):
         response = self.send_rpc_command('get_jobs_summary', params)
         return self.decode_response(response, 'result')
 
-    def get_jobs_by_ids(self, id_list=None):
-        params = {}
-        if id_list:
-            assert isinstance(id_list, list)
-            params['id__in'] = id_list
+    def get_jobs_by_ids(self, id_list):
+        assert isinstance(id_list, list)
+        params = {
+            'id__in' : id_list
+        }
         response = self.send_rpc_command('get_jobs_summary', params)
+        return self.decode_response(response, 'result')
+
+    def get_job_history(self, id):
+        params = {
+            'job_id' : str(id)
+        }
+        response = self.send_rpc_command('get_job_history', params)
         return self.decode_response(response, 'result')
 
     def get_special_tasks(self, id_list):
