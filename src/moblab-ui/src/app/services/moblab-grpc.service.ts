@@ -120,7 +120,7 @@ export class MoblabGrpcService {
       request.setCreatedTimeLt(created_time_lt)
     }
     if (created_time_gt) {
-      request.setCreatedTimeLt(created_time_gt)
+      request.setCreatedTimeGt(created_time_gt)
     }
     if (status_filter) {
       request.setStatusFilter(status_filter)
@@ -146,7 +146,6 @@ export class MoblabGrpcService {
           name_filter?: string, created_time_lt?: number, created_time_gt?: number,
           status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
           ) {
-    console.log('inside get jobs')
     const request = new GetJobsRequest();
     request.setQueryStart(queryStart);
     request.setQueryLimit(queryLimit);
@@ -160,7 +159,7 @@ export class MoblabGrpcService {
       request.setCreatedTimeLt(created_time_lt)
     }
     if (created_time_gt) {
-      request.setCreatedTimeLt(created_time_gt)
+      request.setCreatedTimeGt(created_time_gt)
     }
     if (status_filter) {
       request.setStatusFilter(status_filter)
