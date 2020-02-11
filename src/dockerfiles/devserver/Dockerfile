@@ -1,0 +1,89 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+FROM alpine/git as source
+
+WORKDIR /
+RUN git clone https://chromium.googlesource.com/chromiumos/chromite
+
+WORKDIR /devserver-src
+RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
+
+######################################################################
+
+FROM debian:stretch as run
+
+COPY --from=source /devserver-src /devserver-src
+COPY --from=source /chromite /chromite
+
+# Install packages
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+    curl python2.7 python3 python-pip sudo gcc python-dev procps \
+    bzip2 unzip sudo
+
+COPY requirements.txt ./
+RUN pip install --upgrade pip
+RUN pip install setuptools
+RUN pip install --no-cache-dir -r devserver-requirements.txt
+ENV DESTDIR="/"
+
+WORKDIR /
+COPY setup_chromite.py /
+RUN pip install --upgrade pip
+RUN pip install setuptools
+RUN python /setup_chromite.py install
+
+# Devserver requires an apache server to be running for a good health check
+# this is a fake apache script that just sleeps forever.
+# TODO remove requirement from devserver to need an apache process.
+COPY apache2 /bin
+
+WORKDIR /devserver-src/dev-util
+
+RUN mkdir -p "${DESTDIR}/usr/bin"
+RUN mkdir -p "${DESTDIR}/usr/lib/devserver"
+RUN mkdir -p "${DESTDIR}/usr/lib/devserver/dut-scripts"
+
+RUN install -m 0755 host/start_devserver "${DESTDIR}/usr/bin"
+RUN install -m 0755 devserver.py strip_package.py "${DESTDIR}/usr/lib/devserver"
+RUN install -m 0644  \
+        autoupdate.py \
+        builder.py \
+        cherrypy_ext.py \
+        health_checker.py \
+        nebraska/nebraska.py \
+        setup_chromite.py \
+        "${DESTDIR}/usr/lib/devserver"
+
+RUN install -m 0755 stateful_update "${DESTDIR}/usr/bin"
+
+RUN mkdir /static
+RUN install -m 0644 stateful_update /static
+RUN install -m 0644 quick-provision/quick-provision /static
+RUN install -m 0644 stateful_update \
+         "${DESTDIR}/usr/lib/devserver/dut-scripts"
+RUN install -m 0644 quick-provision/quick-provision \
+       "${DESTDIR}/usr/lib/devserver/dut-scripts"
+
+EXPOSE 8080
+
+## Add moblab user
+RUN addgroup --gid 246 moblab && \
+    adduser --gecos "" --ingroup moblab \
+       --disabled-password --uid 246 moblab
+RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+RUN mkdir -p /static/cache
+RUN chown -R moblab:moblab /static
+RUN mkdir -p /var/log/moblab/devserver/
+RUN chown -R moblab:moblab /var/log/moblab
+
+USER moblab:moblab
+
+CMD ["/usr/lib/devserver/devserver.py", "--production", \
+     "--static_dir=/static", "--logfile", \
+     "/var/log/moblab/devserver/server.log", \
+     "/var/log/moblab/devserver/console.log"]
+
+
