@@ -5,7 +5,9 @@ function convertToSecondsTimestamp(timestamp: number) {
     throw new Error(['Invalid timestamp', timestamp].join(' '))
   }
 
-  return Number(timestamp.toString().substring(0, 10))
+  return Number(
+    timestamp.toString().substring(0, timestamp.toString().length - 3)
+  )
 }
 
 function convertToMilisecondsTimestamp(timestamp: number) {
