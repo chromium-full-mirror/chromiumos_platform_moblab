@@ -1,0 +1,36 @@
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {
+  FormsModule,
+  ReactiveFormsModule
+} from '@angular/forms';
+import {
+  MatButtonModule,
+  MatTableModule,
+} from '@angular/material';
+import {MatCardModule} from '@angular/material/card';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+
+import {JobDetailComponent} from './job-detail.component';
+
+
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatCardModule,
+    MatDividerModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTableModule
+  ],
+  declarations: [JobDetailComponent],
+  exports: [JobDetailComponent]
+})
+export class JobDetailModule {}
