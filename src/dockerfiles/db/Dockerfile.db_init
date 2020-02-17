@@ -1,0 +1,22 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+FROM debian:buster
+
+COPY init_script.sh /
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+    mariadb-client
+
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
+    --uid 246 --disabled-password --gecos "" moblab
+
+RUN chown -R moblab:moblab /init_script.sh
+RUN chmod uog+x /init_script.sh
+
+USER moblab:moblab
+
+ENTRYPOINT []
+
+CMD ["/init_script.sh"]
