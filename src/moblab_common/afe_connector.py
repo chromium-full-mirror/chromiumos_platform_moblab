@@ -3,9 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Interface to the AFE RPC server for all moblab code."""
-from __future__ import print_function
-
-import future
 
 import http.client
 import json
@@ -22,7 +19,7 @@ except ImportError:
 
 import requests
 
-MOBLAB_RPC_SERVER = 'localhost:80'
+MOBLAB_RPC_SERVER = 'autotest:80'
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -106,7 +103,7 @@ class AFEConnector(object):
         if not raw_result:
             return result
 
-        for k, v in raw_result.items():
+        for k, v in list(raw_result.items()):
             try:
                 result[k] = dict(v)
             except ValueError:
@@ -126,9 +123,16 @@ class AFEConnector(object):
         response = self.send_rpc_command('get_hosts')
         return self.decode_response(response, 'result')
 
-    def get_num_jobs(self,id_filter=None, name_filter=None, created_time_lt=None,
-        created_time_gt=None, sub=False, suite=False, not_yet_run=False,
-        running=False, finished=False):
+    def get_num_jobs(self,
+                     id_filter=None,
+                     name_filter=None,
+                     created_time_lt=None,
+                     created_time_gt=None,
+                     sub=False,
+                     suite=False,
+                     not_yet_run=False,
+                     running=False,
+                     finished=False):
         params = {}
 
         if id_filter:
@@ -138,13 +142,11 @@ class AFEConnector(object):
         if created_time_lt:
             params['created_on__lt'] = str(
                 datetime.utcfromtimestamp(created_time_lt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-            ))
+                    '%Y-%m-%d %H:%M:%S'))
         if created_time_gt:
             params['created_on__gt'] = str(
                 datetime.utcfromtimestamp(created_time_gt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-            ))
+                    '%Y-%m-%d %H:%M:%S'))
         _LOGGER.error('getNumJobs params {}'.format(params))
 
         if sub:
@@ -163,11 +165,18 @@ class AFEConnector(object):
         _LOGGER.error(response)
         return self.decode_response(response, 'result')
 
-    def get_jobs(self, query_start, query_limit,
-        id_filter=None, name_filter=None, created_time_lt=None,
-        created_time_gt=None, sub=False, suite=False, not_yet_run=False,
-        running=False, finished=False
-        ):
+    def get_jobs(self,
+                 query_start,
+                 query_limit,
+                 id_filter=None,
+                 name_filter=None,
+                 created_time_lt=None,
+                 created_time_gt=None,
+                 sub=False,
+                 suite=False,
+                 not_yet_run=False,
+                 running=False,
+                 finished=False):
         """
             Get attributes of the jobs specified.
         Args:
@@ -190,13 +199,11 @@ class AFEConnector(object):
         if created_time_lt:
             params['created_on__lt'] = str(
                 datetime.utcfromtimestamp(created_time_lt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-                ))
+                    '%Y-%m-%d %H:%M:%S'))
         if created_time_gt:
             params['created_on__gt'] = str(
                 datetime.utcfromtimestamp(created_time_gt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-                ))
+                    '%Y-%m-%d %H:%M:%S'))
 
         if sub:
             params['sub'] = 'true'
@@ -215,16 +222,12 @@ class AFEConnector(object):
 
     def get_jobs_by_ids(self, id_list):
         assert isinstance(id_list, list)
-        params = {
-            'id__in' : id_list
-        }
+        params = {'id__in': id_list}
         response = self.send_rpc_command('get_jobs_summary', params)
         return self.decode_response(response, 'result')
 
     def get_job_history(self, id):
-        params = {
-            'job_id' : str(id)
-        }
+        params = {'job_id': str(id)}
         response = self.send_rpc_command('get_job_history', params)
         return self.decode_response(response, 'result')
 
@@ -296,7 +299,7 @@ class AFEConnector(object):
             'suite_args': suite_args,
             'test_args': test_args,
             'job_retry': True,
-            'max_retries': sys.maxint,
+            'max_retries': sys.maxsize,
             'model': model,
             'timeout_mins': suite_timeout_mins,
             'max_runtime_mins': suite_timeout_mins

@@ -11,8 +11,6 @@ setting the generation to 0 guarantees only a single system/process
 can create the file.
 """
 
-from __future__ import print_function
-
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import storage
 

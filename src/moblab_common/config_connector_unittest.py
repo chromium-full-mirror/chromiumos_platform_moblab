@@ -4,11 +4,9 @@
 # found in the LICENSE file.
 """Unit test for the configuration connector."""
 
-from __future__ import print_function
-
 import unittest
 import config_connector
-import mock
+from unittest import mock
 
 
 class MoblabConfigConnector(unittest.TestCase):

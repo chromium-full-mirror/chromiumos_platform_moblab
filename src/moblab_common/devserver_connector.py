@@ -4,14 +4,8 @@
 # found in the LICENSE file.
 """Interface to the devserver server for all moblab code."""
 
-from __future__ import print_function
-
 import requests
-
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    import logging
+import logging
 
 DEV_SERVER = 'localhost:8080'
 

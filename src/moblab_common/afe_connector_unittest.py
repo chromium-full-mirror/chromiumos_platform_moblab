@@ -4,26 +4,15 @@
 # found in the LICENSE file.
 """Unit tests for the mob-remote-scheduler"""
 
-from __future__ import print_function
-
-# TODO(guocb): Remove this try except after migration to python 3.
-try:
-    import httplib  # python 2
-except ImportError:
-    import http.client as httplib  # python 3
+import http.client
 import json
 import time
 import unittest
 
-from datetime import datetime
-
-# TODO(guocb): Remove this try except after migration to python 3.
-try:
-    import mock
-except ImportError:
-    from unittest import mock
-
 import afe_connector
+
+from datetime import datetime
+from unittest import mock
 
 
 class AFEConnectorTest(unittest.TestCase):
@@ -56,21 +45,21 @@ class AFEConnectorTest(unittest.TestCase):
     def test_decode_response(self):
         response = mock.Mock()
         response.text = '{"error": null, "result": [1], "id": 0}'
-        response.status_code = httplib.OK
+        response.status_code = http.client.OK
 
         self.assertEqual([1], self.afe_conn.decode_response(response, 'result'))
 
     def test_decode_response_bad_code(self):
         response = mock.Mock()
         response.text = '{"error": null, "result": [1], "id": 0}'
-        response.status_code = httplib.FOUND
+        response.status_code = http.client.FOUND
 
         self.assertEqual({}, self.afe_conn.decode_response(response, 'result'))
 
     def test_decode_response_no_response(self):
         response = mock.Mock()
         response.text = None
-        response.status_code = httplib.FOUND
+        response.status_code = http.client.FOUND
 
         self.assertEqual({}, self.afe_conn.decode_response(response, 'result'))
 
@@ -113,66 +102,99 @@ class AFEConnectorTest(unittest.TestCase):
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')
     def test_get_jobs(self, mock_send_rpc_command):
         jobs_dict = [
-            {'id': 1, 'name': 'job1'},
-            {'id': 2, 'name': 'job2'},
+            {
+                'id': 1,
+                'name': 'job1'
+            },
+            {
+                'id': 2,
+                'name': 'job2'
+            },
         ]
         mock_send_rpc_command.return_value = mock.MagicMock(
-            status_code=httplib.OK, text=json.dumps({'result': jobs_dict}))
+            status_code=http.client.OK, text=json.dumps({
+                'result': jobs_dict
+            }))
 
         dummy_timestamp = time.time()
 
         result = self.afe_conn.get_jobs(
-            0, 25, 1, 'job_name', dummy_timestamp, dummy_timestamp, sub=True,
-            finished=True
-        )
+            0,
+            25,
+            1,
+            'job_name',
+            dummy_timestamp,
+            dummy_timestamp,
+            sub=True,
+            finished=True)
 
         mock_send_rpc_command.assert_called_once_with(
-            'get_jobs_summary',
-            {
-                'created_on__gt': datetime.utcfromtimestamp(
-                    int(dummy_timestamp)
-                ).strftime("%Y-%m-%d %H:%M:%S"),
-                'name__icontains': 'job_name',
-                'sub': 'true',
-                'query_start': 0,
-                'query_limit': 25,
-                'id__icontains': 1,
-                'finished': 'true',
-                'created_on__lt': datetime.utcfromtimestamp(
-                    int(dummy_timestamp)
-                ).strftime("%Y-%m-%d %H:%M:%S")
-            }
-        )
+            'get_jobs_summary', {
+                'created_on__gt':
+                    datetime.utcfromtimestamp(int(dummy_timestamp)
+                                             ).strftime('%Y-%m-%d %H:%M:%S'),
+                'name__icontains':
+                    'job_name',
+                'sub':
+                    'true',
+                'query_start':
+                    0,
+                'query_limit':
+                    25,
+                'id__icontains':
+                    1,
+                'finished':
+                    'true',
+                'created_on__lt':
+                    datetime.utcfromtimestamp(int(dummy_timestamp)
+                                             ).strftime('%Y-%m-%d %H:%M:%S')
+            })
         self.assertEqual(jobs_dict, result)
 
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')
     def test_get_jobs_by_ids(self, mock_send_rpc_command):
         jobs_id = [1, 2]
         jobs_dict = [
-            {'id': 1, 'name': 'job1'},
-            {'id': 2, 'name': 'job2'},
+            {
+                'id': 1,
+                'name': 'job1'
+            },
+            {
+                'id': 2,
+                'name': 'job2'
+            },
         ]
         mock_send_rpc_command.return_value = mock.MagicMock(
-            status_code=httplib.OK, text=json.dumps({'result': jobs_dict}))
+            status_code=http.client.OK, text=json.dumps({
+                'result': jobs_dict
+            }))
         result = self.afe_conn.get_jobs_by_ids(jobs_id)
-        mock_send_rpc_command.assert_called_once_with(
-            'get_jobs_summary', {'id__in': jobs_id})
+        mock_send_rpc_command.assert_called_once_with('get_jobs_summary',
+                                                      {'id__in': jobs_id})
         self.assertEqual(jobs_dict, result)
 
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')
     def test_get_special_tasks(self, mock_send_rpc_command):
         tasks_id = [1, 2]
         tasks_dict = [
-            {'id': 1, 'name': 'task1'},
-            {'id': 2, 'name': 'task2'},
+            {
+                'id': 1,
+                'name': 'task1'
+            },
+            {
+                'id': 2,
+                'name': 'task2'
+            },
         ]
         mock_send_rpc_command.return_value = mock.MagicMock(
-            status_code=httplib.OK, text=json.dumps({'result': tasks_dict}))
+            status_code=http.client.OK, text=json.dumps({
+                'result': tasks_dict
+            }))
 
         result = self.afe_conn.get_special_tasks(tasks_id)
 
-        mock_send_rpc_command.assert_called_once_with(
-            'get_special_tasks', {'id__in': tasks_id})
+        mock_send_rpc_command.assert_called_once_with('get_special_tasks',
+                                                      {'id__in': tasks_id})
         self.assertEqual(tasks_dict, result)
 
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')
@@ -180,11 +202,13 @@ class AFEConnectorTest(unittest.TestCase):
         job_id = 1
         hqes = [{'key1': 'value1'}, {'key2': 'value2'}]
         mock_send_rpc_command.return_value = mock.MagicMock(
-            status_code=httplib.OK, text=json.dumps({'result': hqes}))
+            status_code=http.client.OK, text=json.dumps({
+                'result': hqes
+            }))
         result = self.afe_conn.get_host_queue_entries(job_id)
 
-        mock_send_rpc_command.assert_called_once_with(
-            'get_host_queue_entries', {'id': job_id})
+        mock_send_rpc_command.assert_called_once_with('get_host_queue_entries',
+                                                      {'id': job_id})
         self.assertEqual(hqes, result)
 
     @mock.patch('afe_connector.AFEConnector.send_rpc_command')

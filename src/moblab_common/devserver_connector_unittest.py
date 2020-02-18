@@ -4,11 +4,9 @@
 # found in the LICENSE file.
 """Unit tests for the mob-remote-scheduler"""
 
-from __future__ import print_function
-
 import unittest
 import devserver_connector
-import mock
+from unittest import mock
 
 
 class DevserverConnectorTest(unittest.TestCase):

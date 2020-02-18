@@ -3,44 +3,44 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Interface to the AFE RPC server for all moblab code."""
-from __future__ import print_function
 
 import json
 import re
 import subprocess
 
 import cachetools
-
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    import logging
+import logging
 
 from pssh.clients import ParallelSSHClient
-from pssh.exceptions import ConnectionErrorException
 
+# fping, ping a range of IP addresses in parallel.
+# -c is the number of packets to send.
+# -p is the interval between ping packets to a single target.
+# -i is the interval between sending ping packets.
 FIND_DUT_CMD = [
-    'sudo /usr/sbin/fping -g 192.168.231.100 192.168.231.150 -c 10 -p 1 -i 1 -q'
+    '/usr/bin/fping -g 192.168.231.4 192.168.231.250 -c 1 -p 2 -i 2 -q'
 ]
 
-SUBNET_DUT_SEARCH_RE = (r'(?P<ip>192\.168\.231\.1[0-1][0-9]) : '
+SUBNET_DUT_SEARCH_RE = (r'(?P<ip>192\.168\.231\.[0-2][0-9][0-9]) : '
                         r'xmt\/rcv\/%loss = [0-9]+\/[0-9]+\/0%.*')
 
 
 class MoblabDUTConnectorException(Exception):
+    """Generic exception for this module."""
     pass
 
 
-#ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master"
+# ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master"
 #            | awk -F ':' '{gsub(/ /, "", $2); print $2}'
 
-#inf=$(ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master" |
+# inf=$(ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master" |
 #       awk -F ':' '{gsub(/ /, "", $2); print $2}')
-#mac=$( cat /sys/class/net/${inf}/address)
-#echo $inf $mac
+# mac=$( cat /sys/class/net/${inf}/address)
+# echo $inf $mac
 
 
 class DUTInfo(object):
+    """Class to encapsulate the information for a single DUT."""
     mac_address = None
     ip_addresses = None
 
@@ -61,7 +61,7 @@ class MoblabDUTConnector(object):
         process = subprocess.Popen(
             FIND_DUT_CMD, stderr=subprocess.PIPE, shell=True, close_fds=False)
         _, fping_result = process.communicate()
-        for line in fping_result.splitlines():
+        for line in fping_result.decode('utf-8').splitlines():
             match = re.match(SUBNET_DUT_SEARCH_RE, line)
             if match:
                 self.connected_ip_addresses.append(match.group('ip'))
@@ -88,7 +88,7 @@ class MoblabDUTConnector(object):
             user='root',
             num_retries=1,
             timeout=10,
-            pkey='/home/moblab/.ssh/mobbase_id_rsa')
+            pkey='/home/moblab/.ssh/testing_rsa')
         command_results = []
 
         output = client.run_command(command, stop_on_errors=False, timeout=10)
@@ -124,7 +124,7 @@ class MoblabDUTConnector(object):
             return False
 
         def extract_model(output):
-            return output[0] if len(output) > 0 else 'Unknown'
+            return output[0] if output else 'Unknown'
 
         return [(host, extract_model(stdout), is_dut_connected(stdout), stderr)
                 for (host, stdout, stderr) in command_results]

@@ -4,8 +4,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from __future__ import print_function
-
 import argparse
 import re
 import sys
@@ -165,16 +163,13 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def get_num_jobs(self, request, _context):
         num_jobs = self.service.get_num_jobs(
-            request.id_filter,
-            request.name_filter,
-            request.created_time_lt,
+            request.id_filter, request.name_filter, request.created_time_lt,
             request.created_time_gt,
             request.rel_filter == moblabrpc_pb2.Job.CHILD,
             request.rel_filter == moblabrpc_pb2.Job.SUITE,
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
-            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS
-        )
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS)
         response = moblabrpc_pb2.GetNumJobsResponse(num_jobs=num_jobs)
         return response
 
@@ -206,33 +201,28 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             return moblabrpc_pb2.Job.ABORTED
         else:
             logging.error(
-                'Encountered unexpected status "{}"'.format(
-                    status_str))
+                'Encountered unexpected status "{}"'.format(status_str))
             return moblabrpc_pb2.Job.STATUS_NOT_SET
 
     def _extract_status_from_count(self, job):
         # "if there is more than one status count, error out"
         if len(job.get('status_counts').keys()) != 1 or \
-            job.get('status_counts')[job.get('status_counts').keys()[0]] != 1:
-            logging.error('Encountered multiple status values for job {}'
-                          .format(job))
+            job.get('status_counts')[list(job.get('status_counts').keys())[0]] != 1:
+            logging.error(
+                'Encountered multiple status values for job {}'.format(job))
             return moblabrpc_pb2.Job.STATUS_NOT_SET
-        return self._extract_status(job.get('status_counts').keys()[0])
+        return self._extract_status(list(job.get('status_counts').keys())[0])
 
     def get_jobs(self, request, _context):
         jobs = self.service.get_jobs(
-            request.query_start,
-            request.query_limit,
-            request.id_filter,
-            request.name_filter,
-            request.created_time_lt,
+            request.query_start, request.query_limit, request.id_filter,
+            request.name_filter, request.created_time_lt,
             request.created_time_gt,
             request.rel_filter == moblabrpc_pb2.Job.CHILD,
             request.rel_filter == moblabrpc_pb2.Job.SUITE,
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
-            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS
-        )
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS)
 
         response = moblabrpc_pb2.GetJobsResponse()
         if jobs:
@@ -244,8 +234,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     created_time_sec_utc=self._convert_timestamp_to_utc_secs(
                         job['created_on']),
                     parent_job_id=job.get('parent_job', -1),
-                    status=self._extract_status_from_count(job)
-                )
+                    status=self._extract_status_from_count(job))
                 response.jobs.extend([job_proto])
         return response
 
@@ -261,34 +250,35 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             return miliseconds
         except ValueError:
             logging.error('Got invalid timedelta values {} {}'.format(
-                minutes, seconds
-            ))
+                minutes, seconds))
             return None
 
     def get_job_details(self, request, _context):
         try:
             job = self.service.get_job_details(request.id)[0]
         except IndexError:
-            error_msg='Unable to find job with ID: {}'.format(request.id)
+            error_msg = 'Unable to find job with ID: {}'.format(request.id)
             logging.error(error_msg)
             _context.set_code(grpc.StatusCode.NOT_FOUND)
             _context.set_details(error_msg)
         else:
-            execution_history = [moblabrpc_pb2.Job.Execution(
-                name=item.get('name', ''),
-                job_id=item.get('id', ''),
-                status=self._extract_status(item.get('status', None)),
-                start_time_utc=self._convert_timestamp_to_utc_secs(
-                    item.get('start_time', '')),
-                end_time_utc=self._convert_timestamp_to_utc_secs(
-                    item.get('end_time', '')),
-                used_time=self._convert_timedelta_to_miliseconds(
-                    seconds=item.get('time_used', '')),
-                dut=item.get('hostname', '')
-            ) for item in self.service.get_job_history(request.id)]
+            execution_history = [
+                moblabrpc_pb2.Job.Execution(
+                    name=item.get('name', ''),
+                    job_id=item.get('id', ''),
+                    status=self._extract_status(item.get('status', None)),
+                    start_time_utc=self._convert_timestamp_to_utc_secs(
+                        item.get('start_time', '')),
+                    end_time_utc=self._convert_timestamp_to_utc_secs(
+                        item.get('end_time', '')),
+                    used_time=self._convert_timedelta_to_miliseconds(
+                        seconds=item.get('time_used', '')),
+                    dut=item.get('hostname', ''))
+                for item in self.service.get_job_history(request.id)
+            ]
 
             response = moblabrpc_pb2.GetJobDetailsResponse(
-                job_detail= moblabrpc_pb2.Job(
+                job_detail=moblabrpc_pb2.Job(
                     job_id=job.get('id'),
                     name=job.get('name', ''),
                     priority=job.get('priority', 0),
@@ -303,10 +293,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     timeout=self._convert_timedelta_to_miliseconds(
                         minutes=job.get('timeout_mins', '')),
                     test_retries=job.get('test_retry', None),
-                    execution_history=execution_history
-                )
-            )
+                    execution_history=execution_history))
         return response
+
 
 def setup_logging(level):
     """Enable the correct level of logging.

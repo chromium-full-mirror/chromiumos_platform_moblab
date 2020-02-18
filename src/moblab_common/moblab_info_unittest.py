@@ -2,10 +2,7 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Unit test cases for module `moblab_info`."""
-
-from __future__ import print_function
 
 import subprocess
 import unittest
@@ -17,6 +14,7 @@ import moblab_info
 
 class MoblabInfoTest(unittest.TestCase):
     """Unit test case for module moblab_info"""
+
     def test_get_moblab_id(self):
         """Test for getting moblab id."""
         id_ = 'moblabid'

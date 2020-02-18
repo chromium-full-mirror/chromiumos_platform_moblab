@@ -5,8 +5,8 @@
 from setuptools import setup
 
 setup(
-      name='moblab',
-      version='0.1',
-      packages=["moblab_common"],
-      package_dir={'':'/'},
+    name='moblab',
+    version='0.1',
+    packages=['moblab_common'],
+    package_dir={'': '/'},
 )

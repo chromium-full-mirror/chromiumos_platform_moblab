@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 """Moblab pubsub client library."""
 
-from __future__ import print_function
-
 import base64
 import logging  # pylint: disable=cros-logging-import
 
@@ -50,12 +48,15 @@ class PubSubClient(object):
     def publish_notifications(self, topic, messages=None):
         """Publishes a test result notification to a given pubsub topic.
 
-        @param topic: The Cloud pubsub topic.
-        @param messages: A list of notification messages.
+        Args:
+            topic: The Cloud pubsub topic.
+            messages: A list of notification messages.
 
-        @returns A list of pubsub message ids, and empty if fails.
+        Returns:
+            A list of pubsub message ids, and empty if fails.
 
-        @raises PubSubException if failed to publish the notification.
+        Raises:
+            PubSubException if failed to publish the notification.
         """
         topic_path = self.publisher.topic_path('chromeos-partner-moblab', topic)
         for message in messages:
@@ -71,19 +72,22 @@ class PubSubBasedClient(object):
     def __init__(self):
         """Constructor.
 
-        @param credential: The service account credential filename. Default to
+        Args:
+            credential: The service account credential filename. Default to
             '/home/moblab/.service_account.json'.
-        @param pubsub_topic: The cloud pubsub topic name to use.
+            pubsub_topic: The cloud pubsub topic name to use.
         """
         self.pubsub_client = PubSubClient()
 
     def _create_message(self, data, msg_attributes):
         """Creates a cloud pubsub notification object.
 
-        @param data: The message data as a string.
-        @param msg_attributes: The message attribute map.
+        Args:
+            data: The message data as a string.
+            msg_attributes: The message attribute map.
 
-        @returns: A pubsub message object with data and attributes.
+        Returns:
+            A pubsub message object with data and attributes.
         """
         message = {}
         if data:
@@ -97,9 +101,11 @@ class PubSubBasedClient(object):
         """Construct a test result notification.
 
         TODO(ntang): switch LEGACY to new message format.
-        @param gcs_uri: The test result Google Cloud Storage URI.
+        Args:
+            gcs_uri: The test result Google Cloud Storage URI.
 
-        @returns The notification message.
+        Returns:
+            The notification message.
         """
         data = base64.b64encode(LEGACY_TEST_OFFLOAD_MESSAGE)
         msg_attributes = {}
@@ -114,9 +120,11 @@ class PubSubBasedClient(object):
                                         moblab_id):
         """Notify the cloud console a test job is offloaded.
 
-        @param gcs_uri: The test result Google Cloud Storage URI.
+        Args:
+            gcs_uri: The test result Google Cloud Storage URI.
 
-        @returns True if the notification is successfully sent.
+        Returns:
+            True if the notification is successfully sent.
             Otherwise, False.
         """
         logging.info('Notification on gcs_uri %s', gcs_uri)

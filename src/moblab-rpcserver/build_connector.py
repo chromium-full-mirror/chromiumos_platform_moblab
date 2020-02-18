@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Interface to the AFE RPC server for all moblab code."""
-from __future__ import print_function
 
 try:
     from chromite.lib import cros_logging as logging
