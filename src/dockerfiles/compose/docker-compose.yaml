@@ -1,0 +1,139 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+version: '3'
+services:
+  db:
+    image: gcr.io/chromeos-partner-moblab/moblab-db:release
+    hostname: db
+    user: moblab
+
+    volumes:
+    - logs:/var/log/moblab
+    - db_data:/var/lib/mysql
+
+    networks:
+      moblab:
+        aliases:
+          - db
+
+    environment:
+    - MYSQL_ROOT_PASSWORD=moblab_db_passwd
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-pmoblab_db_passwd", "--silent"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+
+  db-init:
+    image: gcr.io/chromeos-partner-moblab/moblab-db-init:release
+    user: moblab
+    depends_on:
+      - db
+    networks:
+      moblab:
+
+  devserver:
+    image: gcr.io/chromeos-partner-moblab/devserver:release
+    hostname: devserver
+    user: moblab
+    depends_on:
+      - autotest
+
+    volumes:
+    - logs:/var/log/moblab
+    - moblab_home:/home/moblab
+    - usr_local_moblab:/usr/local/moblab
+    - static_cache:/static
+
+    networks:
+      moblab:
+        ipv4_address: 192.168.100.50
+        aliases:
+          - database
+
+  autotest:
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest:release
+    hostname: autotest
+    user: moblab
+    ports:
+    - 80:80
+
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - logs:/var/log/moblab
+    - usr_local_moblab:/usr/local/moblab
+    - results:/usr/local/autotest/results
+    - moblab_home:/home/moblab
+    - containers:/moblab/third_party/autotest/containers
+    - apache_logs:/var/log/apache2
+
+    environment:
+    - CROS_VENV_CACHE=/usr/local/.cros-venv-cache
+
+    networks:
+    - moblab
+
+    depends_on:
+      - db
+      - db-init
+
+  envoy-proxy:
+    image: gcr.io/chromeos-partner-moblab/envoy-proxy:release
+    user: moblab
+
+    networks:
+    - moblab
+
+    ports:
+    - 6001:6001
+    - 6011:6011
+
+  moblab-ui:
+    image: gcr.io/chromeos-partner-moblab/moblab-ui:release
+
+    networks:
+    - moblab
+
+    ports:
+    - 6010:6010
+
+  moblab-rpcserver:
+    image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:release
+    user: moblab
+
+    volumes:
+    - logs:/var/log/moblab
+    - moblab_home:/home/moblab
+
+    networks:
+    - moblab
+
+  watchtower:
+    image: gcr.io/chromeos-partner-moblab/watchtower:release
+
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
+    command: --interval 500
+
+
+volumes:
+  db_data: {}
+  logs: {}
+  moblab_home: {}
+  usr_local_moblab: {}
+  static_cache: {}
+  results: {}
+  containers: {}
+  apache_logs: {}
+
+
+networks:
+  moblab:
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.100.0/24"
