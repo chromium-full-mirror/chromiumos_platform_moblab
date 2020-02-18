@@ -65,6 +65,9 @@ COPY --from=build /usr/local/lib/python3.6/site-packages \
 RUN mkdir /var/log/moblab
 # run moblab-rpcserver
 
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+    --disabled-password --gecos "" moblab
+
 EXPOSE 6002
 
 CMD ["/etc/moblab/moblab-rpcserver/moblab-rpcserver.py", "-v"]
