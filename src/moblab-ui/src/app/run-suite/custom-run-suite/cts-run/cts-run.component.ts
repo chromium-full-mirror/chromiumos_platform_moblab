@@ -18,8 +18,8 @@ interface CtsLetterConfiguration {
   styleUrls: ["./cts-run.component.scss"]
 })
 export class CtsRunComponent {
-  @ViewChild("runSuiteButton") runSuiteButton;
-  @ViewChild("androidGroup") androidGroup;
+  @ViewChild("runSuiteButton", { static: true }) runSuiteButton;
+  @ViewChild("androidGroup", { static: true }) androidGroup;
 
   runSuiteButtonDisabled = true;
   selectedBuild: string;

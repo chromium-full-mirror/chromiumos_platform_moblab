@@ -8,9 +8,9 @@ import {MoblabGrpcService} from './../../services/moblab-grpc.service';
   styleUrls: ['./moblab-runtest-selector.component.scss']
 })
 export class MoblabRuntestSelectorComponent implements OnInit {
-  @ViewChild('modelSelector') modelSelector;
-  @ViewChild('buildSelector') buildSelector;
-  @ViewChild('poolSelector') poolSelector;
+  @ViewChild('modelSelector', { static: true }) modelSelector;
+  @ViewChild('buildSelector', { static: true }) buildSelector;
+  @ViewChild('poolSelector', { static: true }) poolSelector;
 
   @Output() update = new EventEmitter();
 

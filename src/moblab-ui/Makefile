@@ -2,33 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-all: compile_node
+all: compile_proto
 
-copy_modules:
-	if [ ! -d "${T}/node_modules" ]; then \
-		cp -r "${WORKDIR}/moblab-ui/node_modules" ${T};\
-	fi
-
-copy_src: copy_modules
-	cp -r * ${T}
 
 clean_proto:
 	rm -f ${T}/src/app/services/moblabrpc*pb*
 
-compile_proto: copy_src clean_proto
+compile_proto: clean_proto
 	protoc \
-                -I="${S}/src/moblab-rpcserver" \
-		--js_out=import_style=commonjs:${T}/src/app/services \
-                --grpc-web_out="import_style=commonjs+dts,mode=grpcwebtext:${T}/src/app/services" \
-                "${S}/src/moblab-rpcserver/moblabrpc.proto" || die
-
-compile_node: compile_proto
-	cd ${T}; node ./node_modules/.bin/ng build \
-		--prod \
-		--output-path=${WORKDIR}/dist || die;
-
-install:
-	install -d ${DESTDIR}etc/moblab/moblab-ui/static
-	install -d ${DESTDIR}etc/moblab/moblab-ui/static/assets
-	install moblab-ui.py ${DESTDIR}etc/moblab/moblab-ui/moblab-ui.py
-	cp -r ${WORKDIR}/dist/* ${DESTDIR}etc/moblab/moblab-ui/static
+                -I="../moblab-rpcserver" \
+		--js_out=import_style=commonjs:src/app/services \
+                --grpc-web_out="import_style=commonjs+dts,mode=grpcwebtext:src/app/services" \
+                "../moblab-rpcserver/moblabrpc.proto"

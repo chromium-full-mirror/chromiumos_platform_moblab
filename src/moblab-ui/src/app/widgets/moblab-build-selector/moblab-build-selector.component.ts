@@ -7,9 +7,9 @@ import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
   styleUrls: ['./moblab-build-selector.component.scss']
 })
 export class MoblabBuildSelectorComponent {
-  @ViewChild('boardSelector') boardSelector;
-  @ViewChild('milestoneSelector') milestoneSelector;
-  @ViewChild('buildSelector') buildSelector;
+  @ViewChild('boardSelector', { static: true }) boardSelector;
+  @ViewChild('milestoneSelector', { static: true }) milestoneSelector;
+  @ViewChild('buildSelector', { static: true }) buildSelector;
 
   @Output() update = new EventEmitter();
 

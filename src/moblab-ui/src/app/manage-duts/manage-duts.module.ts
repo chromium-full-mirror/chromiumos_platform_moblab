@@ -1,15 +1,11 @@
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import {
-  MatButtonModule,
-  MatCheckboxModule,
-  MatOptionModule,
-  MatTableModule,
-  MatTabsModule,
-  MatSortModule
-} from "@angular/material";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatTabsModule } from "@angular/material/tabs";
+import { MatSortModule } from "@angular/material/sort";
+import { MatTableModule } from "@angular/material/table";
 import { MatCardModule } from "@angular/material/card";
-import { MatSelectModule } from "@angular/material/select";
 
 import { PipesModule } from "app/pipes/pipes.module";
 
@@ -30,8 +26,6 @@ import { CommonModule } from "@angular/common";
     MatCardModule,
     MatButtonModule,
     MatTableModule,
-    MatOptionModule,
-    MatSelectModule,
     PipesModule,
     ServicesModule,
     FlexLayoutModule,

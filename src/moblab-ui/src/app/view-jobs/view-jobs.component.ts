@@ -17,10 +17,8 @@ import {
 } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
-import {
-  MatTableDataSource,
-  MatPaginator
-} from '@angular/material';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import {SelectionModel} from '@angular/cdk/collections';
 
 import {Job} from 'app/services/moblabrpc_pb';
@@ -109,7 +107,7 @@ class MultiFilterForm {
   providers: [DatePipe]
 })
 export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
   displayedColumns: string[] = [
     'job_checkboxes',
     'job_id',
