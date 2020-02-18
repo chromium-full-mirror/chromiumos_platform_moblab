@@ -11,7 +11,7 @@ FROM python:3.6-stretch as build
 
 RUN apt-get update && apt-get install -yq unzip cmake
 
-COPY moblab-rpcserver/requirements.txt ./
+COPY dockerfiles/rpcserver/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -32,10 +32,12 @@ RUN cp /tmp/grpc/bins/opt/grpc_python_plugin /usr/local/bin
 # set working directory
 WORKDIR /etc/moblab/moblab-rpcserver
 
-EXPOSE 6002
-# moblab_common 
 COPY moblab-rpcserver/ /etc/moblab/moblab-rpcserver
-RUN protoc -I=/etc/moblab/moblab-rpcserver --python_out=:/etc/moblab/moblab-rpcserver --grpc_python_out=:/etc/moblab/moblab-rpcserver --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin moblabrpc.proto
+RUN protoc -I=/etc/moblab/moblab-rpcserver \
+    --python_out=:/etc/moblab/moblab-rpcserver \
+    --grpc_python_out=:/etc/moblab/moblab-rpcserver \
+    --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin \
+    moblabrpc.proto
 
 # moblab_common
 WORKDIR /moblab_common
@@ -57,8 +59,12 @@ FROM python:3.6-slim
 
 # copy artifact build from the 'build environment'
 COPY --from=build /etc/moblab/moblab-rpcserver /etc/moblab/moblab-rpcserver
-COPY --from=build /usr/local/lib/python3.6/site-packages /usr/local/lib/python3.6/site-packages
+COPY --from=build /usr/local/lib/python3.6/site-packages \
+    /usr/local/lib/python3.6/site-packages
 
 RUN mkdir /var/log/moblab
 # run moblab-rpcserver
+
+EXPOSE 6002
+
 CMD ["/etc/moblab/moblab-rpcserver/moblab-rpcserver.py", "-v"]
