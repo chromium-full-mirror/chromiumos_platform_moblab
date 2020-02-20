@@ -35,6 +35,7 @@ import {PipesModule} from './pipes/pipes.module';
 import {RunSuiteModule} from './run-suite/run-suite.module';
 import {ServicesModule} from './services/services.module';
 import {ViewJobsModule} from './view-jobs/view-jobs.module';
+import {JobDetailModule} from './job-detail/job-detail.module';
 import {WidgetsModule} from './widgets/widgets.module';
 import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings.component';
 
@@ -79,7 +80,8 @@ import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings
       PipesModule,
       ManageDutsModule,
       RunSuiteModule,
-      ViewJobsModule
+      ViewJobsModule,
+      JobDetailModule
    ],
    exports: [
       WidgetsModule,
