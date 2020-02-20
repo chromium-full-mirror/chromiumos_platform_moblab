@@ -1,13 +1,11 @@
 import { NgModule } from "@angular/core";
-import {
-  MatButtonModule,
-  MatCheckboxModule,
-  MatTableModule,
-  MatListModule,
-  MatSortModule,
-  MatChipsModule,
-  MatSnackBarModule
-} from "@angular/material";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatTableModule } from "@angular/material/table";
+import { MatListModule } from "@angular/material/list";
+import { MatSortModule } from "@angular/material/sort";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';

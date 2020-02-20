@@ -1,11 +1,11 @@
-
 import {LayoutModule} from '@angular/cdk/layout';
 import {CommonModule} from '@angular/common';
 import {HttpClientModule} from '@angular/common/http';
 import {NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule} from '@angular/forms';
-import {MatChipsModule, MatTabsModule} from '@angular/material';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatTabsModule} from '@angular/material/tabs';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -75,7 +75,6 @@ import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings
       FormsModule,
       RunSuiteModule,
       MatChipsModule,
-      FeedbackModule,
       MatSelectModule,
       PipesModule,
       ManageDutsModule,

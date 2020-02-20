@@ -9,7 +9,7 @@ import { MoblabBuildSelectorComponent } from "./moblab-build-selector/moblab-bui
 import { MoblabRuntestSelectorComponent } from "./moblab-runtest-selector/moblab-runtest-selector.component";
 import { MoblabSelectorComponent } from "./moblab-selector/moblab-selector.component";
 import { TableHeaderSelectorComponent } from "./table-header-selector/table-header-selector.component";
-import { MatCheckboxModule } from "@angular/material";
+import { MatCheckboxModule } from "@angular/material/checkbox";
 import { FlexLayoutModule } from "@angular/flex-layout";
 
 @NgModule({

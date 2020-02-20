@@ -32,7 +32,7 @@ export class EnrollmentComponent implements OnInit {
 
   constructor(private moblabGrpcService: MoblabGrpcService) {}
 
-  @ViewChild(MatSort, {}) sort: MatSort;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   sortingDataAccessor(item, property) {
     switch (property) {

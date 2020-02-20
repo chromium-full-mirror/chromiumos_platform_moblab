@@ -52,7 +52,7 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
 
   uploader: FileUploader = new FileUploader({url: URL});
 
-  @ViewChild('formRef') form;
+  @ViewChild('formRef', { static: true }) form;
 
   constructor(private moblabRpcService: MoblabGrpcService) {}
 
