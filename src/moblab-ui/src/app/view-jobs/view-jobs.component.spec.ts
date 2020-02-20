@@ -31,23 +31,23 @@ const NUM_IDS = 2;
 const NUM_PRIORITIES = Object.keys(Job.Priority).length;
 const NUM_STATUS = Object.keys(Job.JobStatus).length;
 
-const BASELINE_TIME = Math.floor(Date.now() / 1000)
+const BASELINE_TIME_SEC = Math.floor(Date.now() / 1000)
 // one hour
-const TIME_OFFSET = 3600;
+const TIME_OFFSET_SEC = 3600;
 
 // Creates unique, mock jobs, each a different permutation. Useful for tests on
 // filtering.
 function createMockJobs(id_filter?: string, name_filter?: string,
                         created_time_lt?: number, created_time_gt?: number) {
   const mockFilterJobs = [];
-  let running_timestamp = BASELINE_TIME;
+  let running_timestamp = BASELINE_TIME_SEC;
   for (let i = 0; i < NUM_NAMES; i++) {
     for (let j = 0; j < NUM_IDS; j++) {
       for (let k = 0; k < NUM_PRIORITIES; k++) {
         for (let l = 0; l < NUM_STATUS; l++) {
-          running_timestamp += TIME_OFFSET
+          running_timestamp += TIME_OFFSET_SEC
           const startTimestamp = running_timestamp ;
-          running_timestamp += TIME_OFFSET
+          running_timestamp += TIME_OFFSET_SEC
           const finishedTimestamp = running_timestamp;
           const mockJob = new Job();
           mockJob.setName('Job' + i.toString());
@@ -237,7 +237,8 @@ describe('ViewJobsComponent', () => {
         '#startFromTimeInput'
       );
       startFromFilterInput.value = new Date(
-        BASELINE_TIME + createMockJobs().length * TIME_OFFSET
+        // TS timestamps need to be milisecond granularity, hence * 1000.
+        (BASELINE_TIME_SEC + createMockJobs().length * TIME_OFFSET_SEC) * 1000
       ).toLocaleString();
       startFromFilterInput.dispatchEvent(new Event('input'));
       const filterButton = fixture.debugElement.nativeElement.querySelector(
@@ -254,7 +255,9 @@ describe('ViewJobsComponent', () => {
         '#startToTimeInput'
       );
       startToFilterInput.value = new Date(
-        BASELINE_TIME + (createMockJobs().length + 2) * TIME_OFFSET
+        // TS timestamps need to be milisecond granularity, hence * 1000.
+        (BASELINE_TIME_SEC + (createMockJobs().length + 2) * TIME_OFFSET_SEC)
+        * 1000
       ).toLocaleString();
       startToFilterInput.dispatchEvent(new Event('input'));
       filterButton.dispatchEvent(new Event('click'));
@@ -272,7 +275,7 @@ describe('ViewJobsComponent', () => {
         except a char is added to make the string malformed.
       */
       startFromFilterInput.value = new Date(
-        BASELINE_TIME + createMockJobs().length * TIME_OFFSET * 10
+        BASELINE_TIME_SEC + createMockJobs().length * TIME_OFFSET_SEC * 10
       ).toLocaleString() + 'x';
       startFromFilterInput.dispatchEvent(new Event('input'));
 
