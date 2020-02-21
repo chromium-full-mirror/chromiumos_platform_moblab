@@ -169,7 +169,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.rel_filter == moblabrpc_pb2.Job.SUITE,
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
-            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS)
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            request.parent_id_filter
+        )
         response = moblabrpc_pb2.GetNumJobsResponse(num_jobs=num_jobs)
         return response
 
@@ -222,7 +224,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.rel_filter == moblabrpc_pb2.Job.SUITE,
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
-            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS)
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            request.parent_id_filter
+        )
 
         response = moblabrpc_pb2.GetJobsResponse()
         if jobs:

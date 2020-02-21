@@ -132,7 +132,30 @@ class AFEConnector(object):
                      suite=False,
                      not_yet_run=False,
                      running=False,
-                     finished=False):
+                     finished=False,
+                     parent_id_filter=None):
+        """
+            Returns number of jobs that match filter arguments. Any arg that
+            evaluates to false is not used for filtering.
+        Args:
+            id_filter: Filter for only jobs that contain id string, this is a
+                contains match rather than an exact match.
+            name_filter: Filter for only jobs that contain name string, this is a
+                contains match rather than an exact match.
+            created_time_lt: Upper bound created time filter. Second granularity
+                timestamp.
+            created_time_gt: Lower bound created time filter. Second granularity
+                timestamp.
+            sub: true iff only child jobs are not to be filtered.
+            suite: true iff only parent jobs are not to be filtered.
+            not_yet_run: true iff only not-yet-run jobs are not to be filtered.
+            running: true iff only running jobs are not to be filtered.
+            finished: true iff only finished jobs are not to be filtered.
+            parent_id_filter: Filter for only jobs that are children of this
+                job id, this is an exact match:
+        Returns:
+            A dict containing 'result' number.
+        """
         params = {}
 
         if id_filter:
@@ -161,6 +184,9 @@ class AFEConnector(object):
         elif finished:
             params['finished'] = 'true'
 
+        if parent_id_filter:
+            params['parent_job'] = parent_id_filter
+
         response = self.send_rpc_command('get_num_jobs', params)
         _LOGGER.error(response)
         return self.decode_response(response, 'result')
@@ -176,13 +202,25 @@ class AFEConnector(object):
                  suite=False,
                  not_yet_run=False,
                  running=False,
-                 finished=False):
+                 finished=False,
+                 parent_id_filter=None):
         """
             Get attributes of the jobs specified.
         Args:
-            id_list: A list of job id to be retrieved.
-            job_state_filters: A dictionary of job filter options (ex.
-                running : True).
+            id_filter: Filter for only jobs that contain id string, this is a
+                contains match rather than an exact match.
+            name_filter: Filter for only jobs that contain name string, this is a
+                contains match rather than an exact match.
+            created_time_lt: Upper bound created time filter. Second granularity
+                timestamp.
+            created_time_gt: Lower bound created time filter. Second granularity
+                timestamp.
+            sub: true iff only child jobs are not to be filtered.
+            suite: true iff only parent jobs are not to be filtered.
+            not_yet_run: true iff only not-yet-run jobs are not to be filtered.
+            running: true iff only running jobs are not to be filtered.
+            finished: true iff only finished jobs are not to be filtered.
+            parent_id_filter: Filter for only jobs that are children of this
         Returns:
             A list of dict. The key, value of the dict is the job attribute
             name and the value.
@@ -216,6 +254,9 @@ class AFEConnector(object):
             params['running'] = 'true'
         elif finished:
             params['finished'] = 'true'
+
+        if parent_id_filter:
+            params['parent_job'] = parent_id_filter
 
         response = self.send_rpc_command('get_jobs_summary', params)
         return self.decode_response(response, 'result')
