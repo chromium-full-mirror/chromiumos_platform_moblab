@@ -1,7 +1,7 @@
 <div id="root-container">
   <div>
     <div class="time-filter-form-wrapper">
-      <div class="filter-box" style="border: 1px solid #ebebeb;">
+      <div *ngIf="!hideFilters" class="filter-box">
         <mat-card class="time_filters" style="padding:8px;">
           <b> Start Time </b>
           <span> from: </span>
@@ -87,7 +87,7 @@
   <table mat-table [dataSource]="jobs"
          multiTemplateDataRows
          class="jobs-table mat-elevation-z8">
-    <ng-container matColumnDef="job_checkboxes">
+    <ng-container *ngIf="!hideSelectors" matColumnDef="job_checkboxes">
       <th mat-header-cell *matHeaderCellDef>
         <app-table-header-selector
           class="select-cb table-checkbox-col"

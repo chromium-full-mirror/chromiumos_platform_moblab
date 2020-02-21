@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
@@ -79,6 +80,14 @@ function createMockJobs(id_filter?: string, name_filter?: string,
   return mockFilterJobs;
 }
 
+@Component({
+  selector: 'view-jobs-test-wrapper',
+  template:
+      `<app-view-jobs [manualPopulate]="true"></app-view-jobs>`,
+})
+class ViewJobsTestWrapperComponent {
+}
+
 describe('ViewJobsComponent', () => {
   let component: ViewJobsComponent;
   let fixture: ComponentFixture<ViewJobsComponent>;
@@ -111,8 +120,39 @@ describe('ViewJobsComponent', () => {
           WidgetsModule,
         ],
         declarations: [
-          ViewJobsComponent]})
+          ViewJobsComponent,
+          ViewJobsTestWrapperComponent,
+        ]})
         .compileComponents();
+  });
+
+  describe('Tests of @Input argument functionality.', function () {
+    let wrapperFixture: ComponentFixture<ViewJobsTestWrapperComponent>
+
+    beforeEach(() => {
+      wrapperFixture = TestBed.createComponent(ViewJobsTestWrapperComponent);
+      component = wrapperFixture.debugElement.children[0].componentInstance;
+      wrapperFixture.detectChanges();
+    });
+
+    // The ViewJobsTestWrapperComponent used in this test group is templated to
+    // have the manualPopulate flag set to true on initialization.
+    it ('Checking jobs are not auto-loaded when manual populate flag is set.',
+      () => {
+      expect(component.getNumVisibleJobs()).toBe(0);
+    });
+
+    it ('Check hide filters and hide selectors flags work.',
+      () => {
+        expect(wrapperFixture.debugElement.query(By.css('.filter-box'))).toBeDefined();
+        expect(wrapperFixture.debugElement.query(By.css('.job_checkboxes'))).toBeDefined();
+        component.hideFilters = true;
+        component.hideSelectors = true;
+        wrapperFixture.detectChanges();
+        expect(wrapperFixture.debugElement.query(By.css('.filter-box'))).toBeNull();
+        expect(wrapperFixture.debugElement.query(By.css('.job_checkboxes'))).toBeNull();
+      });
+
   });
 
   describe('Basic/Filtering/Checkbox tests.', function () {
