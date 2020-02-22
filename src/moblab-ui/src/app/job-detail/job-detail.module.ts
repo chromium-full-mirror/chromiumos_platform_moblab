@@ -20,7 +20,6 @@ import {ViewJobsModule} from '../view-jobs/view-jobs.module';
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
     MatDividerModule,
@@ -28,6 +27,7 @@ import {ViewJobsModule} from '../view-jobs/view-jobs.module';
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
+    ReactiveFormsModule,
     ViewJobsModule,
   ],
   declarations: [JobDetailComponent],

@@ -31,8 +31,11 @@ describe('ManageDutsComponent', () => {
         PipesModule,
         WidgetsModule
       ],
-        declarations: [ManageDutsComponent, FirmwareComponent, EnrollmentComponent]})
-        .compileComponents();
+      declarations: [
+        EnrollmentComponent
+        FirmwareComponent,
+        ManageDutsComponent,
+      ]}).compileComponents();
   }));
 
   beforeEach(() => {
