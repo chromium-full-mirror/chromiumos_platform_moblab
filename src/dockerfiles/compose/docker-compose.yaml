@@ -5,7 +5,7 @@
 version: '3'
 services:
   db:
-    image: gcr.io/chromeos-partner-moblab/moblab-db:release
+    image: gcr.io/chromeos-partner-moblab/moblab-db:haddowk
     hostname: db
     user: moblab
 
@@ -55,11 +55,11 @@ services:
           - database
 
   autotest:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest:release
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest:haddowk
     hostname: autotest
     user: moblab
     ports:
-    - 80:80
+    - 80:8888
 
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
@@ -101,7 +101,7 @@ services:
     - 6010:6010
 
   moblab-rpcserver:
-    image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:release
+    image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:haddowk
     user: moblab
 
     volumes:
@@ -111,13 +111,19 @@ services:
     networks:
     - moblab
 
+    depends_on:
+    - autotest
+
   watchtower:
     image: gcr.io/chromeos-partner-moblab/watchtower:release
 
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 
-    command: --interval 500
+    command: --interval 1
+
+    networks:
+    - moblab
 
 
 volumes:
