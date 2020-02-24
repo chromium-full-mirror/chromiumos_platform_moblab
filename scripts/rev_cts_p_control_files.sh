@@ -58,9 +58,8 @@ git add . -A
 git commit -F- <<EOF
 [autotest] Uprev CTS ${CTS_LETTER} version to ${CTS_VERSION}
 
-TEST=None
 BUG=b:68778082
+TEST=None
 EOF
 
-repo upload . --verify --wip 
-
+repo upload . --verify --wip
