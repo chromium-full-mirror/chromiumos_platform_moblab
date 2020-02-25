@@ -10,9 +10,11 @@ import {CtsRunComponent} from './run-suite/custom-run-suite/cts-run/cts-run.comp
 import {StorageQualComponent} from './run-suite/custom-run-suite/storage-qual/storage-qual.component';
 import {RunSuiteComponent} from './run-suite/run-suite.component';
 import {ViewJobsComponent} from './view-jobs/view-jobs.component';
+import {JobDetailComponent} from './job-detail/job-detail.component';
 
 const routes: Routes = [
   {path: 'view_jobs', component: ViewJobsComponent},
+  {path: 'job_detail', component: JobDetailComponent},
   {
     path: 'run_tests',
     component: RunSuiteComponent,

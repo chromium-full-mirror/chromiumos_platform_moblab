@@ -20,7 +20,9 @@ export class AppSidebarComponent implements OnInit {
     this.addSidebarEntry(
         Feature.VIEW_JOBS, this.navTabsAboveRun,
         {route: '/view_jobs', label: 'View Jobs', icon: 'visibility'});
-
+    this.addSidebarEntry(
+      Feature.JOB_DETAIL, this.navTabsAboveRun,
+        {route: '/job_detail', label: 'Job Detail'});
     this.addSidebarEntry(
         Feature.RUN_CTS, this.navTestRunMenuOptions,
         {route: '/run_tests/cts', label: 'Android Qualification'});
