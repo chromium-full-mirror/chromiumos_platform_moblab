@@ -17,7 +17,7 @@ GTS_BINARY="${2}"
 GTS_BUCKET_LOCATION="gs://chromeos-partner-gts/"
 GTS_FILE="${GTS_BUCKET_LOCATION}"gts-"${GTS_VERSION}".zip
 
-#gsutil cp "${GTS_BINARY}"  gs://chromeos-partner-gts/
+gsutil cp "${GTS_BINARY}"  gs://chromeos-partner-gts/
 LAST_GTS_BINARY=$(gsutil ls -r gs://chromeos-partner-gts/gts-6* | tail -1)
 rm -f update_acl_setting
 gsutil acl get "${LAST_GTS_BINARY}" > update_acl_setting
@@ -60,8 +60,8 @@ git add . -A
 git commit -F- <<EOF
 [autotest] Uprev GTS version to ${GTS_VERSION}
 
-TEST=None
 BUG=b:68021674
+TEST=None
 EOF
 
 repo upload . --verify
