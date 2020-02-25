@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-all: compile_proto
+all: compile_proto install start
 
 
 clean_proto:
@@ -14,3 +14,10 @@ compile_proto: clean_proto
 		--js_out=import_style=commonjs:src/app/services \
                 --grpc-web_out="import_style=commonjs+dts,mode=grpcwebtext:src/app/services" \
                 "../moblab-rpcserver/moblabrpc.proto"
+
+# TODO - fix the npm install errors that make the || true required.
+install:
+	npm install || true
+
+start:
+	npm start
