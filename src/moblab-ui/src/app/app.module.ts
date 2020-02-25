@@ -22,7 +22,6 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterModule} from '@angular/router';
-import {FeedbackModule} from 'ng-feedback';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppSidebarComponent} from './app-sidebar/app-sidebar.component';

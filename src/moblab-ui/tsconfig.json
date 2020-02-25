@@ -10,5 +10,9 @@
     "src/**/*.ts",
     "test/*.ts",
     "test/**/*.ts"
-  ]
-}
+  ],
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
+  ],
+ 
