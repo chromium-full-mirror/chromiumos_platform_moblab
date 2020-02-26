@@ -250,10 +250,12 @@ class MoblabService(object):
                      suite=False,
                      not_yet_run=False,
                      running=False,
-                     finished=False):
+                     finished=False,
+                     parent_id_filter=None):
+
         return self.afe_connector.get_num_jobs(
             id_filter, name_filter, created_time_lt, created_time_gt, sub,
-            suite, not_yet_run, running, finished)
+            suite, not_yet_run, running, finished, parent_id_filter)
 
     def get_jobs(self,
                  query_start,
@@ -266,10 +268,12 @@ class MoblabService(object):
                  suite=False,
                  not_yet_run=False,
                  running=False,
-                 finished=False):
+                 finished=False,
+                 parent_id_filter=None):
         return self.afe_connector.get_jobs(
             query_start, query_limit, id_filter, name_filter, created_time_lt,
-            created_time_gt, sub, suite, not_yet_run, running, finished)
+            created_time_gt, sub, suite, not_yet_run, running, finished,
+            parent_id_filter)
 
     def get_job_details(self, job_id):
         return self.afe_connector.get_jobs_by_ids([job_id])

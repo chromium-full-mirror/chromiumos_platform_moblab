@@ -198,10 +198,13 @@ message Job {
 message GetNumJobsRequest {
   string id_filter = 3;
   string name_filter = 4;
+  // Timestamp int's are in second granularity.
   int64 created_time_lt = 5;
   int64 created_time_gt = 6;
   Job.QueueStatus status_filter = 7;
+  // Relationship denotes whether a job is a parent/suite or child.
   Job.Relationship rel_filter = 8;
+  string parent_id_filter = 9;
 }
 
 message GetNumJobsResponse {
@@ -213,10 +216,13 @@ message GetJobsRequest {
   int32 query_limit = 2;
   string id_filter = 3;
   string name_filter = 4;
+  // Timestamp int's are in second granularity.
   int64 created_time_lt = 5;
   int64 created_time_gt = 6;
   Job.QueueStatus status_filter = 7;
+  // Relationship denotes whether a job is a parent/suite or child.
   Job.Relationship rel_filter = 8;
+  string parent_id_filter = 9;
 }
 
 message GetJobsResponse {

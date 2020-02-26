@@ -34,6 +34,7 @@ const QUEUE_STATUS = 'queueStatus';
 const JOB_RELATIONSHIP = 'relationship';
 const JOB_START_TIME_FROM_FILTER = 'startTimeFromFilter';
 const JOB_START_TIME_TO_FILTER = 'startTimeToFilter';
+const PARENT_JOB_ID = 'parent_job_id'
 const FILTER_PARAMETERS = [
   JOB_NAME,
   JOB_ID,
@@ -42,6 +43,7 @@ const FILTER_PARAMETERS = [
   JOB_RELATIONSHIP,
   JOB_START_TIME_FROM_FILTER,
   JOB_START_TIME_TO_FILTER,
+  PARENT_JOB_ID
 ];
 const FILTER_VALIDATORS = {}
 
@@ -221,7 +223,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
       Number(Job.QueueStatus[this.filters.getFormValue(QUEUE_STATUS)]) : 0;
     const job_relationship_filter =
       this.filters.getFormValue(JOB_RELATIONSHIP) ?
-      Number(Job.Relationship[this.filters.getFormValue(JOB_RELATIONSHIP)]) : 0;
+        Number(Job.Relationship[this.filters.getFormValue(JOB_RELATIONSHIP)]) : 0;
+    const parent_id_filter = this.filters.getFormValue(PARENT_JOB_ID);
 
     this.moblabGrpcService.getJobs(
       (jobs: Job[]) => this.assignJobs(jobs),
@@ -234,7 +237,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
       job_start_lt_filter,
       job_start_gt_filter,
       job_queue_status_filter,
-      job_relationship_filter
+      job_relationship_filter,
+      parent_id_filter
     );
 
     this.moblabGrpcService.getNumJobs(
@@ -244,7 +248,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
       job_start_lt_filter,
       job_start_gt_filter,
       job_queue_status_filter,
-      job_relationship_filter
+      job_relationship_filter,
+      parent_id_filter
     )
   }
 

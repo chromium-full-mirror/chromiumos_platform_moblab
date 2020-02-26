@@ -108,7 +108,8 @@ export class MoblabGrpcService {
   getNumJobs(callback: (x: number) => void,
              id_filter?: string,
              name_filter?: string, created_time_lt?: number, created_time_gt?: number,
-             status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship) {
+             status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
+             parent_id_filter?: string) {
     const request = new GetNumJobsRequest();
     if (id_filter) {
       request.setIdFilter(id_filter)
@@ -128,6 +129,10 @@ export class MoblabGrpcService {
     if (rel_filter) {
       request.setRelFilter(rel_filter)
     }
+    if (parent_id_filter) {
+      request.setParentIdFilter(parent_id_filter);
+    }
+
 
     const call = this.moblabRpcService.get_num_jobs(
       request,
@@ -145,7 +150,7 @@ export class MoblabGrpcService {
           queryStart: number, queryLimit: number, id_filter?: string,
           name_filter?: string, created_time_lt?: number, created_time_gt?: number,
           status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
-          ) {
+          parent_id_filter?: string) {
     const request = new GetJobsRequest();
     request.setQueryStart(queryStart);
     request.setQueryLimit(queryLimit);
@@ -166,6 +171,9 @@ export class MoblabGrpcService {
     }
     if (rel_filter) {
       request.setRelFilter(rel_filter)
+    }
+    if (parent_id_filter) {
+      request.setParentIdFilter(parent_id_filter);
     }
 
     const call = this.moblabRpcService.get_jobs(
