@@ -21,7 +21,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 import {JobDetailComponent} from './job-detail.component';
 import {Job} from '../services/moblabrpc_pb';
-
+import {ViewJobsModule} from '../view-jobs/view-jobs.module';
 
 function createMockJobInfo() {
   const mockJob = new Job();
@@ -49,7 +49,8 @@ describe('JobDetailComponent', () => {
           MatFormFieldModule,
           MatInputModule,
           MatTableModule,
-          MatSnackBarModule
+          MatSnackBarModule,
+          ViewJobsModule,
         ],
         declarations: [JobDetailComponent]})
       .compileComponents();
@@ -70,6 +71,7 @@ describe('JobDetailComponent', () => {
       component = fixture.componentInstance;
       fixture.detectChanges();
 
+      const childJobsRefSpy = spyOn<any>(component.childViewJobsTableRef, 'refreshJobs');
       const getJobDetailsSpy = spyOn<any>(
         // @ts-ignore
         component.moblabGrpcService,

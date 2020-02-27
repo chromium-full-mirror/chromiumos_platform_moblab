@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {MatExpansionPanel} from '@angular/material/expansion';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
@@ -9,6 +9,7 @@ import {Job} from '../services/moblabrpc_pb';
 import {normalizeTimestamp} from '../utils/date';
 import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
 import {forbiddenIDValidator} from '../utils/validators';
+import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
 
 interface KeyVal {
   key: string;
@@ -23,6 +24,7 @@ interface KeyVal {
   viewProviders: [MatExpansionPanel]
 })
 export class JobDetailComponent {
+  @ViewChild(ViewJobsComponent) childViewJobsTableRef: ViewJobsComponent;
   jobQuery = new FormControl(
     '',
     [Validators.minLength(1), forbiddenIDValidator]
@@ -53,6 +55,7 @@ export class JobDetailComponent {
   fetchJobDetails() {
     // Reset current job info.
     this.resetJob();
+    this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
 
     this.moblabGrpcService.getJobDetails(
       (jobInfo: Job) => {

@@ -8,6 +8,7 @@ import {
 import {
   ChangeDetectorRef,
   Component,
+  Input,
   HostListener,
   OnDestroy,
   OnInit,
@@ -76,6 +77,10 @@ class MultiFilterForm {
     return this.getFormControl(filterName).value;
   }
 
+  setFormValue(filterName, value) {
+    this.getFormControl(filterName).setValue(value);
+  }
+
   anyErrors() {
     for (const filterName in this.formControls) {
       if (this.getFormControl(filterName).errors) {
@@ -109,9 +114,12 @@ class MultiFilterForm {
   providers: [DatePipe]
 })
 export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
+  @Input() input: string;
+  @Input() manualPopulate: boolean;
+  @Input() hideFilters: boolean;
+  @Input() hideSelectors: boolean;
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
   displayedColumns: string[] = [
-    'job_checkboxes',
     'job_id',
     'name',
     'priority',
@@ -156,10 +164,16 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.moblabGrpcService.getNumJobs(
-      (numJobs: number) => { this.numJobs = numJobs; }
+    if (!this.hideSelectors) {
+      this.displayedColumns = ['job_checkboxes'].concat(this.displayedColumns);
+    }
+
+    if (!this.manualPopulate) {
+      this.moblabGrpcService.getNumJobs(
+        (numJobs: number) => { this.numJobs = numJobs; }
       )
-    this.getNextPageJobs();
+      this.getNextPageJobs();
+    }
   }
 
   ngAfterViewInit() {
@@ -202,8 +216,9 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.getNextPageJobs()
   }
 
-  refreshJobs() {
+  refreshJobs(parentJobId?: string) {
     this.filters.reset();
+    this.filters.setFormValue(PARENT_JOB_ID, parentJobId);
     this.resetPagination();
     this.getNextPageJobs();
   }
