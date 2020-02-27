@@ -24,7 +24,7 @@ export class EnrollmentComponent implements OnInit {
 
   selectOptions: string[] = ["All Enrolled", "All Unenrolled"];
 
-  labelFilterList: Set<string> = new Set();
+  labelFilterSet: Set<string> = new Set();
 
   filterLabels = true;
 
@@ -64,27 +64,19 @@ export class EnrollmentComponent implements OnInit {
 
   toggleFilterLabels() {
     this.filterLabels = !this.filterLabels;
-    this.calculateLabelFilter();
   }
 
   calculateLabelFilter() {
-    this.labelFilterList.clear();
-    if (this.filterLabels) {
-      this.duts.data[0].getLabelsList().forEach(label => {
-        this.labelFilterList.add(label);
-      });
-
-      // Remove board, model and pool labels
-      this.labelFilterList.forEach(filter => {
-        if (
-          filter.startsWith("model:") ||
-          filter.startsWith("pool:") ||
-          filter.startsWith("board:")
-        ) {
-          this.labelFilterList.delete(filter);
+    this.labelFilterSet = new Set<string>();
+    this.duts.data.forEach(dut => {
+      dut.getLabelsList().forEach(label => {
+        if (!label.startsWith('model:') &&
+            !label.startsWith('pool:') &&
+            !label.startsWith('board:')) {
+          this.labelFilterSet.add(label);
         }
       });
-    }
+    });
   }
 
   enrollSelected() {
