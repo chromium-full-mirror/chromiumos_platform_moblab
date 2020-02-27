@@ -15,6 +15,7 @@ import {MatInputModule} from '@angular/material/input';
 import {JobDetailComponent} from './job-detail.component';
 
 import {ViewJobsModule} from '../view-jobs/view-jobs.module';
+import {WidgetsModule} from '../widgets/widgets.module';
 
 @NgModule({
   imports: [
@@ -29,6 +30,7 @@ import {ViewJobsModule} from '../view-jobs/view-jobs.module';
     MatTableModule,
     ReactiveFormsModule,
     ViewJobsModule,
+    WidgetsModule
   ],
   declarations: [JobDetailComponent],
   exports: [JobDetailComponent]

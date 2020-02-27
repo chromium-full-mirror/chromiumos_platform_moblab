@@ -10,11 +10,8 @@ import {normalizeTimestamp} from '../utils/date';
 import {INT_TO_JOBSTATUS, INT_TO_PRIORITY} from '../utils/proto_helpers';
 import {forbiddenIDValidator} from '../utils/validators';
 import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
+import {KeyVal, KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
 
-interface KeyVal {
-  key: string;
-  value: string;
-}
 
 @Component({
   selector: 'app-job-detail',
@@ -25,6 +22,7 @@ interface KeyVal {
 })
 export class JobDetailComponent {
   @ViewChild(ViewJobsComponent) childViewJobsTableRef: ViewJobsComponent;
+  @ViewChild(KeyValTableComponent) jobInfoTableRef: KeyValTableComponent;
   jobQuery = new FormControl(
     '',
     [Validators.minLength(1), forbiddenIDValidator]
@@ -71,40 +69,19 @@ export class JobDetailComponent {
   }
 
   unpackJobInfoToTable(job: Job) {
-    const jobInfoRows: KeyVal[] = [];
+    this.jobInfoTableRef.loadRows([
+      ['Name', job.getName()],
+      ['ID', job.getJobId().toString()],
+      ['Parent ID', job.getParentJobId().toString()],
+      ['Dependencies', job.getDependencies()],
+      ['Priority', INT_TO_PRIORITY[job.getPriority()]],
+      ['Created time', normalizeTimestamp(job.getCreatedTimeSecUtc())],
+      ['Status', INT_TO_JOBSTATUS[job.getStatus()]],
+      ['Timeout', (job.getTimeout() / 60 / 1000).toString() + ' minutes'],
+      ['Max Runtime', (job.getMaxRuntime() / 60 / 1000).toString() + ' minutes'],
+      ['Test Retries', job.getTestRetries().toString()],
+    ])
 
-    jobInfoRows.push({
-      key: 'Name',
-      value: job.getName()})
-    jobInfoRows.push({
-      key: 'ID',
-      value: job.getJobId().toString()})
-    jobInfoRows.push({
-      key: 'Parent ID',
-      value: job.getParentJobId().toString()})
-    jobInfoRows.push({
-      key: 'Dependencies',
-      value: job.getDependencies()})
-    jobInfoRows.push({
-      key: 'Priority',
-      value: INT_TO_PRIORITY[job.getPriority()]})
-    jobInfoRows.push({
-      key: 'Created time',
-      value: normalizeTimestamp(job.getCreatedTimeSecUtc())})
-    jobInfoRows.push({
-      key: 'Status',
-      value: INT_TO_JOBSTATUS[job.getStatus()]})
-    jobInfoRows.push({
-      key: 'Timeout',
-      value: (job.getTimeout() / 60 / 1000).toString() + ' minutes'})
-    jobInfoRows.push({
-      key: 'Max Runtime',
-      value: (job.getMaxRuntime() / 60 / 1000).toString() + ' minutes'})
-    jobInfoRows.push({
-      key: 'Test Retries',
-      value: job.getTestRetries().toString()})
-
-    this.jobInfoTable = new MatTableDataSource<KeyVal>(jobInfoRows);
     this.jobHistoryTable =
       new MatTableDataSource<Execution>(job.getExecutionHistoryList());
     this.associatedDutsTable =

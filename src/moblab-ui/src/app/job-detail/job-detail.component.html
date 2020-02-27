@@ -15,11 +15,12 @@
   </button>
 </div>
 <div id="job-detail-table-wrapper">
-  <div id="loading-overlay" *ngIf="!jobInfoTable.data.length">
+  <div id="loading-overlay" *ngIf="jobInfoTableRef.isEmpty()">
   </div>
-  <div id="job-not-found-label" *ngIf="!jobInfoTable.data.length">
+  <div id="job-not-found-label" *ngIf="jobInfoTableRef.isEmpty()">
     <p>No job data fetched.</p>
   </div>
+  <app-keyval-table></app-keyval-table>
   <table mat-table id="job-detail-table" [dataSource]="jobInfoTable">
     <ng-container matColumnDef="key">
       <th mat-header-cell *matHeaderCellDef>Key</th>

@@ -22,6 +22,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {JobDetailComponent} from './job-detail.component';
 import {Job, Execution} from '../services/moblabrpc_pb';
 import {ViewJobsModule} from '../view-jobs/view-jobs.module';
+import {WidgetsModule} from '../widgets/widgets.module';
 
 function createMockJobInfo() {
   const mockJob = new Job();
@@ -71,6 +72,7 @@ describe('JobDetailComponent', () => {
           MatTableModule,
           ReactiveFormsModule,
           ViewJobsModule,
+          WidgetsModule,
         ],
         declarations: [JobDetailComponent]})
       .compileComponents();
@@ -137,7 +139,7 @@ describe('JobDetailComponent', () => {
       // Loading overlay is visible before a job is loaded.
       expect(fixture.debugElement.query(
         By.css('#loading-overlay'))).toBeDefined();
-      expect(jobDetailTableRows.length).toBe(0);
+      expect(component.jobInfoTableRef.isEmpty()).toBe(true);
 
       inputJobQuery('1');
       const jobQueryButton = fixture.debugElement.nativeElement.querySelector(
@@ -159,7 +161,7 @@ describe('JobDetailComponent', () => {
       // Loading overlay is gone after a job is loaded.
       expect(fixture.debugElement.query(
         By.css('#loading-overlay'))).toBeNull();
-      expect(jobDetailTableRows.length > 0 ).toBeTruthy();
+      expect(component.jobInfoTableRef.isEmpty()).toBe(false);
       expect(jobHistoryTableRows.length > 0 ).toBeTruthy();
       expect(associatedDutsTableRows.length > 0 ).toBeTruthy();
     });
