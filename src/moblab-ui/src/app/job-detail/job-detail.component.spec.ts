@@ -20,7 +20,7 @@ import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 import {JobDetailComponent} from './job-detail.component';
-import {Job} from '../services/moblabrpc_pb';
+import {Job, Execution} from '../services/moblabrpc_pb';
 import {ViewJobsModule} from '../view-jobs/view-jobs.module';
 
 function createMockJobInfo() {
@@ -28,6 +28,26 @@ function createMockJobInfo() {
   mockJob.setJobId(1);
   mockJob.setName('Name');
   mockJob.setServerControlFile('Fake file.');
+
+  const mockJobHistory = []
+  for (let i = 0; i < 5; ++i) {
+    const mockExecution = new Execution();
+    mockExecution.setName(i.toString());
+    mockExecution.setJobId(i);
+    mockExecution.setUsedTime(Number(Math.random() * 1000));
+    mockJobHistory.push(mockExecution);
+  }
+  mockJob.setExecutionHistoryList(mockJobHistory);
+
+  const mockAssociatedDuts = []
+  for (let i = 0; i < 5; ++i) {
+    const mockExecution = new Execution();
+    mockExecution.setDut(i.toString())
+    mockExecution.setStatus(Number(Math.random() * 8));
+    mockAssociatedDuts.push(mockExecution);
+  }
+  mockJob.setAssociatedDutsList(mockJobHistory);
+
   return mockJob;
 }
 
@@ -104,8 +124,15 @@ describe('JobDetailComponent', () => {
     it('Test successful load of job information.', () => {
       let jobDetailTableRows =
         fixture.debugElement.nativeElement.querySelectorAll(
-        '#job-detail-table .mat-row'
-      );
+        '#job-detail-table .mat-row');
+
+      let jobHistoryTableRows =
+        fixture.debugElement.nativeElement.querySelectorAll(
+          '#job-execution-history-table .mat-row');
+
+      let associatedDutsTableRows =
+        fixture.debugElement.nativeElement.querySelectorAll(
+          '#associated-duts-table .mat-row');
 
       // Loading overlay is visible before a job is loaded.
       expect(fixture.debugElement.query(
@@ -120,13 +147,21 @@ describe('JobDetailComponent', () => {
       fixture.detectChanges();
 
       jobDetailTableRows = fixture.debugElement.nativeElement.querySelectorAll(
-        '#job-detail-table .mat-row'
-      );
+        '#job-detail-table .mat-row');
+
+      jobHistoryTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+          '#job-execution-history-table .mat-row');
+
+      associatedDutsTableRows =
+        fixture.debugElement.nativeElement.querySelectorAll(
+          '#associated-duts-table .mat-row');
 
       // Loading overlay is gone after a job is loaded.
       expect(fixture.debugElement.query(
         By.css('#loading-overlay'))).toBeNull();
       expect(jobDetailTableRows.length > 0 ).toBeTruthy();
+      expect(jobHistoryTableRows.length > 0 ).toBeTruthy();
+      expect(associatedDutsTableRows.length > 0 ).toBeTruthy();
     });
   });
 

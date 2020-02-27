@@ -280,3 +280,6 @@ class MoblabService(object):
 
     def get_job_history(self, job_id):
         return self.afe_connector.get_job_history(job_id)
+
+    def get_associated_duts(self, job_id):
+        return self.afe_connector.get_host_queue_entries(job_id=job_id)

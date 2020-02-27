@@ -151,7 +151,19 @@ message UpdateDutsFirmwareRequest {
 message UpdateDutsFirmwareResponse {
 }
 
-// NEXT_TAG = 15
+// NEXT_TAG = 9
+message Execution {
+  string name = 1;
+  int32 job_id = 2;
+  int64 start_time_utc = 3;
+  int64 end_time_utc = 4;
+  int64 used_time = 5;
+  Job.JobStatus status = 6;
+  string dut = 7;
+  string dut_status = 8;
+}
+
+// NEXT_TAG = 16
 message Job {
   // NEXT_TAG = 90
   enum Priority {
@@ -194,17 +206,6 @@ message Job {
     FINISHED_JOBS = 3;
   }
 
-  // NEXT_TAG = 8
-  message Execution {
-    string name = 1;
-    int32 job_id = 2;
-    int64 start_time_utc = 3;
-    int64 end_time_utc = 4;
-    int64 used_time = 5;
-    JobStatus status = 6;
-    string dut = 7;
-  }
-
   int32 job_id = 1;
   string name = 2;
   Priority priority = 3;
@@ -221,6 +222,7 @@ message Job {
   int64 max_runtime = 12;
   int32 test_retries = 13;
   repeated Execution execution_history = 14;
+  repeated Execution associated_duts = 15;
 }
 
 // NEXT_TAG = 10
