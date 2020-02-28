@@ -284,19 +284,92 @@ class AFEConnector(object):
         response = self.send_rpc_command('get_job_history', params)
         return self.decode_response(response, 'result')
 
-    def get_special_tasks(self, id_list):
+    def get_num_special_tasks(self, id_list=[], host_id_list=[], start_time_gt=None, end_time_lt=None):
+        """Get attributes of the special tasks specified.
+        Args:
+            id_list: List of special task id's,
+            host_id_list: List of AFE host id's
+            start_time_gt(int): Seconds timestamp of a filter to DUT tasks by
+                start time.
+            end_time_lt(int): Seconds timestamp of a filter to DUT tasks by
+                end time.
+        Returns:
+            Number of tasks that match the given filters ( special_tasks in AFE
+            vernacular ).
+        """
+        if id_list:
+            assert isinstance(id_list, list)
+            params = {
+                'id__in' : id_list
+            }
+        if host_id_list:
+            assert isinstance(host_id_list, list)
+            params = {
+                'host__in' : host_id_list
+            }
+
+        if start_time_gt:
+            params['start_time'] = str(
+                datetime.utcfromtimestamp(start_time_gt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                )
+            )
+        if end_time_lt:
+            params['end_time'] = str(
+                datetime.utcfromtimestamp(end_time_lt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                )
+            )
+        response = self.send_rpc_command('get_num_special_tasks',
+                                         params)
+        return self.decode_response(response, 'result')
+
+
+    def get_special_tasks(self, id_list=[], host_id_list=[], query_start=None, query_limit=None, start_time_gt=None, end_time_lt=None):
         """Get attributes of the special tasks specified.
 
         Args:
             id_list: A list of special task id to be retrieved.
-
+            host_id_list: A list of AFE host id's to filter results by.
+            query_start(int): Parameter specifying index on where to start when
+                returning paged results.
+            query_limit(int): Upper limit on number of results to return.
+            start_time_gt(int): Seconds timestamp of a filter to DUT tasks by
+                start time.
+            end_time_lt(int): Seconds timestamp of a filter to DUT tasks by
+                end time.
         Returns:
             A list of dict. The key, value of the dict is the special task
             attribute name and the value.
         """
-        assert isinstance(id_list, list)
-        response = self.send_rpc_command('get_special_tasks',
-                                         {'id__in': id_list})
+        if id_list:
+            assert isinstance(id_list, list)
+            params = {
+                'id__in' : id_list
+            }
+        if host_id_list:
+            assert isinstance(host_id_list, list)
+            params = {
+                'host__in' : host_id_list
+            }
+
+        if query_start is not None and query_limit is not None:
+            params['query_start'] = query_start
+            params['query_limit'] = query_limit
+
+        if start_time_gt:
+            params['start_time'] = str(
+                datetime.utcfromtimestamp(start_time_gt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                )
+            )
+        if end_time_lt:
+            params['end_time'] = str(
+                datetime.utcfromtimestamp(end_time_lt).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                )
+            )
+        response = self.send_rpc_command('get_special_tasks', params)
         return self.decode_response(response, 'result')
 
     def get_host_queue_entries(self, job_id):

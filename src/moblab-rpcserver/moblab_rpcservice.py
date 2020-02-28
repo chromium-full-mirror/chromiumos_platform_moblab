@@ -286,3 +286,56 @@ class MoblabService(object):
 
     def get_associated_duts(self, job_id):
         return self.afe_connector.get_host_queue_entries(job_id=job_id)
+
+    def get_num_dut_tasks(self, ip, start_time_gt, end_time_lt):
+        """
+            Given a DUT's IP, returns a number of tasks (e.g. repairs, reverifies)
+            associated with that DUT.
+        Args:
+            ip (string): DUT IP.
+            start_time_gt(int): Seconds timestamp of a filter to DUT tasks by
+                start time.
+            end_time_lt(int): Seconds timestamp of a filter to DUT tasks by
+                end time.
+        Returns:
+            Returns number of task associated with DUT which match query parameters.
+            If DUT itself is not found, returns -1.
+        """
+        try:
+            dut_id = self.afe_connector.get_connected_devices(hostname=ip)[0]['id']
+            return self.afe_connector.get_num_special_tasks(
+                host_id_list=[dut_id],
+                start_time_gt=start_time_gt,
+                end_time_lt=end_time_lt
+            )
+        except (IndexError, KeyError):
+            logging.error('Unable to find AFE id for dut: {}'.format(dut_id))
+            return -1
+
+    def get_dut_tasks(self, ip, query_start, query_limit, start_time_gt, end_time_lt):
+        """
+            Given a DUT's IP, returns a list of tasks (e.g. repairs, reverifies)
+            requested for that DUT. If DUT is not found, returns None.
+        Args:
+            query_start(int): Parameter specifying index on where to start when
+                returning paged results.
+            query_limit(int): Upper limit on number of results to return.
+            start_time_gt(int): Seconds timestamp of a filter to DUT tasks by
+                start time.
+            end_time_lt(int): Seconds timestamp of a filter to DUT tasks by
+                end time.
+        Returns:
+            A list of dicts, each dict specifying a task associated with the
+            queried DUT. If DUT is not found returns None.
+        """
+        try:
+            dut_id = self.afe_connector.get_connected_devices(hostname=ip)[0]['id']
+            return self.afe_connector.get_special_tasks(
+                host_id_list=[dut_id],
+                query_start=query_start,
+                query_limit=query_limit,
+                start_time_gt=start_time_gt,
+                end_time_lt=end_time_lt,
+            )
+        except (IndexError, KeyError):
+            logging.error('Unable to find AFE id for dut: {}'.format(dut_id))
