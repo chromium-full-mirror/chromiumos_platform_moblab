@@ -12,7 +12,7 @@ RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
 
 ######################################################################
 
-FROM debian:stretch as run
+FROM debian:buster as run
 
 COPY --from=source /devserver-src /devserver-src
 COPY --from=source /chromite /chromite
@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install setuptools
-RUN pip install --no-cache-dir -r devserver-requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 ENV DESTDIR="/"
 
 WORKDIR /
@@ -41,12 +41,10 @@ COPY apache2 /bin
 
 WORKDIR /devserver-src/dev-util
 
-RUN mkdir -p "${DESTDIR}/usr/bin"
-RUN mkdir -p "${DESTDIR}/usr/lib/devserver"
-RUN mkdir -p "${DESTDIR}/usr/lib/devserver/dut-scripts"
+RUN install -m 0755 host/start_devserver "/usr/bin"
 
-RUN install -m 0755 host/start_devserver "${DESTDIR}/usr/bin"
-RUN install -m 0755 devserver.py strip_package.py "${DESTDIR}/usr/lib/devserver"
+RUN mkdir /usr/lib/devserver
+RUN install -m 0755 devserver.py strip_package.py /usr/lib/devserver
 RUN install -m 0644  \
         autoupdate.py \
         builder.py \
@@ -54,17 +52,11 @@ RUN install -m 0644  \
         health_checker.py \
         nebraska/nebraska.py \
         setup_chromite.py \
-        "${DESTDIR}/usr/lib/devserver"
-
-RUN install -m 0755 stateful_update "${DESTDIR}/usr/bin"
+        /usr/lib/devserver
 
 RUN mkdir /static
 RUN install -m 0644 stateful_update /static
 RUN install -m 0644 quick-provision/quick-provision /static
-RUN install -m 0644 stateful_update \
-         "${DESTDIR}/usr/lib/devserver/dut-scripts"
-RUN install -m 0644 quick-provision/quick-provision \
-       "${DESTDIR}/usr/lib/devserver/dut-scripts"
 
 EXPOSE 8080
 
