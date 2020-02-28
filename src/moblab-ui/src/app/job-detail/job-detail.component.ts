@@ -7,7 +7,7 @@ import {FormControl, Validators} from '@angular/forms';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {Job} from '../services/moblabrpc_pb';
 import {normalizeTimestamp} from '../utils/date';
-import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
+import {INT_TO_JOBSTATUS, INT_TO_PRIORITY} from '../utils/proto_helpers';
 import {forbiddenIDValidator} from '../utils/validators';
 import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
 

@@ -20,20 +20,24 @@ import { CommonModule } from "@angular/common";
 
 @NgModule({
   imports: [
-    MatCheckboxModule,
-    MatTabsModule,
+    CommonModule
+    FlexLayoutModule,
     FormsModule,
-    MatCardModule,
     MatButtonModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatSortModule,
     MatTableModule,
+    MatTabsModule,
     PipesModule,
     ServicesModule,
-    FlexLayoutModule,
     WidgetsModule,
-    MatSortModule,
-    CommonModule
   ],
-  declarations: [ManageDutsComponent, EnrollmentComponent, FirmwareComponent],
+  declarations: [
+    EnrollmentComponent,
+    FirmwareComponent
+    ManageDutsComponent,
+  ],
   exports: [ManageDutsComponent]
 })
 export class ManageDutsModule {}
