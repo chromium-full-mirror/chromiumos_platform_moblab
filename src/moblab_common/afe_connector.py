@@ -372,17 +372,51 @@ class AFEConnector(object):
         response = self.send_rpc_command('get_special_tasks', params)
         return self.decode_response(response, 'result')
 
-    def get_host_queue_entries(self, job_id):
+    def get_num_host_queue_entries(self, job_id=None, host_id=None):
+        """
+            Get number of HQE's that match given query parameters.
+        Args:
+            job_id(int): The job id which HQEs associated with.
+            host_id(int): The AFE DUT id which HQEs associated with.
+        Returns:
+            An integer.
+        """
+        params = {}
+
+        if job_id:
+            params['id'] = job_id
+        if host_id:
+            params['host'] = host_id
+
+        response = self.send_rpc_command('get_num_host_queue_entries', params)
+        return self.decode_response(response, 'result')
+
+    def get_host_queue_entries(self, job_id=None, host_id=None,
+        query_start=None, query_limit=None):
         """Get attributes of all HQE of given id.
 
         Args:
-            job_id: The job id which HQEs associated with.
+            job_id(int): The job id which HQEs associated with.
+            host_id(int): The AFE DUT id which HQEs associated with.
+            query_start(int): Parameter specifying index on where to start when
+                returning paged results.
+            query_limit(int): Upper limit on number of results to return.
 
         Returns:
             A list of dict. The dict is the information about the HQE.
         """
-        response = self.send_rpc_command('get_host_queue_entries',
-                                         {'id': job_id})
+        params = {}
+
+        if query_start is not None and query_limit is not None:
+            params['query_start'] = query_start
+            params['query_limit'] = query_limit
+
+        if job_id:
+            params['id'] = job_id
+        if host_id:
+            params['host'] = host_id
+
+        response = self.send_rpc_command('get_host_queue_entries', params)
         return self.decode_response(response, 'result')
 
     def run_suite(self,

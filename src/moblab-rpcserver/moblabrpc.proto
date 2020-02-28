@@ -242,7 +242,7 @@ message Job {
   repeated Execution associated_duts = 15;
 }
 
-// NEXT_TAG = 10
+// NEXT_TAG = 11
 message GetNumJobsRequest {
   string id_filter = 3;
   string name_filter = 4;
@@ -253,6 +253,7 @@ message GetNumJobsRequest {
   // Relationship denotes whether a job is a parent/suite or child.
   Job.Relationship rel_filter = 8;
   string parent_id_filter = 9;
+  string dut_hostname_filter = 10;
 }
 
 // NEXT_TAG = 2
@@ -260,7 +261,7 @@ message GetNumJobsResponse {
   int32 num_jobs = 1;
 }
 
-// NEXT_TAG = 10
+// NEXT_TAG = 11
 message GetJobsRequest {
   int32 query_start = 1;
   int32 query_limit = 2;
@@ -273,6 +274,7 @@ message GetJobsRequest {
   // Relationship denotes whether a job is a parent/suite or child.
   Job.Relationship rel_filter = 8;
   string parent_id_filter = 9;
+  string dut_hostname_filter = 10;
 }
 
 // NEXT_TAG = 2

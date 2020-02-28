@@ -254,11 +254,27 @@ class MoblabService(object):
                      not_yet_run=False,
                      running=False,
                      finished=False,
-                     parent_id_filter=None):
-
-        return self.afe_connector.get_num_jobs(
-            id_filter, name_filter, created_time_lt, created_time_gt, sub,
-            suite, not_yet_run, running, finished, parent_id_filter)
+                     parent_id_filter=None,
+                     dut_hostname_filter=None):
+        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because the
+        # Autotest backend that we currently invoke only accepts dut_filter on
+        # calls to get_num_host_queue_entries, not get_num_jobs. Even though,
+        # in both cases, the results are packaged and returned as jobs. This may
+        # change when Autotest RPC itself is refactored.
+        if dut_hostname_filter:
+            try:
+                dut_id = self.afe_connector.get_connected_devices(
+                hostname=dut_hostname_filter)[0]['id']
+            except (IndexError, KeyError):
+                logging.error('Unable to find AFE id for dut: {}'.format(dut_hostname_filter))
+                return
+            return self.afe_connector.get_num_host_queue_entries(
+                host_id=dut_id
+            )
+        else:
+            return self.afe_connector.get_num_jobs(
+                id_filter, name_filter, created_time_lt, created_time_gt, sub,
+                suite, not_yet_run, running, finished, parent_id_filter)
 
     def get_jobs(self,
                  query_start,
@@ -272,11 +288,38 @@ class MoblabService(object):
                  not_yet_run=False,
                  running=False,
                  finished=False,
-                 parent_id_filter=None):
-        return self.afe_connector.get_jobs(
-            query_start, query_limit, id_filter, name_filter, created_time_lt,
-            created_time_gt, sub, suite, not_yet_run, running, finished,
-            parent_id_filter)
+                 parent_id_filter=None,
+                 dut_hostname_filter=None):
+        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because the
+        # Autotest backend that we currently invoke only accepts dut_filter on
+        # calls to get_host_queue_entries, not get_jobs. Even though,
+        # in both cases, the results are packaged and returned as jobs. This may
+        # change when Autotest RPC itself is refactored.
+        if dut_hostname_filter:
+            try:
+                dut_id = self.afe_connector.get_connected_devices(
+                    hostname=dut_hostname_filter)[0]['id']
+            except (IndexError, KeyError):
+                logging.error('Unable to find AFE id for dut: {}'.format(dut_hostname_filter))
+                return
+            hqes = self.afe_connector.get_host_queue_entries(
+                host_id=dut_id,
+                query_start=query_start,
+                query_limit=query_limit,
+            )
+
+            jobs = []
+            # Extracting jobs information from HQE entries.
+            for hqe in hqes:
+                job = hqe['job']
+                job['status'] = hqe.get('status')
+                jobs.append(job)
+            return jobs
+        else:
+            return self.afe_connector.get_jobs(
+                query_start, query_limit, id_filter, name_filter,
+                created_time_lt, created_time_gt, sub, suite, not_yet_run,
+                running, finished, parent_id_filter)
 
     def get_job_details(self, job_id):
         return self.afe_connector.get_jobs_by_ids([job_id])
