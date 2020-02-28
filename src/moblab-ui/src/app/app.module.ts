@@ -1,14 +1,14 @@
-import {LayoutModule} from '@angular/cdk/layout';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {BrowserModule} from '@angular/platform-browser';
 import {CommonModule} from '@angular/common';
-import {HttpClientModule} from '@angular/common/http';
-import {NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule} from '@angular/forms';
-import {MatChipsModule} from '@angular/material/chips';
-import {MatTabsModule} from '@angular/material/tabs';
+import {HttpClientModule} from '@angular/common/http';
+import {LayoutModule} from '@angular/cdk/layout';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatChipsModule} from '@angular/material/chips';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -18,15 +18,17 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTableModule} from '@angular/material/table';
+import {MatTabsModule} from '@angular/material/tabs';
 import {MatToolbarModule} from '@angular/material/toolbar';
-import {BrowserModule} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 
+import {AdvancedSettingsComponent} from './advanced-settings/advanced-settings.component';
+import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {AppSidebarComponent} from './app-sidebar/app-sidebar.component';
-import {AppComponent} from './app.component';
 import {ConfigurationComponent} from './configuration/configuration.component';
+import {JobDetailModule} from './job-detail/job-detail.module';
 import {ManageDutsModule} from './manage-duts/manage-duts.module';
 import {MobmonitorComponent} from './mobmonitor/mobmonitor.component';
 import {MobmonitorPipe} from './mobmonitor/mobmonitor.component';
@@ -34,62 +36,60 @@ import {PipesModule} from './pipes/pipes.module';
 import {RunSuiteModule} from './run-suite/run-suite.module';
 import {ServicesModule} from './services/services.module';
 import {ViewJobsModule} from './view-jobs/view-jobs.module';
-import {JobDetailModule} from './job-detail/job-detail.module';
 import {WidgetsModule} from './widgets/widgets.module';
-import { AdvancedSettingsComponent } from './advanced-settings/advanced-settings.component';
 
 @NgModule({
    declarations: [
+      AdvancedSettingsComponent,
       AppComponent,
       AppSidebarComponent,
       ConfigurationComponent,
       MobmonitorComponent,
       MobmonitorPipe,
-      AdvancedSettingsComponent
    ],
    imports: [
-      MatSnackBarModule,
-      BrowserModule,
-      BrowserAnimationsModule,
-      ServicesModule.forRoot(),
-      MatIconModule,
-      MatListModule,
-      MatMenuModule,
-      MatSidenavModule,
-      MatToolbarModule,
-      MatCardModule,
-      BrowserAnimationsModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatButtonModule,
-      LayoutModule,
-      CommonModule,
       AppRoutingModule,
-      RouterModule,
-      MatTabsModule,
-      WidgetsModule,
-      MatTableModule,
-      MatCheckboxModule,
-      HttpClientModule,
+      BrowserAnimationsModule,
+      BrowserAnimationsModule,
+      BrowserModule,
+      CommonModule,
       FlexLayoutModule,
       FormsModule,
-      RunSuiteModule,
-      MatChipsModule,
-      MatSelectModule,
-      PipesModule,
+      HttpClientModule,
+      JobDetailModule,
+      LayoutModule,
       ManageDutsModule,
+      MatButtonModule,
+      MatCardModule,
+      MatCheckboxModule,
+      MatChipsModule,
+      MatFormFieldModule,
+      MatIconModule,
+      MatInputModule,
+      MatListModule,
+      MatMenuModule,
+      MatSelectModule,
+      MatSidenavModule,
+      MatSnackBarModule,
+      MatTableModule,
+      MatTabsModule,
+      MatToolbarModule,
+      PipesModule,
+      RouterModule,
       RunSuiteModule,
+      RunSuiteModule,
+      ServicesModule.forRoot(),
       ViewJobsModule,
-      JobDetailModule
+      WidgetsModule,
    ],
    exports: [
-      WidgetsModule,
       AppRoutingModule,
-      RouterModule,
       MatCardModule,
-      MatTableModule,
       MatMenuModule,
-      RunSuiteModule
+      MatTableModule,
+      RouterModule,
+      RunSuiteModule,
+      WidgetsModule,
    ],
    bootstrap: [
       AppComponent
