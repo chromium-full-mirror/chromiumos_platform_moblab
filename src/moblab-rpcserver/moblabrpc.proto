@@ -19,6 +19,7 @@ service MoblabRpcService {
 
   rpc list_connected_duts_firmware(ListConnectedDutsFirmwareRequest) returns (ListConnectedDutsFirmwareResponse) {}
   rpc update_duts_firmware(UpdateDutsFirmwareRequest) returns (UpdateDutsFirmwareResponse) {}
+  rpc get_dut_details(GetDutDetailsRequest) returns (GetDutDetailsResponse)  {}
 
   rpc get_num_jobs(GetNumJobsRequest) returns (GetNumJobsResponse)  {}
   rpc get_jobs(GetJobsRequest) returns (GetJobsResponse)  {}
@@ -51,7 +52,7 @@ message RunCtsSuiteResponse {
   string message = 1;
 }
 
-// NEXT_TAG = 14
+// NEXT_TAG = 16
 message ConnectedDutInfo {
   string name = 1;
   string ip = 2;
@@ -66,6 +67,9 @@ message ConnectedDutInfo {
   repeated string attributes= 11;
   repeated string pools= 12;
   string error = 13;
+  int32 current_job = 14;
+  // e.g., repairs, reverifies
+  string current_dut_task = 15;
 }
 message ListConnectedDutsRequest {
 }
@@ -126,6 +130,16 @@ message EnrollDutsRequest {
 }
 
 message EnrollDutsResponse {
+}
+
+// NEXT_TAG = 2
+message GetDutDetailsRequest {
+  string dut = 1;
+}
+
+// NEXT_TAG = 2
+message GetDutDetailsResponse {
+  ConnectedDutInfo dut_detail = 1;
 }
 
 message ListConnectedDutsFirmwareRequest {

@@ -72,26 +72,49 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                            request.model, request.pool))
         return response
 
+    def get_connected_dut_from_dict(self, dut_dict):
+        return moblabrpc_pb2.ConnectedDutInfo(
+            name=dut_dict.get('platform', ''),
+            ip=dut_dict.get('hostname', ''),
+            mac_addr='',
+            models=self.service.extract_model_from_labels(
+                dut_dict.get('labels', [])),
+            build_targets=self.service.extract_build_target_from_labels(
+                dut_dict.get('labels', [])),
+            pools=self.service.extract_pool_from_labels(
+                dut_dict.get('labels', [])),
+            status=dut_dict['status'],
+            is_enrolled=True,
+            labels=dut_dict.get('labels', []),
+            attributes=dut_dict.get('attributes', []),
+            error=dut_dict.get('error', '')
+        )
+
     def list_connected_duts(self, _request, _context):
         response = moblabrpc_pb2.ListConnectedDutsResponse()
         duts = self.service.list_duts()
         for dut in duts:
-            dut_info = moblabrpc_pb2.ConnectedDutInfo(
-                name=dut.get('platform', ''),
-                ip=dut.get('hostname', ''),
-                mac_addr='',
-                models=self.service.extract_model_from_labels(
-                    dut.get('labels', [])),
-                build_targets=self.service.extract_build_target_from_labels(
-                    dut.get('labels', [])),
-                pools=self.service.extract_pool_from_labels(
-                    dut.get('labels', [])),
-                status=dut['status'],
-                is_enrolled=True,
-                labels=dut.get('labels', []),
-                attributes=dut.get('attributes', []),
-                error=dut.get('error', ''))
+            dut_info = self.get_connected_dut_from_dict(dut)
             response.duts.extend([dut_info])
+        return response
+
+    def get_dut_details(self, request, _context):
+        try:
+            dut = self.service.get_dut_details(request.dut)[0]
+        except IndexError:
+            error_msg = 'Unable to find DUT: {}'.format(request.dut)
+            logging.error(error_msg)
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            _context.set_details(error_msg)
+        else:
+            response = moblabrpc_pb2.GetDutDetailsResponse(
+                dut_detail=self.get_connected_dut_from_dict(dut)
+            )
+            if 'current_job' in dut:
+                response.dut_detail.current_job = dut['current_job'] if dut['current_job'] else 0
+            if 'current_special_task' in dut:
+                response.dut_detail.current_dut_task =\
+                    dut['current_special_task'] if dut['current_special_task'] else ''
         return response
 
     def list_test_jobs(self, request, context):

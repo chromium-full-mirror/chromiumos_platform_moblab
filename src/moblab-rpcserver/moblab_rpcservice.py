@@ -221,6 +221,9 @@ class MoblabService(object):
         duts = self.dut_connector.get_connected_dut_firmware()
         return duts
 
+    def get_dut_details(self, dut):
+        return self.afe_connector.get_connected_devices(dut, get_current_jobs=True)
+
     def update_duts_firmware(self, ip_addresses):
         self.dut_connector.update_firmware(ip_addresses)
 

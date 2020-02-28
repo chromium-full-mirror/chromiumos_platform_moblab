@@ -112,15 +112,27 @@ class AFEConnector(object):
 
         return result
 
-    def get_connected_devices(self):
-        """Get the list of hosts (DUT's) configured in AFE.
+    def get_connected_devices(self, hostname=None, get_current_jobs=False):
+        """
+            Get the list of hosts (DUT's) configured in AFE ( which match
+            the specified hostname, if provided).
+
+            hostname (string): ip for which to return information.
+            get_current_jobs (bool): return info about curently executing
+                jobs and special tasks on DUT.
 
         Returns:
-            list: host
-            host is a dict of information about the host, such
+            A list of dictionaries, each dict with host information.
         """
+        params = {}
 
-        response = self.send_rpc_command('get_hosts')
+        if hostname:
+            params['hostname'] = hostname
+
+        if get_current_jobs:
+            params['include_current_job'] = 'true'
+
+        response = self.send_rpc_command('get_hosts', params)
         return self.decode_response(response, 'result')
 
     def get_num_jobs(self,
