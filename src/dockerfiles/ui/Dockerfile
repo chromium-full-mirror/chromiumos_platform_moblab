@@ -6,7 +6,7 @@
 #############
 
 # base image
-FROM node:8.12.0 as build
+FROM node:12 as build
 
 # install chrome for protractor tests
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -14,7 +14,7 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get update && apt-get install -yq google-chrome-stable
 
 # install protoc
-RUN apt-get install -yq unzip 
+RUN apt-get install -yq unzip
 ENV PROTOBUF_URL https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
 RUN curl -L -o /tmp/protobuf.zip $PROTOBUF_URL
 WORKDIR /tmp/
@@ -30,15 +30,12 @@ WORKDIR /app
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
-# install and cache app dependencies
-COPY moblab-ui/package.json /app/package.json
-RUN npm install
-RUN npm install -g @angular/cli@7.3.9
 
+# install and cache app dependencies
 # add app
 COPY ./moblab-ui /app
 COPY ./moblab-rpcserver/moblabrpc.proto /app
-
+RUN npm install
 RUN protoc -I=/app --js_out=import_style=commonjs:/app/src/app/services --grpc-web_out=import_style=commonjs+dts,mode=grpcwebtext:/app/src/app/services /app/moblabrpc.proto
 
 # run tests
