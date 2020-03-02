@@ -6,6 +6,8 @@
 
 BASE_URL=gcr.io/chromeos-partner-moblab
 
+all: rpcserver compose autotest db devserver ui
+
 rpcserver: export DOCKER_BUILDKIT=1
 rpcserver:
 	docker build -t ${BASE_URL}/moblab-rpcserver:${USER} -f \
@@ -14,6 +16,7 @@ rpcserver:
 
 compose: export DOCKER_BUILDKIT=1
 compose:
+	cp dockerfiles/compose/docker-compose.yaml.${USER} dockerfiles/compose/docker-compose.yaml
 	docker build -t ${BASE_URL}/moblab-compose:${USER} \
 		-f dockerfiles/compose/Dockerfile dockerfiles/compose
 	docker push ${BASE_URL}/moblab-compose:${USER}
@@ -29,5 +32,27 @@ db:
 	docker build -t ${BASE_URL}/moblab-db:${USER} \
 		-f dockerfiles/db/Dockerfile dockerfiles/db
 	docker push ${BASE_URL}/moblab-db:${USER}
+	docker build -t ${BASE_URL}/moblab-db-init:${USER} \
+		-f dockerfiles/db/Dockerfile.db_init dockerfiles/db
+	docker push ${BASE_URL}/moblab-db-init:${USER}
 
-.PHONY: rpcserver compose db autotest
+devserver: export DOCKER_BUILDKIT=1
+devserver:
+	docker build -t ${BASE_URL}/devserver:${USER} \
+		-f dockerfiles/devserver/Dockerfile dockerfiles/devserver
+	docker push ${BASE_URL}/devserver:${USER}
+
+ui: export DOCKER_BUILDKIT=1
+ui:
+	docker build -t ${BASE_URL}/moblab-ui:${USER} \
+		-f dockerfiles/ui/Dockerfile .
+	docker push ${BASE_URL}/moblab-ui:${USER}
+
+ssp: export DOCKER_BUILDKIT=1
+ssp:
+	docker build -t ${BASE_URL}/moblab-ssp:${USER} \
+		-f dockerfiles/ssp/Dockerfile dockerfiles/ssp 
+	docker push ${BASE_URL}/moblab-ssp:${USER}
+
+
+.PHONY: rpcserver compose db autotest db devserver ui
