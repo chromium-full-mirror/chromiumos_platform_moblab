@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,21 +11,21 @@ set -x
 passwd=moblab_db_passwd
 PASSWD_STRING="-p${passwd}"
 
-while ! mysqladmin ping -uroot -p${passwd} --silent; do
+while ! mysqladmin status -h db -uroot -p${passwd} --silent; do
     sleep 1
 done
 
 # In the case we have updated to a new version of the db - upgrade
-mysqlcheck --no-defaults --fix-db-names --fix-table-names -uroot \
+mysqlcheck -h db --no-defaults --fix-db-names --fix-table-names -uroot \
      "${PASSWD_STRING}" --all-databases -v
-mysqlcheck --no-defaults --check-upgrade --auto-repair -uroot \
+mysqlcheck -h db --no-defaults --check-upgrade --auto-repair -uroot \
      "${PASSWD_STRING}" --all-databases -v
 
 # Create autotest database
 clobberdb=
 DATABASE_LOOKUP_SQL="SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA \
     WHERE SCHEMA_NAME = 'chromeos_autotest_db'"
-EXISTING_DATABASE=$(mysql -u root "${PASSWD_STRING}" \
+EXISTING_DATABASE=$(mysql -h db -u root "${PASSWD_STRING}" \
     -e "${DATABASE_LOOKUP_SQL}")
 if [ -z "${EXISTING_DATABASE}" ]; then
   clobberdb=true
@@ -37,6 +38,6 @@ SQL_COMMAND="drop database if exists chromeos_autotest_db; \
     FLUSH PRIVILEGES;"
 
 if [ "${clobberdb}" = true ]; then
-  mysql -u root "${PASSWD_STRING}" -e "${SQL_COMMAND}"
+  mysql -h db -u root "${PASSWD_STRING}" -e "${SQL_COMMAND}"
 fi
 
