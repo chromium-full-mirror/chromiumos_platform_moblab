@@ -1,13 +1,16 @@
+import { catchError } from 'rxjs/operators';
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
-import { Subscription } from 'rxjs/Subscription';
-import { timer } from 'rxjs/observable/timer';
-import 'rxjs/add/operator/catch';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
-import { Subscriber } from 'rxjs/Subscriber';
-import { MatDialog } from '@angular/material';
+import {
+  Observable,
+  Subject,
+  Subscription,
+  timer,
+  Subscriber,
+  throwError,
+  of
+} from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { HealthCheck } from '../shared/health-check';
 import { Action } from '../shared/action';
 import { ActionInfo } from '../shared/action-info';
@@ -18,10 +21,8 @@ import { Diagnostic } from '../shared/diagnostic';
 import { DiagnosticResult } from '../shared/diagnostic-result';
 import { RunDiagnosticParams } from '../shared/run-diagnostic-params';
 
-
 @Injectable()
 export class MobmonitorRpcService implements OnDestroy {
-
   // subject to bind GetStatus updates to
   private getStatusSubject: Subject<Array<HealthCheck>>;
 
@@ -59,9 +60,11 @@ export class MobmonitorRpcService implements OnDestroy {
     // updates and not need to issue extra HTTP requests
     this.getStatusSubject = new Subject<Array<HealthCheck>>();
     this.timerSub = timer(50, 1000).subscribe(() => {
-      if (this.repairing) { return; }
-      this.http.get('/GetStatus')
-        .subscribe(data => {
+      if (this.repairing) {
+        return;
+      }
+      this.http.get('/GetStatus').subscribe(
+        data => {
           this.getStatusSubject.next(this.handleGetStatus(data));
         },
         error => {
@@ -69,7 +72,8 @@ export class MobmonitorRpcService implements OnDestroy {
           // to emit any new events if the connection is re-established
           // so just handle the error on the subscriber side by detecting
           // a time delta
-        });
+        }
+      );
     });
   }
 
@@ -87,7 +91,7 @@ export class MobmonitorRpcService implements OnDestroy {
       const errors = [];
       const warnings = [];
       for (const check of service.healthchecks) {
-        const pushTo = (check.health) ? warnings : errors;
+        const pushTo = check.health ? warnings : errors;
         pushTo.push({
           name: check.name,
           description: check.description,
@@ -124,22 +128,23 @@ export class MobmonitorRpcService implements OnDestroy {
   runAction(action: Action): Observable<boolean> {
     return new Observable(observer => {
       this.repairing = true;
-      this.getActionInfo(action).subscribe(actionInfo => {
-        // does this action require parameters
-        // compare the actionInfo.params to an empty object
-        if (JSON.stringify(actionInfo.params) !== JSON.stringify({})) {
-          // need to open a params dialog, then run the action
-          this.runActionWithParams(action, actionInfo, observer);
-        } else {
-          this.runActionWithoutParams(action, actionInfo, observer);
+      this.getActionInfo(action).subscribe(
+        actionInfo => {
+          // does this action require parameters
+          // compare the actionInfo.params to an empty object
+          if (JSON.stringify(actionInfo.params) !== JSON.stringify({})) {
+            // need to open a params dialog, then run the action
+            this.runActionWithParams(action, actionInfo, observer);
+          } else {
+            this.runActionWithoutParams(action, actionInfo, observer);
+          }
+        },
+        error => {
+          this.repairing = false;
+          observer.error(wrapError(error, 'Failed to gather action info'));
         }
-      },
-      error => {
-        this.repairing = false;
-        observer.error(wrapError(error, 'Failed to gather action info'));
-      });
+      );
     });
-
   }
 
   /**
@@ -150,36 +155,41 @@ export class MobmonitorRpcService implements OnDestroy {
   @param observer subscriber that should be emitted to when action is run
     or determined to not be run
   */
-  private runActionWithParams(action: Action, actionInfo: ActionInfo,
-        observer: Subscriber<boolean>) {
+  private runActionWithParams(
+    action: Action,
+    actionInfo: ActionInfo,
+    observer: Subscriber<boolean>
+  ) {
     const dialogRef = this.dialog.open(ActionsParamDialogComponent, {
       width: '600px',
       data: actionInfo
     });
 
-    dialogRef.afterClosed().subscribe(params => {
-      // user entered all required params into the dialog
-      if (params) {
-        const repairServiceInfo: RepairServiceInfo = {
-          service: action.service,
-          healthcheck: action.healthCheck,
-          action: action.action,
-          params: params
-        };
-        this.repairService(repairServiceInfo).subscribe(() => {
+    dialogRef.afterClosed().subscribe(
+      params => {
+        // user entered all required params into the dialog
+        if (params) {
+          const repairServiceInfo: RepairServiceInfo = {
+            service: action.service,
+            healthcheck: action.healthCheck,
+            action: action.action,
+            params: params
+          };
+          this.repairService(repairServiceInfo).subscribe(() => {
+            this.repairing = false;
+            observer.next(true);
+          });
+          // user did not finish the form
+        } else {
           this.repairing = false;
-          observer.next(true);
-        });
-      // user did not finish the form
-      } else {
+          observer.next(false);
+        }
+      },
+      error => {
         this.repairing = false;
-        observer.next(false);
+        observer.error(wrapError(error, 'Failed to repair service'));
       }
-    },
-    error => {
-      this.repairing = false;
-      observer.error(wrapError(error, 'Failed to repair service'));
-    });
+    );
   }
 
   /**
@@ -190,22 +200,27 @@ export class MobmonitorRpcService implements OnDestroy {
   @param observer subscriber that should be emitted to when action is run
     or determined to not be run
   */
-  private runActionWithoutParams(action: Action, actionInfo: ActionInfo,
-      observer: Subscriber<boolean>) {
+  private runActionWithoutParams(
+    action: Action,
+    actionInfo: ActionInfo,
+    observer: Subscriber<boolean>
+  ) {
     const repairServiceInfo: RepairServiceInfo = {
       service: action.service,
       healthcheck: action.healthCheck,
       action: action.action,
       params: {}
     };
-    this.repairService(repairServiceInfo).subscribe(() => {
-      this.repairing = false;
-      observer.next(true);
-    },
-    error => {
-      this.repairing = false;
-      observer.error(wrapError(error, 'Failed to repair service'));
-    });
+    this.repairService(repairServiceInfo).subscribe(
+      () => {
+        this.repairing = false;
+        observer.next(true);
+      },
+      error => {
+        this.repairing = false;
+        observer.error(wrapError(error, 'Failed to repair service'));
+      }
+    );
   }
 
   /**
@@ -219,7 +234,7 @@ export class MobmonitorRpcService implements OnDestroy {
       .set('action', action.action)
       .set('healthcheck', action.healthCheck)
       .set('service', action.service);
-    return this.http.get<ActionInfo>('/ActionInfo', {params: params});
+    return this.http.get<ActionInfo>('/ActionInfo', { params: params });
   }
 
   /**
@@ -235,35 +250,43 @@ export class MobmonitorRpcService implements OnDestroy {
       .set('healthcheck', repairServiceInfo.healthcheck)
       .set('service', repairServiceInfo.service)
       .set('params', JSON.stringify(repairServiceInfo.params));
-    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
-    return this.http.post('/RepairService', params.toString(), {headers});
-  }
-
-  /**
-  Run http request to list all available diagnostics
-
-  @return observable that resolves to a list of supported Diagnostics
-  */
-  listDiagnostics(): Observable<Diagnostic[]> {
-    return this.http.get<Diagnostic[]>('/ListDiagnosticChecks').catch(err => {
-      return new ErrorObservable(wrapError(err, 'Failed to list diagnostics'));
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
     });
+    return this.http.post('/RepairService', params.toString(), { headers });
   }
 
   /**
-  Run http request to run a diagnostic
-  @param diagnosticParams params indicating which diagnostic to run
-  @return observable resolving to a DiagnosticResult containing the data gathered from the diagnostic
-  */
-  runDiagnostic(diagnosticParams: RunDiagnosticParams): Observable<DiagnosticResult> {
+   * Run http request to list all available diagnostics
+   *
+   * @return observable that resolves to a list of supported Diagnostics
+   */
+  listDiagnostics(): Observable<Diagnostic[]> {
+    // TODO - figure out how to catch errors from get calls.
+    return this.http.get<Diagnostic[]>('/ListDiagnosticChecks');
+  }
+
+  /**
+   * Run http request to run a diagnostic
+   * @param diagnosticParams params indicating which diagnostic to run
+   * @return observable resolving to a DiagnosticResult containing the data gathered from the diagnostic
+   */
+  runDiagnostic(
+    diagnosticParams: RunDiagnosticParams
+  ): Observable<DiagnosticResult> {
     const params = new HttpParams()
       .set('category', diagnosticParams.category)
       .set('name', diagnosticParams.name);
-    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
-    return this.http.post<DiagnosticResult>('/RunDiagnosticCheck', params.toString(), {headers})
-      .catch(err => {
-        return new ErrorObservable(wrapError(err, 'Failed to run diagnostic')) ;
-      });
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+    // TODO - figure out how to catch errors from get calls.
+    return this.http.post<DiagnosticResult>(
+      '/RunDiagnosticCheck',
+      params.toString(),
+      {
+        headers
+      }
+    );
   }
-
 }

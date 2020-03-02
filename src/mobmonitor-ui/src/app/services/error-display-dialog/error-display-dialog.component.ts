@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { MobmonitorError } from '../../shared/mobmonitor-error';
 
@@ -9,14 +9,14 @@ import { MobmonitorError } from '../../shared/mobmonitor-error';
   styleUrls: ['./error-display-dialog.component.scss']
 })
 export class ErrorDisplayDialogComponent implements OnInit {
+  bodyText: string;
 
-  private bodyText: string;
-
-  constructor(public dialogRef: MatDialogRef<ErrorDisplayDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: MobmonitorError) { }
+  constructor(
+    public dialogRef: MatDialogRef<ErrorDisplayDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: MobmonitorError
+  ) {}
 
   ngOnInit() {
     this.bodyText = JSON.stringify(this.data.body);
   }
-
 }

@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-import { interval } from 'rxjs/observable/interval';
+import { Subscription, interval } from 'rxjs';
 
 import { MobmonitorRpcService } from './services/mobmonitor-rpc.service';
 import { HealthCheck } from './shared/health-check';
@@ -11,16 +10,15 @@ import { HealthCheck } from './shared/health-check';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
-
   // time of last successful update
-  private updated: Date;
+  updated: Date;
 
   // indicating that UI has lost connection to the backend
   // essentially in an error state until regular updates begin
   // streaming in
-  private lostConnection = false;
+  lostConnection = false;
 
-  private intervalSub: Subscription;
+  intervalSub: Subscription;
 
   constructor(private rpc: MobmonitorRpcService) {}
 
@@ -47,5 +45,4 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.intervalSub.unsubscribe();
   }
-
 }
