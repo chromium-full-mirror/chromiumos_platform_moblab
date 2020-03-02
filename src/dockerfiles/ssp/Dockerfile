@@ -60,7 +60,7 @@ RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-USER moblab:moblab
+RUN usermod -aG sudo moblab
 ENV USER=moblab
 
 # Unlike lxc containers which you can start and will keep running on their own,
