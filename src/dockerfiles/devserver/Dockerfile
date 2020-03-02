@@ -9,7 +9,8 @@ RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 
 WORKDIR /devserver-src
 RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
-
+RUN ls /devserver-src/dev-util
+RUN sed -i 's#python2#python3#g' /devserver-src/dev-util/devserver.py
 ######################################################################
 
 FROM debian:buster as run
@@ -19,19 +20,23 @@ COPY --from=source /chromite /chromite
 
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-    curl python2.7 python3 python-pip sudo gcc python-dev procps \
-    bzip2 unzip sudo
+    curl python3 sudo gcc python-dev procps \
+    bzip2 unzip sudo ca-certificates python3-distutils python3-dev
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
 
 COPY requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install setuptools
-RUN pip install --no-cache-dir -r requirements.txt
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN python3 get-pip.py
+RUN python -m pip install --upgrade pip
+RUN python -m pip install --no-cache-dir -r requirements.txt
 ENV DESTDIR="/"
 
 WORKDIR /
 COPY setup_chromite.py /
-RUN pip install --upgrade pip
-RUN pip install setuptools
+RUN python -m pip install setuptools
 RUN python /setup_chromite.py install
 
 # Devserver requires an apache server to be running for a good health check
