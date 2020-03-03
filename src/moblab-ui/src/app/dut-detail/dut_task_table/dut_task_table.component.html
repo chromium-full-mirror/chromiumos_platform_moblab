@@ -1,0 +1,49 @@
+<table mat-table [dataSource]="tasks"
+       multiTemplateDataRows
+       id="dut-task-table"
+       class="mat-elevation-z8">
+
+  <ng-container matColumnDef="task">
+    <th mat-header-cell *matHeaderCellDef>
+      <div>Task</div>
+    </th>
+    <td mat-cell *matCellDef="let element">
+      <span>{{element.getTask()}}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="time_started">
+    <th mat-header-cell *matHeaderCellDef>
+      <div>Start Time</div>
+    </th>
+    <td mat-cell *matCellDef="let element">
+      <span>{{normalizeTimestamp(element.getStartedTimeUtc())}}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="time_finished">
+    <th mat-header-cell *matHeaderCellDef>
+      <div>Finish Time</div>
+    </th>
+    <td mat-cell *matCellDef="let element">
+      <span>{{normalizeTimestamp(element.getFinishedTimeUtc())}}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef>
+      <div>Status</div>
+    </th>
+    <td mat-cell *matCellDef="let element">
+      <span>{{getStatusFromNum(element.getStatus())}}</span>
+    </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+<div>
+  <mat-paginator [length]="numDutTasks"
+                 [pageSize]="pageSize"
+                 [pageSizeOptions]=[10,25,100,1000]>
+  </mat-paginator>
+</div>
