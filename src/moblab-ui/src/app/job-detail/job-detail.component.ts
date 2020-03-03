@@ -5,7 +5,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {FormControl, Validators} from '@angular/forms';
 
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
-import {Job} from '../services/moblabrpc_pb';
+import {Job, Execution} from '../services/moblabrpc_pb';
 import {normalizeTimestamp} from '../utils/date';
 import {INT_TO_JOBSTATUS, INT_TO_PRIORITY} from '../utils/proto_helpers';
 import {forbiddenIDValidator} from '../utils/validators';
@@ -30,7 +30,8 @@ export class JobDetailComponent {
     [Validators.minLength(1), forbiddenIDValidator]
   );
   jobInfoTable = new MatTableDataSource<KeyVal>();
-  jobHistoryTable = new MatTableDataSource<Job.Execution>();
+  jobHistoryTable = new MatTableDataSource<Execution>();
+  associatedDutsTable = new MatTableDataSource<Execution>();
   serverControlFile = '';
 
   normalizeTimestamp = normalizeTimestamp;
@@ -38,6 +39,7 @@ export class JobDetailComponent {
   jobDetailsTableColumns: string[] = ['key', 'value'];
   jobHistoryTableColumns: string[] = ['job_id', 'name', 'dut', 'start_time',
     'end_time', 'time_used', 'status'];
+  associatedDutsTableColumns: string[] = ['dut', 'dut_status', 'status'];
 
   constructor(
     private readonly moblabGrpcService: MoblabGrpcService,
@@ -104,7 +106,9 @@ export class JobDetailComponent {
 
     this.jobInfoTable = new MatTableDataSource<KeyVal>(jobInfoRows);
     this.jobHistoryTable =
-      new MatTableDataSource<Job.Execution>(job.getExecutionHistoryList());
+      new MatTableDataSource<Execution>(job.getExecutionHistoryList());
+    this.associatedDutsTable =
+      new MatTableDataSource<Execution>(job.getAssociatedDutsList());
     this.serverControlFile = job.getServerControlFile();
   }
 

@@ -267,7 +267,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             _context.set_details(error_msg)
         else:
             execution_history = [
-                moblabrpc_pb2.Job.Execution(
+                moblabrpc_pb2.Execution(
                     name=item.get('name', ''),
                     job_id=item.get('id', ''),
                     status=self._extract_status(item.get('status', None)),
@@ -280,6 +280,26 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     dut=item.get('hostname', ''))
                 for item in self.service.get_job_history(request.id)
             ]
+
+            associated_duts = []
+            for item in self.service.get_associated_duts(request.id):
+                try:
+                    dut = item['host']['hostname']
+                except (KeyError, TypeError):
+                    dut = 'unknown'
+
+                try:
+                    dut_status = item['host']['status']
+                except (KeyError, TypeError):
+                    dut_status = ''
+
+                status = self._extract_status(item['status'])
+                associated_duts.append(moblabrpc_pb2.Execution(
+                        dut=dut,
+                        dut_status=dut_status,
+                        status=status
+                    )
+                )
 
             response = moblabrpc_pb2.GetJobDetailsResponse(
                 job_detail=moblabrpc_pb2.Job(
@@ -297,7 +317,10 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     timeout=self._convert_timedelta_to_miliseconds(
                         minutes=job.get('timeout_mins', '')),
                     test_retries=job.get('test_retry', None),
-                    execution_history=execution_history))
+                    execution_history=execution_history,
+                    associated_duts=associated_duts
+                )
+            )
         return response
 
 
