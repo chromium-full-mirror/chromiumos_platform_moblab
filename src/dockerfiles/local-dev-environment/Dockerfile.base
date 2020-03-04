@@ -1,0 +1,49 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+FROM node:12-buster as base
+
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
+    https://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg |\
+    apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    docker.io \
+    git-core \
+    git-gui \
+    gitk \
+    gnupg \
+    google-cloud-sdk \
+    python3 \
+    sudo \
+    vim \
+    vim-gtk
+
+# Install chrome
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub |\
+    apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ \
+    stable main" >> /etc/apt/sources.list.d/google.list'
+RUN apt-get update && apt-get install -yq google-chrome-stable
+
+# Install protoc
+RUN apt-get install -yq unzip
+ENV PROTOBUF_URL https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
+RUN curl -L -o /tmp/protobuf.zip $PROTOBUF_URL
+WORKDIR /tmp/
+RUN unzip protobuf.zip
+RUN cp bin/protoc /usr/local/bin
+
+RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web \
+    https://github.com/grpc/grpc-web/releases/download/1.0.6/protoc-gen-grpc-web-1.0.6-linux-x86_64
+RUN chmod uog+x /usr/local/bin/protoc-gen-grpc-web
+
+COPY get_source.sh /usr/local/bin
+COPY entry.sh /usr/local/bin
+RUN chmod uog+rx /usr/local/bin/get_source.sh
+RUN chmod uog+rx /usr/local/bin/entry.sh
