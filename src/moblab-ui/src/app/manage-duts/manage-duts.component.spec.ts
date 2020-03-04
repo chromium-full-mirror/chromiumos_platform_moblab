@@ -29,10 +29,10 @@ describe('ManageDutsComponent', () => {
         MatTableModule,
         MatTabsModule,
         PipesModule,
-        WidgetsModule
+        WidgetsModule,
       ],
       declarations: [
-        EnrollmentComponent
+        EnrollmentComponent,
         FirmwareComponent,
         ManageDutsComponent,
       ]}).compileComponents();
