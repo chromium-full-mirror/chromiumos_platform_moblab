@@ -17,12 +17,6 @@ from autotest_lib.scheduler import email_manager, pidfile_monitor
 from autotest_lib.scheduler import scheduler_config
 from autotest_lib.server import autoserv_utils
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
-
 _parser_path = os.path.join(drones.AUTOTEST_INSTALL_DIR, 'tko', 'parse')
 
 
@@ -124,23 +118,12 @@ class SelfThrottledPostJobTask(PostJobTask):
     REVIVE_NOTIFICATION_THRESHOLD = 0.80
 
     @classmethod
-    def _gauge_metrics(cls):
-        """Report to monarch the number of running processes."""
-        m = metrics.Gauge('chromeos/autotest/scheduler/postjob_tasks')
-        m.set(cls._num_running_processes, fields={'task_name': cls.__name__})
-
-
-    @classmethod
     def _increment_running_processes(cls):
         cls._num_running_processes += 1
-        cls._gauge_metrics()
-
 
     @classmethod
     def _decrement_running_processes(cls):
         cls._num_running_processes -= 1
-        cls._gauge_metrics()
-
 
     @classmethod
     def _max_processes(cls):
@@ -272,8 +255,6 @@ class GatherLogsTask(PostJobTask):
                     not final_success or num_tests_failed > 0))
         self._reboot_hosts(final_success, num_tests_failed, reset_after_failure)
         if reset_after_failure:
-            m = metrics.Counter('chromeos/autotest/scheduler/postjob_tasks/'
-                                'reset_after_failure')
             m.increment(fields={'autoserv_process_success': final_success,
                                 'num_tests_failed': num_tests_failed > 0})
             self._reset_after_failure()

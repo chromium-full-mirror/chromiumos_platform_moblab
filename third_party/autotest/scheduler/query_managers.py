@@ -20,11 +20,6 @@ from autotest_lib.server.cros.dynamic_suite import constants
 from autotest_lib.scheduler import scheduler_models
 from autotest_lib.scheduler import scheduler_lib
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
 
 _job_timer_name = 'chromeos/autotest/scheduler/job_query_durations/%s'
 class AFEJobQueryManager(object):
@@ -34,8 +29,6 @@ class AFEJobQueryManager(object):
     hostless_query = 'host_id IS NULL AND meta_host IS NULL'
 
 
-    @metrics.SecondsTimerDecorator(
-            _job_timer_name % 'get_pending_queue_entries')
     def get_pending_queue_entries(self, only_hostless=False):
         """
         Fetch a list of new host queue entries.
@@ -115,8 +108,6 @@ class AFEJobQueryManager(object):
             where=query, order_by=sort_order))
 
 
-    @metrics.SecondsTimerDecorator(
-            _job_timer_name % 'get_prioritized_special_tasks')
     def get_prioritized_special_tasks(self, only_tasks_with_leased_hosts=False):
         """
         Returns all queued SpecialTasks prioritized for repair first, then
@@ -179,8 +170,6 @@ class AFEJobQueryManager(object):
                         'id', 'job_id', 'host_id'))
 
 
-    @metrics.SecondsTimerDecorator(
-            _job_timer_name % 'get_suite_host_assignment')
     def get_suite_host_assignment(self):
         """A helper method to get how many hosts each suite is holding.
 
@@ -204,7 +193,6 @@ class AFEJobQueryManager(object):
         return suite_host_num, hosts_to_suites
 
 
-    @metrics.SecondsTimerDecorator( _job_timer_name % 'get_min_duts_of_suites')
     def get_min_duts_of_suites(self, suite_job_ids):
         """Load suite_min_duts job keyval for a set of suites.
 
@@ -267,7 +255,6 @@ class AFEHostQueryManager(object):
         return dict((host.id, host) for host in hosts)
 
 
-    @metrics.SecondsTimerDecorator(_host_timer_name % 'get_job_acl_groups')
     def _get_job_acl_groups(self, job_ids):
         query = """
         SELECT afe_jobs.id, afe_acl_groups_users.aclgroup_id
@@ -289,7 +276,6 @@ class AFEHostQueryManager(object):
         return self._get_many2many_dict(query, job_ids)
 
 
-    @metrics.SecondsTimerDecorator(_host_timer_name % 'get_job_dependencies')
     def _get_job_dependencies(self, job_ids):
         query = """
         SELECT job_id, label_id
@@ -329,7 +315,6 @@ class AFEHostQueryManager(object):
                   "AND (afe_hosts.status IS NULL "
                           "OR afe_hosts.status = 'Ready')")
 
-    @metrics.SecondsTimerDecorator(_host_timer_name % 'set_leased')
     def set_leased(self, leased_value, **kwargs):
         """Modify the leased bit on the hosts with ids in host_ids.
 
@@ -342,7 +327,6 @@ class AFEHostQueryManager(object):
         models.Host.objects.filter(**kwargs).update(leased=leased_value)
 
 
-    @metrics.SecondsTimerDecorator(_host_timer_name % 'get_labels')
     def _get_labels(self, job_dependencies):
         """
         Calculate a dict mapping label id to label object so that we don't

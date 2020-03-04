@@ -12,12 +12,6 @@ from autotest_lib.scheduler import drones
 from autotest_lib.scheduler import scheduler_config
 from autotest_lib.scheduler import thread_lib
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
-
 # results on drones will be placed under the drone_installation_directory in a
 # directory with this name
 _DRONE_RESULTS_DIR_SUFFIX = 'results'
@@ -226,11 +220,7 @@ class DroneManager(object):
 
     def reinitialize_drones(self):
         for drone in self.get_drones():
-            with metrics.SecondsTimer(
-                    'chromeos/autotest/drone_manager/'
-                    'reinitialize_drones_duration',
-                    fields={'drone': drone.hostname}):
-                drone.call('initialize', self._results_dir)
+            drone.call('initialize', self._results_dir)
 
 
     def shutdown(self):
@@ -455,10 +445,6 @@ class DroneManager(object):
                 if info.num_processes is not None:
                     drone.active_processes += info.num_processes
 
-        metrics.Gauge('chromeos/autotest/drone/active_processes').set(
-                drone.active_processes,
-                fields={'drone_hostname': drone.hostname})
-
 
     def _check_drone_process_limit(self, drone):
         """
@@ -470,8 +456,6 @@ class DroneManager(object):
             percent = float(drone.active_processes) / drone.max_processes
         except ZeroDivisionError:
             percent = 100
-        metrics.Float('chromeos/autotest/drone/active_process_percentage'
-                      ).set(percent, fields={'drone_hostname': drone.hostname})
 
     def trigger_refresh(self):
         """Triggers a drone manager refresh.
@@ -493,9 +477,6 @@ class DroneManager(object):
                                         (drone, [str(call) for call in calls]))
             drone.queue_call('refresh', pidfile_paths)
         logging.info("Invoking drone refresh.")
-        with metrics.SecondsTimer(
-                'chromeos/autotest/drone_manager/trigger_refresh_duration'):
-            self._refresh_task_queue.execute(drones, wait=False)
 
 
     def sync_refresh(self):
@@ -516,9 +497,7 @@ class DroneManager(object):
         # drone utility interface (each call is executed and its results are
         # places in a list, but since we never couple the refresh calls with
         # any other call, this list will always contain a single dict).
-        with metrics.SecondsTimer(
-                'chromeos/autotest/drone_manager/sync_refresh_duration'):
-            all_results = self._refresh_task_queue.get_results()
+        all_results = self._refresh_task_queue.get_results()
         logging.info("Drones refreshed.")
 
         # The loop below goes through and parses pidfile contents. Pidfiles
@@ -560,14 +539,10 @@ class DroneManager(object):
 
     def refresh(self):
         """Refresh all drones."""
-        with metrics.SecondsTimer(
-                'chromeos/autotest/drone_manager/refresh_duration'):
-            self.trigger_refresh()
-            self.sync_refresh()
+        self.trigger_refresh()
+        self.sync_refresh()
 
 
-    @metrics.SecondsTimerDecorator(
-        'chromeos/autotest/drone_manager/execute_actions_duration')
     def execute_actions(self):
         """
         Called at the end of a scheduler cycle to execute all queued actions
@@ -586,8 +561,6 @@ class DroneManager(object):
             self._results_drone.execute_queued_calls()
         except error.AutoservError:
             m = 'chromeos/autotest/errors/results_repository_failed'
-            metrics.Counter(m).increment(
-                fields={'drone_hostname': self._results_drone.hostname})
             self._results_drone.clear_call_queue()
 
 

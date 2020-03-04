@@ -13,11 +13,6 @@ import common
 from autotest_lib.client.common_lib import priorities
 from autotest_lib.client.common_lib import utils
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
 
 RDB_STATS_KEY = 'rdb'
 
@@ -104,9 +99,6 @@ class RequestAccountant(object):
     in the case when the first round failed, regardless how many duts
     get_rest requests, it will not be fullfilled anyway.
     """
-
-    _host_ratio_metric = metrics.Float(
-            'chromeos/autotest/scheduler/rdb/host_acquisition_ratio')
 
 
     def __init__(self, host_requests):

@@ -15,11 +15,6 @@ from autotest_lib.client.common_lib import global_config
 from autotest_lib.scheduler import drone_manager
 from autotest_lib.scheduler import scheduler_config
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
 
 def _get_pidfile_timeout_secs():
     """@returns How long to wait for autoserv to write pidfile."""
@@ -162,8 +157,7 @@ class PidfileRunMonitor(object):
             # writing a pidfile, then it's because we killed it, and thus this
             # isn't a surprising situation.
             if not self._killed:
-                metrics.Counter('chromeos/autotest/errors/scheduler/no_pidfile'
-                                ).increment()
+                pass
             else:
                 logging.warning("%s didn't exit after SIGTERM", self.pidfile_id)
             self.on_lost_process()

@@ -29,11 +29,6 @@ from autotest_lib.scheduler import rdb_utils
 from autotest_lib.server import constants
 from autotest_lib.utils import labellib
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
 
 class RDBHost(object):
     """A python host object representing a django model for the host."""
@@ -255,9 +250,6 @@ class RDBClientHostWrapper(RDBHost):
         if pool in constants.Pools.MANAGED_POOLS:
             pool = 'managed:' + pool
 
-        metrics.String(self._HOST_POOL_METRIC,
-                       reset_after=True).set(pool, fields=fields)
-
 
     def set_status(self, status):
         """Proxy for setting the status of a host via the rdb.
@@ -273,8 +265,6 @@ class RDBClientHostWrapper(RDBHost):
         # As each device switches state, indicate that it is not in any
         # other state.  This allows Monarch queries to avoid double counting
         # when additional points are added by the Window Align operation.
-        host_status_metric = metrics.Boolean(
-                self._HOST_STATUS_METRIC, reset_after=True)
         for s in rdb_models.AbstractHostModel.Status.names:
             fields['status'] = s
             host_status_metric.set(s == status, fields=fields)
@@ -289,17 +279,6 @@ class RDBClientHostWrapper(RDBHost):
                           manual intervention.
         @param timestamp  Time that the status was recorded.
         """
-        fields = self.get_metric_fields()
-        metrics.Boolean(
-                self._HOST_WORKING_METRIC, reset_after=True).set(
-                        working, fields=fields)
-        metrics.Boolean(self._BOARD_SHARD_METRIC, reset_after=True).set(
-                True,
-                fields={
-                        'board': self.board,
-                        'model': self._model,
-                },
-        )
         self.record_pool(fields)
 
 

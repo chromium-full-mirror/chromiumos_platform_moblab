@@ -63,14 +63,6 @@ import common
 from autotest_lib.client.common_lib import utils
 from autotest_lib.frontend import setup_django_environment
 
-# This import needs to come earlier to avoid using autotest's version of
-# httplib2, which is out of date.
-try:
-    from chromite.lib import metrics
-    from chromite.lib import ts_mon_config
-except ImportError:
-    metrics = utils.metrics_mock
-    ts_mon_config = utils.metrics_mock
 
 from autotest_lib.client.common_lib import global_config
 from autotest_lib.scheduler import email_manager
@@ -88,7 +80,6 @@ _tick_pause_sec = global_config.global_config.get_config_value(
         'SCHEDULER', 'tick_pause_sec', type=int, default=5)
 _monitor_db_host_acquisition = global_config.global_config.get_config_value(
         'SCHEDULER', 'inline_host_acquisition', type=bool, default=True)
-_METRICS_PREFIX = 'chromeos/autotest/host_scheduler'
 
 class SuiteRecorder(object):
     """Recording the host assignment for suites.
@@ -314,8 +305,6 @@ class HostScheduler(BaseHostScheduler):
         self._suite_recorder.record_assignment(queue_entry)
 
 
-    @metrics.SecondsTimerDecorator(
-            '%s/schedule_jobs_duration' % _METRICS_PREFIX)
     def _schedule_jobs(self):
         """Schedule new jobs against hosts."""
 
@@ -329,17 +318,11 @@ class HostScheduler(BaseHostScheduler):
                 self.schedule_host_job(acquisition.host, acquisition.job)
                 self._record_host_assignment(acquisition.host, acquisition.job)
                 new_jobs_with_hosts += 1
-            metrics.Counter('%s/new_jobs_with_hosts' % _METRICS_PREFIX
-                            ).increment_by(new_jobs_with_hosts)
 
         num_jobs_without_hosts = (len(unverified_host_jobs) -
                                   new_jobs_with_hosts)
-        metrics.Gauge('%s/current_jobs_without_hosts' % _METRICS_PREFIX
-                      ).set(num_jobs_without_hosts)
 
-        metrics.Counter('%s/tick' % _METRICS_PREFIX).increment()
 
-    @metrics.SecondsTimerDecorator('%s/lease_hosts_duration' % _METRICS_PREFIX)
     def _lease_hosts_of_frontend_tasks(self):
         """Lease hosts of tasks scheduled through the frontend."""
         # We really don't need to get all the special tasks here, just the ones
@@ -378,7 +361,6 @@ class HostScheduler(BaseHostScheduler):
         return rdb_lib.acquire_hosts(host_jobs, suite_min_duts)
 
 
-    @metrics.SecondsTimerDecorator('%s/tick_time' % _METRICS_PREFIX)
     def tick(self):
         logging.info('Calling new tick.')
         logging.info('Leasing hosts for frontend tasks.')
@@ -455,13 +437,6 @@ def parse_arguments(argv):
                  'At the expiry of this time, the process will exit '
                  'gracefully.',
     )
-    parser.add_argument(
-            '--metrics-file',
-            help='If provided, drop metrics to this local file instead of '
-                 'reporting to ts_mon',
-            type=str,
-            default=None,
-    )
     options = parser.parse_args(argv)
 
     return options
@@ -485,34 +460,28 @@ def main():
 
         initialize(options.testing)
 
-        with ts_mon_config.SetupTsMonGlobalState(
-                'autotest_host_scheduler',
-                indirect=True,
-                debug_file=options.metrics_file,
-        ):
-            metrics.Counter('%s/start' % _METRICS_PREFIX).increment()
-            process_start_time = time.time()
-            host_scheduler = HostScheduler()
-            minimum_tick_sec = global_config.global_config.get_config_value(
-                    'SCHEDULER', 'host_scheduler_minimum_tick_sec', type=float)
-            while not _shutdown:
-                if _lifetime_expired(options.lifetime_hours,
-                                     process_start_time):
-                    break
-                start = time.time()
-                host_scheduler.tick()
-                curr_tick_sec = time.time() - start
-                if (minimum_tick_sec > curr_tick_sec):
-                    time.sleep(minimum_tick_sec - curr_tick_sec)
-                else:
-                    time.sleep(0.0001)
-            logging.info('Shutdown request recieved. Bye! Bye!')
+    
+        process_start_time = time.time()
+        host_scheduler = HostScheduler()
+        minimum_tick_sec = global_config.global_config.get_config_value(
+                'SCHEDULER', 'host_scheduler_minimum_tick_sec', type=float)
+        while not _shutdown:
+            if _lifetime_expired(options.lifetime_hours,
+                                 process_start_time):
+                break
+            start = time.time()
+            host_scheduler.tick()
+            curr_tick_sec = time.time() - start
+            if (minimum_tick_sec > curr_tick_sec):
+                time.sleep(minimum_tick_sec - curr_tick_sec)
+            else:
+                time.sleep(0.0001)
+        logging.info('Shutdown request recieved. Bye! Bye!')
     except server_manager_utils.ServerActionError:
         # This error is expected when the server is not in primary status
         # for host-scheduler role. Thus do not send email for it.
         raise
     except Exception:
-        metrics.Counter('%s/uncaught_exception' % _METRICS_PREFIX).increment()
         raise
     finally:
         email_manager.manager.send_queued_emails()

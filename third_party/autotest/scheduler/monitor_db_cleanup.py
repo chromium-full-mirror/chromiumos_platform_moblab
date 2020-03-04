@@ -11,11 +11,6 @@ from autotest_lib.scheduler import scheduler_config
 from autotest_lib.client.common_lib import global_config
 from autotest_lib.client.common_lib import host_protections
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
 
 _METRICS_PREFIX = 'chromeos/autotest/scheduler/cleanup'
 
@@ -64,7 +59,6 @@ class UserCleanup(PeriodicCleanup):
         self._last_reverify_time = time.time()
 
 
-    @metrics.SecondsTimerDecorator(_METRICS_PREFIX + '/user/durations')
     def _cleanup(self):
         logging.info('Running periodic cleanup')
         self._abort_timed_out_jobs()
@@ -284,7 +278,6 @@ class TwentyFourHourUpkeep(PeriodicCleanup):
             db, clean_interval_minutes, run_at_initialize=run_at_initialize)
 
 
-    @metrics.SecondsTimerDecorator(_METRICS_PREFIX + '/daily/durations')
     def _cleanup(self):
         logging.info('Running 24 hour clean up')
         self._check_for_uncleanable_db_inconsistencies()
@@ -385,9 +378,7 @@ def _report_detected_errors(metric_name, count, fields={}):
     @param count: How many "errors" were fixed this cycle.
     @param fields: Optional fields to include with the metric.
     """
-    m = '%s/errors_recovered/%s' % (_METRICS_PREFIX, metric_name)
-    metrics.Counter(m).increment_by(count, fields=fields)
-
+    pass
 
 def _report_detected_errors(metric_name, gauge, fields={}):
     """Reports a gauge metric for errors detected
@@ -396,9 +387,7 @@ def _report_detected_errors(metric_name, gauge, fields={}):
     @param gauge: Outstanding number of unrecoverable errors of this type.
     @param fields: Optional fields to include with the metric.
     """
-    m = '%s/errors_detected/%s' % (_METRICS_PREFIX, metric_name)
-    metrics.Gauge(m).set(gauge, fields=fields)
-
+    pass
 
 @contextlib.contextmanager
 def _cleanup_warning_banner(banner, error_count=None):

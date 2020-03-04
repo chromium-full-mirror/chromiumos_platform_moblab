@@ -19,12 +19,6 @@ from autotest_lib.scheduler import rdb_requests
 from autotest_lib.scheduler import rdb_utils
 from autotest_lib.server import utils
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
-
 _rdb_timer_name = 'chromeos/autotest/scheduler/rdb/durations/%s'
 _is_master = not utils.is_shard()
 
@@ -249,7 +243,6 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
         self.request_accountant = None
 
 
-    @metrics.SecondsTimerDecorator(_rdb_timer_name % 'lease_hosts')
     def lease_hosts(self, hosts):
         """Leases a list of hosts.
 
@@ -381,7 +374,6 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
         return hosts[attempt_lease_hosts:]
 
 
-    @metrics.SecondsTimerDecorator(_rdb_timer_name % 'batch_acquire_hosts')
     def batch_acquire_hosts(self, host_requests):
         """Acquire hosts for a list of requests.
 
@@ -395,8 +387,6 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
 
         logging.debug('Processing %s host acquisition requests',
                       len(host_requests))
-        metrics.Gauge('chromeos/autotest/scheduler/pending_host_acq_requests'
-                      ).set(len(host_requests))
 
         self.request_accountant = rdb_utils.RequestAccountant(host_requests)
         # First pass tries to satisfy min_duts for each suite.
@@ -420,7 +410,6 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
                       self.leased_hosts_count, self.unsatisfied_requests)
 
 
-    @metrics.SecondsTimerDecorator(_rdb_timer_name % 'batch_validate_hosts')
     def batch_validate_hosts(self, requests):
         """Validate requests with hosts.
 

@@ -4,11 +4,6 @@
 
 import logging
 
-from chromite.lib import metrics
-
-
-DRONE_ACCESSIBILITY_METRIC = metrics.Boolean(
-    'chromeos/autotest/scheduler/drone_accessibility')
 
 class DroneTaskQueueException(Exception):
     """Generic task queue exception."""

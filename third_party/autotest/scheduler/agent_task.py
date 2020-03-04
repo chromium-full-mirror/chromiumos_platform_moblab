@@ -125,11 +125,6 @@ from autotest_lib.scheduler import scheduler_models
 from autotest_lib.server import autoserv_utils
 from autotest_lib.server import system_utils
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
-
 
 CONFIG = global_config.global_config
 AUTOSERV_NICE_LEVEL = 10
@@ -349,9 +344,6 @@ class AgentTask(object):
 
     def _check_paired_results_exist(self):
         if not self._paired_with_monitor().has_process():
-            metrics.Counter(
-                'chromeos/autotest/errors/scheduler/no_paired_results'
-            ).increment()
             self.finished(False)
             return False
         return True
@@ -597,9 +589,6 @@ class SpecialAgentTask(AgentTask, TaskWithJobKeyvals):
     TASK_TYPE = None
     host = None
     queue_entry = None
-    _COUNT_METRIC = 'chromeos/autotest/scheduler/special_task_count'
-    _DUT_METRIC = 'chromeos/autotest/scheduler/special_task_by_dut'
-    _DURATION_METRIC = 'chromeos/autotest/scheduler/special_task_durations'
 
 
     def __init__(self, task, extra_command_args):
@@ -692,31 +681,8 @@ class SpecialAgentTask(AgentTask, TaskWithJobKeyvals):
 
     def epilog(self):
         super(SpecialAgentTask, self).epilog()
-        self._emit_special_task_status_metric()
 
 
-    def _emit_special_task_status_metric(self):
-        """Increments an accumulator associated with this special task."""
-        fields = {'type': self.TASK_TYPE,
-                  'success': bool(self.success),
-                  'board': str(self.host.board),
-                  'milestone': self._milestone}
-        metrics.Counter(self._COUNT_METRIC).increment(
-            fields=fields)
-
-        if (self.task.time_finished and self.task.time_started):
-            duration = (self.task.time_finished -
-                        self.task.time_started).total_seconds()
-            metrics.SecondsDistribution(self._DURATION_METRIC).add(
-                duration, fields=fields)
-
-        dut_fields = {
-            'type': self.TASK_TYPE,
-            'success': bool(self.success),
-            'board': str(self.host.board),
-            'dut_host_name': self.host.hostname
-        }
-        metrics.Counter(self._DUT_METRIC).increment(fields=dut_fields)
 
     # TODO(milleral): http://crbug.com/268607
     # All this used to be a part of _fail_queue_entry.  The

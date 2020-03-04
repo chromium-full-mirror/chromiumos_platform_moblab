@@ -39,14 +39,6 @@ from autotest_lib.scheduler import scheduler_lib
 from autotest_lib.server import afe_urls
 from autotest_lib.server.cros import provision
 
-try:
-    from chromite.lib import metrics
-    from chromite.lib import cloud_trace
-except ImportError:
-    metrics = utils.metrics_mock
-    import mock
-    cloud_trace = mock.Mock()
-
 
 _notify_email_statuses = []
 _base_url = None
@@ -484,8 +476,6 @@ class HostQueueEntry(DBObject):
                'active', 'complete', 'deleted', 'execution_subdir',
                'atomic_group_id', 'aborted', 'started_on', 'finished_on')
 
-    _COMPLETION_COUNT_METRIC = metrics.Counter(
-        'chromeos/autotest/scheduler/hqe_completion_count')
 
     def __init__(self, id=None, row=None, job_row=None, **kwargs):
         """
@@ -700,23 +690,7 @@ class HostQueueEntry(DBObject):
 
     def _log_trace(self):
         """Emits a Cloud Trace span for the HQE's duration."""
-        if self.started_on and self.finished_on:
-            span = cloud_trace.Span('HQE', spanId='0',
-                                    traceId=hqe_trace_id(self.id))
-            # TODO(phobbs) make a .SetStart() and .SetEnd() helper method
-            span.startTime = types.Timestamp()
-            span.startTime.FromDatetime(self.started_on)
-            span.endTime = types.Timestamp()
-            span.endTime.FromDatetime(self.finished_on)
-            # TODO(phobbs) any LogSpan calls need to be wrapped in this for
-            # safety during tests, so this should be caught within LogSpan.
-            try:
-                cloud_trace.LogSpan(span)
-            except IOError as e:
-                if e.errno == errno.ENOENT:
-                    logging.warning('Error writing to cloud trace results '
-                                    'directory: %s', e)
-
+        pass
 
     def _get_status_email_contents(self, status, summary=None, hostname=None):
         """

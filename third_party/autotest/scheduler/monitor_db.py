@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python2.7
 
 #pylint: disable=C0111
 
@@ -37,13 +37,6 @@ from autotest_lib.server import autoserv_utils
 from autotest_lib.server import system_utils
 from autotest_lib.server import utils as server_utils
 from autotest_lib.site_utils import server_manager_utils
-
-try:
-    from chromite.lib import metrics
-    from chromite.lib import ts_mon_config
-except ImportError:
-    metrics = utils.metrics_mock
-    ts_mon_config = utils.metrics_mock
 
 
 PID_FILE_PREFIX = 'monitor_db'
@@ -114,13 +107,6 @@ def main_without_exception_handling():
                       'test and should use dummy autoserv and no parsing',
                       action='store_true')
     parser.add_option(
-            '--metrics-file',
-            help='If provided, drop metrics to this local file instead of '
-                 'reporting to ts_mon',
-            type=str,
-            default=None,
-    )
-    parser.add_option(
             '--lifetime-hours',
             type=float,
             default=None,
@@ -169,41 +155,35 @@ def main_without_exception_handling():
         global _testing_mode
         _testing_mode = True
 
-    with ts_mon_config.SetupTsMonGlobalState('autotest_scheduler',
-                                             indirect=True,
-                                             debug_file=options.metrics_file):
-      try:
-          metrics.Counter('chromeos/autotest/scheduler/start').increment()
-          process_start_time = time.time()
-          initialize()
-          dispatcher = Dispatcher()
-          dispatcher.initialize(recover_hosts=options.recover_hosts)
-          minimum_tick_sec = global_config.global_config.get_config_value(
-                  scheduler_config.CONFIG_SECTION, 'minimum_tick_sec', type=float)
+    try:
+        process_start_time = time.time()
+        initialize()
+        dispatcher = Dispatcher()
+        dispatcher.initialize(recover_hosts=options.recover_hosts)
+        minimum_tick_sec = global_config.global_config.get_config_value(
+                scheduler_config.CONFIG_SECTION, 'minimum_tick_sec', type=float)
 
-          # TODO(crbug.com/837680): Force creating the current user.
-          # This is a dirty hack to work around a race; see bug.
-          models.User.current_user()
+        # TODO(crbug.com/837680): Force creating the current user.
+        # This is a dirty hack to work around a race; see bug.
+        models.User.current_user()
 
-          while not _shutdown:
-              if _lifetime_expired(options.lifetime_hours, process_start_time):
-                  break
+        while not _shutdown:
+            if _lifetime_expired(options.lifetime_hours, process_start_time):
+                break
 
-              start = time.time()
-              dispatcher.tick()
-              curr_tick_sec = time.time() - start
-              if minimum_tick_sec > curr_tick_sec:
-                  time.sleep(minimum_tick_sec - curr_tick_sec)
-              else:
-                  time.sleep(0.0001)
-      except server_manager_utils.ServerActionError as e:
-          # This error is expected when the server is not in primary status
-          # for scheduler role. Thus do not send email for it.
-          logging.exception(e)
-      except Exception:
-          logging.exception('Uncaught exception, terminating monitor_db.')
-          metrics.Counter('chromeos/autotest/scheduler/uncaught_exception'
-                          ).increment()
+            start = time.time()
+            dispatcher.tick()
+            curr_tick_sec = time.time() - start
+            if minimum_tick_sec > curr_tick_sec:
+                time.sleep(minimum_tick_sec - curr_tick_sec)
+            else:
+                time.sleep(0.0001)
+    except server_manager_utils.ServerActionError as e:
+        # This error is expected when the server is not in primary status
+        # for scheduler role. Thus do not send email for it.
+        logging.exception(e)
+    except Exception:
+        logging.exception('Uncaught exception, terminating monitor_db.')
 
     email_manager.manager.send_queued_emails()
     _drone_manager.shutdown()
@@ -358,80 +338,52 @@ class Dispatcher(object):
             self._recover_hosts()
 
 
-    # TODO(pprabhu) Drop this metric once tick_times has been verified.
-    @metrics.SecondsTimerDecorator(
-            'chromeos/autotest/scheduler/tick_durations/tick')
     def tick(self):
         """
         This is an altered version of tick() where we keep track of when each
         major step begins so we can try to figure out where we are using most
         of the tick time.
         """
-        with metrics.RuntimeBreakdownTimer(
-            'chromeos/autotest/scheduler/tick_times') as breakdown_timer:
-            self._log_tick_msg('New tick')
-            system_utils.DroneCache.refresh()
+        system_utils.DroneCache.refresh()
 
-            with breakdown_timer.Step('trigger_refresh'):
-                self._log_tick_msg('Starting _drone_manager.trigger_refresh')
-                _drone_manager.trigger_refresh()
-            with breakdown_timer.Step('schedule_running_host_queue_entries'):
-                self._schedule_running_host_queue_entries()
-            with breakdown_timer.Step('schedule_special_tasks'):
-                self._schedule_special_tasks()
-            with breakdown_timer.Step('schedule_new_jobs'):
-                self._schedule_new_jobs()
-            with breakdown_timer.Step('gather_tick_metrics'):
-                self._gather_tick_metrics()
-            with breakdown_timer.Step('sync_refresh'):
-                self._log_tick_msg('Starting _drone_manager.sync_refresh')
-                _drone_manager.sync_refresh()
-            if luciferlib.is_lucifer_enabled():
-                with breakdown_timer.Step('send_to_lucifer'):
-                    self._send_to_lucifer()
-            # _run_cleanup must be called between drone_manager.sync_refresh,
-            # and drone_manager.execute_actions, as sync_refresh will clear the
-            # calls queued in drones. Therefore, any action that calls
-            # drone.queue_call to add calls to the drone._calls, should be after
-            # drone refresh is completed and before
-            # drone_manager.execute_actions at the end of the tick.
-            with breakdown_timer.Step('run_cleanup'):
-                self._run_cleanup()
-            with breakdown_timer.Step('find_aborting'):
-                self._find_aborting()
-            with breakdown_timer.Step('find_aborted_special_tasks'):
-                self._find_aborted_special_tasks()
-            with breakdown_timer.Step('handle_agents'):
-                self._handle_agents()
-            with breakdown_timer.Step('host_scheduler_tick'):
-                self._log_tick_msg('Starting _host_scheduler.tick')
-                self._host_scheduler.tick()
-            with breakdown_timer.Step('drones_execute_actions'):
-                self._log_tick_msg('Starting _drone_manager.execute_actions')
-                _drone_manager.execute_actions()
-            with breakdown_timer.Step('send_queued_emails'):
-                self._log_tick_msg(
-                    'Starting email_manager.manager.send_queued_emails')
-                email_manager.manager.send_queued_emails()
-            with breakdown_timer.Step('db_reset_queries'):
-                self._log_tick_msg('Starting django.db.reset_queries')
-                django.db.reset_queries()
 
-            self._tick_count += 1
-            metrics.Counter('chromeos/autotest/scheduler/tick').increment()
+        self._log_tick_msg('Starting _drone_manager.trigger_refresh')
+        _drone_manager.trigger_refresh()
+
+        self._schedule_running_host_queue_entries()
+
+        self._schedule_special_tasks()
+
+        self._schedule_new_jobs()
+
+        self._log_tick_msg('Starting _drone_manager.sync_refresh')
+        _drone_manager.sync_refresh()
+        if luciferlib.is_lucifer_enabled():
+
+            self._send_to_lucifer()
+        # _run_cleanup must be called between drone_manager.sync_refresh,
+        # and drone_manager.execute_actions, as sync_refresh will clear the
+        # calls queued in drones. Therefore, any action that calls
+        # drone.queue_call to add calls to the drone._calls, should be after
+        # drone refresh is completed and before
+        # drone_manager.execute_actions at the end of the tick.
+        self._run_cleanup()
+        self._find_aborting()
+        self._find_aborted_special_tasks()
+        self._log_tick_msg('Starting _host_scheduler.tick')
+        self._host_scheduler.tick()
+        self._log_tick_msg('Starting _drone_manager.execute_actions')
+        _drone_manager.execute_actions()
+        self._log_tick_msg('Starting django.db.reset_queries')
+        django.db.reset_queries()
+
+        self._tick_count += 1
 
 
     @_calls_log_tick_msg
     def _run_cleanup(self):
         self._periodic_cleanup.run_cleanup_maybe()
         self._24hr_upkeep.run_cleanup_maybe()
-
-
-    def _gather_tick_metrics(self):
-        """Gather metrics during tick, after all tasks have been scheduled."""
-        metrics.Gauge(
-            'chromeos/autotest/scheduler/agent_count'
-        ).set(len(self._agents))
 
 
     def _register_agent_for_ids(self, agent_dict, object_ids, agent):
@@ -585,12 +537,6 @@ class Dispatcher(object):
             except scheduler_lib.MalformedRecordError as e:
                 logging.exception('Skipping agent task for a malformed hqe.')
                 m = 'chromeos/autotest/scheduler/skipped_malformed_hqe'
-                metrics.Counter(m).increment()
-
-        for status, count in hqe_count_by_status.iteritems():
-            metrics.Gauge(
-                'chromeos/autotest/scheduler/active_host_queue_entries'
-            ).set(count, fields={'status': status})
 
         return agent_tasks
 
@@ -606,7 +552,6 @@ class Dispatcher(object):
               logging.exception('Skipping agent task for malformed special '
                                 'task.')
               m = 'chromeos/autotest/scheduler/skipped_malformed_special_task'
-              metrics.Counter(m).increment()
         return agent_tasks
 
 
@@ -715,7 +660,6 @@ class Dispatcher(object):
 
     def _check_for_remaining_orphan_processes(self, orphans):
         m = 'chromeos/autotest/errors/unrecovered_orphan_processes'
-        metrics.Gauge(m).set(len(orphans))
 
         if not orphans:
             return
@@ -738,7 +682,6 @@ class Dispatcher(object):
                 logging.exception(
                         'Skipping agent task for malformed special task.')
                 m = 'chromeos/autotest/scheduler/skipped_malformed_special_task'
-                metrics.Counter(m).increment()
 
 
     def _check_for_unrecovered_verifying_entries(self):
@@ -797,7 +740,6 @@ class Dispatcher(object):
                 logging.exception('Skipping schedule for malformed '
                                   'special task.')
                 m = 'chromeos/autotest/scheduler/skipped_schedule_special_task'
-                metrics.Counter(m).increment()
 
 
     def _reverify_remaining_hosts(self):
@@ -931,10 +873,6 @@ class Dispatcher(object):
                 host_jobs.append(queue_entry)
                 new_jobs_need_hosts = new_jobs_need_hosts + 1
 
-        metrics.Counter(
-            'chromeos/autotest/scheduler/scheduled_jobs_hostless'
-        ).increment_by(new_hostless_jobs)
-
         if not host_jobs:
             return
 
@@ -943,9 +881,6 @@ class Dispatcher(object):
           # host_jobs. Scheduling the jobs ourselves can lead to DB corruption
           # since host_scheduler assumes it is the single process scheduling
           # host jobs.
-          metrics.Gauge(
-              'chromeos/autotest/errors/scheduler/unexpected_host_jobs').set(
-                  len(host_jobs))
           return
 
         jobs_with_hosts = self._host_scheduler.find_hosts_for_jobs(host_jobs)
@@ -953,9 +888,6 @@ class Dispatcher(object):
             self._schedule_host_job(host_assignment.host, host_assignment.job)
             new_jobs_with_hosts = new_jobs_with_hosts + 1
 
-        metrics.Counter(
-            'chromeos/autotest/scheduler/scheduled_jobs_with_hosts'
-        ).increment_by(new_jobs_with_hosts)
 
 
     @_calls_log_tick_msg
@@ -1214,16 +1146,6 @@ class Dispatcher(object):
                 self._log_extra_msg("Agent finished")
                 self.remove_agent(agent)
 
-        metrics.Counter(
-            'chromeos/autotest/scheduler/agent_processes_started'
-        ).increment_by(num_started_this_tick)
-        metrics.Counter(
-            'chromeos/autotest/scheduler/agent_processes_finished'
-        ).increment_by(num_finished_this_tick)
-        num_agent_processes = _drone_manager.total_running_processes()
-        metrics.Gauge(
-            'chromeos/autotest/scheduler/agent_processes'
-        ).set(num_agent_processes)
         logging.info('%d running processes. %d added this tick.',
                      num_agent_processes, num_started_this_tick)
 
