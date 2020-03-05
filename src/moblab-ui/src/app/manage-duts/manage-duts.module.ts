@@ -20,7 +20,7 @@ import { CommonModule } from "@angular/common";
 
 @NgModule({
   imports: [
-    CommonModule
+    CommonModule,
     FlexLayoutModule,
     FormsModule,
     MatButtonModule,
@@ -35,7 +35,7 @@ import { CommonModule } from "@angular/common";
   ],
   declarations: [
     EnrollmentComponent,
-    FirmwareComponent
+    FirmwareComponent,
     ManageDutsComponent,
   ],
   exports: [ManageDutsComponent]
