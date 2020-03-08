@@ -61,13 +61,8 @@ from chromite.lib import osutils
 
 from django.core import exceptions as django_exceptions
 
-try:
-    from suite_scheduler import config_reader
-    from suite_scheduler import skylab
-except ImportError:
-    # For unittest
-    config_reader = None
-    skylab = None
+config_reader = None
+skylab = None
 
 from autotest_lib.client.common_lib import control_data
 from autotest_lib.client.common_lib import error
