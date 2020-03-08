@@ -25,7 +25,7 @@ from autotest_lib.client.common_lib import global_config
 from autotest_lib.client.common_lib import utils
 from autotest_lib.frontend.afe import models
 from autotest_lib.scheduler import agent_task, drone_manager
-from autotest_lib.scheduler import email_manager, host_scheduler
+from autotest_lib.scheduler import host_scheduler
 from autotest_lib.scheduler import luciferlib
 from autotest_lib.scheduler import monitor_db_cleanup, prejob_task
 from autotest_lib.scheduler import postjob_task
@@ -185,7 +185,6 @@ def main_without_exception_handling():
     except Exception:
         logging.exception('Uncaught exception, terminating monitor_db.')
 
-    email_manager.manager.send_queued_emails()
     _drone_manager.shutdown()
     _db_manager.disconnect()
 
@@ -344,8 +343,47 @@ class Dispatcher(object):
         major step begins so we can try to figure out where we are using most
         of the tick time.
         """
-        system_utils.DroneCache.refresh()
 
+	self._log_tick_msg('New tick')
+	system_utils.DroneCache.refresh()
+
+
+	self._log_tick_msg('Starting _drone_manager.trigger_refresh')
+	_drone_manager.trigger_refresh()
+
+	self._schedule_running_host_queue_entries()
+
+	self._schedule_special_tasks()
+
+	self._schedule_new_jobs()
+
+	self._log_tick_msg('Starting _drone_manager.sync_refresh')
+	_drone_manager.sync_refresh()
+	if luciferlib.is_lucifer_enabled():
+	    self._send_to_lucifer()
+	# _run_cleanup must be called between drone_manager.sync_refresh,
+	# and drone_manager.execute_actions, as sync_refresh will clear the
+	# calls queued in drones. Therefore, any action that calls
+	# drone.queue_call to add calls to the drone._calls, should be after
+	# drone refresh is completed and before
+	# drone_manager.execute_actions at the end of the tick.
+
+	self._run_cleanup()
+
+	self._find_aborting()
+
+	self._find_aborted_special_tasks()
+
+	self._handle_agents()
+
+	self._log_tick_msg('Starting _host_scheduler.tick')
+	self._host_scheduler.tick()
+
+	self._log_tick_msg('Starting _drone_manager.execute_actions')
+	_drone_manager.execute_actions()
+
+	self._log_tick_msg('Starting django.db.reset_queries')
+	django.db.reset_queries()
 
         self._log_tick_msg('Starting _drone_manager.trigger_refresh')
         _drone_manager.trigger_refresh()
@@ -370,6 +408,7 @@ class Dispatcher(object):
         self._run_cleanup()
         self._find_aborting()
         self._find_aborted_special_tasks()
+        self._handle_agents()
         self._log_tick_msg('Starting _host_scheduler.tick')
         self._host_scheduler.tick()
         self._log_tick_msg('Starting _drone_manager.execute_actions')
@@ -536,7 +575,6 @@ class Dispatcher(object):
                 used_queue_entries.update(agent_task.queue_entries)
             except scheduler_lib.MalformedRecordError as e:
                 logging.exception('Skipping agent task for a malformed hqe.')
-                m = 'chromeos/autotest/scheduler/skipped_malformed_hqe'
 
         return agent_tasks
 
@@ -1145,7 +1183,7 @@ class Dispatcher(object):
                 num_finished_this_tick += agent.task.num_processes
                 self._log_extra_msg("Agent finished")
                 self.remove_agent(agent)
-
+        num_agent_processes = _drone_manager.total_running_processes()
         logging.info('%d running processes. %d added this tick.',
                      num_agent_processes, num_started_this_tick)
 

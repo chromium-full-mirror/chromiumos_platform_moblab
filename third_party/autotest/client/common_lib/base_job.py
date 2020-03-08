@@ -773,7 +773,7 @@ class base_job(object):
     testdir = _job_directory.property_factory('testdir')
     site_testdir = _job_directory.property_factory('site_testdir')
     bindir = _job_directory.property_factory('bindir')
-    profdir = _job_directory.property_factory('profdir')
+    #profdir = _job_directory.property_factory('profdir')
     toolsdir = _job_directory.property_factory('toolsdir')
 
 
@@ -849,7 +849,7 @@ class base_job(object):
 
         # various client-specific directories
         self._bindir = readonly_dir(self.clientdir, 'bin')
-        self._profdir = readonly_dir(self.clientdir, 'profilers')
+        #self._profdir = readonly_dir(self.clientdir, 'profilers')
         self._pkgdir = readwrite_dir(self.clientdir, 'packages')
         self._toolsdir = readonly_dir(self.clientdir, 'tools')
 

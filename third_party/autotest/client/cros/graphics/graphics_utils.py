@@ -27,7 +27,7 @@ from autotest_lib.client.bin import test
 from autotest_lib.client.bin import utils
 from autotest_lib.client.common_lib import error
 from autotest_lib.client.common_lib import test as test_utils
-from autotest_lib.client.cros.input_playback import input_playback
+#from autotest_lib.client.cros.input_playback import input_playback
 from autotest_lib.client.cros.power import power_utils
 from functools import wraps
 
@@ -84,10 +84,11 @@ class GraphicsTest(test.test):
 
     def input_check(self):
         """Check if it exists and initialize input player."""
-        if self._player is None:
-            self._player = input_playback.InputPlayback()
-            self._player.emulate(input_type='keyboard')
-            self._player.find_connected_inputs()
+        # if self._player is None:
+        #     self._player = input_playback.InputPlayback()
+        #     self._player.emulate(input_type='keyboard')
+        #     self._player.find_connected_inputs()
+        pass
 
     def cleanup(self, *args, **kwargs):
         """Finalize state checker and report values to perf dashboard."""

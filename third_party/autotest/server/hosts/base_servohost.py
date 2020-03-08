@@ -25,7 +25,6 @@ from autotest_lib.server import afe_utils
 from autotest_lib.server import site_utils as server_utils
 from autotest_lib.server.cros import autoupdater
 from autotest_lib.server.hosts import ssh_host
-from autotest_lib.site_utils.rpm_control_system import rpm_client
 
 try:
     from chromite.lib import metrics
@@ -281,18 +280,7 @@ class BaseServoHost(ssh_host.SSHHost):
                 servo host.
 
         """
-        if self.has_power():
-            try:
-                rpm_client.set_power(self, 'CYCLE')
-            except (socket.error, xmlrpclib.Error,
-                    httplib.BadStatusLine,
-                    rpm_client.RemotePowerException) as e:
-                raise hosts.AutoservRepairError(
-                    'Power cycling %s failed: %s' % (self.hostname, e),
-                    'power_cycle_via_rpm_failed'
-                )
-        else:
-            logging.info('Skipping power cycling, not a lab device.')
+        logging.info('Skipping power cycling, not a lab device.')
 
 
     def _servo_host_reboot(self):

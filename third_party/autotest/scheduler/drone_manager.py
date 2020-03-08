@@ -477,6 +477,7 @@ class DroneManager(object):
                                         (drone, [str(call) for call in calls]))
             drone.queue_call('refresh', pidfile_paths)
         logging.info("Invoking drone refresh.")
+        self._refresh_task_queue.execute(drones, wait=False)
 
 
     def sync_refresh(self):

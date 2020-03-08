@@ -28,12 +28,11 @@ from autotest_lib.server.cros.dynamic_suite import tools, frontend_wrappers
 from autotest_lib.server.cros.servo import pdtester
 from autotest_lib.server.hosts import abstract_ssh
 from autotest_lib.server.hosts import base_label
-from autotest_lib.server.hosts import chameleon_host
+#from autotest_lib.server.hosts import chameleon_host
 from autotest_lib.server.hosts import cros_label
 from autotest_lib.server.hosts import cros_repair
 from autotest_lib.server.hosts import pdtester_host
 from autotest_lib.server.hosts import servo_host
-from autotest_lib.site_utils.rpm_control_system import rpm_client
 
 # In case cros_host is being ran via SSP on an older Moblab version with an
 # older chromite version.
@@ -198,20 +197,7 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         @param args_dict Dictionary from which to extract the chameleon
           arguments.
         """
-        if 'chameleon_host_list' in args_dict:
-            result = []
-            for chameleon in args_dict['chameleon_host_list'].split(','):
-                result.append({key: value for key,value in
-                    zip(('chameleon_host','chameleon_port'),
-                    chameleon.split(':'))})
-
-            logging.info(result)
-            return result
-        else:
-           return {key: args_dict[key]
-                for key in ('chameleon_host', 'chameleon_port')
-                if key in args_dict}
-
+        return {}
 
     @staticmethod
     def get_pdtester_arguments(args_dict):
@@ -227,9 +213,7 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         @param args_dict Dictionary from which to extract the pdtester
           arguments.
         """
-        return {key: args_dict[key]
-                for key in ('pdtester_host', 'pdtester_port')
-                if key in args_dict}
+        return {}
 
 
     @staticmethod
@@ -308,38 +292,12 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
                 dut_host_info=self.host_info_store.get()))
         self._default_power_method = None
 
-        # TODO(waihong): Do the simplication on Chameleon too.
-        if type(chameleon_args) is list:
-            self.multi_chameleon = True
-            chameleon_args_list = chameleon_args
-        else:
-            self.multi_chameleon = False
-            chameleon_args_list = [chameleon_args]
 
-        self._chameleon_host_list = [
-            chameleon_host.create_chameleon_host(
-            dut=self.hostname, chameleon_args=_args)
-            for _args in chameleon_args_list]
+ 
+        self.chameleon = None
 
-        self.chameleon_list = [_host.create_chameleon_board() for _host in
-                               self._chameleon_host_list if _host is not None]
-        if len(self.chameleon_list) > 0:
-            self.chameleon = self.chameleon_list[0]
-        else:
-            self.chameleon = None
 
-        # Add pdtester host if pdtester args were added on command line
-        self._pdtester_host = pdtester_host.create_pdtester_host(
-                pdtester_args, self._servo_host)
-
-        if self._pdtester_host:
-            self.pdtester_servo = self._pdtester_host.get_servo()
-            logging.info('pdtester_servo: %r', self.pdtester_servo)
-            # Create the pdtester object used to access the ec uart
-            self.pdtester = pdtester.PDTester(self.pdtester_servo,
-                    self._pdtester_host.get_servod_server_proxy())
-        else:
-            self.pdtester = None
+        self.pdtester = None
 
 
     def get_cros_repair_image_name(self):
@@ -785,10 +743,6 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         """Close connection."""
         super(CrosHost, self).close()
 
-        for chameleon_host in self._chameleon_host_list:
-            if chameleon_host:
-                chameleon_host.close()
-
         if self._servo_host:
             self._servo_host.close()
 
@@ -872,25 +826,6 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             return
         logging.debug('This host has recently interacted with the RPM'
                       ' Infrastructure. Ensuring power is on.')
-        try:
-            self.power_on()
-            self._remove_rpm_changed_tag()
-        except rpm_client.RemotePowerException:
-            logging.error('Failed to turn Power On for this host after '
-                          'cleanup through the RPM Infrastructure.')
-
-            battery_percentage = self.get_battery_percentage()
-            if battery_percentage and battery_percentage < 50:
-                raise
-            elif self.is_ac_connected():
-                logging.info('The device has power adapter connected and '
-                             'charging. No need to try to turn RPM on '
-                             'again.')
-                self._remove_rpm_changed_tag()
-            logging.info('Battery level is now at %s%%. The device may '
-                         'still have enough power to run test, so no '
-                         'exception will be raised.', battery_percentage)
-
 
     def _remove_rpm_changed_tag(self):
         info = self.host_info_store.get()
@@ -1539,7 +1474,6 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             if not self.has_power():
                 raise error.TestFail('DUT does not have RPM connected.')
             self._add_rpm_changed_tag()
-            rpm_client.set_power(self, state, timeout_mins=5)
 
 
     def power_off(self, power_method=None):
@@ -1586,7 +1520,6 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             self.power_on(power_method=power_method)
         else:
             self._add_rpm_changed_tag()
-            rpm_client.set_power(self, 'CYCLE')
 
 
     def get_platform_from_fwid(self):

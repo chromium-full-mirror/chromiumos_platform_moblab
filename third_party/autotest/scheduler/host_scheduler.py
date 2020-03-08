@@ -65,7 +65,6 @@ from autotest_lib.frontend import setup_django_environment
 
 
 from autotest_lib.client.common_lib import global_config
-from autotest_lib.scheduler import email_manager
 from autotest_lib.scheduler import query_managers
 from autotest_lib.scheduler import rdb_lib
 from autotest_lib.scheduler import rdb_utils
@@ -371,8 +370,6 @@ class HostScheduler(BaseHostScheduler):
         released_hosts = self._release_hosts()
         logging.info('Updating suite assignment with released hosts')
         self._suite_recorder.record_release(released_hosts)
-        logging.info('Calling email_manager.')
-        email_manager.manager.send_queued_emails()
 
 
 class DummyHostScheduler(BaseHostScheduler):
@@ -484,7 +481,6 @@ def main():
     except Exception:
         raise
     finally:
-        email_manager.manager.send_queued_emails()
         if _db_manager:
             _db_manager.disconnect()
 
