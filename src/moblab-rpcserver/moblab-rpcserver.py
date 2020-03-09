@@ -346,6 +346,77 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             )
         return response
 
+    def get_num_dut_tasks(self, request, _context):
+        """
+            Given a GetNumDutTasksRequest, returns a GetNumDutTasksResponse obj
+            which wraps an int representing the number of tasks that match filter
+            parameters of the request.
+        """
+        num_dut_tasks = self.service.get_num_dut_tasks(
+            request.ip,
+            request.start_time_gt,
+            request.end_time_lt,
+        )
+        if num_dut_tasks < 0:
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            return
+        return moblabrpc_pb2.GetNumDutTasksResponse(num_dut_tasks=num_dut_tasks)
+
+    def _extract_dut_task_status(self, dut_task_dict):
+        """
+            Given a dict representing a dut_task, will extract a status enum
+            based on the provided boolean flags.
+        """
+        try:
+            if dut_task_dict['is_aborted']:
+                return moblabrpc_pb2.DutTask.ABORTED
+            elif dut_task_dict['success']:
+                return moblabrpc_pb2.DutTask.SUCCEEDED
+            elif dut_task_dict['is_complete']:
+                return moblabrpc_pb2.DutTask.FAILED
+            elif dut_task_dict['is_active']:
+                return moblabrpc_pb2.DutTask.STARTED
+            else:
+                return moblabrpc_pb2.DutTask.REQUESTED
+        except KeyError:
+            logging.error('Failed to determine dut task status for:\n{}'
+                          .format(dut_task_dict))
+            return moblabrpc_pb2.DutTask.STATUS_NOT_SET
+
+    def get_dut_tasks(self, request, _context):
+        """
+            Given a GetDutTasksRequest, returns a GetDutTasksResponse obj which
+            wraps a list of DutTask objects that match the given filter
+            parameters.
+        """
+        dut_task_list = self.service.get_dut_tasks(
+            request.ip,
+            request.query_start,
+            request.query_limit,
+            request.start_time_gt,
+            request.end_time_lt
+        )
+
+        if dut_task_list is None:
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            return
+
+        response = moblabrpc_pb2.GetDutTasksResponse()
+        for dut_task_dict in dut_task_list:
+            dut_task = moblabrpc_pb2.DutTask(
+                id=dut_task_dict.get('id', ''),
+                task=dut_task_dict.get('task', ''),
+                status=self._extract_dut_task_status(
+                    dut_task_dict),
+                created_time_utc=self._convert_timestamp_to_utc_secs(
+                    dut_task_dict.get('time_requested', '')),
+                started_time_utc=self._convert_timestamp_to_utc_secs(
+                    dut_task_dict.get('time_started', '')),
+                finished_time_utc=self._convert_timestamp_to_utc_secs(
+                    dut_task_dict.get('time_finished', '')),
+            )
+            response.tasks.extend([dut_task])
+        return response
 
 def setup_logging(level):
     """Enable the correct level of logging.

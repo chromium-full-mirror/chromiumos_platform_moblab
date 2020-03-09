@@ -5,12 +5,17 @@ import { MoblabRpcServiceClient } from "./moblabrpc_grpc_web_pb";
 import {
   ConnectedDutFirmwareInfo,
   ConnectedDutInfo,
+  DutTask,
   EnrollDutsRequest,
   EnrollDutsResponse,
+  GetDutTasksRequest,
+  GetDutTasksResponse,
   GetJobsRequest,
   GetJobsResponse,
   GetJobDetailsRequest,
   GetJobDetailsResponse,
+  GetNumDutTasksRequest,
+  GetNumDutTasksResponse,
   GetNumJobsRequest,
   GetNumJobsResponse,
   Job,
@@ -348,6 +353,64 @@ export class MoblabGrpcService {
     );
     call.on("data", (response: UpdateDutsFirmwareResponse) => {
       callback();
+    });
+  }
+
+  getNumDutTasks(callback: (numDutTasks: number) => void,
+                 errorHandlingCallback: (errorMsg: string) => void,
+                 ip: string, start_time_gt?: number, end_time_lt?: number) {
+    const request = new GetNumDutTasksRequest();
+
+    if (start_time_gt) {
+      request.setStartTimeGt(start_time_gt);
+    }
+    if (end_time_lt) {
+      request.setEndTimeLt(end_time_lt);
+    }
+
+    const call = this.moblabRpcService.get_num_dut_tasks(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetNumDutTasksResponse) => {
+        console.log(
+          'Failed get_num_dut_actions RPC call. Request: ',
+          request,
+          'Response: ', err);
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: GetNumDutTasksResponse) => {
+      callback(response.getNumDutTasks());
+    });
+  }
+
+  getDutTasks(callback: (x: DutTask[]) => void,
+              errorHandlingCallback: (errorMsg: string) => void,
+                ip: string, queryStart: number, queryLimit: number,
+                start_time_gt?: number, end_time_lt?: number) {
+    const request = new GetDutTasksRequest();
+    request.setQueryStart(queryStart);
+    request.setQueryLimit(queryLimit);
+
+    if (start_time_gt) {
+      request.setStartTimeGt(start_time_gt);
+    }
+    if (end_time_lt) {
+      request.setEndTimeLt(end_time_lt);
+    }
+
+    const call = this.moblabRpcService.get_dut_tasks(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetDutTasksResponse) => {
+        console.log('Failed get_dut_actions RPC call. Request: ',
+          request,
+          'Response: ', err);
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: GetDutTasksResponse) => {
+      callback(response.getTasksList())
     });
   }
 }

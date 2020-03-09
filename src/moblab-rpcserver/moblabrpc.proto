@@ -19,11 +19,14 @@ service MoblabRpcService {
 
   rpc list_connected_duts_firmware(ListConnectedDutsFirmwareRequest) returns (ListConnectedDutsFirmwareResponse) {}
   rpc update_duts_firmware(UpdateDutsFirmwareRequest) returns (UpdateDutsFirmwareResponse) {}
-  rpc get_dut_details(GetDutDetailsRequest) returns (GetDutDetailsResponse)  {}
 
   rpc get_num_jobs(GetNumJobsRequest) returns (GetNumJobsResponse)  {}
   rpc get_jobs(GetJobsRequest) returns (GetJobsResponse)  {}
   rpc get_job_details(GetJobDetailsRequest) returns (GetJobDetailsResponse)  {}
+
+  rpc get_dut_details(GetDutDetailsRequest) returns (GetDutDetailsResponse)  {}
+  rpc get_num_dut_tasks(GetNumDutTasksRequest) returns (GetNumDutTasksResponse) {}
+  rpc get_dut_tasks(GetDutTasksRequest) returns (GetDutTasksResponse) {}
 }
 
 // NEXT_TAG = 2
@@ -285,4 +288,50 @@ message GetJobDetailsRequest {
 // NEXT_TAG = 2
 message GetJobDetailsResponse {
   Job job_detail = 1;
+}
+
+// NEXT_TAG = 4
+message GetNumDutTasksRequest {
+  string ip = 1;
+  int64 start_time_gt = 2;
+  int64 end_time_lt = 3;
+}
+
+// NEXT_TAG = 2
+message GetNumDutTasksResponse {
+  int32 num_dut_tasks = 1;
+}
+
+// NEXT_TAG = 6
+message GetDutTasksRequest {
+  string ip = 1;
+  int64 query_start = 2;
+  int32 query_limit = 3;
+  int64 start_time_gt = 4;
+  int64 end_time_lt = 5;
+}
+
+// NEXT_TAG = 7
+message DutTask {
+  // NEXT_TAG = 6
+  enum Status {
+    STATUS_NOT_SET = 0;
+    REQUESTED = 1;
+    STARTED = 2;
+    SUCCEEDED = 3;
+    FAILED = 4;
+    ABORTED = 5;
+  }
+
+  int32 id = 1;
+  string task = 2;
+  Status status = 3;
+  int64 created_time_utc = 4;
+  int64 started_time_utc = 5;
+  int64 finished_time_utc = 6;
+}
+
+// NEXT_TAG = 2
+message GetDutTasksResponse {
+  repeated DutTask tasks = 1;
 }
