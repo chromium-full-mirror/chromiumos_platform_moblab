@@ -382,3 +382,125 @@ class MoblabService(object):
             )
         except (IndexError, KeyError):
             logging.error('Unable to find AFE id for dut: {}'.format(dut_id))
+
+    def add_label_to_host(self, dut_hostname, label):
+        return self.afe_connector.add_label_to_host(dut_hostname, label)
+
+    def remove_label_from_host(self, dut_hostname, label):
+        return self.afe_connector.remove_label_to_host(dut_hostname, label)
+
+    def _apply_edit_to_duts(self, dut_hostnames, afe_edit_func, success_msg, *args):
+        """
+            A helper function which contains the repeated logic involved in
+            applying an edit to multiple DUTs. This logic is repeated for
+            adding and removing attributes and labels.
+        Args:
+            dut_hostnames(string[]): A list of strings representing the hostnames
+            of the DUT's to be targeted.
+            afe_edit_func((*args) => (tuple(bool,string))): A reference to a
+            function of AFEConnector which takes in *args and returns a tuple
+            containing a bool indicating success and a results message string.
+            This function does the 'edit' to the DUT's. success_msg(int): A
+            format-able string to be returned in success cases; It should have
+            exactly as many format indexes ({}) as there are arguments in *args.
+            *args: Arguments which are meant to be passed into afe_edit_func.
+        Returns:
+            String message summarizing results.
+        """
+        failures = {}
+        for dut_hostname in dut_hostnames:
+            is_success, message = afe_edit_func(dut_hostname, *args)
+            if not is_success:
+                failures[dut_hostname] = message
+
+        response_message = success_msg.format(*args) +\
+            " to {} DUTs\n".format(
+                len(dut_hostnames) - len(failures.keys())
+            )
+
+        if failures:
+            response_message += "Failures on the following DUTs:\n"
+            for dut_hostname, message in failures.iteritems():
+                response_message += "{}: {}\n".format(dut_hostname, message)
+
+        return response_message
+
+    def add_attribute_to_duts(self, dut_hostnames, key, value):
+        """
+            Adds attribute key:value to the selected dut_hostnames. Returns a message
+            summarizing how many DUT's the attribute was successfully added to
+            as well for which DUT's the addition failed.
+        Args:
+            dut_hostnames(string[]): A list of strings representing the hostnames
+            of the DUT's to be targeted.
+            key (string): Key of attribute to be added.
+            value (string): Value of attribute to be added.
+        Returns:
+            String message summarizing results.
+        """
+        return self._apply_edit_to_duts(
+            dut_hostnames,
+            # self.add_attribute_to_host,
+            self.afe_connector.add_attribute_to_host,
+            "Successfully added attribute {}:{}",
+            key,
+            value,
+        )
+
+    def remove_attribute_from_duts(self, dut_hostnames, key):
+        """
+            Removes attribute (referenced by key) from the selected dut_hostnames.
+            Returns a message summarizing how many DUT's the attribute was
+            successfully removed from as well for which DUT's the remove failed.
+        Args:
+            dut_hostnames(string[]): A list of strings representing the hostnames
+            of the DUT's to be targeted.
+            key (string): Key of attribute to be remove.
+            value (string): Value of attribute to be remove.
+        Returns:
+            String message summarizing results.
+        """
+        return self._apply_edit_to_duts(
+            dut_hostnames,
+            self.afe_connector.remove_attribute_from_host,
+            "Successfully removed attribute {}",
+            key,
+        )
+
+    def add_label_to_duts(self, dut_hostnames, label):
+        """
+            Adds label to the selected dut_hostnames. Returns a message summarizing
+            how many DUT's the label was successfully added to as well for which
+            DUT's the addition failed.
+        Args:
+            dut_hostnames(string[]): A list of strings representing the hostnames
+            of the DUT's to be targeted.
+            label (string): Label to be added.
+        Returns:
+            String message summarizing results.
+        """
+        return self._apply_edit_to_duts(
+            dut_hostnames,
+            self.afe_connector.add_label_to_host,
+            "Successfully added label {}",
+            label,
+        )
+
+    def remove_label_from_duts(self, dut_hostnames, label):
+        """
+            Remove label from the selected dut_hostnames. Returns a message summarizing
+            how many DUT's the label was successfully removed from as well as for
+            which DUT's the remove failed.
+        Args:
+            dut_hostnames(string[]): A list of strings representing the hostnames
+            of the DUT's to be targeted.
+            label (string): Label to be removed.
+        Returns:
+            String message summarizing results.
+        """
+        return self._apply_edit_to_duts(
+            dut_hostnames,
+            self.afe_connector.remove_label_from_host,
+            "Successfully removed label {}",
+            label,
+        )

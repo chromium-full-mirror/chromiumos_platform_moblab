@@ -484,3 +484,88 @@ class AFEConnector(object):
             if hostname in ip_addresses:
                 response = self.send_rpc_command('delete_host', params)
             _LOGGER.error(response)
+
+    def _package_edit_action_results(self, response):
+        """
+            Add/remove attribute label actions are currently implemented by
+            calling an AFE endpoint that will return (True, <message>)
+            on success cases, but not the same format on failure cases. This
+            logic packages failure cases in the same format.
+
+            TO-DO: This logic should disappear when the underlying AFE calls
+            are no longer relied upon.
+        """
+        if self.decode_response(response, 'result') :
+            return self.decode_response(response, 'result')
+        else:
+            return (False, self.decode_response(response, 'error')['message'])
+
+    def add_label_to_host(self, dut_hostname, label):
+        """
+            Adds label to the specified DUT.
+        Args:
+            dut_hostname(string): hostname (IP) of targeted DUT.
+            label (string): Label to be added.
+        Returns:
+            A tuple with first value indicating whether action succeeded and the
+            second value a message summarizing the result (+ reason for failure,
+            if action failed).
+        """
+        response = self.send_rpc_command('add_moblab_label', {
+            'ipaddress' : dut_hostname,
+            'label_name' : label
+        })
+        return self._package_edit_action_results(response)
+
+    def remove_label_from_host(self, dut_hostname, label):
+        """
+            Removes label from the specified DUT.
+        Args:
+            dut_hostname(string): hostname (IP) of targeted DUT.
+            label (string): Label to be removed.
+        Returns:
+            A tuple with first value indicating whether action succeeded and the
+            second value a message summarizing the result (+ reason for failure,
+            if action failed).
+        """
+        response = self.send_rpc_command('remove_moblab_label', {
+            'ipaddress' : dut_hostname,
+            'label_name' : label
+        })
+        return self._package_edit_action_results(response)
+
+    def add_attribute_to_host(self, dut_hostname, key, value):
+        """
+            Adds attribute key:value to the specified DUT.
+        Args:
+            dut_hostname(string): hostname (IP) of targeted DUT.
+            key (string): Key of attribute to be added.
+            value (string): Value of attribute to be added.
+        Returns:
+            A tuple with first value indicating whether action succeeded and the
+            second value a message summarizing the result (+ reason for failure,
+            if action failed).
+        """
+        response = self.send_rpc_command('set_host_attrib', {
+            'ipaddress' : dut_hostname,
+            'attribute' : key,
+            'value' : value
+        })
+        return self._package_edit_action_results(response)
+
+    def remove_attribute_from_host(self, dut_hostname, key):
+        """
+            Removes attribute ( referenced by key ) from the specified DUT.
+        Args:
+            dut_hostname(string): hostname (IP) of targeted DUT.
+            key (string): Key of attribute to be removed.
+        Returns:
+            A tuple with first value indicating whether action succeeded and the
+            second value a message summarizing the result (+ reason for failure,
+            if action failed).
+        """
+        response = self.send_rpc_command('delete_host_attrib', {
+            'ipaddress' : dut_hostname,
+            'attribute' : key,
+        })
+        return self._package_edit_action_results(response)

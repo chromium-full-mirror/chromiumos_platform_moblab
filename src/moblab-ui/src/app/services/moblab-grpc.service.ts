@@ -37,7 +37,16 @@ import {
   RunSuiteRequest,
   RunSuiteResponse,
   UpdateDutsFirmwareRequest,
-  UpdateDutsFirmwareResponse
+  UpdateDutsFirmwareResponse,
+  AddAttributeToDutsRequest,
+  AddAttributeToDutsResponse,
+  RemoveAttributeFromDutsResponse,
+  RemoveAttributeFromDutsRequest,
+  AddLabelToDutsRequest,
+  AddLabelToDutsResponse,
+  RemoveLabelFromDutsResponse,
+  RemoveLabelFromDutsRequest,
+
 } from "./moblabrpc_pb";
 
 @Injectable({ providedIn: "root" })
@@ -416,6 +425,76 @@ export class MoblabGrpcService {
     );
     call.on('data', (response: GetDutTasksResponse) => {
       callback(response.getTasksList())
+    });
+  }
+
+  addAttributeToDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+               dut_ips: string[], key: string, value: string) {
+    const request = new AddAttributeToDutsRequest();
+    request.setDutHostnamesList(dut_ips);
+    request.setKey(key);
+    request.setValue(value);
+
+    const call = this.moblabRpcService.add_attribute_to_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: AddAttributeToDutsResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on("data", (response: AddAttributeToDutsResponse) => {
+      callback(response.getMessage());
+    });
+  }
+
+  removeAttributeFromDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+                     dut_ips: string[], key: string) {
+    const request = new RemoveAttributeFromDutsRequest();
+    request.setDutHostnamesList(dut_ips);
+    request.setKey(key);
+    const call = this.moblabRpcService.remove_attribute_from_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: RemoveAttributeFromDutsResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on("data", (response: RemoveAttributeFromDutsResponse) => {
+      callback(response.getMessage());
+    });
+  }
+
+  addLabelToDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+               dut_ips: string[], label: string) {
+    const request = new AddLabelToDutsRequest();
+    request.setDutHostnamesList(dut_ips);
+    request.setLabel(label);
+    const call = this.moblabRpcService.add_label_to_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: AddLabelToDutsResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on("data", (response: AddLabelToDutsResponse) => {
+      callback(response.getMessage());
+    });
+  }
+
+  removeLabelFromDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+           dut_ips: string[], label: string) {
+    const request = new RemoveLabelFromDutsRequest();
+    request.setDutHostnamesList(dut_ips);
+    request.setLabel(label);
+    const call = this.moblabRpcService.remove_label_from_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: RemoveLabelFromDutsResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on("data", (response: RemoveLabelFromDutsResponse) => {
+      callback(response.getMessage());
     });
   }
 }
