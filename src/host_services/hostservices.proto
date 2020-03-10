@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package moblab;
+
+service MoblabHostService {
+  rpc get_host_identifier(HostIdentifierRequest) returns (HostIdentifierResponse) {}
+}
+
+// NEXT_TAG = 1
+message HostIdentifierRequest {
+}
+
+// NEXT_TAG = 2
+message HostIdentifierResponse {
+  string identifier = 1;
+}
