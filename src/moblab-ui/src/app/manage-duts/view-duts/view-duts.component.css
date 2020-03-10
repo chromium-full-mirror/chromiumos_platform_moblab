@@ -1,0 +1,21 @@
+.mat-table {
+  width: 100%;
+  height: 100%;
+}
+
+.filter-cb {
+  float: right;
+}
+
+.select-cb {
+  width: 15px;
+}
+
+#duts-refresh-button {
+  float:right;
+}
+
+#duts-refresh-button-wrapper {
+  width:100%;
+  display:inline-block;
+}

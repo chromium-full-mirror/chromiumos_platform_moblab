@@ -1,134 +1,37 @@
-import { SelectionModel } from "@angular/cdk/collections";
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { MoblabGrpcService } from "app/services/moblab-grpc.service";
-import { ConnectedDutInfo } from "app/services/moblabrpc_pb";
-import { MatSort, Sort } from "@angular/material/sort";
-import { MatTableDataSource } from "@angular/material/table";
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {MatTableDataSource} from '@angular/material/table';
+
+import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
+import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
+import {ViewDutsComponent} from '../view-duts/view-duts.component';
+
 
 @Component({
-  selector: "app-enrollment",
-  templateUrl: "./enrollment.component.html",
-  styleUrls: ["./enrollment.component.scss"]
+  selector: 'app-enrollment',
+  templateUrl: './enrollment.component.html',
+  styleUrls: ['./enrollment.component.scss']
 })
-// class MyMatTableDataSource<T> extends MatTableDataSource<T> {}
+
 export class EnrollmentComponent implements OnInit {
+  @ViewChild(ViewDutsComponent) dutsTableRef: ViewDutsComponent;
   duts = new MatTableDataSource<ConnectedDutInfo>();
-  displayedColumns: string[] = [
-    "select",
-    "name",
-    "buildtarget",
-    "model",
-    "status",
-    "labels"
-  ];
-
-  selectOptions: string[] = ["All Enrolled", "All Unenrolled"];
-
-  labelFilterSet: Set<string> = new Set();
-
-  filterLabels = true;
-
-  selection = new SelectionModel<ConnectedDutInfo>(true, []);
 
   constructor(private moblabGrpcService: MoblabGrpcService) {}
 
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
-
-  sortingDataAccessor(item, property) {
-    switch (property) {
-      case "name":
-        return item.getName();
-      case "buildtarget":
-        return item.getBuildTarget();
-      case "model":
-        return item.getModel();
-      case "status":
-        return item.getStatus();
-    }
-  }
-
   ngOnInit() {
-    this.getConnectedDuts();
-    this.duts.sortingDataAccessor = this.sortingDataAccessor;
-    this.duts.sort = this.sort;
-  }
-
-  getConnectedDuts() {
-    this.moblabGrpcService.listConnectedDuts(
-      (connectedDuts: ConnectedDutInfo[]) => {
-        this.duts.data = connectedDuts;
-        this.calculateLabelFilter();
-      }
-    );
-  }
-
-  toggleFilterLabels() {
-    this.filterLabels = !this.filterLabels;
-  }
-
-  calculateLabelFilter() {
-    this.labelFilterSet = new Set<string>();
-    this.duts.data.forEach(dut => {
-      dut.getLabelsList().forEach(label => {
-        if (!label.startsWith('model:') &&
-            !label.startsWith('pool:') &&
-            !label.startsWith('board:')) {
-          this.labelFilterSet.add(label);
-        }
-      });
-    });
   }
 
   enrollSelected() {
-    const ips: string[] = [];
-    this.duts.data.forEach(row => {
-      if (this.selection.isSelected(row)) {
-        ips.push(row.getIp());
-      }
-    });
-    this.moblabGrpcService.enrollDuts(ips, () => {
-      this.getConnectedDuts();
+    const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
+    this.moblabGrpcService.enrollDuts(hostnames, () => {
+      this.dutsTableRef.getConnectedDuts();
     });
   }
 
   unenrollSelected() {
-    const ips: string[] = [];
-    this.duts.data.forEach(row => {
-      if (this.selection.isSelected(row)) {
-        ips.push(row.getIp());
-      }
+    const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
+    this.moblabGrpcService.unenrollDuts(hostnames, () => {
+      this.dutsTableRef.getConnectedDuts();
     });
-    this.moblabGrpcService.unenrollDuts(ips, () => {
-      this.getConnectedDuts();
-    });
-  }
-
-  selectionChanged(event) {
-    if (event.selection == "All") {
-      this.duts.data.forEach(row => this.selection.select(row));
-    } else if (event.selection == "None") {
-      this.selection.clear();
-    } else if (event.selection == this.selectOptions[0]) {
-      this.duts.data.filter(row => {
-        if (row.getIsEnrolled()) {
-          this.selection.select(row);
-        } else {
-          this.selection.deselect(row);
-        }
-      });
-    } else if (event.selection == this.selectOptions[1]) {
-      this.duts.data.filter(row => {
-        if (!row.getIsEnrolled()) {
-          this.selection.select(row);
-        } else {
-          this.selection.deselect(row);
-        }
-      });
-    }
-  }
-
-  onSortChange(sortdetails: Sort) {
-    console.log(this.sort);
-    console.log(sortdetails);
   }
 }
