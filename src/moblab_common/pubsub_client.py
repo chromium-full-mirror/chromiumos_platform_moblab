@@ -59,10 +59,13 @@ class PubSubClient(object):
             PubSubException if failed to publish the notification.
         """
         topic_path = self.publisher.topic_path('chromeos-partner-moblab', topic)
+        fs = []
         for message in messages:
             resp = self.publisher.publish(topic_path, message['data'],
                                           **message['attributes'])
             resp.add_done_callback(callback)
+            fs.append(resp)
+        return list(map(lambda x : x.result(), fs))
 
 
 class PubSubBasedClient(object):
