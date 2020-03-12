@@ -1,6 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'mob-actions-param-dialog',
@@ -8,18 +7,18 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   styleUrls: ['./actions-param-dialog.component.scss']
 })
 export class ActionsParamDialogComponent implements OnInit {
-
   // List of parameter definitions that will generate the form
   // each definition has a name and an info
-  private paramDefinitions = [];
+  paramDefinitions = [];
 
   // model binding for the params, each param will have an entry
   // in the map
-  private params = {};
+  params = {};
 
   constructor(
     public dialogRef: MatDialogRef<ActionsParamDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any) { }
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {}
 
   ngOnInit() {
     // initialize the params model and paramDefinitions array
@@ -40,9 +39,8 @@ export class ActionsParamDialogComponent implements OnInit {
   }
 
   runAction() {
-    // close the dialog with the "return value" of the param
+    // close the dialog with the 'return value' of the param
     // values entered into the form
     this.dialogRef.close(this.params);
   }
-
 }

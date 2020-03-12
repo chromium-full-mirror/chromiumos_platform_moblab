@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { MobmonitorRpcService } from '../services/mobmonitor-rpc.service';
 import { ErrorDisplayService } from '../services/error-display.service';
 import { Diagnostic } from '../shared/diagnostic';
 import { DiagnosticResult } from '../shared/diagnostic-result';
-
 
 @Component({
   selector: 'mob-diagnostics',
@@ -13,58 +12,66 @@ import { DiagnosticResult } from '../shared/diagnostic-result';
   styleUrls: ['./diagnostics.component.scss']
 })
 export class DiagnosticsComponent implements OnInit {
-
   // list of diagnostic definitions
-  private diagnostics: Diagnostic[] = [];
+  diagnostics: Diagnostic[] = [];
 
   // indicates whether a diagnostic defined by a diagnosticKey is
   // currently running, used for UI indicators
-  private diagnosticRunning: {[key: string]: boolean} = {};
+  private diagnosticRunning: { [key: string]: boolean } = {};
 
   // holds the results of running a diagnostic, grouped by diagnosticKey
-  private diagnosticResult: {[key: string]: DiagnosticResult} = {};
+  private diagnosticResult: { [key: string]: DiagnosticResult } = {};
 
   // whether user has chosen to hide a completed diagnostic, key is diagnosticKey
-  private resultHidden: {[key: string]: boolean} = {};
+  private resultHidden: { [key: string]: boolean } = {};
 
-  constructor(private rpc: MobmonitorRpcService, public snackBar: MatSnackBar,
-      private errorDisplay: ErrorDisplayService) { }
+  constructor(
+    private rpc: MobmonitorRpcService,
+    public snackBar: MatSnackBar,
+    private errorDisplay: ErrorDisplayService
+  ) {}
 
   ngOnInit() {
-    this.rpc.listDiagnostics().subscribe(data => {
-      this.diagnostics = data;
-      for (const diagnostic of this.diagnostics) {
-        for (const check of diagnostic.checks) {
-          const key = this.getDiagnosticKey(diagnostic.category, check.name);
-          this.diagnosticRunning[key] = false;
+    this.rpc.listDiagnostics().subscribe(
+      data => {
+        this.diagnostics = data;
+        for (const diagnostic of this.diagnostics) {
+          for (const check of diagnostic.checks) {
+            const key = this.getDiagnosticKey(diagnostic.category, check.name);
+            this.diagnosticRunning[key] = false;
+          }
         }
+      },
+      error => {
+        this.errorDisplay.openErrorDialog(error);
       }
-    },
-    error => {
-      this.errorDisplay.openErrorDialog(error);
-    });
+    );
   }
 
   runDiagnostic(category: string, name: string) {
     const key = this.getDiagnosticKey(category, name);
     this.diagnosticRunning[key] = true;
     this.diagnosticResult[key] = undefined;
-    this.rpc.runDiagnostic({
-      category,
-      name
-    }).subscribe(result => {
-      // cache the response
-      this.diagnosticResult[key] = result;
-      this.diagnosticRunning[key] = false;
-      this.resultHidden[key] = false;
-      this.snackBar.open(`Diagnostic ${name} complete`, 'OK', {
-        duration: 2000
-      });
-    },
-    error => {
-      this.diagnosticRunning[key] = false;
-      this.errorDisplay.openErrorDialog(error);
-    });
+    this.rpc
+      .runDiagnostic({
+        category,
+        name
+      })
+      .subscribe(
+        result => {
+          // cache the response
+          this.diagnosticResult[key] = result;
+          this.diagnosticRunning[key] = false;
+          this.resultHidden[key] = false;
+          this.snackBar.open(`Diagnostic ${name} complete`, 'OK', {
+            duration: 2000
+          });
+        },
+        error => {
+          this.diagnosticRunning[key] = false;
+          this.errorDisplay.openErrorDialog(error);
+        }
+      );
   }
 
   // UI indicator telling if the diagnostic is running and awaiting response
@@ -74,8 +81,7 @@ export class DiagnosticsComponent implements OnInit {
 
   // Fetch the response, if any, from the diagnosticResults cache
   getDiagnosticResult(category: string, name: string): string {
-    const result = this.diagnosticResult[
-      this.getDiagnosticKey(category, name)];
+    const result = this.diagnosticResult[this.getDiagnosticKey(category, name)];
     if (result) {
       return result.result;
     } else {
@@ -105,7 +111,8 @@ export class DiagnosticsComponent implements OnInit {
   }
 
   getButtonId(category: string, name: string): string {
-    return `diagnostic-${category.split(' ').join('-')}-${name.split(' ').join('-')}`;
+    return `diagnostic-${category.split(' ').join('-')}-${name
+      .split(' ')
+      .join('-')}`;
   }
-
 }

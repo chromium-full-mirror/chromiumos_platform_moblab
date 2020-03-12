@@ -10,14 +10,13 @@ import { Action } from '../shared/action';
   styleUrls: ['./health-checks.component.scss']
 })
 export class HealthChecksComponent implements OnInit {
+  healthChecks: HealthCheck[];
 
-  private healthChecks: HealthCheck[];
-
-  constructor(private rpc: MobmonitorRpcService) { }
+  constructor(private rpc: MobmonitorRpcService) {}
 
   ngOnInit() {
     this.rpc.getStatus().subscribe(
-      value => this.healthChecks = value,
+      value => (this.healthChecks = value),
       error => {} // can't really do anything with the error
       // the app component will notify user of lost connection
     );
@@ -65,5 +64,4 @@ export class HealthChecksComponent implements OnInit {
     }
     return [];
   }
-
 }
