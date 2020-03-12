@@ -14,7 +14,6 @@ import common
 from autotest_lib.client.bin import utils
 from autotest_lib.client.common_lib import global_config
 from autotest_lib.client.cros.audio import cras_utils
-from autotest_lib.client.cros.video import constants as video_test_constants
 from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
 from autotest_lib.server.hosts import base_label
 from autotest_lib.server.hosts import common_label
@@ -629,17 +628,6 @@ class CtsArchLabel(base_label.StringLabel):
         return abi_labels + cpu_labels
 
 
-class VideoGlitchLabel(base_label.BaseLabel):
-    """Label indicates if host supports video glitch detection tests."""
-
-    _NAME = 'video_glitch_detection'
-
-    def exists(self, host):
-        board = host.get_board().replace(ds_constants.BOARD_PREFIX, '')
-
-        return board in video_test_constants.SUPPORTED_BOARDS
-
-
 class InternalDisplayLabel(base_label.StringLabel):
     """Label that determines if the device has an internal display."""
 
@@ -882,7 +870,6 @@ CROS_LABELS = [
     ReferenceDesignLabel(),
     ServoLabel(),
     StorageLabel(),
-    VideoGlitchLabel(),
 ]
 
 LABSTATION_LABELS = [

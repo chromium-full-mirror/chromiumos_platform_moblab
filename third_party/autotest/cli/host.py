@@ -27,12 +27,9 @@ import socket
 import sys
 import time
 
-from autotest_lib.cli import action_common, rpc, topic_common, skylab_utils, skylab_migration, skylab_migration2
+from autotest_lib.cli import action_common, rpc, topic_common
 from autotest_lib.cli import fair_partition
 from autotest_lib.client.bin import utils as bin_utils
-from autotest_lib.cli.skylab_json_utils import process_labels, print_textpb, write, writeln
-from autotest_lib.cli import skylab_rollback
-from autotest_lib.cli.skylab_json_utils import process_labels, validate_required_fields_for_skylab
 from autotest_lib.client.common_lib import error, host_protections
 from autotest_lib.server import frontend, hosts
 from autotest_lib.server.hosts import host_info
@@ -40,13 +37,6 @@ from autotest_lib.server.lib.status_history import HostJobHistory
 from autotest_lib.server.lib.status_history import UNUSED, WORKING
 from autotest_lib.server.lib.status_history import BROKEN, UNKNOWN
 
-
-try:
-    from skylab_inventory import text_manager
-    from skylab_inventory.lib import device
-    from skylab_inventory.lib import server as skylab_server
-except ImportError:
-    pass
 
 
 MIGRATED_HOST_SUFFIX = '-migrated-do-not-use'
@@ -59,8 +49,8 @@ ID_AUTOGEN_MESSAGE = ("[IGNORED]. Do not edit (crbug.com/950553). ID is "
 
 class host(topic_common.atest):
     """Host class
-    atest host [create|delete|list|stat|mod|jobs|rename|migrate|skylab_migrate|statjson] <options>"""
-    usage_action = '[create|delete|list|stat|mod|jobs|rename|migrate|skylab_migrate|statjson]'
+    atest host [create|delete|list|stat|mod|jobs|rename|migrate|statjson] <options>"""
+    usage_action = '[create|delete|list|stat|mod|jobs|rename|migrate|statjson]'
     topic = msg_topic = 'host'
     msg_items = '<hosts>'
 
@@ -149,12 +139,10 @@ class host_list(action_common.atest_list, host):
                                'statuses (comma separated)')
         self.parser.add_option('-a', '--acl',
                                default='',
-                               help=('Only list hosts within this ACL. %s' %
-                                     skylab_utils.MSG_INVALID_IN_SKYLAB))
+                               help=('Only list hosts within this ACL.'))
         self.parser.add_option('-u', '--user',
                                default='',
-                               help=('Only list hosts available to this user. '
-                                     '%s' % skylab_utils.MSG_INVALID_IN_SKYLAB))
+                               help=('Only list hosts available to this user. '))
         self.parser.add_option('-N', '--hostnames-only', help='Only return '
                                'hostnames for the machines queried.',
                                action='store_true')
@@ -166,14 +154,7 @@ class host_list(action_common.atest_list, host):
                                default=False,
                                help='Only list unlocked hosts',
                                action='store_true')
-        self.parser.add_option('--full-output',
-                               default=False,
-                               help=('Print out the full content of the hosts. '
-                                     'Only supported with --skylab.'),
-                               action='store_true',
-                               dest='full_output')
 
-        self.add_skylab_options()
 
 
     def parse(self):
@@ -196,46 +177,11 @@ class host_list(action_common.atest_list, host):
         self.unlocked = options.unlocked
         self.label_map = None
 
-        if self.skylab:
-            if options.user or options.acl or options.status:
-                self.invalid_syntax('--user, --acl or --status is not '
-                                    'supported with --skylab.')
-            self.full_output = options.full_output
-            if self.full_output and self.hostnames_only:
-                self.invalid_syntax('--full-output is conflicted with '
-                                    '--hostnames-only.')
-
-            if self.labels:
-                self.label_map = device.convert_to_label_map(self.labels)
-        else:
-            if options.full_output:
-                self.invalid_syntax('--full_output is only supported with '
-                                    '--skylab.')
-
         return (options, leftover)
-
-
-    def execute_skylab(self):
-        """Execute 'atest host list' with --skylab."""
-        inventory_repo = skylab_utils.InventoryRepo(self.inventory_repo_dir)
-        inventory_repo.initialize()
-        lab = text_manager.load_lab(inventory_repo.get_data_dir())
-
-        # TODO(nxia): support filtering on run-time labels and status.
-        return device.get_devices(
-            lab,
-            'duts',
-            self.environment,
-            label_map=self.label_map,
-            hostnames=self.hosts,
-            locked=self.locked,
-            unlocked=self.unlocked)
 
 
     def execute(self):
         """Execute 'atest host list'."""
-        if self.skylab:
-            return self.execute_skylab()
 
         filters = {}
         check_results = {}
@@ -281,25 +227,17 @@ class host_list(action_common.atest_list, host):
 
         @param results: the results to be printed.
         """
-        if results and not self.skylab:
+        if results:
             # Remove the platform from the labels.
             for result in results:
                 result['labels'] = self._cleanup_labels(result['labels'],
                                                         result['platform'])
-        if self.skylab and self.full_output:
-            print results
-            return
-
-        if self.skylab:
-            results = device.convert_to_autotest_hosts(results)
-
         if self.hostnames_only:
             self.print_list(results, key='hostname')
         else:
             keys = ['hostname', 'status', 'shard', 'locked', 'lock_reason',
                     'locked_by', 'platform', 'labels']
             super(host_list, self).output(results, keys=keys)
-
 
 class host_stat(host):
     """atest host stat --mlist <file>|<hosts>"""
@@ -360,7 +298,6 @@ class host_get_migration_plan(host_stat):
     def __init__(self):
         super(host_get_migration_plan, self).__init__()
         self.parser.add_option("--ratio", default=0.5, type=float, dest="ratio")
-        self.add_skylab_options()
 
     def parse(self):
         (options, leftover) = super(host_get_migration_plan, self).parse()
@@ -407,84 +344,6 @@ class host_get_migration_plan(host_stat):
     def output(self, results):
         print json.dumps(results, indent=4, sort_keys=True)
 
-
-class host_statjson(host_stat):
-    """atest host statjson --mlist <file>|<hosts>
-
-    exposes the same information that 'atest host stat' does, but in the json
-    format that 'skylab add-dut' expects
-    """
-
-    usage_action = "statjson"
-
-    def __init__(self):
-        super(host_statjson, self).__init__()
-        self.parser.add_option('--verify',
-                               default=False,
-                               help='Verify that required fields are provided',
-                               action='store_true',
-                               dest='verify')
-        self.parser.add_option('--textpb',
-                               default=False,
-                               help='Print in best effort textpb format',
-                               action='store_true',
-                               dest='textpb')
-
-    def parse(self):
-        (options, leftover) = super(host_statjson, self).parse()
-        self.verify = options.verify
-        self.textpb = options.textpb
-        return (options, leftover)
-
-    def output(self, results):
-        """Print output of 'atest host statjson <...>'"""
-        for row in results:
-            stats, acls, labels, attributes = row
-            # TODO(gregorynisbet): under what circumstances is stats
-            #    not a list of length 1?
-            assert len(stats) == 1
-            stats_map = stats[0]
-
-            # Stripping the MIGRATED_HOST_SUFFIX makes it possible to
-            # migrate a DUT from autotest to skylab even after its hostname
-            # has been changed.
-            # This enables the steps (renaming the host,
-            # copying the inventory information to skylab) to be doable in
-            # either order.
-            hostname = _remove_hostname_suffix_if_present(
-                stats_map["hostname"],
-                MIGRATED_HOST_SUFFIX
-            )
-
-            # TODO(gregorynisbet): clean up servo information
-            if "servo_host" not in attributes:
-                attributes["servo_host"] = "dummy_host"
-            if "servo_port" not in attributes:
-                attributes["servo_port"] = "dummy_port"
-
-            labels = self._cleanup_labels(labels)
-            attrs = [{"key": k, "value": v} for k, v in attributes.iteritems()]
-            out_labels = process_labels(labels, platform=stats_map["platform"])
-            skylab_json = {
-                "common": {
-                    "attributes": attrs,
-                    "environment": "ENVIRONMENT_PROD",
-                    "hostname": hostname,
-                    "id": ID_AUTOGEN_MESSAGE,
-                    "labels": out_labels,
-                    "serialNumber": attributes.get("serial_number", None),
-                }
-            }
-            # if the validate flag is provided, check that a given json blob
-            # has all the required fields for skylab.
-            if self.verify:
-                validate_required_fields_for_skylab(skylab_json)
-            if self.textpb:
-                # need leading "duts" preamble
-                write("duts ")
-                print_textpb(skylab_json)
-            else:
-                print json.dumps(skylab_json, indent=4, sort_keys=True)
 
 
 class host_jobs(host):
@@ -572,10 +431,9 @@ class BaseHostModCreate(host):
 
         self.parser.add_option('-p', '--protection', type='choice',
                                help=('Set the protection level on a host.  '
-                                     'Must be one of: %s. %s' %
+                                     'Must be one of: %s.' %
                                      (', '.join('"%s"' % p
-                                               for p in self.protections),
-                                      skylab_utils.MSG_INVALID_IN_SKYLAB)),
+                                               for p in self.protections))),
                                choices=self.protections)
         self._attributes = []
         self.parser.add_option('--attribute', '-i',
@@ -595,18 +453,15 @@ class BaseHostModCreate(host):
                                type='string',
                                metavar='LABEL_FLIST')
         self.parser.add_option('-a', '--acls',
-                               help=('Comma separated list of ACLs. %s' %
-                                     skylab_utils.MSG_INVALID_IN_SKYLAB))
+                               help=('Comma separated list of ACLs.'))
         self.parser.add_option('-A', '--alist',
-                               help=('File listing the acls. %s' %
-                                     skylab_utils.MSG_INVALID_IN_SKYLAB),
+                               help=('File listing the acls. %s'),
                                type='string',
                                metavar='ACL_FLIST')
         self.parser.add_option('-t', '--platform',
                                help=('Sets the platform label. %s Please set '
                                      'platform in labels (e.g., -b '
-                                     'platform:platform_name) with --skylab.' %
-                                     skylab_utils.MSG_INVALID_IN_SKYLAB))
+                                     'platform:platform_name) with --skylab.'))
 
 
     def parse(self):
@@ -626,16 +481,9 @@ class BaseHostModCreate(host):
         self._parse_lock_options(options)
 
         self.label_map = None
-        if self.allow_skylab and self.skylab:
-            # TODO(nxia): drop these flags when all hosts are migrated to skylab
-            if (options.protection or options.acls or options.alist or
-                options.platform):
-                self.invalid_syntax(
-                        '--protection, --acls, --alist or --platform is not '
-                        'supported with --skylab.')
 
-            if self.labels:
-                self.label_map = device.convert_to_label_map(self.labels)
+        if self.labels:
+            self.label_map = device.convert_to_label_map(self.labels)
 
         if options.protection:
             self.data['protection'] = options.protection
@@ -748,40 +596,30 @@ class host_mod(BaseHostModCreate):
         """Add the options specific to the mod action"""
         super(host_mod, self).__init__()
         self.parser.add_option('--unlock-lock-id',
-                               help=('Unlock the lock with the lock-id. %s' %
-                                     skylab_utils.MSG_ONLY_VALID_IN_SKYLAB),
+                               help=('Unlock the lock with the lock-id. %s'),
                                default=None)
         self.parser.add_option('-f', '--force_modify_locking',
                                help='Forcefully lock\unlock a host',
                                action='store_true')
         self.parser.add_option('--remove_acls',
-                               help=('Remove all active acls. %s' %
-                                     skylab_utils.MSG_INVALID_IN_SKYLAB),
+                               help=('Remove all active acls. %s'),
                                action='store_true')
         self.parser.add_option('--remove_labels',
                                help='Remove all labels.',
                                action='store_true')
-
-        self.add_skylab_options()
         self.parser.add_option('--new-env',
                                dest='new_env',
                                choices=['staging', 'prod'],
                                help=('The new environment ("staging" or '
-                                     '"prod") of the hosts. %s' %
-                                     skylab_utils.MSG_ONLY_VALID_IN_SKYLAB),
+                                     '"prod") of the hosts. %s'),
                                default=None)
 
 
     def _parse_unlock_options(self, options):
         """Parse unlock related options."""
-        if self.skylab and options.unlock and options.unlock_lock_id is None:
-            self.invalid_syntax('Must provide --unlock-lock-id with "--skylab '
-                                '--unlock".')
 
-        if (not (self.skylab and options.unlock) and
-            options.unlock_lock_id is not None):
-            self.invalid_syntax('--unlock-lock-id is only valid with '
-                                '"--skylab --unlock".')
+
+
 
         self.unlock_lock_id = options.unlock_lock_id
 
@@ -795,10 +633,6 @@ class host_mod(BaseHostModCreate):
         if options.force_modify_locking:
              self.data['force_modify_locking'] = True
 
-        if self.skylab and options.remove_acls:
-            # TODO(nxia): drop the flag when all hosts are migrated to skylab
-            self.invalid_syntax('--remove_acls is not supported with --skylab.')
-
         self.remove_acls = options.remove_acls
         self.remove_labels = options.remove_labels
         self.new_env = options.new_env
@@ -806,62 +640,8 @@ class host_mod(BaseHostModCreate):
         return (options, leftover)
 
 
-    def execute_skylab(self):
-        """Execute atest host mod with --skylab.
-
-        @return A list of hostnames which have been successfully modified.
-        """
-        inventory_repo = skylab_utils.InventoryRepo(self.inventory_repo_dir)
-        inventory_repo.initialize()
-        data_dir = inventory_repo.get_data_dir()
-        lab = text_manager.load_lab(data_dir)
-
-        locked_by = None
-        if self.lock:
-            locked_by = inventory_repo.git_repo.config('user.email')
-
-        successes = []
-        for hostname in self.hosts:
-            try:
-                device.modify(
-                        lab,
-                        'duts',
-                        hostname,
-                        self.environment,
-                        lock=self.lock,
-                        locked_by=locked_by,
-                        lock_reason = self.lock_reason,
-                        unlock=self.unlock,
-                        unlock_lock_id=self.unlock_lock_id,
-                        attributes=self.attributes,
-                        remove_labels=self.remove_labels,
-                        label_map=self.label_map,
-                        new_env=self.new_env)
-                successes.append(hostname)
-            except device.SkylabDeviceActionError as e:
-                print('Cannot modify host %s: %s' % (hostname, e))
-
-        if successes:
-            text_manager.dump_lab(data_dir, lab)
-
-            status = inventory_repo.git_repo.status()
-            if not status:
-                print('Nothing is changed for hosts %s.' % successes)
-                return []
-
-            message = skylab_utils.construct_commit_message(
-                    'Modify %d hosts.\n\n%s' % (len(successes), successes))
-            self.change_number = inventory_repo.upload_change(
-                    message, draft=self.draft, dryrun=self.dryrun,
-                    submit=self.submit)
-
-        return successes
-
-
     def execute(self):
         """Execute 'atest host mod'."""
-        if self.skylab:
-            return self.execute_skylab()
 
         successes = []
         for host in self.execute_rpc('get_hosts', hostname__in=self.hosts):
@@ -907,10 +687,6 @@ class host_mod(BaseHostModCreate):
         for msg in self.messages:
             self.print_wrapped(msg, hosts)
 
-        if hosts and self.skylab:
-            print('Modified hosts: %s.' % ', '.join(hosts))
-            if self.skylab and not self.dryrun and not self.submit:
-                print(skylab_utils.get_cl_message(self.change_number))
 
 
 class HostInfo(object):
@@ -1087,49 +863,11 @@ class host_delete(action_common.atest_delete, host):
     def __init__(self):
         super(host_delete, self).__init__()
 
-        self.add_skylab_options()
-
-
-    def execute_skylab(self):
-        """Execute 'atest host delete' with '--skylab'.
-
-        @return A list of hostnames which have been successfully deleted.
-        """
-        inventory_repo = skylab_utils.InventoryRepo(self.inventory_repo_dir)
-        inventory_repo.initialize()
-        data_dir = inventory_repo.get_data_dir()
-        lab = text_manager.load_lab(data_dir)
-
-        successes = []
-        for hostname in self.hosts:
-            try:
-                device.delete(
-                        lab,
-                        'duts',
-                        hostname,
-                        self.environment)
-                successes.append(hostname)
-            except device.SkylabDeviceActionError as e:
-                print('Cannot delete host %s: %s' % (hostname, e))
-
-        if successes:
-            text_manager.dump_lab(data_dir, lab)
-            message = skylab_utils.construct_commit_message(
-                    'Delete %d hosts.\n\n%s' % (len(successes), successes))
-            self.change_number = inventory_repo.upload_change(
-                    message, draft=self.draft, dryrun=self.dryrun,
-                    submit=self.submit)
-
-        return successes
-
-
     def execute(self):
         """Execute 'atest host delete'.
 
         @return A list of hostnames which have been successfully deleted.
         """
-        if self.skylab:
-            return self.execute_skylab()
 
         return super(host_delete, self).execute()
 
@@ -1153,795 +891,3 @@ def _remove_hostname_suffix_if_present(hostname, suffix):
         return hostname[:len(hostname) - len(suffix)]
     else:
         return hostname
-
-
-class host_rename(host):
-    """Host rename is only for migrating hosts between skylab and AFE DB."""
-
-    usage_action = 'rename'
-
-    def __init__(self):
-        """Add the options specific to the rename action."""
-        super(host_rename, self).__init__()
-
-        self.parser.add_option('--for-migration',
-                               help=('Rename hostnames for migration. Rename '
-                                     'each "hostname" to "hostname%s". '
-                                     'The original "hostname" must not contain '
-                                     'suffix.' % MIGRATED_HOST_SUFFIX),
-                               action='store_true',
-                               default=False)
-        self.parser.add_option('--for-rollback',
-                               help=('Rename hostnames for migration rollback. '
-                                     'Rename each "hostname%s" to its original '
-                                     '"hostname".' % MIGRATED_HOST_SUFFIX),
-                               action='store_true',
-                               default=False)
-        self.parser.add_option('--dryrun',
-                               help='Execute the action as a dryrun.',
-                               action='store_true',
-                               default=False)
-        self.parser.add_option('--non-interactive',
-                               help='run non-interactively',
-                               action='store_true',
-                               default=False)
-
-
-    def parse(self):
-        """Consume the options common to host rename."""
-        (options, leftovers) = super(host_rename, self).parse()
-        self.for_migration = options.for_migration
-        self.for_rollback = options.for_rollback
-        self.dryrun = options.dryrun
-        self.interactive = not options.non_interactive
-        self.host_ids = {}
-
-        if not (self.for_migration ^ self.for_rollback):
-            self.invalid_syntax('--for-migration and --for-rollback are '
-                                'exclusive, and one of them must be enabled.')
-
-        if not self.hosts:
-            self.invalid_syntax('Must provide hostname(s).')
-
-        if self.dryrun:
-            print('This will be a dryrun and will not rename hostnames.')
-
-        return (options, leftovers)
-
-
-    def execute(self):
-        """Execute 'atest host rename'."""
-        if self.interactive:
-            if self.prompt_confirmation():
-                pass
-            else:
-                return
-
-        successes = []
-        for host in self.execute_rpc('get_hosts', hostname__in=self.hosts):
-            self.host_ids[host['hostname']] = host['id']
-        for host in self.hosts:
-            if host not in self.host_ids:
-                self.failure('Cannot rename non-existant host %s.' % host,
-                              item=host, what_failed='Failed to rename')
-                continue
-            try:
-                host_id = self.host_ids[host]
-                if self.for_migration:
-                    new_hostname = _add_hostname_suffix(
-                            host, MIGRATED_HOST_SUFFIX)
-                else:
-                    #for_rollback
-                    new_hostname = _remove_hostname_suffix_if_present(
-                            host, MIGRATED_HOST_SUFFIX)
-
-                if not self.dryrun:
-                    # TODO(crbug.com/850737): delete and abort HQE.
-                    data = {'hostname': new_hostname}
-                    self.execute_rpc('modify_host', item=host, id=host_id,
-                                     **data)
-                successes.append((host, new_hostname))
-            except InvalidHostnameError as e:
-                self.failure('Cannot rename host %s: %s' % (host, e), item=host,
-                             what_failed='Failed to rename')
-            except topic_common.CliError, full_error:
-                # Already logged by execute_rpc()
-                pass
-
-        return successes
-
-
-    def output(self, results):
-        """Print output of 'atest host rename'."""
-        if results:
-            print('Successfully renamed:')
-            for old_hostname, new_hostname in results:
-                print('%s to %s' % (old_hostname, new_hostname))
-
-
-class host_migrate(action_common.atest_list, host):
-    """'atest host migrate' to migrate or rollback hosts."""
-
-    usage_action = 'migrate'
-
-    def __init__(self):
-        super(host_migrate, self).__init__()
-
-        self.parser.add_option('--migration',
-                               dest='migration',
-                               help='Migrate the hosts to skylab.',
-                               action='store_true',
-                               default=False)
-        self.parser.add_option('--rollback',
-                               dest='rollback',
-                               help='Rollback the hosts migrated to skylab.',
-                               action='store_true',
-                               default=False)
-        self.parser.add_option('--model',
-                               help='Model of the hosts to migrate.',
-                               dest='model',
-                               default=None)
-        self.parser.add_option('--board',
-                               help='Board of the hosts to migrate.',
-                               dest='board',
-                               default=None)
-        self.parser.add_option('--pool',
-                               help=('Pool of the hosts to migrate. Must '
-                                     'specify --model for the pool.'),
-                               dest='pool',
-                               default=None)
-
-        self.add_skylab_options(enforce_skylab=True)
-
-
-    def parse(self):
-        """Consume the specific options"""
-        (options, leftover) = super(host_migrate, self).parse()
-
-        self.migration = options.migration
-        self.rollback = options.rollback
-        self.model = options.model
-        self.pool = options.pool
-        self.board = options.board
-        self.host_ids = {}
-
-        if not (self.migration ^ self.rollback):
-            self.invalid_syntax('--migration and --rollback are exclusive, '
-                                'and one of them must be enabled.')
-
-        if self.pool is not None and (self.model is None and
-                                      self.board is None):
-            self.invalid_syntax('Must provide --model or --board with --pool.')
-
-        if not self.hosts and not (self.model or self.board):
-            self.invalid_syntax('Must provide hosts or --model or --board.')
-
-        return (options, leftover)
-
-
-    def _remove_invalid_hostnames(self, hostnames, log_failure=False):
-        """Remove hostnames with MIGRATED_HOST_SUFFIX.
-
-        @param hostnames: A list of hostnames.
-        @param log_failure: Bool indicating whether to log invalid hostsnames.
-
-        @return A list of valid hostnames.
-        """
-        invalid_hostnames = set()
-        for hostname in hostnames:
-            if hostname.endswith(MIGRATED_HOST_SUFFIX):
-                if log_failure:
-                    self.failure('Cannot migrate host with suffix "%s" %s.' %
-                                 (MIGRATED_HOST_SUFFIX, hostname),
-                                 item=hostname, what_failed='Failed to rename')
-                invalid_hostnames.add(hostname)
-
-        hostnames = list(set(hostnames) - invalid_hostnames)
-
-        return hostnames
-
-
-    def execute(self):
-        """Execute 'atest host migrate'."""
-        hostnames = self._remove_invalid_hostnames(self.hosts, log_failure=True)
-
-        filters = {}
-        check_results = {}
-        if hostnames:
-            check_results['hostname__in'] = 'hostname'
-            if self.migration:
-                filters['hostname__in'] = hostnames
-            else:
-                # rollback
-                hostnames_with_suffix = [
-                        _add_hostname_suffix(h, MIGRATED_HOST_SUFFIX)
-                        for h in hostnames]
-                filters['hostname__in'] = hostnames_with_suffix
-        else:
-            # TODO(nxia): add exclude_filter {'hostname__endswith':
-            # MIGRATED_HOST_SUFFIX} for --migration
-            if self.rollback:
-                filters['hostname__endswith'] = MIGRATED_HOST_SUFFIX
-
-        labels = []
-        if self.model:
-            labels.append('model:%s' % self.model)
-        if self.pool:
-            labels.append('pool:%s' % self.pool)
-        if self.board:
-            labels.append('board:%s' % self.board)
-
-        if labels:
-            if len(labels) == 1:
-                filters['labels__name__in'] = labels
-                check_results['labels__name__in'] = None
-            else:
-                filters['multiple_labels'] = labels
-                check_results['multiple_labels'] = None
-
-        results = super(host_migrate, self).execute(
-                op='get_hosts', filters=filters, check_results=check_results)
-        hostnames = [h['hostname'] for h in results]
-
-        if self.migration:
-            hostnames = self._remove_invalid_hostnames(hostnames)
-        else:
-            # rollback
-            hostnames = [_remove_hostname_suffix(h, MIGRATED_HOST_SUFFIX)
-                         for h in hostnames]
-
-        return self.execute_skylab_migration(hostnames)
-
-
-    def assign_duts_to_drone(self, infra, devices, environment):
-        """Assign uids of the devices to a random skylab drone.
-
-        @param infra: An instance of lab_pb2.Infrastructure.
-        @param devices: A list of device_pb2.Device to be assigned to the drone.
-        @param environment: 'staging' or 'prod'.
-        """
-        skylab_drones = skylab_server.get_servers(
-                infra, environment, role='skylab_drone', status='primary')
-
-        if len(skylab_drones) == 0:
-            raise device.SkylabDeviceActionError(
-                'No skylab drone is found in primary status and staging '
-                'environment. Please confirm there is at least one valid skylab'
-                ' drone added in skylab inventory.')
-
-        for device in devices:
-            # Randomly distribute each device to a skylab_drone.
-            skylab_drone = random.choice(skylab_drones)
-            skylab_server.add_dut_uids(skylab_drone, [device])
-
-
-    def remove_duts_from_drone(self, infra, devices):
-        """Remove uids of the devices from their skylab drones.
-
-        @param infra: An instance of lab_pb2.Infrastructure.
-        @devices: A list of device_pb2.Device to be remove from the drone.
-        """
-        skylab_drones = skylab_server.get_servers(
-                infra, 'staging', role='skylab_drone', status='primary')
-
-        for skylab_drone in skylab_drones:
-            skylab_server.remove_dut_uids(skylab_drone, devices)
-
-
-    def execute_skylab_migration(self, hostnames):
-        """Execute migration in skylab_inventory.
-
-        @param hostnames: A list of hostnames to migrate.
-        @return If there're hosts to migrate, return a list of the hostnames and
-                a message instructing actions after the migration; else return
-                None.
-        """
-        if not hostnames:
-            return
-
-        inventory_repo = skylab_utils.InventoryRepo(self.inventory_repo_dir)
-        inventory_repo.initialize()
-
-        subdirs = ['skylab', 'prod', 'staging']
-        data_dirs = skylab_data_dir, prod_data_dir, staging_data_dir = [
-                inventory_repo.get_data_dir(data_subdir=d) for d in subdirs]
-        skylab_lab, prod_lab, staging_lab = [
-                text_manager.load_lab(d) for d in data_dirs]
-        infra = text_manager.load_infrastructure(skylab_data_dir)
-
-        label_map = None
-        labels = []
-        if self.board:
-            labels.append('board:%s' % self.board)
-        if self.model:
-            labels.append('model:%s' % self.model)
-        if self.pool:
-            labels.append('critical_pool:%s' % self.pool)
-        if labels:
-            label_map = device.convert_to_label_map(labels)
-
-        if self.migration:
-            prod_devices = device.move_devices(
-                    prod_lab, skylab_lab, 'duts', label_map=label_map,
-                    hostnames=hostnames)
-            staging_devices = device.move_devices(
-                    staging_lab, skylab_lab, 'duts', label_map=label_map,
-                    hostnames=hostnames)
-
-            all_devices = prod_devices + staging_devices
-            # Hostnames in afe_hosts tabel.
-            device_hostnames = [str(d.common.hostname) for d in all_devices]
-            message = (
-                'Migration: move %s hosts into skylab_inventory.\n\n'
-                'Please run this command after the CL is submitted:\n'
-                'atest host rename --for-migration %s' %
-                (len(all_devices), ' '.join(device_hostnames)))
-
-            self.assign_duts_to_drone(infra, prod_devices, 'prod')
-            self.assign_duts_to_drone(infra, staging_devices, 'staging')
-        else:
-            # rollback
-            prod_devices = device.move_devices(
-                    skylab_lab, prod_lab, 'duts', environment='prod',
-                    label_map=label_map, hostnames=hostnames)
-            staging_devices = device.move_devices(
-                    skylab_lab, staging_lab, 'duts', environment='staging',
-                    label_map=label_map, hostnames=hostnames)
-
-            all_devices = prod_devices + staging_devices
-            # Hostnames in afe_hosts tabel.
-            device_hostnames = [_add_hostname_suffix(str(d.common.hostname),
-                                                     MIGRATED_HOST_SUFFIX)
-                                for d in all_devices]
-            message = (
-                'Rollback: remove %s hosts from skylab_inventory.\n\n'
-                'Please run this command after the CL is submitted:\n'
-                'atest host rename --for-rollback %s' %
-                (len(all_devices), ' '.join(device_hostnames)))
-
-            self.remove_duts_from_drone(infra, all_devices)
-
-        if all_devices:
-            text_manager.dump_infrastructure(skylab_data_dir, infra)
-
-            if prod_devices:
-                text_manager.dump_lab(prod_data_dir, prod_lab)
-
-            if staging_devices:
-                text_manager.dump_lab(staging_data_dir, staging_lab)
-
-            text_manager.dump_lab(skylab_data_dir, skylab_lab)
-
-            self.change_number = inventory_repo.upload_change(
-                    message, draft=self.draft, dryrun=self.dryrun,
-                    submit=self.submit)
-
-            return all_devices, message
-
-
-    def output(self, result):
-        """Print output of 'atest host list'.
-
-        @param result: the result to be printed.
-        """
-        if result:
-            devices, message = result
-
-            if devices:
-                hostnames = [h.common.hostname for h in devices]
-                if self.migration:
-                    print('Migrating hosts: %s' % ','.join(hostnames))
-                else:
-                    # rollback
-                    print('Rolling back hosts: %s' % ','.join(hostnames))
-
-                if not self.dryrun:
-                    if not self.submit:
-                        print(skylab_utils.get_cl_message(self.change_number))
-                    else:
-                        # Print the instruction command for renaming hosts.
-                        print('%s' % message)
-        else:
-            print('No hosts were migrated.')
-
-
-
-def _host_skylab_migrate_get_hostnames(obj, class_, model=None, pool=None, board=None):
-    """
-    @params : in 'model', 'pool', 'board'
-
-    """
-    # TODO(gregorynisbet)
-    # this just gets all the hostnames, it doesn't filter by
-    # presence or absence of migrated-do-not-use.
-    labels = []
-    for key, value in ({'model': model, 'board': board, 'pool': pool}).items():
-        if value:
-            labels.append(key + ":" + value)
-    filters = {}
-    check_results = {}
-    # Copy the filter and check_results initialization logic from
-    # the 'execute' method of the class 'host_migrate'.
-    if not labels:
-        return []
-    elif len(labels) == 1:
-        filters['labels__name__in'] = labels
-        check_results['labels__name__in'] = None
-    elif len(labels) > 1:
-        filters['multiple_labels'] = labels
-        check_results['multiple_labels'] = None
-    else:
-        assert False
-
-    results = super(class_, obj).execute(
-        op='get_hosts', filters=filters, check_results=check_results)
-    return [result['hostname'] for result in results]
-
-
-
-class host_skylab_migrate(action_common.atest_list, host):
-    usage_action = 'skylab_migrate'
-
-    def __init__(self):
-        super(host_skylab_migrate, self).__init__()
-        self.parser.add_option('--dry-run',
-                               help='Dry run. Show only candidate hosts.',
-                               action='store_true',
-                               dest='dry_run')
-        self.parser.add_option('--ratio',
-                               help='ratio of hosts to migrate as number from 0 to 1.',
-                               type=float,
-                               dest='ratio',
-                               default=1)
-        self.parser.add_option('--bug-number',
-                               help='bug number for tracking purposes.',
-                               dest='bug_number',
-                               default=None)
-        self.parser.add_option('--board',
-                               help='Board of the hosts to migrate',
-                               dest='board',
-                               default=None)
-        self.parser.add_option('--model',
-                               help='Model of the hosts to migrate',
-                               dest='model',
-                               default=None)
-        self.parser.add_option('--pool',
-                               help='Pool of the hosts to migrate',
-                               dest='pool',
-                               default=None)
-        self.parser.add_option('-q',
-                               '--quick',
-                               help='use quick-add-duts',
-                               dest='use_quick_add',
-                               action='store_true')
-        self.parser.add_option('-s',
-                               '--slow',
-                               help='don\'t use quick-add-duts',
-                               dest='no_use_quick_add',
-                               action='store_true')
-        self.parser.add_option('-b',
-                               '--batch-size',
-                               help='process n duts at a time',
-                               dest="batch_size",
-                               default=None)
-
-    def parse(self):
-        (options, leftover) = super(host_skylab_migrate, self).parse()
-        self.dry_run = options.dry_run
-        self.ratio = options.ratio
-        self.bug_number = options.bug_number
-        self.model = options.model
-        self.pool = options.pool
-        self.board = options.board
-        self._reason = "migration to skylab: %s" % self.bug_number
-        use_quick_add = options.use_quick_add
-        no_use_quick_add = options.no_use_quick_add
-        if use_quick_add:
-            if no_use_quick_add:
-                self.invalid_syntax('cannot supply both --quick and --slow.')
-            else:
-                self.use_quick_add = True
-        else:
-            if no_use_quick_add:
-                self.use_quick_add = False
-            else:
-                self.invalid_syntax('must include either --quick or --slow.')
-        self.batch_size = options.batch_size
-
-        return (options, leftover)
-
-    def _validate_one_hostname_source(self):
-        """Validate that hostname source is explicit hostnames or valid query.
-
-        Hostnames must either be provided explicitly or be the result of a
-        query defined by 'model', 'board', and 'pool'.
-
-        @returns : whether the hostnames come from exactly one valid source.
-        """
-        has_criteria = any([(self.model and self.board), self.board, self.pool])
-        has_command_line_hosts = bool(self.hosts)
-        if has_criteria != has_command_line_hosts:
-            # all good, one data source
-            return True
-        if has_criteria and has_command_line_hosts:
-            self.failure(
-                '--model/host/board and explicit hostnames are alternatives. Provide exactly one.',
-                item='cli',
-                what_failed='user')
-            return False
-        self.failure(
-            'no explicit hosts and no criteria provided.',
-            item='cli',
-            what_failed='user')
-        return False
-
-
-    def execute(self):
-        if not self._validate_one_hostname_source():
-            return None
-        if self.hosts:
-            hostnames = self.hosts
-        else:
-            hostnames = _host_skylab_migrate_get_hostnames(
-                obj=self,
-                class_=host_skylab_migrate,
-                model=self.model,
-                board=self.board,
-                pool=self.pool,
-            )
-        if self.dry_run:
-            return hostnames
-        if not hostnames:
-            return {'error': 'no hosts to migrate'}
-        res = skylab_migration.migrate(
-            ratio=self.ratio,
-            reason=self._reason,
-            hostnames=hostnames,
-            max_duration=10 * 60,
-            interval_len=2,
-            min_ready_intervals=10,
-            immediately=True,
-            use_quick_add=self.use_quick_add,
-            batch_size=self.batch_size,
-        )
-        return res
-
-
-    def output(self, result):
-        if result is not None:
-            print json.dumps(result, indent=4, sort_keys=True)
-
-
-class host_skylab_rollback(action_common.atest_list, host):
-    usage_action = "skylab_rollback"
-
-    def __init__(self):
-        super(host_skylab_rollback, self).__init__()
-        self.parser.add_option('--bug-number',
-                               help='bug number for tracking purposes.',
-                               dest='bug_number',
-                               default=None)
-
-    def parse(self):
-        (options, leftover) = super(host_skylab_rollback, self).parse()
-        self.bug_number = options.bug_number
-        return (options, leftover)
-
-    def execute(self):
-        if self.hosts:
-            hostnames = self.hosts
-        else:
-            hostnames = _host_skylab_migrate_get_hostnames(
-                obj=self,
-                class_=host_skylab_migrate,
-                model=self.model,
-                board=self.board,
-                pool=self.pool,
-            )
-        if not hostnames:
-            return {'error': 'no hosts to migrate'}
-        res = skylab_rollback.rollback(
-            hosts=hostnames,
-            bug=self.bug_number,
-            dry_run=False,
-        )
-        return res
-
-
-    def output(self, result):
-        print result
-
-
-class host_skylab_verify(action_common.atest_list, host):
-    usage_action = "skylab_verify"
-
-    def __init__(self):
-        super(host_skylab_verify, self).__init__()
-
-    def parse(self):
-        (options, leftover) = super(host_skylab_verify, self).parse()
-        self.model = getattr(options, 'model', None)
-        self.pool = getattr(options, 'pool', None)
-        self.board = getattr(options, 'board', None)
-        return (options, leftover)
-
-    def execute(self):
-        if self.hosts:
-            hostnames = self.hosts
-        else:
-            hostnames = _host_skylab_migrate_get_hostnames(
-                obj=self,
-                class_=host_skylab_migrate,
-                model=self.model,
-                board=self.board,
-                pool=self.pool,
-            )
-        if not hostnames:
-            return {'error': 'no hosts to migrate'}
-        res = skylab_migration.hostname_migrated_status(
-            hostnames=hostnames,
-        )
-        return res
-
-
-    def output(self, result):
-        json.dump(result, sys.stdout, indent=4)
-
-
-class host_dump_duts(action_common.atest_list, host):
-    usage_action = "host_dump_duts"
-
-    def __init__(self):
-        super(host_dump_duts, self).__init__()
-        self.parser.add_option('--output-dir',
-                               help='directory to dump the board json files',
-                               dest='output_dir',
-                               default=None)
-
-    def parse(self):
-        (options, leftover) = super(host_dump_duts, self).parse()
-        self.output_dir = options.output_dir
-        self.model = getattr(options, 'model', None)
-        self.pool = getattr(options, 'pool', None)
-        self.board = getattr(options, 'board', None)
-        return (options, leftover)
-
-    def execute(self):
-        if not hasattr(self, 'output_dir') or not self.output_dir:
-            return {'error': "must specify output directory"}
-
-        if self.hosts:
-            hostnames = self.hosts
-        else:
-            hostnames = _host_skylab_migrate_get_hostnames(
-                obj=self,
-                class_=host_dump_duts,
-                model=self.model,
-                board=self.board,
-                pool=self.pool,
-            )
-
-        good, bad, err = skylab_migration2.write_statjson_hostnames(hostnames=hostnames, outdir=self.output_dir)
-
-        if err is not None:
-            return {"error": err}
-
-        hostname_err_map, err = skylab_migration2.validate_output(self.output_dir)
-
-        if err is not None:
-            return {"error": err}
-
-        invalid_entries = {}
-        for hostname in hostname_err_map:
-            if hostname_err_map[hostname] is not None:
-                invalid_entries[hostname] = hostname_err_map[hostname]
-
-        return {
-            "not-processed": bad,
-            "errors": invalid_entries,
-        }
-
-
-
-    def output(self, result):
-        json.dump(result, sys.stdout, indent=4)
-
-
-class host_read_dump(action_common.atest_list, host):
-    usage_action = "host_read_dump"
-
-    def __init__(self):
-        super(host_read_dump, self).__init__()
-        self.parser.add_option('--output-dir',
-                               help='directory to read json files from',
-                               dest='output_dir',
-                               default=None)
-
-    def parse(self):
-        (options, leftover) = super(host_read_dump, self).parse()
-        self.output_dir = options.output_dir
-        self.model = getattr(options, 'model', None)
-        self.pool = getattr(options, 'pool', None)
-        self.board = getattr(options, 'board', None)
-        return (options, leftover)
-
-    def execute(self):
-        if not hasattr(self, 'output_dir') or not self.output_dir:
-            return {'error': "must specify output directory"}
-
-        json_obj, err = skylab_migration2.assemble_output_dir(output_dir=self.output_dir)
-
-        if err is not None:
-            return {"error": err}
-        else:
-            return json_obj
-
-    def output(self, result):
-        json.dump(result, sys.stdout, indent=4)
-
-
-class host_do_quick_add(action_common.atest_list, host):
-    usage_action = "do_quick_add"
-
-    def __init__(self):
-        super(host_do_quick_add, self).__init__()
-        self.parser.add_option('--data',
-                               help='directory to read json files from',
-                               dest='data',
-                               default=None)
-
-    def parse(self):
-        (options, leftover) = super(host_do_quick_add, self).parse()
-        self.data_dir = options.data
-        self.model = getattr(options, 'model', None)
-        self.pool = getattr(options, 'pool', None)
-        self.board = getattr(options, 'board', None)
-        return (options, leftover)
-
-    def execute(self):
-        if self.hosts:
-            hostnames = self.hosts
-        else:
-            hostnames = _host_skylab_migrate_get_hostnames(
-                obj=self,
-                class_=host_do_quick_add,
-                model=self.model,
-                board=self.board,
-                pool=self.pool,
-            )
-        if not hostnames:
-            return {'error': 'no hosts to add'}
-        error_msg = skylab_migration2.do_quick_add_duts(hostnames=hostnames, dirpath=self.data_dir)
-        return {'error' : error_msg}
-
-    def output(self, result):
-        json.dump(result, sys.stdout, indent=4)
-
-
-class host_lock_rename(action_common.atest_list, host):
-    usage_action = "lock_rename"
-
-    def __init__(self):
-        super(host_lock_rename, self).__init__()
-
-    def parse(self):
-        (options, leftover) = super(host_lock_rename, self).parse()
-        self.model = getattr(options, 'model', None)
-        self.pool = getattr(options, 'pool', None)
-        self.board = getattr(options, 'board', None)
-        return (options, leftover)
-
-    def execute(self):
-        if self.hosts:
-            hostnames = self.hosts
-        else:
-            hostnames = _host_skylab_migrate_get_hostnames(
-                obj=self,
-                class_=host_lock_rename,
-                model=self.model,
-                board=self.board,
-                pool=self.pool,
-            )
-        if not hostnames:
-            return {'error': 'no hostnames'}
-        skylab_migration2.atest_lock_rename(hostnames=hostnames)

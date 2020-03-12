@@ -32,7 +32,7 @@ from autotest_lib.client.common_lib import global_config, host_protections
 from autotest_lib.client.common_lib import time_utils
 from autotest_lib.client.common_lib import utils
 from autotest_lib.frontend.afe import models, model_attributes
-from autotest_lib.scheduler import drone_manager, email_manager
+from autotest_lib.scheduler import drone_manager
 from autotest_lib.scheduler import rdb_lib
 from autotest_lib.scheduler import scheduler_config
 from autotest_lib.scheduler import scheduler_lib
@@ -661,17 +661,6 @@ class HostQueueEntry(DBObject):
 
 
     def _on_complete(self, status):
-        metric_fields = {'status': status.lower()}
-        if self.host:
-            metric_fields['board'] = self.host.board or ''
-            if len(self.host.pools) == 1:
-                metric_fields['pool'] = self.host.pools[0]
-            else:
-                metric_fields['pool'] = 'MULTIPLE'
-        else:
-            metric_fields['board'] = 'NO_HOST'
-            metric_fields['pool'] = 'NO_HOST'
-        self._COMPLETION_COUNT_METRIC.increment(fields=metric_fields)
         if status is not models.HostQueueEntry.Status.ABORTED:
             self.job.stop_if_necessary()
         if self.started_on:
@@ -743,7 +732,6 @@ class HostQueueEntry(DBObject):
     def _email_on_status(self, status):
         hostname = self._get_hostname()
         subject, body = self._get_status_email_contents(status, None, hostname)
-        email_manager.manager.send_email(self.job.email_list, subject, body)
 
 
     def _email_on_job_complete(self):
@@ -764,8 +752,6 @@ class HostQueueEntry(DBObject):
                     in status_counts.iteritems())
 
         subject, body = self._get_status_email_contents(status, summary, None)
-        email_manager.manager.send_email(self.job.email_list, subject, body)
-
 
     def schedule_pre_job_tasks(self):
         logging.info("%s/%s/%s (job %s, entry %s) scheduled on %s, status=%s",
@@ -843,7 +829,6 @@ class HostQueueEntry(DBObject):
                 self.status == models.HostQueueEntry.Status.PENDING):
             subject = 'Job %s (id %s)' % (self.job.name, self.job.id)
             message = 'Asynchronous job stuck in Pending'
-            email_manager.manager.enqueue_notify_email(subject, message)
 
 
     def abort(self, dispatcher):
@@ -1316,8 +1301,6 @@ class Job(DBObject):
             message = ('job %s got less than %s chosen entries: %s' % (
                     self.id, self.synch_count, chosen_entries))
             logging.error(message)
-            email_manager.manager.enqueue_notify_email(
-                    'Job not started, too few chosen entries', message)
             return []
 
         self._assign_new_group(chosen_entries)

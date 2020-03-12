@@ -1922,18 +1922,14 @@ WIRELESS_SSID_PATTERN = 'wireless_ssid_(.*)/(\d+)'
 
 def get_moblab_serial_number():
     """Gets a unique identifier for the moblab.
-
-    Serial number is the prefered identifier, use it if
-    present, however fallback is the ethernet mac address.
     """
-    for vpd_key in ['serial_number', 'ethernet_mac']:
-      try:
-          cmd_result = run('sudo vpd -g %s' % vpd_key)
-          if cmd_result and cmd_result.stdout:
-            return cmd_result.stdout
-      except error.CmdError as e:
-          logging.error(str(e))
-          logging.info(vpd_key)
+    vpd_file = "/mnt/stateful_partition/unencrypted/cache/vpd/full-v2.txt"
+    sn_re = re.compile(r"\"serial_number\"=\"(.*)\"")
+    if os.path.exists(vpd_file):
+        lines = open(vpd_file, "r").read()
+        result = sn_re.search(lines)
+        if result:
+            return result.group(1)
     return 'NoSerialNumber'
 
 

@@ -259,16 +259,6 @@ class RDBClientHostWrapper(RDBHost):
         # Update elasticsearch db.
         self._update({'status': status})
 
-        # Update Monarch.
-        fields = self.get_metric_fields()
-        self.record_pool(fields)
-        # As each device switches state, indicate that it is not in any
-        # other state.  This allows Monarch queries to avoid double counting
-        # when additional points are added by the Window Align operation.
-        for s in rdb_models.AbstractHostModel.Status.names:
-            fields['status'] = s
-            host_status_metric.set(s == status, fields=fields)
-
 
     def record_working_state(self, working, timestamp):
         """Report to Monarch whether we are working or broken.
@@ -279,7 +269,7 @@ class RDBClientHostWrapper(RDBHost):
                           manual intervention.
         @param timestamp  Time that the status was recorded.
         """
-        self.record_pool(fields)
+        pass
 
 
     def update_field(self, fieldname, value):

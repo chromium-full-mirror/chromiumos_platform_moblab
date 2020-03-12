@@ -117,7 +117,6 @@ from autotest_lib.client.common_lib import global_config
 from autotest_lib.client.common_lib import utils
 from autotest_lib.frontend.afe import models
 from autotest_lib.scheduler import drone_manager
-from autotest_lib.scheduler import email_manager
 from autotest_lib.scheduler import pidfile_monitor
 from autotest_lib.scheduler import rdb_lib
 from autotest_lib.scheduler import scheduler_lib
@@ -508,24 +507,12 @@ class AgentTask(object):
                                  % (class_name, entry.status, entry,
                                     entry.job))
                 logging.error(error_message)
-                email_manager.manager.enqueue_notify_email(
-                    'Job Aborted - Invalid Host Queue Entry Status',
-                    error_message)
                 entry.job.request_abort()
             invalid_host_status = (
                     allowed_host_statuses is not None
                     and entry.host.status not in allowed_host_statuses)
             if invalid_host_status:
-                # In the orignal code, here we raise an exception. In an
-                # effort to prevent downtime we will instead abort the job and
-                # send out an email notifying us this has occured.
-                error_message = ('%s attempting to start on queue entry with '
-                                 'invalid host status %s: %s. Aborting Job: %s'
-                                 % (class_name, entry.host.status, entry,
-                                    entry.job))
-                logging.error(error_message)
-                email_manager.manager.enqueue_notify_email(
-                    'Job Aborted - Invalid Host Status', error_message)
+                logging.error("Invalid host status")
                 entry.job.request_abort()
 
 
