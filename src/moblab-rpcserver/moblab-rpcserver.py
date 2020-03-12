@@ -193,7 +193,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
             request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
-            request.parent_id_filter
+            request.parent_id_filter,
+            request.dut_hostname_filter,
         )
         response = moblabrpc_pb2.GetNumJobsResponse(num_jobs=num_jobs)
         return response
@@ -211,7 +212,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                           ' timestamp: {}'.format(ts))
             return None
 
-    def _extract_status(self, status_str):
+    def _extract_status_enum(self, status_str):
         if status_str == 'Queued':
             return moblabrpc_pb2.Job.QUEUED
         elif status_str == 'Provisioned':
@@ -229,14 +230,20 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 'Encountered unexpected status "{}"'.format(status_str))
             return moblabrpc_pb2.Job.STATUS_NOT_SET
 
-    def _extract_status_from_count(self, job):
-        # "if there is more than one status count, error out"
-        if len(job.get('status_counts').keys()) != 1 or \
-            job.get('status_counts')[list(job.get('status_counts').keys())[0]] != 1:
-            logging.error(
-                'Encountered multiple status values for job {}'.format(job))
+    def _extract_status(self, job):
+        if job.get('status'):
+            return self._extract_status_enum(job.get('status'))
+        elif job.get('status_counts'):
+            # "if there is more than one status count, error out"
+            if len(job.get('status_counts').keys()) != 1 or \
+                job.get('status_counts')[list(job.get('status_counts').keys())[0]] != 1:
+                logging.error(
+                    'Encountered multiple status values for job {}'.format(job))
+                return moblabrpc_pb2.Job.STATUS_NOT_SET
+            return self._extract_status_enum(list(job.get('status_counts').keys())[0])
+        else:
+            logging.error('Unable to find status for job {}'.format(job))
             return moblabrpc_pb2.Job.STATUS_NOT_SET
-        return self._extract_status(list(job.get('status_counts').keys())[0])
 
     def get_jobs(self, request, _context):
         jobs = self.service.get_jobs(
@@ -248,7 +255,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
             request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
-            request.parent_id_filter
+            request.parent_id_filter,
+            request.dut_hostname_filter,
         )
 
         response = moblabrpc_pb2.GetJobsResponse()
@@ -261,7 +269,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     created_time_sec_utc=self._convert_timestamp_to_utc_secs(
                         job['created_on']),
                     parent_job_id=job.get('parent_job', -1),
-                    status=self._extract_status_from_count(job))
+                    status=self._extract_status(job))
                 response.jobs.extend([job_proto])
         return response
 
@@ -293,7 +301,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 moblabrpc_pb2.Execution(
                     name=item.get('name', ''),
                     job_id=item.get('id', ''),
-                    status=self._extract_status(item.get('status', None)),
+                    status=self._extract_status(item),
                     start_time_utc=self._convert_timestamp_to_utc_secs(
                         item.get('start_time', '')),
                     end_time_utc=self._convert_timestamp_to_utc_secs(
@@ -316,7 +324,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 except (KeyError, TypeError):
                     dut_status = ''
 
-                status = self._extract_status(item['status'])
+                status = self._extract_status(item)
                 associated_duts.append(moblabrpc_pb2.Execution(
                         dut=dut,
                         dut_status=dut_status,
@@ -332,7 +340,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     created_time_sec_utc=self._convert_timestamp_to_utc_secs(
                         job.get('created_on', '')),
                     parent_job_id=job.get('parent_job', None),
-                    status=self._extract_status_from_count(job),
+                    status=self._extract_status(job),
                     dependencies=job.get('dependencies', ''),
                     server_control_file=job.get('control_file', ''),
                     max_runtime=self._convert_timedelta_to_miliseconds(
