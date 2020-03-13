@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-SUBDIRS := upstart-scripts
+SUBDIRS := upstart-scripts host-services
 
 all:
 	for dir in $(SUBDIRS); do \
