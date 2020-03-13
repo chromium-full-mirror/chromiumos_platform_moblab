@@ -4,7 +4,7 @@
 
 # This makefile is just used to make development easier
 
-BASE_URL="gcr.io/chromeos-partner-moblab"
+BASE_URL=gcr.io/chromeos-partner-moblab
 
 rpcserver: export DOCKER_BUILDKIT=1
 rpcserver:
@@ -18,4 +18,16 @@ compose:
 		-f dockerfiles/compose/Dockerfile dockerfiles/compose
 	docker push ${BASE_URL}/moblab-compose:${USER}
 
-.PHONY: rpcserver compose
+autotest: export DOCKER_BUILDKIT=1
+autotest:
+	docker build -t ${BASE_URL}/moblab-autotest:${USER} \
+		-f dockerfiles/autotest/Dockerfile ..
+	docker push ${BASE_URL}/moblab-autotest:${USER}
+
+db: export DOCKER_BUILDKIT=1
+db:
+	docker build -t ${BASE_URL}/moblab-db:${USER} \
+		-f dockerfiles/db/Dockerfile dockerfiles/db
+	docker push ${BASE_URL}/moblab-db:${USER}
+
+.PHONY: rpcserver compose db autotest
