@@ -426,6 +426,75 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             response.tasks.extend([dut_task])
         return response
 
+    def add_attribute_to_duts(self, request, _context):
+        """
+            Given a AddAttributeToDutsRequest, returns a
+            AddAttributeToDutsResponse obj which wraps a message indicating
+            which duts the attribute was successfully added on.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.add_attribute_to_duts(
+            request.dut_hostnames,
+            request.key,
+            request.value
+        )
+
+        response = moblabrpc_pb2.AddAttributeToDutsResponse()
+        response.message = response_msg
+        return response
+
+    def remove_attribute_from_duts(self, request, _context):
+        """
+            Given a RemoveAttributeFromDutsRequest, returns a
+            RemoveAttributeFromDutsResponse obj which wraps a message indicating
+            which duts the attribute was successfully removed from.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.remove_attribute_from_duts(
+            request.dut_hostnames,
+            request.key,
+        )
+
+        response = moblabrpc_pb2.RemoveAttributeFromDutsResponse()
+        response.message = response_msg
+        return response
+
+    def add_label_to_duts(self, request, _context):
+        """
+            Given a AddLabelToDutsRequest, returns a
+            AddLabelToDutsResponse obj which wraps a message indicating
+            which duts the label was successfully added on.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.add_label_to_duts(
+            request.dut_hostnames,
+            request.label,
+        )
+
+        response = moblabrpc_pb2.AddLabelToDutsResponse()
+        response.message = response_msg
+        return response
+
+    def remove_label_from_duts(self, request, _context):
+        """
+            Given a RemoveLabelFromDutsRequest, returns a
+            RemoveLabelFromDutsResponse obj which wraps a message indicating
+            which duts the label was successfully removed from.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.remove_label_from_duts(
+            request.dut_hostnames,
+            request.label,
+        )
+
+        response = moblabrpc_pb2.RemoveLabelFromDutsResponse()
+        response.message = response_msg
+        return response
+
 def setup_logging(level):
     """Enable the correct level of logging.
 

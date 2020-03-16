@@ -27,6 +27,11 @@ service MoblabRpcService {
   rpc get_dut_details(GetDutDetailsRequest) returns (GetDutDetailsResponse)  {}
   rpc get_num_dut_tasks(GetNumDutTasksRequest) returns (GetNumDutTasksResponse) {}
   rpc get_dut_tasks(GetDutTasksRequest) returns (GetDutTasksResponse) {}
+
+  rpc add_label_to_duts(AddLabelToDutsRequest) returns (AddLabelToDutsResponse) {};
+  rpc remove_label_from_duts(RemoveLabelFromDutsRequest) returns (RemoveLabelFromDutsResponse) {};
+  rpc add_attribute_to_duts(AddAttributeToDutsRequest) returns (AddAttributeToDutsResponse) {};
+  rpc remove_attribute_from_duts(RemoveAttributeFromDutsRequest) returns (RemoveAttributeFromDutsResponse) {};
 }
 
 // NEXT_TAG = 2
@@ -336,4 +341,49 @@ message DutTask {
 // NEXT_TAG = 2
 message GetDutTasksResponse {
   repeated DutTask tasks = 1;
+}
+
+// NEXT_TAG = 3
+message AddLabelToDutsRequest {
+  repeated string dut_hostnames = 1;
+  string label = 2;
+}
+
+// NEXT_TAG = 2
+message AddLabelToDutsResponse {
+  string message = 1;
+}
+
+// NEXT_TAG = 3
+message RemoveLabelFromDutsRequest {
+  repeated string dut_hostnames = 1;
+  string label = 2;
+}
+
+// NEXT_TAG = 2
+message RemoveLabelFromDutsResponse {
+  string message = 1;
+}
+
+// NEXT_TAG = 4
+message AddAttributeToDutsRequest {
+  repeated string dut_hostnames = 1;
+  string key = 2;
+  string value = 3;
+}
+
+// NEXT_TAG = 2
+message AddAttributeToDutsResponse {
+  string message = 1;
+}
+
+// NEXT_TAG = 3
+message RemoveAttributeFromDutsRequest {
+  repeated string dut_hostnames = 1;
+  string key = 2;
+}
+
+// NEXT_TAG = 2
+message RemoveAttributeFromDutsResponse {
+  string message = 1;
 }
