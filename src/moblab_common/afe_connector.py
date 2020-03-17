@@ -485,6 +485,13 @@ class AFEConnector(object):
                 response = self.send_rpc_command('delete_host', params)
             _LOGGER.error(response)
 
+    def abort_host_queue_entries(self, job_ids):
+        response = self.send_rpc_command(
+            'abort_host_queue_entries',
+            {'job__id__in': job_ids}
+        )
+        return self.decode_response(response, 'result')
+
     def _package_edit_action_results(self, response):
         """
             Add/remove attribute label actions are currently implemented by
