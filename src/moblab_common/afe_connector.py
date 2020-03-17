@@ -325,7 +325,9 @@ class AFEConnector(object):
         return self.decode_response(response, 'result')
 
 
-    def get_special_tasks(self, id_list=[], host_id_list=[], query_start=None, query_limit=None, start_time_gt=None, end_time_lt=None):
+    def get_special_tasks(self, id_list=[], host_id_list=[], query_start=None,
+        query_limit=None, start_time_gt=None, end_time_lt=None,
+        sort_by_most_recent=True):
         """Get attributes of the special tasks specified.
 
         Args:
@@ -342,16 +344,15 @@ class AFEConnector(object):
             A list of dict. The key, value of the dict is the special task
             attribute name and the value.
         """
+        params = {}
+
         if id_list:
             assert isinstance(id_list, list)
-            params = {
-                'id__in' : id_list
-            }
+            params['id__in'] = id_list
+
         if host_id_list:
             assert isinstance(host_id_list, list)
-            params = {
-                'host__in' : host_id_list
-            }
+            params['host__in'] = host_id_list
 
         if query_start is not None and query_limit is not None:
             params['query_start'] = query_start
@@ -369,6 +370,10 @@ class AFEConnector(object):
                     '%Y-%m-%d %H:%M:%S'
                 )
             )
+
+        if sort_by_most_recent:
+            params['sort_by'] = ['-id']
+
         response = self.send_rpc_command('get_special_tasks', params)
         return self.decode_response(response, 'result')
 
