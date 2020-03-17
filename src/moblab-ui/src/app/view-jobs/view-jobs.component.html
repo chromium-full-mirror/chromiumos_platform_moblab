@@ -82,7 +82,8 @@
         </mat-card>
       </div>
       <mat-divider></mat-divider>
-    </div>
+      <app-job-action (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
+      </app-job-action>
   </div>
   <table mat-table [dataSource]="jobs"
          multiTemplateDataRows
@@ -97,10 +98,10 @@
       </th>
       <td mat-cell *matCellDef="let element" class="table-checkbox-col">
         <mat-checkbox
+          id="job_{{element.getJobId().toString()}}"
           (click)="checkboxClick($event)"
-          (change)="$event ? job_selections.toggle(element) : null"
-          [checked]="job_selections.hasValue() &&
-          job_selections.isSelected(element)">
+          (change)="jobActionRef.toggleJobSelection(element)"
+          [checked]="jobActionRef.isSelected(element)">
         </mat-checkbox>
       </td>
     </ng-container>

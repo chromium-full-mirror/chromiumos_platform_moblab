@@ -13,6 +13,13 @@
   grid-template-rows: 25% 100px auto;
 }
 
+.action-box {
+  border: 1px solid #ebebeb;
+  grid-template-columns: 40px 50px auto 50px 40px;
+  grid-template-rows: 25% 100px auto;
+  margin: 5px 0px 5px 0px;
+}
+
 .time-filter-form-wrapper {
   margin-left: 3%;
   margin-right: 3%;

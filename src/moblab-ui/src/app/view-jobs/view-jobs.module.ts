@@ -1,25 +1,30 @@
-import { NgModule } from "@angular/core";
-import { MatButtonModule } from "@angular/material/button";
-import { MatCheckboxModule } from "@angular/material/checkbox";
-import { MatTableModule } from "@angular/material/table";
-import { MatListModule } from "@angular/material/list";
-import { MatSortModule } from "@angular/material/sort";
-import { MatChipsModule } from "@angular/material/chips";
-import { MatSnackBarModule } from "@angular/material/snack-bar";
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatCardModule } from "@angular/material/card";
-import { MatSelectModule } from "@angular/material/select";
-import { MatIconModule } from "@angular/material/icon";
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { CommonModule } from "@angular/common";
+import {
+  MatButtonModule,
+  MatCheckboxModule,
+  MatTableModule,
+  MatListModule,
+  MatSortModule,
+  MatChipsModule,
+  MatSnackBarModule
+} from '@angular/material';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {CommonModule} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatCardModule} from '@angular/material/card';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSelectModule} from '@angular/material/select';
+import {NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
-import { ViewJobsComponent } from "./view-jobs.component";
-import { WidgetsModule } from "../widgets/widgets.module";
+import {JobActionComponent} from './job-action/job-action.component';
+import {ViewJobsComponent} from './view-jobs.component';
+import {WidgetsModule} from '../widgets/widgets.module';
+
 
 @NgModule({
   imports: [
@@ -42,9 +47,10 @@ import { WidgetsModule } from "../widgets/widgets.module";
     MatSortModule,
     MatTableModule,
     ReactiveFormsModule,
+    RouterModule,
     WidgetsModule,
   ],
-  declarations: [ViewJobsComponent],
+  declarations: [JobActionComponent, ViewJobsComponent],
   exports: [ViewJobsComponent]
 })
 export class ViewJobsModule {}
