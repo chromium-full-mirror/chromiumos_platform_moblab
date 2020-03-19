@@ -5,7 +5,7 @@
 version: '3'
 services:
   db:
-    image: gcr.io/chromeos-partner-moblab/moblab-db:haddowk
+    image: gcr.io/chromeos-partner-moblab/moblab-db:release
     hostname: db
     user: moblab
 
@@ -26,6 +26,10 @@ services:
       interval: 1m30s
       timeout: 10s
       retries: 3
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 16384
 
   db-init:
     image: gcr.io/chromeos-partner-moblab/moblab-db-init:release
@@ -53,25 +57,33 @@ services:
         ipv4_address: 192.168.100.50
         aliases:
           - database
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 16384
 
   autotest:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest:haddowk
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest:release
     hostname: autotest
     user: moblab
     ports:
     - 80:8888
 
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
+    - /var/run/docker.sock:/var/run/docker.sock:rw
     - logs:/var/log/moblab
     - usr_local_moblab:/usr/local/moblab
     - results:/usr/local/autotest/results
+    - results:/results
     - moblab_home:/home/moblab
     - containers:/moblab/third_party/autotest/containers
     - apache_logs:/var/log/apache2
+    - leases:/leases:ro
+    - /etc/lsb-release:/etc/lsb-release:ro
 
     environment:
     - CROS_VENV_CACHE=/usr/local/.cros-venv-cache
+    - LABEL=$LABEL
 
     networks:
     - moblab
@@ -79,6 +91,19 @@ services:
     depends_on:
       - db
       - db-init
+
+    cap_add:
+      - CAP_NET_BIND_SERVICE
+      - CAP_NET_RAW
+      - ALL
+
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 16384
+
+    extra_hosts:
+      - "dockerhost:192.168.100.1"
 
   envoy-proxy:
     image: gcr.io/chromeos-partner-moblab/envoy-proxy:release
@@ -101,7 +126,7 @@ services:
     - 6010:6010
 
   moblab-rpcserver:
-    image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:haddowk
+    image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:release
     user: moblab
 
     volumes:
@@ -114,17 +139,84 @@ services:
     depends_on:
     - autotest
 
+    extra_hosts:
+    - "dockerhost:192.168.100.1"
+
   watchtower:
     image: gcr.io/chromeos-partner-moblab/watchtower:release
 
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 
-    command: --interval 1
+    command: --interval 60
 
     networks:
     - moblab
 
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 16384
+
+  offloader:
+    image: gcr.io/chromeos-partner-moblab/moblab-offloader:release
+    user:  moblab
+
+    volumes:
+      - results:/usr/local/autotest/results
+      - moblab_home:/home/moblab
+
+    networks:
+      - moblab
+
+    command: >
+             run -j 100
+             --gs-bucket chromeos-moblab-peng-staging
+             --credentials-file /home/moblab/.service_account.json
+             -l /var/log/moblab/offloader/offloader.log
+             --min_age_to_prune = 1
+
+    depends_on:
+    - autotest
+
+    environment:
+    - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
+
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 16384
+
+    extra_hosts:
+    - "dockerhost:192.168.100.1"
+
+  monitoring:
+    image: google/cadvisor:latest
+
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+    ports:
+      - 9997:8080
+
+    networks:
+      - moblab
+
+  log-rotate:
+    image: blacklabelops/logrotate
+
+    volumes:
+      - /var/log/bootup:/bootup
+      - logs:/logs
+
+    environment:
+      - LOGS_DIRECTORIES=/bootup /var/log/docker /logs
+      - LOGROTATE_INTERVAL=hourly
+    networks:
+      - moblab
 
 volumes:
   db_data: {}
@@ -135,7 +227,8 @@ volumes:
   results: {}
   containers: {}
   apache_logs: {}
-
+  leases:
+    external: True
 
 networks:
   moblab:
