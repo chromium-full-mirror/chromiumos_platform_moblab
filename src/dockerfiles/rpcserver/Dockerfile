@@ -42,6 +42,7 @@ RUN protoc -I=/etc/moblab/moblab-rpcserver \
 # moblab_common
 WORKDIR /moblab_common
 COPY moblab_common/ .
+COPY host_services/ .
 RUN cp setup.py /
 RUN python /setup.py install
 
