@@ -61,6 +61,9 @@ RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN usermod -aG sudo moblab
+
+RUN apt-get install --reinstall sudo
+
 ENV USER=moblab
 
 # Unlike lxc containers which you can start and will keep running on their own,
