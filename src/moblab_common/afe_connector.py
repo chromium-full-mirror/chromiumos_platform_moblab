@@ -19,7 +19,7 @@ except ImportError:
 
 import requests
 
-MOBLAB_RPC_SERVER = 'autotest:80'
+MOBLAB_RPC_SERVER = 'autotest:8888'
 _LOGGER = logging.getLogger(__name__)
 
 
