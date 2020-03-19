@@ -42,8 +42,8 @@ def _setup_logging(handler):
         handler: The logging handler object.
     """
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    handler.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
+    handler.setLevel(logging.INFO)
     handler.setFormatter(logging.Formatter(
         '%(asctime)s %(name)s %(levelname)s: %(message)s'))
     # Some code runs before this function may have created some handler and we
