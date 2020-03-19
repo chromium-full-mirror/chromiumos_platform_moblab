@@ -2,20 +2,16 @@ FROM alpine/git as copy
 
 WORKDIR /
 
-#RUN git clone https://chromium.googlesource.com/chromiumos/platform/moblab
-COPY ./src /moblab/src
-COPY ./third_party /moblab/third_party
-COPY ./scripts /moblab/scripts
-COPY ./setup.py /moblab/
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
+COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
+COPY --chown=moblab ./src/dockerfiles /moblab/src/dockerfiles
+COPY --chown=moblab ./src/host_services /moblab/src/host_services
+COPY --chown=moblab ./src/tools /moblab/src/tools
+COPY --chown=moblab ./third_party/autotest /moblab/third_party/autotest
+COPY --chown=moblab ./setup.py /moblab/
 
 RUN rm -rf /moblab/third_party/autotest/site-packages
 RUN mkdir -p /moblab/third_party/autotest/site-packages
-
-# This seems pointless ( we set the user in the run enviroment )
-# however if this is not done copies from this overlay to the run_env
-# have messed up permission on the directories ?????????.  Don't remove.
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
-RUN chown -R moblab:moblab /moblab
 
 ######################################################################
 
@@ -74,9 +70,10 @@ FROM debian:buster as protobuild
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	unzip
 
-COPY --from=copy /moblab/third_party/autotest/tko/tko.proto /moblab/third_party/autotest/tko/tko.proto
-COPY --from=copy /moblab/third_party/autotest/site_utils/cloud_console.proto /moblab/third_party/autotest/site_utils/cloud_console.proto
-COPY --from=lucifer /lucifer/src/go.chromium.org/chromiumos/infra/proto/src/test_platform/side_effects /
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
+
+COPY --chown=moblab --from=copy /moblab/third_party/autotest/tko/tko.proto /moblab/third_party/autotest/tko/tko.proto
+COPY --chown=moblab --from=lucifer /lucifer/src/go.chromium.org/chromiumos/infra/proto/src/test_platform/side_effects /
 COPY --from=downloads /protoc-3.10.0-linux-x86_64.zip /
 
 
@@ -85,29 +82,23 @@ RUN unzip protoc-3.10.0-linux-x86_64.zip
 RUN cp bin/protoc /usr/local/bin
 
 RUN protoc --proto_path /moblab/third_party/autotest/tko --python_out=/moblab/third_party/autotest/tko /moblab/third_party/autotest/tko/tko.proto
-RUN protoc --proto_path /moblab/third_party/autotest/site_utils --python_out=/moblab/third_party/autotest/site_utils /moblab/third_party/autotest/site_utils/cloud_console.proto
 RUN protoc --proto_path / --python_out=/ config.proto
 
 ######################################################################
 
-FROM debian:buster as build_env
+FROM debian:buster as build
+
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-	curl unzip python2.7 cmake \
-	default-jdk gcc virtualenv \
-	default-libmysqlclient-dev python-dev
+        curl unzip python2.7 cmake \
+        default-jdk gcc \
+        default-libmysqlclient-dev python-dev
 
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-RUN python get-pip.py
-RUN pip install --upgrade pip
-RUN pip install setuptools six
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
 
-######################################################################
-FROM build_env as build
-
-COPY --from=source /chromite /chromite
-COPY --from=copy /moblab /moblab
-COPY --from=downloads /*.zip /
-COPY --from=source /infra /infra
+COPY --chown=moblab --from=source /chromite /chromite
+COPY --chown=moblab --from=copy /moblab /moblab
+COPY --chown=moblab --from=downloads /*.zip /
+COPY --chown=moblab --from=source /infra /infra
 
 RUN ln -s /moblab/third_party/autotest /usr/local/autotest
 
@@ -118,6 +109,10 @@ COPY src/dockerfiles/autotest/lsb-release /etc/
 RUN chmod uog+r /etc/lsb-release
 
 #Add new mysql virtual env package
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN python get-pip.py
+RUN pip install --upgrade pip
+RUN pip install setuptools six virtualenv==16.7.10
 WORKDIR /infra/infra_virtualenv
 RUN /infra/infra_virtualenv/bin/python_venv -m pip wheel -w pip_packages mysqlclient==1.4.6
 WORKDIR /
@@ -129,16 +124,6 @@ RUN mv gwt-2.8.2/ /usr/local/autotest/site-packages/gwt
 RUN ln -s /chromite /usr/local/autotest/site-packages/chromite
 RUN /usr/local/autotest/utils/compile_gwt_clients.py -a -e"-Djava.util.prefs.userRoot=/tmp"
 
-WORKDIR /
-COPY src/dockerfiles/autotest/setup_chromite.py /
-RUN python /setup_chromite.py install
-
-COPY src/dockerfiles/autotest/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-
-WORKDIR /moblab
-RUN python2.7 ./setup.py install
-
 ###################################################################
 
 FROM debian:buster as run_env
@@ -146,7 +131,7 @@ FROM debian:buster as run_env
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	curl unzip python2.7 lxc pbzip2 xz-utils \
 	sudo libpython2.7-dev \
-	default-libmysqlclient-dev ssh \
+	default-libmysqlclient-dev ssh gcc \
 	apache2 apache2-utils libapache2-mod-wsgi \
 	virtualenv rsync bzip2 vim docker.io mariadb-client
 
@@ -160,24 +145,37 @@ RUN a2enmod mpm_prefork
 RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/apache2
 RUN getcap /usr/sbin/apache2
 
+RUN setcap 'cap_net_bind_service=+ep' /bin/ping
+RUN getcap /bin/ping
+
 RUN sed -i 's/www-data/moblab/g' /etc/apache2/envvars
 
 ###################################################################
 FROM run_env as run
 
-COPY --from=build /chromite /chromite
-COPY --from=build /moblab /moblab
-COPY --from=build /usr/local/lib/python2.7/dist-packages /usr/local/lib/python2.7/dist-packages
-COPY --from=build /infra /infra
-COPY --from=lucifer /usr/bin/lucifer /usr/bin/lucifer
-COPY --from=protobuild /moblab/third_party/autotest/tko/*_pb* /moblab/third_party/autotest/tko/
-COPY --from=protobuild /moblab/third_party/autotest/site_utils/*_pb* /moblab/third_party/autotest/site_utils/
-COPY --from=protobuild /*_pb* /moblab/third_party/autotest/utils/side_effects/proto/
-
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
+
+COPY --chown=moblab --from=build /chromite /chromite
+COPY --chown=moblab --from=build /moblab /moblab
+COPY --chown=moblab --from=build /infra /infra
+COPY --chown=moblab --from=lucifer /usr/bin/lucifer /usr/bin/lucifer
+COPY --chown=moblab --from=protobuild /moblab/third_party/autotest/tko/*_pb* /moblab/third_party/autotest/tko/
+COPY --chown=moblab --from=protobuild /*_pb* /moblab/third_party/autotest/utils/side_effects/proto/
+
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN chown -R moblab:moblab /moblab
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN python get-pip.py
+RUN pip install --upgrade pip
+RUN pip install setuptools six
+COPY src/dockerfiles/autotest/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+WORKDIR /
+COPY src/dockerfiles/autotest/setup_chromite.py /
+RUN python /setup_chromite.py install
+WORKDIR /moblab
+RUN python2.7 ./setup.py install
 
 RUN ln -s /infra/* /opt
 RUN ln -s /moblab/third_party/autotest /usr/local/autotest
@@ -207,34 +205,30 @@ RUN cp /moblab/third_party/autotest/apache/conf/* /etc/apache2/mods-enabled
 
 RUN sed -i 's/#MySQL-python==1.2.5/MySQL-python==1.2.5/g' /moblab/third_party/autotest/venv/requirements.txt
 
-
-RUN chown -R moblab:moblab /run
-RUN chown -R moblab:moblab /var/log
-RUN mkdir -p /home/moblab
-RUN mkdir -p /home/moblab/.ssh
-COPY --from=source /chromite/ssh_keys/* /home/moblab/.ssh/
-RUN chmod -R 600 /home/moblab/.ssh/*
-RUN touch /home/moblab/.boto
-COPY src/dockerfiles/autotest/ssh_config /home/moblab/.ssh/config
-RUN chown -R moblab:moblab /home/moblab
 RUN chown -R moblab:moblab /etc/apache2/mods-enabled/*
 
-ENV CROS_VENV_CACHE=/usr/local/.cros-venv-cache
 RUN mkdir /usr/local/.cros-venv-cache
 RUN chown -R moblab /usr/local/.cros-venv-cache
 
-RUN sudo -u moblab /usr/local/autotest/bin/job_reporter || true
-RUN mkdir /moblab/third_party/autotest/logs
-RUN mkdir /moblab/third_party/autotest/results
-RUN chown -R moblab:moblab /moblab/third_party/autotest
-RUN chown -R moblab:moblab /usr/local/autotest
-RUN chown -R moblab:moblab /etc/apache2/mods-enabled/
-RUN chown -R moblab:moblab /etc/apache2/mods-available/
-RUN setcap cap_net_raw=ep /bin/ping
+RUN mkdir -p /var/log/apache2/
+RUN chmod uog+rw /var/log/apache2
+RUN chmod uog+rw /run
+RUN chown -R moblab /var/log/apache2
+RUN chown -R root /etc/sudoers.d
 
 USER moblab
 ENV USER=moblab
+RUN mkdir /moblab/third_party/autotest/logs
+RUN mkdir /moblab/third_party/autotest/results
+RUN mkdir /moblab/third_party/autotest/leases
 
+ENV CROS_VENV_CACHE=/usr/local/.cros-venv-cache
+RUN mkdir -p /home/moblab
+RUN mkdir -p /home/moblab/.ssh
+COPY --chown=moblab --from=source /chromite/ssh_keys/* /home/moblab/.ssh/
+RUN chmod -R 600 /home/moblab/.ssh/*
+COPY src/dockerfiles/autotest/ssh_config /home/moblab/.ssh/config
+RUN touch /home/moblab/.boto
 EXPOSE 8888
 
 CMD ["/autotest_init"]
