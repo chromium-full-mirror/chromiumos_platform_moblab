@@ -2,16 +2,18 @@
 set -x
 
 passwd=moblab_db_passwd
-while ! mysqladmin ping -h db -uchromeosqa-admin -p${passwd} --silent; do
+while ! mysqladmin status -h db -uchromeosqa-admin -p${passwd} --silent; do
   sleep 1
 done
 
 /usr/sbin/apache2ctl start
 
 /usr/local/autotest/database/migrate.py sync -f || true
+/usr/local/autotest/database/migrate.py sync -f -d TKO || true
 /usr/local/autotest/frontend/manage.py syncdb --noinput
 
 mkdir -p /usr/local/autotest/results/drone_tmp
 
 /usr/local/autotest/scheduler/monitor_db.py --production /usr/local/autotest/results &
-/usr/local/autotest/scheduler/host_scheduler.py --production
+/usr/local/autotest/scheduler/host_scheduler.py --production &
+/usr/local/autotest/bin/job_aborter --jobdir /usr/local/autotest/leases
