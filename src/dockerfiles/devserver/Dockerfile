@@ -76,7 +76,9 @@ RUN chown -R moblab:moblab /static
 RUN mkdir -p /var/log/moblab/devserver/
 RUN chown -R moblab:moblab /var/log/moblab
 
-USER moblab:moblab
+RUN apt-get install --reinstall sudo
+
+USER moblab
 
 CMD ["/usr/lib/devserver/devserver.py", "--production", \
      "--static_dir=/static", "--logfile", \
