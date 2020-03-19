@@ -1,8 +1,7 @@
 #Moblab specific sql settings.
 
 [mysqld]
-#Switch off binary logging
-skip_log_bin
+log_bin
 
 max_connections=500
 
