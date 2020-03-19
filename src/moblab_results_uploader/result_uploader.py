@@ -50,7 +50,7 @@ class Uploader(processing_step.ProcessStep):
         self._gs_path_prefix = os.path.join(_GS_BUCKET_ROOT, _SERIAL_NUMBER,
                                             _MOBLAB_ID)
         self._uploading_context = None
-        self.uploading_queue = asyncio.Queue(maxsize=10)
+        self.uploading_queue = asyncio.Queue(maxsize=200)
 
     def uploading_context(self, ctx):
         self._uploading_context = ctx
@@ -93,7 +93,7 @@ class Uploader(processing_step.ProcessStep):
                 _LOGGER.debug('DRYRUN: Uploading %s', f)
             else:
                 _LOGGER.debug('Uploading %s', f)
-                await loop.run_in_executor(executor, self._upload_file, f)
+                loop.run_in_executor(executor, self._upload_file, f)
             self.uploading_queue.task_done()
 
     def _upload_file(self, result_file):

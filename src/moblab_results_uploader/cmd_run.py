@@ -50,7 +50,7 @@ async def _enumerate_test_results(test_result_registry):
                                   relative_path=d.relative_to(root_dir))
                 _LOGGER.info('Found %s', test_result)
                 # Give other coroutine chance to run.
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(.01)
                 yield _TEST_RESULT_CACHE.setdefault(test_result.abs_path,
                                                     test_result)
 

@@ -42,7 +42,7 @@ async def _load_status(test_result):
 
 async def _write_status(test_result, status):
     """Write new `status` to status file of the `test_result_state`."""
-    _LOGGER.debug('change status of %s to %s', test_result, status)
+    _LOGGER.info('change status of %s to %s', test_result, status)
     (test_result.abs_path / MARKER_FILE).write_text(status.name)
 
 
