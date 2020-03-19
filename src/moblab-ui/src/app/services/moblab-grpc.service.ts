@@ -3,6 +3,12 @@ import * as grpcWeb from "grpc-web";
 
 import { MoblabRpcServiceClient } from "./moblabrpc_grpc_web_pb";
 import {
+  AbortJobsRequest,
+  AbortJobsResponse,
+  AddAttributeToDutsRequest,
+  AddAttributeToDutsResponse,
+  AddLabelToDutsRequest,
+  AddLabelToDutsResponse,
   ConnectedDutFirmwareInfo,
   ConnectedDutInfo,
   DutTask,
@@ -10,10 +16,10 @@ import {
   EnrollDutsResponse,
   GetDutTasksRequest,
   GetDutTasksResponse,
-  GetJobsRequest,
-  GetJobsResponse,
   GetJobDetailsRequest,
   GetJobDetailsResponse,
+  GetJobsRequest,
+  GetJobsResponse,
   GetNumDutTasksRequest,
   GetNumDutTasksResponse,
   GetNumJobsRequest,
@@ -32,20 +38,16 @@ import {
   ListModelsResponse,
   ListPoolsRequest,
   ListPoolsResponse,
+  RemoveAttributeFromDutsRequest,
+  RemoveAttributeFromDutsResponse,
+  RemoveLabelFromDutsRequest,
+  RemoveLabelFromDutsResponse,
   RunCtsSuiteRequest,
   RunCtsSuiteResponse,
   RunSuiteRequest,
   RunSuiteResponse,
   UpdateDutsFirmwareRequest,
   UpdateDutsFirmwareResponse,
-  AddAttributeToDutsRequest,
-  AddAttributeToDutsResponse,
-  RemoveAttributeFromDutsResponse,
-  RemoveAttributeFromDutsRequest,
-  AddLabelToDutsRequest,
-  AddLabelToDutsResponse,
-  RemoveLabelFromDutsResponse,
-  RemoveLabelFromDutsRequest,
 
 } from "./moblabrpc_pb";
 
@@ -204,6 +206,25 @@ export class MoblabGrpcService {
     );
     call.on('data', (response: GetJobsResponse) => {
       callback(response.getJobsList())
+    });
+  }
+
+  abortJobs(callback: (x: ConnectedDutInfo) => void,
+                errorHandlingCallback: (errorMsg: string) => void,
+                jobIds: number[]) {
+    const request = new AbortJobsRequest();
+    request.setJobIdsList(jobIds);
+
+    const call = this.moblabRpcService.abort_jobs(
+      request,
+      {},
+      (err: grpcWeb.Error, response: AbortJobsResponse) => {
+        console.log('Failed abort jobs RPC call. Request: ', request, 'Response: ', err);
+        errorHandlingCallback(err.message)
+      }
+    );
+    call.on('data', (response: AbortJobsResponse) => {
+      callback(response.getMessage());
     });
   }
 

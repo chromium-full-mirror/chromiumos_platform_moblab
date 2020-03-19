@@ -24,6 +24,8 @@ service MoblabRpcService {
   rpc get_jobs(GetJobsRequest) returns (GetJobsResponse)  {}
   rpc get_job_details(GetJobDetailsRequest) returns (GetJobDetailsResponse)  {}
 
+  rpc abort_jobs(AbortJobsRequest) returns (AbortJobsResponse)  {}
+
   rpc get_dut_details(GetDutDetailsRequest) returns (GetDutDetailsResponse)  {}
   rpc get_num_dut_tasks(GetNumDutTasksRequest) returns (GetNumDutTasksResponse) {}
   rpc get_dut_tasks(GetDutTasksRequest) returns (GetDutTasksResponse) {}
@@ -295,6 +297,16 @@ message GetJobDetailsRequest {
 // NEXT_TAG = 2
 message GetJobDetailsResponse {
   Job job_detail = 1;
+}
+
+// NEXT_TAG = 2
+message AbortJobsRequest {
+  repeated int32 job_ids = 1;
+}
+
+// NEXT_TAG = 2
+message AbortJobsResponse {
+  string message = 1;
 }
 
 // NEXT_TAG = 4

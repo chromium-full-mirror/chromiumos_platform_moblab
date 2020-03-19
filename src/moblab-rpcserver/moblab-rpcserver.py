@@ -273,6 +273,15 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 response.jobs.extend([job_proto])
         return response
 
+    def abort_jobs(self, request, _context):
+        message = self.service.abort_jobs(
+            # converting proto RepeatedScalarFieldContainer type to python list
+            [job_id for job_id in request.job_ids]
+        )
+        response =  moblabrpc_pb2.AbortJobsResponse()
+        response.message = message
+        return response
+
     def _convert_timedelta_to_miliseconds(self, minutes=None, seconds=None):
         if not minutes and not seconds:
             return None
