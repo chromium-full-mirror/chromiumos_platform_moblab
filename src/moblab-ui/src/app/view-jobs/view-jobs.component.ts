@@ -40,7 +40,8 @@ const QUEUE_STATUS = 'queueStatus';
 const JOB_RELATIONSHIP = 'relationship';
 const JOB_START_TIME_FROM_FILTER = 'startTimeFromFilter';
 const JOB_START_TIME_TO_FILTER = 'startTimeToFilter';
-const PARENT_JOB_ID = 'parent_job_id'
+const PARENT_JOB_ID = 'parent_job_id';
+const DUT_RUN_ON = 'dut_run_on';
 const FILTER_PARAMETERS = [
   JOB_NAME,
   JOB_ID,
@@ -49,7 +50,8 @@ const FILTER_PARAMETERS = [
   JOB_RELATIONSHIP,
   JOB_START_TIME_FROM_FILTER,
   JOB_START_TIME_TO_FILTER,
-  PARENT_JOB_ID
+  PARENT_JOB_ID,
+  DUT_RUN_ON
 ];
 const FILTER_VALIDATORS = {}
 
@@ -219,9 +221,10 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.getNextPageJobs()
   }
 
-  refreshJobs(parentJobId?: string) {
+  refreshJobs(parentJobId?: string, dutRunOn?: string) {
     this.filters.reset();
     this.filters.setFormValue(PARENT_JOB_ID, parentJobId);
+    this.filters.setFormValue(DUT_RUN_ON, dutRunOn);
     this.resetPagination();
     this.getNextPageJobs();
   }
