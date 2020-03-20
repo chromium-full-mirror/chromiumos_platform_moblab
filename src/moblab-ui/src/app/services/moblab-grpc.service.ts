@@ -14,6 +14,8 @@ import {
   DutTask,
   EnrollDutsRequest,
   EnrollDutsResponse,
+  GetDutDetailsRequest,
+  GetDutDetailsResponse,
   GetDutTasksRequest,
   GetDutTasksResponse,
   GetJobDetailsRequest,
@@ -118,6 +120,25 @@ export class MoblabGrpcService {
       callback(
         response.getDutsList()
       );
+    });
+  }
+
+  getDutDetails(callback: (x: ConnectedDutInfo) => void,
+                errorHandlingCallback: (errorMsg: string) => void,
+                dut: string) {
+    const request = new GetDutDetailsRequest();
+    request.setDut(dut)
+
+    const call = this.moblabRpcService.get_dut_details(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetDutDetailsResponse) => {
+        console.log('Failed get_dut_details RPC call. Request: ', request, 'Response: ', err);
+        errorHandlingCallback(err.message)
+      }
+    );
+    call.on('data', (response: GetDutDetailsResponse) => {
+      callback(response.getDutDetail());
     });
   }
 
