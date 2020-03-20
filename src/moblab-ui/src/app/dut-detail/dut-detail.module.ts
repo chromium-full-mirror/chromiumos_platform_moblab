@@ -4,16 +4,14 @@ import {
   FormsModule,
   ReactiveFormsModule
 } from '@angular/forms';
-import {
-  MatButtonModule,
-  MatTableModule,
-} from '@angular/material';
+import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatTableModule} from '@angular/material/table';
 
 import {DutDetailComponent} from './dut-detail.component';
 import {DutTaskTableComponent} from './dut_task_table/dut_task_table.component'
