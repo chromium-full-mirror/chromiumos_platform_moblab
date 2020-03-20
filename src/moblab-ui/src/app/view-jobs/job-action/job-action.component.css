@@ -1,0 +1,22 @@
+.action-box {
+  display:inline-block;
+  padding: 0px 5px 0px 5px;
+  margin: 0px 10px 0px 10px;
+}
+
+button {
+  margin: 0px 10px 0px 10px;
+}
+
+.mat-card {
+  border: 1px solid #ebebeb;
+  box-shadow: none !important;
+  display:inline-block;
+  padding: 5px 15px 5px 15px;
+  margin: 5px;
+  font-size: 13px;
+}
+
+.mat-form-field {
+  margin: 0px 10px 0px 10px;
+}

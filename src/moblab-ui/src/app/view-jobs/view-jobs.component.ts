@@ -6,27 +6,32 @@ import {
   trigger,
 } from '@angular/animations';
 import {
+  AfterContentInit,
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
-  Input,
   HostListener,
+  Input,
   OnDestroy,
   OnInit,
-  AfterViewInit,
-  AfterContentInit,
   ViewChild,
 } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import {SelectionModel} from '@angular/cdk/collections';
+import {
+  MatPaginator,
+  MatTableDataSource,
+} from '@angular/material';
+import {Router} from '@angular/router';
 
-import {Job} from 'app/services/moblabrpc_pb';
+import {forbiddenDateValidator, forbiddenIDValidator} from '../utils/validators';
+import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
+import {Job, Execution} from '../services/moblabrpc_pb';
+import {JobActionComponent} from './job-action/job-action.component';
+import {KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
-import { INT_TO_PRIORITY, INT_TO_JOBSTATUS } from '../utils/proto_helpers';
-import { normalizeTimestamp, datestringToSecondsTimestamp } from '../utils/date';
-import { forbiddenDateValidator, forbiddenIDValidator } from '../utils/validators';
+import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
+import {TableHeaderSelectorComponent} from '../widgets/table-header-selector/table-header-selector.component';
 
 const JOB_NAME = 'name';
 const JOB_ID = 'id';
@@ -118,7 +123,9 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() manualPopulate: boolean;
   @Input() hideFilters: boolean;
   @Input() hideSelectors: boolean;
-  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(JobActionComponent) jobActionRef: JobActionComponent;
+  @ViewChild(TableHeaderSelectorComponent) tableHeadSelectorRef: TableHeaderSelectorComponent;
   displayedColumns: string[] = [
     'job_id',
     'name',
@@ -130,7 +137,6 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
   jobSelectOptions: string[] = [];
   jobs = new MatTableDataSource<Job>();
-  job_selections = new SelectionModel<Job>(true, []);
   loadingJobs = false;
   numJobs = 0;
   expandedElement: Job|null;
@@ -181,15 +187,12 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
       () => this.getNextPageJobs()
     );
   }
-  selectJob(element) {
-    this.job_selections.select(element);
-  }
 
   selectionChanged(event) {
     if (event.selection === "All") {
-      this.jobs.filteredData.forEach(this.selectJob, this);
+      this.jobs.filteredData.forEach(this.jobActionRef.selectJob, this.jobActionRef);
     } else if (event.selection === "None") {
-      this.job_selections.clear();
+      this.jobActionRef.clearSelectedJobs();
     }
   }
 
@@ -272,6 +275,10 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.jobs.data.length;
   }
 
+  getNumSelectedJobs() {
+    return this.jobActionRef.getNumSelectedJobs();
+  }
+
   /*
     Stops job detail expansion from happening when the user selects a job's
     checkbox.
@@ -280,13 +287,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     e.stopPropagation();
   }
 
-  getNumSelectedJobs() {
-    return this.job_selections.selected.length;
-  }
-
   isAllJobsSelected() {
-    const numSelected = this.getNumSelectedJobs();
-    return numSelected === this.jobs.data.length;
+    return this.jobActionRef.getNumSelectedJobs() === this.jobs.data.length;
   }
 
   ngOnDestroy(): void {
