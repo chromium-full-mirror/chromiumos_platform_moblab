@@ -66,6 +66,5 @@ setuptools.setup(
         'google-cloud-pubsub',
     ],
     scripts=[
-        'scripts/replay_pubsub.py',
         'src/tools/create-moblab-id.py',
     ])
