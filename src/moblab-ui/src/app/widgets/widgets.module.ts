@@ -1,18 +1,18 @@
-import { CommonModule } from "@angular/common";
-import { NgModule } from "@angular/core";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { MatCardModule } from "@angular/material/card";
-import { MatListModule } from "@angular/material/list";
-import { MatSelectModule } from "@angular/material/select";
-import { MatTableModule } from '@angular/material';
+import {CommonModule} from '@angular/common';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatCardModule} from '@angular/material/card';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatListModule} from '@angular/material/list';
+import {MatSelectModule} from '@angular/material/select';
+import {MatTableModule} from '@angular/material/table';
+import {NgModule} from '@angular/core';
 
-import { KeyValTableComponent } from "./keyval-table/keyval-table.component"
-import { MoblabBuildSelectorComponent } from "./moblab-build-selector/moblab-build-selector.component";
-import { MoblabRuntestSelectorComponent } from "./moblab-runtest-selector/moblab-runtest-selector.component";
-import { MoblabSelectorComponent } from "./moblab-selector/moblab-selector.component";
-import { TableHeaderSelectorComponent } from "./table-header-selector/table-header-selector.component";
-import { MatCheckboxModule } from "@angular/material/checkbox";
-import { FlexLayoutModule } from "@angular/flex-layout";
+import {KeyValTableComponent} from './keyval-table/keyval-table.component'
+import {MoblabBuildSelectorComponent} from './moblab-build-selector/moblab-build-selector.component';
+import {MoblabRuntestSelectorComponent} from './moblab-runtest-selector/moblab-runtest-selector.component';
+import {MoblabSelectorComponent} from './moblab-selector/moblab-selector.component';
+import {TableHeaderSelectorComponent} from './table-header-selector/table-header-selector.component';
 
 @NgModule({
   declarations: [
