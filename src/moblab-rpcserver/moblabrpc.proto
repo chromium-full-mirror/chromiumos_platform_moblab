@@ -30,6 +30,9 @@ service MoblabRpcService {
   rpc get_num_dut_tasks(GetNumDutTasksRequest) returns (GetNumDutTasksResponse) {}
   rpc get_dut_tasks(GetDutTasksRequest) returns (GetDutTasksResponse) {}
 
+  rpc reverify_host(ReverifyHostRequest) returns (ReverifyHostResponse) {};
+  rpc repair_host(RepairHostRequest) returns (RepairHostResponse) {};
+
   rpc add_label_to_duts(AddLabelToDutsRequest) returns (AddLabelToDutsResponse) {};
   rpc remove_label_from_duts(RemoveLabelFromDutsRequest) returns (RemoveLabelFromDutsResponse) {};
   rpc add_attribute_to_duts(AddAttributeToDutsRequest) returns (AddAttributeToDutsResponse) {};
@@ -353,6 +356,26 @@ message DutTask {
 // NEXT_TAG = 2
 message GetDutTasksResponse {
   repeated DutTask tasks = 1;
+}
+
+// NEXT_TAG = 2
+message ReverifyHostRequest {
+  string dut_hostname = 1;
+}
+
+// NEXT_TAG = 2
+message ReverifyHostResponse {
+  string message = 1;
+}
+
+// NEXT_TAG = 2
+message RepairHostRequest {
+  string dut_hostname = 1;
+}
+
+// NEXT_TAG = 2
+message RepairHostResponse {
+  string message = 1;
 }
 
 // NEXT_TAG = 3
