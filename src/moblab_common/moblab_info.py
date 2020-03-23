@@ -6,10 +6,10 @@
 
 # pylint: disable=cros-logging-import
 import logging
-import subprocess
 import uuid
 
 from moblab_common import lock_util
+from moblab_common import host_connector
 
 MOBLAB_USER = 'moblab'
 MOBLAB_GROUP = 'moblab'
@@ -57,16 +57,9 @@ NO_SERIAL_NUMBER = 'NoSerialNumber'
 def get_serial_number():
     """Gets a unique identifier for the moblab.
 
-    Serial number is the preferred identifier, use it if present. However
-    fallback is the ethernet mac address.
     """
-    for vpd_key in [_VPD_KEY_SERIAL_NUMBER, _VPD_KEY_ETH_MAC]:
-        try:
-            cmd_result = subprocess.check_output(
-                ['sudo', '--non-interactive', 'vpd', '-g', vpd_key])
-            return cmd_result.decode('ascii')
-        except subprocess.CalledProcessError as err:
-            logging.error(str(err))
-            logging.info(vpd_key)
-
+    try:
+        return host_connector.HostServicesConnector.get_host_identifier()
+    except host_connector.HostServicesException:
+        logging.exception('Failed to get serial number from host.')
     return NO_SERIAL_NUMBER
