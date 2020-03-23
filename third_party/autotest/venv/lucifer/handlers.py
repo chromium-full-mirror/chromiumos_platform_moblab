@@ -31,17 +31,15 @@ class EventHandler(object):
     finishes.
     """
 
-    def __init__(self, metrics, job, autoserv_exit, results_dir):
+    def __init__(self, job, autoserv_exit, results_dir):
         """Initialize instance.
 
-        @param metrics: Metrics instance
         @param job: frontend.afe.models.Job instance to own
         @param hqes: list of HostQueueEntry instances for the job
         @param autoserv_exit: autoserv exit status
         @param results_dir: Job results directory
         """
         self.completed = False
-        self._metrics = metrics
         self._job = job
         # TODO(crbug.com/748234): autoserv not implemented yet.
         self._autoserv_exit = autoserv_exit
@@ -100,14 +98,12 @@ class EventHandler(object):
         host.status = models.Host.Status.RUNNING
         host.dirty = 1
         host.save(update_fields=['status', 'dirty'])
-        self._metrics.send_host_status(host)
 
     def _handle_host_ready(self, msg):
         models = autotest.load('frontend.afe.models')
         host = models.Host.objects.get(hostname=msg)
         host.status = models.Host.Status.READY
         host.save(update_fields=['status'])
-        self._metrics.send_host_status(host)
 
     def _handle_host_needs_cleanup(self, msg):
         models = autotest.load('frontend.afe.models')
@@ -146,7 +142,6 @@ class EventHandler(object):
             logger.debug('Skipping reset because reset_after_failure is False')
             return
         logger.debug('Creating reset jobs for hosts')
-        self._metrics.send_reset_after_failure(autoserv_exit, failures)
         for entry in hqes:
             self._handle_host_needs_reset(entry.host.hostname)
 
@@ -216,81 +211,6 @@ class EventHandler(object):
         if hqe.started_on:
             hqe.finished_on = datetime.datetime.now()
         hqe.save(update_fields=['status', 'active', 'complete', 'finished_on'])
-        self._metrics.send_hqe_completion(hqe)
-        self._metrics.send_hqe_duration(hqe)
-
-
-class Metrics(object):
-
-    """Class for sending job metrics."""
-
-    def __init__(self):
-        # Metrics
-        metrics = autotest.chromite_load('metrics')
-        self._hqe_completion_metric = metrics.Counter(
-                'chromeos/autotest/scheduler/hqe_completion_count')
-        self._reset_after_failure_metric = metrics.Counter(
-                'chromeos/autotest/scheduler/postjob_tasks/'
-                'reset_after_failure')
-        self._host_status_metric = metrics.Boolean(
-                'chromeos/autotest/dut_status', reset_after=True)
-
-    def send_host_status(self, host):
-        """Send ts_mon metrics for host status.
-
-        @param host: frontend.afe.models.Host instance
-        """
-        labellib = autotest.load('utils.labellib')
-        labels = labellib.LabelsMapping.from_host(host)
-        fields = {
-                'dut_host_name': host.hostname,
-                'board': labels['board'],
-                'model': labels['model'],
-        }
-        # As each device switches state, indicate that it is not in any
-        # other state.  This allows Monarch queries to avoid double counting
-        # when additional points are added by the Window Align operation.
-        for s in host.Status.names:
-            fields['status'] = s
-            self._host_status_metric.set(s == host.status, fields=fields)
-
-    def send_hqe_completion(self, hqe):
-        """Send ts_mon metrics for HQE completion."""
-        fields = {
-                'status': hqe.status.lower(),
-                'board': 'NO_HOST',
-                'pool': 'NO_HOST',
-        }
-        if hqe.host:
-            labellib = autotest.load('utils.labellib')
-            labels = labellib.LabelsMapping.from_host(hqe.host)
-            fields['board'] = labels.get('board', '')
-            fields['pool'] = labels.get('pool', '')
-        self._hqe_completion_metric.increment(fields=fields)
-
-    def send_hqe_duration(self, hqe):
-        """Send CloudTrace metrics for HQE duration."""
-        if not (hqe.started_on and hqe.finished_on):
-            return
-        scheduler_models = autotest.load('scheduler.scheduler_models')
-        cloud_trace = autotest.chromite_load('cloud_trace')
-        types = autotest.deps_load('google.protobuf.internal.well_known_types')
-        hqe_trace_id = scheduler_models.hqe_trace_id
-
-        span = cloud_trace.Span(
-                'HQE', spanId='0', traceId=hqe_trace_id(hqe.id))
-        span.startTime = types.Timestamp()
-        span.startTime.FromDatetime(hqe.started_on)
-        span.endTime = types.Timestamp()
-        span.endTime.FromDatetime(hqe.finished_on)
-        cloud_trace.LogSpan(span)
-
-    def send_reset_after_failure(self, autoserv_exit, failures):
-        """Send reset_after_failure metric."""
-        self._reset_after_failure_metric.increment(
-                fields={'autoserv_process_success': autoserv_exit == 0,
-                        # Yes, this is a boolean
-                        'num_tests_failed': failures > 0})
 
 
 def _mark_hqe_aborted(hqe):

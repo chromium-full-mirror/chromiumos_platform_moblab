@@ -54,6 +54,11 @@ from autotest_lib.client.common_lib import logging_manager
 from autotest_lib.client.common_lib import metrics_mock_class
 from autotest_lib.client.cros import constants
 
+try:
+    from moblab_common import host_connector
+except ImportError:
+    pass
+
 # pylint: disable=wildcard-import
 from autotest_lib.client.common_lib.lsbrelease_utils import *
 
@@ -1923,13 +1928,10 @@ WIRELESS_SSID_PATTERN = 'wireless_ssid_(.*)/(\d+)'
 def get_moblab_serial_number():
     """Gets a unique identifier for the moblab.
     """
-    vpd_file = "/mnt/stateful_partition/unencrypted/cache/vpd/full-v2.txt"
-    sn_re = re.compile(r"\"serial_number\"=\"(.*)\"")
-    if os.path.exists(vpd_file):
-        lines = open(vpd_file, "r").read()
-        result = sn_re.search(lines)
-        if result:
-            return result.group(1)
+    try:
+        return host_connector.HostServicesConnector.get_host_identifier()
+    except host_connector.HostServicesException:
+        logging.exception('Failed to get serial number from host.')
     return 'NoSerialNumber'
 
 

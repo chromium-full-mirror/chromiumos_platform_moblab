@@ -32,14 +32,11 @@ from autotest_lib.client.common_lib import host_states
 from autotest_lib.server import results_mocker
 from autotest_lib.server.cros.dynamic_suite import suite
 
-try:
-    from chromite.lib import metrics
-    from chromite.lib import cloud_trace
-except ImportError:
-    from autotest_lib.client.common_lib import utils as common_utils
-    metrics = common_utils.metrics_mock
-    import mock
-    cloud_trace = mock.MagicMock()
+
+from autotest_lib.client.common_lib import utils as common_utils
+metrics = common_utils.metrics_mock
+import mock
+cloud_trace = mock.MagicMock()
 
 _CONFIG = global_config.global_config
 
@@ -162,7 +159,7 @@ def _run_with_ssp(job, container_id, job_id, results, parser, ssp_url,
                     parser.options.results:
                     parser.options.results  can be set to None for results to be
                     stored in a temp folder.
-                    results can be None for autoserv run requires no logging.
+                    results can be None if the autoserv run requires no logging.
     @param parser: Command line parser that contains the options.
     @param ssp_url: url of the staged server-side package.
     @param machines: A list of machines to run the test.
@@ -499,7 +496,7 @@ def run_autoserv(pid_file_manager, results, parser, ssp_url, use_ssp):
     try:
       logging.debug("Parser.options.args is %r", parser.options.args)
     except AttributeError:
-            logging.debug("No Parser.options.args.")
+      logging.debug("No Parser.options.args.")
 
     job_kwargs = {
             'control': control,
@@ -527,6 +524,7 @@ def run_autoserv(pid_file_manager, results, parser, ssp_url, use_ssp):
             'disable_sysinfo': parser.options.disable_sysinfo,
             'in_lab': in_lab,
             'use_client_trampoline': use_client_trampoline,
+            'sync_offload_dir': parser.options.sync_offload_dir,
     }
     if parser.options.parent_job_id:
         job_kwargs['parent_job_id'] = int(parser.options.parent_job_id)

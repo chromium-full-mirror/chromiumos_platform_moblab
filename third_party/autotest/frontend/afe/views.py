@@ -85,8 +85,8 @@ def handler500(request):
     t = loader.get_template('500.html')
     trace = traceback.format_exc()
     context = Context({
-        'type': sys.exc_type,
-        'value': sys.exc_value,
+        'type': sys.exc_info(),
+        'value': sys.exc_info(),
         'traceback': cgi.escape(trace)
     })
     return HttpResponseServerError(t.render(context))

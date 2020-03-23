@@ -30,6 +30,9 @@ except ImportError:
     metrics = client_utils.metrics_mock
 
 
+# This is assumed to be the value by tests, do not change it.
+OFFLOAD_ENVVAR = "SYNCHRONOUS_OFFLOAD_DIR"
+
 AUTOTEST_SVN = 'svn://test.kernel.org/autotest/trunk/client'
 AUTOTEST_HTTP = 'http://test.kernel.org/svn/autotest/trunk/client'
 
@@ -676,7 +679,6 @@ class _Run(object):
     def __init__(self, host, results_dir, tag, parallel_flag, background):
         self.host = host
         self.results_dir = results_dir
-        self.env = host.env
         self.tag = tag
         self.parallel_flag = parallel_flag
         self.background = background
@@ -815,6 +817,62 @@ class _Run(object):
         return bool(re.match(r'^\t*GOOD\t[\w.-]+\treboot\.start.*$', last_line))
 
 
+    # Roughly ordered list from concrete to less specific reboot causes.
+    _failure_reasons = [
+        # Try to find possible reasons leading towards failure.
+        ('ethernet recovery methods have failed. Rebooting.',
+         'dead ethernet dongle crbug/1031035'),
+        # GPU hangs are not always recovered from.
+        ('[drm:amdgpu_job_timedout] \*ERROR\* ring gfx timeout',
+         'drm ring gfx timeout'),
+        ('[drm:do_aquire_global_lock] \*ERROR(.*)hw_done or flip_done timed',
+         'drm hw/flip timeout'),
+        ('[drm:i915_hangcheck_hung] \*ERROR\* Hangcheck(.*)GPU hung',
+         'drm GPU hung'),
+        # TODO(ihf): try to get a better magic signature for kernel crashes.
+        ('BUG: unable to handle kernel paging request', 'kernel paging'),
+        ('Kernel panic - not syncing: Out of memory', 'kernel out of memory'),
+        ('Kernel panic - not syncing', 'kernel panic'),
+        # Fish for user mode killing OOM messages. Shows unstable system.
+        ('out_of_memory', 'process out of memory'),
+        # Reboot was bad enough to have truncated the logs.
+        ('crash_reporter(.*)Stored kcrash', 'kcrash'),
+        ('crash_reporter(.*)Last shutdown was not clean', 'not clean'),
+    ]
+
+    def _diagnose_reboot(self):
+        """
+        Runs diagnostic check on a rebooted DUT.
+
+        TODO(ihf): if this analysis is useful consider moving the code to the
+                   DUT into a script and call it from here. This is more
+                   powerful and might be cleaner to grow in functionality. But
+                   it may also be less robust if stateful is damaged during the
+                   reboot.
+
+        @returns msg describing reboot reason.
+        """
+        reasons = []
+        for (message, bucket) in self._failure_reasons:
+            # Use -a option for grep to avoid "binary file" warning to stdout.
+            # The grep -v is added to not match itself in the log (across jobs).
+            # Using grep is slightly problematic as it finds any reason, not
+            # just the most recent reason (since 2 boots ago), so it may guess
+            # wrong. Multiple reboots are unusual in the lab setting though and
+            # it is better to have a reasonable guess than no reason at all.
+            found = self.host.run(
+                "grep -aE '" + message + "' /var/log/messages | grep -av grep",
+                ignore_status=True
+            ).stdout
+            if found and found.strip():
+                reasons.append(bucket)
+        signature = 'reason unknown'
+        if reasons:
+            # Concatenate possible reasons found to obtain a magic signature.
+            signature = ', '.join(reasons)
+        return ('DUT rebooted during the test run. (%s)\n' % signature)
+
+
     def _diagnose_dut(self, old_boot_id=None):
         """
         Run diagnostic checks on a DUT.
@@ -849,7 +907,7 @@ class _Run(object):
                 raise AutotestDeviceNotSSHable(msg)
             else:
                 if new_boot_id != old_boot_id:
-                    msg += 'DUT rebooted during the test run.\n'
+                    msg += self._diagnose_reboot()
                     raise AutotestDeviceRebooted(msg)
 
             msg += ('DUT is pingable, SSHable and did NOT restart '
@@ -966,7 +1024,7 @@ class _Run(object):
 
 
     def execute_section(self, section, timeout, stderr_redirector,
-                        client_disconnect_timeout):
+                        client_disconnect_timeout, boot_id=None):
         # TODO(crbug.com/684311) The claim is that section is never more than 0
         # in pratice. After validating for a week or so, delete all support of
         # multiple sections.
@@ -995,7 +1053,7 @@ class _Run(object):
 
         # log something if the client failed AND never finished logging
         if err and not self.is_client_job_finished(last_line):
-            self.log_unexpected_abort(stderr_redirector)
+            self.log_unexpected_abort(stderr_redirector, old_boot_id=boot_id)
 
         if err:
             raise err
@@ -1053,7 +1111,8 @@ class _Run(object):
                     section_timeout = None
                 boot_id = self.host.get_boot_id()
                 last = self.execute_section(section, section_timeout,
-                                            logger, client_disconnect_timeout)
+                                            logger, client_disconnect_timeout,
+                                            boot_id=boot_id)
                 if self.background:
                     return
                 section += 1
