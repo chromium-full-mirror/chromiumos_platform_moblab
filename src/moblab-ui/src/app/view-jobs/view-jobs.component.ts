@@ -18,10 +18,8 @@ import {
 } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
-import {
-  MatPaginator,
-  MatTableDataSource,
-} from '@angular/material';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatTableDataSource} from '@angular/material/table';
 import {Router} from '@angular/router';
 
 import {forbiddenDateValidator, forbiddenIDValidator} from '../utils/validators';
