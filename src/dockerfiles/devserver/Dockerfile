@@ -60,8 +60,6 @@ RUN install -m 0644  \
         /usr/lib/devserver
 
 RUN mkdir /static
-RUN install -m 0644 stateful_update /static
-RUN install -m 0644 quick-provision/quick-provision /static
 
 EXPOSE 8080
 
