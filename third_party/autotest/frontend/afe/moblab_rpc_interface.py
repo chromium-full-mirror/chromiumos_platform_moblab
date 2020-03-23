@@ -32,7 +32,6 @@ from chromite.lib import gs
 
 _CONFIG = global_config.global_config
 MOBLAB_BOTO_LOCATION = '/home/moblab/.boto'
-CROS_CACHEDIR = '/mnt/moblab/cros_cache_apache'
 
 # Google Cloud Storage bucket url regex pattern. The pattern is used to extract
 # the bucket name from the bucket URL. For example, "gs://image_bucket/google"
@@ -51,7 +50,7 @@ _WIFI_AP_NAME = 'wifi_dut_ap_name'
 _WIFI_AP_PASS = 'wifi_dut_ap_pass'
 
 # Location where dhcp leases are stored.
-_DHCPD_LEASES = '/var/lib/dhcp/dhcpd.leases'
+_DHCPD_LEASES = '/leases/dnsmasq.leases'
 
 # File where information about the current device is stored.
 _ETC_LSB_RELEASE = '/etc/lsb-release'
@@ -75,8 +74,7 @@ class GsUtil:
     @classmethod
     def get_gsutil_cmd(cls):
       if not cls._GSUTIL_CMD:
-         cls._GSUTIL_CMD = gs.GSContext.GetDefaultGSUtilBin(
-           cache_dir=CROS_CACHEDIR)
+         cls._GSUTIL_CMD = gs.GSContext.GetDefaultGSUtilBin()
 
       return cls._GSUTIL_CMD
 
@@ -197,7 +195,7 @@ def update_config_handler(config_values):
 
     # TODO (sbasi) crbug.com/403916 - Remove the reboot command and
     # instead restart the services that rely on the config values.
-    os.system('sudo reboot')
+    #os.system('sudo reboot')
 
 
 @rpc_utils.moblab_only
@@ -205,13 +203,13 @@ def reset_config_settings():
     """Reset moblab shadow config."""
     with open(_CONFIG.shadow_file, 'w') as config_file:
         pass
-    os.system('sudo reboot')
+    #os.system('sudo reboot')
 
 
 @rpc_utils.moblab_only
 def reboot_moblab():
     """Simply reboot the device."""
-    os.system('sudo reboot')
+    #os.system('sudo reboot')
 
 
 @rpc_utils.moblab_only
@@ -254,7 +252,7 @@ def set_launch_control_key(launch_control_key):
     shutil.copyfile(launch_control_key,
                     moblab_host.MOBLAB_LAUNCH_CONTROL_KEY_LOCATION)
     # Restart the devserver service.
-    os.system('sudo restart moblab-devserver-init')
+    #os.system('sudo restart moblab-devserver-init')
 
 
 ###########Moblab Config Wizard RPCs #######################
@@ -455,12 +453,6 @@ def submit_wizard_config_info(cloud_storage_info, wifi_info):
     cmd += ';sudo start ' + ';sudo start '.join(services)
     cmd += ';sudo apache2 -k graceful'
     logging.info(cmd)
-    try:
-        utils.run(cmd)
-    except error.CmdError as e:
-        logging.error(e)
-        # if all else fails reboot the device.
-        utils.run('sudo reboot')
 
     return _create_operation_status_response(True, None)
 
@@ -477,11 +469,11 @@ def get_version_info():
     version_response['MOBLAB_ID'] = utils.get_moblab_id();
     version_response['MOBLAB_SERIAL_NUMBER'] = (
         utils.get_moblab_serial_number())
-    _check_for_system_update()
-    update_status = _get_system_update_status()
-    version_response['MOBLAB_UPDATE_VERSION'] = update_status['NEW_VERSION']
-    version_response['MOBLAB_UPDATE_STATUS'] = update_status['CURRENT_OP']
-    version_response['MOBLAB_UPDATE_PROGRESS'] = update_status['PROGRESS']
+    #_check_for_system_update()
+    #update_status = _get_system_update_status()
+    version_response['MOBLAB_UPDATE_VERSION'] = ""
+    version_response['MOBLAB_UPDATE_STATUS'] = ""
+    version_response['MOBLAB_UPDATE_PROGRESS'] = ""
     return rpc_utils.prepare_for_serialization(version_response)
 
 
@@ -497,13 +489,13 @@ def _check_for_system_update():
     in the background
     """
     # sudo is required to run the update client
-    subprocess.call(['sudo', _UPDATE_ENGINE_CLIENT, '--check_for_update'])
+    #subprocess.call(['sudo', _UPDATE_ENGINE_CLIENT, '--check_for_update'])
     # wait for update engine to finish checking
-    tries = 0
-    while ('CHECKING_FOR_UPDATE' in _get_system_update_status()['CURRENT_OP']
-            and tries < 10):
-        time.sleep(.1)
-        tries = tries + 1
+    #tries = 0
+    #while ('CHECKING_FOR_UPDATE' in _get_system_update_status()['CURRENT_OP']
+    #        and tries < 10):
+    #    time.sleep(.1)
+    #    tries = tries + 1
 
 def _get_system_update_status():
     """ Run the ChromeOS update client to check status on a
@@ -519,11 +511,11 @@ def _get_system_update_status():
     }
     """
     # sudo is required to run the update client
-    cmd_out = subprocess.check_output(
-        ['sudo' ,_UPDATE_ENGINE_CLIENT, '--status'])
-    split_lines = [x.split('=') for x in cmd_out.strip().split('\n')]
-    status = dict((key, val) for [key, val] in split_lines)
-    return status
+    #cmd_out = subprocess.check_output(
+    #    ['sudo' ,_UPDATE_ENGINE_CLIENT, '--status'])
+    #split_lines = [x.split('=') for x in cmd_out.strip().split('\n')]
+    #status = dict((key, val) for [key, val] in split_lines)
+    return {}
 
 
 def _install_system_update():
@@ -580,18 +572,16 @@ def _get_dhcp_dut_leases():
 
      @return: A dict of ipaddress to mac address for each device connected.
      """
-     lease_info = open(_DHCPD_LEASES).read()
+     if not os.path.exists(_DHCPD_LEASES):
+         return {}
+     lease_info = open(_DHCPD_LEASES).readlines()
 
+     # Lease lines look like this:
+     # 1584225109 60:38:e0:e3:10:bd 192.168.231.113 * 01:60:38:e0:e3:10:bd
      leases = {}
-     for lease in lease_info.split('lease'):
-         if lease.find('binding state active;') != -1:
-             ipaddress = lease.split('\n')[0].strip(' {')
-             last_octet = int(ipaddress.split('.')[-1].strip())
-             if last_octet > 150:
-                 continue
-             mac_address_search = re.search('hardware ethernet (.*);', lease)
-             if mac_address_search:
-                 leases[ipaddress] = mac_address_search.group(1)
+     for lease in lease_info:
+         items = lease.strip().split(' ')
+         leases[items[2]] = items[1]
      return leases
 
 def _test_all_dut_connections(leases):

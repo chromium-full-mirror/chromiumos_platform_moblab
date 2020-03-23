@@ -84,12 +84,7 @@ def _main(args):
 
     @param args: Namespace object containing parsed arguments
     """
-    ts_mon_config = autotest.chromite_load('ts_mon_config')
-    metrics = autotest.chromite_load('metrics')
-    with ts_mon_config.SetupTsMonGlobalState(
-            'job_reporter', short_lived=True):
-        atexit.register(metrics.Flush)
-        return _run_autotest_job(args)
+    return _run_autotest_job(args)
 
 
 def _run_autotest_job(args):
@@ -116,7 +111,6 @@ def _prepare_autotest_job_files(args, job):
 def _make_handler(args, job):
     """Make event handler for lucifer."""
     return handlers.EventHandler(
-            metrics=handlers.Metrics(),
             job=job,
             autoserv_exit=None,
             results_dir=args.results_dir,

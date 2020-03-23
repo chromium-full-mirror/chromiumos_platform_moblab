@@ -110,7 +110,6 @@ class WiFiClient(site_linux_system.LinuxSystem):
     UNKNOWN_BOARD_TYPE = 'unknown'
 
     # DBus device properties. Wireless interfaces should support these.
-    ROAM_THRESHOLD = 'RoamThreshold'
     WAKE_ON_WIFI_FEATURES = 'WakeOnWiFiFeaturesEnabled'
     NET_DETECT_SCAN_PERIOD = 'NetDetectScanPeriodSeconds'
     WAKE_TO_SCAN_PERIOD = 'WakeToScanPeriodSeconds'
@@ -619,7 +618,12 @@ class WiFiClient(site_linux_system.LinuxSystem):
 
       """
       # If the scan returns None, return 0, else return the matching count
-      num_bss_actual = 0
+
+      # Wrap num_bss_actual as a mutable object, list, so that an inner function
+      # can update the value without making an assignment to it. Without any
+      # assignment, the inner function will look for the variable in outer scope
+      # instead of creating a new local one.
+      num_bss_actual = [0]
       def are_all_bsses_discovered():
           """Determine if all BSSes associated with the SSID from parent
           function are discovered in the scan
@@ -635,18 +639,19 @@ class WiFiClient(site_linux_system.LinuxSystem):
                     ssids=[ssid])
             if scan_results is None:
                 return False
-            num_bss_actual = sum(ssid == bss.ssid for bss in scan_results)
-            return num_bss_expected == num_bss_actual
+            num_bss_actual[0] = sum(ssid == bss.ssid for bss in scan_results)
+            return num_bss_expected == num_bss_actual[0]
           finally:
             self.release_wifi_if()
-
-      utils.poll_for_condition(
+      try:
+          utils.poll_for_condition(
               condition=are_all_bsses_discovered,
-              exception=error.TestFail('Failed to discover all BSSes. Found %d,'
-                                      ' wanted %d with SSID %s' %
-                                      (num_bss_actual, num_bss_expected, ssid)),
               timeout=timeout_seconds,
               sleep_interval=0.5)
+      except utils.TimeoutError:
+          raise error.TestFail('Failed to discover all BSSes. Found %d,'
+                               ' wanted %d with SSID %s' %
+                               (num_bss_actual[0], num_bss_expected, ssid))
 
     def wait_for_service_states(self, ssid, states, timeout_seconds):
         """Waits for a WiFi service to achieve one of |states|.
@@ -709,26 +714,6 @@ class WiFiClient(site_linux_system.LinuxSystem):
         return self._shill_proxy.get_active_wifi_SSIDs()
 
 
-    def roam_threshold(self, value):
-        """Get a context manager to temporarily change wpa_supplicant's
-        roaming threshold for the specified interface.
-
-        The correct way to use this method is:
-
-        with client.roam_threshold(40):
-            ...
-
-        @param value: the desired roam threshold for the test.
-
-        @return a context manager for the threshold.
-
-        """
-        return TemporaryDeviceDBusProperty(self._shill_proxy,
-                                           self.wifi_if,
-                                           self.ROAM_THRESHOLD,
-                                           value)
-
-
     def set_device_enabled(self, wifi_interface, value,
                            fail_on_unsupported=False):
         """Enable or disable the WiFi device.
@@ -756,43 +741,6 @@ class WiFiClient(site_linux_system.LinuxSystem):
         """
         self.host.run('ip neigh add %s lladdr %s dev %s nud perm' %
                       (ip_address, mac_address, self.wifi_if))
-
-
-    def discover_tdls_link(self, mac_address):
-        """Send a TDLS Discover to |peer_mac_address|.
-
-        @param mac_address: string MAC address associated with the TDLS peer.
-
-        @return bool True if operation initiated successfully, False otherwise.
-
-        """
-        logging.info('TDLS discovery with peer %s', mac_address)
-        return self._shill_proxy.discover_tdls_link(self.wifi_if, mac_address)
-
-
-    def establish_tdls_link(self, mac_address):
-        """Establish a TDLS link with |mac_address|.
-
-        @param mac_address: string MAC address associated with the TDLS peer.
-
-        @return bool True if operation initiated successfully, False otherwise.
-
-        """
-        logging.info('Establishing TDLS link with peer %s', mac_address)
-        return self._shill_proxy.establish_tdls_link(self.wifi_if, mac_address)
-
-
-    def query_tdls_link(self, mac_address):
-        """Query a TDLS link with |mac_address|.
-
-        @param mac_address: string MAC address associated with the TDLS peer.
-
-        @return string indicating current TDLS connectivity.
-
-        """
-        logging.info('Querying TDLS link with peer %s', mac_address)
-        return self._shill_proxy.query_tdls_link(self.wifi_if, mac_address)
-
 
     def add_wake_packet_source(self, source_ip):
         """Add |source_ip| as a source that can wake us up with packets.
@@ -857,7 +805,12 @@ class WiFiClient(site_linux_system.LinuxSystem):
     def net_detect_scan_period_seconds(self, period):
         """Sets the period between net detect scans performed by the NIC to look
         for whitelisted SSIDs to |period|. This setting only takes effect if the
-        NIC is programmed to wake on SSID. Use as with roam_threshold.
+        NIC is programmed to wake on SSID.
+
+        The correct way to use this method is:
+
+        with client.net_detect_scan_period_seconds(60):
+            ...
 
         @param period: integer number of seconds between NIC net detect scans
 
@@ -873,7 +826,8 @@ class WiFiClient(site_linux_system.LinuxSystem):
     def wake_to_scan_period_seconds(self, period):
         """Sets the period between RTC timer wakeups where the system is woken
         from suspend to perform scans. This setting only takes effect if the
-        NIC is programmed to wake on SSID. Use as with roam_threshold.
+        NIC is programmed to wake on SSID. Use as with
+        net_detect_scan_period_seconds.
 
         @param period: integer number of seconds between wake to scan RTC timer
                 wakes.
@@ -1079,8 +1033,12 @@ class WiFiClient(site_linux_system.LinuxSystem):
         """
         start_time = time.time()
         duration = lambda: time.time() - start_time
-        state = [None] # need mutability for the nested method to save state
 
+        # Wrap state as a mutable object, list, so that an inner function can
+        # update the value without making an assignment to it. Without any
+        # assignment, the inner function will look for the variable in outer
+        # scope instead of creating a new local one.
+        state = [None]
         def verify_connection():
             """Verify the connection and perform optional operations
             as defined in the parent function
@@ -1124,16 +1082,19 @@ class WiFiClient(site_linux_system.LinuxSystem):
 
         freq_error_str = (' on frequency %d Mhz' % freq) if freq else ''
 
-        return utils.poll_for_condition(
+        try:
+            ret = utils.poll_for_condition(
                 condition=verify_connection,
-                exception=error.TestFail(
-                        'Failed to connect to "%s"%s in %f seconds (state=%s)' %
-                        (ssid,
-                        freq_error_str,
-                        duration(),
-                        state[0])),
                 timeout=timeout_seconds,
                 sleep_interval=0)
+        except utils.TimeoutError:
+            raise error.TestFail(
+                'Failed to connect to "%s"%s in %f seconds (state=%s)' %
+                (ssid,
+                 freq_error_str,
+                 duration(),
+                 state[0]))
+        return ret
 
     @contextmanager
     def assert_disconnect_count(self, count):

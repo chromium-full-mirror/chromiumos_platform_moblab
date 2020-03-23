@@ -1,15 +1,27 @@
 [
     {
-        "source": "/etc/resolv.conf",
-        "target": "/etc/resolv.conf",
-        "append": true,
-        "permission": 400
+        "source": "~/.boto",
+        "target": "/home/moblab/.boto",
+        "append": false,
+        "permission": 500
+    },
+    {
+        "source": "~/.ssh",
+        "target": "/home/moblab/.ssh",
+        "append": false,
+        "permission": 600
     },
     {
         "source": "~/.ssh",
         "target": "/root/.ssh",
         "append": false,
-        "permission": 400
+        "permission": 600
+    },
+    {
+        "source": "~/.boto",
+        "target": "/root/.boto",
+        "append": false,
+        "permission": 500
     },
     {
         "source": "shadow_config.ini",
