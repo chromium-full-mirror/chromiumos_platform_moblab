@@ -230,7 +230,7 @@ export class MoblabGrpcService {
     });
   }
 
-  abortJobs(callback: (x: ConnectedDutInfo) => void,
+  abortJobs(callback: (message: string) => void,
                 errorHandlingCallback: (errorMsg: string) => void,
                 jobIds: number[]) {
     const request = new AbortJobsRequest();
