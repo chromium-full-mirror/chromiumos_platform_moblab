@@ -36,7 +36,7 @@ RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/p
 
 ######################################################################
 
-FROM debian:buster as goinstall
+FROM ubuntu:latest as goinstall
 
 COPY --from=downloads /*.gz /
 
@@ -65,7 +65,7 @@ RUN go build -i -o /usr/bin/lucifer lucifer/cmd/lucifer
 
 ######################################################################
 
-FROM debian:buster as protobuild
+FROM ubuntu:latest as protobuild
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	unzip
@@ -86,7 +86,7 @@ RUN protoc --proto_path / --python_out=/ config.proto
 
 ######################################################################
 
-FROM debian:buster as build
+FROM ubuntu:latest as build
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
         curl unzip python2.7 cmake \
@@ -126,27 +126,21 @@ RUN /usr/local/autotest/utils/compile_gwt_clients.py -a -e"-Djava.util.prefs.use
 
 ###################################################################
 
-FROM debian:buster as run_env
+FROM ubuntu:latest as run_env
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	curl unzip python2.7 lxc pbzip2 xz-utils \
 	sudo libpython2.7-dev \
 	default-libmysqlclient-dev ssh gcc \
 	apache2 apache2-utils libapache2-mod-wsgi \
-	virtualenv rsync bzip2 vim docker.io mariadb-client
+	virtualenv rsync bzip2 vim docker.io iputils-ping \
+	mariadb-client
 
 # Apache setup
 RUN a2enmod headers
 RUN a2enmod rewrite
 RUN a2dismod mpm_event
 RUN a2enmod mpm_prefork
-
-#setcap to bind to privileged ports as non-root
-RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/apache2
-RUN getcap /usr/sbin/apache2
-
-RUN setcap 'cap_net_bind_service=+ep' /bin/ping
-RUN getcap /bin/ping
 
 RUN sed -i 's/www-data/moblab/g' /etc/apache2/envvars
 
@@ -203,7 +197,6 @@ RUN ln -s /etc/apache2/mods-available/apache-docker.conf /etc/apache2/mods-enabl
 RUN cp /moblab/third_party/autotest/apache/conf/* /etc/apache2/mods-available
 RUN cp /moblab/third_party/autotest/apache/conf/* /etc/apache2/mods-enabled
 
-RUN sed -i 's/#MySQL-python==1.2.5/MySQL-python==1.2.5/g' /moblab/third_party/autotest/venv/requirements.txt
 
 RUN chown -R moblab:moblab /etc/apache2/mods-enabled/*
 
