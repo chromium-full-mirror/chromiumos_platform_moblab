@@ -123,18 +123,20 @@ RUN mkdir -p /usr/local/autotest
 RUN mv gwt-2.8.2/ /usr/local/autotest/site-packages/gwt
 RUN ln -s /chromite /usr/local/autotest/site-packages/chromite
 RUN /usr/local/autotest/utils/compile_gwt_clients.py -a -e"-Djava.util.prefs.userRoot=/tmp"
+RUN rm -rf /usr/local/autotest/site-packages/gwt
 
 ###################################################################
 
 FROM ubuntu:latest as run_env
 # Install packages
+RUN addgroup --gid 412 docker
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-	curl unzip python2.7 lxc pbzip2 xz-utils \
+	curl unzip python2.7 pbzip2 xz-utils \
 	sudo libpython2.7-dev \
 	default-libmysqlclient-dev ssh gcc \
 	apache2 apache2-utils libapache2-mod-wsgi \
-	virtualenv rsync bzip2 vim docker.io iputils-ping \
-	mariadb-client
+	virtualenv rsync bzip2 vim iputils-ping \
+	mariadb-client apt-transport-https ca-certificates gnupg
 
 # Apache setup
 RUN a2enmod headers
@@ -209,6 +211,17 @@ RUN chmod uog+rw /run
 RUN chown -R moblab /var/log/apache2
 RUN chown -R root /etc/sudoers.d
 
+# Install the google cloud sdk
+RUN echo \
+    "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
+    http://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    apt-key --keyring /usr/share/keyrings/cloud.google.gpg  \
+    add - && apt-get update -y && apt-get install google-cloud-sdk -y
+
+RUN apt purge -yq gcc
+
 USER moblab
 ENV USER=moblab
 RUN mkdir /moblab/third_party/autotest/logs
@@ -222,6 +235,9 @@ COPY --chown=moblab --from=source /chromite/ssh_keys/* /home/moblab/.ssh/
 RUN chmod -R 600 /home/moblab/.ssh/*
 COPY src/dockerfiles/autotest/ssh_config /home/moblab/.ssh/config
 RUN touch /home/moblab/.boto
+
+RUN sudo usermod -aG docker $USER
+
 EXPOSE 8888
 
 CMD ["/autotest_init"]
