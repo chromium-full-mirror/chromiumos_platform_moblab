@@ -1,0 +1,61 @@
+<mat-card>
+  <div class="form-wrapper">
+    <b class="edit-box-contents">Attribute:</b>
+    <mat-form-field class="filter edit-box-contents key-form-field"
+                    floatLabel="never">
+      <input id="attribute-key-input" matInput
+             [formControl]="attribute_key"
+             placeholder='key'>
+    </mat-form-field>
+    <mat-form-field class="filter edit-box-contents value-form-field"
+                    floatLabel="never">
+      <input id="attribute-value-input" matInput
+             [formControl]="attribute_value"
+             placeholder='value'>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary"
+            id="add-label-button"
+            (click)="doEdit(addLabel)"
+            [disabled]="attribute_key.value === '' || attribute_value.value === ''"
+            class="edit-box-contents">
+      Add
+    </button>
+    <button mat-raised-button
+            id="remove-label-button"
+            (click)="doEdit(removeLabel)"
+            [disabled]="attribute_key.value === '' || attribute_value.value !== ''"
+            class="edit-box-contents">
+      Remove
+    </button>
+  </div>
+
+  <div class="filter edit-box-contents form-wrapper">
+    <b class="edit-box-contents"> Label: </b>
+    <mat-form-field id="dateInputFormField"
+                    class="edit-box-contents filter key-form-field"
+                    floatLabel="never">
+      <input id="label-input" matInput
+             [formControl]="label"
+             placeholder='key'>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary"
+            id="add-attribute-button"
+            (click)="doEdit(addAttribute)"
+            [disabled]="label.value === ''"
+            class="edit-box-contents">
+      Add
+    </button>
+    <button mat-raised-button
+            id="remove-attribute-button"
+            (click)="doEdit(removeAttribute)"
+            [disabled]="label.value === ''"
+            class="edit-box-contents">
+      Remove
+    </button>
+  </div>
+</mat-card>
+<app-view-duts
+  hideUnenrolledDuts=true
+></app-view-duts>

@@ -1,0 +1,34 @@
+.mat-card {
+  box-shadow: none !important;
+}
+
+.mat-form-field {
+  max-width:100px;
+  transform: perspective(1px);
+}
+
+.mat-form-field-infix {
+  border-top: 0px;
+}
+
+.edit-box-contents {
+  margin: 3px;
+  display: inline-block;
+}
+
+.form-wrapper {
+  display:inline-block;
+  border: 1px solid #ebebeb;
+  font-size:13px;
+  padding: 0px 5px 0px 5px;
+  margin: 0px 10px 0px 10px;
+}
+
+.key-form-field {
+  max-width:100px;
+  transform: perspective(1px);
+}
+
+.value-form-field {
+  max-width:120px;
+}

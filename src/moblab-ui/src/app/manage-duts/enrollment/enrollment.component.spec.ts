@@ -1,18 +1,19 @@
 /* tslint:disable:no-unused-variable */
-import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {By} from '@angular/platform-browser';
+import {DebugElement} from '@angular/core';
+import {MatCardModule} from '@angular/material/card';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTableModule} from '@angular/material/table';
+import {RouterModule} from '@angular/router';
 
-import {
-  MatCardModule,
-  MatCheckboxModule,
-  MatTableModule
-} from "@angular/material";
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {EnrollmentComponent} from './enrollment.component';
+import {PipesModule} from 'app/pipes/pipes.module';
+import {WidgetsModule} from 'app/widgets/widgets.module';
+import {ViewDutsComponent} from '../view-duts/view-duts.component';
 
-import { EnrollmentComponent } from './enrollment.component';
-import { PipesModule } from "app/pipes/pipes.module";
-import { WidgetsModule } from "app/widgets/widgets.module";
 
 describe('EnrollmentComponent', () => {
   let component: EnrollmentComponent;
@@ -24,11 +25,14 @@ describe('EnrollmentComponent', () => {
           BrowserAnimationsModule,
           MatCardModule,
           MatCheckboxModule,
+          MatIconModule,
           MatTableModule,
           PipesModule,
+          RouterModule,
+          RouterModule.forRoot([]),
           WidgetsModule,
         ],
-        declarations: [EnrollmentComponent]})
+        declarations: [EnrollmentComponent, ViewDutsComponent]})
         .compileComponents();
   }));
 
