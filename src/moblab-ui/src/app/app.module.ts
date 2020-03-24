@@ -2,18 +2,21 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BrowserModule} from '@angular/platform-browser';
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {LayoutModule} from '@angular/cdk/layout';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatChipsModule} from '@angular/material/chips';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -28,6 +31,7 @@ import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {AppSidebarComponent} from './app-sidebar/app-sidebar.component';
 import {ConfigurationComponent} from './configuration/configuration.component';
+import {DutDetailModule} from './dut-detail/dut-detail.module';
 import {JobDetailModule} from './job-detail/job-detail.module';
 import {ManageDutsModule} from './manage-duts/manage-duts.module';
 import {MobmonitorComponent} from './mobmonitor/mobmonitor.component';
@@ -48,39 +52,42 @@ import {WidgetsModule} from './widgets/widgets.module';
       MobmonitorPipe,
    ],
    imports: [
-      AppRoutingModule,
-      BrowserAnimationsModule,
-      BrowserAnimationsModule,
-      BrowserModule,
-      CommonModule,
-      FlexLayoutModule,
-      FormsModule,
-      HttpClientModule,
-      JobDetailModule,
-      LayoutModule,
-      ManageDutsModule,
-      MatButtonModule,
-      MatCardModule,
-      MatCheckboxModule,
-      MatChipsModule,
-      MatFormFieldModule,
-      MatIconModule,
-      MatInputModule,
-      MatListModule,
-      MatMenuModule,
-      MatSelectModule,
-      MatSidenavModule,
-      MatSnackBarModule,
-      MatTableModule,
-      MatTabsModule,
-      MatToolbarModule,
-      PipesModule,
-      RouterModule,
-      RunSuiteModule,
-      RunSuiteModule,
-      ServicesModule.forRoot(),
-      ViewJobsModule,
-      WidgetsModule,
+     AppRoutingModule,
+     BrowserAnimationsModule,
+     BrowserModule,
+     CommonModule,
+     DutDetailModule,
+     FlexLayoutModule,
+     FormsModule,
+     HttpClientModule,
+     JobDetailModule,
+     LayoutModule,
+     ManageDutsModule,
+     MatButtonModule,
+     MatCardModule,
+     MatCheckboxModule,
+     MatChipsModule,
+     MatDividerModule,
+     MatExpansionModule,
+     MatFormFieldModule,
+     MatIconModule,
+     MatInputModule,
+     MatListModule,
+     MatMenuModule,
+     MatPaginatorModule,
+     MatSelectModule,
+     MatSidenavModule,
+     MatSnackBarModule,
+     MatTableModule,
+     MatTabsModule,
+     MatToolbarModule,
+     PipesModule,
+     ReactiveFormsModule,
+     RouterModule,
+     RunSuiteModule,
+     ServicesModule.forRoot(),
+     ViewJobsModule,
+     WidgetsModule,
    ],
    exports: [
       AppRoutingModule,
