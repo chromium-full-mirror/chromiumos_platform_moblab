@@ -41,17 +41,7 @@ class BaseImage(object):
         @param container_path: The LXC path for the base container.
         @param base_name: The base container name.
         """
-        self.container_path = container_path
-        self.base_name = base_name
-        try:
-            base_container = Container.create_from_existing_dir(
-                    container_path, base_name);
-            base_container.refresh_status()
-            self.base_container = base_container
-        except error.ContainerError as e:
-            self.base_container = None
-            self.base_container_error = e
-
+        pass
 
     def setup(self, name=None, force_delete=False):
         """Download and setup the base container.
@@ -132,11 +122,7 @@ class BaseImage(object):
 
         @raise ContainerError: If the base image is invalid or missing.
         """
-        if self.base_container is None:
-            raise self.base_container_error
-        else:
-            return self.base_container
-
+        return None
 
     def _download_and_install_base_container(self):
         """Downloads the base image, untars and configures it."""

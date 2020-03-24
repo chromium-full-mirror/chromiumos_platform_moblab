@@ -15,18 +15,9 @@ from autotest_lib.site_utils.lxc import constants
 from autotest_lib.site_utils.lxc import lxc
 from autotest_lib.site_utils.lxc.cleanup_if_fail import cleanup_if_fail
 from autotest_lib.site_utils.lxc.base_image import BaseImage
-from autotest_lib.site_utils.lxc.constants import \
-    CONTAINER_POOL_METRICS_PREFIX as METRICS_PREFIX
+
 from autotest_lib.site_utils.lxc.container import Container
 from autotest_lib.site_utils.lxc.container_factory import ContainerFactory
-
-try:
-    from chromite.lib import metrics
-    from infra_libs import ts_mon
-except ImportError:
-    import mock
-    metrics = utils.metrics_mock
-    ts_mon = mock.Mock()
 
 
 class ContainerBucket(object):
@@ -46,23 +37,12 @@ class ContainerBucket(object):
         if container_factory is not None:
             self._factory = container_factory
         else:
-            # Pass in the container path so that the bucket is hermetic (i.e. so
-            # that if the container path is customized, the base image doesn't
-            # fall back to using the default container path).
-            try:
-                base_image_ok = True
-                container = BaseImage(self.container_path).get()
-            except error.ContainerError as e:
-                base_image_ok = False
-                raise e
-            finally:
-                metrics.Counter(METRICS_PREFIX + '/base_image',
-                                field_spec=[ts_mon.BooleanField('corrupted')]
-                                ).increment(
-                                    fields={'corrupted': not base_image_ok})
-            self._factory = ContainerFactory(
-                base_container=container,
-                lxc_path=self.container_path)
+            base_image_ok = True
+            container = None
+
+        self._factory = ContainerFactory(
+            base_container=container,
+            lxc_path=self.container_path)
         self.container_cache = {}
 
 
@@ -166,8 +146,7 @@ class ContainerBucket(object):
 
 
 
-    @metrics.SecondsTimerDecorator(
-        '%s/setup_test_duration' % constants.STATS_KEY)
+
     @cleanup_if_fail()
     def setup_test(self, container_id, job_id, server_package_url, result_path,
                    control=None, skip_cleanup=False, job_folder=None,
@@ -209,6 +188,10 @@ class ContainerBucket(object):
                                        result_path)
         result_path = os.path.abspath(result_path)
 
+        hostname=dut_name
+        if dut_name:
+            hostname = constants.CONTAINER_UTSNAME_FORMAT % dut_name.replace('.', '-')
+
         # Save control file to result_path temporarily. The reason is that the
         # control file in drone_tmp folder can be deleted during scheduler
         # restart. For test not using SSP, the window between test starts and
@@ -219,16 +202,13 @@ class ContainerBucket(object):
         if control:
             control_file_name = os.path.basename(control)
             safe_control = os.path.join(result_path, control_file_name)
-            utils.run('cp %s %s' % (control, safe_control))
+            utils.run('sudo cp %s %s' % (control, safe_control))
 
         # Create test container from the base container.
-        container = self._factory.create_container(container_id)
+        container = self._factory.create_container(container_id, hostname)
 
         # Deploy server side package
-        if isolate_hash:
-          container.install_ssp_isolate(isolate_hash)
-        else:
-          container.install_ssp(server_package_url)
+        container.install_ssp(server_package_url)
 
         deploy_config_manager = lxc_config.DeployConfigManager(container)
         deploy_config_manager.deploy_pre_start()
@@ -236,35 +216,11 @@ class ContainerBucket(object):
         # Copy over control file to run the test job.
         if control:
             container.install_control_file(safe_control)
-
-        # Use a pre-packaged Trusty-compatible Autotest site_packages
-        # instead if it exists.  crbug.com/1013241
-        if os.path.exists(constants.TRUSTY_SITE_PACKAGES_PATH):
-            mount_entries = [(constants.TRUSTY_SITE_PACKAGES_PATH,
-                              constants.CONTAINER_SITE_PACKAGES_PATH,
-                              True)]
-        else:
-            mount_entries = [(constants.SITE_PACKAGES_PATH,
-                              constants.CONTAINER_SITE_PACKAGES_PATH,
-                              True)]
-        mount_entries.extend([
-                (result_path,
-                 os.path.join(constants.RESULT_DIR_FMT % job_folder),
-                 False),
-        ])
-
         # Update container config to mount directories.
-        for source, destination, readonly in mount_entries:
-            container.mount_dir(source, destination, readonly)
-
-        # Update file permissions.
-        # TODO(dshi): crbug.com/459344 Skip following action when test container
-        # can be unprivileged container.
-        autotest_path = os.path.join(
-                container.rootfs,
-                constants.CONTAINER_AUTOTEST_DIR.lstrip(os.path.sep))
-        utils.run('sudo chown -R root "%s"' % autotest_path)
-        utils.run('sudo chgrp -R root "%s"' % autotest_path)
+        #for source, destination, readonly in mount_entries:
+        #    container.mount_dir(source, destination, readonly)
+        container.attach_run('mkdir -p /usr/local/autotest/site-packages')
+        container.attach_run('ln -s /chromite /usr/local/autotest/site-packages/chromite')
 
         container.start(wait_for_network=True)
         deploy_config_manager.deploy_post_start()
@@ -275,9 +231,6 @@ class ContainerBucket(object):
         # be the name of the folder, which is unique (as it is composed of job
         # id and timestamp. For better result view, the container's hostname is
         # set to be a string containing the dut hostname.
-        if dut_name:
-            container.set_hostname(constants.CONTAINER_UTSNAME_FORMAT %
-                                   dut_name.replace('.', '-'))
 
         container.modify_import_order()
 

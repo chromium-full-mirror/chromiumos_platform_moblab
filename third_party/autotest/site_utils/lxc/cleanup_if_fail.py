@@ -5,6 +5,8 @@
 import logging
 import sys
 
+import docker
+
 import common
 from autotest_lib.client.bin import utils
 from autotest_lib.client.common_lib import error
@@ -41,9 +43,10 @@ def cleanup_if_fail():
             except:
                 exc_info = sys.exc_info()
                 try:
-                    container = bucket.get_container(container_id)
+                    client = docker.from_env()
+                    container = client.containers.get(container_id)
                     if container and not skip_cleanup:
-                        container.destroy()
+                        container.stop()
                 except error.CmdError as e:
                     logging.error(e)
 

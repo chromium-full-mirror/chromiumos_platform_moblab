@@ -97,6 +97,7 @@ from autotest_lib.client.common_lib import utils
 from autotest_lib.site_utils.lxc import constants
 from autotest_lib.site_utils.lxc import utils as lxc_utils
 
+import logging
 
 config = global_config.global_config
 
@@ -228,13 +229,12 @@ class DeployConfigManager(object):
                                if 'append' in c]
         self.mount_configs = [self.validate_mount(c) for c in deploy_configs
                               if 'mount' in c]
-        tmp_append = os.path.join(self.container.rootfs,
-                                  _APPEND_FOLDER.lstrip(os.path.sep))
+        tmp_append = _APPEND_FOLDER
         commands = []
-        if lxc_utils.path_exists(tmp_append):
+        if lxc_utils.path_exists(container.name, tmp_append):
             commands = ['rm -rf "%s"' % tmp_append]
         commands.append('mkdir -p "%s"' % tmp_append)
-        lxc_utils.sudo_commands(commands)
+        lxc_utils.sudo_commands(container.name, commands)
 
 
     def _deploy_config_pre_start(self, deploy_config):
@@ -246,7 +246,7 @@ class DeployConfigManager(object):
 
         @param deploy_config: Config to be deployed.
         """
-        if not lxc_utils.path_exists(deploy_config.source):
+        if not os.path.exists(deploy_config.source):
             return
         # Path to the target file relative to host.
         if deploy_config.append:
@@ -276,8 +276,11 @@ class DeployConfigManager(object):
             self.container.attach_run('cat \'%s\' >> \'%s\'' %
                                       (source, deploy_config.target))
         self.container.attach_run(
-                'chmod -R %s \'%s\'' %
+                'sudo chmod -R %s \'%s\'' %
                 (deploy_config.permission, deploy_config.target))
+        self.container.attach_run(
+                'sudo chown -R root:root \'%s\'' %
+                (deploy_config.target))
 
 
     def _modify_shadow_config(self):
@@ -362,21 +365,19 @@ class DeployConfigManager(object):
         # Host *
         #   LogLevel Error
         self.container.attach_run(
-                'sed -i \'1s/^/Host *\\n  LogLevel ERROR\\n\\n/\' \'%s\'' %
+                'sudo sed -i \'1s/^/Host *\\n  LogLevel ERROR\\n\\n/\' \'%s\'' %
                 ssh_config)
 
-        # Inject ssh config for moblab to ssh to dut from container.
-        if utils.is_moblab():
-            # ssh to moblab itself using moblab user.
-            self.container.attach_run(
-                    'echo $\'\nHost 192.168.231.1\n  User moblab\n  '
-                    'IdentityFile %%d/.ssh/testing_rsa\' >> %s' %
-                    '/root/.ssh/config')
-            # ssh to duts using root user.
-            self.container.attach_run(
-                    'echo $\'\nHost *\n  User root\n  '
-                    'IdentityFile %%d/.ssh/testing_rsa\' >> %s' %
-                    '/root/.ssh/config')
+        # # ssh to moblab itself using moblab user.
+        # self.container.attach_run(
+        #         'echo $\'\nHost 192.168.231.1\n  User moblab\n  '
+        #         'IdentityFile %%d/.ssh/testing_rsa\' >> %s' %
+        #         '/root/.ssh/config')
+        # # ssh to duts using root user.
+        # self.container.attach_run(
+        #         'echo $\'\nHost *\n  User root\n  '
+        #         'IdentityFile %%d/.ssh/testing_rsa\' >> %s' %
+        #         '/root/.ssh/config')
 
 
     def deploy_pre_start(self):

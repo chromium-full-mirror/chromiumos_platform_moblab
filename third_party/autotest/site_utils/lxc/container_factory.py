@@ -10,17 +10,16 @@ from autotest_lib.client.common_lib import error
 from autotest_lib.site_utils.lxc import constants
 from autotest_lib.site_utils.lxc import container
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
 
 
 class ContainerFactory(object):
     """A factory class for creating LXC container objects."""
 
-    def __init__(self, base_container, container_class=container.Container,
-                 snapshot=True, force_cleanup=False,
+    def __init__(self,
+                 base_container,
+                 container_class=container.Container,
+                 snapshot=True,
+                 force_cleanup=False,
                  lxc_path=constants.DEFAULT_CONTAINER_PATH):
         """Initializes a ContainerFactory.
 
@@ -48,8 +47,7 @@ class ContainerFactory(object):
         self._force_cleanup = force_cleanup
         self._lxc_path = lxc_path
 
-
-    def create_container(self, cid=None, lxc_path=None):
+    def create_container(self, cid=None, hostname=None, lxc_path=None):
         """Creates a new container.
 
         @param cid: (optional) A ContainerId for the new container.  If an ID is
@@ -64,11 +62,11 @@ class ContainerFactory(object):
         if lxc_path is None:
             lxc_path = self._lxc_path
 
-        logging.debug('Creating new container (name: %s, lxc_path: %s)',
-                      name, lxc_path)
+        logging.info('Creating new container (name: %s, lxc_path: %s)', name,
+                     lxc_path)
 
         # If an ID is provided, use it as the container name.
-        new_container = self._create_from_base(name, lxc_path)
+        new_container = self._create_from_base(name, lxc_path, hostname)
         # If an ID is provided, assign it to the container.  When the container
         # is created just-in-time by the container bucket, this ensures that the
         # resulting container is correctly registered with the autoserv system.
@@ -78,12 +76,7 @@ class ContainerFactory(object):
             new_container.id = cid
         return new_container
 
-
-    # create_from_base_duration is the original name of the metric.  Keep this
-    # so we have history.
-    @metrics.SecondsTimerDecorator(
-            '%s/create_from_base_duration' % constants.STATS_KEY)
-    def _create_from_base(self, name, lxc_path):
+    def _create_from_base(self, name, lxc_path, hostname):
         """Creates a container from the base container.
 
         @param name: Name of the container.
@@ -94,25 +87,13 @@ class ContainerFactory(object):
         @raise ContainerError: If the container already exist.
         @raise error.CmdError: If lxc-clone call failed for any reason.
         """
-        use_snapshot = constants.SUPPORT_SNAPSHOT_CLONE and self._snapshot
+        use_snapshot = False
 
-        try:
-            return self._container_class.clone(src=self._base_container,
-                                               new_name=name,
-                                               new_path=lxc_path,
-                                               snapshot=use_snapshot,
-                                               cleanup=self._force_cleanup)
-        except error.CmdError:
-            if not use_snapshot:
-                raise
-            else:
-                logging.debug(
-                        'Creating snapshot clone failed.'
-                        ' Attempting without snapshot...'
-                        ' This forces cleanup of old cloned container.'
-                )
-                return self._container_class.clone(src=self._base_container,
-                                                   new_name=name,
-                                                   new_path=lxc_path,
-                                                   snapshot=False,
-                                                   cleanup=True)
+        return self._container_class.clone(
+            src=self._base_container,
+            new_name=name,
+            new_path=lxc_path,
+            snapshot=use_snapshot,
+            cleanup=self._force_cleanup,
+            hostname=hostname)
+

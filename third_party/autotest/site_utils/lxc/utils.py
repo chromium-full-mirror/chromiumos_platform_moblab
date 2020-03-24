@@ -12,6 +12,7 @@ import shutil
 import tempfile
 import unittest
 from contextlib import contextmanager
+import docker
 
 import common
 from autotest_lib.client.bin import utils
@@ -19,10 +20,8 @@ from autotest_lib.client.common_lib import error
 from autotest_lib.client.common_lib.cros.network import interface
 from autotest_lib.client.common_lib import global_config
 from autotest_lib.site_utils.lxc import constants
-from autotest_lib.site_utils.lxc import unittest_setup
 
-
-def path_exists(path):
+def path_exists(container_name, path):
     """Check if path exists.
 
     If the process is not running with root user, os.path.exists may fail to
@@ -33,11 +32,11 @@ def path_exists(path):
 
     @return: True if path exists, otherwise False.
     """
-    try:
-        utils.run('sudo test -e "%s"' % path)
-        return True
-    except error.CmdError:
-        return False
+    client = docker.from_env(timeout=300)
+    container = client.containers.get(container_name)
+    result = container.exec_run('test -e "%s"' % path)
+    return result.exit_code == 0
+
 
 
 def get_host_ip():
@@ -48,37 +47,10 @@ def get_host_ip():
 
     @return: IP address of the host running containers.
     """
-    # The kernel publishes symlinks to various network devices in /sys.
-    result = utils.run('ls /sys/class/net', ignore_status=True)
-    # filter out empty strings
-    interface_names = [x for x in result.stdout.split() if x]
-
-    lxc_network = None
-    for name in interface_names:
-        if name.startswith('lxcbr'):
-            lxc_network = name
-            break
-    if not lxc_network:
-        raise error.ContainerError('Failed to find network interface used by '
-                                   'lxc. All existing interfaces are: %s' %
-                                   interface_names)
-    netif = interface.Interface(lxc_network)
-    return netif.ipv4_address
+    return "autotest"
 
 def is_vm():
-    """Check if the process is running in a virtual machine.
-
-    @return: True if the process is running in a virtual machine, otherwise
-             return False.
-    """
-    try:
-        virt = utils.run('sudo -n virt-what').stdout.strip()
-        logging.debug('virt-what output: %s', virt)
-        return bool(virt)
-    except error.CmdError:
-        logging.warn('Package virt-what is not installed, default to assume '
-                     'it is not a virtual machine.')
-        return False
+    return False
 
 
 def destroy(path, name,
@@ -94,17 +66,12 @@ def destroy(path, name,
 
   @returns: CmdResult object from the shell command
   """
-  cmd = 'sudo lxc-destroy -P %s -n %s' % (path, name)
-  if force:
-    cmd += ' -f'
-  if snapshots:
-    cmd += ' -s'
-  if timeout >= 0:
-    return utils.run(cmd, ignore_status=ignore_status, timeout=timeout)
-  else:
-    return utils.run(cmd, ignore_status=ignore_status)
+  client = docker.from_env(timeout=300)
+  container = client.containers.get(name)
+  container.stop()
+  return
 
-def clone(lxc_path, src_name, new_path, dst_name, snapshot):
+def clone(lxc_path, src_name, new_path, dst_name, snapshot, hostname):
     """Clones a container.
 
     @param lxc_path: The LXC path of the source container.
@@ -113,22 +80,21 @@ def clone(lxc_path, src_name, new_path, dst_name, snapshot):
     @param dst_name: The name of the destination container.
     @param snapshot: Whether or not to create a snapshot clone.
     """
-    snapshot_arg = '-s' if snapshot and constants.SUPPORT_SNAPSHOT_CLONE else ''
-    # overlayfs is the default clone backend storage. However it is not
-    # supported in Ganeti yet. Use aufs as the alternative.
-    aufs_arg = '-B aufs' if is_vm() and snapshot else ''
-    cmd = (('sudo lxc-copy --lxcpath {lxcpath} --newpath {newpath} '
-                    '--name {name} --newname {newname} {snapshot} {backing}')
-           .format(
-               lxcpath = lxc_path,
-               newpath = new_path,
-               name = src_name,
-               newname = dst_name,
-               snapshot = snapshot_arg,
-               backing = aufs_arg
-           ))
-    utils.run(cmd)
+    client = docker.from_env(timeout=300)
+    client.images.pull('gcr.io/chromeos-partner-moblab/moblab-ssp:release')
 
+    container = client.containers.run(
+        'gcr.io/chromeos-partner-moblab/moblab-ssp:release',
+        remove=True,
+        name=dst_name,
+        hostname=dst_name,
+        network='default_moblab',
+        cap_add=['ALL'],
+        detach=True,
+        volumes=['default_results:/results',
+                 'default_results:/usr/local/autotest/results',
+                 'tradefed_cache:/tmp/autotest-tradefed-cache']
+    )
 
 @contextmanager
 def TempDir(*args, **kwargs):
@@ -240,7 +206,7 @@ def is_subdir(parent, subdir):
     return os.path.commonprefix([parent, subdir]) == parent
 
 
-def sudo_commands(commands):
+def sudo_commands(container_name, commands):
     """Takes a list of bash commands and executes them all with one invocation
     of sudo. Saves ~400 ms per command.
 
@@ -248,47 +214,13 @@ def sudo_commands(commands):
 
     @return The return code of the sudo call.
     """
-
-    combine = global_config.global_config.get_config_value(
-        'LXC_POOL','combine_sudos', type=bool, default=False)
-
-    if combine:
-        with tempfile.NamedTemporaryFile() as temp:
-            temp.write("set -e\n")
-            temp.writelines([command+"\n" for command in commands])
-            logging.info("Commands to run: %s", str(commands))
-            return utils.run("sudo bash %s" % temp.name)
-    else:
-        for command in commands:
-            result = utils.run("sudo %s" % command)
+    client = docker.from_env(timeout=300)
+    container = client.containers.get(container_name)
+    for command in commands:
+        container.exec_run(command)
 
 
 def get_lxc_version():
     """Gets the current version of lxc if available."""
-    cmd = 'sudo lxc-info --version'
-    result = utils.run(cmd)
-    if result and result.exit_status == 0:
-        version = re.split("[.-]", result.stdout.strip())
-        if len(version) < 3:
-            logging.error("LXC version is not expected format %s.",
-                          result.stdout.strip())
-            return None
-        return_value = []
-        for a in version[:3]:
-            try:
-                return_value.append(int(a))
-            except ValueError:
-                logging.error(("LXC version contains non numerical version "
-                               "number %s (%s)."), a, result.stdout.strip())
-                return None
-        return return_value
-    else:
-        logging.error("Unable to determine LXC version.")
-        return None
+    pass
 
-class LXCTests(unittest.TestCase):
-    """Thin wrapper to call correct setup for LXC tests."""
-
-    @classmethod
-    def setUpClass(cls):
-        unittest_setup.setup()
