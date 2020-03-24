@@ -44,6 +44,10 @@ import {
   RemoveAttributeFromDutsResponse,
   RemoveLabelFromDutsRequest,
   RemoveLabelFromDutsResponse,
+  RepairHostRequest,
+  RepairHostResponse,
+  ReverifyHostRequest,
+  ReverifyHostResponse,
   RunCtsSuiteRequest,
   RunCtsSuiteResponse,
   RunSuiteRequest,
@@ -467,6 +471,38 @@ export class MoblabGrpcService {
     );
     call.on('data', (response: GetDutTasksResponse) => {
       callback(response.getTasksList())
+    });
+  }
+
+  repairDut(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+            dut_hostname: string) {
+    const request = new RepairHostRequest();
+    request.setDutHostname(dut_hostname);
+    const call = this.moblabRpcService.repair_host(
+      request,
+      {},
+      (err: grpcWeb.Error, response: RepairHostResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: RepairHostResponse) => {
+      callback(response.getMessage());
+    });
+  }
+
+  reverifyDut(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+               dut_hostname: string) {
+    const request = new ReverifyHostRequest();
+    request.setDutHostname(dut_hostname);
+    const call = this.moblabRpcService.reverify_host(
+      request,
+      {},
+      (err: grpcWeb.Error, response: ReverifyHostResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: ReverifyHostResponse) => {
+      callback(response.getMessage());
     });
   }
 
