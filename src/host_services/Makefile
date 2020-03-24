@@ -8,7 +8,7 @@ PROTO_OUT_DIR = ${WORKDIR}/host_services
 
 all:
 	mkdir -p ${PROTO_OUT_DIR}
-	rm ${WORKDIR}/host_services/*pb2*
+	rm -f ${WORKDIR}/host_services/*pb2*
 	python -m grpc_tools.protoc \
 		-I="." \
 		--python_out=":${PROTO_OUT_DIR}" \
