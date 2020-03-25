@@ -36,7 +36,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
 RUN python2.7 /tmp/get-pip.py --target /usr/lib/python2.7/dist-packages
 COPY requirements.txt .
 RUN python2.7 -m pip install --upgrade --no-cache-dir -r requirements.txt \
-    --target /usr/lib/python2.7/dist-packages
+    --target /usr/local/lib/python2.7/dist-packages
 
 # Java - required for CTS/GTS
 # TODO - see if we can figure out two versions of the SSP and just load the
@@ -55,16 +55,6 @@ RUN  tar xvf openjdk-13.0.1_linux-x64_bin.tar.gz
 RUN  cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/
 RUN  rm -rf jdk-13.0.1
 RUN  rm -rf *.gz
-
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
-    --disabled-password --gecos "" moblab
-RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-RUN usermod -aG sudo moblab
-
-RUN apt-get install --reinstall sudo
-
-ENV USER=moblab
 
 # Unlike lxc containers which you can start and will keep running on their own,
 # docker containers require a running process or they exist.
