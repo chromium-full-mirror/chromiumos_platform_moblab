@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""This module provides some utilities used by LXC and its tools.
+"""This module provides some utilities used by SSP_CONTAINER and its tools.
 """
 
 import logging
@@ -19,7 +19,7 @@ from autotest_lib.client.bin import utils
 from autotest_lib.client.common_lib import error
 from autotest_lib.client.common_lib.cros.network import interface
 from autotest_lib.client.common_lib import global_config
-from autotest_lib.site_utils.lxc import constants
+from autotest_lib.site_utils.ssp_containers import constants
 
 def path_exists(container_name, path):
     """Check if path exists.
@@ -40,10 +40,7 @@ def path_exists(container_name, path):
 
 
 def get_host_ip():
-    """Get the IP address of the host running containers on lxcbr*.
-
-    This function gets the IP address on network interface lxcbr*. The
-    assumption is that lxc uses the network interface started with "lxcbr".
+    """Get the IP address of the host running containers
 
     @return: IP address of the host running containers.
     """
@@ -56,7 +53,7 @@ def is_vm():
 def destroy(path, name,
             force=True, snapshots=False, ignore_status=False, timeout=-1):
   """
-  Destroy an LXC container.
+  Destroy an SSP_CONTAINER container.
 
   @param force: Destroy even if running. Default true.
   @param snapshots: Destroy all snapshots based on the container. Default false.
@@ -71,12 +68,12 @@ def destroy(path, name,
   container.stop()
   return
 
-def clone(lxc_path, src_name, new_path, dst_name, snapshot, hostname):
+def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
     """Clones a container.
 
-    @param lxc_path: The LXC path of the source container.
+    @param ssp_container_path: The SSP_CONTAINER path of the source container.
     @param src_name: The name of the source container.
-    @param new_path: The LXC path of the destination container.
+    @param new_path: The SSP_CONTAINER path of the destination container.
     @param dst_name: The name of the destination container.
     @param snapshot: Whether or not to create a snapshot clone.
     """
@@ -219,8 +216,4 @@ def sudo_commands(container_name, commands):
     for command in commands:
         container.exec_run(command)
 
-
-def get_lxc_version():
-    """Gets the current version of lxc if available."""
-    pass
 

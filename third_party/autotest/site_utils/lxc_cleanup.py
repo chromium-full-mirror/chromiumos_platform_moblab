@@ -27,7 +27,7 @@ from autotest_lib.client.common_lib import logging_config
 from autotest_lib.client.common_lib import time_utils
 from autotest_lib.client.common_lib import utils
 from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.site_utils import lxc
+from autotest_lib.site_utils import ssp_containers
 
 
 AFE = frontend_wrappers.RetryingAFE(timeout_min=0.1, delay_sec=10)
@@ -153,7 +153,7 @@ def main(options):
                 file_path=os.path.abspath(options.logfile),
                 level=logging.DEBUG if options.verbose else logging.INFO)
 
-    bucket = lxc.ContainerBucket()
+    bucket = container_ssp.ContainerBucket()
     logging.info('')
     logging.info('Cleaning container bucket %s', bucket.container_path)
     success_count = 0

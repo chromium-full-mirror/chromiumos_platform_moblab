@@ -9,8 +9,8 @@ import common
 from autotest_lib.client.common_lib import error
 from autotest_lib.client.bin import utils
 from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.site_utils.lxc import constants
-from autotest_lib.site_utils.lxc import utils as lxc_utils
+from autotest_lib.site_utils.ssp_containers import constants
+from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
 
 
 # Cleaning up the bind mount can sometimes be blocked if a process is active in
@@ -39,7 +39,7 @@ class SharedHostDir(object):
 
         # If the host dir exists and is valid and force_delete is not set, there
         # is nothing to do.  Otherwise, clear the host dir if it exists, then
-        # recreate it.  Do not use lxc_utils.path_exists as that forces a sudo
+        # recreate it.  Do not use ssp_container_utils.path_exists as that forces a sudo
         # call - the SharedHostDir is used all over the place, and
         # instantiatinng one should not cause the user to have to enter their
         # password if the host dir already exists.  The host dir is created with
@@ -80,7 +80,7 @@ class SharedHostDir(object):
 
         # Unmount and delete everything in the host path.
         for info in utils.get_mount_info():
-            if lxc_utils.is_subdir(self.path, info.mount_point):
+            if ssp_container_utils.is_subdir(self.path, info.mount_point):
                 utils.run('sudo umount "%s"' % info.mount_point)
 
         # It's possible that the directory is no longer mounted (e.g. if the

@@ -17,9 +17,9 @@ import docker
 import common
 from autotest_lib.client.bin import utils
 from autotest_lib.client.common_lib import error
-from autotest_lib.site_utils.lxc import constants
-from autotest_lib.site_utils.lxc import lxc
-from autotest_lib.site_utils.lxc import utils as lxc_utils
+from autotest_lib.site_utils.ssp_containers import constants
+from autotest_lib.site_utils.ssp_containers import ssp_containers
+from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
 
 
 from chromite.lib import constants as chromite_constants
@@ -104,7 +104,7 @@ class ContainerId(collections.namedtuple('ContainerId',
 
 
 class Container(object):
-    """A wrapper class of an LXC container.
+    """A wrapper class of an SSP_CONTAINER container.
 
     The wrapper class provides methods to interact with a container, e.g.,
     start, stop, destroy, run a command. It also has attributes of the
@@ -112,24 +112,11 @@ class Container(object):
     name: Name of the container.
     state: State of the container, e.g., ABORTING, RUNNING, STARTING, STOPPED,
            or STOPPING.
-
-    lxc-ls can also collect other attributes of a container including:
-    ipv4: IP address for IPv4.
-    ipv6: IP address for IPv6.
-    autostart: If the container will autostart at system boot.
-    pid: Process ID of the container.
-    memory: Memory used by the container, as a string, e.g., "6.2MB"
-    ram: Physical ram used by the container, as a string, e.g., "6.2MB"
-    swap: swap used by the container, as a string, e.g., "1.0MB"
-
-    For performance reason, such info is not collected for now.
-
-    The attributes available are defined in ATTRIBUTES constant.
     """
 
     def __init__(self, container_path, name, attribute_values, src=None,
                  snapshot=False, hostname=""):
-        """Initialize an object of LXC container with given attribute values.
+        """Initialize an object of SSP_CONTAINER container with given attribute values.
 
         @param container_path: Directory that stores the container.
         @param name: Name of the container.
@@ -150,28 +137,28 @@ class Container(object):
         self._id = self.name
         for attribute, value in attribute_values.iteritems():
             setattr(self, attribute, value)
-        exists = lxc.get_container_info(container_path, name=name)
+        exists = ssp_containers.get_container_info(container_path, name=name)
         # Clone the source container to initialize this one.
-        lxc_utils.clone("", "", container_path, name, snapshot, hostname)
+        ssp_container_utils.clone("", "", container_path, name, snapshot, hostname)
 
 
 
     @classmethod
-    def create_from_existing_dir(cls, lxc_path, name, **kwargs):
-        """Creates a new container instance for an lxc container that already
+    def create_from_existing_dir(cls, ssp_container_path, name, **kwargs):
+        """Creates a new container instance for an container that already
         exists on disk.
 
-        @param lxc_path: The LXC path for the container.
+        @param ssp_container_path: The SSP_CONTAINER path for the container.
         @param name: The container name.
 
         @raise error.ContainerError: If the container doesn't already exist.
 
         @return: The new container.
         """
-        return cls(lxc_path, name, kwargs)
+        return cls(ssp_container_path, name, kwargs)
 
 
-    # Containers have a name and an ID.  The name is simply the name of the LXC
+    # Containers have a name and an ID.  The name is simply the name of the SSP_CONTAINER
     # container.  The ID is the actual key that is used to identify the
     # container to the autoserv system.  In the case of a JIT-created container,
     # we have the ID at the container's creation time so we use that to name the
@@ -185,7 +172,7 @@ class Container(object):
         @param new_name: Name for the cloned container.  If this is not
                          provided, a random unique container name will be
                          generated.
-        @param new_path: LXC path for the cloned container (optional; if not
+        @param new_path: SSP_CONTAINER path for the cloned container (optional; if not
                          specified, the new container is created in the same
                          directory as the source container).
         @param snapshot: Whether to snapshot, or create a full clone.  Note that
@@ -213,7 +200,7 @@ class Container(object):
     def refresh_status(self):
         """Refresh the status information of the container.
         """
-        containers = lxc.get_container_info("", name=self.name)
+        containers = ssp_containers.get_container_info("", name=self.name)
         if not containers:
             raise error.ContainerError(
                     'No container found in directory %s with name of %s.' %
@@ -281,7 +268,7 @@ class Container(object):
         logging.debug('Destroying container %s/%s',
                       "",
                       self.name)
-        lxc_utils.destroy("", self.name, force=force)
+        ssp_container_utils.destroy("", self.name, force=force)
 
 
     def mount_dir(self, source, destination, readonly=False):
@@ -312,11 +299,6 @@ class Container(object):
             if file_count < count:
                 raise error.ContainerError('%s is not properly set up.' %
                                            directory)
-        # lxc-attach and run command does not run in shell, thus .bashrc is not
-        # loaded. Following command creates a symlink in /usr/bin/ for gsutil
-        # if it's installed.
-        # TODO(dshi): Remove this code after lab container is updated with
-        # gsutil installed in /usr/bin/
         self.attach_run('test -f /root/gsutil/gsutil && '
                         'ln -s /root/gsutil/gsutil /usr/bin/gsutil || true')
 
@@ -387,7 +369,7 @@ class Container(object):
         self.attach_run('sudo mkdir -p %s' % usr_local_path)
         self.attach_run('sudo chown -R moblab:moblab %s' % usr_local_path)
 
-        lxc.download_extract(ssp_url, autotest_pkg_path, usr_local_path, self.name)
+        ssp_containers.download_extract(ssp_url, autotest_pkg_path, usr_local_path, self.name)
 
 
     def install_control_file(self, control_file):
@@ -448,15 +430,15 @@ class Container(object):
         container = self._client.containers.get(self.name)
         container.put_archive(dst_dir, self.simple_tar(src))
 
-    def _set_lxc_config(self, key, value):
-        """Sets an LXC config value for this container.
+    def _set_ssp_container_config(self, key, value):
+        """Sets an SSP_CONTAINER config value for this container.
 
         Configuration changes made while a container is running don't take
         effect until the container is restarted.  Since this isn't a scenario
         that should ever come up in our use cases, calling this method on a
         running container will cause a ContainerError.
 
-        @param key: The LXC config key to set.
+        @param key: The SSP_CONTAINER config key to set.
         @param value: The value to use for the given key.
 
         @raise error.ContainerError: If the container is already started.
@@ -464,8 +446,8 @@ class Container(object):
         pass
 
 
-    def _get_lxc_config(self, key):
-        """Retrieves an LXC config value from the container.
+    def _get_ssp_container_config(self, key):
+        """Retrieves an SSP_CONTAINER config value from the container.
 
         @param key The key of the config value to retrieve.
         """

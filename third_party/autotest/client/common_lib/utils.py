@@ -2496,13 +2496,7 @@ def is_in_container():
 
     @return: True if the process is running inside a container, otherwise False.
     """
-    result = run('grep -q "/lxc/" /proc/1/cgroup',
-                            verbose=False, ignore_status=True)
-    if result.exit_status == 0:
-        return True
-
-    # Check "container" environment variable for lxd/lxc containers.
-    if os.environ.get('container') == 'lxc':
+    if os.environ.get('container') == 'ssp_container':
         return True
 
     return False

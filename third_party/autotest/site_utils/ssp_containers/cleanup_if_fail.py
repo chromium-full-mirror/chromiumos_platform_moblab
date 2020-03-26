@@ -44,10 +44,10 @@ def cleanup_if_fail():
                 exc_info = sys.exc_info()
                 try:
                     client = docker.from_env()
-                    container = client.containers.get(container_id)
+                    container = client.containers.get(str(container_id))
                     if container and not skip_cleanup:
                         container.stop()
-                except error.CmdError as e:
+                except (docker.errors.NotFound, docker.errors.APIError) as e:
                     logging.error(e)
 
                 # Raise the cached exception with original backtrace.

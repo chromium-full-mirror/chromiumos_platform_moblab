@@ -28,7 +28,7 @@ CONTAINER_BASE_FOLDER_URL = global_config.get_config_value('AUTOSERV',
                                                     'container_base_folder_url')
 CONTAINER_BASE_URL_FMT = '%s/%%s.tar.xz' % CONTAINER_BASE_FOLDER_URL
 CONTAINER_BASE_URL = CONTAINER_BASE_URL_FMT % BASE
-# Default directory used to store LXC containers.
+# Default directory used to store containers.
 DEFAULT_CONTAINER_PATH = global_config.get_config_value('AUTOSERV',
                                                         'container_path')
 # Default directory for host mounts
@@ -40,7 +40,7 @@ DEFAULT_SHARED_HOST_PATH = global_config.get_config_value(
 # exists, so this is just a hard-coded string.
 DEFAULT_CONTAINER_POOL_SOCKET = 'container_pool_socket'
 
-# Default size for the lxc container pool.
+# Default size for the container pool.
 DEFAULT_CONTAINER_POOL_SIZE = 20
 
 # Location of the host mount point in the container.
@@ -54,33 +54,17 @@ CONTROL_TEMP_PATH = os.path.join(CONTAINER_AUTOTEST_DIR, 'drone_tmp')
 # so the command can return an error code if the directory doesn't exist.
 COUNT_FILE_CMD = '[ -d %(dir)s ] && ls %(dir)s | wc -l'
 
-# Seconds to wait for successful completion of a lxc force-destroy
-LXC_SCRUB_TIMEOUT = 300
+# Seconds to wait for successful completion of a force-destroy
+CONTAINER_SSP_SCRUB_TIMEOUT = 300
 
 # Command line to append content to a file
 APPEND_CMD_FMT = ('echo \'%(content)s\' | sudo tee --append %(file)s'
                   '> /dev/null')
 
-# Flag to indicate it's running in a Moblab. Due to crbug.com/457496, lxc-ls has
-# different behavior in Moblab.
-IS_MOBLAB = common_utils.is_moblab()
+IS_MOBLAB = True
 
-if IS_MOBLAB:
-    SITE_PACKAGES_PATH = '/usr/lib64/python2.7/site-packages'
-    CONTAINER_SITE_PACKAGES_PATH = '/usr/local/lib/python2.7/dist-packages/'
-else:
-    SITE_PACKAGES_PATH = os.path.join(common.autotest_dir, 'site-packages')
-    CONTAINER_SITE_PACKAGES_PATH = os.path.join(CONTAINER_AUTOTEST_DIR,
-                                                'site-packages')
-
-# This is an alternate site_packages that is built to be Trusty
-# compatible.  crbug.com/1013241
-TRUSTY_SITE_PACKAGES_PATH = '/opt/trusty_site_packages'
-
-# TODO(dshi): If we are adding more logic in how lxc should interact with
-# different systems, we should consider code refactoring to use a setting-style
-# object to store following flags mapping to different systems.
-SUPPORT_SNAPSHOT_CLONE = True
+SITE_PACKAGES_PATH = '/usr/lib64/python2.7/site-packages'
+CONTAINER_SITE_PACKAGES_PATH = '/usr/local/lib/python2.7/dist-packages/'
 
 # Number of seconds to wait for network to be up in a container.
 NETWORK_INIT_TIMEOUT = 300
@@ -110,7 +94,3 @@ CONTAINER_RUN_TEST_METADB_TYPE = 'container_run_test'
 # a valid hostname as hostnames cannot contain underscores.  Work is underway to
 # migrate to `test-`.  See crbug/726131.
 CONTAINER_UTSNAME_FORMAT = 'test-%s'
-
-STATS_KEY = 'chromeos/autotest/lxc'
-
-CONTAINER_POOL_METRICS_PREFIX = 'chromeos/autotest/container_pool'

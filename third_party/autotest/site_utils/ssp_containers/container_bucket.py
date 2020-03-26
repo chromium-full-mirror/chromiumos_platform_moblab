@@ -10,14 +10,13 @@ import common
 
 from autotest_lib.client.bin import utils
 from autotest_lib.client.common_lib import error
-from autotest_lib.site_utils.lxc import config as lxc_config
-from autotest_lib.site_utils.lxc import constants
-from autotest_lib.site_utils.lxc import lxc
-from autotest_lib.site_utils.lxc.cleanup_if_fail import cleanup_if_fail
-from autotest_lib.site_utils.lxc.base_image import BaseImage
+from autotest_lib.site_utils.ssp_containers import config as ssp_container_config
+from autotest_lib.site_utils.ssp_containers import constants
+from autotest_lib.site_utils.ssp_containers import ssp_containers
+from autotest_lib.site_utils.ssp_containers.cleanup_if_fail import cleanup_if_fail
 
-from autotest_lib.site_utils.lxc.container import Container
-from autotest_lib.site_utils.lxc.container_factory import ContainerFactory
+from autotest_lib.site_utils.ssp_containers.container import Container
+from autotest_lib.site_utils.ssp_containers.container_factory import ContainerFactory
 
 
 class ContainerBucket(object):
@@ -42,7 +41,7 @@ class ContainerBucket(object):
 
         self._factory = ContainerFactory(
             base_container=container,
-            lxc_path=self.container_path)
+            ssp_container_path=self.container_path)
         self.container_cache = {}
 
 
@@ -58,8 +57,8 @@ class ContainerBucket(object):
         @return: A dictionary of all containers with detailed attributes,
                  indexed by container name.
         """
-        logging.debug("Fetching all extant LXC containers")
-        info_collection = lxc.get_container_info(self.container_path)
+        logging.debug("Fetching all extant SSP_CONTAINER containers")
+        info_collection = ssp_containers.get_container_info(self.container_path)
         if force_update:
           logging.debug("Clearing cached container info")
         containers = {} if force_update else self.container_cache
@@ -83,7 +82,7 @@ class ContainerBucket(object):
         @return: A container object with matching name. Returns None if no
                  container matches the given name.
         """
-        logging.debug("Fetching LXC container with id %s", container_id)
+        logging.debug("Fetching SSP_CONTAINER container with id %s", container_id)
         if container_id in self.container_cache:
             logging.debug("Found container %s in cache", container_id)
             return self.container_cache[container_id]
@@ -116,8 +115,7 @@ class ContainerBucket(object):
             container.destroy()
             del self.container_cache[key]
 
-    def scrub_container_location(self, name,
-                                 timeout=constants.LXC_SCRUB_TIMEOUT):
+    def scrub_container_location(self, name):
         """Destroy a possibly-nonexistent, possibly-malformed container.
 
         This exists to clean up an unreachable container which may or may not
@@ -137,7 +135,7 @@ class ContainerBucket(object):
         try:
           result = common.destroy(
               self.container_path, name,
-              force=True, snapshots=True, ignore_status=True, timeout=timeout
+              force=True, snapshots=True, ignore_status=True
           )
         except error.CmdTimeoutError:
           logging.warning("Force-destruction of container %s timed out.", name)
@@ -210,7 +208,7 @@ class ContainerBucket(object):
         # Deploy server side package
         container.install_ssp(server_package_url)
 
-        deploy_config_manager = lxc_config.DeployConfigManager(container)
+        deploy_config_manager = ssp_container_config.DeployConfigManager(container)
         deploy_config_manager.deploy_pre_start()
 
         # Copy over control file to run the test job.

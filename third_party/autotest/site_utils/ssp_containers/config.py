@@ -94,8 +94,8 @@ import socket
 import common
 from autotest_lib.client.common_lib import global_config
 from autotest_lib.client.common_lib import utils
-from autotest_lib.site_utils.lxc import constants
-from autotest_lib.site_utils.lxc import utils as lxc_utils
+from autotest_lib.site_utils.ssp_containers import constants
+from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
 
 import logging
 
@@ -231,10 +231,10 @@ class DeployConfigManager(object):
                               if 'mount' in c]
         tmp_append = _APPEND_FOLDER
         commands = []
-        if lxc_utils.path_exists(container.name, tmp_append):
+        if ssp_container_utils.path_exists(container.name, tmp_append):
             commands = ['rm -rf "%s"' % tmp_append]
         commands.append('mkdir -p "%s"' % tmp_append)
-        lxc_utils.sudo_commands(container.name, commands)
+        ssp_container_utils.sudo_commands(container.name, commands)
 
 
     def _deploy_config_pre_start(self, deploy_config):
@@ -311,7 +311,7 @@ class DeployConfigManager(object):
                 'echo $\'\n[AUTOSERV]\nenable_master_ssh: False\n\' >> %s' %
                 shadow_config)
 
-        host_ip = lxc_utils.get_host_ip()
+        host_ip = ssp_container_utils.get_host_ip()
         local_names = ['localhost', '127.0.0.1']
 
         db_host = config.get_config_value('AUTOTEST_WEB', 'host')
@@ -333,13 +333,13 @@ class DeployConfigManager(object):
         # Update configurations in SSP section:
         # user: The user running current process.
         # is_moblab: True if the autotest server is a Moblab instance.
-        # host_container_ip: IP address of the lxcbr0 interface. Process running
+        # host_container_ip: IP address of the interface. Process running
         #     inside container can make RPC through this IP.
         self.container.attach_run(
                 'echo $\'\n[SSP]\nuser: %s\nis_moblab: %s\n'
                 'host_container_ip: %s\n\' >> %s' %
                 (getpass.getuser(), bool(utils.is_moblab()),
-                 lxc_utils.get_host_ip(), shadow_config))
+                 ssp_container_utils.get_host_ip(), shadow_config))
 
 
     def _modify_ssh_config(self):

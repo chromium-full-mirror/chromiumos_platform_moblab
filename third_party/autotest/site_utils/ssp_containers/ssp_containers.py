@@ -14,17 +14,10 @@ from autotest_lib.client.common_lib import error
 from autotest_lib.client.common_lib.cros import dev_server
 from autotest_lib.client.common_lib.cros import retry
 from autotest_lib.server import utils as server_utils
-from autotest_lib.site_utils.lxc import constants
+from autotest_lib.site_utils.ssp_containers import constants
 
 def get_container_info(container_path, **filters):
     """Get a collection of container information in the given container path.
-
-    This method parse the output of lxc-ls to get a list of container
-    information. The lxc-ls command output looks like:
-    NAME      STATE    IPV4       IPV6  AUTOSTART  PID   MEMORY  RAM     SWAP
-    --------------------------------------------------------------------------
-    base      STOPPED  -          -     NO         -     -       -       -
-    test_123  RUNNING  10.0.3.27  -     NO         8359  6.28MB  6.28MB  0.0MB
 
     @param container_path: Path to look for containers.
     @param filters: Key value to filter the containers, e.g., name='base'

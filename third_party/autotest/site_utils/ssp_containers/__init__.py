@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""This module provides some tools to interact with LXC containers, for example:
+"""This module provides some tools to interact with SSP containers, for example:
   1. Download base container from given GS location, setup the base container.
   2. Create a snapshot as test container from base container.
   3. Mount a directory in drone to the test container.
@@ -10,7 +10,6 @@
   5. Cleanup, e.g., destroy the container.
 """
 
-from base_image import BaseImage
 from constants import *
 from container import Container
 from container import ContainerId

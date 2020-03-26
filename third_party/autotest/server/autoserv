@@ -51,8 +51,8 @@ from autotest_lib.server import utils as server_utils
 from autotest_lib.server import site_utils
 from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
 from autotest_lib.site_utils import job_directories
-from autotest_lib.site_utils import lxc
-from autotest_lib.site_utils.lxc import utils as lxc_utils
+from autotest_lib.site_utils import ssp_containers
+from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
 from autotest_lib.client.common_lib import pidfile, logging_manager
 
 
@@ -67,7 +67,7 @@ STOP_SERVOD_CMD = 'sudo stop servod'
 _AUTOTEST_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 _CONTROL_FILE_FROM_CONTROL_NAME = 'control.from_control_name'
 
-_LXC_JOB_FOLDER = 'lxc_job_folder'
+_CONTAINER_JOB_FOLDER = 'container_job_folder'
 
 def log_alarm(signum, frame):
     logging.error("Received SIGALARM. Ignoring and continuing on.")
@@ -169,14 +169,14 @@ def _run_with_ssp(job, container_id, job_id, results, parser, ssp_url,
                    'Failed to stage server-side package')
         raise error.AutoservError('Failed to stage server-side package')
 
-    bucket = lxc.ContainerBucket()
+    bucket = ssp_containers.ContainerBucket()
     control = (parser.args[0] if len(parser.args) > 0 and parser.args[0] != ''
                else None)
     try:
         dut_name = machines[0] if len(machines) >= 1 else None
         test_container = bucket.setup_test(container_id, job_id, ssp_url,
                                            results, control=control,
-                                           job_folder=_LXC_JOB_FOLDER,
+                                           job_folder=_CONTAINER_JOB_FOLDER,
                                            dut_name=dut_name,
                                            isolate_hash=parser.options.isolate)
     except Exception as e:
@@ -202,7 +202,7 @@ def _run_with_ssp(job, container_id, job_id, results, parser, ssp_url,
     # Replace the control file path with the one in container.
     if control:
         container_control_filename = os.path.join(
-                lxc.CONTROL_TEMP_PATH, os.path.basename(control))
+                ssp_containers.CONTROL_TEMP_PATH, os.path.basename(control))
         paths_to_replace[control] = container_control_filename
 
     # Apply --use-existing-results, results directory is aready created and
@@ -361,7 +361,7 @@ def run_autoserv(pid_file_manager, results, parser, ssp_url, use_ssp):
     # handle_sigterm.
     job_or_task_id = job_directories.get_job_id_or_task_id(
             parser.options.results)
-    container_id = lxc.ContainerId(job_or_task_id, time.time(), os.getpid())
+    container_id = ssp_containers.ContainerId(job_or_task_id, time.time(), os.getpid())
 
     # Implement SIGTERM handler
     def handle_sigterm(signum, frame):
@@ -382,7 +382,7 @@ def run_autoserv(pid_file_manager, results, parser, ssp_url, use_ssp):
             logging.debug('Destroy container %s before aborting the autoserv '
                           'process.', container_id)
             try:
-                bucket = lxc.ContainerBucket()
+                bucket = ssp_containers.ContainerBucket()
                 container = bucket.get_container(container_id)
                 if container:
                     container.destroy()
