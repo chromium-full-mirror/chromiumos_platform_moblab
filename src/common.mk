@@ -4,12 +4,12 @@
 
 BASE_URL=gcr.io/chromeos-partner-moblab
 
-all: rpcserver compose autotest db devserver ssp offloader
+all: rpcserver compose autotest db devserver ssp offloader ui envoy
 
 rpcserver: export DOCKER_BUILDKIT=1
 rpcserver:
 	docker build ${EXTRA_ARGS} -t ${BASE_URL}/moblab-rpcserver:${LABEL} -f \
-		dockerfiles/rpcserver/Dockerfile .
+		dockerfiles/rpcserver/Dockerfile ..
 	docker push ${BASE_URL}/moblab-rpcserver:${LABEL}
 
 compose: export DOCKER_BUILDKIT=1
@@ -58,5 +58,10 @@ offloader:
 		-f dockerfiles/offloader/Dockerfile ..
 	docker push ${BASE_URL}/moblab-offloader:${LABEL}
 
+envoy: export DOCKER_BUILDKIT=1
+envoy:
+	docker build ${EXTRA_ARGS} -t ${BASE_URL}/envoy-proxy:${LABEL} \
+		-f dockerfiles/envoy/Dockerfile dockerfiles/envoy
+	docker push ${BASE_URL}/envoy-proxy:${LABEL}
 
-.PHONY: rpcserver compose db autotest devserver ui ssp offloader
+.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy
