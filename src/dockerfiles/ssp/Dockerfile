@@ -56,6 +56,8 @@ RUN  cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/
 RUN  rm -rf jdk-13.0.1
 RUN  rm -rf *.gz
 
+ENV container=ssp_container
+
 # Unlike lxc containers which you can start and will keep running on their own,
 # docker containers require a running process or they exist.
 # For SSP containers - we start them, execute commands then kill the container
