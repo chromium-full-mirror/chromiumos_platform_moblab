@@ -108,6 +108,9 @@ services:
   envoy-proxy:
     image: gcr.io/chromeos-partner-moblab/envoy-proxy:release
     user: moblab
+    hostname: envoy-proxy
+    volumes:
+    - logs:/var/log/moblab
 
     networks:
     - moblab
@@ -128,6 +131,7 @@ services:
   moblab-rpcserver:
     image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:release
     user: moblab
+    hostname: moblab-rpcserver
 
     volumes:
     - logs:/var/log/moblab
@@ -140,7 +144,7 @@ services:
     - autotest
 
     extra_hosts:
-    - "dockerhost:192.168.100.1"
+      - "dockerhost:192.168.100.1"
 
   watchtower:
     image: gcr.io/chromeos-partner-moblab/watchtower:release
@@ -160,21 +164,28 @@ services:
 
   offloader:
     image: gcr.io/chromeos-partner-moblab/moblab-offloader:release
+    deploy:
+     restart_policy:
+        delay: 120s
+        window: 20s
+
     user:  moblab
 
     volumes:
       - results:/usr/local/autotest/results
       - moblab_home:/home/moblab
+      - logs:/var/log/moblab
 
     networks:
       - moblab
 
     command: >
-             run -j 100
+             -l /var/log/moblab/offloader.log
+             run
              --gs-bucket chromeos-moblab-peng-staging
              --credentials-file /home/moblab/.service_account.json
-             -l /var/log/moblab/offloader/offloader.log
-             --min_age_to_prune = 1
+             --min-age-to-prune 1
+             --jobs 100
 
     depends_on:
     - autotest
@@ -188,16 +199,17 @@ services:
         hard: 16384
 
     extra_hosts:
-    - "dockerhost:192.168.100.1"
+      - "dockerhost:192.168.100.1"
 
   monitoring:
     image: google/cadvisor:latest
 
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
 
     ports:
       - 9997:8080
@@ -206,7 +218,7 @@ services:
       - moblab
 
   log-rotate:
-    image: blacklabelops/logrotate
+    image: blacklabelops/logrotate:latest
 
     volumes:
       - /var/log/bootup:/bootup
