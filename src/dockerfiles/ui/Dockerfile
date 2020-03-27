@@ -21,7 +21,7 @@ WORKDIR /tmp/
 RUN unzip protobuf.zip
 RUN cp bin/protoc /usr/local/bin
 
-RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.0.6/protoc-gen-grpc-web-1.0.6-linux-x86_64
+RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.0.7/protoc-gen-grpc-web-1.0.7-linux-x86_64
 RUN chmod uog+x /usr/local/bin/protoc-gen-grpc-web
 
 # set working directory
@@ -52,13 +52,17 @@ RUN ng build --output-path=dist
 # base image
 FROM nginx:alpine
 
-# copy artifact build from the 'build environment'
-COPY --from=build /app/dist /etc/nginx/html/
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
 
-COPY moblab-ui/nginx.conf /etc/nginx
+# copy artifact build from the 'build environment'
+COPY --chown=moblab --from=build /app/dist /etc/nginx/html/
+
+COPY --chown=moblab moblab-ui/nginx.conf /etc/nginx
 RUN rm -f /etc/nginx/conf.d/*
 
 EXPOSE 6010
+
+USER moblab
 
 # run nginx
 CMD ["nginx", "-g", "daemon off;"]
