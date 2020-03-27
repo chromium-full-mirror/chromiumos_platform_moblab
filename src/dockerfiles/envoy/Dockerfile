@@ -3,5 +3,11 @@
 # found in the LICENSE file.
 
 FROM envoyproxy/envoy:latest
-COPY envoy.yaml /etc/envoy/envoy.yaml
+
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
+
+COPY --chown=moblab envoy.yaml /etc/envoy/envoy.yaml
+
+USER moblab
+
 CMD /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
