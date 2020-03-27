@@ -7,13 +7,11 @@
 #############
 
 # base image
-FROM python:3.6-stretch as build
+FROM python:3.8-buster as build
 
-RUN apt-get update && apt-get install -yq unzip cmake
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+    --disabled-password --gecos "" moblab
 
-COPY dockerfiles/rpcserver/requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
 
 # install protoc
 ENV PROTOBUF_URL https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
@@ -32,42 +30,46 @@ RUN cp /tmp/grpc/bins/opt/grpc_python_plugin /usr/local/bin
 # set working directory
 WORKDIR /etc/moblab/moblab-rpcserver
 
-COPY moblab-rpcserver/ /etc/moblab/moblab-rpcserver
+COPY src/moblab-rpcserver/ /etc/moblab/moblab-rpcserver
 RUN protoc -I=/etc/moblab/moblab-rpcserver \
     --python_out=:/etc/moblab/moblab-rpcserver \
     --grpc_python_out=:/etc/moblab/moblab-rpcserver \
     --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin \
     moblabrpc.proto
 
-# moblab_common
-WORKDIR /moblab_common
-COPY moblab_common/ .
-COPY host_services/ .
-RUN cp setup.py /
-RUN python /setup.py install
-
-# run tests
-
-# generate build
-#RUN ng build --output-path=dist
-
 ############
 ### prod ###
 ############
 
 # base image
-FROM python:3.6-slim
-
-# copy artifact build from the 'build environment'
-COPY --from=build /etc/moblab/moblab-rpcserver /etc/moblab/moblab-rpcserver
-COPY --from=build /usr/local/lib/python3.6/site-packages \
-    /usr/local/lib/python3.6/site-packages
-
-RUN mkdir /var/log/moblab
-# run moblab-rpcserver
+FROM python:3-buster
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
+# copy artifact build from the 'build environment'
+COPY --chown=moblab --from=build /etc/moblab/moblab-rpcserver /etc/moblab/moblab-rpcserver
+RUN apt-get update && apt-get install -yq unzip cmake libssl-dev fping
+
+COPY --chown=moblab src/dockerfiles/rpcserver/requirements.txt ./
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# moblab_common
+COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
+COPY --chown=moblab ./src/tools /moblab/src/tools
+COPY --chown=moblab ./src/dockerfiles /moblab/src/dockerfiles
+COPY --chown=moblab ./src/host_services /moblab/src/host_services
+COPY --chown=moblab ./setup.py /moblab/
+
+WORKDIR /moblab
+RUN python ./setup.py install
+
+RUN mkdir /var/log/moblab
+
+RUN apt purge -yq unzip cmake libssl-dev
+RUN apt-get clean
+
+USER moblab
 
 EXPOSE 6002
 
