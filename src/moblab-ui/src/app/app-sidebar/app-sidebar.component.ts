@@ -48,6 +48,9 @@ export class AppSidebarComponent implements OnInit {
       icon: 'laptop_chromebook'
     });
     this.addSidebarEntry(
+        Feature.DUT_DETAIL, this.navTabsBelowRun,
+        {route: '/dut_detail', label: 'DUT Detail'});
+    this.addSidebarEntry(
         Feature.SYSTEM_CONFIGURATION, this.navTabsBelowRun,
         {route: '/config', label: 'Configuration', icon: 'settings'});
     this.addSidebarEntry(
