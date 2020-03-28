@@ -105,4 +105,8 @@ export class JobDetailComponent {
   resetQuery() {
     this.jobQuery.reset();
   }
+
+  isJobInfoTableEmpty() {
+    return !this.jobInfoTableRef || this.jobInfoTableRef.isEmpty();
+  }
 }

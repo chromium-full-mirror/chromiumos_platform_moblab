@@ -15,9 +15,9 @@
   </button>
 </div>
 <div id="job-detail-table-wrapper">
-  <div id="loading-overlay" *ngIf="jobInfoTableRef.isEmpty()">
+  <div id="loading-overlay" *ngIf="isJobInfoTableEmpty()">
   </div>
-  <div id="job-not-found-label" *ngIf="jobInfoTableRef.isEmpty()">
+  <div id="job-not-found-label" *ngIf="isJobInfoTableEmpty()">
     <p>No job data fetched.</p>
   </div>
   <app-keyval-table></app-keyval-table>
