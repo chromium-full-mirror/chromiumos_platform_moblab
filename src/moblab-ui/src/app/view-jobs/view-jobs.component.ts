@@ -247,9 +247,9 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.moblabGrpcService.getJobs(
       (jobs: Job[]) => this.assignJobs(jobs),
-      (this.paginator.pageIndex * this.paginator.pageSize) ?
+      this.paginator ?
         this.paginator.pageIndex * this.paginator.pageSize : 0,
-      this.paginator.pageSize ?
+      this.paginator ?
         this.paginator.pageSize : this.pageSize,
       job_id_filter,
       job_name_filter,
