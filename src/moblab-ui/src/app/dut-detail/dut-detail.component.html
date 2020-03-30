@@ -14,13 +14,13 @@
 
 <button mat-raised-button color="primary"
         id="repair-button"
-        [disabled]="this.dutInfoTableRef.isEmpty()"
+        [disabled]="isDutInfoTableEmpty()"
         (click)="repairDut()"> Repair DUT
 </button>
 
 <button mat-raised-button color="primary"
         id="reverify-button"
-        [disabled]="this.dutInfoTableRef.isEmpty()"
+        [disabled]="isDutInfoTableEmpty()"
         (click)="reverifyDut()"> Reverify DUT
 </button>
 
@@ -28,15 +28,15 @@
   id="dut-refresh-button"
   matTooltip="Refresh"
   mat-icon-button
-  [disabled]="this.dutInfoTableRef.isEmpty()"
+  [disabled]="isDutInfoTableEmpty()"
   (click)="fetchDutDetails()">
   <mat-icon>refresh</mat-icon>
 </button>
 
 <div id="dut-detail-table-wrapper">
-  <div id="loading-overlay" *ngIf="dutInfoTableRef.isEmpty()">
+  <div id="loading-overlay" *ngIf="isDutInfoTableEmpty()">
   </div>
-  <div id="dut-not-found-label" *ngIf="dutInfoTableRef.isEmpty()">
+  <div id="dut-not-found-label" *ngIf="isDutInfoTableEmpty()">
     <p>No DUT data fetched.</p>
   </div>
   <app-keyval-table></app-keyval-table>

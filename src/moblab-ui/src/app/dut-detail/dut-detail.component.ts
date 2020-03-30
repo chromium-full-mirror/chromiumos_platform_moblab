@@ -87,4 +87,8 @@ export class DutDetailComponent {
       verticalPosition: 'top'
     });
   }
+
+  isDutInfoTableEmpty() {
+    return !this.dutInfoTableRef || this.dutInfoTableRef.isEmpty();
+  }
 }
