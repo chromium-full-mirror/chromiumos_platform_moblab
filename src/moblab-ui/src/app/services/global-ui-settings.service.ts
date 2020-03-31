@@ -24,7 +24,8 @@ export enum Feature {
   DOCUMENTATION,
   FEEDBACK_REPORTS,
   TOOLBAR_PAGE_INFORMATION,
-  JOB_DETAIL
+  JOB_DETAIL,
+  DUT_DETAIL
 }
 ;
 
@@ -33,6 +34,9 @@ export class GlobalInfoService {
   enabledFeatures = [
     Feature.DUT_MANAGEMENT,
     Feature.RUN_CTS,
+    Feature.VIEW_JOBS,
+    Feature.JOB_DETAIL,
+    Feature.DUT_DETAIL,
   ];
 
   constructor() {};
