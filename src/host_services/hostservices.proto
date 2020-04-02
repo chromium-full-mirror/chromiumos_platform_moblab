@@ -4,6 +4,12 @@ package moblab;
 
 service MoblabHostService {
   rpc get_host_identifier(HostIdentifierRequest) returns (HostIdentifierResponse) {}
+  rpc is_service_running(ServiceRunningRequest) returns (ServiceRunningResponse) {}
+  rpc get_disk_info(DiskInfoRequest) returns (DiskInfoResponse) {}
+  rpc get_ip(IpRequest) returns (IpResponse) {}
+  rpc check_for_system_update(SystemUpdateCheckRequest) returns (SystemUpdateCheckResponse) {}
+  rpc get_system_update_status(SystemUpdateStatusRequest) returns (SystemUpdateStatusResponse) {}
+  rpc install_system_update(SystemUpdateInstallRequest) returns (SystemUpdateInstallResponse) {}
 }
 
 // NEXT_TAG = 1
@@ -14,3 +20,62 @@ message HostIdentifierRequest {
 message HostIdentifierResponse {
   string identifier = 1;
 }
+
+// NEXT_TAG = 2
+message ServiceRunningRequest {
+  string service = 1;
+}
+
+// NEXT_TAG = 2
+message ServiceRunningResponse {
+  bool is_running = 1;
+}
+
+// NEXT_TAG = 1
+message DiskInfoRequest {
+}
+
+// NEXT_TAG = 2
+message DiskInfoResponse {
+  string disk_info = 1;
+}
+
+// NEXT_TAG = 1
+message IpRequest {
+}
+
+// NEXT_TAG = 2
+message IpResponse {
+  string ip_address = 1;
+}
+
+// NEXT_TAG = 1
+message SystemUpdateCheckRequest {
+}
+
+// NEXT_TAG = 1
+message SystemUpdateCheckResponse {
+}
+
+// NEXT_TAG = 1
+message SystemUpdateStatusRequest {
+}
+
+// NEXT_TAG = 6
+message SystemUpdateStatusResponse {
+  string progress = 1;
+  string current_op = 2;
+  string new_size = 3;
+  string new_version = 4;
+  string last_checked_time = 5;
+}
+
+// NEXT_TAG = 1
+message SystemUpdateInstallRequest {
+}
+
+// NEXT_TAG = 2
+message SystemUpdateInstallResponse {
+  string error = 1;
+}
+
