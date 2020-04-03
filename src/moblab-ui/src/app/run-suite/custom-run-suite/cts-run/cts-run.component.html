@@ -1,53 +1,16 @@
 <mat-card>
-  <mat-tab-group [(selectedIndex)]="selectedIndex" #androidGroup>
-    <mat-tab
-      label="{{ androidConfig.label }}"
-      *ngFor="let androidConfig of letterConfigs"
-    >
-      <app-moblab-runtest-selector (update)="modelBoardPoolSelected($event)">
-      </app-moblab-runtest-selector>
-      <app-moblab-selector
-        #suiteSelector
-        [title]="'Select suite:'"
-        [placeholder]="['Pick from available suites']"
-        [options]="getSuiteLabelList(androidConfig)"
-        [isShown]="true"
-        (update)="suiteChanged($event.value)"
-      >
-      </app-moblab-selector>
-      <mat-form-field class="ff" appearance="standard">
-        <mat-label>Limit to just these modules (Optional)</mat-label>
-        <textarea
-          class="modulecsvlist"
-          type="text"
-          matInput
-          rows="10"
-          cols="80"
-          [(ngModel)]="moduleCsvList"
-          placeholder=""
-        ></textarea>
-        <mat-hint>Modules should be comma separated</mat-hint>
-        <button
-          mat-button
-          *ngIf="moduleCsvList"
-          matSuffix
-          mat-icon-button
-          aria-label="Clear"
-          (click)="value = ''"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-form-field>
-    </mat-tab>
-  </mat-tab-group>
-  <div><br></div>
-  <button
-    mat-raised-button
-    color="primary"
-    [disabled]="runSuiteButtonDisabled"
-    #runSuiteButton
-    (click)="onRunSuite()"
-  >
-    Run Suite
-  </button>
+  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"></app-build-select-forms>
+
+  <app-basic-selector
+      #versionSelector
+      [title]="'Select CTS version:'"
+      [placeholder]="['Pick from CTS versions']"
+      [options]="['CTS_N', 'CTS_P']"
+      [isShown]="true"
+      (update)="androidVersionChanged($event.value)">
+  </app-basic-selector>
+
+  <app-basic-text-form></app-basic-text-form>
+
+  <app-run-suite-button (click)="onRunSuite()"></app-run-suite-button>
 </mat-card>

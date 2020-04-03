@@ -1,111 +1,58 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild } from '@angular/core';
 
-import { MoblabGrpcService } from "./../../../services/moblab-grpc.service";
-
-interface CtsSuiteConfiguration {
-  suiteLabel: string;
-  suiteName: string;
-}
-
-interface CtsLetterConfiguration {
-  label: string;
-  config: CtsSuiteConfiguration[];
-}
+import {BaseSuite} from '../../common/base_suite/base-suite.component';
+import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
+import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
+import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-form.component';
+import {Router} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
-  selector: "app-cts-run",
-  templateUrl: "./cts-run.component.html",
-  styleUrls: ["./cts-run.component.scss"]
+  selector: 'app-cts-run',
+  templateUrl: './cts-run.component.html',
 })
-export class CtsRunComponent {
-  @ViewChild("runSuiteButton", { static: true }) runSuiteButton;
-  @ViewChild("androidGroup", { static: true }) androidGroup;
+export class CtsRunComponent extends BaseSuite implements OnInit {
+  @ViewChild('versionSelector') versionSelectForm;
+  @ViewChild(RunSuiteButtonComponent) runSuiteButton;
+  @ViewChild(BasicTextFormComponent) modulesTextForm;
 
-  runSuiteButtonDisabled = true;
-  selectedBuild: string;
-  selectedBoard: string;
-  selectedModel: string;
-  selectedPool: string;
-  selectedSuiteLabel: string;
+  selectedAndroidVersion: string;
 
-  moduleCsvList: string = "";
-
-  letterConfigs: CtsLetterConfiguration[] = [
-    {
-      label: "Android N",
-      config: [
-        { suiteLabel: "CTS", suiteName: "cts_N" },
-        { suiteLabel: "GTS", suiteName: "gts" }
-      ]
-    },
-    {
-      label: "Android P",
-      config: [
-        { suiteLabel: "CTS", suiteName: "cts_P" },
-        { suiteLabel: "GTS", suiteName: "gts" }
-      ]
-    }
-  ];
-
-  constructor(private moblabGrpcService: MoblabGrpcService) {}
-
-  selectedIndex = 0;
-
-  modelBoardPoolSelected(event) {
-    if (event.build) {
-      console.log(event.build);
-      this.selectedBuild = event.build;
-    }
-    if (event.board) {
-      this.selectedBoard = event.board;
-    }
-    if (event.model) {
-      console.log(event.model);
-      this.selectedModel = event.model;
-    }
-    if (event.pool) {
-      console.log(event.pool);
-      this.selectedPool = event.pool;
-    }
+  constructor(private moblabGrpcService: MoblabGrpcService,
+              private router: Router,
+              private snackBar: MatSnackBar) {
+    super(moblabGrpcService, router, snackBar);
   }
 
-  getSuiteLabelList(androidConfig: CtsLetterConfiguration) {
-    var labels: string[] = [];
-    androidConfig.config.forEach(config => {
-      labels.push(config.suiteLabel);
-    });
-    return labels;
+  ngOnInit(): void {
+    this.versionSelectForm.disable('Please select build.');
+    this.modulesTextForm.disable('Please select build.');
   }
 
-  getSuiteNameFromLabel(androidConfig: CtsLetterConfiguration, label: string) {
-    let config: CtsSuiteConfiguration = androidConfig.config.find(
-      config => config.suiteLabel == label
-    );
-    if (config) {
-      return config.suiteName;
-    } else {
-      console.log("Fatal Error, can not find %s in %s", label, androidConfig);
-    }
+  androidVersionChanged(selectedAndroidVersion: string) {
+    this.selectedAndroidVersion = selectedAndroidVersion;
+    this.runSuiteButton.enable();
   }
 
-  suiteChanged(selectedSuite: string) {
-    this.selectedSuiteLabel = selectedSuite;
-    this.runSuiteButtonDisabled = false;
+  onBuildSetCustom(event) {
+    this.modulesTextForm.enable();
+    this.versionSelectForm.enable();
   }
 
   onRunSuite() {
-    let suite = this.getSuiteNameFromLabel(
-      this.letterConfigs[this.selectedIndex],
-      this.selectedSuiteLabel
-    );
     this.moblabGrpcService.runCtsSuite(
+      (response) => {
+        this.redirectToViewJobs();
+      },
+      (err, response) => {
+        this.setOffPopup(response.getMessage());
+      },
+      this.selectedAndroidVersion,
       this.selectedBuild,
       this.selectedBoard,
       this.selectedModel,
-      suite,
       this.selectedPool,
-      this.moduleCsvList,
-      ""
+      this.modulesTextForm.getText(),
     );
   }
 }
