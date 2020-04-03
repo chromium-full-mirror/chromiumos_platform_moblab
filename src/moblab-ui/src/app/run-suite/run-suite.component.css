@@ -1,0 +1,11 @@
+.suite-form-wrapper {
+  display:inline-block;
+  border: 1px solid #ebebeb;
+  font-size:13px;
+  margin: 0% 20% 0% 20%;
+  margin-top: 50px;
+}
+
+.mat-card {
+  box-shadow: none !important;
+}

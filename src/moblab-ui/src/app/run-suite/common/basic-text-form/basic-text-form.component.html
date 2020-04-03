@@ -1,0 +1,23 @@
+<div matTooltip="{{this.getDisabledReason()}}">
+  <mat-form-field appearance="standard">
+    <mat-label>Limit to just these modules (Optional)</mat-label>
+    <textarea id="textInput" matInput [disabled]="this.isDisabled()"
+              type="text"
+              matInput
+              rows="10"
+              cols="80"
+              [formControl]="this.getTextFormControl()"
+              placeholder="">
+    </textarea>
+    <mat-hint>Modules should be comma separated</mat-hint>
+    <button
+      mat-button
+      *ngIf="this.getText()"
+      matSuffix
+      mat-icon-button
+      aria-label="Clear"
+      (click)="this.clear()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+</div>
