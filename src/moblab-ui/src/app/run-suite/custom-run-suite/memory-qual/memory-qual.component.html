@@ -1,3 +1,14 @@
-<p>
-  memory-qual works!
-</p>
+<mat-card>
+  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"></app-build-select-forms>
+
+  <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'"
+                   [isNumeric]="true"
+                   (update)="avlInputChanged($event.value)">
+  </app-basic-input>
+
+  <app-basic-input #partNumberInput [name]="'AVL Part Number'"
+                   (update)="avlInputChanged($event.value)">
+  </app-basic-input>
+
+  <app-run-suite-button (click)="onRunSuite()"></app-run-suite-button>
+</mat-card>
