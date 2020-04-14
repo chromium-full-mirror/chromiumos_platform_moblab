@@ -17,7 +17,7 @@ const routes: Routes = [
   {path: 'job_detail', component: JobDetailComponent},
   {path: 'job_detail/:job_id', component: JobDetailComponent},
   {path: 'dut_detail', component: DutDetailComponent},
-  {path: 'dut_detail/:dut_ip', component: DutDetailComponent},
+  {path: 'dut_detail/:dut_hostname', component: DutDetailComponent},
   {
     path: 'run_tests',
     component: RunSuiteComponent,

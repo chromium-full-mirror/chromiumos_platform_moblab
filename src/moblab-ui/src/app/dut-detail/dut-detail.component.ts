@@ -28,8 +28,18 @@ export class DutDetailComponent {
 
   constructor(
     private readonly moblabGrpcService: MoblabGrpcService,
+    private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) {}
+
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      this.dutQuery.setValue(params.get('dut_hostname'));
+      if (this.dutQuery.value) {
+        this.fetchDutDetails();
+      }
+    });
+  }
 
   setDutDetails(dutInfo: ConnectedDutInfo) {
     this.dutInfoTableRef.loadRows(
