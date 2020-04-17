@@ -3,32 +3,35 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 import argparse
-import re
-import sys
-import os
+import calendar
 import datetime
 import json
-from dateutil.tz import tzlocal
+import os
+import re
+import sys
 import time
+
 from concurrent import futures
+from dateutil.tz import tzlocal
 
-import grpc
-
-from moblab_common import afe_connector
-from moblab_common import config_connector
-from moblab_common import devserver_connector
 import build_connector
+import grpc
 import moblab_rpcservice
 # pylint: disable=import-error
 import moblabrpc_pb2
 # pylint: disable=import-error
 import moblabrpc_pb2_grpc
+
+from moblab_common import afe_connector
+from moblab_common import config_connector
+from moblab_common import devserver_connector
+
 try:
     from chromite.lib import cros_logging as logging
 except ImportError:
     import logging
+
 
 model_re = re.compile(r'^model:(.*)')
 pool_re = re.compile(r'^pool:(.*)')
@@ -204,9 +207,10 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             return None
         try:
             dt_ts = datetime.datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
-            dt_ts.replace(tzinfo=tzlocal())
-            #TODO(haddowk) converty to UTC timezone
-            return int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds())
+            to_utc_delta_seconds = calendar.timegm(
+                time.gmtime()) - calendar.timegm(time.localtime())
+            return int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds()) + \
+                   to_utc_delta_seconds
         except (ValueError, TypeError) as e:
             logging.error('Encountered an invalid string for conversion to' +
                           ' timestamp: {}'.format(ts))
