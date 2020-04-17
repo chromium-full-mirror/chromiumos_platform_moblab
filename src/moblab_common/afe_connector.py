@@ -175,14 +175,13 @@ class AFEConnector(object):
         if name_filter:
             params['name__icontains'] = name_filter
         if created_time_lt:
-            params['created_on__lt'] = str(
-                datetime.utcfromtimestamp(created_time_lt).strftime(
+            params['created_on__lte'] = str(
+                datetime.fromtimestamp(created_time_lt).strftime(
                     '%Y-%m-%d %H:%M:%S'))
         if created_time_gt:
-            params['created_on__gt'] = str(
-                datetime.utcfromtimestamp(created_time_gt).strftime(
+            params['created_on__gte'] = str(
+                datetime.fromtimestamp(created_time_gt).strftime(
                     '%Y-%m-%d %H:%M:%S'))
-        _LOGGER.error('getNumJobs params {}'.format(params))
 
         if sub:
             params['sub'] = 'true'
@@ -247,12 +246,12 @@ class AFEConnector(object):
         if name_filter:
             params['name__icontains'] = name_filter
         if created_time_lt:
-            params['created_on__lt'] = str(
-                datetime.utcfromtimestamp(created_time_lt).strftime(
+            params['created_on__lte'] = str(
+                datetime.fromtimestamp(created_time_lt).strftime(
                     '%Y-%m-%d %H:%M:%S'))
         if created_time_gt:
-            params['created_on__gt'] = str(
-                datetime.utcfromtimestamp(created_time_gt).strftime(
+            params['created_on__gte'] = str(
+                datetime.fromtimestamp(created_time_gt).strftime(
                     '%Y-%m-%d %H:%M:%S'))
 
         if sub:
@@ -310,13 +309,13 @@ class AFEConnector(object):
 
         if start_time_gt:
             params['start_time'] = str(
-                datetime.utcfromtimestamp(start_time_gt).strftime(
+                datetime.fromtimestamp(start_time_gt).strftime(
                     '%Y-%m-%d %H:%M:%S'
                 )
             )
         if end_time_lt:
             params['end_time'] = str(
-                datetime.utcfromtimestamp(end_time_lt).strftime(
+                datetime.fromtimestamp(end_time_lt).strftime(
                     '%Y-%m-%d %H:%M:%S'
                 )
             )
@@ -360,13 +359,13 @@ class AFEConnector(object):
 
         if start_time_gt:
             params['start_time'] = str(
-                datetime.utcfromtimestamp(start_time_gt).strftime(
+                datetime.fromtimestamp(start_time_gt).strftime(
                     '%Y-%m-%d %H:%M:%S'
                 )
             )
         if end_time_lt:
             params['end_time'] = str(
-                datetime.utcfromtimestamp(end_time_lt).strftime(
+                datetime.fromtimestamp(end_time_lt).strftime(
                     '%Y-%m-%d %H:%M:%S'
                 )
             )
