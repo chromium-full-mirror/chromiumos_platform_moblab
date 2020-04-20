@@ -91,7 +91,7 @@ class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
         """Run the ChromeOS update client to check update server.
 
         If an update exists, the update client begins downloading it
-        in the background
+        in the background.
         """
         subprocess.call([self._UPDATE_ENGINE_CLIENT, '-check_for_update'])
         # wait for update engine to finish checking
@@ -159,7 +159,7 @@ def setup_logging(level):
     """Enable the correct level of logging.
 
     Args:
-        level (int): One of the predefined logging levels, e.g loging.DEBUG
+        level (int): One of the predefined logging levels, e.g loging.DEBUG.
     """
     logging.getLogger().handlers = []
     logging.getLogger().setLevel(level)
