@@ -29,14 +29,14 @@ RUN git clone https://chromium.googlesource.com/chromiumos/infra_virtualenv
 FROM alpine/git as downloads
 
 WORKDIR /
-RUN wget https://dl.google.com/go/go1.11.2.linux-amd64.tar.gz
+RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
 RUN wget https://storage.googleapis.com/gwt-releases/gwt-2.8.2.zip
 RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
 
 
 ######################################################################
 
-FROM ubuntu:latest as goinstall
+FROM debian:buster as goinstall
 
 COPY --from=downloads /*.gz /
 
@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 	wget unzip git ca-certificates sed
 
 #Install Go, complile lucifer
-RUN tar -xvf go1.11.2.linux-amd64.tar.gz
+RUN tar -xvf go1.14.2.linux-amd64.tar.gz
 RUN mv go /usr/local
 
 ######################################################################
@@ -65,7 +65,7 @@ RUN go build -i -o /usr/bin/lucifer lucifer/cmd/lucifer
 
 ######################################################################
 
-FROM ubuntu:latest as protobuild
+FROM debian:buster as protobuild
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	unzip
@@ -86,7 +86,7 @@ RUN protoc --proto_path / --python_out=/ config.proto
 
 ######################################################################
 
-FROM ubuntu:latest as build
+FROM debian:buster as build
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
         curl unzip python2.7 cmake \
@@ -127,7 +127,7 @@ RUN rm -rf /usr/local/autotest/site-packages/gwt
 
 ###################################################################
 
-FROM ubuntu:latest as run_env
+FROM debian:buster as run_env
 # Install packages
 RUN addgroup --gid 412 docker
 RUN apt-get update && apt-get install --no-install-recommends -yq \
