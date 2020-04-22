@@ -4,7 +4,9 @@
 
 BASE_URL=gcr.io/chromeos-partner-moblab
 
-all: rpcserver compose autotest db devserver ssp offloader ui envoy
+all: rpcserver compose autotest db devserver ssp offloader ui envoy remote_access
+
+#TODO refactor the common rules into a single rule.
 
 rpcserver: export DOCKER_BUILDKIT=1
 rpcserver:
@@ -64,4 +66,10 @@ envoy:
 		-f dockerfiles/envoy/Dockerfile dockerfiles/envoy
 	docker push ${BASE_URL}/envoy-proxy:${LABEL}
 
-.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy
+remote_access: export DOCKER_BUILDKIT=1
+remote_access:
+	docker build ${EXTRA_ARGS} -t ${BASE_URL}/remote_access:${LABEL} \
+		-f dockerfiles/remote_access/Dockerfile dockerfiles/remote_access
+	docker push ${BASE_URL}/remote_access:${LABEL}
+
+.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access
