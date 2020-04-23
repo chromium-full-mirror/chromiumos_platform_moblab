@@ -138,6 +138,8 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 	virtualenv rsync bzip2 vim iputils-ping \
 	mariadb-client apt-transport-https ca-certificates gnupg
 
+RUN setcap cap_net_raw+ep /bin/ping
+
 # Apache setup
 RUN a2enmod headers
 RUN a2enmod rewrite

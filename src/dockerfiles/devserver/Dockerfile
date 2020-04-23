@@ -80,7 +80,7 @@ USER moblab
 
 CMD ["/usr/lib/devserver/devserver.py", "--production", \
      "--static_dir=/static", "--logfile", \
-     "/var/log/moblab/devserver/server.log", \
-     "/var/log/moblab/devserver/console.log"]
+     "/var/log/moblab/devserver_server.log", \
+     "/var/log/moblab/devserver_console.log"]
 
 
