@@ -1,0 +1,13 @@
+<div class="basic-moblab-input" matTooltip="{{this.getDisabledReason()}}">
+  <mat-form-field appearance="standard">
+    <mat-label>{{name}}</mat-label>
+    <input id="input" matInput
+           [formControl]="input"
+           [disabled]="true"
+           (change)="update.emit('')">
+    <mat-error
+      *ngIf="this.getInputFormControl().hasError('isNaN')">
+      Input needs to be numeric.
+    </mat-error>
+  </mat-form-field>
+</div>

@@ -1,0 +1,48 @@
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {FormControl} from '@angular/forms';
+
+import {BaseForm} from '../base-form/base-form.component';
+import {numericValidator} from '../../../utils/validators';
+
+
+/**
+ * Component meant to be used for input form items in run suite components.
+ */
+@Component({
+  selector: 'app-basic-input',
+  templateUrl: './basic-input.component.html',
+  styleUrls: ['./basic-input.component.css']
+})
+export class BasicInputFormComponent extends BaseForm implements OnInit {
+  @Input() name: string;
+  @Input() isNumeric: boolean;
+  private input = new FormControl('');
+
+  ngOnInit(): void {
+    if (this.isNumeric) {
+      this.setNumericValidation();
+    }
+  }
+
+  setNumericValidation() {
+    this.input.setValidators([numericValidator])
+  }
+
+  getInput() {
+    return this.input.value;
+  }
+
+  getInputFormControl() {
+    return this.input;
+  }
+
+  enable() {
+    super.enable();
+    this.input.enable();
+  }
+
+  disable(message?: string) {
+    super.disable(message);
+    this.input.disable();
+  }
+}
