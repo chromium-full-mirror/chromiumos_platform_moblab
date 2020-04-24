@@ -121,6 +121,7 @@ services:
 
   moblab-ui:
     image: gcr.io/chromeos-partner-moblab/moblab-ui:release
+    hostname: moblab-ui
 
     networks:
     - moblab
@@ -169,7 +170,7 @@ services:
         delay: 120s
         window: 20s
 
-    user:  moblab
+    user: moblab
 
     volumes:
       - results:/usr/local/autotest/results
@@ -227,8 +228,37 @@ services:
     environment:
       - LOGS_DIRECTORIES=/bootup /var/log/docker /logs
       - LOGROTATE_INTERVAL=hourly
+
     networks:
       - moblab
+
+  remote_access:
+    image: gcr.io/chromeos-partner-moblab/remote_access:release
+
+    volumes:
+      - logs:/var/log/moblab
+      - usr_local_moblab:/usr/local/moblab
+      - static_cache:/mnt/moblab/cache
+      - results:/mnt/moblab/results
+      - containers:/mnt/moblab/containers
+      - apache_logs:/var/log/apache
+      - /var/log/bootup:/var/log/bootup
+      - moblab_home:/home/moblab
+
+    environment:
+      - PUBLIC_KEY_FILE=/testing_rsa.pub
+      - PUID=246
+      - PGID=246
+      - TZ=Etc/UTC
+      - USER_NAME=moblab
+      - DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel
+
+    ports:
+      - 2222:2222
+
+    networks:
+      - moblab
+
 
 volumes:
   db_data: {}

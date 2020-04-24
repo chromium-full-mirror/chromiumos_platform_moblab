@@ -23,5 +23,4 @@ RUN chmod u+rwx /moblab_source
 
 USER $USER
 
-
 CMD ["entry.sh"]
