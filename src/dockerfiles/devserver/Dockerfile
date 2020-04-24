@@ -21,7 +21,13 @@ COPY --from=source /chromite /chromite
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends -yq \
     curl python3 sudo gcc python-dev procps \
-    bzip2 unzip sudo ca-certificates python3-distutils python3-dev
+    bzip2 unzip sudo ca-certificates python3-distutils python3-dev \
+    openssh-server
+
+RUN mkdir /run/sshd
+RUN mkdir -p /config/.ssh/
+COPY authorized_keys /config/.ssh/
+RUN echo "AuthorizedKeysFile      /config/.ssh/authorized_keys" >> /etc/ssh/sshd_config
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
@@ -59,7 +65,16 @@ RUN install -m 0644  \
         setup_chromite.py \
         /usr/lib/devserver
 
-RUN mkdir /static
+RUN mkdir /static_files_to_serve
+RUN install  \
+        autoupdate.py \
+        builder.py \
+        nebraska/nebraska.py \
+        stateful_update \
+        quick-provision/quick-provision \
+        /static_files_to_serve
+
+
 
 EXPOSE 8080
 
@@ -76,11 +91,11 @@ RUN chown -R moblab:moblab /var/log/moblab
 
 RUN apt-get install --reinstall sudo
 
+COPY ./devserver_init /
+RUN chmod uog+rx /devserver_init
+
 USER moblab
 
-CMD ["/usr/lib/devserver/devserver.py", "--production", \
-     "--static_dir=/static", "--logfile", \
-     "/var/log/moblab/devserver_server.log", \
-     "/var/log/moblab/devserver_console.log"]
+CMD ["/devserver_init"]
 
 

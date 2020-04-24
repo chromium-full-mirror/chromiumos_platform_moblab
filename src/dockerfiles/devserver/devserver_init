@@ -1,0 +1,11 @@
+#!/bin/bash
+set -x
+
+sudo /usr/sbin/sshd
+
+cp -f /static_files_to_serve/* /static
+
+/usr/lib/devserver/devserver.py --production \
+     --static_dir=/static \
+     --logfile /var/log/moblab/devserver_server.log \
+     /var/log/moblab/devserver_console.log
