@@ -29,10 +29,8 @@ from autotest_lib.tko import models, parser_lib
 from autotest_lib.tko.perf_upload import perf_uploader
 from autotest_lib.utils.side_effects import config_loader
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+
+metrics = utils.metrics_mock
 
 
 _ParseOptions = collections.namedtuple(
