@@ -54,10 +54,7 @@ from autotest_lib.server.hosts import ssh_multiplex
 from autotest_lib.tko import models as tko_models
 from autotest_lib.tko import parser_lib
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+metrics = utils.metrics_mock
 
 
 def _control_segment_path(name):

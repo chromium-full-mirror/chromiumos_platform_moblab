@@ -29,10 +29,7 @@ from autotest_lib.client.common_lib import priorities
 from autotest_lib.client.common_lib import utils
 from autotest_lib.tko import db
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+metrics = utils.metrics_mock
 
 try:
     from autotest_lib.server.site_common import site_utils as server_utils

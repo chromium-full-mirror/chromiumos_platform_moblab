@@ -9,7 +9,8 @@ import logging
 
 import common
 from autotest_lib.server.hosts import host_info
-from chromite.lib import metrics
+from autotest_lib.server import utils
+metrics = utils.metrics_mock
 
 
 _METRICS_PREFIX = 'chromeos/autotest/autoserv/host_info/shadowing_store/'

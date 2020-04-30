@@ -18,10 +18,7 @@ from autotest_lib.server.cros import autoupdater
 from autotest_lib.server.cros import provision
 
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+metrics = utils.metrics_mock
 
 
 _CONFIG = global_config.global_config

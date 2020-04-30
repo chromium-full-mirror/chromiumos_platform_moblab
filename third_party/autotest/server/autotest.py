@@ -24,10 +24,7 @@ from autotest_lib.server import utils as server_utils
 from autotest_lib.server.cros.dynamic_suite.constants import JOB_REPO_URL
 
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = client_utils.metrics_mock
+metrics = client_utils.metrics_mock
 
 
 # This is assumed to be the value by tests, do not change it.
