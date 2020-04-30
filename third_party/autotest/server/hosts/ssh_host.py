@@ -23,10 +23,8 @@ from autotest_lib.server.hosts import abstract_ssh
 
 # In case cros_host is being ran via SSP on an older Moblab version with an
 # older chromite version.
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+
+metrics = utils.metrics_mock
 
 
 class SSHHost(abstract_ssh.AbstractSSHHost):

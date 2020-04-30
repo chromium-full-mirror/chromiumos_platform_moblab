@@ -169,16 +169,6 @@ def load(name):
     return _load('autotest_lib.%s' % name)
 
 
-def chromite_load(name):
-    """Import module from chromite.lib.
-
-    This enforces that monkeypatch() is called first.
-
-    @param name: name of module as string, e.g., 'metrics'
-    """
-    return _load('chromite.lib.%s' % name)
-
-
 def deps_load(name):
     """Import module from dependencies, e.g. site-package.
 
@@ -213,18 +203,6 @@ def deferred_load(name):
     @param name: name of module as string, e.g., 'frontend.afe.models'
     """
     return _DeferredModule('autotest_lib.%s' % name)
-
-
-def deferred_chromite_load(name):
-    """Eventually import module from chromite.lib.
-
-    This function returns a dummy module that will load the given chromite
-    module upon its first use (if monkeypatch() has is called first; else
-    its use will fail).
-
-    @param name: name of module as string, e.g., 'metrics'
-    """
-    return _DeferredModule('chromite.lib.%s' % name)
 
 
 _UNLOADED_MODULE = object()
