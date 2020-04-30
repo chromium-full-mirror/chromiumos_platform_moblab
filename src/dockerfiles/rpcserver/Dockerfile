@@ -69,6 +69,14 @@ RUN mkdir /var/log/moblab
 RUN apt purge -yq unzip cmake libssl-dev
 RUN apt-get clean
 
+# Installs Moblab API client library
+WORKDIR /tmp/moblab_api_client_library
+RUN curl https://storage.googleapis.com/moblab-api-distribution/google-chromeos-moblab.tar.gz -o google-chromeos-moblab.tar.gz
+RUN tar -xvzf google-chromeos-moblab.tar.gz
+RUN python -m pip install .
+RUN rm -rf /tmp/moblab_api_client_library
+
+WORKDIR /moblab
 USER moblab
 
 EXPOSE 6002
