@@ -22,8 +22,6 @@ from autotest_lib.site_utils.ssp_containers import ssp_containers
 from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
 
 
-from chromite.lib import constants as chromite_constants
-
 # Naming convention of test container, e.g., test_300_1422862512_2424, where:
 # 300:        The test job ID.
 # 1422862512: The tick when container is created.

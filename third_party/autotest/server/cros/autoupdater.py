@@ -17,12 +17,10 @@ from autotest_lib.server import autotest
 from autotest_lib.server import utils as server_utils
 from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
 from autotest_lib.server.cros.dynamic_suite import tools
-from chromite.lib import retry_util
+from autotest_lib.server import retry_util
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+
+metrics = utils.metrics_mock
 
 
 def _metric_name(base_name):

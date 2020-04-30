@@ -31,10 +31,7 @@ from autotest_lib.server.cros import provision
 from autotest_lib.server.cros.dynamic_suite import constants
 from autotest_lib.server.cros.dynamic_suite import job_status
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+metrics = utils.metrics_mock
 
 
 CONFIG = global_config.global_config
@@ -711,23 +708,6 @@ def SetupTsMonGlobalState(*args, **kwargs):
     @param *args: Args to pass through.
     @param **kwargs: Kwargs to pass through.
     """
-    try:
-        # TODO(crbug.com/739466) This module import is delayed because it adds
-        # 1-2 seconds to the module import time and most users of site_utils
-        # don't need it. The correct fix is to break apart site_utils into more
-        # meaningful chunks.
-        from chromite.lib import ts_mon_config
-    except ImportError:
-        logging.warn('Unable to import chromite. Monarch is disabled.')
-        return TrivialContextManager()
-
-    try:
-        context = ts_mon_config.SetupTsMonGlobalState(*args, **kwargs)
-        if hasattr(context, '__exit__'):
-            return context
-    except Exception as e:
-        logging.warning('Caught an exception trying to setup ts_mon, '
-                        'monitoring is disabled: %s', e, exc_info=True)
     return TrivialContextManager()
 
 

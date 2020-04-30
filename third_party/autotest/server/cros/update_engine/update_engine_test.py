@@ -18,7 +18,7 @@ from autotest_lib.client.cros.update_engine import update_engine_util
 from autotest_lib.server import autotest
 from autotest_lib.server import test
 from autotest_lib.server.cros.dynamic_suite import tools
-from chromite.lib import retry_util
+from autotest_lib.server import retry_util
 from datetime import datetime, timedelta
 
 

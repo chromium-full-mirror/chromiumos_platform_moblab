@@ -14,18 +14,14 @@ from autotest_lib.client.common_lib.cros import retry
 from autotest_lib.frontend.afe.json_rpc import proxy
 from autotest_lib.server import frontend
 try:
-    from chromite.lib import retry_util
+    from autotest_lib.server import retry_util
     from chromite.lib import timeout_util
 except ImportError:
     logging.warn('Unable to import chromite.')
     retry_util = None
     timeout_util = None
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    logging.warn('Unable to import metrics from chromite.')
-    metrics = utils.metrics_mock
+metrics = utils.metrics_mock
 
 
 def convert_timeout_to_retry(backoff, timeout_min, delay_sec):
