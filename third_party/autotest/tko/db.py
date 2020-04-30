@@ -29,10 +29,8 @@ from autotest_lib.client.common_lib import utils
 from autotest_lib.client.common_lib.cros import retry
 from autotest_lib.frontend import database_settings_helper
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+
+metrics = utils.metrics_mock
 
 
 def _log_error(msg):

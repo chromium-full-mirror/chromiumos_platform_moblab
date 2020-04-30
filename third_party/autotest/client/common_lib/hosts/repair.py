@@ -29,10 +29,7 @@ import re
 import common
 from autotest_lib.client.common_lib import error
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    from autotest_lib.client.bin.utils import metrics_mock as metrics
+from autotest_lib.client.bin.utils import metrics_mock as metrics
 
 #Regular experssion pattern to filter out unwanted hostname.
 _HOSTNAME_PATTERN = 'chromeos[0-9]-row[0-9]+[a-z]?-rack[0-9]+[a-z]?-host[0-9]+'
