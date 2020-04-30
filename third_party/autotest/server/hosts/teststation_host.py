@@ -86,13 +86,7 @@ class TestStationHost(base_classes.Host):
         @return: True if the host running adb command is a Moblab, False
                  otherwise.
         """
-        if self._is_host_moblab is None:
-            try:
-                self.run('cat %s | grep -q moblab' % cros_constants.LSB_RELEASE)
-                self._is_host_moblab = True
-            except (error.AutoservRunError, error.AutotestHostRunError):
-                self._is_host_moblab = False
-        return self._is_host_moblab
+        return True
 
 
     def get_tmp_dir(self, parent='/var/tmp'):
