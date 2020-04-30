@@ -144,6 +144,9 @@ services:
     depends_on:
     - autotest
 
+    environment:
+    - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
+
     extra_hosts:
       - "dockerhost:192.168.100.1"
 
