@@ -13,10 +13,7 @@ from autotest_lib.client.common_lib import global_config
 from autotest_lib.client.cros import constants
 from autotest_lib.server import utils
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+metrics = utils.metrics_mock
 
 
 # The amortized max filesize to collect.  For example, if _MAX_FILESIZE is 10

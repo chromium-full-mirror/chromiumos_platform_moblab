@@ -14,10 +14,8 @@ from autotest_lib.server.cros.dynamic_suite import reporting_utils
 from autotest_lib.server.cros.dynamic_suite import tools
 from autotest_lib.site_utils  import gmail_lib
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = site_utils.metrics_mock
+
+metrics = site_utils.metrics_mock
 
 
 EMAIL_CREDS_FILE = global_config.global_config.get_config_value(

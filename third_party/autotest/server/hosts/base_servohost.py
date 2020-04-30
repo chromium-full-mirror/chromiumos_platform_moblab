@@ -24,10 +24,8 @@ from autotest_lib.server import site_utils as server_utils
 from autotest_lib.server.cros import autoupdater
 from autotest_lib.server.hosts import ssh_host
 
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+
+metrics = utils.metrics_mock
 
 
 class BaseServoHost(ssh_host.SSHHost):

@@ -36,10 +36,7 @@ from autotest_lib.server.hosts import servo_constants
 
 # In case cros_host is being ran via SSP on an older Moblab version with an
 # older chromite version.
-try:
-    from chromite.lib import metrics
-except ImportError:
-    metrics = utils.metrics_mock
+metrics = utils.metrics_mock
 
 
 CONFIG = global_config.global_config
