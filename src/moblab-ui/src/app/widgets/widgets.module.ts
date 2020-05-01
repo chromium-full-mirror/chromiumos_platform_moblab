@@ -9,24 +9,15 @@ import {MatTableModule} from '@angular/material/table';
 import {NgModule} from '@angular/core';
 
 import {KeyValTableComponent} from './keyval-table/keyval-table.component'
-import {MoblabBuildSelectorComponent} from './moblab-build-selector/moblab-build-selector.component';
-import {MoblabRuntestSelectorComponent} from './moblab-runtest-selector/moblab-runtest-selector.component';
-import {MoblabSelectorComponent} from './moblab-selector/moblab-selector.component';
 import {TableHeaderSelectorComponent} from './table-header-selector/table-header-selector.component';
 
 @NgModule({
   declarations: [
     KeyValTableComponent,
-    MoblabSelectorComponent,
-    MoblabBuildSelectorComponent,
-    MoblabRuntestSelectorComponent,
     TableHeaderSelectorComponent
   ],
   exports: [
     KeyValTableComponent,
-    MoblabSelectorComponent,
-    MoblabBuildSelectorComponent,
-    MoblabRuntestSelectorComponent,
     TableHeaderSelectorComponent
   ],
   imports: [
