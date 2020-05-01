@@ -17,9 +17,9 @@ export class MemoryQualComponent extends BaseSuite implements OnInit {
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
-  constructor(private moblabGrpcService: MoblabGrpcService,
-              private router: Router,
-              private snackBar: MatSnackBar) {
+  constructor(moblabGrpcService: MoblabGrpcService,
+              router: Router,
+              snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
