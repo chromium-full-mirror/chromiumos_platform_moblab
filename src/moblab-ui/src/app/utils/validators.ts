@@ -19,3 +19,14 @@ export function forbiddenDateValidator(control) {
   }
   return null
 }
+
+export function numericValidator(control) {
+  if (!control.value) {
+    return null;
+  }
+
+  if (isNaN(control.value)) {
+    return {'isNaN': {value: control.value}}
+  }
+  return null
+}
