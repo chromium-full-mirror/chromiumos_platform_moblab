@@ -33,3 +33,7 @@ max_heap_table_size=500M
 
 # We do not want to limit the size of the table
 innodb_data_file_path=ibdata1:50M:autoextend
+
+# In MariaDB 10.2 STRICT_TRANS_TABLES was enabled by default
+# causing "Data too long for column" error, revert to 10.1 mode.
+sql_mode=NO_ENGINE_SUBSTITUTION
