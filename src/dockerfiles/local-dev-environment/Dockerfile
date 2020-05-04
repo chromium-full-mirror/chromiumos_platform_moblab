@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-FROM gcr.io/chromeos-partner-moblab/moblab-dev-enviroment:release
+FROM gcr.io/chromeos-partner-moblab/moblab-dev-environment:release
 
 ARG USER
 ARG USERID
@@ -12,7 +12,7 @@ WORKDIR /moblab_source
 RUN chmod uog+rx /usr/local/bin/get_source.sh
 
 RUN adduser --gecos "" --disabled-password --uid ${USERID} ${USER}
-RUN usermod -a -G docker $USER
+#RUN usermod -a -G docker $USER
 
 RUN echo "$USER     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
