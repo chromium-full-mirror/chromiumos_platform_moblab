@@ -2,34 +2,22 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-#############
-### build ###
-#############
+ARG ${REGISTRY_URI}
 
-# base image
+######################################################################
+
+FROM gcr.io/chromeos-partner-moblab/protoc:haddowk3 as protoc
+
+######################################################################
+
 FROM python:3.8-buster as build
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-
-# install protoc
-ENV PROTOBUF_URL https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
-RUN curl -L -o /tmp/protobuf.zip $PROTOBUF_URL
-WORKDIR /tmp/
-RUN unzip protobuf.zip
-RUN cp bin/protoc /usr/local/bin
-
-# install grpc_python_plugin
-RUN git clone https://github.com/grpc/grpc.git
-WORKDIR /tmp/grpc
-RUN git submodule update --init
-RUN make grpc_python_plugin
-RUN cp /tmp/grpc/bins/opt/grpc_python_plugin /usr/local/bin
-
-# set working directory
 WORKDIR /etc/moblab/moblab-rpcserver
 
+COPY --from=protoc /protoc/* /usr/local/bin/
 COPY src/moblab-rpcserver/ /etc/moblab/moblab-rpcserver
 RUN protoc -I=/etc/moblab/moblab-rpcserver \
     --python_out=:/etc/moblab/moblab-rpcserver \
@@ -37,18 +25,22 @@ RUN protoc -I=/etc/moblab/moblab-rpcserver \
     --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin \
     moblabrpc.proto
 
-############
-### prod ###
-############
+######################################################################
 
-# base image
-FROM python:3-buster
+FROM python:3-slim-buster
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
-# copy artifact build from the 'build environment'
-COPY --chown=moblab --from=build /etc/moblab/moblab-rpcserver /etc/moblab/moblab-rpcserver
-RUN apt-get update && apt-get install -yq unzip cmake libssl-dev fping
+
+COPY --chown=moblab --from=build /etc/moblab/moblab-rpcserver \
+    /etc/moblab/moblab-rpcserver
+RUN apt-get update && apt-get install -yq \
+    cmake \
+    curl \
+    fping \
+    libssl-dev \
+    unzip \
+    zlib1g-dev
 
 COPY --chown=moblab src/dockerfiles/rpcserver/requirements.txt ./
 RUN pip install --upgrade pip
@@ -57,17 +49,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # moblab_common
 COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
 COPY --chown=moblab ./src/tools /moblab/src/tools
-COPY --chown=moblab ./src/dockerfiles /moblab/src/dockerfiles
 COPY --chown=moblab ./src/host_services /moblab/src/host_services
 COPY --chown=moblab ./setup.py /moblab/
 
 WORKDIR /moblab
-RUN python ./setup.py install
+RUN python -m pip install .
+
+RUN rm -rf /moblab
 
 RUN mkdir /var/log/moblab
-
-RUN apt purge -yq unzip cmake libssl-dev
-RUN apt-get clean
 
 # Installs Moblab API client library
 WORKDIR /tmp/moblab_api_client_library
@@ -75,6 +65,9 @@ RUN curl https://storage.googleapis.com/moblab-api-distribution/google-chromeos-
 RUN tar -xvzf google-chromeos-moblab.tar.gz
 RUN python -m pip install .
 RUN rm -rf /tmp/moblab_api_client_library
+
+RUN apt purge -yq unzip cmake libssl-dev zlib1g-dev curl
+RUN apt-get clean
 
 WORKDIR /moblab
 USER moblab

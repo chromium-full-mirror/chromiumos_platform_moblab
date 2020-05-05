@@ -13,16 +13,24 @@ RUN ls /devserver-src/dev-util
 RUN sed -i 's#python2#python3#g' /devserver-src/dev-util/devserver.py
 ######################################################################
 
-FROM debian:buster as run
+FROM debian:buster-slim as run
 
 COPY --from=source /devserver-src /devserver-src
 COPY --from=source /chromite /chromite
 
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-    curl python3 sudo gcc python-dev procps \
-    bzip2 unzip sudo ca-certificates python3-distutils python3-dev \
-    openssh-server
+    bzip2 \
+    ca-certificates \
+    curl \
+    gcc \
+    openssh-server \
+    python-dev procps \
+    python3 \
+    python3-dev \
+    python3-distutils \
+    sudo \
+    unzip 
 
 RUN mkdir /run/sshd
 RUN mkdir -p /config/.ssh/
@@ -44,6 +52,9 @@ WORKDIR /
 COPY setup_chromite.py /
 RUN python -m pip install setuptools
 RUN python /setup_chromite.py install
+
+RUN apt purge -yq gcc
+RUN apt-get clean
 
 # Devserver requires an apache server to be running for a good health check
 # this is a fake apache script that just sleeps forever.
@@ -73,8 +84,6 @@ RUN install  \
         stateful_update \
         quick-provision/quick-provision \
         /static_files_to_serve
-
-
 
 EXPOSE 8080
 

@@ -8,19 +8,26 @@ WORKDIR /
 
 RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 
-
 ###############################################################################
 
-FROM debian:buster as run
+FROM debian:buster-slim as run
 
 WORKDIR /
 
 COPY --from=source /chromite /chromite
 
-# Install packages
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-        bzip2 wget curl python unzip rsync gnupg lsb-release \
-        ca-certificates ssh sudo
+        bzip2 \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release \
+        python \
+        rsync \
+        ssh \
+        sudo \
+        unzip \
+        wget
 
 # Install the google cloud sdk
 RUN echo \

@@ -6,12 +6,25 @@ FROM debian:buster
 
 RUN apt update
 
-RUN apt install -y wget python-pexpect python-numpy python-setuptools python-serial python-pytest tidy libftdi-dev curl gcc make pkg-config libudev-dev usbutils
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+    curl \
+    gcc \
+    libftdi-dev \
+    libudev-dev \
+    make \
+    pkg-config \
+    python-numpy \
+    python-pexpect \
+    python-pytest \
+    python-serial \
+    python-setuptools \
+    tidy \
+    usbutils \
+    wget
 
 RUN wget https://github.com/libusb/libusb/releases/download/v1.0.23/libusb-1.0.23.tar.bz2
 RUN tar xvf libusb-1.0.23.tar.bz2
 WORKDIR /libusb-1.0.23
-
 RUN ./configure && make && make install
 RUN export LD_LIBRARY_PATH=/usr/local/lib
 

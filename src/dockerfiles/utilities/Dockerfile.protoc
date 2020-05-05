@@ -1,0 +1,39 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+FROM debian:buster-slim as download
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+	ca-certificates \
+	curl \
+	dh-autoreconf \
+	g++ \
+	gcc \
+	git \
+	make \
+	unzip
+
+WORKDIR /
+RUN curl -L -o protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
+RUN unzip protobuf.zip
+
+RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.0.7/protoc-gen-grpc-web-1.0.7-linux-x86_64
+RUN chmod uog+x /usr/local/bin/protoc-gen-grpc-web
+
+# install grpc_python_plugin
+RUN git clone https://github.com/grpc/grpc.git
+WORKDIR /grpc
+RUN git submodule update --init
+RUN make grpc_python_plugin
+
+##############################################################################
+FROM debian:buster-slim
+
+RUN mkdir -p /protoc
+COPY --from=download bin/protoc /protoc
+COPY --from=download /usr/local/bin/protoc-gen-grpc-web /protoc
+COPY --from=download /grpc/bins/opt/grpc_python_plugin /protoc
+
+
+

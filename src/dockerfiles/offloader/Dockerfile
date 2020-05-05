@@ -1,15 +1,22 @@
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+ARG REGISTRY_URI
+
+######################################################################
+
+FROM ${REGISTRY_URI}/protoc:haddowk3 as protoc
+
+######################################################################
 
 FROM python:3.8-buster as proto_build
 
 WORKDIR /
-RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
-RUN unzip protoc-3.10.0-linux-x86_64.zip
-RUN cp bin/protoc /usr/local/bin
+COPY --from=protoc /protoc/* /usr/local/bin
 COPY third_party/autotest/tko/tko.proto /usr/local/autotest/tko/tko.proto
-RUN protoc --proto_path /usr/local/autotest/tko --python_out=/usr/local/autotest/tko /usr/local/autotest/tko/tko.proto
+RUN protoc --proto_path /usr/local/autotest/tko \
+    --python_out=/usr/local/autotest/tko \
+    /usr/local/autotest/tko/tko.proto
 
 ####################################################################
 
@@ -17,7 +24,8 @@ FROM python:3-slim-buster
 
 WORKDIR /
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+    --disabled-password --gecos "" moblab
 RUN apt-get update && apt-get install -yq sudo
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN usermod -aG sudo moblab
