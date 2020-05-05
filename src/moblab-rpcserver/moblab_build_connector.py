@@ -57,7 +57,7 @@ class MoblabBuildConnector(object):
             self.build_service_client = build_service_client if \
                 build_service_client is not None else BuildServiceClient()
         except auth_exceptions.DefaultCredentialsError as e:
-            raise MoblabBuildConnectorException('No credentials loaded')
+            raise MoblabBuildConnectorException('No credentials loaded') from e
 
     def list_available_milestones(self, build_target, model, page_size=50,
         page_token=None):
@@ -163,6 +163,3 @@ class MoblabBuildConnector(object):
                                           bucket_name)
         )
         return self.build_service_client.stage_build(request)
-
-if __name__ == '__main__':
-    connector = MoblabBuildConnector()
