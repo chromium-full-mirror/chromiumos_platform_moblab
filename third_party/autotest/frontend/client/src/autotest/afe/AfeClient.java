@@ -55,24 +55,15 @@ public class AfeClient implements EntryPoint {
     protected void finishLoading() {
         SiteCommonClassFactory.globalInitialize();
 
-        String stainlessUrl = StaticDataRepository.getRepository().getData(
-            "stainless_url").isString().stringValue();
-        if (!stainlessUrl.equals("")) {
-            Document.get().getElementById("stainless-link").setAttribute(
-                "href", stainlessUrl);
-            Document.get().getElementById("stainless").removeClassName(
-                "hidden");
-        }
+
         boolean is_moblab = StaticDataRepository.getRepository().getData(
             "is_moblab").isBoolean().booleanValue();
         mainTabPanel = new CustomTabPanel(is_moblab);
-        if (is_moblab) {
-            Document.get().getElementById("moblab_setup").removeClassName("hidden");
-            Document.get().getElementById("mobmonitor_link").setAttribute("href",
-                "http://" + Location.getHostName() + ":9991");
-        } else {
-            Document.get().getElementById("hide_on_moblab").removeClassName("hidden");
-        }
+
+        Document.get().getElementById("moblab_setup").removeClassName("hidden");
+        Document.get().getElementById("mobmonitor_link").setAttribute("href",
+            "http://" + Location.getHostName() + ":9991");
+
 
         jobList = new JobListView(new JobSelectListener() {
             public void onJobSelected(int jobId) {
