@@ -10,3 +10,5 @@ COPY docker-compose.yaml .
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
     --uid 246 --disabled-password --gecos "" moblab
 
+# Test the config for syntax errors
+RUN docker-compose config

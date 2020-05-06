@@ -2,7 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+
+FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
+
+######################################################################
+
 FROM node:12-buster as base
+
+RUN npm install -g gts
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
     https://packages.cloud.google.com/apt cloud-sdk main" | \
@@ -24,12 +33,28 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     vim \
     vim-gtk
 
+# Install docker
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+RUN add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/debian \
+   $(lsb_release -cs) \
+   stable"
+RUN apt-get update && apt-get install docker-ce-cli
+
 # Install chrome
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub |\
     apt-key add -
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ \
     stable main" >> /etc/apt/sources.list.d/google.list'
 RUN apt-get update && apt-get install -yq google-chrome-stable
+
+# git-pylint-commit-hook
+RUN python3 -m pip install -U pip && python3 -m pip install \
+    git-pylint-commit-hook \
+    pylint \
+    yapf \
+    autopep8 \
+    black
 
 # Install protoc
 RUN apt-get install -yq unzip

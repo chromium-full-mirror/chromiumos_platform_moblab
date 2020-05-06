@@ -6,7 +6,7 @@ ARG ${REGISTRY_URI}
 
 ######################################################################
 
-FROM gcr.io/chromeos-partner-moblab/protoc:haddowk3 as protoc
+FROM gcr.io/chromeos-partner-moblab/protoc:release as protoc
 
 ######################################################################
 

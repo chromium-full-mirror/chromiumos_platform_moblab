@@ -1,0 +1,66 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+
+######################################################################
+
+FROM alpine/git as source
+
+WORKDIR /
+
+RUN git clone https://chromium.googlesource.com/chromiumos/infra/lucifer
+
+######################################################################
+
+FROM alpine/git as downloads
+
+WORKDIR /
+RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
+
+######################################################################
+
+FROM ${REGISTRY_URI}/protoc:release as protoc
+
+######################################################################
+
+FROM debian:buster-slim as build
+
+COPY --from=downloads /*.gz /
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+	wget unzip git ca-certificates sed
+
+#Install Go
+RUN tar -xvf go1.14.2.linux-amd64.tar.gz
+RUN mv go /usr/local
+
+COPY --from=source /lucifer /lucifer
+COPY --from=protoc /protoc/* /usr/local/bin
+
+
+WORKDIR /lucifer/src
+
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/lucifer
+ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+RUN sed -i 's#go.opencensus.io/exporter/stackdriver#contrib.go.opencensus.io/exporter/stackdriver#g' lucifer/metrics/metrics.go
+RUN sed -i 's#trace.SetDefaultSampler(trace.AlwaysSample())#//trace.SetDefaultSampler(trace.AlwaysSample())#g' lucifer/metrics/metrics.go
+
+RUN go get -v go.chromium.org/chromiumos/infra/proto/go/test_platform/side_effects
+RUN protoc \
+	--proto_path /lucifer/src/go.chromium.org/chromiumos/infra/proto/src/test_platform/side_effects \
+	--python_out=/ \
+	/lucifer/src/go.chromium.org/chromiumos/infra/proto/src/test_platform/side_effects/config.proto
+RUN go get -v lucifer/cmd/lucifer
+RUN go build -i -o /usr/bin/lucifer lucifer/cmd/lucifer
+
+####################################################################
+
+FROM debian:buster-slim
+
+COPY --chown=moblab --from=build /*_pb* /
+COPY --chown=moblab --from=build /usr/bin/lucifer /usr/bin/lucifer

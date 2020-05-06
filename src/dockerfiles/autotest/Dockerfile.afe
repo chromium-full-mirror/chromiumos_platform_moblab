@@ -1,0 +1,95 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+
+######################################################################
+
+FROM ${REGISTRY_URI}/moblab-autotest-gwt:release as gwt
+
+######################################################################
+
+FROM ${REGISTRY_URI}/moblab-autotest-base:release
+
+COPY --from=gwt /www/ /moblab/third_party/autotest/frontend/client/www/
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+    apache2 \
+    apache2-utils \
+    apt-transport-https  \
+    bzip2  \
+    ca-certificates \
+    curl \
+    gnupg \
+    iputils-ping  \
+    libapache2-mod-wsgi \
+    libcap2-bin \
+    mariadb-client \
+    ncdu  \
+    pbzip2 \
+    rsync \
+    ssh \
+    sudo \
+    unzip \
+    vim \
+    xz-utils
+
+# Install the google cloud sdk
+RUN echo \
+    "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
+    http://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    apt-key --keyring /usr/share/keyrings/cloud.google.gpg  \
+    add - && apt-get update -y && apt-get install google-cloud-sdk -y
+
+# Ping is used to check DUT's are around needs this capability added to run
+# as non root user.
+RUN setcap cap_net_raw+ep /bin/ping
+
+RUN apt purge -yq libcap2-bin
+
+# Apache setuop
+RUN a2dismod mpm_event && \
+    a2enmod mpm_prefork && \
+    a2enmod rewrite && \
+    a2enmod headers && \
+    a2enmod wsgi && \
+    a2enmod cgi
+
+RUN sed -i 's/www-data/moblab/g' /etc/apache2/envvars
+
+RUN rm /etc/apache2/ports.conf
+RUN touch /etc/apache2/ports.conf
+RUN rm /etc/apache2/sites-enabled/*
+COPY apache-docker.conf /etc/apache2/mods-available
+RUN rm -f /etc/apache2/mods-enabled/apache-docker.conf
+RUN ln -s /etc/apache2/mods-available/apache-docker.conf /etc/apache2/mods-enabled/apache-docker.conf
+RUN chown -R moblab:moblab /etc/apache2/mods-enabled/*
+RUN mkdir -p /var/log/apache2/
+RUN chmod uog+rw /var/log/apache2
+RUN chmod uog+rw /run
+RUN chown -R moblab /var/log/apache2
+RUN chown -R root /etc/sudoers.d
+
+RUN echo "moblab   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN apt-get clean
+
+RUN ln -s /usr/local/lib/python2.7/site-packages/* /moblab/third_party/autotest/site-packages
+
+RUN addgroup --gid 412 docker
+USER moblab
+ENV USER=moblab
+
+RUN mkdir -p /home/moblab
+RUN mkdir -p /home/moblab/.ssh
+
+RUN cp /chromite/ssh_keys/* /home/moblab/.ssh/
+RUN chmod -R 600 /home/moblab/.ssh/*
+COPY ssh_config /home/moblab/.ssh/config
+RUN touch /home/moblab/.boto
+RUN sudo usermod -aG docker $USER
+EXPOSE 8888
+CMD ["/usr/sbin/apache2ctl", "-DFOREGROUND"]
