@@ -26,7 +26,7 @@ import logging
 import re
 import weakref
 
-import google.protobuf.internal.well_known_types as types
+#import google.protobuf.internal.well_known_types as types
 
 from autotest_lib.client.common_lib import global_config, host_protections
 from autotest_lib.client.common_lib import time_utils

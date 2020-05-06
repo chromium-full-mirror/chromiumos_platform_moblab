@@ -22,6 +22,7 @@ from autotest_lib.site_utils import stable_version_classify as sv
 from autotest_lib.server import site_utils as server_utils
 from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
 from autotest_lib.server.cros.dynamic_suite import tools
+from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
 
 from chromite.lib import auto_updater
 from chromite.lib import remote_access
@@ -38,6 +39,8 @@ _CONFIG = global_config.global_config
 ENABLE_DEVSERVER_TRIGGER_AUTO_UPDATE = _CONFIG.get_config_value(
         'CROS', 'enable_devserver_trigger_auto_update', type=bool,
         default=False)
+AFE = frontend_wrappers.RetryingAFE(timeout_min=(1.0/60), delay_sec=1)
+_CROS_VERSION_MAP = AFE.get_stable_version_map(AFE.CROS_IMAGE_TYPE)
 
 
 def _host_in_lab(host):
@@ -88,14 +91,6 @@ def get_stable_cros_image_name(board):
             repair the given board.
     """
     return _CROS_VERSION_MAP.get_image_name(board)
-
-
-def get_stable_firmware_version_v2(info, _config_override=None):
-    if sv.classify_model(info.model, _config_override=_config_override) == sv.FROM_HOST_CONFIG:
-        logging.debug("get_stable_firmware_version_v2: model %s from host_info_store" % info.model)
-        return info.firmware_stable_version
-    logging.debug("get_stable_cros_image_name_v2: model %s from autotest frontend" % info.model)
-    return get_stable_firmware_version(info.model)
 
 
 def get_stable_firmware_version(model):

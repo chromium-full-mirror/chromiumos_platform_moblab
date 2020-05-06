@@ -22,5 +22,5 @@ subprocess32
 
 #Extra requirements for chromiumos/infra/skylab_inventory
 #Do NOT need the mysql versions for autotest
-mysqlclient
-protobuf
+#mysqlclient
+#protobuf

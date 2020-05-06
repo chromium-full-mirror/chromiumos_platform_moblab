@@ -313,17 +313,7 @@ class DroneUtility(object):
     def cleanup_orphaned_containers(self):
         """Run lxc_cleanup script to clean up orphaned container.
         """
-        # The script needs to run with sudo as the containers are privileged.
-        # TODO(dshi): crbug.com/459344 Call lxc_cleanup.main when test
-        # container can be unprivileged container.
-        command = ['sudo', LXC_CLEANUP_SCRIPT, '-x', '-v', '-l',
-                   LXC_CLEANUP_LOG_FILE]
-        logging.info('Running %s', command)
-        # stdout and stderr needs to be direct to /dev/null, otherwise existing
-        # of drone_utils process will kill lxc_cleanup script.
-        subprocess.Popen(
-                command, shell=False, stdin=None, stdout=open('/dev/null', 'w'),
-                stderr=open('/dev/null', 'a'), preexec_fn=os.setpgrp)
+        return
 
 
     def wait_for_all_async_commands(self):

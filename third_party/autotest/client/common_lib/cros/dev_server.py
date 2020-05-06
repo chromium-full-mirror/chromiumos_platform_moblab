@@ -280,10 +280,6 @@ def _get_storage_server_for_artifacts(artifacts=None):
     @return: The address of the storage server that has these artifacts.
              The default image storage server if no artifacts are specified.
     """
-    factory_artifact = global_config.global_config.get_config_value(
-            'CROS', 'factory_artifact', type=str, default='')
-    if artifacts and factory_artifact and factory_artifact in artifacts:
-        return _get_canary_channel_server()
     return _get_image_storage_server()
 
 

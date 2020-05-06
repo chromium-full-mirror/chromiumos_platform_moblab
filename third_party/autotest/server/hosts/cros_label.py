@@ -286,23 +286,7 @@ class ChameleonLabel(base_label.BaseLabel):
     _NAME = 'chameleon'
 
     def exists(self, host):
-        # See crbug.com/1004500#2 for details.
-        # https://chromium.googlesource.com/chromiumos/third_party/autotest/+
-        # /refs/heads/master/server/hosts/cros_host.py#335 shows that
-        # _chameleon_host_list is not reliable.
-        has_chameleon = len(host.chameleon_list) > 0
-        # TODO(crbug.com/995900) -- debug why chameleon label is flipping
-        try:
-            logging.info("has_chameleon %s", has_chameleon)
-            logging.info("chameleon_host_list %s",
-                         getattr(host, "_chameleon_host_list", "NO_ATTRIBUTE"))
-            logging.info("chameleon_list %s",
-                         getattr(host, "chameleon_list", "NO_ATTRIBUTE"))
-            logging.info("multi_chameleon %s",
-                         getattr(host, "multi_chameleon", "NO_ATTRIBUTE"))
-        except:
-            pass
-        return has_chameleon
+        return False
 
 
 
@@ -312,11 +296,11 @@ class ChameleonConnectionLabel(base_label.StringPrefixLabel):
     _NAME = 'chameleon'
 
     def exists(self, host):
-        return len(host._chameleon_host_list) > 0
+        return False
 
 
     def generate_labels(self, host):
-        return [chameleon.get_label() for chameleon in host.chameleon_list]
+        return ""
 
 
 class ChameleonPeripheralsLabel(base_label.StringPrefixLabel):
@@ -332,7 +316,7 @@ class ChameleonPeripheralsLabel(base_label.StringPrefixLabel):
     _NAME = 'chameleon'
 
     def exists(self, host):
-        return len(host._chameleon_host_list) > 0
+        return False
 
 
     def generate_labels(self, host):
