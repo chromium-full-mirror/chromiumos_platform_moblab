@@ -43,7 +43,7 @@ def cleanup_if_fail():
             except:
                 exc_info = sys.exc_info()
                 try:
-                    client = docker.from_env()
+                    client = docker.from_env(timeout=300)
                     container = client.containers.get(str(container_id))
                     if container and not skip_cleanup:
                         container.stop()

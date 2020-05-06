@@ -129,7 +129,7 @@ class Container(object):
                          If a snapshot is requested and creating the snapshot
                          fails, a full clone will be attempted.
         """
-        self._client = docker.from_env(timeout=2000000)
+        self._client = docker.from_env(timeout=300)
         self._rootfs = None
         self.name = name
         self._id = self.name
