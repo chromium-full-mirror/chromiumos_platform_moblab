@@ -891,9 +891,7 @@ def get_stainless_url():
 
     @returns the stainless url or an empty string.
     """
-    return global_config.global_config.get_config_value('AUTOTEST_WEB',
-                                                        'stainless_url',
-                                                        default='')
+    return ""
 
 
 def inject_times_to_filter(start_time_key=None, end_time_key=None,
