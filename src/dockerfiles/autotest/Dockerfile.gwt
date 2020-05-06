@@ -1,0 +1,28 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# NOTE - do not make this one -slim - java will not install.
+FROM debian:buster as build
+
+COPY ./third_party/autotest /moblab/third_party/autotest
+RUN ln -s /moblab/third_party/autotest /usr/local/autotest
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+	unzip wget ca-certificates python2 default-jdk apt-utils
+
+WORKDIR /
+RUN wget https://storage.googleapis.com/gwt-releases/gwt-2.8.2.zip
+
+# GWT compile
+RUN unzip gwt-2.8.2.zip
+RUN mkdir -p /usr/local/autotest
+RUN mv gwt-2.8.2/ /usr/local/autotest/site-packages/gwt
+RUN /usr/local/autotest/utils/compile_gwt_clients.py -a -e"-Djava.util.prefs.userRoot=/tmp"
+
+RUN rm -rf /moblab/third_party/autotest/frontend/client/www/*.old
+
+######################################################################
+FROM debian:buster-slim
+
+COPY --from=build /moblab/third_party/autotest/frontend/client/www/ /www/

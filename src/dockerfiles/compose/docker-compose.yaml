@@ -4,9 +4,11 @@
 
 version: '3'
 services:
+  ##############################################################################
   db:
     image: gcr.io/chromeos-partner-moblab/moblab-db:release
     hostname: db
+    restart: on-failure
     user: moblab
 
     volumes:
@@ -26,22 +28,25 @@ services:
       interval: 1m30s
       timeout: 10s
       retries: 3
+
     ulimits:
       nofile:
         soft: 10000
         hard: 16384
-
+  ##############################################################################
   db-init:
     image: gcr.io/chromeos-partner-moblab/moblab-db-init:release
     user: moblab
     depends_on:
       - db
+
     networks:
       moblab:
-
+  ##############################################################################
   devserver:
     image: gcr.io/chromeos-partner-moblab/devserver:release
     hostname: devserver
+    restart: on-failure
     user: moblab
     depends_on:
       - autotest
@@ -61,36 +66,34 @@ services:
       nofile:
         soft: 10000
         hard: 16384
-
+  ##############################################################################
   autotest:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest:release
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest-afe:release
     hostname: autotest
+    restart: on-failure
     user: moblab
     ports:
     - 80:8888
 
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:rw
     - logs:/var/log/moblab
     - usr_local_moblab:/usr/local/moblab
     - results:/usr/local/autotest/results
     - results:/results
     - moblab_home:/home/moblab
-    - containers:/moblab/third_party/autotest/containers
     - apache_logs:/var/log/apache2
     - leases:/leases:ro
     - /etc/lsb-release:/etc/lsb-release:ro
+    - shadowconfig:/shadow_config
 
     environment:
-    - CROS_VENV_CACHE=/usr/local/.cros-venv-cache
     - LABEL=$LABEL
 
     networks:
     - moblab
 
     depends_on:
-      - db
-      - db-init
+      - autotest-dbsetup
 
     cap_add:
       - CAP_NET_BIND_SERVICE
@@ -105,9 +108,93 @@ services:
     extra_hosts:
       - "dockerhost:192.168.100.1"
 
+  autotest-dbsetup:
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest-dbsetup:release
+    user: moblab
+    volumes:
+     - logs:/var/log/moblab
+     - logs:/usr/local/autotest/logs
+     - /etc/lsb-release:/etc/lsb-release:ro
+
+    networks:
+      - moblab
+
+    depends_on:
+      - db-init
+
+  autotest-monitordb:
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest-monitor_db:release
+    user: moblab
+    restart: on-failure
+
+    volumes:
+    - logs:/var/log/moblab
+    - logs:/moblab/third_party/autotest/logs
+    - /etc/lsb-release:/etc/lsb-release:ro
+    - results:/usr/local/autotest/results
+    - lucifer_leases:/usr/local/autotest/leases
+    - shadowconfig:/shadow_config
+    - moblab_home:/home/moblab
+    - /var/run/docker.sock:/var/run/docker.sock:rw
+    - containers:/moblab/third_party/autotest/containers
+
+    networks:
+    - moblab
+
+    depends_on:
+    - autotest
+
+    cap_add:
+      - CAP_NET_BIND_SERVICE
+      - CAP_NET_RAW
+      - ALL
+
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 16384
+
+    extra_hosts:
+      - "dockerhost:192.168.100.1"
+
+  autotest-hostscheduler:
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest-host:release
+    user: moblab
+    restart: on-failure
+
+    volumes:
+    - logs:/var/log/moblab
+    - logs:/moblab/third_party/autotest/logs
+    - /etc/lsb-release:/etc/lsb-release:ro
+
+    networks:
+      - moblab
+
+    depends_on:
+      - autotest
+
+  autotest-job_aborter:
+    image: gcr.io/chromeos-partner-moblab/moblab-autotest-aborter:release
+    user: moblab
+    restart: on-failure
+
+    volumes:
+    - logs:/var/log/moblab
+    - logs:/moblab/third_party/autotest/logs
+    - /etc/lsb-release:/etc/lsb-release:ro
+    - lucifer_leases:/usr/local/autotest/leases
+
+    networks:
+      - moblab
+
+    depends_on:
+      - autotest
+  ##############################################################################
   envoy-proxy:
     image: gcr.io/chromeos-partner-moblab/envoy-proxy:release
     user: moblab
+    restart: on-failure
+
     hostname: envoy-proxy
     volumes:
     - logs:/var/log/moblab
@@ -118,7 +205,7 @@ services:
     ports:
     - 6001:6001
     - 6011:6011
-
+  ##############################################################################
   moblab-ui:
     image: gcr.io/chromeos-partner-moblab/moblab-ui:release
     hostname: moblab-ui
@@ -126,9 +213,12 @@ services:
     networks:
     - moblab
 
+    environment:
+    - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json=
+
     ports:
     - 6010:6010
-
+  ##############################################################################
   moblab-rpcserver:
     image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:release
     user: moblab
@@ -144,15 +234,12 @@ services:
     depends_on:
     - autotest
 
-    environment:
-    - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
-
     extra_hosts:
       - "dockerhost:192.168.100.1"
-
+  ##############################################################################
   watchtower:
     image: gcr.io/chromeos-partner-moblab/watchtower:release
-
+    restart: on-failure
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 
@@ -165,13 +252,10 @@ services:
       nofile:
         soft: 10000
         hard: 16384
-
+  ##############################################################################
   offloader:
     image: gcr.io/chromeos-partner-moblab/moblab-offloader:release
-    deploy:
-     restart_policy:
-        delay: 120s
-        window: 20s
+    restart: on-failure
 
     user: moblab
 
@@ -204,10 +288,10 @@ services:
 
     extra_hosts:
       - "dockerhost:192.168.100.1"
-
+  ##############################################################################
   monitoring:
     image: google/cadvisor:latest
-
+    restart: on-failure
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -220,10 +304,10 @@ services:
 
     networks:
       - moblab
-
+  ##############################################################################
   log-rotate:
     image: blacklabelops/logrotate:latest
-
+    restart: on-failure
     volumes:
       - /var/log/bootup:/bootup
       - logs:/logs
@@ -234,10 +318,10 @@ services:
 
     networks:
       - moblab
-
+  ##############################################################################
   remote_access:
     image: gcr.io/chromeos-partner-moblab/remote_access:release
-
+    restart: on-failure
     volumes:
       - logs:/var/log/moblab
       - usr_local_moblab:/usr/local/moblab
@@ -247,6 +331,7 @@ services:
       - apache_logs:/var/log/apache
       - /var/log/bootup:/var/log/bootup
       - moblab_home:/home/moblab
+      - /var/run/docker.sock:/var/run/docker.sock
 
     environment:
       - PUBLIC_KEY_FILE=/testing_rsa.pub
@@ -255,6 +340,7 @@ services:
       - TZ=Etc/UTC
       - USER_NAME=moblab
       - DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel
+      - SUDO_ACCESS=true
 
     ports:
       - 2222:2222
@@ -270,8 +356,10 @@ volumes:
   usr_local_moblab: {}
   static_cache: {}
   results: {}
+  lucifer_leases: {}
   containers: {}
   apache_logs: {}
+  shadowconfig: {}
   leases:
     external: True
 

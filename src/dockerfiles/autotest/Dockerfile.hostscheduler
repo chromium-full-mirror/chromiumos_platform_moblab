@@ -1,0 +1,19 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+
+######################################################################
+
+FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
+
+
+RUN ln -s /usr/local/lib/python2.7/site-packages/* \
+    /moblab/third_party/autotest/site-packages
+
+COPY host_scheduler.sh /
+RUN chmod uog+rx /host_scheduler.sh
+
+CMD ["/host_scheduler.sh"]

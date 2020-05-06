@@ -64,6 +64,7 @@ RUN  rm -rf jdk-13.0.1
 RUN  rm -rf *.gz
 
 ENV container=ssp_container
+ENV AUTOTEST_WEB=autotest:8888
 
 # Unlike lxc containers which you can start and will keep running on their own,
 # docker containers require a running process or they exist.
