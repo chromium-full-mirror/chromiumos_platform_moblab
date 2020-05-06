@@ -25,7 +25,7 @@ def get_container_info(container_path, **filters):
     @return: A list of dictionaries that each dictionary has the information of
              a container. The keys are defined in ATTRIBUTES.
     """
-    client = docker.from_env()
+    client = docker.from_env(timeout=300)
     containers = client.containers.list(filters={"name": "^test_.*"})
     info_collection = []
     for container in containers:
@@ -52,7 +52,7 @@ def download_extract(url, target, extract_dir, name):
     """
     remote_url = dev_server.DevServer.get_server_url(url)
 
-    client = docker.from_env()
+    client = docker.from_env(timeout=300)
     container = client.containers.get(name)
     result = container.exec_run('curl %s -o %s' % (url, target))
     result = container.exec_run('tar xf %s -C %s' % (target, extract_dir))
