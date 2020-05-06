@@ -2,7 +2,7 @@
   <mat-form-field appearance="standard">
     <mat-label>{{name}}</mat-label>
     <input id="input" matInput
-           [formControl]="input"
+           [formControl]="this.getInputFormControl()"
            [disabled]="true"
            (change)="update.emit('')">
     <mat-error
