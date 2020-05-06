@@ -15,9 +15,9 @@ export class GtsRunComponent extends BaseSuite implements OnInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
   @ViewChild(BasicTextFormComponent) modulesTextForm;
 
-  constructor(private moblabGrpcService: MoblabGrpcService,
-              private router: Router,
-              private snackBar: MatSnackBar) {
+  constructor(moblabGrpcService: MoblabGrpcService,
+              router: Router,
+              snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 

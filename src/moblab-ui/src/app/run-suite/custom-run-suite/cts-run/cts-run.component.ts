@@ -18,9 +18,9 @@ export class CtsRunComponent extends BaseSuite implements OnInit {
 
   selectedAndroidVersion: string;
 
-  constructor(private moblabGrpcService: MoblabGrpcService,
-              private router: Router,
-              private snackBar: MatSnackBar) {
+  constructor(moblabGrpcService: MoblabGrpcService,
+              router: Router,
+              snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 

@@ -25,9 +25,10 @@ export abstract class BaseSuite {
   selectedModel: string;
   selectedPool: string;
 
-  constructor(private moblabGrpcService: MoblabGrpcService,
-              private router: Router,
-              private snackBar: MatSnackBar) {}
+  constructor(public moblabGrpcService: MoblabGrpcService,
+              public router: Router,
+              public snackBar: MatSnackBar) {
+  }
 
   onBuildSet(event: BuildSettings) {
     this.selectedModel = event.model;
