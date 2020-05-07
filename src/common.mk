@@ -6,7 +6,7 @@ REGISTRY_URI=gcr.io/chromeos-partner-moblab
 EXTRA_ARGS+= --build-arg REGISTRY_URI=${REGISTRY_URI}
 EXTRA_ARGS+= --build-arg LABEL=${LABEL}
 
-all: rpcserver compose autotest db devserver ssp offloader envoy remote_access ui 
+all: rpcserver compose autotest db devserver ssp offloader envoy remote_access ui
 
 #TODO refactor the common rules into a single rule.
 
@@ -24,7 +24,7 @@ compose:
 	docker push ${REGISTRY_URI}/moblab-compose:${LABEL}
 
 autotest: autotest-gwt autotest-afe autotest-dbsetup autotest-monitor \
-	autotest-host autotest-aborter
+	autotest-host autotest-abort
 
 autotest-base: export DOCKER_BUILDKIT=1
 autotest-base:
@@ -130,5 +130,11 @@ local-dev:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-dev-environment:${LABEL} \
 		-f dockerfiles/local-dev-environment/Dockerfile.base dockerfiles/local-dev-environment
 	docker push ${REGISTRY_URI}/moblab-dev-environment:${LABEL}
+
+remote-agent: export DOCKER_BUILDKIT=1
+remote-agent:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-agent:${LABEL} -f \
+		dockerfiles/remote-logging-agent/Dockerfile ..
+	docker push ${REGISTRY_URI}/moblab-remote-agent:${LABEL}
 
 .PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access
