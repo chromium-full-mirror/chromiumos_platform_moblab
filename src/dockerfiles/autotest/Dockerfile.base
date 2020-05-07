@@ -1,0 +1,84 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+
+######################################################################
+
+FROM alpine/git as source
+
+WORKDIR /
+
+RUN git clone https://chromium.googlesource.com/chromiumos/chromite
+WORKDIR /chromite
+RUN git fetch
+RUN git reset --hard 94aa4ea0dd9f79d59f491572f8892ab25e2e07db
+
+######################################################################
+
+FROM ${REGISTRY_URI}/protoc:release as protoc
+
+######################################################################
+
+FROM debian:buster-slim as protobuild
+
+COPY --from=protoc /protoc/* /usr/local/bin
+
+COPY ./third_party/autotest/tko/ /moblab/third_party/autotest/tko/
+
+RUN protoc --proto_path /moblab/third_party/autotest/tko \
+    --python_out=/moblab/third_party/autotest/tko \
+    /moblab/third_party/autotest/tko/tko.proto
+
+######################################################################
+
+
+FROM python:2.7-slim-buster
+
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
+    --uid 246 --disabled-password --gecos "" moblab
+
+COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
+COPY --chown=moblab ./src/dockerfiles /moblab/src/dockerfiles
+COPY --chown=moblab ./src/host_services /moblab/src/host_services
+COPY --chown=moblab ./src/tools /moblab/src/tools
+COPY --chown=moblab ./third_party/autotest /moblab/third_party/autotest
+COPY --chown=moblab ./setup.py /moblab/
+
+COPY --chown=moblab --from=protobuild /moblab/third_party/autotest/tko/*pb2* /moblab/third_party/autotest/tko/
+
+RUN rm -rf /moblab/third_party/autotest/site-packages
+RUN mkdir -p /moblab/third_party/autotest/site-packages
+
+RUN apt-get update && apt-get install --no-install-recommends -yq  \
+    python-pip gcc-multilib default-libmysqlclient-dev mariadb-client
+
+COPY src/dockerfiles/autotest/requirements.txt ./
+
+RUN python2.7 -m pip install -r requirements.txt
+
+WORKDIR /
+
+COPY --chown=moblab --from=source /chromite /chromite
+COPY src/dockerfiles/autotest/setup_chromite.py /
+RUN python2.7 /setup_chromite.py install
+
+RUN apt purge -yq gcc-multilib python-pip
+RUN apt-get clean
+
+WORKDIR /moblab
+RUN python2.7 ./setup.py install
+
+WORKDIR /shadow_config
+COPY --chown=moblab src/dockerfiles/autotest/shadow_config.ini .
+RUN chmod uog+rw ./shadow_config.ini
+RUN ln -s /shadow_config/shadow_config.ini /moblab/third_party/autotest/shadow_config.ini
+
+RUN ln -s /moblab/third_party/autotest /usr/local/autotest
+RUN ln -s /chromite /usr/local/autotest/site-packages/chromite
+
+RUN mkdir -p /moblab/third_party/autotest/logs
+RUN mkdir -p /moblab/third_party/autotest/results
+RUN mkdir -p /moblab/third_party/autotest/leases
