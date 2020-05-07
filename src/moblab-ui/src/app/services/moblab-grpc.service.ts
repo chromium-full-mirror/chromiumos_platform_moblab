@@ -50,6 +50,9 @@ import {
   ReverifyHostResponse,
   RunCtsSuiteRequest,
   RunCtsSuiteResponse,
+  RunGtsSuiteRequest,
+  RunMemoryQualificationSuiteRequest,
+  RunStorageQualificationSuiteRequest,
   RunSuiteRequest,
   RunSuiteResponse,
   UpdateDutsFirmwareRequest,
@@ -67,46 +70,198 @@ export class MoblabGrpcService {
 
   constructor() {}
 
-  runSuite(name: string, callback: (x: string) => void) {
-    // const request = new RunSuiteRequest();
-    // request.setName(name);
+  /** Generic run suite method that can run any of the specific suites defined below
+   *  ( with no suite-specific options ).
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param suite_name: ex. CTS, GTS.
+   *  @param build: String name of build the suite is being run under.
+   *  @param buildtarget: ex. XXX-release/R99-99999.9.9
+   *  @param model: Device model.
+   *  @param pool: String identifer of a group of DUTs
+   *    (as configured in the 'Manage DUTs' component )
+   * */
+  runSuite(
+    callback: (response: RunSuiteResponse) => void,
+    error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
+    suite_name: string,
+    build: string,
+    buildtarget: string,
+    model: string,
+    pool: string,
+  ) {
+    const request = new RunSuiteRequest();
+    request.setSuite(suite_name);
+    request.setBuildVersion(build);
+    request.setBuildTarget(buildtarget);
+    request.setModel(model);
+    request.setPool(pool);
 
-    // const call = this.moblabRpcService.run_suite(request, {},
-    //   (err: grpcWeb.Error, response: Response) => {
-    //   callback("RPC Error");
-    // });
-
-    // call.on('data', (response: Response) => {
-    // console.log(response.getMessage()); callback(response.getMessage());});
-    callback("Hello");
+    const call = this.moblabRpcService.run_suite(
+      request,
+      {},
+      error_callback
+    );
   }
 
+  /** Starts CTS suite run.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param android_version: ex. String identifier indicating the android
+   *    version the CTS suite is being run for (ex. CTS_N ).
+   *  @param build: String name of build the suite is being run under.
+   *  @param buildtarget: ex. XXX-release/R99-99999.9.9
+   *  @param model: Device model.
+   *  @param pool: String identifer of a group of DUTs
+   *    (as configured in the 'Manage DUTs' component ).
+   *  @param specific_modules_list: Comma separated string containing names of
+   *    CTS modules. If not empty, only modules in this list will be run as a
+   *    part of suite execution.
+   * */
   runCtsSuite(
+    callback: (response: RunCtsSuiteResponse) => void,
+    error_callback: (err: grpcWeb.Error, response: RunCtsSuiteResponse) => void,
+    android_version: string,
+    build: string,
+    buildtarget: string,
+    model: string,
+    pool: string,
+    specific_modules_list: string[],
+  ) {
+    const request = new RunCtsSuiteRequest();
+    request.setAndroidVersion(android_version);
+    request.setBuildVersion(build);
+    request.setBuildTarget(buildtarget);
+    request.setModel(model);
+    request.setPool(pool);
+    request.setSpecificModulesList(specific_modules_list);
+
+    const call = this.moblabRpcService.run_cts_suite(
+      request,
+      {},
+      error_callback
+    );
+
+    call.on("data", callback);
+  }
+
+  /** Starts GTS suite run.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param build: String name of build the suite is being run under.
+   *  @param buildtarget: ex. XXX-release/R99-99999.9.9
+   *  @param model: Device model.
+   *  @param pool: String identifer of a group of DUTs
+   *    (as configured in the 'Manage DUTs' component ).
+   *  @param specific_modules_list: Comma separated string containing names ofss
+   *    GTS modules. If not empty, only modules in this list will be run as a
+   *    part of suite execution.
+   * */
+  runGtsSuite(
+    callback: (response: RunSuiteResponse) => void,
+    error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
+    build: string,
+    buildtarget: string,
+    model: string,
+    pool: string,
+    specific_modules_list: string[],
+  ) {
+    const request = new RunGtsSuiteRequest();
+    request.setBuildVersion(build);
+    request.setBuildTarget(buildtarget);
+    request.setModel(model);
+    request.setPool(pool);
+    request.setSpecificModulesList(specific_modules_list);
+
+    const call = this.moblabRpcService.run_gts_suite(
+      request,
+      {},
+      error_callback
+    );
+
+    call.on("data", callback);
+  }
+
+  /** Starts hardware storage qualification suite run.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param build: String name of build the suite is being run under.
+   *  @param buildtarget: ex. XXX-release/R99-99999.9.9
+   *  @param model: Device model.
+   *  @param pool: String identifer of a group of DUTs
+   *    (as configured in the 'Manage DUTs' component ).
+   *  @param avl_process_bug_id: ID of buganizer issue associated with this
+   *    storage qualification run.
+   *  @param avl_part_number: Number identifier of part for which qualification
+   *    is being run.
+   *  */
+  runStorageQualificationSuite(
+    callback: (response: RunSuiteResponse) => void,
+    error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
+    build: string,
+    buildtarget: string,
+    model: string,
+    pool: string,
+    avl_process_bug_id: number,
+    avl_part_number: string
+  ) {
+    const request = new RunStorageQualificationSuiteRequest();
+    request.setBuildVersion(build);
+    request.setBuildTarget(buildtarget);
+    request.setModel(model);
+    request.setPool(pool);
+    request.setAvlProcessBugId(avl_process_bug_id);
+    request.setAvlPartNumber(avl_part_number);
+
+    const call = this.moblabRpcService.run_storage_qualification_suite(
+      request,
+      {},
+      error_callback
+    );
+
+    call.on("data", callback);
+  }
+
+
+  /** Starts hardware memory qualification suite run.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param build: String name of build the suite is being run under.
+   *  @param buildtarget: ex. XXX-release/R99-99999.9.9
+   *  @param model: Device model.
+   *  @param pool: String identifer of a group of DUTs
+   *    (as configured in the 'Manage DUTs' component ).
+   *  @param avl_process_bug_id: ID of buganizer issue associated with this
+   *    qualification run.
+   *  @param avl_part_number: Number identifier of part for which qualification
+   *    is being run.
+   *  */
+  runMemoryQualificationSuite(
+    callback: (response: RunSuiteResponse) => void,
+    error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
     build: string,
     buildtarget: string,
     model: string,
     suite: string,
     pool: string,
-    autotest_tests: string,
-    tradefed_tests: string
+    avl_process_bug_id: number,
+    avl_part_number: string
   ) {
-    const request = new RunCtsSuiteRequest();
+    const request = new RunMemoryQualificationSuiteRequest();
     request.setBuildVersion(build);
     request.setBuildTarget(buildtarget);
     request.setModel(model);
-    request.setSuite(suite);
     request.setPool(pool);
-    const call = this.moblabRpcService.run_cts_suite(
+    request.setAvlProcessBugId(avl_process_bug_id);
+    request.setAvlPartNumber(avl_part_number);
+
+    const call = this.moblabRpcService.run_memory_qualification_suite(
       request,
       {},
-      (err: grpcWeb.Error, response: RunCtsSuiteResponse) => {
-        console.log(err);
-      }
+      error_callback
     );
 
-    call.on("data", (response: RunCtsSuiteResponse) => {
-      console.log(response.getMessage());
-    });
+    call.on("data", callback);
   }
 
   listConnectedDuts(callback: (x: ConnectedDutInfo[]) => void) {

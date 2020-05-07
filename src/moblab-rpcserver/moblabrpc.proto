@@ -6,6 +6,11 @@ service MoblabRpcService {
   // Run a test suite
   rpc run_suite (RunSuiteRequest) returns (RunSuiteResponse) {}
   rpc run_cts_suite (RunCtsSuiteRequest) returns (RunCtsSuiteResponse) {}
+  rpc run_gts_suite (RunGtsSuiteRequest) returns (RunSuiteResponse) {}
+  rpc run_storage_qualification_suite (RunStorageQualificationSuiteRequest)
+    returns (RunSuiteResponse) {}
+  rpc run_memory_qualification_suite (RunMemoryQualificationSuiteRequest)
+    returns (RunSuiteResponse) {}
 
   rpc list_connected_duts (ListConnectedDutsRequest) returns (ListConnectedDutsResponse) {}
   rpc list_build_targets (ListBuildTargetsRequest) returns (ListBuildTargetsResponse) {}
@@ -39,9 +44,14 @@ service MoblabRpcService {
   rpc remove_attribute_from_duts(RemoveAttributeFromDutsRequest) returns (RemoveAttributeFromDutsResponse) {};
 }
 
-// NEXT_TAG = 2
+
+// NEXT_TAG = 6
 message RunSuiteRequest {
-  string name = 1;
+  string suite = 1;
+  string build_target = 2;
+  string build_version = 3;
+  string model = 4;
+  string pool = 5;
 }
 
 // NEXT_TAG = 2
@@ -49,15 +59,47 @@ message RunSuiteResponse {
   string message = 1;
 }
 
-// NEXT_TAG = 8
+// NEXT_TAG = 7
 message RunCtsSuiteRequest {
-  string suite = 1;
+  string android_version = 1;
   string build_target = 2;
   string build_version = 3;
   string model = 4;
   string pool = 5;
-  repeated string autotest_tests = 6;
-  repeated string tradefed_tests = 7;
+  // Comma separated list of modules which, if specified, will be the only
+  // CTS suite modules to be run.
+  repeated string specific_modules = 6;
+}
+
+// NEXT_TAG = 6
+message RunGtsSuiteRequest {
+  string build_target = 1;
+  string build_version = 2;
+  string model = 3;
+  string pool = 4;
+  // Comma separated list of modules which, if specified, will be the only
+  // GTS suite modules to be run.
+  repeated string specific_modules = 5;
+}
+
+// NEXT_TAG = 7
+message RunStorageQualificationSuiteRequest {
+  string build_target = 1;
+  string build_version = 2;
+  string model = 3;
+  string pool = 4;
+  int32 avl_process_bug_id = 5;
+  string avl_part_number = 6;
+}
+
+// NEXT_TAG = 7
+message RunMemoryQualificationSuiteRequest {
+  string build_target = 1;
+  string build_version = 2;
+  string model = 3;
+  string pool = 4;
+  int32 avl_process_bug_id = 5;
+  string avl_part_number = 6;
 }
 
 // NEXT_TAG = 2
