@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package moblab;
+
+service RemoteLoggingAgent {
+    rpc hello_world (HelloWorldRequest) returns (HelloWorldResponse) {}
+}
+
+// NEXT_TAG = 1
+message HelloWorldRequest {
+}
+
+// NEXT_TAG = 2
+message HelloWorldResponse {
+    string message = 1;
+}
