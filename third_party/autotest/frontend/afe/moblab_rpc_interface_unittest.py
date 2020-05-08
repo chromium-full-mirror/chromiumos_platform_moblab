@@ -121,7 +121,7 @@ class MoblabRpcInterfaceTest(mox.MoxTestBase,
                                 mox.IgnoreArg())
         open(moblab_rpc_interface._CONFIG.shadow_file,
              'w').AndReturn(mockShadowFile)
-        moblab_rpc_interface.os.system('sudo reboot')
+        moblab_rpc_interface.os.system(' reboot')
 
         self.mox.ReplayAll()
         moblab_rpc_interface.update_config_handler(
@@ -151,7 +151,7 @@ class MoblabRpcInterfaceTest(mox.MoxTestBase,
         mockFile.__exit__(mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg())
         open(config_mock.shadow_file, 'w').AndReturn(mockFile)
         moblab_rpc_interface.os = self.mox.CreateMockAnything()
-        moblab_rpc_interface.os.system('sudo reboot')
+        moblab_rpc_interface.os.system(' reboot')
         self.mox.ReplayAll()
         moblab_rpc_interface.reset_config_settings()
 
@@ -169,7 +169,7 @@ class MoblabRpcInterfaceTest(mox.MoxTestBase,
         moblab_rpc_interface.shutil.copyfile(
                 launch_control_key,
                 moblab_host.MOBLAB_LAUNCH_CONTROL_KEY_LOCATION)
-        moblab_rpc_interface.os.system('sudo restart moblab-devserver-init')
+        moblab_rpc_interface.os.system(' restart moblab-devserver-init')
         self.mox.ReplayAll()
         moblab_rpc_interface.set_launch_control_key(launch_control_key)
 
@@ -494,13 +494,13 @@ class MoblabRpcInterfaceTest(mox.MoxTestBase,
         update_engine_client = moblab_rpc_interface._UPDATE_ENGINE_CLIENT
 
         self.mox.StubOutWithMock(moblab_rpc_interface.subprocess, 'check_call')
-        moblab_rpc_interface.subprocess.check_call(['sudo',
+        moblab_rpc_interface.subprocess.check_call([
                 update_engine_client, '--update'])
-        moblab_rpc_interface.subprocess.check_call(['sudo',
+        moblab_rpc_interface.subprocess.check_call([
                 update_engine_client, '--is_reboot_needed'])
 
         self.mox.StubOutWithMock(moblab_rpc_interface.subprocess, 'call')
-        moblab_rpc_interface.subprocess.call(['sudo', update_engine_client,
+        moblab_rpc_interface.subprocess.call([ update_engine_client,
                 '--reboot'])
 
         self.mox.ReplayAll()
@@ -513,14 +513,14 @@ class MoblabRpcInterfaceTest(mox.MoxTestBase,
             'ERROR_MESSAGE=ErrorCode::kOmahaErrorInHTTPResponse')
 
         self.mox.StubOutWithMock(moblab_rpc_interface.subprocess, 'check_call')
-        moblab_rpc_interface.subprocess.check_call(['sudo',
+        moblab_rpc_interface.subprocess.check_call([
                 update_engine_client, '--update']).AndRaise(
                     moblab_rpc_interface.subprocess.CalledProcessError(1,
-                        'sudo'))
+                        ''))
 
         self.mox.StubOutWithMock(moblab_rpc_interface.subprocess,
                 'check_output')
-        moblab_rpc_interface.subprocess.check_output(['sudo',
+        moblab_rpc_interface.subprocess.check_output([
                 update_engine_client, '--last_attempt_error']).AndReturn(
                 error_message)
 
@@ -541,7 +541,7 @@ class MoblabRpcInterfaceTest(mox.MoxTestBase,
 
         self.mox.StubOutWithMock(moblab_rpc_interface.subprocess,
                 'check_output')
-        moblab_rpc_interface.subprocess.check_output(['sudo',
+        moblab_rpc_interface.subprocess.check_output([
                 update_engine_client, '--status']).AndReturn(
                         update_status)
 
@@ -557,7 +557,7 @@ class MoblabRpcInterfaceTest(mox.MoxTestBase,
         update_engine_client = moblab_rpc_interface._UPDATE_ENGINE_CLIENT
 
         self.mox.StubOutWithMock(moblab_rpc_interface.subprocess, 'call')
-        moblab_rpc_interface.subprocess.call(['sudo', update_engine_client,
+        moblab_rpc_interface.subprocess.call([ update_engine_client,
                 '--check_for_update'])
 
         self.mox.StubOutWithMock(moblab_rpc_interface,

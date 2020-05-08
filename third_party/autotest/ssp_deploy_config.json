@@ -1,13 +1,13 @@
 [
     {
         "source": "~/.ssh",
-        "target": "/root/.ssh",
+        "target": "/home/moblab/.ssh",
         "append": false,
-        "permission": 600
+        "permission": 700
     },
     {
         "source": "~/.boto",
-        "target": "/root/.boto",
+        "target": "/home/moblab/.boto",
         "append": false,
         "permission": 500
     },

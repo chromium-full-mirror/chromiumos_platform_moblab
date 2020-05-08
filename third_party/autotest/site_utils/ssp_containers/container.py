@@ -129,7 +129,12 @@ class Container(object):
                          If a snapshot is requested and creating the snapshot
                          fails, a full clone will be attempted.
         """
-        self._client = docker.from_env(timeout=300)
+        # The container calls the docker API to run autoserv (the test) in
+        # the container, so the call has to not timeout at least as long as
+        # a single test might run.  Set to 14 days.
+        # TODO -pass the timeout for the test along to the container so
+        # it can timeout when the test timesout.
+        self._client = docker.from_env(timeout=60*60*24*14)
         self._rootfs = None
         self.name = name
         self._id = self.name
@@ -207,7 +212,7 @@ class Container(object):
         for attribute, value in attribute_values.iteritems():
             setattr(self, attribute, value)
 
-    def attach_run(self, command, bash=True):
+    def attach_run(self, command, bash=True, user='moblab'):
         """Attach to a given container and run the given command.
 
         @param command: Command to run in the container.
@@ -218,9 +223,11 @@ class Container(object):
 
         @raise error.CmdError: If container does not exist, or not running.
         """
+        #raise Exception(command)
+        logging.info("Running %s", command)
         container = self._client.containers.get(self.name)
-        result = container.exec_run(command)
-
+        result = container.exec_run(command, user=user)
+        logging.info("Result %d %s", result.exit_code, result.output)
         return utils.CmdResult(command, result.output, "", result.exit_code)
 
 
@@ -266,7 +273,7 @@ class Container(object):
         logging.debug('Destroying container %s/%s',
                       "",
                       self.name)
-        ssp_container_utils.destroy("", self.name, force=force)
+        #ssp_container_utils.destroy("", self.name, force=force)
 
 
     def mount_dir(self, source, destination, readonly=False):
@@ -323,12 +330,13 @@ class Container(object):
         in /usr/lib can be imported before /usr/local/lib.
         """
         site_module = '/usr/lib/python2.7/site.py'
-        self.attach_run("sudo sed -i ':a;N;$!ba;s/\"local\/lib\",\\n/"
+        self.attach_run(" sed -i ':a;N;$!ba;s/\"local\/lib\",\\n/"
                         "\"lib_placeholder\",\\n/g' %s" % site_module)
-        self.attach_run("sudo sed -i ':a;N;$!ba;s/\"lib\",\\n/"
+        self.attach_run(" sed -i ':a;N;$!ba;s/\"lib\",\\n/"
                         "\"local\/lib\",\\n/g' %s" % site_module)
-        self.attach_run('sudo sed -i "s/lib_placeholder/lib/g" %s' %
+        self.attach_run(' sed -i "s/lib_placeholder/lib/g" %s' %
                         site_module)
+        pass
 
 
     def is_running(self):
@@ -364,8 +372,8 @@ class Container(object):
         usr_local_path = os.path.join('/usr', 'local')
         autotest_pkg_path = os.path.join(usr_local_path,
                                          'autotest_server_package.tar.bz2')
-        self.attach_run('sudo mkdir -p %s' % usr_local_path)
-        self.attach_run('sudo chown -R moblab:moblab %s' % usr_local_path)
+        self.attach_run('mkdir -p %s' % usr_local_path)
+        self.attach_run('chown -R moblab:moblab %s' % usr_local_path + '/autotest', user='root')
 
         ssp_containers.download_extract(ssp_url, autotest_pkg_path, usr_local_path, self.name)
 
@@ -424,7 +432,9 @@ class Container(object):
         """
         # Create the dst dir. mkdir -p will not fail if dst_dir exists.
         dst_dir = os.path.dirname(dst)
-        self.attach_run('mkdir -p %s' % dst_dir)
+        #self.attach_run('mkdir -p %s' % dst_dir)
+        logging.info("Do copy %s %s" % (src, dst))
+        self.attach_run('ls %s' % dst_dir, user='root')
         container = self._client.containers.get(self.name)
         container.put_archive(dst_dir, self.simple_tar(src))
 

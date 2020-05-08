@@ -25,7 +25,7 @@ try:
     from pylint.__pkginfo__ import version as pylint_version
 except ImportError:
     print ("Unable to import pylint, it may need to be installed."
-           " Run 'sudo aptitude install pylint' if you haven't already.")
+           " Run ' aptitude install pylint' if you haven't already.")
     sys.exit(1)
 
 pylint_version_parsed = tuple(map(int, pylint_version.split('.')))

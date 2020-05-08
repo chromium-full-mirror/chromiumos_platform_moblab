@@ -194,7 +194,7 @@ def update_config_handler(config_values):
 
     # TODO (sbasi) crbug.com/403916 - Remove the reboot command and
     # instead restart the services that rely on the config values.
-    #os.system('sudo reboot')
+    #os.system(' reboot')
 
 
 @rpc_utils.moblab_only
@@ -202,13 +202,13 @@ def reset_config_settings():
     """Reset moblab shadow config."""
     with open(_CONFIG.shadow_file, 'w') as config_file:
         pass
-    #os.system('sudo reboot')
+    #os.system(' reboot')
 
 
 @rpc_utils.moblab_only
 def reboot_moblab():
     """Simply reboot the device."""
-    #os.system('sudo reboot')
+    #os.system(' reboot')
 
 
 @rpc_utils.moblab_only
@@ -251,7 +251,7 @@ def set_launch_control_key(launch_control_key):
     shutil.copyfile(launch_control_key,
                     moblab_host.MOBLAB_LAUNCH_CONTROL_KEY_LOCATION)
     # Restart the devserver service.
-    #os.system('sudo restart moblab-devserver-init')
+    #os.system(' restart moblab-devserver-init')
 
 
 ###########Moblab Config Wizard RPCs #######################
@@ -448,9 +448,9 @@ def submit_wizard_config_info(cloud_storage_info, wifi_info):
     'moblab-devserver-cleanup-init', 'moblab-gsoffloader_s-init',
     'moblab-scheduler-init', 'moblab-gsoffloader-init']
     cmd = 'export ATEST_RESULTS_DIR=/usr/local/autotest/results;'
-    cmd += 'sudo stop ' + ';sudo stop '.join(services)
-    cmd += ';sudo start ' + ';sudo start '.join(services)
-    cmd += ';sudo apache2 -k graceful'
+    cmd += ' stop ' + '; stop '.join(services)
+    cmd += '; start ' + '; start '.join(services)
+    cmd += '; apache2 -k graceful'
     logging.info(cmd)
 
     return _create_operation_status_response(True, None)
@@ -487,8 +487,8 @@ def _check_for_system_update():
     update. If an update exists, the update client begins downloading it
     in the background
     """
-    # sudo is required to run the update client
-    #subprocess.call(['sudo', _UPDATE_ENGINE_CLIENT, '--check_for_update'])
+    #  is required to run the update client
+    #subprocess.call([ _UPDATE_ENGINE_CLIENT, '--check_for_update'])
     # wait for update engine to finish checking
     #tries = 0
     #while ('CHECKING_FOR_UPDATE' in _get_system_update_status()['CURRENT_OP']
@@ -509,9 +509,9 @@ def _get_system_update_status():
         LAST_CHECKED_TIME: str unix time stamp of the last update check
     }
     """
-    # sudo is required to run the update client
+    #  is required to run the update client
     #cmd_out = subprocess.check_output(
-    #    ['sudo' ,_UPDATE_ENGINE_CLIENT, '--status'])
+    #    ['' ,_UPDATE_ENGINE_CLIENT, '--status'])
     #split_lines = [x.split('=') for x in cmd_out.strip().split('\n')]
     #status = dict((key, val) for [key, val] in split_lines)
     return {}
@@ -520,19 +520,19 @@ def _get_system_update_status():
 def _install_system_update():
     """ Installs a ChromeOS update, will cause the system to reboot
     """
-    # sudo is required to run the update client
+    #  is required to run the update client
     # first run a blocking command to check, fetch, prepare an update
     # then check if a reboot is needed
     try:
-        subprocess.check_call(['sudo', _UPDATE_ENGINE_CLIENT, '--update'])
+        subprocess.check_call([ _UPDATE_ENGINE_CLIENT, '--update'])
         # --is_reboot_needed returns 0 if a reboot is required
         subprocess.check_call(
-            ['sudo', _UPDATE_ENGINE_CLIENT, '--is_reboot_needed'])
-        subprocess.call(['sudo', _UPDATE_ENGINE_CLIENT, '--reboot'])
+            [ _UPDATE_ENGINE_CLIENT, '--is_reboot_needed'])
+        subprocess.call([ _UPDATE_ENGINE_CLIENT, '--reboot'])
 
     except subprocess.CalledProcessError as e:
         update_error = subprocess.check_output(
-            ['sudo', _UPDATE_ENGINE_CLIENT, '--last_attempt_error'])
+            [ _UPDATE_ENGINE_CLIENT, '--last_attempt_error'])
         raise error.RPCException(update_error)
 
 

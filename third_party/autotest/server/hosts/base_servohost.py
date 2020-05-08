@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
-# Expects to be run in an environment with sudo and no interactive password
+# Expects to be run in an environment with  and no interactive password
 # prompt, such as within the Chromium OS development chroot.
 
 
@@ -67,11 +67,11 @@ class BaseServoHost(ssh_host.SSHHost):
         # Commands on the servo host must be run by the superuser.
         # Our account on a remote host is root, but if our target is
         # localhost then we might be running unprivileged.  If so,
-        # `sudo` will have to be added to the commands.
+        # `` will have to be added to the commands.
         if self._is_localhost:
-            self._sudo_required = utils.system_output('id -u') != '0'
+            self.__required = utils.system_output('id -u') != '0'
         else:
-            self._sudo_required = False
+            self.__required = False
 
         self._is_labstation = None
         self._dut_host_info = None
@@ -448,8 +448,8 @@ class BaseServoHost(ssh_host.SSHHost):
                     'stderr_tee': stderr_tee, 'stdin': stdin,
                     'verbose': verbose, 'args': args}
         if self.is_localhost():
-            if self._sudo_required:
-                run_args['command'] = 'sudo -n sh -c "%s"' % utils.sh_escape(
+            if self.__required:
+                run_args['command'] = ' sh -c "%s"' % utils.sh_escape(
                     command)
             try:
                 return utils.run(**run_args)

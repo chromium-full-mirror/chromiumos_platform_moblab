@@ -46,7 +46,7 @@ def cleanup_if_fail():
                     client = docker.from_env(timeout=300)
                     container = client.containers.get(str(container_id))
                     if container and not skip_cleanup:
-                        container.stop()
+                       container.stop()
                 except (docker.errors.NotFound, docker.errors.APIError) as e:
                     logging.error(e)
 

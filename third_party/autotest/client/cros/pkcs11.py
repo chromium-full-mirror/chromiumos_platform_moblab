@@ -139,7 +139,7 @@ def load_p11_test_token(auth_data='1234'):
 
     @param auth_data: The authorization data to use for the token.
     """
-    utils.system('sudo chaps_client --load --path=%s --auth="%s"' %
+    utils.system(' chaps_client --load --path=%s --auth="%s"' %
                  (TMP_CHAPS_DIR, auth_data))
 
 def change_p11_test_token_auth_data(auth_data, new_auth_data):
@@ -148,12 +148,12 @@ def change_p11_test_token_auth_data(auth_data, new_auth_data):
     @param auth_data: The current authorization data.
     @param new_auth_data: The new authorization data.
     """
-    utils.system('sudo chaps_client --change_auth --path=%s --auth="%s" '
+    utils.system(' chaps_client --change_auth --path=%s --auth="%s" '
                  '--new_auth="%s"' % (TMP_CHAPS_DIR, auth_data, new_auth_data))
 
 def unload_p11_test_token():
     """Unloads a loaded test token."""
-    utils.system('sudo chaps_client --unload --path=%s' % TMP_CHAPS_DIR)
+    utils.system(' chaps_client --unload --path=%s' % TMP_CHAPS_DIR)
 
 def copytree_with_ownership(src, dst):
     """Like shutil.copytree but also copies owner and group attributes.
@@ -173,7 +173,7 @@ def setup_p11_test_token(unload_user_tokens, auth_data='1234'):
     cleanup_p11_test_token()
     if unload_user_tokens:
         for path in __get_token_paths(exclude_system_token=False):
-            utils.system('sudo chaps_client --unload --path=%s' % path)
+            utils.system(' chaps_client --unload --path=%s' % path)
     os.makedirs(TMP_CHAPS_DIR)
     uid = pwd.getpwnam('chaps')[2]
     gid = grp.getgrnam('chronos-access')[2]

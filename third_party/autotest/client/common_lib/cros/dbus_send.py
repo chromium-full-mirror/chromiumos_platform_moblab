@@ -194,8 +194,6 @@ def dbus_send(bus_name, interface, object_path, method_name, args=None,
            '%s %s.%s' % (int(timeout_seconds * 1000), bus_name,
                          object_path, interface, method_name))
 
-    if user is not None:
-        cmd = ('sudo -u %s %s' % (user, cmd))
     if args is not None:
         cmd = cmd + ' ' + _build_arg_string(args)
     result = run(cmd, ignore_status=tolerate_failures)

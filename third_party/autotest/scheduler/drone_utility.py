@@ -251,8 +251,8 @@ class DroneUtility(object):
             if e.errno == 13 and not is_retry:
                 logging.error('Error write to file %s: %s. Will be retried.',
                               file_path, e)
-                utils.run('sudo chown %s "%s"' % (os.getuid(), file_path))
-                utils.run('sudo chgrp %s "%s"' % (os.getgid(), file_path))
+                utils.run(' chown %s "%s"' % (os.getuid(), file_path))
+                utils.run(' chgrp %s "%s"' % (os.getgid(), file_path))
                 self.write_to_file(file_path, contents, is_retry=True)
             else:
                 self._warn('Error write to file %s: %s' % (file_path, e))

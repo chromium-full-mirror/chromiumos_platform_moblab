@@ -39,21 +39,21 @@ class SharedHostDir(object):
 
         # If the host dir exists and is valid and force_delete is not set, there
         # is nothing to do.  Otherwise, clear the host dir if it exists, then
-        # recreate it.  Do not use ssp_container_utils.path_exists as that forces a sudo
+        # recreate it.  Do not use ssp_container_utils.path_exists as that forces a
         # call - the SharedHostDir is used all over the place, and
         # instantiatinng one should not cause the user to have to enter their
         # password if the host dir already exists.  The host dir is created with
-        # open permissions so it should be accessible without sudo.
+        # open permissions so it should be accessible without .
         if os.path.isdir(self.path):
             if not force_delete and self._host_dir_is_valid():
                 return
             else:
                 self.cleanup()
 
-        utils.run('sudo mkdir "%(path)s" && '
-                  'sudo chmod 777 "%(path)s" && '
-                  'sudo mount --bind "%(path)s" "%(path)s" && '
-                  'sudo mount --make-shared "%(path)s"' %
+        utils.run('mkdir "%(path)s" && '
+                  'chmod 777 "%(path)s" && '
+                  'mount --bind "%(path)s" "%(path)s" && '
+                  'mount --make-shared "%(path)s"' %
                   {'path': self.path})
 
 
@@ -81,7 +81,7 @@ class SharedHostDir(object):
         # Unmount and delete everything in the host path.
         for info in utils.get_mount_info():
             if ssp_container_utils.is_subdir(self.path, info.mount_point):
-                utils.run('sudo umount "%s"' % info.mount_point)
+                utils.run('umount "%s"' % info.mount_point)
 
         # It's possible that the directory is no longer mounted (e.g. if the
         # system was rebooted), so check before unmounting.
@@ -106,7 +106,7 @@ class SharedHostDir(object):
                      delay_sec=1)
         def run_with_retry():
             """Actually unmounts the shared host dir.  Internal function."""
-            utils.run('sudo umount %s' % self.path)
+            utils.run('umount %s' % self.path)
         run_with_retry()
 
 
@@ -125,7 +125,7 @@ class SharedHostDir(object):
                      delay_sec=1)
         def run_with_retry():
             """Actually removes the shared host dir.  Internal function."""
-            utils.run('sudo rm -r "%s"' % self.path)
+            utils.run('rm -r "%s"' % self.path)
         run_with_retry()
 
 

@@ -48,7 +48,7 @@ CONTAINER_HOST_DIR = '/host'
 
 # Path to drone_temp folder in the container, which stores the control file for
 # test job to run.
-CONTROL_TEMP_PATH = os.path.join(CONTAINER_AUTOTEST_DIR, 'drone_tmp')
+CONTROL_TEMP_PATH = os.path.join(CONTAINER_AUTOTEST_DIR, 'results', 'drone_tmp')
 
 # Bash command to return the file count in a directory. Test the existence first
 # so the command can return an error code if the directory doesn't exist.
@@ -58,7 +58,7 @@ COUNT_FILE_CMD = '[ -d %(dir)s ] && ls %(dir)s | wc -l'
 CONTAINER_SSP_SCRUB_TIMEOUT = 300
 
 # Command line to append content to a file
-APPEND_CMD_FMT = ('echo \'%(content)s\' | sudo tee --append %(file)s'
+APPEND_CMD_FMT = ('echo \'%(content)s\' |  tee --append %(file)s'
                   '> /dev/null')
 
 IS_MOBLAB = True

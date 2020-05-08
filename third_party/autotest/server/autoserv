@@ -61,8 +61,8 @@ STAGE_SERVER_SIDE_PACKAGE_CONTROL_FILE = server_job._control_segment_path(
         'stage_server_side_package')
 
 # Command line to start servod in a moblab.
-START_SERVOD_CMD = 'sudo start servod BOARD=%s PORT=%s'
-STOP_SERVOD_CMD = 'sudo stop servod'
+START_SERVOD_CMD = ' start servod BOARD=%s PORT=%s'
+STOP_SERVOD_CMD = ' stop servod'
 
 _AUTOTEST_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 _CONTROL_FILE_FROM_CONTROL_NAME = 'control.from_control_name'
@@ -251,8 +251,8 @@ def correct_results_folder_permission(results):
     if not results:
         return
 
-    utils.run('sudo -n chown -R %s "%s"' % (os.getuid(), results))
-    utils.run('sudo -n chgrp -R %s "%s"' % (os.getgid(), results))
+    utils.run(' chown -R %s "%s"' % (os.getuid(), results))
+    utils.run(' chgrp -R %s "%s"' % (os.getgid(), results))
 
 
 def _start_servod(machine):
@@ -291,7 +291,7 @@ def _start_servod(machine):
             return
         logging.debug('Servod is running with different board or port. '
                       'Stopping existing servod.')
-        utils.run('sudo stop servod')
+        utils.run(' stop servod')
     except error.CmdError:
         # servod is not running.
         pass
@@ -578,7 +578,7 @@ def run_autoserv(pid_file_manager, results, parser, ssp_url, use_ssp):
                             correct_results_folder_permission(results)
                         except:
                             # Ignore any error as the user may not have root
-                            # permission to run sudo command.
+                            # permission to run  command.
                             pass
                     metric_name = ('chromeos/autotest/experimental/'
                                    'autoserv_job_run_duration')

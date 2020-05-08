@@ -423,7 +423,7 @@ def RunCurl(curl_args, *args, **kwargs):
     if e.result.returncode in (51, 58, 60):
       # These are the return codes of failing certs as per 'man curl'.
       raise DownloadError(
-          'Download failed with certificate error? Try "sudo c_rehash".')
+          'Download failed with certificate error? Try " c_rehash".')
     raise DownloadError('Curl failed w/ exit code %i: %s' %
                         (e.result.returncode, e.result.error))
 

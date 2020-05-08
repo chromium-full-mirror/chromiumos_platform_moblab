@@ -40,6 +40,7 @@ def get_container_info(container_path, **filters):
                 if key in info and info[key] == value:
                     filtered_collection.append(info)
         info_collection = filtered_collection
+    logging.info("get containers %s", info_collection)
     return info_collection
 
 
@@ -54,8 +55,14 @@ def download_extract(url, target, extract_dir, name):
 
     client = docker.from_env(timeout=300)
     container = client.containers.get(name)
-    result = container.exec_run('curl %s -o %s' % (url, target))
-    result = container.exec_run('tar xf %s -C %s' % (target, extract_dir))
+    result = container.exec_run('mktemp -d', user='moblab')
+    tempfile = os.path.join(result.output.strip(), os.path.basename(target).strip())
+    logging.info('curl %s -o %s' % (url, tempfile))
+    result = container.exec_run('curl %s -o %s' % (url, tempfile))
+    logging.info("Result %d %s", result.exit_code, result.output)
+    logging.info('tar xf %s -C %s' % (tempfile, extract_dir))
+    result = container.exec_run('tar xf %s -C %s' % (tempfile, extract_dir))
+    logging.info("Result %d %s", result.exit_code, result.output)
 
 
 # Make sure retries only happen in the non-timeout case.
@@ -66,7 +73,7 @@ def download_extract(url, target, extract_dir, name):
 def _download_via_curl(url, target_file_path):
     # We do not want to retry on CmdTimeoutError but still retry on
     # CmdError. Hence we can't use curl --timeout=...
-    common_utils.run('sudo curl -s %s -o %s' % (url, target_file_path),
+    common_utils.run(' curl -s %s -o %s' % (url, target_file_path),
                      stderr_tee=common_utils.TEE_TO_LOGS, timeout=3*60)
 
 

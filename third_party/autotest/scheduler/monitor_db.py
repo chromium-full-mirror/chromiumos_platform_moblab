@@ -142,7 +142,7 @@ def main_without_exception_handling():
 
     # Change the cwd while running to avoid issues incase we were launched from
     # somewhere odd (such as a random NFS home directory of the person running
-    # sudo to launch us as the appropriate user).
+    #  to launch us as the appropriate user).
     os.chdir(RESULTS_DIR)
 
     # This is helpful for debugging why stuff a scheduler launches is

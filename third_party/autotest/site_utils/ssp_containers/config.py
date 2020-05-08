@@ -19,13 +19,7 @@ string of a list of deployment settings. For example:
     "append": false,
     "permission": 400
  },
- {
-    "source": "/usr/local/autotest/results/shared",
-    "target": "/usr/local/autotest/results/shared",
-    "mount": true,
-    "readonly": false,
-    "force_create": true
- }
+
 ]
 
 Definition of each attribute for config files are as follows:
@@ -49,26 +43,6 @@ The above example will:
 2. Copy all files in ssh to /root/.ssh in container.
 3. Change all these files' permission to 400
 
-Definition of each attribute for sharing folders are as follows:
-source: a folder in host to be mounted in container.
-target: the folder's location inside container.
-mount: true to mount the source folder onto the target inside container.
-       A setting with false value of mount is invalid.
-readonly: true if the mounted folder inside container should be readonly.
-force_create: true to create the source folder if it doesn't exist.
-
-Example:
- {
-    "source": "/usr/local/autotest/results/shared",
-    "target": "/usr/local/autotest/results/shared",
-    "mount": true,
-    "readonly": false,
-    "force_create": true
- }
-The above example will mount folder "/usr/local/autotest/results/shared" in the
-host to path "/usr/local/autotest/results/shared" inside the container. The
-folder can be written to inside container. If the source folder doesn't exist,
-it will be created as `force_create` is set to true.
 
 The setting file (ssp_deploy_config) lives in AUTOTEST_DIR folder.
 For relative file path specified in ssp_deploy_config, AUTOTEST_DIR/containers
@@ -112,10 +86,6 @@ _APPEND_FOLDER = '/usr/local/ssp_append'
 
 DeployConfig = collections.namedtuple(
         'DeployConfig', ['source', 'target', 'append', 'permission'])
-MountConfig = collections.namedtuple(
-        'MountConfig', ['source', 'target', 'mount', 'readonly',
-                        'force_create'])
-
 
 class SSPDeployError(Exception):
     """Exception raised if any error occurs when setting up test container."""
@@ -149,7 +119,7 @@ class DeployConfigManager(object):
                                  target)
         if not os.path.isabs(source):
             if source.startswith('~'):
-                # This is to handle the case that the script is run with sudo.
+                # This is to handle the case that the script is run with .
                 inject_user_path = ('~%s%s' % (utils.get_real_user(),
                                                source[1:]))
                 source = os.path.expanduser(inject_user_path)
@@ -178,31 +148,6 @@ class DeployConfigManager(object):
         return DeployConfig(**deploy_config)
 
 
-    @staticmethod
-    def validate_mount(deploy_config):
-        """Validate the deploy config for mounting a directory.
-
-        Deploy configs need to be validated and pre-processed, e.g.,
-        1. Target must be an absolute path.
-        2. Source must be updated to be an absolute path.
-        3. Mount must be true.
-
-        @param deploy_config: A dictionary of deploy config to be validated.
-
-        @return: A DeployConfig object that contains the deploy config.
-
-        @raise SSPDeployError: If the deploy config is invalid.
-
-        """
-        DeployConfigManager.validate_path(deploy_config)
-        c = MountConfig(**deploy_config)
-        if not c.mount:
-            raise SSPDeployError('`mount` must be true.')
-        if not c.force_create and not os.path.exists(c.source):
-            raise SSPDeployError('`source` does not exist.')
-        return c
-
-
     def __init__(self, container, config_file=None):
         """Initialize the deploy config manager.
 
@@ -227,8 +172,6 @@ class DeployConfigManager(object):
             deploy_configs = json.load(f)
         self.deploy_configs = [self.validate(c) for c in deploy_configs
                                if 'append' in c]
-        self.mount_configs = [self.validate_mount(c) for c in deploy_configs
-                              if 'mount' in c]
         tmp_append = _APPEND_FOLDER
         commands = []
         if ssp_container_utils.path_exists(container.name, tmp_append):
@@ -276,11 +219,11 @@ class DeployConfigManager(object):
             self.container.attach_run('cat \'%s\' >> \'%s\'' %
                                       (source, deploy_config.target))
         self.container.attach_run(
-                'sudo chmod -R %s \'%s\'' %
-                (deploy_config.permission, deploy_config.target))
+                'chmod -R %s \'%s\'' %
+                (deploy_config.permission, deploy_config.target), user='root')
         self.container.attach_run(
-                'sudo chown -R root:root \'%s\'' %
-                (deploy_config.target))
+                'chown -R moblab:moblab \'%s\'' %
+                (deploy_config.target), user='root')
 
 
     def _modify_shadow_config(self):
@@ -365,7 +308,7 @@ class DeployConfigManager(object):
         # Host *
         #   LogLevel Error
         self.container.attach_run(
-                'sudo sed -i \'1s/^/Host *\\n  LogLevel ERROR\\n\\n/\' \'%s\'' %
+                'sed -i \'1s/^/Host *\\n  LogLevel ERROR\\n\\n/\' \'%s\'' %
                 ssh_config)
 
         # # ssh to moblab itself using moblab user.
@@ -385,14 +328,6 @@ class DeployConfigManager(object):
         """
         for deploy_config in self.deploy_configs:
             self._deploy_config_pre_start(deploy_config)
-        for mount_config in self.mount_configs:
-            if (mount_config.force_create and
-                not os.path.exists(mount_config.source)):
-                utils.run('mkdir -p %s' % mount_config.source)
-            self.container.mount_dir(mount_config.source,
-                                     mount_config.target,
-                                     mount_config.readonly)
-
 
     def deploy_post_start(self):
         """Deploy configs after the container is started.

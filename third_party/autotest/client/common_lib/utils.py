@@ -2384,17 +2384,15 @@ def has_systemd():
 def get_real_user():
     """Get the real user that runs the script.
 
-    The function check environment variable SUDO_USER for the user if the
-    script is run with sudo. Otherwise, it returns the value of environment
+    The function check environment variable _USER for the user if the
+    script is run with . Otherwise, it returns the value of environment
     variable USER.
 
     @return: The user name that runs the script.
 
     """
-    user = os.environ.get('SUDO_USER')
-    if not user:
-        user = os.environ.get('USER')
-    return user
+
+    return os.environ.get('USER')
 
 
 def get_service_pid(service_name):
@@ -2475,20 +2473,6 @@ def stop_service(service_name, ignore_status=True):
     """
     return control_service(service_name, action='stop',
                            ignore_status=ignore_status)
-
-
-def sudo_require_password():
-    """Test if the process can run sudo command without using password.
-
-    @return: True if the process needs password to run sudo command.
-
-    """
-    try:
-        run('sudo -n true')
-        return False
-    except error.CmdError:
-        logging.warn('sudo command requires password.')
-        return True
 
 
 def is_in_container():

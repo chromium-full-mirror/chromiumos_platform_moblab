@@ -837,7 +837,7 @@ class host_create(BaseHostModCreate):
                 self._execute_add_one_host(host)
                 successful_hosts.append(host)
             except topic_common.CliError:
-                pass
+                raise
 
         if successful_hosts:
             self._set_acls(successful_hosts, self.acls)

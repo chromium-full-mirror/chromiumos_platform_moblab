@@ -34,7 +34,9 @@ def path_exists(container_name, path):
     """
     client = docker.from_env(timeout=300)
     container = client.containers.get(container_name)
-    result = container.exec_run('test -e "%s"' % path)
+    logging.info('test -e "%s"', path)
+    result = container.exec_run('test -e "%s"' % path, user='moblab')
+    logging.info('test -e "%s" results %d', path, result.exit_code)
     return result.exit_code == 0
 
 
@@ -78,15 +80,16 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
     @param snapshot: Whether or not to create a snapshot clone.
     """
     client = docker.from_env(timeout=300)
-    client.images.pull('gcr.io/chromeos-partner-moblab/moblab-ssp:release')
+    client.images.pull('gcr.io/chromeos-partner-moblab/moblab-ssp:haddowk3')
 
     container = client.containers.run(
-        'gcr.io/chromeos-partner-moblab/moblab-ssp:release',
+        'gcr.io/chromeos-partner-moblab/moblab-ssp:haddowk3',
         remove=True,
         name=dst_name,
         hostname=dst_name,
         network='default_moblab',
         cap_add=['ALL'],
+        user='moblab',
         detach=True,
         volumes=['default_results:/results',
                  'default_results:/usr/local/autotest/results',
@@ -150,11 +153,11 @@ class BindMount(object):
         full_dst = os.path.join(*list(spec))
 
         if not path_exists(full_dst):
-            utils.run('sudo mkdir -p %s' % full_dst)
+            utils.run('mkdir -p %s' % full_dst)
 
-        utils.run('sudo mount --bind %s %s' % (src, full_dst))
+        utils.run('mount --bind %s %s' % (src, full_dst))
         if readonly:
-            utils.run('sudo mount -o remount,ro,bind %s' % full_dst)
+            utils.run('mount -o remount,ro,bind %s' % full_dst)
 
         return cls(spec)
 
@@ -181,12 +184,12 @@ class BindMount(object):
         alongside important files, it will not be deleted.
         """
         full_dst = os.path.join(*list(self.spec))
-        utils.run('sudo umount %s' % full_dst)
+        utils.run('umount %s' % full_dst)
         # Ignore errors because bind mount locations are sometimes nested
         # alongside actual file content (e.g. SSPs install into
         # /usr/local/autotest so rmdir -p will fail for any mounts located in
         # /usr/local/autotest).
-        utils.run('sudo bash -c "cd %s; rmdir -p --ignore-fail-on-non-empty %s"'
+        utils.run('bash -c "cd %s; rmdir -p --ignore-fail-on-non-empty %s"'
                   % self.spec)
 
 
@@ -206,15 +209,16 @@ def is_subdir(parent, subdir):
 
 def sudo_commands(container_name, commands):
     """Takes a list of bash commands and executes them all with one invocation
-    of sudo. Saves ~400 ms per command.
+    of . Saves ~400 ms per command.
 
     @param commands: The bash commands, as strings.
 
-    @return The return code of the sudo call.
+    @return The return code of the  call.
     """
     client = docker.from_env(timeout=300)
     container = client.containers.get(container_name)
     for command in commands:
-        container.exec_run(command)
+        logging.info('Running command %s', command)
+        container.exec_run(command, user='moblab')
 
 

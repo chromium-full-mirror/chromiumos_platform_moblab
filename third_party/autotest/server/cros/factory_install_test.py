@@ -144,11 +144,11 @@ class FactoryInstallTest(test.test):
             exist) and which should return the new contents.
         """
         if os.path.exists(path):
-            contents = utils.system_output("sudo cat %s" % path)
+            contents = utils.system_output(" cat %s" % path)
         else:
             contents = func(None)
 
-        utils.run("sudo dd of=%s" % path, stdin=func(contents))
+        utils.run(" dd of=%s" % path, stdin=func(contents))
 
     def _mount_partition(self, image, index):
         """
@@ -167,7 +167,7 @@ class FactoryInstallTest(test.test):
         common_args = "cgpt show -i %d %s" % (index, image)
         offset = int(utils.system_output(common_args + " -b")) * 512
         size = int(utils.system_output(common_args + " -s")) * 512
-        utils.run("sudo mount -o rw,loop,offset=%d,sizelimit=%d %s %s" % (
+        utils.run(" mount -o rw,loop,offset=%d,sizelimit=%d %s %s" % (
                 offset, size, image, mount_point))
         self.cleanup_tasks.append(lambda: self._umount_partition(mount_point))
         return mount_point
@@ -180,7 +180,7 @@ class FactoryInstallTest(test.test):
         exception if the mount point does not exist or the mount fails.
         """
         if os.path.exists(mount_point):
-            utils.run("sudo umount -d %s" % mount_point)
+            utils.run(" umount -d %s" % mount_point)
             os.rmdir(mount_point)
 
     def _make_factory_package(self, factory_test_image, test_image):

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
-# Expects to be run in an environment with sudo and no interactive password
+# Expects to be run in an environment with  and no interactive password
 # prompt, such as within the Chromium OS development chroot.
 
 import ast

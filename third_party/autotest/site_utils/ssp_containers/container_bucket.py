@@ -200,7 +200,7 @@ class ContainerBucket(object):
         if control:
             control_file_name = os.path.basename(control)
             safe_control = os.path.join(result_path, control_file_name)
-            utils.run('sudo cp %s %s' % (control, safe_control))
+            utils.run('cp %s %s' % (control, safe_control))
 
         # Create test container from the base container.
         container = self._factory.create_container(container_id, hostname)

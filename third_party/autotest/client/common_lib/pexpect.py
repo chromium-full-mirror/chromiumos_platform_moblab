@@ -549,7 +549,7 @@ class spawn (object):
                     pass
 
             # I don't know why this works, but ignoring SIGHUP fixes a
-            # problem when trying to start a Java daemon with sudo
+            # problem when trying to start a Java daemon with
             # (specifically, Tomcat).
             signal.signal(signal.SIGHUP, signal.SIG_IGN)
 
