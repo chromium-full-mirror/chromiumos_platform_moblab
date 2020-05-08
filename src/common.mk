@@ -6,7 +6,7 @@ REGISTRY_URI=gcr.io/chromeos-partner-moblab
 EXTRA_ARGS+= --build-arg REGISTRY_URI=${REGISTRY_URI}
 EXTRA_ARGS+= --build-arg LABEL=${LABEL}
 
-all: rpcserver compose autotest db devserver ssp offloader envoy remote_access ui
+all: rpcserver compose autotest db devserver ssp offloader envoy remote_access ui remote_agent
 
 #TODO refactor the common rules into a single rule.
 
@@ -134,7 +134,7 @@ local-dev:
 remote-agent: export DOCKER_BUILDKIT=1
 remote-agent:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-agent:${LABEL} -f \
-		dockerfiles/remote-logging-agent/Dockerfile ..
+		dockerfiles/remote_agent/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-agent:${LABEL}
 
-.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access
+.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access remote_agent
