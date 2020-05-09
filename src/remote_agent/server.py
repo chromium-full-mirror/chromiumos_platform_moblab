@@ -4,6 +4,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 import argparse
+import sys
+import time
+from concurrent import futures
+
 import grpc
 
 # pylint: disable=import-error
@@ -13,15 +17,32 @@ import remoteagentrpc_pb2_grpc
 
 import logging
 
+
 class RemoteLoggingAgent(remoteagentrpc_pb2_grpc.RemoteLoggingAgentServicer):
 
     def __init__(self):
         super(RemoteLoggingAgent, self).__init__()
 
     def hello_world(self, request, _context):
-        response = moblabrpc_pb2.HelloWorldResponse(
-            message="Hello World"
+        response = remoteagentrpc_pb2.HelloWorldResponse(message="Hello World")
         return response
+
+
+def setup_logging(level):
+    """Enable the correct level of logging.
+
+    Args:
+        level (int): One of the predefined logging levels, e.g loging.DEBUG.
+    """
+    logging.getLogger().handlers = []
+    logging.getLogger().setLevel(level)
+    fh = logging.FileHandler('/var/log/moblab/remote_agent.log')
+    fh.setLevel(level)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logging.getLogger().addHandler(fh)
 
 
 def parse_arguments(argv):
@@ -42,11 +63,11 @@ def serve():
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
 
-    moblab_service = MoblabRpcService()
+    remoteLoggingAgent = RemoteLoggingAgent()
 
     try:
-        moblabrpc_pb2_grpc.add_MoblabRpcServiceServicer_to_server(
-            moblab_service, server)
+        remoteagentrpc_pb2_grpc.add_RemoteLoggingAgentServicer_to_server(
+            remoteLoggingAgent, server)
 
         server.add_insecure_port('[::]:6050')
         logging.info('Starting server')
