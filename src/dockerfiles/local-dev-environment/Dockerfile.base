@@ -36,6 +36,8 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     vim \
     vim-gtk
 
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
 # Install docker
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 RUN add-apt-repository \
@@ -51,13 +53,9 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ \
     stable main" >> /etc/apt/sources.list.d/google.list'
 RUN apt-get update && apt-get install -yq google-chrome-stable
 
-# git-pylint-commit-hook
-RUN python3 -m pip install -U pip && python3 -m pip install \
-    git-pylint-commit-hook \
-    pylint \
-    yapf \
-    autopep8 \
-    black
+COPY requirements.txt ./
+RUN python3 -m pip install -U pip && python3 -m pip install --no-cache-dir -r \
+     requirements.txt
 
 # Install protoc
 COPY --from=protoc /protoc/* /usr/local/bin

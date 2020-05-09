@@ -1,0 +1,9 @@
+    autopep8
+    black
+    cherrypy
+    git-pylint-commit-hook
+    mock
+    pip-tools
+    pylint
+    requests
+    yapf
