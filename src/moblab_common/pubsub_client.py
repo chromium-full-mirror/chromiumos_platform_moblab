@@ -65,7 +65,7 @@ class PubSubClient(object):
                                           **message['attributes'])
             resp.add_done_callback(callback)
             fs.append(resp)
-        return list(map(lambda x : x.result(), fs))
+        return list([x.result() for x in fs])
 
 
 class PubSubBasedClient(object):
