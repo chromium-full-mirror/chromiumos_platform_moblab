@@ -273,7 +273,7 @@ class Container(object):
         logging.debug('Destroying container %s/%s',
                       "",
                       self.name)
-        #ssp_container_utils.destroy("", self.name, force=force)
+        ssp_container_utils.destroy("", self.name, force=force)
 
 
     def mount_dir(self, source, destination, readonly=False):

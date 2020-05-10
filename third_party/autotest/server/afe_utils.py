@@ -104,6 +104,12 @@ def get_stable_firmware_version(model):
     return _FIRMWARE_VERSION_MAP.get_version(model)
 
 
+def get_stable_firmware_version_v2(host_info):
+    logging.debug("Get firmware stable_version for model: %s",
+                  getattr(host_info, "model", None))
+    return host_info.firmware_stable_version
+
+
 def get_stable_faft_version_v2(info, _config_override=None):
     if sv.classify_board(info.board, _config_override=_config_override) == sv.FROM_HOST_CONFIG:
         logging.debug("get_stable_faft_version_v2: model %s from host_info_store" % info.model)

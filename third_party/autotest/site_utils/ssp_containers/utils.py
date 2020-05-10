@@ -80,10 +80,10 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
     @param snapshot: Whether or not to create a snapshot clone.
     """
     client = docker.from_env(timeout=300)
-    client.images.pull('gcr.io/chromeos-partner-moblab/moblab-ssp:haddowk3')
+    client.images.pull('gcr.io/chromeos-partner-moblab/moblab-ssp:release')
 
     container = client.containers.run(
-        'gcr.io/chromeos-partner-moblab/moblab-ssp:haddowk3',
+        'gcr.io/chromeos-partner-moblab/moblab-ssp:release',
         remove=True,
         name=dst_name,
         hostname=dst_name,
