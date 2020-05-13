@@ -14,7 +14,10 @@ FROM debian:buster-slim as run
 
 WORKDIR /
 
-COPY --from=source /chromite /chromite
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+    --disabled-password --gecos "" moblab
+
+COPY --from=source --chown=moblab /chromite /chromite
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
         bzip2 \
@@ -63,6 +66,13 @@ RUN  tar xvf openjdk-13.0.1_linux-x64_bin.tar.gz
 RUN  cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/
 RUN  rm -rf jdk-13.0.1
 RUN  rm -rf *.gz
+RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN mkdir -p /usr/local/tast
+RUN chown moblab:moblab /usr/local/tast
+RUN mkdir -p /tmp/autotest-tradefed-cache
+RUN chown moblab:moblab /tmp/autotest-tradefed-cache
+
+USER moblab
 
 ENV container=ssp_container
 ENV AUTOTEST_WEB=autotest:8888
