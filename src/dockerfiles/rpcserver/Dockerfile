@@ -27,7 +27,7 @@ RUN protoc -I=/etc/moblab/moblab-rpcserver \
 
 ######################################################################
 
-FROM python:3-slim-buster
+FROM python:3.8-slim-buster
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
