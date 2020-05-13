@@ -20,13 +20,13 @@ RUN protoc --proto_path /usr/local/autotest/tko \
 
 ####################################################################
 
-FROM python:3-slim-buster
+FROM python:3.8-slim-buster
 
 WORKDIR /
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
-RUN apt-get update && apt-get install -yq sudo
+RUN apt-get update && apt-get install -yq sudo vim
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN usermod -aG sudo moblab
 
@@ -37,11 +37,8 @@ COPY --chown=moblab ./src/host_services /moblab/src/host_services
 COPY --chown=moblab ./setup.py /moblab/
 COPY --chown=moblab --from=proto_build /usr/local/autotest /usr/local/autotest
 
-RUN apt-get update && apt-get install -yq unzip cmake wget
-
 COPY src/dockerfiles/offloader/requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 WORKDIR /moblab
 RUN python ./setup.py install
@@ -52,9 +49,11 @@ COPY --chown=moblab src/moblab_results_uploader/ /etc/moblab/moblab_results_uplo
 RUN mkdir -p /var/log/moblab/offloader
 RUN chown -R moblab /var/log/moblab
 
-RUN apt purge -yq unzip cmake wget
 RUN apt-get clean
+
+COPY --chown=moblab src/dockerfiles/offloader/start_offloader.sh /
+RUN chmod uog+rx /start_offloader.sh
 
 USER moblab
 
-ENTRYPOINT ["/etc/moblab/moblab_results_uploader/moblab_results_uploader"]
+CMD ["/start_offloader.sh"]
