@@ -4,9 +4,9 @@
 
 """Repair actions for moblab health checks."""
 
-from __future__ import print_function
 
-import common
+
+from moblab import common
 
 import os
 import re
@@ -36,14 +36,7 @@ class MountUsb(AbstractAction):
         self.device = device
 
     def run(self, params):
-        # Unmount |device| as it may already be mounted in the wrong location.
-        osutils.sudo_run_command(
-                ['umount', self.device], error_code_ok=True)
-
-        # Mount |device| in the correct location.
-        cmd = ['mount', self.device, common.MOBLAB_MOUNTPOINT, '-o',
-                'exec,dev,nosuid']
-        osutils.sudo_run_command(cmd)
+        pass
 
 
 class ClearOldDbRecords(AbstractAction):
@@ -94,16 +87,3 @@ class LaunchUpstartService(AbstractAction):
     def run(self, params):
         cmd = ['start', self.service]
         osutils.sudo_run_command(cmd)
-
-
-class RepairBaseContainer(AbstractAction):
-    action = 'Repair Base Container'
-    info = """Redownload and reinstall the base lxc container (about 400MB)"""
-    param_info = {}
-
-    def run(self, params):
-        rebuild_container = \
-                ['python', '/usr/local/autotest/site_utils/lxc.py', '-s', '-f']
-        osutils.sudo_run_command(rebuild_container)
-        init = ['start', 'moblab-base-container-init']
-        osutils.sudo_run_command(init)

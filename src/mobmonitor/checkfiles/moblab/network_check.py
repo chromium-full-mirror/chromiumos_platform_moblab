@@ -4,7 +4,7 @@
 
 """Network monitoring health checks for moblab."""
 
-from __future__ import print_function
+
 
 import netifaces
 

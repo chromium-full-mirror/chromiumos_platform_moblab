@@ -7,8 +7,8 @@ import json
 import sys
 
 sys.path.append('..')
-from abstract_diagnostic_check import AbstractDiagnosticCheck
-from diagnostic_error import DiagnosticError
+from .abstract_diagnostic_check import AbstractDiagnosticCheck
+from .diagnostic_error import DiagnosticError
 from util import osutils
 from util import config
 
@@ -59,6 +59,7 @@ class CloudStorageSpeedTest(AbstractDiagnosticCheck):
                 "Can't connect with bucket " + bucket_url)
 
         output_file = '/tmp/perfdiag_output.json'
+        #docker run --rm -it -e BOTO_CONFIG=/home/moblab/.boto -v default_moblab_home:/home/moblab google/cloud-sdk:alpine "gsutil perfdiag -s 1M -o /tmp/aaaa gs://chromeos-moblab-peng-staging
         perf_cmd = [
             'gsutil', 'perfdiag', '-s' '1M', '-o', output_file, bucket_url]
         try:

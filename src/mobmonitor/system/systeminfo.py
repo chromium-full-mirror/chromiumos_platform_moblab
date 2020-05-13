@@ -34,7 +34,7 @@ information class instance, which can help to reduce additional and
 redundant system checks being performed.
 """
 
-from __future__ import print_function
+
 
 import collections
 import functools
@@ -293,7 +293,7 @@ class Disk(SystemInfoStorage):
     physmounts = []
     with open(SYSTEMFILE_PROC_FILESYSTEMS, 'rb') as f:
       for line in f:
-        if not line.startswith('nodev'):
+        if not line.startswith(b'nodev'):
           physmounts.append(line.strip())
 
     # From these two sources, create a list of partitions
@@ -359,7 +359,7 @@ class Disk(SystemInfoStorage):
     sizes = {}
 
     # Collect diskby information.
-    for prop, diskdir in SYSTEMFILE_DEV_DISKBY.iteritems():
+    for prop, diskdir in SYSTEMFILE_DEV_DISKBY.items():
       cmd = ['find', diskdir, '-lname', '*%s' % devicefilter]
 
       output = osutils.run_command(cmd)
@@ -390,7 +390,7 @@ class Disk(SystemInfoStorage):
 
     return [RESOURCE_BLOCKDEVICE(device, sizes[device], ids[device],
                                  labels[device])
-            for device in ids.iterkeys()]
+            for device in ids.keys()]
 
 
 class Cpu(SystemInfoStorage):
@@ -429,9 +429,9 @@ class Cpu(SystemInfoStorage):
       for line in f:
         if not line.startswith('cpu'):
           continue
-        cpudesc = dict(itertools.izip(CPU_ATTRS, line.split()))
+        cpudesc = dict(zip(CPU_ATTRS, line.split()))
         idle, nonidle = (0, 0)
-        for attr, value in cpudesc.iteritems():
+        for attr, value in cpudesc.items():
           if attr in CPU_IDLE_ATTRS:
             idle += int(value)
           if attr in CPU_NONIDLE_ATTRS:
@@ -461,7 +461,7 @@ class Cpu(SystemInfoStorage):
     prevcputimes = self.resources.get(RESOURCENAME_CPUPREVTIMES)
     cputimes = self.CpuTime()
     cpuloads = []
-    for prevtime, curtime in itertools.izip(prevcputimes, cputimes):
+    for prevtime, curtime in zip(prevcputimes, cputimes):
       ct = curtime.total
       ci = curtime.idle
       pt = prevtime.total

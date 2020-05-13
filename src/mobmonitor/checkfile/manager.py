@@ -5,7 +5,7 @@
 
 """Store and manage Mob* Monitor checkfiles."""
 
-from __future__ import print_function
+
 
 import cherrypy
 import collections
@@ -173,7 +173,7 @@ def ApplyHealthCheckAttributes(obj):
     The same object with default attribute values set if they were not
     already defined.
   """
-  for attr, default in HEALTH_CHECK_DEFAULT_ATTRIBUTES.iteritems():
+  for attr, default in HEALTH_CHECK_DEFAULT_ATTRIBUTES.items():
     if not hasattr(obj, attr):
       setattr(obj, attr, default)
 
@@ -278,11 +278,11 @@ class CheckFileManager(object):
     Args:
       force: Ignore the health check interval and execute the health checks.
     """
-    for service, healthchecks in self.service_checks.iteritems():
+    for service, healthchecks in self.service_checks.items():
       # Set default result dictionary if this is a new service.
       self.service_check_results.setdefault(service, {})
 
-      for hcname, (_mtime, healthcheck) in healthchecks.iteritems():
+      for hcname, (_mtime, healthcheck) in healthchecks.items():
         # Update if the record is stale or non-existent.
         etime = time.time()
         _, exec_time, status = self.service_check_results[service].get(
@@ -307,11 +307,11 @@ class CheckFileManager(object):
 
   def ConsolidateServiceStates(self):
     """Consolidate health check results and determine service health states."""
-    for service, results in self.service_check_results.iteritems():
+    for service, results in self.service_check_results.items():
       self.service_states.setdefault(service, {})
 
       quasi_or_unhealthy_checks = []
-      for (_exec_status, _exec_stime, hcstatus) in results.itervalues():
+      for (_exec_status, _exec_stime, hcstatus) in results.values():
         if not isHealthcheckHealthy(hcstatus):
           quasi_or_unhealthy_checks.append(hcstatus)
 
@@ -330,7 +330,7 @@ class CheckFileManager(object):
       # Import the package.
       try:
         file_, path, desc = imp.find_module(service_name, [self.checkdir])
-        imp.load_module(service_name, file_, path, desc)
+        print(imp.load_module(service_name, file_, path, desc))
       except Exception as e:
         LOGGER.warning('Failed to import package %s: %s', service_name, e,
                        exc_info=True)
@@ -341,6 +341,7 @@ class CheckFileManager(object):
         filepath = os.path.join(service_package, file_)
         if os.path.isfile(filepath) and file_.endswith(CHECKFILE_ENDING):
           try:
+            print(file_)
             healthchecks, mtime = ImportFile(service_name, filepath)
             self.Update(service_name, healthchecks, mtime)
           except Exception as e:
@@ -365,7 +366,7 @@ class CheckFileManager(object):
     Returns:
       A list of the services for which we have checks defined.
     """
-    return self.service_states.keys()
+    return list(self.service_states.keys())
 
   def GetStatus(self, service):
     """Query the current health state of the service.
@@ -384,7 +385,7 @@ class CheckFileManager(object):
       If service is not specified, a list of all service states is returned.
     """
     if not service:
-      return self.service_states.values()
+      return list(self.service_states.values())
 
     return self.service_states.get(service, SERVICE_STATUS(service, False, []))
 
@@ -478,7 +479,7 @@ class CheckFileManager(object):
         # all services.
         self.Execute(force=True)
         self.ConsolidateServiceStates()
-      except Exception, e:
+      except Exception as e:
         LOGGER.error('Failed to execute the repair action "%s"'
                      ' for service "%s": %s', action, service, e,
                      exc_info=True)

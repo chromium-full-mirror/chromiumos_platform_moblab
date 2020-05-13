@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import ConfigParser
+import configparser
 
 class Config:
     """
@@ -15,7 +15,7 @@ class Config:
     SHADOW_CONFIG = '/usr/local/autotest/shadow_config.ini'
 
     def __init__(self):
-        self.config = ConfigParser.ConfigParser()
+        self.config = configparser.ConfigParser()
         self.config.read(
             [self.GLOBAL_CONFIG, self.MOBLAB_CONFIG, self.SHADOW_CONFIG])
 

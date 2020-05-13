@@ -5,7 +5,7 @@
 
 """Unittests for systeminfo."""
 
-from __future__ import print_function
+
 
 import collections
 import io
@@ -21,7 +21,7 @@ sys.path.append('.') # or from mobmonitor/
 import systeminfo
 
 # Strings that are used to mock particular system files for testing.
-MOCK_PROC_MEMINFO = u'''
+MOCK_PROC_MEMINFO = '''
 MemTotal:       65897588 kB
 MemFree:        24802380 kB
 Buffers:         1867288 kB
@@ -67,7 +67,7 @@ DirectMap2M:    46536704 kB
 DirectMap1G:    18874368 kB
 '''
 
-MOCK_PROC_MOUNTS = u'''
+MOCK_PROC_MOUNTS = '''
 rootfs / rootfs rw 0 0
 sysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
 proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
@@ -103,7 +103,7 @@ objfsd /google/obj fuse.objfsd rw,nosuid,nodev,relatime,user_id=903,group_id=655
 x20fsd /google/data fuse.x20fsd rw,nosuid,nodev,relatime,user_id=904,group_id=65534,allow_other 0 0
 '''
 
-MOCK_PROC_FILESYSTEMS = u'''
+MOCK_PROC_FILESYSTEMS = '''
 nodev sysfs
 nodev rootfs
 nodev ramfs
@@ -148,7 +148,7 @@ nodev autofs
       btrfs
 '''
 
-MOCK_PROC_STAT = u'''
+MOCK_PROC_STAT = '''
 cpu  36790888 1263256 11740848 7297360559 3637601 444 116964 0 0 0
 intr 3386552889 27 3 0 0 0 0 0 0 1 0 0 0 4 0 0 0 33 26 0 0 0 0 0 3508578 0 0 0
 ctxt 9855640605
@@ -171,19 +171,19 @@ class SystemInfoStorageTest(unittest.TestCase):
     """Test SystemInfoStorage Update."""
     si = self._CreateSystemInfoStorage(1)
     si.Update('test', 'testvalue')
-    self.assertEquals(si.resources.get('test'), 'testvalue')
+    self.assertEqual(si.resources.get('test'), 'testvalue')
 
   def testNeedToUpdateNoData(self):
     """Test NeedToUpdate with no data."""
     si = self._CreateSystemInfoStorage(1)
-    self.assertEquals(si.NeedToUpdate('test'), True)
+    self.assertEqual(si.NeedToUpdate('test'), True)
 
   def testNeedToUpdateNoUpdateTime(self):
     """Test NeedToUpdate with data that has no update time recorded."""
     si = self._CreateSystemInfoStorage(1)
     dataname, data = ('testname', 'testvalue')
     si.resources[dataname] = data
-    self.assertEquals(si.NeedToUpdate(dataname), True)
+    self.assertEqual(si.NeedToUpdate(dataname), True)
 
   @mock.patch('systeminfo.time')
   def testNeedToUpdateStaleData(self, MockTime):
@@ -198,7 +198,7 @@ class SystemInfoStorageTest(unittest.TestCase):
 
     MockTime.time.return_value = curtime + 2
 
-    self.assertEquals(si.NeedToUpdate(dataname), True)
+    self.assertEqual(si.NeedToUpdate(dataname), True)
 
   @mock.patch('systeminfo.time')
   def testNeedToUpdateFreshData(self, MockTime):
@@ -213,7 +213,7 @@ class SystemInfoStorageTest(unittest.TestCase):
 
     MockTime.time.return_value = curtime + 0.5
 
-    self.assertEquals(si.NeedToUpdate(dataname), False)
+    self.assertEqual(si.NeedToUpdate(dataname), False)
 
 
 class MemoryTest(unittest.TestCase):
@@ -230,7 +230,7 @@ class MemoryTest(unittest.TestCase):
     dataname, data = (systeminfo.RESOURCENAME_MEMORY, 'testvalue')
     mem.Update(dataname, data)
 
-    self.assertEquals(mem.MemoryUsage(), 'testvalue')
+    self.assertEqual(mem.MemoryUsage(), 'testvalue')
 
   def testMemory(self):
     """Test memory info when there is no record, or record is stale."""
@@ -249,7 +249,7 @@ class MemoryTest(unittest.TestCase):
     mock_memory = systeminfo.RESOURCE_MEMORY(mock_memtotal, mock_available,
                                              mock_percent_used)
 
-    self.assertEquals(mem.resources.get(systeminfo.RESOURCENAME_MEMORY),
+    self.assertEqual(mem.resources.get(systeminfo.RESOURCENAME_MEMORY),
                       mock_memory)
 
 
@@ -267,7 +267,7 @@ class DiskTest(unittest.TestCase):
     dataname, data = (systeminfo.RESOURCENAME_DISKPARTITIONS, 'testvalue')
     disk.Update(dataname, data)
 
-    self.assertEquals(disk.DiskPartitions(), 'testvalue')
+    self.assertEqual(disk.DiskPartitions(), 'testvalue')
 
   def testDiskPartitions(self):
     """Test disk partition info when there is no record, or record is stale."""
@@ -304,7 +304,7 @@ class DiskTest(unittest.TestCase):
             '/dev/mapper/dhcp--100--106--128--134--vg-root',
             '/auto/buildstatic', 'ext4')]
 
-    self.assertEquals(
+    self.assertEqual(
         disk.resources.get(systeminfo.RESOURCENAME_DISKPARTITIONS),
         mock_disk_partitions)
 
@@ -318,7 +318,7 @@ class DiskTest(unittest.TestCase):
 
     disk.Update(dataname, data)
 
-    self.assertEquals(disk.DiskUsage(partition), 'testvalue')
+    self.assertEqual(disk.DiskUsage(partition), 'testvalue')
 
   @mock.patch('systeminfo.os')
   def testDiskUsage(self, MockOs):
@@ -345,7 +345,7 @@ class DiskTest(unittest.TestCase):
                                                    mock_free,
                                                    mock_percent_used)
 
-    self.assertEquals(disk.DiskUsage(partition), mock_diskusage)
+    self.assertEqual(disk.DiskUsage(partition), mock_diskusage)
 
   def testBlockDevicesExisting(self):
     """Test block device information collection when a record exists."""
@@ -357,7 +357,7 @@ class DiskTest(unittest.TestCase):
 
     disk.Update(dataname, data)
 
-    self.assertEquals(disk.BlockDevices(device), data)
+    self.assertEqual(disk.BlockDevices(device), data)
 
   @mock.patch('systeminfo.osutils')
   def testBlockDevice(self, MockOsUtils):
@@ -389,7 +389,7 @@ class DiskTest(unittest.TestCase):
                                                         mock_ids,
                                                         mock_labels)]
 
-    self.assertEquals(disk.BlockDevices(mock_device), mock_blockdevice)
+    self.assertEqual(disk.BlockDevices(mock_device), mock_blockdevice)
 
 
 class Cpu(unittest.TestCase):
@@ -406,7 +406,7 @@ class Cpu(unittest.TestCase):
     dataname, data = (systeminfo.RESOURCENAME_CPUTIMES, 'testvalue')
     cpu.Update(dataname, data)
 
-    self.assertEquals(cpu.CpuTime(), 'testvalue')
+    self.assertEqual(cpu.CpuTime(), 'testvalue')
 
   def testCpuTime(self):
     """Test cpu timing info when there is no record or record is stale."""
@@ -426,7 +426,7 @@ class Cpu(unittest.TestCase):
                                                  mock_cpu_idle,
                                                  mock_cpu_nonidle)]
 
-    self.assertEquals(cpu.resources.get(systeminfo.RESOURCENAME_CPUTIMES),
+    self.assertEqual(cpu.resources.get(systeminfo.RESOURCENAME_CPUTIMES),
                       mock_cputimes)
 
   def testCpuLoadExisting(self):
@@ -436,7 +436,7 @@ class Cpu(unittest.TestCase):
     dataname, data = (systeminfo.RESOURCENAME_CPULOADS, 'testvalue')
     cpu.Update(dataname, data)
 
-    self.assertEquals(cpu.CpuLoad(), 'testvalue')
+    self.assertEqual(cpu.CpuLoad(), 'testvalue')
 
   def testCpuLoad(self):
     """Test cpu load collection info when we have previous timing data."""
@@ -466,7 +466,7 @@ class Cpu(unittest.TestCase):
 
     mock_cpuloads = [systeminfo.RESOURCE_CPULOAD(mock_cpu_name, mock_cpu_load)]
 
-    self.assertEquals(cpu.resources.get(systeminfo.RESOURCENAME_CPULOADS),
+    self.assertEqual(cpu.resources.get(systeminfo.RESOURCENAME_CPULOADS),
                       mock_cpuloads)
 
 
