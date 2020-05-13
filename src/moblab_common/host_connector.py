@@ -11,7 +11,7 @@ import grpc
 from host_services import hostservices_pb2
 from host_services import hostservices_pb2_grpc
 
-DEFAULT_SERVER = 'dockerhost:7002'
+DEFAULT_SERVER = "dockerhost:7002"
 
 channel = None
 stub = None
@@ -34,9 +34,10 @@ class HostServicesConnector(object):
             if cls.channel:
                 cls.stub = hostservices_pb2_grpc.MoblabHostServiceStub(cls.channel)
                 if not cls.stub:
-                    raise HostServicesException('Unable to connect to server %s', DEFAULT_SERVER)
+                    raise HostServicesException("Unable to connect to server %s"
+                 % DEFAULT_SERVER)
             else:
-                raise HostServicesException('No server found %s', DEFAULT_SERVER)
+                raise HostServicesException("No server found %s", DEFAULT_SERVER)
 
     @classmethod
     def disconnect(cls):
@@ -46,7 +47,7 @@ class HostServicesConnector(object):
 
     @classmethod
     def get_host_identifier(cls):
-        # Call the host service to get a non volitile identifier.
+        # Call the host service to get a non volatile identifier.
         cls.connect()
         try:
             request = hostservices_pb2.HostIdentifierRequest()
@@ -56,3 +57,74 @@ class HostServicesConnector(object):
             cls.disconnect()  # Force reconnect on retry
             logging.exception('Error getting the host identifier')
             raise HostServicesException('Error getting the host identifier')
+
+    @classmethod
+    def is_service_running(cls, service_name):
+        cls.connect()
+        try:
+            request = hostservices_pb2.ServiceRunningRequest()
+            response = cls.stub.get_host_identifier(request)
+            return response.is_running
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error getting service %s status', service_name)
+            raise HostServicesException('Error getting service %s status' % service_name)
+
+    @classmethod
+    def get_disk_info(cls):
+        cls.connect()
+        try:
+            request = hostservices_pb2.DiskInfoRequest()
+            response = cls.stub.get_disk_info(request)
+            return response.disk_info
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error getting disk info')
+            raise HostServicesException('Error getting disk info')
+
+    @classmethod
+    def get_ip(cls):
+        cls.connect()
+        try:
+            request = hostservices_pb2.GetIpRequest()
+            response = cls.stub.get_ip(request)
+            return response.ip_address
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error getting host ip')
+            raise HostServicesException('Error getting host ip')
+
+    @classmethod
+    def check_for_system_update(cls):
+        cls.connect()
+        try:
+            request = hostservices_pb2.SystemUpdateCheckRequest()
+            response = cls.stub.check_for_system_update(request)
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error checking for system updates')
+            raise HostServicesException('Error checking for system updates')
+
+    @classmethod
+    def get_system_update_status(cls):
+        cls.connect()
+        try:
+            request = hostservices_pb2.SystemUpdateStatusRequest()
+            response = cls.stub.get_system_update_status(request)
+            return response
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error getting update status')
+            raise HostServicesException('Error getting update status')
+
+    @classmethod
+    def get_system_update_status(cls):
+        cls.connect()
+        try:
+            request = hostservices_pb2.SystemUpdateStatusRequest()
+            response = cls.stub.get_system_update_status(request)
+            return response
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error getting update status')
+            raise HostServicesException('Error getting update status')
