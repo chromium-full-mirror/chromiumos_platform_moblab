@@ -3,12 +3,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+from moblab_common import host_connector
+from util import osutils
+from .diagnostic_error import DiagnosticError
+from .abstract_diagnostic_check import AbstractDiagnosticCheck
 import sys
 
 sys.path.append('..')
-from abstract_diagnostic_check import AbstractDiagnosticCheck
-from diagnostic_error import DiagnosticError
-from util import osutils
+
 
 class DiskInfo(AbstractDiagnosticCheck):
     """
@@ -21,17 +23,7 @@ class DiskInfo(AbstractDiagnosticCheck):
     name = 'Disk Info'
 
     description = ('Get information on current disk usage, '
-    'mounted filesystems and their mount points')
+                   'mounted filesystems and their mount points')
 
     def run(self):
-        try:
-            result = 'df -h\n'
-            cmd = ['df -h | sort -r -k 5 -i']
-            result += osutils.run_command(cmd, shell=True)
-
-            result +='\nlsblk\n'
-            cmd = ['lsblk']
-            result += osutils.run_command(cmd)
-            return result
-        except osutils.RunCommandError:
-            raise DiagnosticError('Failed to gather disk information')
+        return host_connector.HostServicesConnector().get_disk_info()

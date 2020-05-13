@@ -5,16 +5,16 @@
 
 """Simple log collection script for Mob* Monitor"""
 
-from __future__ import print_function
+
 
 import glob
 import os
 import tempfile
 import shutil
 
-import osutils
+from util import osutils
 
-TMPDIR = '/mnt/moblab/tmp'
+TMPDIR = '/tmp'
 TMPDIR_PREFIX = 'moblab_logs_'
 LOG_DIRS = {
     'apache_errors': '/var/log/apache2/error_log',
@@ -41,7 +41,7 @@ def collect_logs():
   os.chmod(tempdir, 0o777)
 
   try:
-    for name, path in LOG_DIRS.iteritems():
+    for name, path in LOG_DIRS.items():
       if not os.path.exists(path):
         continue
       if os.path.isdir(path):

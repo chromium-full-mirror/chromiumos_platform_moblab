@@ -6,8 +6,6 @@
 
 """The Mob* Monitor web interface."""
 
-from __future__ import print_function
-
 import cherrypy
 import json
 import os
@@ -17,14 +15,14 @@ import logging.handlers
 import argparse
 
 from cherrypy.lib.static import serve_file
-from checkfile import manager
+from checkfile import manager as cf_manager
 from util import collect_logs
-import diagnostic_checks.manager
+from diagnostic_checks import manager as dc_manager
 
 
 STATICDIR = '/etc/moblab/mobmonitor/static/'
 
-LOGDIR = '/var/log/mobmonitor/'
+LOGDIR = '/var/log/moblab/'
 LOGFILE = 'mobmonitor.log'
 LOGFILE_SIZE_BYTES = 1024 * 1024
 LOGFILE_COUNT = 10
@@ -225,8 +223,8 @@ def main(argv):
   }
 
   # Setup the mobmonitor
-  checkfile_manager = manager.CheckFileManager(checkdir=options.checkdir)
-  diagnostic_manager = diagnostic_checks.manager.DiagnosticCheckManager()
+  checkfile_manager = cf_manager.CheckFileManager(checkdir=options.checkdir)
+  diagnostic_manager = dc_manager.DiagnosticCheckManager()
   diagnostic_manager.init_checks()
   mobmonitor = MobMonitorRoot(checkfile_manager, diagnostic_manager,
       staticdir=options.staticdir)

@@ -4,11 +4,11 @@
 
 """DUT health checks for moblab."""
 
-from __future__ import print_function
+
 
 import netifaces
 
-import common
+from moblab import common
 
 from util import osutils
 

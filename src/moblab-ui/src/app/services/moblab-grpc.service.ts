@@ -58,8 +58,7 @@ import {
   SendMoblabScreenshotRequest,
   SendMoblabScreenshotResponse,
   UpdateDutsFirmwareRequest,
-  UpdateDutsFirmwareResponse,
-
+  UpdateDutsFirmwareResponse
 } from "./moblabrpc_pb";
 
 @Injectable({ providedIn: "root" })
@@ -304,9 +303,7 @@ export class MoblabGrpcService {
     );
 
     call.on("data", (response: ListConnectedDutsResponse) => {
-      callback(
-        response.getDutsList()
-      );
+      callback(response.getDutsList());
     });
   }
 
@@ -314,17 +311,22 @@ export class MoblabGrpcService {
                 errorHandlingCallback: (errorMsg: string) => void,
                 dut: string) {
     const request = new GetDutDetailsRequest();
-    request.setDut(dut)
+    request.setDut(dut);
 
     const call = this.moblabRpcService.get_dut_details(
       request,
       {},
       (err: grpcWeb.Error, response: GetDutDetailsResponse) => {
-        console.log('Failed get_dut_details RPC call. Request: ', request, 'Response: ', err);
-        errorHandlingCallback(err.message)
+        console.log(
+          "Failed get_dut_details RPC call. Request: ",
+          request,
+          "Response: ",
+          err
+        );
+        errorHandlingCallback(err.message);
       }
     );
-    call.on('data', (response: GetDutDetailsResponse) => {
+    call.on("data", (response: GetDutDetailsResponse) => {
       callback(response.getDutDetail());
     });
   }
@@ -336,22 +338,22 @@ export class MoblabGrpcService {
              parent_id_filter?: string, dut_hostname_filter?: string) {
     const request = new GetNumJobsRequest();
     if (id_filter) {
-      request.setIdFilter(id_filter)
+      request.setIdFilter(id_filter);
     }
     if (name_filter) {
-      request.setNameFilter(name_filter)
+      request.setNameFilter(name_filter);
     }
     if (created_time_lt) {
-      request.setCreatedTimeLt(created_time_lt)
+      request.setCreatedTimeLt(created_time_lt);
     }
     if (created_time_gt) {
-      request.setCreatedTimeGt(created_time_gt)
+      request.setCreatedTimeGt(created_time_gt);
     }
     if (status_filter) {
-      request.setStatusFilter(status_filter)
+      request.setStatusFilter(status_filter);
     }
     if (rel_filter) {
-      request.setRelFilter(rel_filter)
+      request.setRelFilter(rel_filter);
     }
     if (parent_id_filter) {
       request.setParentIdFilter(parent_id_filter);
@@ -364,10 +366,15 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: GetNumJobsResponse) => {
-        console.log('Failed get_num_jobs RPC call. Request: ', request, 'Response: ', err);
+        console.log(
+          "Failed get_num_jobs RPC call. Request: ",
+          request,
+          "Response: ",
+          err
+        );
       }
     );
-    call.on('data', (response: GetNumJobsResponse) => {
+    call.on("data", (response: GetNumJobsResponse) => {
       callback(response.getNumJobs());
     });
   }
@@ -381,22 +388,22 @@ export class MoblabGrpcService {
     request.setQueryStart(queryStart);
     request.setQueryLimit(queryLimit);
     if (id_filter) {
-      request.setIdFilter(id_filter)
+      request.setIdFilter(id_filter);
     }
     if (name_filter) {
-      request.setNameFilter(name_filter)
+      request.setNameFilter(name_filter);
     }
     if (created_time_lt) {
-      request.setCreatedTimeLt(created_time_lt)
+      request.setCreatedTimeLt(created_time_lt);
     }
     if (created_time_gt) {
-      request.setCreatedTimeGt(created_time_gt)
+      request.setCreatedTimeGt(created_time_gt);
     }
     if (status_filter) {
-      request.setStatusFilter(status_filter)
+      request.setStatusFilter(status_filter);
     }
     if (rel_filter) {
-      request.setRelFilter(rel_filter)
+      request.setRelFilter(rel_filter);
     }
     if (parent_id_filter) {
       request.setParentIdFilter(parent_id_filter);
@@ -409,11 +416,16 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: GetJobsResponse) => {
-        console.log('Failed get_num_jobs RPC call. Request: ', request, 'Response: ', err);
+        console.log(
+          "Failed get_num_jobs RPC call. Request: ",
+          request,
+          "Response: ",
+          err
+        );
       }
     );
-    call.on('data', (response: GetJobsResponse) => {
-      callback(response.getJobsList())
+    call.on("data", (response: GetJobsResponse) => {
+      callback(response.getJobsList());
     });
   }
 
@@ -427,11 +439,16 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: AbortJobsResponse) => {
-        console.log('Failed abort jobs RPC call. Request: ', request, 'Response: ', err);
-        errorHandlingCallback(err.message)
+        console.log(
+          "Failed abort jobs RPC call. Request: ",
+          request,
+          "Response: ",
+          err
+        );
+        errorHandlingCallback(err.message);
       }
     );
-    call.on('data', (response: AbortJobsResponse) => {
+    call.on("data", (response: AbortJobsResponse) => {
       callback(response.getMessage());
     });
   }
@@ -440,17 +457,22 @@ export class MoblabGrpcService {
                 errorHandlingCallback: (errorMsg: string) => void,
                 id: string) {
     const request = new GetJobDetailsRequest();
-    request.setId(id)
+    request.setId(id);
 
     const call = this.moblabRpcService.get_job_details(
       request,
       {},
       (err: grpcWeb.Error, response: GetJobDetailsResponse) => {
-        console.log('Failed get_job_details RPC call. Request: ', request, 'Response: ', err);
-        errorHandlingCallback(err.message)
+        console.log(
+          "Failed get_job_details RPC call. Request: ",
+          request,
+          "Response: ",
+          err
+        );
+        errorHandlingCallback(err.message);
       }
     );
-    call.on('data', (response: GetJobDetailsResponse) => {
+    call.on("data", (response: GetJobDetailsResponse) => {
       callback(response.getJobDetail());
     });
   }
@@ -616,13 +638,15 @@ export class MoblabGrpcService {
       {},
       (err: grpcWeb.Error, response: GetNumDutTasksResponse) => {
         console.log(
-          'Failed get_num_dut_actions RPC call. Request: ',
+          "Failed get_num_dut_actions RPC call. Request: ",
           request,
-          'Response: ', err);
+          "Response: ",
+          err
+        );
         errorHandlingCallback(err.message);
       }
     );
-    call.on('data', (response: GetNumDutTasksResponse) => {
+    call.on("data", (response: GetNumDutTasksResponse) => {
       callback(response.getNumDutTasks());
     });
   }
@@ -646,14 +670,17 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: GetDutTasksResponse) => {
-        console.log('Failed get_dut_actions RPC call. Request: ',
+        console.log(
+          "Failed get_dut_actions RPC call. Request: ",
           request,
-          'Response: ', err);
+          "Response: ",
+          err
+        );
         errorHandlingCallback(err.message);
       }
     );
-    call.on('data', (response: GetDutTasksResponse) => {
-      callback(response.getTasksList())
+    call.on("data", (response: GetDutTasksResponse) => {
+      callback(response.getTasksList());
     });
   }
 
@@ -668,7 +695,7 @@ export class MoblabGrpcService {
         errorHandlingCallback(err.message);
       }
     );
-    call.on('data', (response: RepairHostResponse) => {
+    call.on("data", (response: RepairHostResponse) => {
       callback(response.getMessage());
     });
   }
@@ -684,7 +711,7 @@ export class MoblabGrpcService {
         errorHandlingCallback(err.message);
       }
     );
-    call.on('data', (response: ReverifyHostResponse) => {
+    call.on("data", (response: ReverifyHostResponse) => {
       callback(response.getMessage());
     });
   }

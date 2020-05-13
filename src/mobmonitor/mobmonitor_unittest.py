@@ -5,7 +5,7 @@
 
 """Unittests for the main Mob* Monitor script."""
 
-from __future__ import print_function
+
 
 import json
 import os
@@ -131,7 +131,7 @@ class MobMonitorRootTest(unittest.TestCase):
     status = cfm.service_statuses[0]
     expect = {'service': status.service, 'health': status.health,
               'healthchecks': []}
-    self.assertEquals([expect], json.loads(self.root.GetStatus(status.service)))
+    self.assertEqual([expect], json.loads(self.root.GetStatus(status.service)))
 
     # Test the result for multiple services.
     status1, status2 = cfm.service_statuses
@@ -142,14 +142,14 @@ class MobMonitorRootTest(unittest.TestCase):
                'healthchecks': [{'name': check.name, 'health': check.health,
                                  'description': check.description,
                                  'actions': []}]}]
-    self.assertEquals(expect, json.loads(self.root.GetStatus()))
+    self.assertEqual(expect, json.loads(self.root.GetStatus()))
 
   def testActionInfo(self):
     """Test the ActionInfo RPC."""
     cfm = self.mock_checkfile_manager
 
     expect = {'action': 'DummyAction', 'info': '', 'params': {'x': 'x'}}
-    self.assertEquals(expect,
+    self.assertEqual(expect,
                       json.loads(self.root.ActionInfo('service2',
                                                  'dummy_healthcheck',
                                                  'DummyAction')))
@@ -162,7 +162,7 @@ class MobMonitorRootTest(unittest.TestCase):
     expect = {'service': status.service, 'health': status.health,
               'healthchecks': []}
     string_params = '{"a":1}'
-    self.assertEquals(expect,
+    self.assertEqual(expect,
                       json.loads(self.root.RepairService('dummy_service',
                                                     'dummy_healthcheck',
                                                     'dummy_action',
@@ -171,7 +171,7 @@ class MobMonitorRootTest(unittest.TestCase):
   def testListDiagnosticChecks(self):
     """Test the ListDiagnosticChecks RPC."""
     expect = self.mock_diagnostic_manager.list_diagnostic_checks()
-    self.assertEquals(expect,
+    self.assertEqual(expect,
         json.loads(self.root.ListDiagnosticChecks()))
 
   def testRunDiagnosticCheck(self):
@@ -179,7 +179,7 @@ class MobMonitorRootTest(unittest.TestCase):
     expect = {
       'result': 'test diagnostic result'
     }
-    self.assertEquals(expect,
+    self.assertEqual(expect,
         json.loads(self.root.RunDiagnosticCheck('testcategory', 'testname')))
 
 

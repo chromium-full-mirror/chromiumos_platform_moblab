@@ -4,7 +4,7 @@
 
 """Google Storage health checks for devserver."""
 
-from __future__ import print_function
+
 
 import netifaces
 import os

@@ -4,26 +4,18 @@
 
 """Boto file health checks for devserver."""
 
-from __future__ import print_function
+
 
 import netifaces
 import os
 
-import common
+from moblab import common
+
+from moblab_common import host_connector
 
 
 def GetIp():
-  for iface in netifaces.interfaces():
-    if 'eth' not in iface:
-      continue
-    addrs = netifaces.ifaddresses(iface).get(netifaces.AF_INET)
-    if not addrs:
-      continue
-    for addr in addrs:
-      if common.MOBLAB_SUBNET_ADDR != addr.get('addr'):
-        return addr['addr']
-
-  return 'localhost'
+  return host_connector.HostServicesConnector().get_ip()
 
 
 class BotoFile(object):

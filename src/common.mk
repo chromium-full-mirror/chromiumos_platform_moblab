@@ -10,7 +10,7 @@ EXTRA_ARGS+= --build-arg SSH_PORT="${SSH_PORT}"
 
 all: protoc rpcserver compose autotest-lucifer autotest-gwt autotest \
 	db devserver ssp offloader envoy remote_access ui remote_agent \
-        remote-scheduler local-dev remote-access
+        remote-scheduler local-dev remote-access mobmonitor
 
 #TODO refactor the common rules into a single rule.
 
@@ -152,4 +152,10 @@ remote-scheduler:
 		dockerfiles/remote-scheduler/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL}
 
-.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access remote_agent remote-scheduler
+mobmonitor: export DOCKER_BUILDKIT=1
+mobmonitor:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/mobmonitor:${LABEL} \
+		-f dockerfiles/mobmonitor/Dockerfile ..
+	docker push ${REGISTRY_URI}/mobmonitor:${LABEL}
+
+.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access remote_agent remote-scheduler mobmonitor

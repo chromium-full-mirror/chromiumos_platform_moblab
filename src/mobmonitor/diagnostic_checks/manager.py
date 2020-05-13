@@ -6,11 +6,9 @@
 import logging
 LOGGER = logging.getLogger(__name__)
 
-from cloud_storage_speedtest import CloudStorageSpeedTest
-from disk_info import DiskInfo
-from base_container_clone import BaseContainerClone
-from repair_base_container import RepairBaseContainer
-from diagnostic_error import DiagnosticError
+from diagnostic_checks.cloud_storage_speedtest import CloudStorageSpeedTest
+from diagnostic_checks.disk_info import DiskInfo
+from diagnostic_checks.diagnostic_error import DiagnosticError
 
 class DiagnosticCheckManager:
     """
@@ -33,8 +31,6 @@ class DiagnosticCheckManager:
     CHECKS = [
         CloudStorageSpeedTest,
         DiskInfo,
-        BaseContainerClone,
-        RepairBaseContainer
     ]
 
     def __init__(self):

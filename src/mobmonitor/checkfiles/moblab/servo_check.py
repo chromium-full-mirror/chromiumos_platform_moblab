@@ -4,12 +4,12 @@
 
 """Servo health checks for moblab."""
 
-from __future__ import print_function
+
 
 from util import osutils
 
-SERVO_VID = '18d1'
-SERVO_PID = ['5002', '501b']
+SERVO_VID = b'18d1'
+SERVO_PID = [b'5002', b'501b']
 
 
 class ServoExists(object):
@@ -25,8 +25,8 @@ class ServoExists(object):
     cmd = ['lsusb']
     usbs = osutils.sudo_run_command(cmd).strip()
     for pid in SERVO_PID:
-      servo_id = '%s:%s' % (SERVO_VID, pid)
-      for usb in usbs.split('\n'):
+      servo_id = b'%s:%s' % (SERVO_VID, pid)
+      for usb in usbs.split(b'\n'):
         if servo_id in usb:
           return 0
     return 1

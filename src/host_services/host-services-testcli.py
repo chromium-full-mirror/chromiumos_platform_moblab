@@ -13,6 +13,31 @@ def get_host_identifier(st):
     request = hostservices_pb2.HostIdentifierRequest()
     print((st.get_host_identifier(request)))
 
+def is_service_running(st, service):
+    request = hostservices_pb2.ServiceRunningRequest()
+    request.service = service
+    print(st.is_service_running(request))
+
+def get_disk_info(st):
+    request = hostservices_pb2.DiskInfoRequest()
+    print(st.get_disk_info(request))
+
+def get_ip(st):
+    request = hostservices_pb2.GetIpRequest()
+    print(st.get_ip(request))
+
+def check_for_system_update(st):
+    request = hostservices_pb2.SystemUpdateCheckRequest()
+    print(st.check_for_system_update(request))
+
+def get_system_update_status(st):
+    request = hostservices_pb2.SystemUpdateStatusRequest()
+    print(st.get_system_update_status(request))
+
+def install_system_update(st):
+    request = hostservices_pb2.SystemUpdateInstallRequest()
+    print(st.install_system_update(request))
+
 
 def is_service_running(st, service):
     request = hostservices_pb2.ServiceRunningRequest()

@@ -403,6 +403,31 @@ services:
 
     networks:
       - moblab
+
+##############################################################################
+
+  mobmonitor:
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/mobmonitor:${MOBMONITOR:-release}
+    user:  moblab
+
+    volumes:
+      - logs:/var/log/moblab
+      - /sys:/sys:ro
+      - /dev/disk/:/dev/disk:ro
+      - moblab_home:/home/moblab
+      - logs:/logs
+      - /var/log/bootup:/bootup
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+
+    networks:
+      - moblab
+
+    ports:
+      - 9991:9991
+
+    extra_hosts:
+      - "dockerhost:192.168.100.1"
+
 ##############################################################################
 volumes:
   db_data: {}

@@ -4,12 +4,12 @@
 
 """Disk monitoring health checks for moblab."""
 
-from __future__ import print_function
+
 
 import copy
 
-import moblab_actions
-import common
+from moblab import moblab_actions
+from moblab import common
 
 from util import osutils
 from system import systeminfo
@@ -69,10 +69,10 @@ class DiskDevices(object):
     """
     # Get a list of all usb block devices.
     usbs = [db for db in self.diskinfo.BlockDevices()
-            if any(x.startswith('usb') for x in db.ids)]
+            if any(x.startswith(b'usb') for x in db.ids)]
 
-    if not usbs:
-      return DISK_DEVICE_CODES.NO_USB
+    #if not usbs:
+    return DISK_DEVICE_CODES.NO_USB
 
     # Get all well-labelled usb block devices.
     self.useable_usbs = copy.copy(usbs)
@@ -207,7 +207,7 @@ class DiskSpace(object):
         <DISK_FREE_THRESHOLD_PERCENT free disk space on either the moblab or
         stateful partition.
     """
-    partitions = [common.MOBLAB_MOUNTPOINT, common.STATEFUL_MOUNTPOINT]
+    partitions = [common.STATEFUL_MOUNTPOINT]
     for part in partitions:
       diskusage = self.diskinfo.DiskUsage(part)
       free = 1 - diskusage.percent_used / 100.0

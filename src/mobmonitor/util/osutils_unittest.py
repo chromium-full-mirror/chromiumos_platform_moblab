@@ -176,7 +176,7 @@ class TestListConnectedDutIps(unittest.TestCase):
         expected = ['192.168.231.100', '192.168.231.101']
         result = osutils.list_connected_dut_ips()
 
-        self.assertEquals(expected, result)
+        self.assertEqual(expected, result)
 
 
 if __name__ == '__main__':

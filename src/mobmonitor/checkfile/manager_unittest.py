@@ -5,8 +5,6 @@
 
 """Unittests for Mob* Monitor checkfile manager."""
 
-from __future__ import print_function
-
 import imp
 import mock
 import os
@@ -285,7 +283,7 @@ class CheckFileManagerHelperTest(unittest.TestCase):
             'test', False, 'desc', [self.CfmTestAction()])
     expect = {'name': 'test', 'health': False, 'description': 'desc',
               'actions': ['test']}
-    self.assertEquals(expect, manager.MapHealthcheckStatusToDict(status))
+    self.assertEqual(expect, manager.MapHealthcheckStatusToDict(status))
 
   def testMapServiceStatusToDict(self):
     """Test mapping a manager.SERVICE_STATUS to a dict."""
@@ -297,13 +295,13 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     status = manager.SERVICE_STATUS('test-service', False, [hcstatus])
     expect = {'service': 'test-service', 'health': False,
               'healthchecks': [hcexpect]}
-    self.assertEquals(expect, manager.MapServiceStatusToDict(status))
+    self.assertEqual(expect, manager.MapServiceStatusToDict(status))
 
   def testMapActionInfoToDict(self):
     """Test mapping a manager.ACTION_INFO to a dict."""
     actioninfo = manager.ACTION_INFO('test', 'test', {'a': 1})
     expect = {'action': 'test', 'info': 'test', 'params': {'a': 1}}
-    self.assertEquals(expect, manager.MapActionInfoToDict(actioninfo))
+    self.assertEqual(expect, manager.MapActionInfoToDict(actioninfo))
 
   def testIsHealthcheckHealthy(self):
     """Test checking whether health check statuses are healthy."""
@@ -358,7 +356,7 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     expected = manager.HEALTHCHECK_STATUS(hcname, True,
                                           manager.NULL_DESCRIPTION,
                                           manager.EMPTY_ACTIONS)
-    self.assertEquals(expected,
+    self.assertEqual(expected,
                       manager.DetermineHealthcheckStatus(hcname, testhc))
 
   def testDeterminHealthcheckStatusUnhealthy(self):
@@ -368,13 +366,13 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     desc, actions = testhc.Diagnose(testhc.Check())
     expected = manager.HEALTHCHECK_STATUS(hcname, False, desc, actions)
     result = manager.DetermineHealthcheckStatus(hcname, testhc)
-    self.assertEquals(expected.actions[0].action, result.actions[0].action)
+    self.assertEqual(expected.actions[0].action, result.actions[0].action)
     # can't compare instances of the action objects very easily with
     # assertEquals, it tries to compare pointers
     # just compare the names
-    self.assertEquals(expected.name, result.name)
-    self.assertEquals(expected.health, result.health)
-    self.assertEquals(expected.description, result.description)
+    self.assertEqual(expected.name, result.name)
+    self.assertEqual(expected.health, result.health)
+    self.assertEqual(expected.description, result.description)
 
   def testDetermineHealthcheckStatusQuasihealth(self):
     """Test DetermineHealthcheckStatus on a quasi-healthy check."""
@@ -382,7 +380,7 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     testhc = TestHealthCheckQuasihealthy()
     desc, actions = testhc.Diagnose(testhc.Check())
     expected = manager.HEALTHCHECK_STATUS(hcname, True, desc, actions)
-    self.assertEquals(expected,
+    self.assertEqual(expected,
                       manager.DetermineHealthcheckStatus(hcname, testhc))
 
   def testDetermineHealthcheckStatusBrokenCheck(self):
@@ -391,7 +389,7 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     testhc = TestHealthCheckBroken()
     result = manager.DetermineHealthcheckStatus(hcname, testhc)
 
-    self.assertEquals(hcname, result.name)
+    self.assertEqual(hcname, result.name)
     self.assertFalse(result.health)
     self.assertFalse(result.actions)
 
@@ -428,7 +426,7 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     """Test that we can apply attributes to a health check."""
     testhc = TestHealthCheck()
     result = manager.ApplyHealthCheckAttributes(testhc)
-    self.assertEquals(result.CHECK_INTERVAL_SEC,
+    self.assertEqual(result.CHECK_INTERVAL_SEC,
                       manager.CHECK_INTERVAL_DEFAULT_SEC)
 
   def testApplyHealthCheckAttributesHasAttrs(self):
@@ -436,7 +434,7 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     testhc = TestHealthCheckHasAttributes()
     check_interval = testhc.CHECK_INTERVAL_SEC
     result = manager.ApplyHealthCheckAttributes(testhc)
-    self.assertEquals(result.CHECK_INTERVAL_SEC, check_interval)
+    self.assertEqual(result.CHECK_INTERVAL_SEC, check_interval)
 
   @mock.patch('manager.os')
   @mock.patch('manager.imp')
@@ -447,14 +445,14 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     manager.os.path.getmtime.return_value = TEST_MTIME
 
     checkmodule = imp.new_module('test_check')
-    exec CHECKFILE_MANY_SIMPLE in checkmodule.__dict__
+    exec(CHECKFILE_MANY_SIMPLE, checkmodule.__dict__)
     manager.imp.load_source.return_value = checkmodule
 
 
     healthchecks, mtime = manager.ImportFile(TEST_SERVICE_NAME, '/')
 
-    self.assertEquals(len(healthchecks), 3)
-    self.assertEquals(mtime, TEST_MTIME)
+    self.assertEqual(len(healthchecks), 3)
+    self.assertEqual(mtime, TEST_MTIME)
 
   @mock.patch('manager.os')
   @mock.patch('manager.imp')
@@ -465,13 +463,13 @@ class CheckFileManagerHelperTest(unittest.TestCase):
     manager.os.path.getmtime.return_value = TEST_MTIME
 
     checkmodule = imp.new_module('test_check')
-    exec CHECKFILE_MANY_SIMPLE_ONE_BAD in checkmodule.__dict__
+    exec(CHECKFILE_MANY_SIMPLE_ONE_BAD, checkmodule.__dict__)
     manager.imp.load_source.return_value = checkmodule
 
     healthchecks, mtime = manager.ImportFile(TEST_SERVICE_NAME, '/')
 
-    self.assertEquals(len(healthchecks), 2)
-    self.assertEquals(mtime, TEST_MTIME)
+    self.assertEqual(len(healthchecks), 2)
+    self.assertEqual(mtime, TEST_MTIME)
 
 
 class CheckFileManagerTest(unittest.TestCase):
@@ -497,7 +495,7 @@ class CheckFileManagerTest(unittest.TestCase):
         TEST_SERVICE_NAME, './%s/test_check.py' % TEST_SERVICE_NAME)
 
     self.assertTrue(TEST_SERVICE_NAME in cfm.service_checks)
-    self.assertEquals(cfm.service_checks[TEST_SERVICE_NAME],
+    self.assertEqual(cfm.service_checks[TEST_SERVICE_NAME],
                       {myobj.__class__.__name__: (TEST_MTIME, myobj)})
 
   @mock.patch('manager.os')
@@ -534,7 +532,7 @@ class CheckFileManagerTest(unittest.TestCase):
     myobj2 = TestHealthCheck()
     cfm.Update(TEST_SERVICE_NAME, [myobj2], TEST_MTIME)
     self.assertTrue(TEST_SERVICE_NAME in cfm.service_checks)
-    self.assertEquals(cfm.service_checks[TEST_SERVICE_NAME],
+    self.assertEqual(cfm.service_checks[TEST_SERVICE_NAME],
                       {myobj.__class__.__name__: (TEST_MTIME, myobj)})
 
   def testUpdateNonExistingHealthCheck(self):
@@ -546,7 +544,7 @@ class CheckFileManagerTest(unittest.TestCase):
     cfm.Update(TEST_SERVICE_NAME, [myobj], TEST_MTIME)
 
     self.assertTrue(TEST_SERVICE_NAME in cfm.service_checks)
-    self.assertEquals(cfm.service_checks[TEST_SERVICE_NAME],
+    self.assertEqual(cfm.service_checks[TEST_SERVICE_NAME],
                       {myobj.__class__.__name__: (TEST_MTIME, myobj)})
 
   @mock.patch('manager.time')
@@ -569,7 +567,7 @@ class CheckFileManagerTest(unittest.TestCase):
     _, exec_time, _ = cfm.service_check_results[TEST_SERVICE_NAME][
         TestHealthCheckHasAttributes.__name__]
 
-    self.assertEquals(exec_time, TEST_EXEC_TIME)
+    self.assertEqual(exec_time, TEST_EXEC_TIME)
 
   @mock.patch('manager.time')
   def testExecuteStale(self, MockTime):
@@ -591,7 +589,7 @@ class CheckFileManagerTest(unittest.TestCase):
     _, exec_time, _ = cfm.service_check_results[TEST_SERVICE_NAME][
         TestHealthCheckHasAttributes.__name__]
 
-    self.assertEquals(exec_time, TEST_EXEC_TIME + exec_time_offset)
+    self.assertEqual(exec_time, TEST_EXEC_TIME + exec_time_offset)
 
   @mock.patch('manager.time')
   def testExecuteNonExistent(self, MockTime):
@@ -613,8 +611,8 @@ class CheckFileManagerTest(unittest.TestCase):
     self.assertTrue(exec_status is not None)
     self.assertTrue(exec_time is not None)
 
-    self.assertEquals(exec_status, manager.HCEXECUTION_COMPLETED)
-    self.assertEquals(exec_time, TEST_EXEC_TIME)
+    self.assertEqual(exec_status, manager.HCEXECUTION_COMPLETED)
+    self.assertEqual(exec_time, TEST_EXEC_TIME)
 
   @mock.patch('manager.time')
   def testExecuteForce(self, MockTime):
@@ -636,7 +634,7 @@ class CheckFileManagerTest(unittest.TestCase):
     _, exec_time, _ = cfm.service_check_results[TEST_SERVICE_NAME][
         TestHealthCheckHasAttributes.__name__]
 
-    self.assertEquals(exec_time, TEST_EXEC_TIME + exec_time_offset)
+    self.assertEqual(exec_time, TEST_EXEC_TIME + exec_time_offset)
 
   def testConsolidateServiceStatesUnhealthy(self):
     """Test consolidating state for a service with unhealthy checks."""
@@ -662,7 +660,7 @@ class CheckFileManagerTest(unittest.TestCase):
 
     _, health, healthchecks = cfm.service_states[TEST_SERVICE_NAME]
     self.assertFalse(health)
-    self.assertEquals(2, len(healthchecks))
+    self.assertEqual(2, len(healthchecks))
     self.assertTrue(all([x in healthchecks for x in statuses[:2]]))
 
   def testConsolidateServiceStatesQuasiHealthy(self):
@@ -688,7 +686,7 @@ class CheckFileManagerTest(unittest.TestCase):
 
     _, health, healthchecks = cfm.service_states[TEST_SERVICE_NAME]
     self.assertTrue(health)
-    self.assertEquals(1, len(healthchecks))
+    self.assertEqual(1, len(healthchecks))
     self.assertTrue(statuses[0] in healthchecks)
 
   def testConsolidateServiceStatesHealthy(self):
@@ -715,18 +713,18 @@ class CheckFileManagerTest(unittest.TestCase):
 
     _, health, healthchecks = cfm.service_states.get(TEST_SERVICE_NAME)
     self.assertTrue(health)
-    self.assertEquals(0, len(healthchecks))
+    self.assertEqual(0, len(healthchecks))
 
   def testGetServiceList(self):
     """Test the GetServiceList RPC response."""
     cfm = manager.CheckFileManager(checkdir=CHECKDIR)
 
-    self.assertEquals([], cfm.GetServiceList())
+    self.assertEqual([], cfm.GetServiceList())
 
     status = manager.SERVICE_STATUS(TEST_SERVICE_NAME, True, [])
     cfm.service_states[TEST_SERVICE_NAME] = status
 
-    self.assertEquals([TEST_SERVICE_NAME], cfm.GetServiceList())
+    self.assertEqual([TEST_SERVICE_NAME], cfm.GetServiceList())
 
   def testGetStatusNonExistent(self):
     """Test the GetStatus RPC response when the service does not exist."""
@@ -735,7 +733,7 @@ class CheckFileManagerTest(unittest.TestCase):
     self.assertFalse(TEST_SERVICE_NAME in cfm.service_states)
 
     status = manager.SERVICE_STATUS(TEST_SERVICE_NAME, False, [])
-    self.assertEquals(status, cfm.GetStatus(TEST_SERVICE_NAME))
+    self.assertEqual(status, cfm.GetStatus(TEST_SERVICE_NAME))
 
   def testGetStatusSingleService(self):
     """Test the GetStatus RPC response for a single service."""
@@ -748,8 +746,8 @@ class CheckFileManagerTest(unittest.TestCase):
     cfm.service_states[s1name] = status1
     cfm.service_states[s2name] = status2
 
-    self.assertEquals(status1, cfm.GetStatus(s1name))
-    self.assertEquals(status2, cfm.GetStatus(s2name))
+    self.assertEqual(status1, cfm.GetStatus(s1name))
+    self.assertEqual(status2, cfm.GetStatus(s2name))
 
   def testGetStatusAllServices(self):
     """Test the GetStatus RPC response when no service is specified."""
@@ -763,7 +761,7 @@ class CheckFileManagerTest(unittest.TestCase):
     cfm.service_states[s2name] = status2
 
     result = cfm.GetStatus('')
-    self.assertEquals(2, len(result))
+    self.assertEqual(2, len(result))
     self.assertTrue(all([x in result for x in [status1, status2]]))
 
   def testRepairServiceHealthy(self):
@@ -773,7 +771,7 @@ class CheckFileManagerTest(unittest.TestCase):
     healthy_status = manager.SERVICE_STATUS(TEST_SERVICE_NAME, True, [])
     cfm.service_states[TEST_SERVICE_NAME] = healthy_status
 
-    self.assertEquals(healthy_status, cfm.RepairService(TEST_SERVICE_NAME,
+    self.assertEqual(healthy_status, cfm.RepairService(TEST_SERVICE_NAME,
                                                         'HealthcheckName',
                                                         'RepairFuncName',
                                                         {}))
@@ -787,7 +785,7 @@ class CheckFileManagerTest(unittest.TestCase):
     expected = manager.SERVICE_STATUS(TEST_SERVICE_NAME, False, [])
     result = cfm.RepairService(TEST_SERVICE_NAME, 'DummyHealthcheck',
                                'DummyAction', {})
-    self.assertEquals(expected, result)
+    self.assertEqual(expected, result)
 
   def testRepairServiceInvalidAction(self):
     """Test the RepairService RPC when the action is not recognized."""
@@ -805,12 +803,12 @@ class CheckFileManagerTest(unittest.TestCase):
 
     status = cfm.GetStatus(TEST_SERVICE_NAME)
     self.assertFalse(status.health)
-    self.assertEquals(1, len(status.healthchecks))
+    self.assertEqual(1, len(status.healthchecks))
 
     status = cfm.RepairService(TEST_SERVICE_NAME, hcobj.__class__.__name__,
                                'Blah', {})
     self.assertFalse(status.health)
-    self.assertEquals(1, len(status.healthchecks))
+    self.assertEqual(1, len(status.healthchecks))
 
   def testRepairServiceInvalidActionArguments(self):
     """Test the RepairService RPC when the action arguments are invalid."""
@@ -828,12 +826,12 @@ class CheckFileManagerTest(unittest.TestCase):
 
     status = cfm.GetStatus(TEST_SERVICE_NAME)
     self.assertFalse(status.health)
-    self.assertEquals(1, len(status.healthchecks))
+    self.assertEqual(1, len(status.healthchecks))
 
     status = cfm.RepairService(TEST_SERVICE_NAME, hcobj.__class__.__name__,
                                'Repair', {})
     self.assertFalse(status.health)
-    self.assertEquals(1, len(status.healthchecks))
+    self.assertEqual(1, len(status.healthchecks))
 
   def testRepairService(self):
     """Test the RepairService RPC to repair an unhealthy service."""
@@ -852,14 +850,14 @@ class CheckFileManagerTest(unittest.TestCase):
 
     status = cfm.GetStatus(TEST_SERVICE_NAME)
     self.assertFalse(status.health)
-    self.assertEquals(1, len(status.healthchecks))
+    self.assertEqual(1, len(status.healthchecks))
 
     status = cfm.RepairService(TEST_SERVICE_NAME,
                                hcobj.__class__.__name__,
                                'Repair',
                                {})
     self.assertTrue(status.health)
-    self.assertEquals(0, len(status.healthchecks))
+    self.assertEqual(0, len(status.healthchecks))
 
   def testActionInfoServiceNonExistent(self):
     """Test the ActionInfo RPC when the service does not exist."""
@@ -869,7 +867,7 @@ class CheckFileManagerTest(unittest.TestCase):
 
     expect = manager.ACTION_INFO('test', 'Service not recognized.', {})
     result = cfm.ActionInfo(TEST_SERVICE_NAME, 'test', 'test')
-    self.assertEquals(expect, result)
+    self.assertEqual(expect, result)
 
   def testActionInfoServiceHealthy(self):
     """Test the ActionInfo RPC when the service is healthy."""
@@ -880,7 +878,7 @@ class CheckFileManagerTest(unittest.TestCase):
 
     expect = manager.ACTION_INFO('test', 'Service is healthy.', {})
     result = cfm.ActionInfo(TEST_SERVICE_NAME, 'test', 'test')
-    self.assertEquals(expect, result)
+    self.assertEqual(expect, result)
 
   def testActionInfoActionNonExistent(self):
     """Test the ActionInfo RPC when the action does not exist."""
@@ -899,7 +897,7 @@ class CheckFileManagerTest(unittest.TestCase):
     expect = manager.ACTION_INFO('test', 'Action not recognized.', {})
     result = cfm.ActionInfo(TEST_SERVICE_NAME, hcobj.__class__.__name__,
                             'test')
-    self.assertEquals(expect, result)
+    self.assertEqual(expect, result)
 
   def testActionInfo(self):
     """Test the ActionInfo RPC to collect information on a repair action."""
@@ -918,13 +916,13 @@ class CheckFileManagerTest(unittest.TestCase):
 
     # Test ActionInfo when the action has no parameters.
     expect = manager.ACTION_INFO('NoParams', 'NoParams Action.', {})
-    self.assertEquals(expect,
+    self.assertEqual(expect,
                       cfm.ActionInfo(TEST_SERVICE_NAME, hcname, 'NoParams'))
 
     # Test ActionInfo when the action has positional and default parameters.
     expect = manager.ACTION_INFO('Params', 'Params Action.',
                                  {'x': 'y'})
-    self.assertEquals(expect, cfm.ActionInfo(TEST_SERVICE_NAME,
+    self.assertEqual(expect, cfm.ActionInfo(TEST_SERVICE_NAME,
                                              hcname, 'Params'))
 
 if __name__ == '__main__':

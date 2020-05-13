@@ -4,7 +4,7 @@
 
 """Common lib for moblab checkfiles."""
 
-from __future__ import print_function
+
 
 
 #
@@ -20,13 +20,8 @@ DISK_SIZE_BYTES = 100 * 1024 * 1024 * 1024
 
 MOBLAB_LABEL = 'MOBLAB-STORAGE'
 
-STATEFUL_MOUNTPOINT = '/mnt/stateful_partition'
+STATEFUL_MOUNTPOINT = '/'
 MOBLAB_MOUNTPOINT = '/mnt/moblab'
 MOBLAB_FILESYSTEM = 'ext4'
 
 DISK_FREE_THRESHOLD_PERCENT = 0.3
-
-#
-# Networking constants.
-#
-MOBLAB_SUBNET_ADDR = '192.168.231.1'
