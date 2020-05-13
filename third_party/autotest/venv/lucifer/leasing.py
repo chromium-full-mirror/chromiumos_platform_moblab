@@ -26,7 +26,7 @@ import time
 
 from scandir import scandir
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
@@ -51,6 +51,7 @@ def leases_iter(jobdir):
     @returns: iterator of Leases
     """
     for entry in scandir(jobdir):
+        _LOGGER.debug("Lease entry %s", entry)
         if _is_lease_entry(entry):
             yield Lease(entry)
 

@@ -30,7 +30,9 @@ from lucifer import leasing
 from lucifer import loglib
 
 logger = logging.getLogger(__name__)
-
+handler = logging.FileHandler('/var/log/moblab/aborter.log')
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def main(args):
     """Main function
@@ -70,6 +72,7 @@ def _main_loop_body(jobdir):
             lease.id: lease for lease in leasing.leases_iter(jobdir)
             if not lease.expired()
     }
+    logger.debug('Active leases %s', active_leases)
     _mark_expired_jobs_failed(active_leases)
     _abort_timed_out_jobs(active_leases)
     _abort_jobs_marked_aborting(active_leases)
@@ -117,6 +120,7 @@ def _abort_jobs_marked_aborting(active_leases):
     @param active_leases: dict mapping job ids to Leases.
     """
     for job in _aborting_jobs_queryset():
+        logger.debug("Aborting job %s %d", job, job.id)
         if job.id in active_leases:
             logger.info('Job %d is marked for aborting; aborting', job.id)
             active_leases[job.id].maybe_abort()
