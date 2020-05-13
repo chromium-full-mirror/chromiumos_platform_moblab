@@ -52,7 +52,7 @@ class MoblabConfigConnector(object):
         """
 
         # The bucket setting has gs:// and ends in /, so remove them
-        image_server = self.get('CROS', 'image_storage_server')
+        image_server = self.get("CROS", "image_storage_server")
         if image_server and len(image_server) > 5:
             return image_server[5:-1]
         else:
@@ -60,16 +60,16 @@ class MoblabConfigConnector(object):
 
     def is_remote_task_scheduler_enabled(self):
         """Return task scheduler is enabled otherwise false."""
-        return self.get('REMOTE_TASK_SCHEDULER', 'enabled', default=False)
+        return self.get("REMOTE_TASK_SCHEDULER", "enabled", default=False)
 
     def get_remote_task_scheduler_tick_delay(self):
         """Return the number of mins task scheduler waits between attempts."""
-        return int(self.get('REMOTE_TASK_SCHEDULER', 'tick_interval', 30))
+        return int(self.get("REMOTE_TASK_SCHEDULER", "tick_interval", 30))
 
     def is_remote_task_debug_enabled(self):
-        return self.get('REMOTE_TASK_SCHEDULER', 'debug_enabled', default=False)
+        return self.get("REMOTE_TASK_SCHEDULER", "debug_enabled", default=False)
 
     def get_test_wifi_ap_and_password(self):
-        ap_name = self.get('MOBLAB', 'wifi_dut_ap_name', default=None)
-        ap_pass = self.get('MOBLAB', 'wifi_dut_ap_pass', default='')
+        ap_name = self.get("MOBLAB", "wifi_dut_ap_name", default=None)
+        ap_pass = self.get("MOBLAB", "wifi_dut_ap_pass", default="")
         return (ap_name, ap_pass)

@@ -11,10 +11,10 @@ import uuid
 from moblab_common import lock_util
 from moblab_common import host_connector
 
-MOBLAB_USER = 'moblab'
-MOBLAB_GROUP = 'moblab'
-MOBLAB_ID_FILENAME = '/home/moblab/.moblab_id'
-_ID_FILE_LOCK_PATH = '%s.lock' % MOBLAB_ID_FILENAME
+MOBLAB_USER = "moblab"
+MOBLAB_GROUP = "moblab"
+MOBLAB_ID_FILENAME = "/home/moblab/.moblab_id"
+_ID_FILE_LOCK_PATH = "%s.lock" % MOBLAB_ID_FILENAME
 
 # TODO(guocb): Remove get_moblab_id() and get_moblab_serialnumber() completely
 # from autotest code base.
@@ -33,8 +33,7 @@ def get_or_create_id():
         with open(MOBLAB_ID_FILENAME) as id_file:
             random_id = id_file.read()
     except IOError:
-        with lock_util.file_lock(
-            _ID_FILE_LOCK_PATH, exclusive=True, timeout_seconds=1):
+        with lock_util.file_lock(_ID_FILE_LOCK_PATH, exclusive=True, timeout_seconds=1):
             # Check again to see if another process just created it.
             try:
                 with open(MOBLAB_ID_FILENAME) as id_file:
@@ -43,15 +42,15 @@ def get_or_create_id():
                 pass
 
             random_id = uuid.uuid1().hex
-            with open(MOBLAB_ID_FILENAME, 'w') as id_file:
+            with open(MOBLAB_ID_FILENAME, "w") as id_file:
                 id_file.write(random_id)
 
     return random_id
 
 
-_VPD_KEY_SERIAL_NUMBER = 'serial_number'
-_VPD_KEY_ETH_MAC = 'ethernet_mac'
-NO_SERIAL_NUMBER = 'NoSerialNumber'
+_VPD_KEY_SERIAL_NUMBER = "serial_number"
+_VPD_KEY_ETH_MAC = "ethernet_mac"
+NO_SERIAL_NUMBER = "NoSerialNumber"
 
 
 def get_serial_number():
@@ -61,5 +60,5 @@ def get_serial_number():
     try:
         return host_connector.HostServicesConnector.get_host_identifier()
     except host_connector.HostServicesException:
-        logging.exception('Failed to get serial number from host.')
+        logging.exception("Failed to get serial number from host.")
     return NO_SERIAL_NUMBER
