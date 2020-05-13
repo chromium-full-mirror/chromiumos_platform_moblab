@@ -10,7 +10,7 @@ DB_UP=$(mysql -h db -u root -p${passwd} \
     -e "SELECT 1")
 while [ -z "${DB_UP}" ]; do
    sleep 1
-   DB_UP=$(mysql -h db -u root -p${passwd} \
+   DB_UP=$(mysql -h db -u chromeosqa-admin -p${passwd} \
     -e "SELECT 1")
 done
 
