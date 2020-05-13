@@ -33,10 +33,14 @@ def upload_from_string(blob, data, version=None):
     """
 
     if version:
-        storage.blob._MULTIPART_URL_TEMPLATE = ('%s&ifGenerationMatch=%d' % (
-            DEFAULT_MULTIPART_URL_TEMPLATE, version))
-        storage.blob._RESUMABLE_URL_TEMPLATE = ('%s&ifGenerationMatch=%d' % (
-            DEFAULT_RESUMABLE_URL_TEMPLATE, version))
+        storage.blob._MULTIPART_URL_TEMPLATE = "%s&ifGenerationMatch=%d" % (
+            DEFAULT_MULTIPART_URL_TEMPLATE,
+            version,
+        )
+        storage.blob._RESUMABLE_URL_TEMPLATE = "%s&ifGenerationMatch=%d" % (
+            DEFAULT_RESUMABLE_URL_TEMPLATE,
+            version,
+        )
     blob.upload_from_string(data)
     storage.blob._MULTIPART_URL_TEMPLATE = DEFAULT_MULTIPART_URL_TEMPLATE
     storage.blob._RESUMABLE_URL_TEMPLATE = DEFAULT_RESUMABLE_URL_TEMPLATE

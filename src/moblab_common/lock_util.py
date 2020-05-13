@@ -30,8 +30,10 @@ def file_lock(lock_file_path, exclusive=False, timeout_seconds=None):
         except (IOError, OSError) as err:
             if err.errno != errno.EAGAIN:
                 raise
-            if timeout_seconds is not None and \
-                    time.time() - start_time > timeout_seconds:
+            if (
+                timeout_seconds is not None
+                and time.time() - start_time > timeout_seconds
+            ):
                 raise
             time.sleep(0.1)
 

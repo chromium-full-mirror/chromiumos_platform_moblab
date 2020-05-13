@@ -10,22 +10,23 @@ import logging  # pylint: disable=cros-logging-import
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import pubsub_v1
 
-_PUBSUB_TOPIC = 'moblab-notification'
+_PUBSUB_TOPIC = "moblab-notification"
 
 # Current notification version.
-CURRENT_MESSAGE_VERSION = '1'
+CURRENT_MESSAGE_VERSION = "1"
 
 # Test upload pubsub notification attributes
-LEGACY_ATTR_VERSION = 'version'
-LEGACY_ATTR_GCS_URI = 'gcs_uri'
-LEGACY_ATTR_MOBLAB_MAC = 'moblab_mac_address'
-LEGACY_ATTR_MOBLAB_ID = 'moblab_id'
+LEGACY_ATTR_VERSION = "version"
+LEGACY_ATTR_GCS_URI = "gcs_uri"
+LEGACY_ATTR_MOBLAB_MAC = "moblab_mac_address"
+LEGACY_ATTR_MOBLAB_ID = "moblab_id"
 # the message data for new test result notification.
-LEGACY_TEST_OFFLOAD_MESSAGE = b'NEW_TEST_RESULT'
+LEGACY_TEST_OFFLOAD_MESSAGE = b"NEW_TEST_RESULT"
 
 
 class PubSubException(Exception):
     """Exception to be raised when the test to push to prod failed."""
+
     pass
 
 
@@ -33,8 +34,10 @@ def callback(message_future):
     # When timeout is unspecified, the exception method waits indefinitely.
     if message_future.exception(timeout=30):
         raise PubSubException(
-            'Publishing message on {} threw an Exception {}.'.format(
-                'Moblab notifications', message_future.exception()))
+            "Publishing message on {} threw an Exception {}.".format(
+                "Moblab notifications", message_future.exception()
+            )
+        )
     else:
         logging.info(message_future.result())
 
@@ -58,11 +61,12 @@ class PubSubClient(object):
         Raises:
             PubSubException if failed to publish the notification.
         """
-        topic_path = self.publisher.topic_path('chromeos-partner-moblab', topic)
+        topic_path = self.publisher.topic_path("chromeos-partner-moblab", topic)
         fs = []
         for message in messages:
-            resp = self.publisher.publish(topic_path, message['data'],
-                                          **message['attributes'])
+            resp = self.publisher.publish(
+                topic_path, message["data"], **message["attributes"]
+            )
             resp.add_done_callback(callback)
             fs.append(resp)
         return list([x.result() for x in fs])
@@ -94,13 +98,12 @@ class PubSubBasedClient(object):
         """
         message = {}
         if data:
-            message['data'] = data
+            message["data"] = data
         if msg_attributes:
-            message['attributes'] = msg_attributes
+            message["attributes"] = msg_attributes
         return message
 
-    def _create_test_job_offloaded_message(self, gcs_uri, serial_number,
-                                           moblab_id):
+    def _create_test_job_offloaded_message(self, gcs_uri, serial_number, moblab_id):
         """Construct a test result notification.
 
         TODO(ntang): switch LEGACY to new message format.
@@ -119,8 +122,7 @@ class PubSubBasedClient(object):
 
         return self._create_message(data, msg_attributes)
 
-    def send_test_job_offloaded_message(self, gcs_uri, serial_number,
-                                        moblab_id):
+    def send_test_job_offloaded_message(self, gcs_uri, serial_number, moblab_id):
         """Notify the cloud console a test job is offloaded.
 
         Args:
@@ -130,8 +132,8 @@ class PubSubBasedClient(object):
             True if the notification is successfully sent.
             Otherwise, False.
         """
-        logging.info('Notification on gcs_uri %s', gcs_uri)
+        logging.info("Notification on gcs_uri %s", gcs_uri)
         message = self._create_test_job_offloaded_message(
-            gcs_uri, serial_number, moblab_id)
-        return self.pubsub_client.publish_notifications(_PUBSUB_TOPIC,
-                                                        [message])
+            gcs_uri, serial_number, moblab_id
+        )
+        return self.pubsub_client.publish_notifications(_PUBSUB_TOPIC, [message])
