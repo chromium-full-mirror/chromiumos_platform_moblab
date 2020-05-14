@@ -76,27 +76,36 @@ class ResultStatusChecker(processing_step.ProcessStep):
 
     def _check_latest_status(self, test_result, previous_status):
         # check test_result finished time to determine the status.
+        _LOGGER.debug("Check latest status %s", test_result)
         try:
             finished_time = test_result.finished_time
         except test_result_interface.TestResultError:
             _LOGGER.warning(
                 'Cannot get info of %s from scheduler, '
-                'suppose it has been expired.', test_result
+                'keep retrying.', test_result
             )
-            return Status.EXPIRED
+            # TODO(haddowk) Figure out a way to expire these jobs after
+            # a certain amount of time.
+            return Status.NOT_READY
         if not finished_time:
+            _LOGGER.debug("Status not ready, process is still running")
             return Status.NOT_READY
 
-        _LOGGER.debug('%s finsihed on %s', test_result, finished_time)
+        _LOGGER.debug('%s finished on %s', test_result, finished_time)
         age = datetime.datetime.now() - finished_time
         if age < self._min_age_to_upload:
             return Status.NOT_READY
+            _LOGGER.debug("Status not ready age %s", age)
+
         if age > self._min_age_to_prune:
+            _LOGGER.debug("Job is past the max age - expire")
             return Status.EXPIRED
 
         if previous_status == Status.NOT_READY:
+            _LOGGER.debug("Not running and in the age rage to upload.")
             return Status.READY
         else:
+            _LOGGER.debug("leaving state alone %s", previous_status)
             return previous_status
 
     async def check(self, test_result):
@@ -111,16 +120,18 @@ class ResultStatusChecker(processing_step.ProcessStep):
         time according to the finished time to see if it is ready for UPLOADING
         or has EXPIRED.
         """
+        _LOGGER.debug("Checking %s", test_result.abs_path)
         try:
             with lock_util.file_lock(test_result.abs_path / _MARKER_LOCK_FILE,
                                      exclusive=True):
                 previous_status = await _load_status(test_result)
+                _LOGGER.debug("Previous status %s", previous_status)
                 current_status = previous_status
                 if previous_status not in [Status.EXPIRED, Status.UPLOADING]:
                     _LOGGER.debug('Check the latest status of %s', test_result)
                     current_status = self._check_latest_status(test_result,
                                                                previous_status)
-
+                _LOGGER.debug("Current status %s", current_status)
                 if previous_status != current_status:
                     await _write_status(test_result, current_status)
         except FileNotFoundError:

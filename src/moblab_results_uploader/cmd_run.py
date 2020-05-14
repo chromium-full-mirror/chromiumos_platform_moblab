@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 """The implementation of subcommand `run`."""
 
-from __future__ import print_function
-
 import argparse
 import asyncio
 import datetime
@@ -253,7 +251,13 @@ def _post_parse_args(arg_parser, args):
     """massage input arguments."""
     _LOGGER.debug('Input arguments: %s', args)
     if not args.gs_bucket:
-        arg_parser.error('GS Bucket not specified.')
+        arg_parser.info('GS Bucket not specified.')
+        config_connector.MoblabConfigConnector()
+        gs_bucket = config_connector.get_cloud_bucket()
+        if not gs_bucket:
+            raise Exception("No GS bucket specified or configured.")
+    else:
+        gs_bucket = args.gs_bucket
 
     try:
         args.gs_api = gs_api_wrapper.GsApiWrapper(args.gs_bucket,
@@ -277,6 +281,7 @@ def run(args, test_result_registry=None):
             needed test result directory information.
     """
     _LOGGER.info('Start to scan, upload and prune test results.')
+    _LOGGER.setLevel(logging.DEBUG)
 
     registry = test_result_registry or test_result_registry_module.REGISTRY
     loop = asyncio.get_event_loop()
