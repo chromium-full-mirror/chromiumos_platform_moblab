@@ -6,9 +6,11 @@
 
 import requests
 import logging
+import sys
 
-DEV_SERVER = 'localhost:8080'
+DEV_SERVER = "devserver:8080"
 
+_LOGGER = logging.getLogger('__name__')
 
 class DevserverConnector(object):
     """Connector the the moblab devserver."""
@@ -30,12 +32,14 @@ class DevserverConnector(object):
                 otherwise False.
         """
 
-        url = 'http://%s/%s?%s' % (DEV_SERVER, command, params)
+        url = "http://%s/%s?%s" % (DEV_SERVER, command, params)
+        _LOGGER.info("Devserver request %s", url)
         try:
             response = requests.get(url, timeout=10 * 60)
         except requests.exceptions.RequestException as e:
-            logging.error(e)
+            _LOGGER.error(e)
             return False
+        _LOGGER.info(response)
         return response.status_code == 200
 
     def stage_build_on_devserver(self, archive_url, artifacts):
@@ -52,8 +56,8 @@ class DevserverConnector(object):
             actually in the cache.
         """
 
-        command = 'stage'
-        params = 'archive_url=%s&artifacts=%s' % (archive_url, artifacts)
+        command = "stage"
+        params = "archive_url=%s&artifacts=%s" % (archive_url, artifacts)
         return self.send_devserver_command(command, params)
 
     def check_build_staged_on_devserver(self, archive_url, artifacts):
@@ -67,11 +71,11 @@ class DevserverConnector(object):
             boolean: True if the build is in the cache.
         """
 
-        command = 'is_staged'
-        params = 'archive_url=%s&artifacts=%s' % (archive_url, artifacts)
+        command = "is_staged"
+        params = "archive_url=%s&artifacts=%s" % (archive_url, artifacts)
         return self.send_devserver_command(command, params)
 
-    def stage_build(self, board, build, build_type='release', archive_url=None):
+    def stage_build(self, board, build, build_type="release", archive_url=None):
         """Stage a build to the local moblab cache.
 
         By default the source of the build is the moblab's configured bucket,
@@ -92,14 +96,18 @@ class DevserverConnector(object):
             boolean: True if the build is in the moblab cache, otherwise False.
         """
 
-        artifacts = 'full_payload,autotest_packages,stateful,quick_provision'
+        artifacts = "full_payload,autotest_packages,stateful,quick_provision"
         if not archive_url:
-            archive_url = 'gs://%s/%s-%s/%s' % (self.cloud_storage, board,
-                                                build_type, build)
+            archive_url = "gs://%s/%s-%s/%s" % (
+                self.cloud_storage,
+                board,
+                build_type,
+                build,
+            )
 
         if not self.check_build_staged_on_devserver(archive_url, artifacts):
             self.stage_build_on_devserver(archive_url, artifacts)
-            logging.info('Staging: %s for board: %s' % (build, board))
+            logging.info("Staging: %s for board: %s" % (build, board))
             return self.check_build_staged_on_devserver(archive_url, artifacts)
-        logging.info('Build already staged: %s for board: %s' % (build, board))
+        logging.info("Build already staged: %s for board: %s" % (build, board))
         return True

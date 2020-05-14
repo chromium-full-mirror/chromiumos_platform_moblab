@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 """Utilities to return information about the current moblab."""
 
-# pylint: disable=cros-logging-import
 import logging
 import uuid
 
