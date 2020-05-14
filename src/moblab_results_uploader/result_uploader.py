@@ -87,13 +87,18 @@ class Uploader(processing_step.ProcessStep):
         """Upload files in the queue to GS in background."""
         loop = asyncio.get_event_loop()
         executor = futures.ThreadPoolExecutor(max_workers=jobs)
+        awaitables = []
         while True:
             f = await self.uploading_queue.get()
             if dry_run:
                 _LOGGER.debug('DRYRUN: Uploading %s', f)
             else:
                 _LOGGER.debug('Uploading %s', f)
-                loop.run_in_executor(executor, self._upload_file, f)
+                awaitables.append(loop.run_in_executor(executor, self._upload_file, f))
+
+            if self.uploading_queue.empty():
+                for a in awaitables:
+                    await a
             self.uploading_queue.task_done()
 
     def _upload_file(self, result_file):
