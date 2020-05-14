@@ -139,10 +139,11 @@ class AFEConnector(object):
                 suite times out.
             pool (string, optional): Pool label to target suite on.
         """
-
+        test_build = '%s-%s/%s' % (board, 'release', build)
+        test_builds = {'cros-version': test_build}
         params = {
-            'board': board, 'builds': builds, 'name': suite, 'pool': pool,
-            'run_prod_code': False, 'test_source_build': build,
+            'board': board, 'builds': test_builds, 'name': suite, 'pool': pool,
+            'run_prod_code': False, 'test_source_build': test_build,
             'wait_for_results': True, 'suite_args': suite_args,
             'test_args': test_args, 'job_retry': True,
             'max_retries': sys.maxint, 'model': model,
@@ -151,6 +152,5 @@ class AFEConnector(object):
         }
         response = self.send_rpc_command('create_suite_job', params)
 
-        self.afe_connector.run_suite()
         logging.info(response)
         return response.text

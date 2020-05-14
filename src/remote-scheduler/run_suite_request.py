@@ -171,9 +171,11 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
 
         if devserver_connector.stage_build(self.board, self.build):
             autotest_connector.run_suite(
-                self.board,
-                self.build,
-                self.suite,
-                self.model,
+                board=self.board,
+                build=self.build,
+                builds=[],
+                suite=self.suite,
+                suite_timeout_mins=60*24*21,
+                model=self.model,
                 suite_args=self.suite_args,
                 test_args=self.test_args)
