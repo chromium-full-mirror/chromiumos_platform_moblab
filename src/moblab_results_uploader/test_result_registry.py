@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 """A data structure for all test result classes registering."""
-from __future__ import print_function
+
 
 import collections
 import autotest_result
@@ -30,8 +30,7 @@ REGISTRY.append(
     TestResultRegisteryEntry(
         root_dir=autotest_result.ROOT_DIR,
         classes=[
-            autotest_result.AutotestTestJob,
-            autotest_result.AutotestHostTask
+            autotest_result.AutotestTestJob
         ]
     )
 )
