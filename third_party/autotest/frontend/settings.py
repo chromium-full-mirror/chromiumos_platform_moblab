@@ -18,9 +18,8 @@ from autotest_lib.frontend import database_settings_helper
 c = global_config.global_config
 _section = 'AUTOTEST_WEB'
 
-DEBUG = c.get_config_value(_section, "sql_debug_mode", type=bool, default=False)
-TEMPLATE_DEBUG = c.get_config_value(_section, "template_debug_mode", type=bool,
-                                    default=False)
+DEBUG = True
+TEMPLATE_DEBUG = True
 
 FULL_ADMIN = False
 

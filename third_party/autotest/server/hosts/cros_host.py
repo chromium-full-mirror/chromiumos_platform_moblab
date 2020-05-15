@@ -15,6 +15,7 @@ from autotest_lib.client.common_lib import error
 from autotest_lib.client.common_lib import global_config
 from autotest_lib.client.common_lib import hosts
 from autotest_lib.client.common_lib import lsbrelease_utils
+from autotest_lib.client.common_lib.cros import cros_config
 from autotest_lib.client.common_lib.cros import dev_server
 from autotest_lib.client.common_lib.cros import retry
 from autotest_lib.client.cros import constants as client_constants
@@ -283,7 +284,7 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
 
     def _initialize(self, hostname, chameleon_args=None, servo_args=None,
                     pdtester_args=None, try_lab_servo=False,
-                    try_servo_repair=False,
+                    try_servo_repair=False, btpeer_args=[],
                     ssh_verbosity_flag='', ssh_options='',
                     *args, **dargs):
         """Initialize superclasses, |self.chameleon|, and |self.servo|.
@@ -332,10 +333,11 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
 
         self.chameleon = None
 
-        # Bluetooth peers. These will be initialized by test if required.
-        self._btpeer_host_list = []
-        self.btpeer_list = []
-        self.btpeer = None
+        # Initialize Bluetooth peers.
+        try:
+            self.initialize_btpeer(btpeer_args)
+        except Exception as e:
+            logging.error('Exception %s in initialize_btpeer', str(e))
 
         # Add pdtester host if pdtester args were added on command line
         self._pdtester_host = pdtester_host.create_pdtester_host(
@@ -360,26 +362,8 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
                             a ChameleonHost. See chameleon_host for details.
 
         """
+        return
 
-        if type(btpeer_args) is list:
-            btpeer_args_list = btpeer_args
-        else:
-            btpeer_args_list = [btpeer_args]
-
-        self._btpeer_host_list = chameleon_host.create_btpeer_host(
-                dut=self.hostname, btpeer_args_list=btpeer_args_list)
-        logging.debug('Bluetooth peer hosts are  %s', self._btpeer_host_list)
-        self.btpeer_list = [_host.create_chameleon_board() for _host in
-                               self._btpeer_host_list if _host is not None]
-
-        if len(self.btpeer_list) > 0:
-            self.btpeer = self.btpeer_list[0]
-        else:
-            self.btpeer = None
-
-        logging.debug('After initialize_btpeer btpeer_list %s btpeer_host_list'
-                      'is %s and btpeer is %s',self.btpeer_list,
-                      self._btpeer_host_list, self.btpeer)
 
 
     def get_cros_repair_image_name(self):
@@ -390,17 +374,18 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
 
         @returns: current stable cros image name for this host.
         """
-        board = self.host_info_store.get().board
-        if not board:
+        info = self.host_info_store.get()
+        if not info.board:
             logging.warn('No board label value found. Trying to infer '
                          'from the host itself.')
             try:
-                board = self.get_board().split(':')[1]
+                info.labels.append(self.get_board())
             except (error.AutoservRunError, error.AutoservSSHTimeout) as e:
                 logging.error('Also failed to get the board name from the DUT '
                               'itself. %s.', str(e))
-                raise error.AutoservError('Cannot obtain repair image name.')
-        return afe_utils.get_stable_cros_image_name_v2(self.host_info_store.get())
+                raise error.AutoservError('Cannot determine board of the DUT'
+                                          ' while getting repair image name.')
+        return afe_utils.get_stable_cros_image_name_v2(info)
 
 
     def host_version_prefix(self, image):
@@ -1078,6 +1063,20 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             return None
 
 
+    def get_battery_state(self):
+        """Get the battery charging state.
+
+        @return: A string representing the battery charging state. It can be
+                 'Charging', 'Fully charged', or 'Discharging'.
+        """
+        try:
+            info = self.get_power_supply_info()
+            logging.info(info)
+            return info['Battery']['state']
+        except (KeyError, ValueError, error.AutoservRunError):
+            return None
+
+
     def get_battery_display_percentage(self):
         """Get the battery display percentage.
 
@@ -1235,10 +1234,11 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             self.cleanup_services()
         except (error.AutotestRunError, error.AutoservRunError,
                 FactoryImageCheckerException):
-            logging.warning('Unable to restart ui, rebooting device.')
-            # Since restarting the UI fails fall back to normal Autotest
-            # cleanup routines, i.e. reboot the machine.
-            super(CrosHost, self).cleanup()
+            logging.warning('Unable to restart ui.')
+
+        # cleanup routines, i.e. reboot the machine.
+        super(CrosHost, self).cleanup()
+
         # Check if the rpm outlet was manipulated.
         if self.has_power():
             self._cleanup_poweron()
@@ -1809,7 +1809,7 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
 
         @returns a string representing this host's platform.
         """
-        # Look at the firmware for non-unibuild cases or if mosys fails.
+        # Look at the firmware for non-unibuild cases or if cros_config fails.
         crossystem = utils.Crossystem(self)
         crossystem.init()
         # Extract fwid value and use the leading part as the platform id.
@@ -1829,18 +1829,17 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
                                               run_method=self.run)
         platform = ''
         if release_info.get('CHROMEOS_RELEASE_UNIBUILD') == '1':
-            platform = self.get_platform_from_mosys()
+            platform = self.get_model_from_cros_config()
         return platform if platform else self.get_platform_from_fwid()
 
 
-    def get_platform_from_mosys(self):
-        """Get the host platform from mosys command.
+    def get_model_from_cros_config(self):
+        """Get the host model from cros_config command.
 
-        @returns a string representing this host's platform.
+        @returns a string representing this host's model.
         """
-        cmd = 'mosys platform model'
-        result = self.run(command=cmd, ignore_status=True)
-        return result.stdout.strip() if result.exit_status == 0 else ''
+        return cros_config.call_cros_config_get_output('/ name',
+                self.run, ignore_status=True)
 
 
     def get_architecture(self):
@@ -2180,6 +2179,11 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         removable = int(self.run('cat /sys/block/%s/removable' %
                                  os.path.basename(device)).stdout.strip())
         return removable == 1
+
+
+    def get_active_boot_slot(self):
+        """Returns the active boot slot."""
+        return self.run(('rootdev', '-s')).stdout.strip()
 
 
     def read_from_meminfo(self, key):
