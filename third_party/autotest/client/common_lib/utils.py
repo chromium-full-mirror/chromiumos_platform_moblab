@@ -2865,6 +2865,65 @@ def poll_for_condition_ex(condition, timeout=10, sleep_interval=0.1, desc=None):
     raise to_raise
 
 
+def poll_till_condition_holds(condition,
+                              exception=None,
+                              timeout=10,
+                              sleep_interval=0.1,
+                              hold_interval=5,
+                              desc=None):
+    """Polls until a condition is evaluated to true for a period of time
+
+    This function checks that a condition remains true for the 'hold_interval'
+    seconds after it first becomes true. If the condition becomes false
+    subsequently, the timer is reset. This function will not detect if
+    condition becomes false for any period of time less than the sleep_interval.
+
+    @param condition: function taking no args and returning anything that will
+                      evaluate to True in a conditional check
+    @param exception: exception to throw if condition doesn't evaluate to true
+    @param timeout: maximum number of seconds to wait
+    @param sleep_interval: time to sleep between polls
+    @param hold_interval: time period for which the condition should hold true
+    @param desc: description of default TimeoutError used if 'exception' is
+                 None
+
+    @return The evaluated value that caused the poll loop to terminate.
+
+    @raise 'exception' arg if supplied; TimeoutError otherwise
+    """
+    start_time = time.time()
+    cond_is_held = False
+    cond_hold_start_time = None
+
+    while True:
+        value = condition()
+        if value:
+            if cond_is_held:
+                if time.time() - cond_hold_start_time > hold_interval:
+                    return value
+            else:
+                cond_is_held = True
+                cond_hold_start_time = time.time()
+        else:
+            cond_is_held = False
+
+        time_remaining = timeout - (time.time() - start_time)
+        if time_remaining < hold_interval:
+            if exception:
+                logging.error('Will raise error %r due to unexpected return: '
+                              '%r', exception, value)
+                raise exception # pylint: disable=raising-bad-type
+
+            if desc:
+                desc = 'Timed out waiting for condition: ' + desc
+            else:
+                desc = 'Timed out waiting for unnamed condition'
+            logging.error(desc)
+            raise TimeoutError(message=desc)
+
+        time.sleep(sleep_interval)
+
+
 def shadowroot_query(element, action):
     """Recursively queries shadowRoot.
 
@@ -3045,3 +3104,58 @@ CHART_ADDRESS_SUFFIX = '-tablet'
 def get_lab_chart_address(hostname):
     """Convert lab DUT hostname to address of camera box chart tablet"""
     return hostname + CHART_ADDRESS_SUFFIX if is_in_container() else None
+
+
+def cherry_pick_args(func, args, dargs):
+    """Sanitize positional and keyword arguments before calling a function.
+
+    Given a callable (func), an argument tuple and a dictionary of keyword
+    arguments, pick only those arguments which the function is prepared to
+    accept and return a new argument tuple and keyword argument dictionary.
+
+    Args:
+      func: A callable that we want to choose arguments for.
+      args: A tuple of positional arguments to consider passing to func.
+      dargs: A dictionary of keyword arguments to consider passing to func.
+    Returns:
+      A tuple of: (args tuple, keyword arguments dictionary)
+    """
+    # Cherry pick args:
+    if func.func_code.co_flags & 0x04:
+        # func accepts *args, so return the entire args.
+        p_args = args
+    else:
+        p_args = ()
+
+    # Cherry pick dargs:
+    if func.func_code.co_flags & 0x08:
+        # func accepts **dargs, so return the entire dargs.
+        p_dargs = dargs
+    else:
+        # Only return the keyword arguments that func accepts.
+        p_dargs = {}
+        for param in get_nonstar_args(func):
+            if param in dargs:
+                p_dargs[param] = dargs[param]
+
+    return p_args, p_dargs
+
+
+def cherry_pick_call(func, *args, **dargs):
+    """Cherry picks arguments from args/dargs based on what "func" accepts
+    and calls the function with the picked arguments."""
+    p_args, p_dargs = cherry_pick_args(func, args, dargs)
+    return func(*p_args, **p_dargs)
+
+
+def get_nonstar_args(func):
+    """Extract all the (normal) function parameter names.
+
+    Given a function, returns a tuple of parameter names, specifically
+    excluding the * and ** parameters, if the function accepts them.
+
+    @param func: A callable that we want to chose arguments for.
+
+    @return: A tuple of parameters accepted by the function.
+    """
+    return func.func_code.co_varnames[:func.func_code.co_argcount]

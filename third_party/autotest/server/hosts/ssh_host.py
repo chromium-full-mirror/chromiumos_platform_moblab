@@ -106,8 +106,8 @@ class SSHHost(abstract_ssh.AbstractSSHHost):
         stack = self._get_server_stack_state(lowest_frames=3, highest_frames=6)
         # If logger executable exists on the DUT, use it to report the command.
         # Then regardless of logger, run the command as usual.
-        command = ('test -x /usr/bin/logger && /usr/bin/logger --id '
-                   '--tag=autotest "from [%s] ssh_run: %s"; %s'
+        command = ('test -x /usr/bin/logger && /usr/bin/logger'
+                   ' -t autotest "from [%s] ssh_run: %s"; %s'
                    % (stack, utils.sh_escape(command), command))
         return command
 
@@ -117,7 +117,9 @@ class SSHHost(abstract_ssh.AbstractSSHHost):
              ignore_timeout, ssh_failure_retry_ok):
         """Helper function for run()."""
         if connect_timeout > timeout:
-            connect_timeout = int(timeout)
+            # timeout passed from run_very_slowly may be smaller than 1
+            # due to we minus elapsed time from original timeout supplied.
+            connect_timeout = max(int(timeout), 1)
         original_cmd = command
 
         ssh_cmd = self.ssh_command(connect_timeout, options)
