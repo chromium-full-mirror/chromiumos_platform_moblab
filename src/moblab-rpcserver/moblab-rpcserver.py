@@ -6,7 +6,7 @@
 import argparse
 import calendar
 import datetime
-import json
+import grpc
 import os
 import re
 import sys
@@ -16,7 +16,7 @@ from concurrent import futures
 from dateutil.tz import tzlocal
 
 import build_connector
-import grpc
+import feedback_connector
 import moblab_rpcservice
 # pylint: disable=import-error
 import moblabrpc_pb2
@@ -63,6 +63,25 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             self.build_connector = None
             logging.info('Setting has_credentials to false')
             self.has_credentials = False
+
+    def send_moblab_screenshot(self, request, _context):
+        """Uploads image and feedback text to GCS.
+
+        Args:
+          request: SendMoblabRequest object with a string description and a
+            Base64 serialized png image screenshot.
+          _context: grpc.server.Context
+
+        Returns:
+          SendMoblabResponse type with string message indicating location of
+          uploaded feedback.
+        """
+        fc = feedback_connector.MoblabFeedbackConnector(self.moblab_bucket_name)
+        path, url = fc.upload_feedback(request.description, request.screenshot)
+        response = moblabrpc_pb2.SendMoblabScreenshotResponse(
+            message='Feedback uploaded to bucket {} under {}. URL to screenshot: {}'.format(self.moblab_bucket_name, path, url)
+        )
+        return response
 
     def run_suite(self, request, _context):
         return moblabrpc_pb2.RunSuiteResponse(

@@ -55,6 +55,8 @@ import {
   RunStorageQualificationSuiteRequest,
   RunSuiteRequest,
   RunSuiteResponse,
+  SendMoblabScreenshotRequest,
+  SendMoblabScreenshotResponse,
   UpdateDutsFirmwareRequest,
   UpdateDutsFirmwareResponse,
 
@@ -69,6 +71,32 @@ export class MoblabGrpcService {
   );
 
   constructor() {}
+
+  /** Method for submitting feedback and screenshots to Moblab-associated GCS
+   *  bucket.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param description: User-submitted text describing motivation of feedback
+   *    submission.
+   *  @param screenshot: Serialized, Base64 png screenshot image.
+   * */
+  sendMoblabScreenshot(
+    callback: (message: string) => void,
+    error_callback: (message: string) => void,
+    description,
+    screenshot
+  ) {
+    const request = new SendMoblabScreenshotRequest();
+    request.setDescription(description);
+    request.setScreenshot(screenshot.substring(screenshot.indexOf(',') + 1));
+
+    const call = this.moblabRpcService.send_moblab_screenshot(
+      request,
+      {},
+      (response) => {error_callback(response.message);}
+    );
+    call.on("data", (response) => {callback(response.getMessage())});
+  }
 
   /** Generic run suite method that can run any of the specific suites defined below
    *  ( with no suite-specific options ).

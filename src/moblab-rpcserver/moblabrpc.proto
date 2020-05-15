@@ -42,8 +42,26 @@ service MoblabRpcService {
   rpc remove_label_from_duts(RemoveLabelFromDutsRequest) returns (RemoveLabelFromDutsResponse) {};
   rpc add_attribute_to_duts(AddAttributeToDutsRequest) returns (AddAttributeToDutsResponse) {};
   rpc remove_attribute_from_duts(RemoveAttributeFromDutsRequest) returns (RemoveAttributeFromDutsResponse) {};
+
+  // Sends screenshot and feedback information to GCS bucket.
+  rpc send_moblab_screenshot(SendMoblabScreenshotRequest) returns (SendMoblabScreenshotResponse) {};
 }
 
+
+// NEXT_TAG = 3
+message SendMoblabScreenshotRequest {
+  // Text description of issue motivating screenshot submission.
+  string description = 1;
+  // Serialized Base64 png image.
+  string screenshot = 2;
+}
+
+// NEXT_TAG = 2
+message SendMoblabScreenshotResponse {
+  // Text response message indicating success of submission and where screenshot
+  // has been uploaded.
+  string message = 1;
+}
 
 // NEXT_TAG = 6
 message RunSuiteRequest {

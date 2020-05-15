@@ -33,6 +33,7 @@ export enum Feature {
 export class GlobalInfoService {
   enabledFeatures = [
     Feature.DUT_MANAGEMENT,
+    Feature.FEEDBACK_REPORTS,
     Feature.RUN_CTS,
     Feature.VIEW_JOBS,
     Feature.JOB_DETAIL,
