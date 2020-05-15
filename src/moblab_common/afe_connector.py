@@ -12,19 +12,17 @@ import multiprocessing
 
 from datetime import datetime
 
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    import logging  # pylint: disable=cros-logging-import
+import logging
 
 import requests
 
-MOBLAB_RPC_SERVER = 'autotest:8888'
-_LOGGER = logging.getLogger(__name__)
+MOBLAB_RPC_SERVER = "autotest:8888"
 
+_LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 def enroll_dut(ip_address):
-    cmd = '/usr/local/autotest/cli/atest host create %s' % ip_address
+    cmd = "/usr/local/autotest/cli/atest host create %s" % ip_address
     _LOGGER.error(cmd)
     subprocess.call(cmd, shell=True)
 
@@ -48,22 +46,21 @@ class AFEConnector(object):
         if not params:
             params = {}
 
-        rpc_url = ('http://%s/afe/server/rpc/' % MOBLAB_RPC_SERVER)
-        data = self.json_encoder.encode({
-            'id': 0,
-            'method': method,
-            'params': [params]
-        })
+        rpc_url = "http://%s/afe/server/rpc/" % MOBLAB_RPC_SERVER
+        data = self.json_encoder.encode({"id": 0, "method": method, "params": [params]})
 
-        _LOGGER.debug('%s %s', rpc_url, data)
+        _LOGGER.debug("%s %s", rpc_url, data)
         try:
+            _LOGGER.debug("URL %s", rpc_url)
+            _LOGGER.debug("Data %s ", data)
             response = requests.post(rpc_url, data=data)
-            error = self.decode_response(response, 'error')
+            error = self.decode_response(response, "error")
             if error:
-                _LOGGER.error('AFE RPC called %s failed with error %s', rpc_url,
-                              error)
-            _LOGGER.debug('%s %s', response.text, response.content)
-
+                _LOGGER.error("AFE RPC called %s", rpc_url)
+                _LOGGER.error("failed with error %s", error)
+            _LOGGER.debug("****************************************")
+            _LOGGER.debug("%s %s", response.text, response.content)
+            _LOGGER.debug("****************************************")
             return response
         except requests.exceptions.RequestException as e:
             _LOGGER.error(e)
@@ -85,7 +82,7 @@ class AFEConnector(object):
             if response:
                 # TODO(haddowk): Figure out how to return a useful error
                 # message.
-                _LOGGER.error('AFE RPC Failed %s', response.get('error', ''))
+                _LOGGER.error("AFE RPC Failed %s", response.get("error", ""))
             return {}
         return self.json_decoder.decode(response.text)[key]
 
@@ -96,8 +93,8 @@ class AFEConnector(object):
             dict: { <section name> : { <config_name> : <config_value> } }
         """
 
-        response = self.send_rpc_command('get_config_values')
-        raw_result = self.decode_response(response, 'result')
+        response = self.send_rpc_command("get_config_values")
+        raw_result = self.decode_response(response, "result")
         result = {}
 
         if not raw_result:
@@ -107,8 +104,7 @@ class AFEConnector(object):
             try:
                 result[k] = dict(v)
             except ValueError:
-                _LOGGER.error('Error getting config values key: %s value: %s',
-                              k, v)
+                _LOGGER.error("Error getting config values key: %s value: %s", k, v)
 
         return result
 
@@ -127,25 +123,27 @@ class AFEConnector(object):
         params = {}
 
         if hostname:
-            params['hostname'] = hostname
+            params["hostname"] = hostname
 
         if get_current_jobs:
-            params['include_current_job'] = 'true'
+            params["include_current_job"] = "true"
 
-        response = self.send_rpc_command('get_hosts', params)
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("get_hosts", params)
+        return self.decode_response(response, "result")
 
-    def get_num_jobs(self,
-                     id_filter=None,
-                     name_filter=None,
-                     created_time_lt=None,
-                     created_time_gt=None,
-                     sub=False,
-                     suite=False,
-                     not_yet_run=False,
-                     running=False,
-                     finished=False,
-                     parent_id_filter=None):
+    def get_num_jobs(
+        self,
+        id_filter=None,
+        name_filter=None,
+        created_time_lt=None,
+        created_time_gt=None,
+        sub=False,
+        suite=False,
+        not_yet_run=False,
+        running=False,
+        finished=False,
+        parent_id_filter=None,
+    ):
         """
             Returns number of jobs that match filter arguments. Any arg that
             evaluates to false is not used for filtering.
@@ -171,50 +169,52 @@ class AFEConnector(object):
         params = {}
 
         if id_filter:
-            params['id__icontains'] = id_filter
+            params["id__icontains"] = id_filter
         if name_filter:
-            params['name__icontains'] = name_filter
+            params["name__icontains"] = name_filter
         if created_time_lt:
-            params['created_on__lte'] = str(
-                datetime.fromtimestamp(created_time_lt).strftime(
-                    '%Y-%m-%d %H:%M:%S'))
+            params["created_on__lte"] = str(
+                datetime.fromtimestamp(created_time_lt).strftime("%Y-%m-%d %H:%M:%S")
+            )
         if created_time_gt:
-            params['created_on__gte'] = str(
-                datetime.fromtimestamp(created_time_gt).strftime(
-                    '%Y-%m-%d %H:%M:%S'))
+            params["created_on__gte"] = str(
+                datetime.fromtimestamp(created_time_gt).strftime("%Y-%m-%d %H:%M:%S")
+            )
 
         if sub:
-            params['sub'] = 'true'
+            params["sub"] = "true"
         elif suite:
-            params['suite'] = 'true'
+            params["suite"] = "true"
 
         if not_yet_run:
-            params['not_yet_run'] = 'true'
+            params["not_yet_run"] = "true"
         elif running:
-            params['running'] = 'true'
+            params["running"] = "true"
         elif finished:
-            params['finished'] = 'true'
+            params["finished"] = "true"
 
         if parent_id_filter:
-            params['parent_job'] = parent_id_filter
+            params["parent_job"] = parent_id_filter
 
-        response = self.send_rpc_command('get_num_jobs', params)
+        response = self.send_rpc_command("get_num_jobs", params)
         _LOGGER.error(response)
-        return self.decode_response(response, 'result')
+        return self.decode_response(response, "result")
 
-    def get_jobs(self,
-                 query_start,
-                 query_limit,
-                 id_filter=None,
-                 name_filter=None,
-                 created_time_lt=None,
-                 created_time_gt=None,
-                 sub=False,
-                 suite=False,
-                 not_yet_run=False,
-                 running=False,
-                 finished=False,
-                 parent_id_filter=None):
+    def get_jobs(
+        self,
+        query_start,
+        query_limit,
+        id_filter=None,
+        name_filter=None,
+        created_time_lt=None,
+        created_time_gt=None,
+        sub=False,
+        suite=False,
+        not_yet_run=False,
+        running=False,
+        finished=False,
+        parent_id_filter=None,
+    ):
         """
             Get attributes of the jobs specified.
         Args:
@@ -237,53 +237,55 @@ class AFEConnector(object):
             name and the value.
         """
         params = {
-            'query_start': query_start,
-            'query_limit': query_limit,
+            "query_start": query_start,
+            "query_limit": query_limit,
         }
 
         if id_filter:
-            params['id__icontains'] = id_filter
+            params["id__icontains"] = id_filter
         if name_filter:
-            params['name__icontains'] = name_filter
+            params["name__icontains"] = name_filter
         if created_time_lt:
-            params['created_on__lte'] = str(
-                datetime.fromtimestamp(created_time_lt).strftime(
-                    '%Y-%m-%d %H:%M:%S'))
+            params["created_on__lte"] = str(
+                datetime.fromtimestamp(created_time_lt).strftime("%Y-%m-%d %H:%M:%S")
+            )
         if created_time_gt:
-            params['created_on__gte'] = str(
-                datetime.fromtimestamp(created_time_gt).strftime(
-                    '%Y-%m-%d %H:%M:%S'))
+            params["created_on__gte"] = str(
+                datetime.fromtimestamp(created_time_gt).strftime("%Y-%m-%d %H:%M:%S")
+            )
 
         if sub:
-            params['sub'] = 'true'
+            params["sub"] = "true"
         elif suite:
-            params['suite'] = 'true'
+            params["suite"] = "true"
 
         if not_yet_run:
-            params['not_yet_run'] = 'true'
+            params["not_yet_run"] = "true"
         elif running:
-            params['running'] = 'true'
+            params["running"] = "true"
         elif finished:
-            params['finished'] = 'true'
+            params["finished"] = "true"
 
         if parent_id_filter:
-            params['parent_job'] = parent_id_filter
+            params["parent_job"] = parent_id_filter
 
-        response = self.send_rpc_command('get_jobs_summary', params)
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("get_jobs_summary", params)
+        return self.decode_response(response, "result")
 
     def get_jobs_by_ids(self, id_list):
         assert isinstance(id_list, list)
-        params = {'id__in': id_list}
-        response = self.send_rpc_command('get_jobs_summary', params)
-        return self.decode_response(response, 'result')
+        params = {"id__in": id_list}
+        response = self.send_rpc_command("get_jobs_summary", params)
+        return self.decode_response(response, "result")
 
     def get_job_history(self, id):
-        params = {'job_id': str(id)}
-        response = self.send_rpc_command('get_job_history', params)
-        return self.decode_response(response, 'result')
+        params = {"job_id": str(id)}
+        response = self.send_rpc_command("get_job_history", params)
+        return self.decode_response(response, "result")
 
-    def get_num_special_tasks(self, id_list=[], host_id_list=[], start_time_gt=None, end_time_lt=None):
+    def get_num_special_tasks(
+        self, id_list=[], host_id_list=[], start_time_gt=None, end_time_lt=None
+    ):
         """Get attributes of the special tasks specified.
         Args:
             id_list: List of special task id's,
@@ -298,35 +300,32 @@ class AFEConnector(object):
         """
         if id_list:
             assert isinstance(id_list, list)
-            params = {
-                'id__in' : id_list
-            }
+            params = {"id__in": id_list}
         if host_id_list:
             assert isinstance(host_id_list, list)
-            params = {
-                'host__in' : host_id_list
-            }
+            params = {"host__in": host_id_list}
 
         if start_time_gt:
-            params['start_time'] = str(
-                datetime.fromtimestamp(start_time_gt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-                )
+            params["start_time"] = str(
+                datetime.fromtimestamp(start_time_gt).strftime("%Y-%m-%d %H:%M:%S")
             )
         if end_time_lt:
-            params['end_time'] = str(
-                datetime.fromtimestamp(end_time_lt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-                )
+            params["end_time"] = str(
+                datetime.fromtimestamp(end_time_lt).strftime("%Y-%m-%d %H:%M:%S")
             )
-        response = self.send_rpc_command('get_num_special_tasks',
-                                         params)
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("get_num_special_tasks", params)
+        return self.decode_response(response, "result")
 
-
-    def get_special_tasks(self, id_list=[], host_id_list=[], query_start=None,
-        query_limit=None, start_time_gt=None, end_time_lt=None,
-        sort_by_most_recent=True):
+    def get_special_tasks(
+        self,
+        id_list=[],
+        host_id_list=[],
+        query_start=None,
+        query_limit=None,
+        start_time_gt=None,
+        end_time_lt=None,
+        sort_by_most_recent=True,
+    ):
         """Get attributes of the special tasks specified.
 
         Args:
@@ -347,34 +346,30 @@ class AFEConnector(object):
 
         if id_list:
             assert isinstance(id_list, list)
-            params['id__in'] = id_list
+            params["id__in"] = id_list
 
         if host_id_list:
             assert isinstance(host_id_list, list)
-            params['host__in'] = host_id_list
+            params["host__in"] = host_id_list
 
         if query_start is not None and query_limit is not None:
-            params['query_start'] = query_start
-            params['query_limit'] = query_limit
+            params["query_start"] = query_start
+            params["query_limit"] = query_limit
 
         if start_time_gt:
-            params['start_time'] = str(
-                datetime.fromtimestamp(start_time_gt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-                )
+            params["start_time"] = str(
+                datetime.fromtimestamp(start_time_gt).strftime("%Y-%m-%d %H:%M:%S")
             )
         if end_time_lt:
-            params['end_time'] = str(
-                datetime.fromtimestamp(end_time_lt).strftime(
-                    '%Y-%m-%d %H:%M:%S'
-                )
+            params["end_time"] = str(
+                datetime.fromtimestamp(end_time_lt).strftime("%Y-%m-%d %H:%M:%S")
             )
 
         if sort_by_most_recent:
-            params['sort_by'] = ['-id']
+            params["sort_by"] = ["-id"]
 
-        response = self.send_rpc_command('get_special_tasks', params)
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("get_special_tasks", params)
+        return self.decode_response(response, "result")
 
     def get_num_host_queue_entries(self, job_id=None, host_id=None):
         """
@@ -388,15 +383,16 @@ class AFEConnector(object):
         params = {}
 
         if job_id:
-            params['id'] = job_id
+            params["id"] = job_id
         if host_id:
-            params['host'] = host_id
+            params["host"] = host_id
 
-        response = self.send_rpc_command('get_num_host_queue_entries', params)
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("get_num_host_queue_entries", params)
+        return self.decode_response(response, "result")
 
-    def get_host_queue_entries(self, job_id=None, host_id=None,
-        query_start=None, query_limit=None):
+    def get_host_queue_entries(
+        self, job_id=None, host_id=None, query_start=None, query_limit=None
+    ):
         """Get attributes of all HQE of given id.
 
         Args:
@@ -412,27 +408,29 @@ class AFEConnector(object):
         params = {}
 
         if query_start is not None and query_limit is not None:
-            params['query_start'] = query_start
-            params['query_limit'] = query_limit
+            params["query_start"] = query_start
+            params["query_limit"] = query_limit
 
         if job_id:
-            params['id'] = job_id
+            params["id"] = job_id
         if host_id:
-            params['host'] = host_id
+            params["host"] = host_id
 
-        response = self.send_rpc_command('get_host_queue_entries', params)
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("get_host_queue_entries", params)
+        return self.decode_response(response, "result")
 
-    def run_suite(self,
-                  board,
-                  build,
-                  builds,
-                  suite,
-                  suite_timeout_mins,
-                  pool=None,
-                  model=None,
-                  suite_args=None,
-                  test_args=None):
+    def run_suite(
+        self,
+        board,
+        build,
+        builds,
+        suite,
+        suite_timeout_mins,
+        pool=None,
+        model=None,
+        suite_args=None,
+        test_args=None,
+    ):
         """Request AFE run a given suite.
 
         Args:
@@ -452,25 +450,26 @@ class AFEConnector(object):
             pool (string, optional): Pool label to target suite on.
         """
 
-        params = {
-            'board': board,
-            'builds': builds,
-            'name': suite,
-            'pool': pool,
-            'run_prod_code': False,
-            'test_source_build': build,
-            'wait_for_results': True,
-            'suite_args': suite_args,
-            'test_args': test_args,
-            'job_retry': True,
-            'max_retries': sys.maxsize,
-            'model': model,
-            'timeout_mins': suite_timeout_mins,
-            'max_runtime_mins': suite_timeout_mins
-        }
-        response = self.send_rpc_command('create_suite_job', params)
+        test_build = '%s-%s/%s' % (board, 'release', build)
+        test_builds = {'cros-version': test_build}
 
-        _LOGGER.info(response)
+        params = {
+            "board": board,
+            "builds": test_builds,
+            "name": suite,
+            "pool": pool,
+            "run_prod_code": False,
+            "test_source_build": test_build,
+            "wait_for_results": True,
+            "suite_args": suite_args,
+            "test_args": test_args,
+            "job_retry": True,
+            "max_retries": sys.maxsize,
+            "model": model,
+            "timeout_mins": suite_timeout_mins,
+            "max_runtime_mins": suite_timeout_mins,
+        }
+        response = self.send_rpc_command("create_suite_job", params)
         return response.text
 
     def enroll_duts(self, ip_addresses):
@@ -482,19 +481,18 @@ class AFEConnector(object):
     def unenroll_duts(self, ip_addresses):
         hosts = self.get_connected_devices()
         for host in hosts:
-            hostname = host.get('hostname')
-            params = {'id': host.get('id')}
+            hostname = host.get("hostname")
+            params = {"id": host.get("id")}
             _LOGGER.error(params)
             if hostname in ip_addresses:
-                response = self.send_rpc_command('delete_host', params)
+                response = self.send_rpc_command("delete_host", params)
             _LOGGER.error(response)
 
     def abort_host_queue_entries(self, job_ids):
         response = self.send_rpc_command(
-            'abort_host_queue_entries',
-            {'job__id__in': job_ids}
+            "abort_host_queue_entries", {"job__id__in": job_ids}
         )
-        return self.decode_response(response, 'result')
+        return self.decode_response(response, "result")
 
     def _package_edit_action_results(self, response):
         """
@@ -506,10 +504,10 @@ class AFEConnector(object):
             TO-DO: This logic should disappear when the underlying AFE calls
             are no longer relied upon.
         """
-        if self.decode_response(response, 'result') :
-            return self.decode_response(response, 'result')
+        if self.decode_response(response, "result"):
+            return self.decode_response(response, "result")
         else:
-            return (False, self.decode_response(response, 'error')['message'])
+            return (False, self.decode_response(response, "error")["message"])
 
     def add_label_to_host(self, dut_hostname, label):
         """
@@ -522,10 +520,9 @@ class AFEConnector(object):
             second value a message summarizing the result (+ reason for failure,
             if action failed).
         """
-        response = self.send_rpc_command('add_moblab_label', {
-            'ipaddress' : dut_hostname,
-            'label_name' : label
-        })
+        response = self.send_rpc_command(
+            "add_moblab_label", {"ipaddress": dut_hostname, "label_name": label}
+        )
         return self._package_edit_action_results(response)
 
     def remove_label_from_host(self, dut_hostname, label):
@@ -539,10 +536,9 @@ class AFEConnector(object):
             second value a message summarizing the result (+ reason for failure,
             if action failed).
         """
-        response = self.send_rpc_command('remove_moblab_label', {
-            'ipaddress' : dut_hostname,
-            'label_name' : label
-        })
+        response = self.send_rpc_command(
+            "remove_moblab_label", {"ipaddress": dut_hostname, "label_name": label}
+        )
         return self._package_edit_action_results(response)
 
     def add_attribute_to_host(self, dut_hostname, key, value):
@@ -557,11 +553,10 @@ class AFEConnector(object):
             second value a message summarizing the result (+ reason for failure,
             if action failed).
         """
-        response = self.send_rpc_command('set_host_attrib', {
-            'ipaddress' : dut_hostname,
-            'attribute' : key,
-            'value' : value
-        })
+        response = self.send_rpc_command(
+            "set_host_attrib",
+            {"ipaddress": dut_hostname, "attribute": key, "value": value},
+        )
         return self._package_edit_action_results(response)
 
     def remove_attribute_from_host(self, dut_hostname, key):
@@ -575,8 +570,7 @@ class AFEConnector(object):
             second value a message summarizing the result (+ reason for failure,
             if action failed).
         """
-        response = self.send_rpc_command('delete_host_attrib', {
-            'ipaddress' : dut_hostname,
-            'attribute' : key,
-        })
+        response = self.send_rpc_command(
+            "delete_host_attrib", {"ipaddress": dut_hostname, "attribute": key,}
+        )
         return self._package_edit_action_results(response)

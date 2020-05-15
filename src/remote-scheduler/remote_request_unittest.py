@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 """Unit tests for remote_request module."""
 
-from __future__ import print_function
-
 import sys
 import unittest
 
@@ -20,7 +18,7 @@ class MoblabRemoteRequestTest(unittest.TestCase):
     def setUp(self):
         self.request = remote_request.MoblabRemoteRequest()
 
-    @mock.patch('remote_request.uuid.uuid4')
+    @mock.patch("remote_request.uuid.uuid4")
     def test_init(self, mock_uuid):
 
         mock_uuid.return_value = mock.Mock()
@@ -51,5 +49,5 @@ class MoblabRemoteRequestTest(unittest.TestCase):
             self.request.can_be_executed(None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-REGISTRY_URI=gcr.io/chromeos-partner-moblab
+REGISTRY_URI=${REGISTRY}
 EXTRA_ARGS+= --build-arg REGISTRY_URI=${REGISTRY_URI}
 EXTRA_ARGS+= --build-arg LABEL=${LABEL}
 
@@ -137,4 +137,10 @@ remote-agent:
 		dockerfiles/remote_agent/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-agent:${LABEL}
 
-.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access remote_agent
+remote-scheduler: export DOCKER_BUILDKIT=1
+remote-scheduler:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL} -f \
+		dockerfiles/remote-scheduler/Dockerfile ..
+	docker push ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL}
+
+.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access remote_agent remote-scheduler

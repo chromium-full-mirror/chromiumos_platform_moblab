@@ -7,7 +7,7 @@ ARG LABEL=release
 
 ######################################################################
 
-FROM ${REGISTRY_URI}/moblab-autotest-base:release
+FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
 COPY db_setup.sh /
 RUN chmod uog+rx /db_setup.sh

@@ -2,11 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-version: '3'
+version: "3"
 services:
   ##############################################################################
   db:
-    image: gcr.io/chromeos-partner-moblab/moblab-db:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-db:${LABEL:-release}
     hostname: db
     restart: on-failure
     user: moblab
@@ -24,7 +24,15 @@ services:
       - MYSQL_ROOT_PASSWORD=moblab_db_passwd
 
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-uroot", "-pmoblab_db_passwd", "--silent"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-uroot",
+          "-pmoblab_db_passwd",
+          "--silent",
+        ]
       interval: 1m30s
       timeout: 10s
       retries: 3
@@ -35,7 +43,7 @@ services:
         hard: 16384
   ##############################################################################
   db-init:
-    image: gcr.io/chromeos-partner-moblab/moblab-db-init:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-db-init:${LABEL:-release}
     user: moblab
     depends_on:
       - db
@@ -44,7 +52,7 @@ services:
       moblab:
   ##############################################################################
   devserver:
-    image: gcr.io/chromeos-partner-moblab/devserver:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/devserver:${LABEL:-release}
     hostname: devserver
     restart: on-failure
     user: moblab
@@ -68,7 +76,7 @@ services:
         hard: 16384
   ##############################################################################
   autotest:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest-afe:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-afe:${LABEL:-release}
     hostname: autotest
     restart: on-failure
     user: moblab
@@ -109,7 +117,7 @@ services:
       - "dockerhost:192.168.100.1"
 
   autotest-dbsetup:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest-dbsetup:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-dbsetup:${LABEL:-release}
     user: moblab
     volumes:
       - logs:/var/log/moblab
@@ -123,7 +131,7 @@ services:
       - db-init
 
   autotest-monitordb:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest-monitor_db:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-monitor_db:${LABEL:-release}
     user: moblab
     restart: on-failure
 
@@ -158,7 +166,7 @@ services:
       - "dockerhost:192.168.100.1"
 
   autotest-hostscheduler:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest-host:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-host:${LABEL:-release}
     user: moblab
     restart: on-failure
 
@@ -174,7 +182,7 @@ services:
       - autotest
 
   autotest-job_aborter:
-    image: gcr.io/chromeos-partner-moblab/moblab-autotest-aborter:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-aborter:${LABEL:-release}
     user: moblab
     restart: on-failure
 
@@ -191,7 +199,7 @@ services:
       - autotest
   ##############################################################################
   envoy-proxy:
-    image: gcr.io/chromeos-partner-moblab/envoy-proxy:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/envoy-proxy:${LABEL:-release}
     user: moblab
     restart: on-failure
 
@@ -207,7 +215,7 @@ services:
       - 6011:6011
   ##############################################################################
   moblab-ui:
-    image: gcr.io/chromeos-partner-moblab/moblab-ui:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-ui:${LABEL:-release}
     hostname: moblab-ui
 
     networks:
@@ -220,7 +228,7 @@ services:
       - 6010:6010
   ##############################################################################
   moblab-rpcserver:
-    image: gcr.io/chromeos-partner-moblab/moblab-rpcserver:zhihuixie
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-rpcserver:${LABEL:-release}
     user: moblab
     hostname: moblab-rpcserver
 
@@ -241,7 +249,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
   ##############################################################################
   remote_agent:
-    image: gcr.io/chromeos-partner-moblab/moblab-remote-agent:zhihuixie
+    image: gcr.io/chromeos-partner-moblab/moblab-remote-agent:${LABEL:-release}
     user: moblab
     hostname: moblab-remote-agent
     restart: on-failure
@@ -263,7 +271,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
   ##############################################################################
   watchtower:
-    image: gcr.io/chromeos-partner-moblab/watchtower:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/watchtower:${LABEL:-release}
     restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -279,7 +287,7 @@ services:
         hard: 16384
   ##############################################################################
   offloader:
-    image: gcr.io/chromeos-partner-moblab/moblab-offloader:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-offloader:${LABEL:-release}
     restart: on-failure
 
     user: moblab
@@ -345,7 +353,7 @@ services:
       - moblab
   ##############################################################################
   remote_access:
-    image: gcr.io/chromeos-partner-moblab/remote_access:release
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/remote_access:${LABEL:-release}
     restart: on-failure
     volumes:
       - logs:/var/log/moblab
@@ -372,8 +380,18 @@ services:
 
     networks:
       - moblab
+##############################################################################
+  remote-scheduler:
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-remote-scheduler:${LABEL:-release}
+    restart: on-failure
+    volumes:
+      - logs:/var/log/moblab
+      - usr_local_moblab:/usr/local/moblab
+      - moblab_home:/home/moblab
 
-
+    networks:
+      - moblab
+##############################################################################
 volumes:
   db_data: {}
   logs: {}

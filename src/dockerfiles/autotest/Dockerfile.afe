@@ -7,11 +7,11 @@ ARG LABEL=release
 
 ######################################################################
 
-FROM ${REGISTRY_URI}/moblab-autotest-gwt:release as gwt
+FROM ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL} as gwt
 
 ######################################################################
 
-FROM ${REGISTRY_URI}/moblab-autotest-base:release
+FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
 COPY --from=gwt /www/ /moblab/third_party/autotest/frontend/client/www/
 
@@ -35,6 +35,8 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     unzip \
     vim \
     xz-utils
+
+RUN python2.7 -m pip install docker
 
 # Install the google cloud sdk
 RUN echo \
