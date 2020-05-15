@@ -3,13 +3,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-if [ ! -d  depot_tools ]; then
-  git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-fi
+git clone https://chromium.googlesource.com/chromiumos/platform/moblab
 
-export PATH=$(pwd)/depot_tools:${PATH}
+cd moblab
 
-repo init -u https://chrome-internal.googlesource.com/chromeos/manifest-internal.git \
-          --repo-url https://chromium.googlesource.com/external/repo.git \
-          -g moblab
-repo sync -j4
+read -p "Enter Your Email (chromium.org if you have otherwise google.com): "  email
+git config --global user.email "${email}"
+read -p "Enter your first and last name for Git to use in reviews "  name
+git config --global user.name "${name}"
+git config --local remote.origin.review https://chromium-review.googlesource.com
+f=`git rev-parse --git-dir`/hooks/commit-msg ; mkdir -p $(dirname $f)
+curl -Lo $f https://gerrit-review.googlesource.com/tools/hooks/commit-msg
+chmod +x $f
