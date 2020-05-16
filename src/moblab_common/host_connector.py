@@ -32,12 +32,14 @@ class HostServicesConnector(object):
         if not cls.channel or not cls.stub:
             cls.channel = grpc.insecure_channel(DEFAULT_SERVER)
             if cls.channel:
-                cls.stub = hostservices_pb2_grpc.MoblabHostServiceStub(cls.channel)
+                cls.stub = hostservices_pb2_grpc.MoblabHostServiceStub(
+                    cls.channel)
                 if not cls.stub:
-                    raise HostServicesException("Unable to connect to server %s"
-                 % DEFAULT_SERVER)
+                    raise HostServicesException(
+                "Unable to connect to server %s" % DEFAULT_SERVER)
             else:
-                raise HostServicesException("No server found %s", DEFAULT_SERVER)
+                raise HostServicesException(
+            "No server found %s" % DEFAULT_SERVER)
 
     @classmethod
     def disconnect(cls):
@@ -86,7 +88,7 @@ class HostServicesConnector(object):
     def get_ip(cls):
         cls.connect()
         try:
-            request = hostservices_pb2.GetIpRequest()
+            request = hostservices_pb2.IpRequest()
             response = cls.stub.get_ip(request)
             return response.ip_address
         except grpc.RpcError:
@@ -118,13 +120,13 @@ class HostServicesConnector(object):
             raise HostServicesException('Error getting update status')
 
     @classmethod
-    def get_system_update_status(cls):
+    def install_system_update(cls):
         cls.connect()
         try:
-            request = hostservices_pb2.SystemUpdateStatusRequest()
-            response = cls.stub.get_system_update_status(request)
+            request = hostservices_pb2.SystemUpdateInstallRequest()
+            response = cls.stub.install_system_update(request)
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error getting update status')
-            raise HostServicesException('Error getting update status')
+            logging.exception('Error installing update')
+            raise HostServicesException('Error installing update')

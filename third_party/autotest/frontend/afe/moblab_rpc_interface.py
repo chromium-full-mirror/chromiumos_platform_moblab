@@ -29,6 +29,9 @@ from autotest_lib.frontend.afe import rpc_utils
 from autotest_lib.server import frontend
 from autotest_lib.server.hosts import moblab_host
 
+from moblab_common import host_connector
+from moblab_common import moblab_info
+
 _CONFIG = global_config.global_config
 MOBLAB_BOTO_LOCATION = '/home/moblab/.boto'
 
@@ -266,16 +269,10 @@ def _get_public_ip_address(socket_handle):
     @return: public ip address as string.
     """
     try:
-        socket_handle.settimeout(1)
-        socket_handle.connect(('8.8.8.8', 53))
-        socket_name = socket_handle.getsockname()
-        if socket_name is not None:
-            logging.info('Got socket name from UDP socket.')
-            return socket_name[0]
-        logging.warn('Created UDP socket but with no socket_name.')
-    except socket.error:
-        logging.warn('Could not get socket name from UDP socket.')
-    return None
+        return host_connector.HostServicesConnector.get_ip()
+    except host_connector.HostServicesException:
+        logging.exception("Failed to get ip address rom host.")
+    return "No IP Address"
 
 
 def _get_network_info():
@@ -467,12 +464,12 @@ def get_version_info():
         x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}
     version_response['MOBLAB_ID'] = utils.get_moblab_id();
     version_response['MOBLAB_SERIAL_NUMBER'] = (
-        utils.get_moblab_serial_number())
-    #_check_for_system_update()
-    #update_status = _get_system_update_status()
-    version_response['MOBLAB_UPDATE_VERSION'] = ""
-    version_response['MOBLAB_UPDATE_STATUS'] = ""
-    version_response['MOBLAB_UPDATE_PROGRESS'] = ""
+        moblab_info.get_serial_number())
+    _check_for_system_update()
+    update_status = _get_system_update_status()
+    version_response['MOBLAB_UPDATE_VERSION'] = update_status.new_version
+    version_response['MOBLAB_UPDATE_STATUS'] = update_status.current_op
+    version_response['MOBLAB_UPDATE_PROGRESS'] = update_status.progress
     return rpc_utils.prepare_for_serialization(version_response)
 
 
@@ -487,14 +484,10 @@ def _check_for_system_update():
     update. If an update exists, the update client begins downloading it
     in the background
     """
-    #  is required to run the update client
-    #subprocess.call([ _UPDATE_ENGINE_CLIENT, '--check_for_update'])
-    # wait for update engine to finish checking
-    #tries = 0
-    #while ('CHECKING_FOR_UPDATE' in _get_system_update_status()['CURRENT_OP']
-    #        and tries < 10):
-    #    time.sleep(.1)
-    #    tries = tries + 1
+    try:
+        return host_connector.HostServicesConnector.check_for_system_update()
+    except host_connector.HostServicesException:
+        raise error.RPCException("Failed to check for update.")
 
 def _get_system_update_status():
     """ Run the ChromeOS update client to check status on a
@@ -509,12 +502,11 @@ def _get_system_update_status():
         LAST_CHECKED_TIME: str unix time stamp of the last update check
     }
     """
-    #  is required to run the update client
-    #cmd_out = subprocess.check_output(
-    #    ['' ,_UPDATE_ENGINE_CLIENT, '--status'])
-    #split_lines = [x.split('=') for x in cmd_out.strip().split('\n')]
-    #status = dict((key, val) for [key, val] in split_lines)
-    return {}
+    try:
+        return host_connector.HostServicesConnector.get_system_update_status()
+    except host_connector.HostServicesException:
+        raise error.RPCException("Failed to check for update.")
+    return None
 
 
 def _install_system_update():
@@ -524,16 +516,11 @@ def _install_system_update():
     # first run a blocking command to check, fetch, prepare an update
     # then check if a reboot is needed
     try:
-        subprocess.check_call([ _UPDATE_ENGINE_CLIENT, '--update'])
-        # --is_reboot_needed returns 0 if a reboot is required
-        subprocess.check_call(
-            [ _UPDATE_ENGINE_CLIENT, '--is_reboot_needed'])
-        subprocess.call([ _UPDATE_ENGINE_CLIENT, '--reboot'])
-
-    except subprocess.CalledProcessError as e:
-        update_error = subprocess.check_output(
-            [ _UPDATE_ENGINE_CLIENT, '--last_attempt_error'])
-        raise error.RPCException(update_error)
+        response = host_connector.HostServicesConnector.install_system_update()
+        if response.error:
+            raise error.RPCException(response.error)
+    except host_connector.HostServicesException:
+        raise error.RPCException("Failed to install update." )
 
 
 @rpc_utils.moblab_only
