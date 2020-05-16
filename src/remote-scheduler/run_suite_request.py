@@ -4,36 +4,33 @@
 # found in the LICENSE file.
 """Service that schedules commands on the moblab."""
 
-from __future__ import print_function
-
+import logging
 import time
 import json
 
 import remote_request
 
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    # pylint: disable=cros-logging-import
-    import logging
-
+_LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
     """Encapsulates all the information required to run a suite on moblab."""
 
-    def __init__(self,
-                 unique_id=None,
-                 board=None,
-                 build=None,
-                 priority=None,
-                 suite=None,
-                 min_duts=0,
-                 suite_args='',
-                 model=None,
-                 test_args='',
-                 expires_at_sec_utc=None,
-                 pubsub_message_id=None,
-                 proto=None):
+    def __init__(
+        self,
+        unique_id=None,
+        board=None,
+        build=None,
+        priority=None,
+        suite=None,
+        min_duts=0,
+        suite_args="",
+        model=None,
+        test_args="",
+        expires_at_sec_utc=None,
+        pubsub_message_id=None,
+        proto=None,
+    ):
         """Class constructor.
 
             Construct the suite request either from the params or from
@@ -101,10 +98,18 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
         """
 
         return (
-            'unique_id=%s, build=%s, board=%s, suite=%s, model=%s, priority=%s,'
-            ' min_duts=%s' % (self.unique_id, self.build, self.board,
-                              self.suite, self.model, self.priority,
-                              self.min_duts))
+            "unique_id=%s, build=%s, board=%s, suite=%s, model=%s, priority=%s,"
+            " min_duts=%s"
+            % (
+                self.unique_id,
+                self.build,
+                self.board,
+                self.suite,
+                self.model,
+                self.priority,
+                self.min_duts,
+            )
+        )
 
     def copy_to_proto(self, proto):
         """Copy the object data into a proto format.
@@ -140,18 +145,21 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
             currently capable of running the request.
         """
 
-        board_model = '%s.%s' % (self.board, self.model)
-        if board_model not in attached_boards.keys():
-            logging.debug('No attached boards for %s', board_model)
+        board_model = "%s.%s" % (self.board, self.model)
+        if board_model not in list(attached_boards.keys()):
+            logging.debug("No attached boards for %s", board_model)
             return False
 
         if self.min_duts and self.min_duts > attached_boards[board_model]:
-            logging.info(('Not enough DUTs board: %s attached: %d'
-                          ' required: %d'), board_model,
-                         attached_boards[board_model], self.min_duts)
+            logging.info(
+                ("Not enough DUTs board: %s attached: %d" " required: %d"),
+                board_model,
+                attached_boards[board_model],
+                self.min_duts,
+            )
             return False
 
-        #TODO(haddowk) move the check that the build can be staged to here.
+        # TODO(haddowk) move the check that the build can be staged to here.
         return True
 
     def execute(self, devserver_connector, autotest_connector):
@@ -163,17 +171,19 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
             autotest_connector (object): Instanciated API object to access the
                 autotest server.
         """
-
+        _LOGGER.debug("Running suite %s", self)
         # if the request has expired then don't run the suite
-        if self.expires_at_sec_utc and int(
-                time.time()) > self.expires_at_sec_utc:
+        if self.expires_at_sec_utc and int(time.time()) > self.expires_at_sec_utc:
             return
 
         if devserver_connector.stage_build(self.board, self.build):
             autotest_connector.run_suite(
-                self.board,
-                self.build,
-                self.suite,
-                self.model,
+                board=self.board,
+                build=self.build,
+                builds=[],
+                suite=self.suite,
+                model=self.model,
+                suite_timeout_mins=60*24*21,
                 suite_args=self.suite_args,
-                test_args=self.test_args)
+                test_args=self.test_args,
+            )

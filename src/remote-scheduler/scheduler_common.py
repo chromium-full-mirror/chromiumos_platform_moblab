@@ -4,24 +4,17 @@
 # found in the LICENSE file.
 """Tests for the remote requests module."""
 
-from __future__ import print_function
 
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    # pylint: disable=cros-logging-import
-    import logging
+import logging
 
 # pylint: disable=no-name-in-module, import-error, wrong-import-order
 from google.cloud import exceptions as cloud_exceptions
 
-SCHEDULE_FILENAME = 'scheduled_suites.data'
-SCHEDULE_DIR = 'scheduled_builds'
+SCHEDULE_FILENAME = "scheduled_suites.data"
+SCHEDULE_DIR = "scheduled_builds"
 
 
-def get_executed_commands(storage_client,
-                          bucket_name,
-                          schedule_dir=SCHEDULE_DIR):
+def get_executed_commands(storage_client, bucket_name, schedule_dir=SCHEDULE_DIR):
     """Generate a list of the request Id's that have been executed.
 
     The request may still be being executed, in this status executed
@@ -37,19 +30,17 @@ def get_executed_commands(storage_client,
         list : List of strings each one being the name of a
     """
     executed = []
-    blob_itr = storage_client.bucket(bucket_name).list_blobs(
-        prefix=schedule_dir)
+    blob_itr = storage_client.bucket(bucket_name).list_blobs(prefix=schedule_dir)
     try:
-        executed = [blob.name[len(schedule_dir) + 1:] for blob in blob_itr]
+        executed = [blob.name[len(schedule_dir) + 1 :] for blob in blob_itr]
     except cloud_exceptions.NotFound as e:
         logging.debug(e)
     return executed
 
 
-def get_executed_contents(storage_client,
-                          bucket_name,
-                          unique_id,
-                          schedule_dir=SCHEDULE_DIR):
+def get_executed_contents(
+    storage_client, bucket_name, unique_id, schedule_dir=SCHEDULE_DIR
+):
     """Retrieve the debugging information placed in the lock file.
 
     Lock files are used to prevent commands being run multiple times, in that
@@ -63,6 +54,5 @@ def get_executed_contents(storage_client,
         schedule_dir (string, optional): Defaults to SCHEDULE_DIR. Path to
             search for the marker files for executed commands.
     """
-    blob = storage_client.bucket(bucket_name).blob(
-        '%s/%s' % (schedule_dir, unique_id))
+    blob = storage_client.bucket(bucket_name).blob("%s/%s" % (schedule_dir, unique_id))
     return blob.download_as_string()

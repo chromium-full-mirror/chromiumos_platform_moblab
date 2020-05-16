@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 """Unit tests for remote_requests module"""
 
-from __future__ import print_function
 
 import unittest
 
@@ -32,7 +31,7 @@ class TestRemoteRequest(remote_request.MoblabRemoteRequest):
         pass
 
     def __str__(self):
-        return 'Unique ID: %s' % self.unique_id
+        return "Unique ID: %s" % self.unique_id
 
 
 class MoblabRemoteRequestsTest(unittest.TestCase):
@@ -50,36 +49,33 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         self.assertEqual(1, len(self.test_requests.requests))
         self.assertEqual(request, self.test_requests.requests[0])
 
-    @mock.patch('chromite.lib.cros_logging.error')
+    @mock.patch("logging.error")
     def test_load_requests_from_gcs_fails(self, mock_error_log):
         test_blob = mock.Mock()
-        test_blob.path = 'test path'
-        test_exception = remote_requests.exceptions.NotFound('Testing')
+        test_blob.path = "test path"
+        test_exception = remote_requests.exceptions.NotFound("Testing")
         test_blob.download_as_string.side_effect = test_exception
 
         self.test_requests.load_requests_from_gcs(test_blob)
 
         test_blob.download_as_string.assert_called_once()
-        mock_error_log.assert_called_once_with(
-            'No request list found in test path')
+        mock_error_log.assert_called_once_with("No request list found in test path")
 
-    @mock.patch('moblab_request_pb2.MoblabRequests')
+    @mock.patch("moblab_request_pb2.MoblabRequests")
     def test_load_requests_from_gcs(self, mock_requests_constructor):
         test_blob = mock.Mock()
         mock_requests = mock.Mock()
         mock_requests_constructor.return_value = mock_requests
-        mock_requests.suite_requests = [
-            moblab_request_pb2.MoblabSuiteRunRequest()
-        ]
-        test_blob.download_as_string.return_value = 'Test string'
+        mock_requests.suite_requests = [moblab_request_pb2.MoblabSuiteRunRequest()]
+        test_blob.download_as_string.return_value = "Test string"
 
         self.test_requests.load_requests_from_gcs(test_blob)
 
         test_blob.download_as_string.assert_called_once()
-        mock_requests.ParseFromString.assert_called_once_with('Test string')
+        mock_requests.ParseFromString.assert_called_once_with("Test string")
         self.assertEqual(1, len(self.test_requests.requests))
 
-    @mock.patch('moblab_request_pb2.MoblabRequests')
+    @mock.patch("moblab_request_pb2.MoblabRequests")
     def test_save_requests_to_gcs_unknown_type(self, mock_requests_constructor):
         test_blob = mock.Mock()
         mock_requests = mock.Mock()
@@ -88,13 +84,12 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         with self.assertRaises(remote_requests.UnknownRequestType):
             self.test_requests.save_requests_to_gcs(test_blob)
 
-    @mock.patch('moblab_request_pb2.MoblabRequests')
+    @mock.patch("moblab_request_pb2.MoblabRequests")
     def test_save_requests_to_gcs(self, mock_requests_constructor):
         test_blob = mock.Mock()
         mock_requests = mock.Mock()
         mock_requests_constructor.return_value = mock_requests
-        mock_run_suite_request = mock.Mock(
-            run_suite_request.MoblabSuiteRunRequest)
+        mock_run_suite_request = mock.Mock(run_suite_request.MoblabSuiteRunRequest)
         self.test_requests.add_request(mock_run_suite_request)
         mock_proto = mock.Mock()
         mock_requests.suite_requests.add.return_value = mock_proto
@@ -123,10 +118,8 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         self.assertListEqual([2], ids)
 
     def test_sort_requests(self):
-        self.test_requests.add_request(
-            TestRemoteRequest(unique_id=2, priority=2))
-        self.test_requests.add_request(
-            TestRemoteRequest(unique_id=1, priority=1))
+        self.test_requests.add_request(TestRemoteRequest(unique_id=2, priority=2))
+        self.test_requests.add_request(TestRemoteRequest(unique_id=1, priority=1))
 
         ids = [request.unique_id for request in self.test_requests.requests]
         self.assertListEqual([2, 1], ids)
@@ -148,9 +141,10 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         self.test_requests.add_request(TestRemoteRequest(1))
         self.test_requests.add_request(TestRemoteRequest(2))
 
-        self.assertEqual('Requests:\nUnique ID: 1\nUnique ID: 2\n',
-                         str(self.test_requests))
+        self.assertEqual(
+            "Requests:\nUnique ID: 1\nUnique ID: 2\n", str(self.test_requests)
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -6,9 +6,8 @@ FROM docker/compose:alpine-1.25.4
 
 COPY docker-compose.yaml .
 
-# TODO figure out how to run the container as moblab
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
-    --uid 246 --disabled-password --gecos "" moblab
+ENV LABEL=${LABEL}
+ENV REGISTRY_URI=${REGISTRY_URI}
 
 # Test the config for syntax errors
 RUN docker-compose config

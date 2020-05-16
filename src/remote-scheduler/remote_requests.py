@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 """Tests for the remote requests module."""
 
-from __future__ import print_function
 
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import exceptions
@@ -14,15 +13,12 @@ from moblab_common import versioned_upload
 import moblab_request_pb2
 import run_suite_request
 
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    # pylint: disable=cros-logging-import
-    import logging
+import logging
 
 
 class UnknownRequestType(Exception):
     """Custom Exception Type for Unknown Request Type."""
+
     pass
 
 
@@ -57,7 +53,7 @@ class MoblabRemoteRequests(object):
             serialized_proto = blob.download_as_string()
         except exceptions.NotFound as e:
             logging.debug(e)
-            logging.error('No request list found in %s', blob.path)
+            logging.error("No request list found in %s", blob.path)
             return False
 
         requests = moblab_request_pb2.MoblabRequests()
@@ -65,8 +61,8 @@ class MoblabRemoteRequests(object):
 
         for suite_request in requests.suite_requests:
             self.requests.append(
-                run_suite_request.MoblabSuiteRunRequestWrapper(
-                    proto=suite_request))
+                run_suite_request.MoblabSuiteRunRequestWrapper(proto=suite_request)
+            )
         return True
 
     def save_requests_to_gcs(self, blob):
@@ -77,8 +73,7 @@ class MoblabRemoteRequests(object):
         """
         requests = moblab_request_pb2.MoblabRequests()
         for request in self.requests:
-            if isinstance(request,
-                          run_suite_request.MoblabSuiteRunRequestWrapper):
+            if isinstance(request, run_suite_request.MoblabSuiteRunRequestWrapper):
                 proto = requests.suite_requests.add()
             else:
                 raise UnknownRequestType(request)
@@ -95,9 +90,7 @@ class MoblabRemoteRequests(object):
             filter_func (function): function that takes request as a param, and
                 returns True or False.
         """
-        self.requests = [
-            request for request in self.requests if filter_func(request)
-        ]
+        self.requests = [request for request in self.requests if filter_func(request)]
 
     def sort_requests(self):
         """Sort requests based on priority.
@@ -133,7 +126,7 @@ class MoblabRemoteRequests(object):
         Returns:
             string: A line for each request.
         """
-        output = 'Requests:\n'
+        output = "Requests:\n"
         for request in self.requests:
-            output += '%s\n' % request
+            output += "%s\n" % request
         return output
