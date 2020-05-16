@@ -57,7 +57,7 @@ autotest-lucifer:
 	docker push ${REGISTRY_URI}/moblab-autotest-lucifer:${LABEL}
 
 autotest-gwt: export DOCKER_BUILDKIT=1
-autotest-gwt: autotest-base
+autotest-gwt:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL} \
 		-f dockerfiles/autotest/Dockerfile.gwt ..
 	docker push ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL}
