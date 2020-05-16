@@ -8,8 +8,6 @@
 
 """A wrapper of Google Cloud Storage API."""
 
-from __future__ import print_function
-
 import logging  # pylint: disable=cros-logging-import
 import os
 
@@ -68,6 +66,7 @@ class GsApiWrapper(object):
         """
         self._bucket_name = gs_bucket
         self._credentials_file = credentials_file
+        self._gs_bucket = _get_gs_bucket(self._bucket_name, self._credentials_file)
 
     def upload_from_filename(self, *, local_name, remote_name):
         """Upload the file `local_name` to GS as a blob named `remote_name`."""
@@ -76,8 +75,7 @@ class GsApiWrapper(object):
             return
         if local_name.is_symlink():
             return
-        gs_bucket = _get_gs_bucket(self._bucket_name, self._credentials_file)
-        blob = gs_bucket.blob(remote_name)
+        blob = self._gs_bucket.blob(remote_name)
         blob.upload_from_filename(str(local_name))
 
     @property
