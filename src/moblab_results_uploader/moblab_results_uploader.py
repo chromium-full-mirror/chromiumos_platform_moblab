@@ -5,10 +5,10 @@
 
 """A moblab dedicated service to upload test results to GS bucket."""
 
-from __future__ import print_function
+
 
 import argparse
-import logging  # pylint: disable=cros-logging-import
+import logging
 import logging.handlers as logging_handlers
 import pathlib
 import sys
@@ -18,6 +18,8 @@ import yaml
 import cmd_run
 import cmd_try_file_filter
 import result_file_filter
+
+from moblab_common import config_connector
 
 _LOG_FILE_BACKUP_COUNT = 14
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
@@ -29,9 +31,7 @@ def _logging_file_type(logfile_path):
         return logging_handlers.TimedRotatingFileHandler(
             logfile_path, when='D', interval=1,
             backupCount=_LOG_FILE_BACKUP_COUNT)
-    # TODO (guocb) remove below pylint pragma once `cros lint` upgrade to
-    # python 3.
-    except PermissionError as err:   # pylint: disable=undefined-variable
+    except PermissionError as err:
         raise argparse.ArgumentTypeError(str(err))
 
 
@@ -42,10 +42,10 @@ def _setup_logging(handler):
         handler: The logging handler object.
     """
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    handler.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
+    handler.setLevel(logging.DEBUG)
     handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(name)s %(levelname)s: %(message)s'))
+        '%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s'))
     # Some code runs before this function may have created some handler and we
     # don't want them.
     logger.handlers = [handler]

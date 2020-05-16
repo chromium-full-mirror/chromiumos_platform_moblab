@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 """This module defines some common utils for processing the test results."""
 
-from __future__ import print_function
+
 
 
 class ProcessStep(object):
