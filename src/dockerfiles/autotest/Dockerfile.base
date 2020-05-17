@@ -82,3 +82,6 @@ RUN ln -s /chromite /usr/local/autotest/site-packages/chromite
 RUN mkdir -p /moblab/third_party/autotest/logs
 RUN mkdir -p /moblab/third_party/autotest/results
 RUN mkdir -p /moblab/third_party/autotest/leases
+RUN mkdir -p /moblab/third_party/autotest/containers
+
+RUN chown -R moblab:moblab /moblab/third_party/autotest
