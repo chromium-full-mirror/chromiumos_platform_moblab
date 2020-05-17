@@ -53,10 +53,10 @@ def _query_speical_task_finished_time(id_):
 def _query_job_finished_time(id_):
     """Query AFE with job id and yield the finished time."""
     _LOGGER.setLevel(logging.DEBUG)
-    _LOGGER.debug('_query_job_finished_time %d', id_)
+    _LOGGER.debug('_query_job_finished_time %s', id_)
     afe = afe_connector.AFEConnector()
     while True:
-        _LOGGER.debug('Query job finished time %d', id_)
+        _LOGGER.debug('Query job finished time %s', id_)
         result = afe.get_jobs_by_ids([id_])
         if not result:
             raise test_result_interface.TestResultError(
@@ -66,14 +66,14 @@ def _query_job_finished_time(id_):
         hqes = afe.get_host_queue_entries(id_)
         running_hqes = [hqe for hqe in hqes if not hqe.get('complete')]
         if running_hqes:  # Test job is still running.
-            _LOGGER.debug('Determined the HQE for job %d are running', id_)
+            _LOGGER.debug('Determined the HQE for job %s are running', id_)
             yield None
 
         hqes_finished_time = [datetime.datetime.strptime(hqe.get('finished_on'),
                                                          _TIMESTAMP_FORMAT)
                               for hqe in hqes if hqe.get('finished_on')]
         if hqes_finished_time:
-            _LOGGER.debug('Determined the HQEs %d are complete', id_)
+            _LOGGER.debug('Determined the HQEs %s are complete', id_)
             yield max(hqes_finished_time)
         else:
             # TODO(haddowk) investigate why the HQE's are not showing as running
