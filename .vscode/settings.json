@@ -1,33 +1,15 @@
 {
-    "typescript.tsdk": "/google/src/head/depot/google3/third_party/javascript/node_modules/typescript/stable/lib",
     "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
     "[typescript]": {
       "editor.formatOnSave": true
     },
-    "tslint.configFile": "/google/data/ro/teams/typescript/tslint/node_modules/google.tslint.json",
-    "tslint.nodePath": "/google/data/ro/teams/typescript/tslint/node_modules",
 
-    
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "python.pythonPath": "/usr/bin/python",
-    "python.formatting.provider": "yapf",
-    "python.formatting.yapfArgs": ["--style", "{indent_width: 4, based_on_style: chromium, column_limit: 80, allow_split_before_dict_value: false, each_dict_entry_on_separate_line: false, indent_dictionary_value: false}"],
-    "autoDocstring.docstringFormat":"google",
     "trailing-spaces.trimOnSave": true,
-    "python.linting.pylintArgs": ["--rcfile", "/mnt/thirddrive/tot2/src/platform/moblab/pylintrc"],
-    "python.linting.pylintPath": "/mnt/thirddrive/tot2/depot_tools/pylint",
     "python.linting.pylintUseMinimalCheckers":false,
     "python.linting.pylintCategorySeverity.refactor": "Warning",
-    "python.testing.unittestEnabled": true,
-    "python.testing.pytestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "/mnt/builddrive/tot/src/platform/moblab/src/",
-        "-p",
-        "*_unittest.py"
      ],
 
     "files.exclude": {
@@ -75,4 +57,10 @@
         "typescriptreact",
         "yml"
     ]
+    "files.associations": {
+        "Dockerfile*": "dockerfile",
+        "docker-compose*": "yaml"
+    }
 }
+
+
