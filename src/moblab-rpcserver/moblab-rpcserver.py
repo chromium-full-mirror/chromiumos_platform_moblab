@@ -15,7 +15,6 @@ import time
 from concurrent import futures
 from dateutil.tz import tzlocal
 
-import build_connector
 import feedback_connector
 import moblab_rpcservice
 # pylint: disable=import-error
@@ -24,6 +23,7 @@ import moblabrpc_pb2
 import moblabrpc_pb2_grpc
 
 from moblab_common import afe_connector
+from moblab_common import build_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
 
