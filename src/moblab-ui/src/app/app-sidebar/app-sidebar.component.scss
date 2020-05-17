@@ -3,6 +3,8 @@
 
 mat-sidenav-container {
   min-height: 600px;
+  background: white;
+  height:100%;
 }
 
 mat-toolbar {
@@ -33,4 +35,16 @@ mat-toolbar {
 
 .moblab-sidebar-icon {
   padding-right: 10px;
+}
+
+.links {
+  font-size:17px;
+  text-align: right;
+  color: #CCCCCC;
+  text-decoration: none;
+}
+
+.list-item-active {
+  font-weight: bold;
+  color: mat-color($accent, darker) !important;
 }

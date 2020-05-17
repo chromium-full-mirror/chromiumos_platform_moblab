@@ -10,64 +10,44 @@ import {Feature} from 'app/services/services.module';
 export class AppSidebarComponent implements OnInit {
   appErrorMessage = 'This is where error messages go';
 
-  navTabsAboveRun = [];
+  navTabs = [];
   navTestRunMenuOptions = [];
-  navTabsBelowRun = [];
 
   constructor(private globalInfo: GlobalInfoService) {
     this.globalInfo = globalInfo;
-
     this.addSidebarEntry(
-        Feature.VIEW_JOBS, this.navTabsAboveRun,
+      Feature.DUT_MANAGEMENT, this.navTabs, {
+        route: '/manage_dut', label: 'Manage DUT\'s', icon: 'laptop_chromebook'});
+    this.addSidebarEntry(
+      Feature.DUT_DETAIL, this.navTabs,
+      {route: '/dut_detail', label: 'DUT Detail'});
+    this.addSidebarEntry(
+      Feature.RUN_TESTS, this.navTabs,
+      {route: '/run_tests', label: 'Run Suite', icon: 'play_arrow'});
+    this.addSidebarEntry(
+      Feature.VIEW_JOBS, this.navTabs,
         {route: '/view_jobs', label: 'View Jobs', icon: 'visibility'});
     this.addSidebarEntry(
-      Feature.JOB_DETAIL, this.navTabsAboveRun,
-        {route: '/job_detail', label: 'Job Detail'});
+      Feature.JOB_DETAIL, this.navTabs,
+      {route: '/job_detail', label: 'Job Detail'});
     this.addSidebarEntry(
-        Feature.RUN_CTS, this.navTestRunMenuOptions,
-        {route: '/run_tests/cts', label: 'Android Qualification'});
-    this.addSidebarEntry(
-        Feature.RUN_STORAGE_QUAL, this.navTestRunMenuOptions,
-        {route: '/run_tests/storagequal', label: 'Storage Qualification'});
-    this.addSidebarEntry(
-        Feature.RUN_MEMORY_QUAL, this.navTestRunMenuOptions,
-        {route: '/run_tests/memoryqual', label: 'Memory Qualification'});
-    this.addSidebarEntry(
-        Feature.RUN_BOARD_QUAL, this.navTestRunMenuOptions,
-        {route: '/run_tests/bvt', label: 'Board Qualification'});
-    this.addSidebarEntry(
-        Feature.RUN_POWER, this.navTestRunMenuOptions,
-        {route: '/run_tests/power', label: 'Power'});
-    this.addSidebarEntry(
-        Feature.RUN_TESTS, this.navTestRunMenuOptions,
-        {route: '/run_tests/other', label: 'Run Suite'});
-
-    this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabsBelowRun, {
-      route: '/manage_dut',
-      label: 'Manage DUT\'s',
-      icon: 'laptop_chromebook'
-    });
-    this.addSidebarEntry(
-        Feature.DUT_DETAIL, this.navTabsBelowRun,
-        {route: '/dut_detail', label: 'DUT Detail'});
-    this.addSidebarEntry(
-        Feature.SYSTEM_CONFIGURATION, this.navTabsBelowRun,
+        Feature.SYSTEM_CONFIGURATION, this.navTabs,
         {route: '/config', label: 'Configuration', icon: 'settings'});
     this.addSidebarEntry(
-        Feature.MOBMONITOR, this.navTabsBelowRun,
+        Feature.MOBMONITOR, this.navTabs,
         {route: '/mobmonitor', label: 'Mobmonitor', icon: 'security'});
-    this.addSidebarEntry(Feature.ADVANCED_SETTINGS, this.navTabsBelowRun, {
+    this.addSidebarEntry(Feature.ADVANCED_SETTINGS, this.navTabs, {
       route: '/advanced',
       label: 'Advanced Settings',
       icon: 'settings_applications'
     });
-    this.addSidebarEntry(Feature.REPORT_A_PROBLEM, this.navTabsBelowRun, {
+    this.addSidebarEntry(Feature.REPORT_A_PROBLEM, this.navTabs, {
       route: '/report_problem',
       label: 'Report Problem',
       icon: 'bug_report'
     });
     this.addSidebarEntry(
-        Feature.DOCUMENTATION, this.navTabsBelowRun,
+        Feature.DOCUMENTATION, this.navTabs,
         {route: '/documentation', label: 'Documentation', icon: 'help'});
   }
 

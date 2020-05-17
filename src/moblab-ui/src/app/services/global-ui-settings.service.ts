@@ -34,7 +34,7 @@ export class GlobalInfoService {
   enabledFeatures = [
     Feature.DUT_MANAGEMENT,
     Feature.FEEDBACK_REPORTS,
-    Feature.RUN_CTS,
+    Feature.RUN_TESTS,
     Feature.VIEW_JOBS,
     Feature.JOB_DETAIL,
     Feature.DUT_DETAIL,
