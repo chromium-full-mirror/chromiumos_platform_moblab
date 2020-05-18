@@ -38,7 +38,7 @@ RUN tar -xvf go1.14.2.linux-amd64.tar.gz
 RUN mv go /usr/local
 
 COPY --from=source /lucifer /lucifer
-COPY --from=protoc /protoc/* /usr/local/bin
+COPY --from=protoc /protoc/* /usr/local/bin/
 
 
 WORKDIR /lucifer/src
@@ -62,5 +62,5 @@ RUN go build -i -o /usr/bin/lucifer lucifer/cmd/lucifer
 
 FROM debian:buster-slim
 
-COPY --chown=moblab --from=build /*_pb* /
-COPY --chown=moblab --from=build /usr/bin/lucifer /usr/bin/lucifer
+COPY --from=build /*_pb* /
+COPY --from=build /usr/bin/lucifer /usr/bin/lucifer

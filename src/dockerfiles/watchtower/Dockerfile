@@ -3,5 +3,5 @@
 # found in the LICENSE file.
 
 # TODO - fix the version we are using.
-FROM v2tec/watchtower:latest
+FROM containrrr/watchtower:latest
 

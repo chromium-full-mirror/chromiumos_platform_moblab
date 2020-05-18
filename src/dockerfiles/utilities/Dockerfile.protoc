@@ -25,7 +25,7 @@ RUN chmod uog+x /usr/local/bin/protoc-gen-grpc-web
 RUN git clone https://github.com/grpc/grpc.git
 WORKDIR /grpc
 RUN git submodule update --init
-RUN make grpc_python_plugin
+RUN make -j32 grpc_python_plugin
 
 ##############################################################################
 FROM debian:buster-slim

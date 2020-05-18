@@ -1,0 +1,493 @@
+substitutions:
+  _REGISTRY_URI: gcr.io/chromeos-partner-moblab
+  _LABEL: beta
+  _WATCHTOWER_CMD: "--interval 3600 --monitor-only"
+
+steps:
+  - id: pull
+    name: "docker:19.03.8"
+    args: ["pull", "debian:buster-slim"]
+  - id: pull2
+    name: "docker:19.03.8"
+    args: ["pull", "alpine/git"]
+  - id: pull3
+    name: "docker:19.03.8"
+    args: ["pull", "docker/dockerfile-copy:v0.1.9"]
+  - id: pull4
+    name: "docker:19.03.8"
+    args: ["pull", "debian:buster"]
+  - id: pull5
+    name: "docker:19.03.8"
+    args: ["pull", "python:2.7-slim-buster"]
+  - id: pull6
+    name: "docker:19.03.8"
+    args: ["pull", "mariadb:10.2"]
+  - id: pull7
+    name: "docker:19.03.8"
+    args: ["pull", "python:3.8-slim-buster"]
+  - id: pull8
+    name: "docker:19.03.8"
+    args: ["pull", "python:3.8-buster"]
+  - id: pull9
+    name: "docker:19.03.8"
+    args: ["pull", "envoyproxy/envoy:v1.14.1"]
+  - id: pull10
+    name: "docker:19.03.8"
+    args: ["pull", "linuxserver/openssh-server"]
+  - id: pull11
+    name: "docker:19.03.8"
+    args: ["pull", "v2tec/watchtower:latest"]
+  - id: pull12
+    name: "docker:19.03.8"
+    args: ["pull", "docker/compose:alpine-1.25.4"]
+
+  - id: protoc
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
+        "-t",
+        "${_REGISTRY_URI}/protoc:${_LABEL}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-lucifer
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.lucifer",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-lucifer:${_LABEL}",
+        "/workspace/src/dockerfiles/autotest/",
+      ]
+    waitFor:
+      - "protoc"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-gwt
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.gwt",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-gwt:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-base
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.base",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-base:${_LABEL}",
+        "/workspace/",
+      ]
+    waitFor:
+      - "protoc"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-afe
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.afe",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-afe:${_LABEL}",
+        "/workspace/src/dockerfiles/autotest",
+      ]
+    waitFor:
+      - "autotest-base"
+      - "autotest-gwt"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-dbsetup
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.dbsetup",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-dbsetup:${_LABEL}",
+        "/workspace/src/dockerfiles/autotest",
+      ]
+    waitFor:
+      - "autotest-base"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-monitor
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.monitor_db",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-monitor_db:${_LABEL}",
+        "/workspace/src/dockerfiles/autotest",
+      ]
+    waitFor:
+      - "autotest-base"
+      - "autotest-lucifer"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-host
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.hostscheduler",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-host:${_LABEL}",
+        "/workspace/src/dockerfiles/autotest",
+      ]
+    waitFor:
+      - "autotest-base"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: autotest-abort
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/autotest/Dockerfile.job_aborter",
+        "-t",
+        "${_REGISTRY_URI}/moblab-autotest-aborter:${_LABEL}",
+        "/workspace/src/dockerfiles/autotest",
+      ]
+    waitFor:
+      - "autotest-base"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: db
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/db/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-db:${_LABEL}",
+        "/workspace/src/dockerfiles/db",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: db-init
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/db/Dockerfile.db_init",
+        "-t",
+        "${_REGISTRY_URI}/moblab-db-init:${_LABEL}",
+        "/workspace/src/dockerfiles/db",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: devserver
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/devserver/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/devserver:${_LABEL}",
+        "/workspace/src/dockerfiles/devserver",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: ui
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/ui/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-ui:${_LABEL}",
+        "/workspace/src/",
+      ]
+    waitFor:
+      - "protoc"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: ssp
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/ssp/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-ssp:${_LABEL}",
+        "/workspace/src/dockerfiles/ssp",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: offloader
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/offloader/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-offloader:${_LABEL}",
+        "/workspace/",
+      ]
+    waitFor:
+      - "protoc"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: envoy
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/envoy/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/envoy-proxy:${_LABEL}",
+        "/workspace/src/dockerfiles/envoy",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: remote_access
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/remote_access/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/remote_access:${_LABEL}",
+        "/workspace/src/dockerfiles/remote_access",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: remote-agent
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/remote-agent/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-remote-agent:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: remote-scheduler
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/remote-scheduler/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-remote-scheduler:${_LABEL}",
+        "/workspace/",
+      ]
+    waitFor:
+      - "protoc"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: rpcserver
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/rpcserver/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-rpcserver:${_LABEL}",
+        "/workspace/",
+      ]
+    waitFor:
+      - "protoc"
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  - id: compose
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/compose/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-compose:${_LABEL}",
+        "/workspace/src/dockerfiles/compose",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+      - "WATCHTOWER_CMD=${_WATCHTOWER_CMD}"
+
+images:
+  [
+    "${_REGISTRY_URI}/protoc:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-lucifer:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-gwt:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-base:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-dbsetup:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-monitor_db:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-host:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-aborter:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-compose:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-rpcserver:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-remote-scheduler:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-remote-agent:${_LABEL}",
+    "${_REGISTRY_URI}/remote_access:${_LABEL}",
+    "${_REGISTRY_URI}/envoy-proxy:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-offloader:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-ui:${_LABEL}",
+    "${_REGISTRY_URI}/devserver:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-db-init:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-db:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-autotest-afe:${_LABEL}",
+  ]
+
+options:
+  # Use higher CPU machines so the caching and build steps are faster.
+  machineType: "N1_HIGHCPU_32"
+  substitution_option: "ALLOW_LOOSE"
+
+timeout: 18000s

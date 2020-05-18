@@ -8,6 +8,7 @@ COPY docker-compose.yaml .
 
 ENV LABEL=${LABEL}
 ENV REGISTRY_URI=${REGISTRY_URI}
+ENV WATCHTOWER_CMD=${WATCHTOWER_CMD}
 
 # Test the config for syntax errors
 RUN docker-compose config
