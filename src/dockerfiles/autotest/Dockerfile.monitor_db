@@ -51,12 +51,10 @@ RUN chown moblab /usr/local/.cros-venv-cache
 
 # Need to be in docker group to use docker API
 RUN addgroup --gid 412 docker
-RUN sudo usermod -aG docker moblab
+RUN usermod -aG docker moblab
 
 RUN apt purge -yq python-pip libcap2-bin
 RUN apt-get clean
-
-
 
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 

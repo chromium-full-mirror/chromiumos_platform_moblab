@@ -56,14 +56,15 @@ services:
     hostname: devserver
     restart: on-failure
     user: moblab
-    depends_on:
-      - autotest
 
     volumes:
       - logs:/var/log/moblab
       - moblab_home:/home/moblab
       - usr_local_moblab:/usr/local/moblab
       - static_cache:/static
+
+    depends_on:
+      - autotest
 
     networks:
       moblab:
@@ -276,7 +277,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-    command: --interval 60
+    command: ${WATCHTOWER_CMD}
 
     networks:
       - moblab
@@ -299,14 +300,6 @@ services:
 
     networks:
       - moblab
-
-    command: >
-      -l /var/log/moblab/offloader.log
-      run
-      --gs-bucket chromeos-moblab-peng-staging
-      --credentials-file /home/moblab/.service_account.json
-      --min-age-to-prune 1
-      --jobs 100
 
     depends_on:
       - autotest
@@ -365,6 +358,10 @@ services:
       - /var/log/bootup:/var/log/bootup
       - moblab_home:/home/moblab
       - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/tmp:/usr/local/tmp
+
+    depends_on:
+      - autotest
 
     environment:
       - PUBLIC_KEY_FILE=/testing_rsa.pub
@@ -388,6 +385,9 @@ services:
       - logs:/var/log/moblab
       - usr_local_moblab:/usr/local/moblab
       - moblab_home:/home/moblab
+
+    depends_on:
+      - autotest
 
     networks:
       - moblab

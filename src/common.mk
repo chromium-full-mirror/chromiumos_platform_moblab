@@ -5,8 +5,11 @@
 REGISTRY_URI=${REGISTRY}
 EXTRA_ARGS+= --build-arg REGISTRY_URI=${REGISTRY_URI}
 EXTRA_ARGS+= --build-arg LABEL=${LABEL}
+EXTRA_ARGS+= --build-arg WATCHTOWER_CMD="${WATCHTOWER_CMD}"
 
-all: rpcserver compose autotest db devserver ssp offloader envoy remote_access ui remote_agent
+all: protoc rpcserver compose autotest-lucifer autotest-gwt autotest \
+	db devserver ssp offloader envoy remote_access ui remote_agent \
+        remote-scheduler local-dev remote-access
 
 #TODO refactor the common rules into a single rule.
 
@@ -18,12 +21,11 @@ rpcserver:
 
 compose: export DOCKER_BUILDKIT=1
 compose:
-	cp dockerfiles/compose/docker-compose.yaml.${LABEL} dockerfiles/compose/docker-compose.yaml
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-compose:${LABEL} \
 		-f dockerfiles/compose/Dockerfile dockerfiles/compose
 	docker push ${REGISTRY_URI}/moblab-compose:${LABEL}
 
-autotest: autotest-gwt autotest-afe autotest-dbsetup autotest-monitor \
+autotest: autotest-afe autotest-dbsetup autotest-monitor \
 	autotest-host autotest-abort
 
 autotest-base: export DOCKER_BUILDKIT=1
@@ -119,11 +121,17 @@ envoy:
 		-f dockerfiles/envoy/Dockerfile dockerfiles/envoy
 	docker push ${REGISTRY_URI}/envoy-proxy:${LABEL}
 
-remote_access: export DOCKER_BUILDKIT=1
-remote_access:
+remote-access: export DOCKER_BUILDKIT=1
+remote-access:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/remote_access:${LABEL} \
 		-f dockerfiles/remote_access/Dockerfile dockerfiles/remote_access
 	docker push ${REGISTRY_URI}/remote_access:${LABEL}
+
+watchtower: export DOCKER_BUILDKIT=1
+watchtower:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/watchtower:${LABEL} \
+		-f dockerfiles/watchtower/Dockerfile dockerfiles/watchtower
+	docker push ${REGISTRY_URI}/watchtower:${LABEL}
 
 local-dev: export DOCKER_BUILDKIT=1
 local-dev:
