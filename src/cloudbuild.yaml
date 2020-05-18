@@ -391,7 +391,7 @@ steps:
         "--build-arg",
         "LABEL=${_LABEL}",
         "-f",
-        "/workspace/src/dockerfiles/remote-agent/Dockerfile",
+        "/workspace/src/dockerfiles/remote_agent/Dockerfile",
         "-t",
         "${_REGISTRY_URI}/moblab-remote-agent:${_LABEL}",
         "/workspace/",
