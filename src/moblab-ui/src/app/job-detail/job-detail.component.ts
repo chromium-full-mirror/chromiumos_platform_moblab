@@ -1,4 +1,5 @@
-import {Component, ViewChild} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {MatExpansionPanel} from '@angular/material/expansion';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
@@ -20,7 +21,7 @@ import {KeyVal, KeyValTableComponent} from '../widgets/keyval-table/keyval-table
   animations: [],
   viewProviders: [MatExpansionPanel]
 })
-export class JobDetailComponent {
+export class JobDetailComponent implements OnInit {
   @ViewChild(ViewJobsComponent) childViewJobsTableRef: ViewJobsComponent;
   @ViewChild(KeyValTableComponent) jobInfoTableRef: KeyValTableComponent;
   jobQuery = new FormControl(
@@ -41,8 +42,18 @@ export class JobDetailComponent {
 
   constructor(
     private readonly moblabGrpcService: MoblabGrpcService,
+    private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) {}
+
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      this.jobQuery.setValue(params.get('job_id'));
+      if (this.jobQuery.value) {
+        this.fetchJobDetails()
+      }
+    });
+  }
 
   getPriorityFromInt(enum_int) {
     return INT_TO_PRIORITY[enum_int]
@@ -55,7 +66,6 @@ export class JobDetailComponent {
   fetchJobDetails() {
     // Reset current job info.
     this.resetJob();
-    this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
 
     this.moblabGrpcService.getJobDetails(
       (jobInfo: Job) => {
@@ -65,7 +75,8 @@ export class JobDetailComponent {
         this.reportError(errorMsg)
       },
       this.jobQuery.value
-    )
+    );
+    this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
   }
 
   unpackJobInfoToTable(job: Job) {
