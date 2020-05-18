@@ -11,6 +11,11 @@
   border-top: 0px;
 }
 
+.mat-table {
+  width: 100%;
+  height: 100%;
+}
+
 .edit-box-contents {
   margin: 3px;
   display: inline-block;

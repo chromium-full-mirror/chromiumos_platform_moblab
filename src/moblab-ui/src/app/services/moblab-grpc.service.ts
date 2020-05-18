@@ -250,7 +250,6 @@ export class MoblabGrpcService {
     call.on("data", callback);
   }
 
-
   /** Starts hardware memory qualification suite run.
    *  @param callback: function invoked in success scenarios.
    *  @param error_callback: function invoked in failure scenarios.

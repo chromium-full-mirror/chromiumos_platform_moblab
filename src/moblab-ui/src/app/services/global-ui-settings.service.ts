@@ -4,8 +4,7 @@ enum UIState {
   NEEDS_SETUP = 1,
   SETUP_COMPLETE,
   NO_DUTS_CONFIGURED,
-}
-;
+};
 
 export enum Feature {
   VIEW_JOBS = 1,

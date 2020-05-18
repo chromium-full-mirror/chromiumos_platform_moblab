@@ -30,7 +30,7 @@ function createMockJobInfo() {
   mockJob.setName('Name');
   mockJob.setServerControlFile('Fake file.');
 
-  const mockJobHistory = []
+  const mockJobHistory = [];
   for (let i = 0; i < 5; ++i) {
     const mockExecution = new Execution();
     mockExecution.setName(i.toString());
@@ -40,10 +40,10 @@ function createMockJobInfo() {
   }
   mockJob.setExecutionHistoryList(mockJobHistory);
 
-  const mockAssociatedDuts = []
+  const mockAssociatedDuts = [];
   for (let i = 0; i < 5; ++i) {
     const mockExecution = new Execution();
-    mockExecution.setDut(i.toString())
+    mockExecution.setDut(i.toString());
     mockExecution.setStatus(Number(Math.random() * 8));
     mockAssociatedDuts.push(mockExecution);
   }

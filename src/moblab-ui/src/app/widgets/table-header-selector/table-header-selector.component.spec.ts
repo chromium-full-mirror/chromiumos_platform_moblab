@@ -1,17 +1,14 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
-import {
-  MatCheckboxModule,
-  MatSelectModule
-} from "@angular/material";
-
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {FormsModule} from '@angular/forms';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatSelectModule} from '@angular/material/select'
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 import { TableHeaderSelectorComponent } from './table-header-selector.component';
 import { MoblabSelectorComponent } from '../moblab-selector/moblab-selector.component';
+
 
 describe('TableHeaderSelectorComponent', () => {
   let component: TableHeaderSelectorComponent;
@@ -24,6 +21,7 @@ describe('TableHeaderSelectorComponent', () => {
         FormsModule,
         MatCheckboxModule,
         MatSelectModule,
+        MatTooltipModule,
       ],
       declarations: [ TableHeaderSelectorComponent, MoblabSelectorComponent ]
     })

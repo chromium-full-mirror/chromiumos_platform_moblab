@@ -5,33 +5,12 @@ import {MoblabGrpcService} from '../services/moblab-grpc.service';
 
 const URL = 'https://google.com/api/';
 
+
 @Component({
   selector: 'app-configuration',
   templateUrl: './configuration.component.html',
-  styles: [`
-    .configuration-label {
-      min-width: 250px;
-      margin: 10px;
-    }
-    .configuration-input {
-      margin-right: 15px;
-      min-width: 400px;
-    }
-    .configuration {
-      flex-direction: row;
-      layout-margin: 50px;
-    }
-    mat-form-field .ng-invalid {
-      border:3px solid red;
-    }
-    mat-card-header {
-      text-decoration: underline;
-      font-size: 18px;
-    }
-
-    `],
+  styleUrls: ['./configuration.component.css']
 })
-
 export class ConfigurationComponent implements OnInit, AfterViewInit {
   botoKeyId: string;
   botoKeySecret: string;
@@ -52,7 +31,7 @@ export class ConfigurationComponent implements OnInit, AfterViewInit {
 
   uploader: FileUploader = new FileUploader({url: URL});
 
-  @ViewChild('formRef', { static: true }) form;
+  @ViewChild('formRef') form;
 
   constructor(private moblabRpcService: MoblabGrpcService) {}
 

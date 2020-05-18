@@ -13,6 +13,7 @@ export interface BuildSettings {
   pool: string;
 }
 
+
 /**
  * Base class meant to parent all implementations of run suite logic. Contains
  * some logic that is common to all suites.
