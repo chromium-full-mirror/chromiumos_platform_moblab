@@ -4,11 +4,15 @@
 
 FROM docker/compose:alpine-1.25.4
 
-COPY docker-compose.yaml .
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+ARG WATCHTOWER_CMD="--interval 3600 --monitor-only"
 
-ENV LABEL=${LABEL}
-ENV REGISTRY_URI=${REGISTRY_URI}
-ENV WATCHTOWER_CMD=${WATCHTOWER_CMD}
+ENV LABEL="${LABEL}"
+ENV REGISTRY_URI="${REGISTRY_URI}"
+ENV WATCHTOWER_CMD="${WATCHTOWER_CMD}"
+
+COPY docker-compose.yaml .
 
 # Test the config for syntax errors
 RUN docker-compose config

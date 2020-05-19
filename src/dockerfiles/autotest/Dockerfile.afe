@@ -11,6 +11,9 @@ FROM ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL} as gwt
 
 ######################################################################
 
+ARG LABEL
+ARG REGISTRY_URI
+
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
 COPY --from=gwt /www/ /moblab/third_party/autotest/frontend/client/www/

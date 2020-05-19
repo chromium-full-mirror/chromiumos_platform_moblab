@@ -2,11 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL=release
-
-######################################################################
-
 FROM alpine/git as source
 
 WORKDIR /
@@ -21,6 +16,9 @@ WORKDIR /
 RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
 
 ######################################################################
+
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
 
 FROM ${REGISTRY_URI}/protoc:release as protoc
 

@@ -3,11 +3,11 @@
 # found in the LICENSE file.
 
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL
+ARG LABEL=release
 
 ######################################################################
 
-FROM gcr.io/chromeos-partner-moblab/protoc:${LABEL} as protoc
+FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 

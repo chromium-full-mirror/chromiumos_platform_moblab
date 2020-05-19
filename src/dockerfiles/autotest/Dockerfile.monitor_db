@@ -2,17 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL=release
-
-######################################################################
-
 FROM alpine/git as source
 
 WORKDIR /infra
 RUN git clone https://chromium.googlesource.com/chromiumos/infra_virtualenv
 
 ######################################################################
+
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
 
 FROM ${REGISTRY_URI}/moblab-autotest-lucifer:${LABEL} as lucifer
 

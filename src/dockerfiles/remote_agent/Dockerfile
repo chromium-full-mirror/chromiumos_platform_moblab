@@ -2,11 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-ARG ${REGISTRY_URI}
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
 
 ######################################################################
 
-FROM gcr.io/chromeos-partner-moblab/protoc:release as protoc
+FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 
