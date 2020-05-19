@@ -32,7 +32,7 @@ from lucifer import loglib
 logger = logging.getLogger(__name__)
 handler = logging.FileHandler('/var/log/moblab/aborter.log')
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 def main(args):
     """Main function

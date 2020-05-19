@@ -27,6 +27,7 @@ import time
 from scandir import scandir
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 
 @contextlib.contextmanager
@@ -105,13 +106,13 @@ class Lease(object):
         try:
             os.unlink(self._entry.path)
         except OSError as e:
-            logger.warning('Error removing %s: %s', self._entry.path, e)
+            _LOGGER.warning('Error removing %s: %s', self._entry.path, e)
         try:
             os.unlink(self._sock_path)
         except OSError as e:
             # This is fine; it means that job_reporter crashed, but
             # lucifer was able to run its cleanup.
-            logger.debug('Error removing %s: %s', self._sock_path, e)
+            _LOGGER.debug('Error removing %s: %s', self._sock_path, e)
 
     def abort(self):
         """Abort the job.
@@ -124,9 +125,9 @@ class Lease(object):
         """
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         sock.setblocking(0)
-        logger.debug('Connecting to abort socket %s', self._sock_path)
+        _LOGGER.debug('Connecting to abort socket %s', self._sock_path)
         sock.connect(self._sock_path)
-        logger.debug('Sending abort to %s', self._sock_path)
+        _LOGGER.debug('Sending abort to %s', self._sock_path)
         # The value sent does not matter.
         sent = sock.send('abort')
         # TODO(ayatane): I don't know if it is possible for sent to be 0
@@ -137,7 +138,7 @@ class Lease(object):
         try:
             self.abort()
         except socket.error as e:
-            logger.debug('Error aborting socket: %s', e)
+            _LOGGER.debug('Error aborting socket: %s', e)
 
     @property
     def _sock_path(self):

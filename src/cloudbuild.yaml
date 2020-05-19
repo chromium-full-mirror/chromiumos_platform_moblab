@@ -483,6 +483,7 @@ images:
     "${_REGISTRY_URI}/moblab-db-init:${_LABEL}",
     "${_REGISTRY_URI}/moblab-db:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-afe:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-ssp:${_LABEL}",
   ]
 
 options:

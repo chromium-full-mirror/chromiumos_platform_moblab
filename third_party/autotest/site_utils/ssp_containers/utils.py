@@ -79,11 +79,12 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
     @param dst_name: The name of the destination container.
     @param snapshot: Whether or not to create a snapshot clone.
     """
+    label = os.environ.get('LABEL', 'release')
     client = docker.from_env(timeout=300)
-    client.images.pull('gcr.io/chromeos-partner-moblab/moblab-ssp:release')
+    client.images.pull('gcr.io/chromeos-partner-moblab/moblab-ssp:%s' % label)
 
-    container = client.containers.run(
-        'gcr.io/chromeos-partner-moblab/moblab-ssp:release',
+    client.containers.run(
+        'gcr.io/chromeos-partner-moblab/moblab-ssp:%s' % label,
         remove=True,
         name=dst_name,
         hostname=dst_name,
