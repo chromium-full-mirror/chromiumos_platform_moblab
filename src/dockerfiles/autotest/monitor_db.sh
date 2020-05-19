@@ -14,4 +14,12 @@ while [ -z "${DB_UP}" ]; do
     -e "SELECT 1")
 done
 
+ACL_QUERY="mysql -h db  -uroot -p${passwd} -Dchromeos_autotest_db \
+    -e 'select count(*) from afe_acl_groups'"
+ACL_GROUP_AVAILABLE=$(${ACL_QUERY})
+while [ -z "${ACL_QUERY}" ]; do
+   sleep 1
+   ACL_GROUP_AVAILABLE=$(${ACL_QUERY})
+done
+
 /usr/local/autotest/scheduler/monitor_db.py --production /usr/local/autotest/results
