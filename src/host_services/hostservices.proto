@@ -10,6 +10,8 @@ service MoblabHostService {
   rpc check_for_system_update(SystemUpdateCheckRequest) returns (SystemUpdateCheckResponse) {}
   rpc get_system_update_status(SystemUpdateStatusRequest) returns (SystemUpdateStatusResponse) {}
   rpc install_system_update(SystemUpdateInstallRequest) returns (SystemUpdateInstallResponse) {}
+  rpc reboot(RebootRequest) returns (RebootResponse) {}
+  rpc factory_reset(FactoryResetRequest) returns (FactoryResetResponse) {}
 }
 
 // NEXT_TAG = 1
@@ -77,5 +79,21 @@ message SystemUpdateInstallRequest {
 // NEXT_TAG = 2
 message SystemUpdateInstallResponse {
   string error = 1;
+}
+
+// NEXT_TAG = 1
+message RebootRequest {
+}
+
+// NEXT_TAG = 1
+message RebootResponse {
+}
+
+// NEXT_TAG = 1
+message FactoryResetRequest {
+}
+
+// NEXT_TAG = 1
+message FactoryResetResponse {
 }
 
