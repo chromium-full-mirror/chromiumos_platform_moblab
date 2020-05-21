@@ -154,6 +154,20 @@ class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
 
         return response
 
+    def reboot(self, unused_request, unused_context):
+        """Reboot the moblab."""
+        response = hostservices_pb2.RebootResponse()
+        subprocess.check_call(['reboot'])
+        return response
+
+    def factory_reset(self, unused_request, unused_context):
+        """Powerwash the moblab."""
+        response = hostservices_pb2.FactoryResetResponse()
+        subprocess.check_call(['echo', 'safe fast keepimg', '>',
+             '/mnt/stateful_partition/factory_install_reset'])
+        subprocess.check_call(['reboot'])
+        return response
+
 
 def setup_logging(level):
     """Enable the correct level of logging.
