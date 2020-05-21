@@ -23,6 +23,7 @@ import {JobDetailComponent} from './job-detail.component';
 import {Job, Execution} from '../services/moblabrpc_pb';
 import {ViewJobsModule} from '../view-jobs/view-jobs.module';
 import {WidgetsModule} from '../widgets/widgets.module';
+import {RouterModule} from '@angular/router';
 
 function createMockJobInfo() {
   const mockJob = new Job();
@@ -68,9 +69,11 @@ describe('JobDetailComponent', () => {
           MatExpansionModule,
           MatFormFieldModule,
           MatInputModule,
-          MatSnackBarModule,
           MatTableModule,
+          MatSnackBarModule,
           ReactiveFormsModule,
+          RouterModule,
+          RouterModule.forRoot([]),
           ViewJobsModule,
           WidgetsModule,
         ],
