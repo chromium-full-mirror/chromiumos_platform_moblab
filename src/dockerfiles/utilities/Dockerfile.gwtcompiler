@@ -1,0 +1,17 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# NOTE - do not make this one -slim - java will not install.
+FROM debian:buster as build
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+	unzip wget ca-certificates python2 default-jdk apt-utils
+
+WORKDIR /
+RUN wget https://storage.googleapis.com/gwt-releases/gwt-2.8.2.zip
+
+# GWT compile
+RUN unzip gwt-2.8.2.zip
+RUN ln -s /gwt-2.8.2 /usr/local/lib/gwt
+RUN rm gwt-2.8.2.zip

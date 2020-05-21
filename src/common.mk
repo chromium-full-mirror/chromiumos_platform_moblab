@@ -151,4 +151,10 @@ remote-scheduler:
 		dockerfiles/remote-scheduler/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL}
 
-.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access remote_agent remote-scheduler
+gwtcompiler: export DOCKER_BUILDKIT=1
+gwtcompiler:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/gwtcompiler:${LABEL} \
+		-f dockerfiles/utilities/Dockerfile.gwtcompiler dockerfiles/utilities
+	docker push ${REGISTRY_URI}/gwtcompiler:${LABEL}
+
+.PHONY: rpcserver compose db autotest devserver ui ssp offloader envoy remote_access remote_agent remote-scheduler gwtcompiler
