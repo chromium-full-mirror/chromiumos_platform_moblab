@@ -132,3 +132,12 @@
   left: 50%;
   margin-left: -50px;
 }
+
+#no-jobs-label {
+  color: #000000;
+  padding-top:40px;
+  padding-bottom:40px;
+  font-size:30px;
+  font-family:Roboto, sans-serif;
+  text-align: center;
+}

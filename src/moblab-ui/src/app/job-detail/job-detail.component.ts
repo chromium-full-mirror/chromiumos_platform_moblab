@@ -80,7 +80,7 @@ export class JobDetailComponent {
       ['Timeout', (job.getTimeout() / 60 / 1000).toString() + ' minutes'],
       ['Max Runtime', (job.getMaxRuntime() / 60 / 1000).toString() + ' minutes'],
       ['Test Retries', job.getTestRetries().toString()],
-    ])
+    ]);
 
     this.jobHistoryTable =
       new MatTableDataSource<Execution>(job.getExecutionHistoryList());

@@ -70,7 +70,12 @@
             </mat-select>
           </mat-form-field>
           <button id="filter-button" mat-raised-button color="primary"
-                  [disabled]="this.filters.anyErrors()" (click)="filterSubmission()"> Filter
+                  [disabled]="this.filters.anyErrors()"
+                  (click)="filterSubmission()"> Filter
+          </button>
+          <button mat-raised-button
+                  [disabled]="this.loading"
+                  (click)="clearFilters()"> Clear
           </button>
           <button
             class="job-refresh-button"
@@ -82,9 +87,11 @@
         </mat-card>
       </div>
       <mat-divider></mat-divider>
-      <app-job-action (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
+      <app-job-action
+        (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
       </app-job-action>
   </div>
+  <div style="position: relative;">
   <table mat-table [dataSource]="jobs"
          multiTemplateDataRows
          class="jobs-table mat-elevation-z8">
@@ -169,42 +176,26 @@
       </td>
     </ng-container>
 
-    <ng-container matColumnDef="expandedDetail">
-      <td mat-cell
-          *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-        <div class="job-detail mat-typography"
-             [@detailExpand]="element === expandedElement ?
-            'expanded' : 'collapsed'">
-          <!--TO-DO: Replace with an actual job details component.-->
-          <h1 class="job-detail-text">
-            TODO : Job details here.
-          </h1>
-        </div>
-      </td>
-    </ng-container>
+
     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-    <tr mat-row *matRowDef="let element; columns: displayedColumns;"
-        class="job-detail-click-layer"
-        [class.expanded-row]="expandedElement === element"
-        (click)="expandedElement = expandedElement === element ? null : element">
-    </tr>
-    <tr
-      mat-row
-      *matRowDef="let row; columns: ['expandedDetail']"
-      class="job-detail-row">
+    <tr mat-row *matRowDef="let element; columns: displayedColumns;" [routerLink]="['/job_detail',element.getJobId()]">
     </tr>
   </table>
+    <div id="no-jobs-label" *ngIf="jobs.data.length === 0">
+      <p>No Jobs fetched.</p>
+    </div>
+    <div>
+      <mat-paginator [length]="numJobs"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]=[10,20,100,1000]
+                     [showFirstLastButtons]="true">
+      </mat-paginator>
+    </div>
 
-  <div>
-    <mat-paginator [length]="numJobs"
-                   [pageSize]="pageSize"
-                   [pageSizeOptions]=[10,25,100,1000]>
-    </mat-paginator>
-  </div>
-
-  <div id="loading-overlay" *ngIf="loadingJobs">
-    <div class="loading-spinner-wrapper">
-      <mat-spinner></mat-spinner>
+    <div id="loading-overlay" *ngIf="loadingJobs">
+      <div class="loading-spinner-wrapper">
+        <mat-spinner></mat-spinner>
+      </div>
     </div>
   </div>
 </div>

@@ -10,7 +10,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatPaginatorModule} from '@angular/material/paginator';
-import {MatTableModule} from '@angular/material';
+import {MatTableModule} from '@angular/material/table';
 
 import {DutTask} from '../../services/moblabrpc_pb';
 import {ViewJobsModule} from '../../view-jobs/view-jobs.module';
@@ -86,11 +86,11 @@ describe('DutTaskTableComponent', () => {
     fixture.detectChanges();
   });
 
-  fit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  fit('Test setting DUT IP initializes table.', () => {
+  it('setting DUT IP should initialize table', () => {
     component.setDutIp('000.000.000.000');
     fixture.detectChanges();
     expect(component.tasks.data.length).toBe(createMockDutTasks().length);

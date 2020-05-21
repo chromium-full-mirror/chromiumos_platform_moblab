@@ -7,6 +7,8 @@ import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-fo
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
+import {BuildSettings} from '../../common/base_suite/base-suite.component';
+
 @Component({
   selector: 'app-cts-run',
   templateUrl: './cts-run.component.html',
@@ -34,7 +36,7 @@ export class CtsRunComponent extends BaseSuite implements OnInit {
     this.runSuiteButton.enable();
   }
 
-  onBuildSetCustom(event) {
+  onBuildSetCustom(event: BuildSettings) {
     this.modulesTextForm.enable();
     this.versionSelectForm.enable();
   }

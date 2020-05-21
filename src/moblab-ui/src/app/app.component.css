@@ -16,3 +16,10 @@ mat-toolbar {
   display: flex;
 }
 
+body {
+  margin: 0px;
+}
+
+.mat-sidenav-content {
+  background: white;
+}

@@ -1,0 +1,19 @@
+.configuration-label {
+  min-width: 250px;
+  margin: 10px;
+}
+.configuration-input {
+  margin-right: 15px;
+  min-width: 400px;
+}
+.configuration {
+  flex-direction: row;
+  layout-margin: 50px;
+}
+mat-form-field .ng-invalid {
+  border:3px solid red;
+}
+mat-card-header {
+  text-decoration: underline;
+  font-size: 18px;
+}

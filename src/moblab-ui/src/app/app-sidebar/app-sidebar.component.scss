@@ -7,6 +7,10 @@ mat-sidenav-container {
   height:100%;
 }
 
+mat-sidenav-content {
+  background: white;
+}
+
 mat-toolbar {
   min-height: 60px;
 }
@@ -35,6 +39,10 @@ mat-toolbar {
 
 .moblab-sidebar-icon {
   padding-right: 10px;
+}
+
+.body {
+  margin: 0px;
 }
 
 .links {
