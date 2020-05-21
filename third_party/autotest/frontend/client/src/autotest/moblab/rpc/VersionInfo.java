@@ -13,6 +13,7 @@ public class VersionInfo extends JsonRpcEntity {
     UPDATE_AVAILABLE,
     DOWNLOADING,
     UPDATED_NEED_REBOOT,
+    UPDATE_DOCKER,
     UNKNOWN
   }
 
@@ -109,6 +110,9 @@ public class VersionInfo extends JsonRpcEntity {
     else if(status.contains("NEED_REBOOT")) {
       return UPDATE_STATUS.UPDATED_NEED_REBOOT;
     }
+    else if(status.contains("DOCKER_UPDATE")) {
+      return UPDATE_STATUS.UPDATE_DOCKER;
+    }
     else {
       return UPDATE_STATUS.UNKNOWN;
     }
@@ -127,6 +131,8 @@ public class VersionInfo extends JsonRpcEntity {
       case UPDATED_NEED_REBOOT:
         return "Version " + moblabUpdateVersion
             + " is available, reboot required";
+      case UPDATE_DOCKER:
+        return "Moblab software update available.";
       case IDLE:
       case UNKNOWN:
       default:
@@ -136,6 +142,8 @@ public class VersionInfo extends JsonRpcEntity {
 
   public String getUpdateAction() {
     switch(moblabUpdateStatus){
+      case UPDATE_DOCKER:
+        return "Update";
       case CHECKING_FOR_UPDATE:
       case UPDATE_AVAILABLE:
       case DOWNLOADING:

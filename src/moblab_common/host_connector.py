@@ -130,3 +130,27 @@ class HostServicesConnector(object):
             cls.disconnect()  # Force reconnect on retry
             logging.exception('Error installing update')
             raise HostServicesException('Error installing update')
+
+    @classmethod
+    def reboot(cls):
+        cls.connect()
+        try:
+            request = hostservices_pb2.RebootRequest()
+            response = cls.stub.reboot(request)
+            return response
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error rebooting')
+            raise HostServicesException('Error rebooting')
+
+    @classmethod
+    def factory_reset(cls):
+        cls.connect()
+        try:
+            request = hostservices_pb2.FactoryResetRequest()
+            response = cls.stub.factory_reset(request)
+            return response
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception('Error factory reset')
+            raise HostServicesException('Error factory reset')

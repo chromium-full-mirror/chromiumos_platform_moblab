@@ -8,29 +8,26 @@ on moblab.
 """
 
 import ConfigParser
-import common
+import ctypes
 import logging
+import multiprocessing
 import os
 import re
-import sys
 import shutil
 import socket
 import StringIO
 import subprocess
+import sys
 import time
-import multiprocessing
-import ctypes
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.frontend.afe import rpc_utils
+import common
+import docker
+
+from autotest_lib.client.common_lib import error, global_config, utils
+from autotest_lib.frontend.afe import models, rpc_utils
 from autotest_lib.server import frontend
 from autotest_lib.server.hosts import moblab_host
-
-from moblab_common import host_connector
-from moblab_common import moblab_info
+from moblab_common import host_connector, moblab_info
 
 _CONFIG = global_config.global_config
 MOBLAB_BOTO_LOCATION = '/home/moblab/.boto'
@@ -195,10 +192,6 @@ def update_config_handler(config_values):
         raise error.RPCException('Shadow config file does not exist.')
     _write_config_file(_CONFIG.shadow_file, new_shadow, True)
 
-    # TODO (sbasi) crbug.com/403916 - Remove the reboot command and
-    # instead restart the services that rely on the config values.
-    #os.system(' reboot')
-
 
 @rpc_utils.moblab_only
 def reset_config_settings():
@@ -211,7 +204,10 @@ def reset_config_settings():
 @rpc_utils.moblab_only
 def reboot_moblab():
     """Simply reboot the device."""
-    #os.system(' reboot')
+    try:
+        host_connector.HostServicesConnector.reboot()
+    except host_connector.HostServicesException:
+        logging.exception("Failed to reboot the host device.")
 
 
 @rpc_utils.moblab_only
@@ -253,8 +249,6 @@ def set_launch_control_key(launch_control_key):
                                  launch_control_key)
     shutil.copyfile(launch_control_key,
                     moblab_host.MOBLAB_LAUNCH_CONTROL_KEY_LOCATION)
-    # Restart the devserver service.
-    #os.system(' restart moblab-devserver-init')
 
 
 ###########Moblab Config Wizard RPCs #######################
@@ -271,7 +265,7 @@ def _get_public_ip_address(socket_handle):
     try:
         return host_connector.HostServicesConnector.get_ip()
     except host_connector.HostServicesException:
-        logging.exception("Failed to get ip address rom host.")
+        logging.exception("Failed to get ip address from host.")
     return "No IP Address"
 
 
@@ -470,6 +464,10 @@ def get_version_info():
     version_response['MOBLAB_UPDATE_VERSION'] = update_status.new_version
     version_response['MOBLAB_UPDATE_STATUS'] = update_status.current_op
     version_response['MOBLAB_UPDATE_PROGRESS'] = update_status.progress
+    if version_response['MOBLAB_UPDATE_STATUS'].find("IDLE") > -1:
+        is_docker_update = _get_docker_update_status()
+        if _get_docker_update_status():
+            version_response['MOBLAB_UPDATE_STATUS'] = "DOCKER_UPDATE"
     return rpc_utils.prepare_for_serialization(version_response)
 
 
@@ -477,6 +475,21 @@ def get_version_info():
 def update_moblab():
     """ RPC call to update and reboot moblab """
     _install_system_update()
+
+
+@rpc_utils.moblab_only
+def update_docker():
+    """ RPC call to update and reboot moblab """
+    label = os.environ.get('LABEL', 'release')
+    client = docker.from_env(timeout=300)
+    container = client.containers.run(
+        'gcr.io/chromeos-partner-moblab/watchtower:%s' % label,
+        volumes=['/var/run/docker.sock:/var/run/docker.sock'],
+        name='update',
+        detach=True,
+        command='--run-once')
+    container.wait()
+    container.remove()
 
 
 def _check_for_system_update():
@@ -502,12 +515,30 @@ def _get_system_update_status():
         LAST_CHECKED_TIME: str unix time stamp of the last update check
     }
     """
+    status = None
     try:
-        return host_connector.HostServicesConnector.get_system_update_status()
+        status = host_connector.HostServicesConnector.get_system_update_status()
     except host_connector.HostServicesException:
         raise error.RPCException("Failed to check for update.")
-    return None
 
+    return status
+
+def _get_docker_update_status():
+    """Check to see if there are any containers that have updated images.
+
+    Scan the running containers, if the watchtower program has pulled down
+    a newer image then the container to image reference tag is broken.
+
+    Detect these image tag link breaks and assume that means we have an update.
+    Looking through update tools and forums, it seems this is the way
+    all update tools work.
+    """
+    client = docker.from_env(timeout=300)
+    for container in client.containers.list():
+        if len(container.image.tags) == 0:
+            return True
+
+    return False
 
 def _install_system_update():
     """ Installs a ChromeOS update, will cause the system to reboot
@@ -515,6 +546,7 @@ def _install_system_update():
     #  is required to run the update client
     # first run a blocking command to check, fetch, prepare an update
     # then check if a reboot is needed
+
     try:
         response = host_connector.HostServicesConnector.install_system_update()
         if response.error:
