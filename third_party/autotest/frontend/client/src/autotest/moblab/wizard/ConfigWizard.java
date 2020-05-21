@@ -2,6 +2,8 @@ package autotest.moblab.wizard;
 
 import autotest.moblab.rpc.MoblabRpcCallbacks;
 import autotest.moblab.rpc.VersionInfo;
+import autotest.moblab.rpc.VersionInfo.UPDATE_STATUS;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONValue;
@@ -23,10 +25,10 @@ import autotest.moblab.rpc.MoblabRpcHelper;
 import java.util.Collection;
 
 /**
- * The configuration wizard for Moblab. A wizard supports multiple modes -
- * the view mode and the edit mode. Each mode has its own UI. A wizard has
- * a list of cards. Each card is responsible for the configuration of one
- * piece of information.
+ * The configuration wizard for Moblab. A wizard supports multiple modes - the
+ * view mode and the edit mode. Each mode has its own UI. A wizard has a list of
+ * cards. Each card is responsible for the configuration of one piece of
+ * information.
  */
 public class ConfigWizard extends Composite {
   // All the wizard cards.
@@ -128,23 +130,43 @@ public class ConfigWizard extends Composite {
         FlowPanel updatePanel = new FlowPanel();
         updatePanel.add(new InlineLabel(info.getUpdateString()));
         Button btnUpdate = new Button(info.getUpdateAction());
-        btnUpdate.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            String windowText = "If an update is available, the device will be "
-              + "rebooted and all running jobs will be halted. "
-              + "This may take 5-10 minutes based on network speed. Proceed?";
-            if (Window.confirm(windowText)) {
-              MoblabRpcHelper.updateMoblab(new JsonRpcCallback() {
-                @Override
-                public void onSuccess(JSONValue result) {
-                  String messageText = "Device is rebooting";
-                  NotifyManager.getInstance().showMessage(messageText);
-                }
-              });
+        if (info.getMoblabUpdateStatus() == UPDATE_STATUS.UPDATE_DOCKER) {
+          btnUpdate.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              String windowText = "This software update will just take a "
+                  + "1-2 mins. "
+                  + "Please ensure no tests are running before the update. Proceed?";
+              if (Window.confirm(windowText)) {
+                MoblabRpcHelper.updateDocker(new JsonRpcCallback() {
+                  @Override
+                  public void onSuccess(JSONValue result) {
+                    String messageText = "Update complete";
+                    NotifyManager.getInstance().showMessage(messageText);
+                  }
+                });
+              }
             }
-          }
-        });
+          });
+        } else {
+          btnUpdate.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              String windowText = "If an update is available, the device will be "
+                  + "rebooted and all running jobs will be halted. "
+                  + "This may take 5-10 minutes based on network speed. Proceed?";
+              if (Window.confirm(windowText)) {
+                MoblabRpcHelper.updateMoblab(new JsonRpcCallback() {
+                  @Override
+                  public void onSuccess(JSONValue result) {
+                    String messageText = "Device is rebooting";
+                    NotifyManager.getInstance().showMessage(messageText);
+                  }
+                });
+              }
+            }
+          });
+        }
         updatePanel.add(btnUpdate);
         layoutTable.setWidget(row, 1, updatePanel);
         row++;
@@ -156,8 +178,7 @@ public class ConfigWizard extends Composite {
         layoutTable.setWidget(row, 1, new Label(info.getReleaseDescription()));
         row++;
         layoutTable.setWidget(row, 0, new Label("Moblab Identification"));
-        layoutTable.setWidget(row, 1, new Label(
-            info.getMoblabIdentification()));
+        layoutTable.setWidget(row, 1, new Label(info.getMoblabIdentification()));
         row++;
         layoutTable.setWidget(row, 0, new Label("Moblab Serial Number"));
         layoutTable.setWidget(row, 1, new Label(info.getMoblabSerialNumber()));
@@ -215,7 +236,7 @@ public class ConfigWizard extends Composite {
   }
 
   private void updateModeUI() {
-    switch(this.mode) {
+    switch (this.mode) {
       case Edit:
         contentContainer.setWidget(editMode.display());
         viewMode.hide();
@@ -228,12 +249,12 @@ public class ConfigWizard extends Composite {
   }
 
   public enum Mode {
-    View,
-    Edit
+    View, Edit
   }
 
   public interface ConfigWizardMode {
     public void hide();
+
     public Widget display();
   }
 }
