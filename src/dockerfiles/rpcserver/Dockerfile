@@ -41,7 +41,8 @@ RUN apt-get update && apt-get install -yq \
     fping \
     libssl-dev \
     unzip \
-    zlib1g-dev
+    zlib1g-dev \
+    libcap2-bin
 
 COPY --chown=moblab src/dockerfiles/rpcserver/requirements.txt ./
 RUN pip install --upgrade pip
@@ -67,7 +68,9 @@ RUN tar -xvzf google-chromeos-moblab.tar.gz
 RUN python -m pip install .
 RUN rm -rf /tmp/moblab_api_client_library
 
-RUN apt purge -yq unzip cmake libssl-dev zlib1g-dev curl
+RUN setcap cap_net_raw+ep /usr/bin/fping
+
+RUN apt purge -yq unzip cmake libssl-dev zlib1g-dev curl zlib1g-dev
 RUN apt-get clean
 
 WORKDIR /moblab
