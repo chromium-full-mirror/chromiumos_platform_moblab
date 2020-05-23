@@ -64,13 +64,20 @@ import {
 
 @Injectable({ providedIn: "root" })
 export class MoblabGrpcService {
-  moblabRpcService = new MoblabRpcServiceClient(
-    "http://localhost:6001",
-    null,
-    null
-  );
+  moblabRpcService = null;
 
-  constructor() {}
+  constructor() {
+    let url = new URL(window.location.href);
+    let service_url = new String(url.origin);
+    service_url.concat(url.hostname, ":6001");
+    console.log(service_url);
+
+    this.moblabRpcService = new MoblabRpcServiceClient(
+      service_url.toString(),
+      null,
+      null
+    );
+  }
 
   /** Method for submitting feedback and screenshots to Moblab-associated GCS
    *  bucket.
