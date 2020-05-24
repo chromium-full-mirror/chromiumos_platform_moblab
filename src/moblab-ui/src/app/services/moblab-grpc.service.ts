@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
+import {Injectable} from "@angular/core";
 import * as grpcWeb from "grpc-web";
 
-import { MoblabRpcServiceClient } from "./moblabrpc_grpc_web_pb";
+import {MoblabRpcServiceClient} from "./moblabrpc_grpc_web_pb";
 import {
   AbortJobsRequest,
   AbortJobsResponse,
@@ -62,14 +62,14 @@ import {
 
 } from "./moblabrpc_pb";
 
-@Injectable({ providedIn: "root" })
+@Injectable({providedIn: "root"})
 export class MoblabGrpcService {
   moblabRpcService = null;
 
   constructor() {
     let url = new URL(window.location.href);
-    let service_url = new String(url.origin);
-    service_url.concat(url.hostname, ":6001");
+    let service_url = new String(url.protocol);
+    service_url = service_url.concat("//", url.hostname, ":", "6001");
     console.log(service_url);
 
     this.moblabRpcService = new MoblabRpcServiceClient(
@@ -317,8 +317,8 @@ export class MoblabGrpcService {
   }
 
   getDutDetails(callback: (x: ConnectedDutInfo) => void,
-                errorHandlingCallback: (errorMsg: string) => void,
-                dut: string) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    dut: string) {
     const request = new GetDutDetailsRequest();
     request.setDut(dut)
 
@@ -336,10 +336,10 @@ export class MoblabGrpcService {
   }
 
   getNumJobs(callback: (x: number) => void,
-             id_filter?: string,
-             name_filter?: string, created_time_lt?: number, created_time_gt?: number,
-             status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
-             parent_id_filter?: string, dut_hostname_filter?: string) {
+    id_filter?: string,
+    name_filter?: string, created_time_lt?: number, created_time_gt?: number,
+    status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
+    parent_id_filter?: string, dut_hostname_filter?: string) {
     const request = new GetNumJobsRequest();
     if (id_filter) {
       request.setIdFilter(id_filter)
@@ -379,10 +379,10 @@ export class MoblabGrpcService {
   }
 
   getJobs(callback: (x: Job[]) => void,
-          queryStart: number, queryLimit: number, id_filter?: string,
-          name_filter?: string, created_time_lt?: number, created_time_gt?: number,
-          status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
-          parent_id_filter?: string, dut_hostname_filter?: string) {
+    queryStart: number, queryLimit: number, id_filter?: string,
+    name_filter?: string, created_time_lt?: number, created_time_gt?: number,
+    status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
+    parent_id_filter?: string, dut_hostname_filter?: string) {
     const request = new GetJobsRequest();
     request.setQueryStart(queryStart);
     request.setQueryLimit(queryLimit);
@@ -424,8 +424,8 @@ export class MoblabGrpcService {
   }
 
   abortJobs(callback: (message: string) => void,
-                errorHandlingCallback: (errorMsg: string) => void,
-                jobIds: number[]) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    jobIds: number[]) {
     const request = new AbortJobsRequest();
     request.setJobIdsList(jobIds);
 
@@ -443,8 +443,8 @@ export class MoblabGrpcService {
   }
 
   getJobDetails(callback: (x: Job) => void,
-                errorHandlingCallback: (errorMsg: string) => void,
-                id: string) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    id: string) {
     const request = new GetJobDetailsRequest();
     request.setId(id)
 
@@ -606,8 +606,8 @@ export class MoblabGrpcService {
   }
 
   getNumDutTasks(callback: (numDutTasks: number) => void,
-                 errorHandlingCallback: (errorMsg: string) => void,
-                 ip: string, start_time_gt?: number, end_time_lt?: number) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    ip: string, start_time_gt?: number, end_time_lt?: number) {
     const request = new GetNumDutTasksRequest();
 
     if (start_time_gt) {
@@ -634,9 +634,9 @@ export class MoblabGrpcService {
   }
 
   getDutTasks(callback: (x: DutTask[]) => void,
-              errorHandlingCallback: (errorMsg: string) => void,
-                ip: string, queryStart: number, queryLimit: number,
-                start_time_gt?: number, end_time_lt?: number) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    ip: string, queryStart: number, queryLimit: number,
+    start_time_gt?: number, end_time_lt?: number) {
     const request = new GetDutTasksRequest();
     request.setQueryStart(queryStart);
     request.setQueryLimit(queryLimit);
@@ -664,7 +664,7 @@ export class MoblabGrpcService {
   }
 
   repairDut(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-            dut_hostname: string) {
+    dut_hostname: string) {
     const request = new RepairHostRequest();
     request.setDutHostname(dut_hostname);
     const call = this.moblabRpcService.repair_host(
@@ -680,7 +680,7 @@ export class MoblabGrpcService {
   }
 
   reverifyDut(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-               dut_hostname: string) {
+    dut_hostname: string) {
     const request = new ReverifyHostRequest();
     request.setDutHostname(dut_hostname);
     const call = this.moblabRpcService.reverify_host(
@@ -696,7 +696,7 @@ export class MoblabGrpcService {
   }
 
   addAttributeToDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-               dut_ips: string[], key: string, value: string) {
+    dut_ips: string[], key: string, value: string) {
     const request = new AddAttributeToDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setKey(key);
@@ -715,7 +715,7 @@ export class MoblabGrpcService {
   }
 
   removeAttributeFromDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-                     dut_ips: string[], key: string) {
+    dut_ips: string[], key: string) {
     const request = new RemoveAttributeFromDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setKey(key);
@@ -732,7 +732,7 @@ export class MoblabGrpcService {
   }
 
   addLabelToDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-               dut_ips: string[], label: string) {
+    dut_ips: string[], label: string) {
     const request = new AddLabelToDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setLabel(label);
@@ -749,7 +749,7 @@ export class MoblabGrpcService {
   }
 
   removeLabelFromDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-           dut_ips: string[], label: string) {
+    dut_ips: string[], label: string) {
     const request = new RemoveLabelFromDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setLabel(label);
