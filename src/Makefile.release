@@ -1,5 +1,0 @@
-LABEL=beta
-REGISTRY=gcr.io/chromeos-partner-moblab
-EXTRA_ARGS="--no-cache"
-WATCHTOWER_CMD=--interval 3600 --monitor-only
-include common.mk
