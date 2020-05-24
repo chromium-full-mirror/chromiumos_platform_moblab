@@ -31,7 +31,8 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
         sudo \
         unzip \
         wget \
-        iputils-ping
+        iputils-ping \
+        psmisc
 
 # Install the google cloud sdk
 RUN echo \
