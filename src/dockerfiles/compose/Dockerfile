@@ -13,6 +13,7 @@ ENV REGISTRY_URI="${REGISTRY_URI}"
 ENV WATCHTOWER_CMD="${WATCHTOWER_CMD}"
 
 COPY docker-compose.yaml .
+COPY .env .
 
 # Test the config for syntax errors
 RUN docker-compose config
