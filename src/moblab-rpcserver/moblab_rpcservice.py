@@ -6,7 +6,7 @@
 import re
 
 from moblab_common import build_connector
-import dut_connector
+from moblab_common import dut_connector
 try:
     from chromite.lib import cros_logging as logging
 except ImportError:

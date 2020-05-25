@@ -272,6 +272,7 @@ services:
     volumes:
       - logs:/var/log/moblab
       - moblab_home:/home/moblab
+      - leases:/leases:ro
 
     networks:
       - moblab
