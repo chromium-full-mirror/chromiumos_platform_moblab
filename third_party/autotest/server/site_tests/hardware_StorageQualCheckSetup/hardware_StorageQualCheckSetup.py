@@ -62,7 +62,7 @@ class hardware_StorageQualCheckSetup(test.test):
         pool_name = self._get_running_host_pool()
         logging.info('Test is running on pool %s', pool_name)
 
-        afe = frontend.AFE(server='localhost', user='moblab')
+        afe = frontend.AFE(server='autotest:8888', user='moblab')
 
         # get autotest statuses that indicate a live host
         live_statuses = afe.host_statuses(live=True)
