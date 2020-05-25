@@ -5,39 +5,21 @@
 """Interface to the AFE RPC server for all moblab code."""
 
 import json
+import logging
+import os
 import re
 import subprocess
 
 import cachetools
-import logging
-
 from pssh.clients import ParallelSSHClient
 
-# fping, ping a range of IP addresses in parallel.
-# -c is the number of packets to send.
-# -p is the interval between ping packets to a single target.
-# -i is the interval between sending ping packets.
-FIND_DUT_CMD = [
-    '/usr/bin/fping -g 192.168.231.4 192.168.231.250 -c 1 -p 2 -i 2 -q'
-]
 
-SUBNET_DUT_SEARCH_RE = (r'(?P<ip>192\.168\.231\.[0-2][0-9][0-9]) : '
-                        r'xmt\/rcv\/%loss = [0-9]+\/[0-9]+\/0%.*')
-
+# Location where dhcp leases are stored.
+_DHCPD_LEASES = '/leases/dnsmasq.leases'
 
 class MoblabDUTConnectorException(Exception):
     """Generic exception for this module."""
     pass
-
-
-# ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master"
-#            | awk -F ':' '{gsub(/ /, "", $2); print $2}'
-
-# inf=$(ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master" |
-#       awk -F ':' '{gsub(/ /, "", $2); print $2}')
-# mac=$( cat /sys/class/net/${inf}/address)
-# echo $inf $mac
-
 
 class DUTInfo(object):
     """Class to encapsulate the information for a single DUT."""
@@ -48,7 +30,6 @@ class DUTInfo(object):
         ip_address = ip_address
         mac_address = mac_address
 
-
 class MoblabDUTConnector(object):
     """TODO ADD DOC"""
 
@@ -57,19 +38,25 @@ class MoblabDUTConnector(object):
         self.connected_duts = cachetools.TTLCache(25, 30 * 60)
 
     def find_duts(self):
-        self.connected_ip_addresses = []
-        process = subprocess.Popen(
-            FIND_DUT_CMD, stderr=subprocess.PIPE, shell=True, close_fds=False)
-        _, fping_result = process.communicate()
-        for line in fping_result.decode('utf-8').splitlines():
-            match = re.match(SUBNET_DUT_SEARCH_RE, line)
-            if match:
-                self.connected_ip_addresses.append(match.group('ip'))
-        if process.returncode == 1:
-            pass
-        else:
-            raise MoblabDUTConnectorException(fping_result)
-        self.connected_ip_addresses = list(set(self.connected_ip_addresses))
+         logging.info(list(self._get_dhcp_dut_leases()))
+         self.connected_ip_addresses = list(self._get_dhcp_dut_leases())
+
+    def _get_dhcp_dut_leases(self):
+     """ Extract information about connected duts from the dhcp server.
+
+     @return: A dict of ipaddress to mac address for each device connected.
+     """
+     if not os.path.exists(_DHCPD_LEASES):
+         return {}
+     lease_lines = open(_DHCPD_LEASES).readlines()
+
+     # Lease lines look like this:
+     # 1584225109 60:38:e0:e3:10:bd 192.168.231.113 * 01:60:38:e0:e3:10:bd
+     leases = {}
+     for lease in lease_lines:
+         items = lease.strip().split(' ')
+         leases[items[2]] = items[1]
+     return leases
 
     def reload_cache(self):
         for (ip, mac_address) in self.get_all_connected_mac():
@@ -106,17 +93,12 @@ class MoblabDUTConnector(object):
         return command_results
 
     def get_all_connected_mac(self):
-        cmd = """
-            inf=$(ip link show | grep "state UP" | grep "mode DEFAULT"  | grep "master" | awk -F ':' '{gsub(/ /, "", $2); print $2}')
-            mac=$( cat /sys/class/net/${inf}/address)
-            echo $mac
-        """
-        command_results = self.run_command_on_connected_duts(cmd)
-        return [(host, output) for (host, output) in command_results]
+        leases = self._get_dhcp_dut_leases()
+        return [(host, output) for (host, output) in leases.items()]
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
-            'timeout 10 mosys platform model', timeout=20)
+            'timeout 100 mosys platform model', timeout=100)
 
         def is_dut_connected(output):
             if output:
@@ -131,18 +113,24 @@ class MoblabDUTConnector(object):
 
     def get_connected_dut_firmware(self):
         command_results = self.run_command_on_connected_duts(
-            ('timeout 10 crossystem fwid; echo "";'
+            ('timeout 10 crossystem fwid; echo ""; '
+             'mosys platform model;'
              'chromeos-firmwareupdate --manifest'))
 
-        def get_rw_firmware(command_output):
+        def get_rw_firmware(command_output, model):
+            logging.info(model)
             json_data = json.loads(''.join(command_output))
-            for key in json_data.iterkeys():
-                return json_data[key]['host']['versions']['rw']
+            return json_data[model]['host']['versions']['rw']
             return None
 
-        return [(host, output[0], get_rw_firmware(output[1:]))
-                for (host, output) in command_results]
+        return [(host, output[0], get_rw_firmware(output[2:], output[1]))
+                for (host, output, stderr) in command_results]
 
     def update_firmware(self, ip_addresses):
         return self.run_command_on_ips(
             'chromeos-firmwareupdate -m autoupdate; reboot', ip_addresses)
+
+    def get_connected_dut_serialno(self):
+        command_results = self.run_command_on_connected_duts(
+            'timeout 20 vpd -g serial_number', timeout=20)
+        return [(host, output[0]) for (host, output, stderr) in command_results]
