@@ -160,7 +160,7 @@ services:
       - ALL
 
     environment:
-      - LABEL=$ATMONITORDB
+      - LABEL=$AT_MONITORDB
 
     ulimits:
       nofile:
@@ -227,6 +227,7 @@ services:
   moblab-ui:
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-ui:${MOBLAB_UI:-release}
     hostname: moblab-ui
+    restart: on-failure
 
     networks:
       - moblab
@@ -241,11 +242,13 @@ services:
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-rpcserver:${MOBLAB_RPCSERVER:-release}
     user: moblab
     hostname: moblab-rpcserver
+    restart: on-failure
 
     volumes:
       - logs:/var/log/moblab
       - moblab_home:/home/moblab
       - leases:/leases:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
 
     cap_add:
       - CAP_NET_BIND_SERVICE
