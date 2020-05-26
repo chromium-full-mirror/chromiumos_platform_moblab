@@ -64,6 +64,9 @@ setuptools.setup(
         'requests',
         'google-cloud-storage',
         'google-cloud-pubsub',
+        'docker',
+        'parallel-ssh'
+
     ],
     scripts=[
         'src/tools/create-moblab-id.py',

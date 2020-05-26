@@ -73,6 +73,10 @@ RUN setcap cap_net_raw+ep /usr/bin/fping
 RUN apt purge -yq unzip cmake libssl-dev zlib1g-dev curl zlib1g-dev
 RUN apt-get clean
 
+# Need to be in docker group to use docker API
+RUN addgroup --gid 412 docker
+RUN usermod -aG docker moblab
+
 WORKDIR /moblab
 USER moblab
 

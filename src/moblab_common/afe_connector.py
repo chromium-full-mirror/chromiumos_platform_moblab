@@ -14,6 +14,7 @@ from datetime import datetime
 
 import logging
 
+import docker
 import requests
 
 MOBLAB_RPC_SERVER = "autotest:8888"
@@ -22,9 +23,12 @@ _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
 def enroll_dut(ip_address):
+    client = docker.from_env()
+    afe_container = client.containers.get("default_autotest_1")
     cmd = "/usr/local/autotest/cli/atest host create %s" % ip_address
-    _LOGGER.error(cmd)
-    subprocess.call(cmd, shell=True)
+    _LOGGER.debug(cmd)
+    (exit_code, output) = afe_container.exec_run(cmd)
+    _LOGGER.debug(output)
 
 
 class AFEConnector(object):
@@ -473,6 +477,7 @@ class AFEConnector(object):
         return response.text
 
     def enroll_duts(self, ip_addresses):
+        _LOGGER.debug("Enroll hosts %s", ip_addresses)
         p = multiprocessing.Pool(20)
         p.map(enroll_dut, ip_addresses)
         p.close()
