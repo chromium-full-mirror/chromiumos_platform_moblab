@@ -14,7 +14,7 @@ FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 FROM python:3.8-buster as proto_build
 
 WORKDIR /
-COPY --from=protoc /protoc/* /usr/local/bin
+COPY --from=protoc /protoc/* /usr/local/bin/
 COPY third_party/autotest/tko/tko.proto /usr/local/autotest/tko/tko.proto
 RUN protoc --proto_path /usr/local/autotest/tko \
     --python_out=/usr/local/autotest/tko \
@@ -28,7 +28,12 @@ WORKDIR /
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
-RUN apt-get update && apt-get install -yq sudo vim
+RUN apt-get update && apt-get install -yq \
+    cmake \
+    libssl-dev \
+    sudo \
+    zlib1g-dev
+
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN usermod -aG sudo moblab
 
@@ -40,10 +45,10 @@ COPY --chown=moblab ./setup.py /moblab/
 COPY --chown=moblab --from=proto_build /usr/local/autotest /usr/local/autotest
 
 COPY src/dockerfiles/offloader/requirements.txt ./
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --upgrade pip && pip3 install --no-cache-dir -r requirements.txt
 
 WORKDIR /moblab
-RUN python ./setup.py install
+RUN python3 ./setup.py install
 
 WORKDIR /etc/moblab/moblab_results_uploader
 COPY --chown=moblab src/moblab_results_uploader/ /etc/moblab/moblab_results_uploader
@@ -51,6 +56,8 @@ COPY --chown=moblab src/moblab_results_uploader/ /etc/moblab/moblab_results_uplo
 RUN mkdir -p /var/log/moblab/offloader
 RUN chown -R moblab /var/log/moblab
 
+RUN apt purge -yq cmake libssl-dev zlib1g-dev
+RUN apt autoremove -yq
 RUN apt-get clean
 
 COPY --chown=moblab src/dockerfiles/offloader/start_offloader.sh /

@@ -8,7 +8,7 @@ RUN apt update
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
     curl \
-    gcc \
+    gcc-multilib \
     libftdi-dev \
     libudev-dev \
     make \

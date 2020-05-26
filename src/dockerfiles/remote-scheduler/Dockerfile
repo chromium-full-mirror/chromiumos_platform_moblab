@@ -60,6 +60,7 @@ RUN rm -rf /moblab
 RUN mkdir /var/log/moblab
 
 RUN apt purge -yq unzip cmake libssl-dev zlib1g-dev curl
+RUN apt autoremove -yq
 RUN apt-get clean
 
 WORKDIR /moblab

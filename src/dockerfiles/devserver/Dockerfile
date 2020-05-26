@@ -23,14 +23,14 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     bzip2 \
     ca-certificates \
     curl \
-    gcc \
+    gcc-multilib \
     openssh-server \
     python-dev procps \
     python3 \
     python3-dev \
     python3-distutils \
     sudo \
-    unzip 
+    unzip
 
 RUN mkdir /run/sshd
 RUN mkdir -p /config/.ssh/
@@ -53,7 +53,8 @@ COPY setup_chromite.py /
 RUN python -m pip install setuptools
 RUN python /setup_chromite.py install
 
-RUN apt purge -yq gcc
+RUN apt purge -yq gcc-multilib
+RUN apt autoremove -yq
 RUN apt-get clean
 
 # Devserver requires an apache server to be running for a good health check

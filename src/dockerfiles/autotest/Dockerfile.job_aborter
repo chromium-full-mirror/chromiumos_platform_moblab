@@ -35,6 +35,7 @@ RUN mkdir -p /usr/local/.cros-venv-cache
 RUN chown moblab /usr/local/.cros-venv-cache
 
 RUN apt purge -yq python-pip
+RUN apt autoremove -yq
 RUN apt-get clean
 
 CMD ["/job_aborter.sh"]

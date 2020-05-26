@@ -53,7 +53,13 @@ RUN rm -rf /moblab/third_party/autotest/site-packages
 RUN mkdir -p /moblab/third_party/autotest/site-packages
 
 RUN apt-get update && apt-get install --no-install-recommends -yq  \
-    python-pip gcc-multilib default-libmysqlclient-dev mariadb-client
+    cmake \
+    default-libmysqlclient-dev \
+    gcc-multilib \
+    libssl-dev \
+    mariadb-client \
+    python-pip \
+    zlib1g-dev
 
 COPY src/dockerfiles/autotest/requirements.txt ./
 
@@ -65,7 +71,8 @@ COPY --chown=moblab --from=source /chromite /chromite
 COPY src/dockerfiles/autotest/setup_chromite.py /
 RUN python2.7 /setup_chromite.py install
 
-RUN apt purge -yq gcc-multilib python-pip
+RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev zlib1g-dev
+RUN apt autoremove -yq
 RUN apt-get clean
 
 WORKDIR /moblab

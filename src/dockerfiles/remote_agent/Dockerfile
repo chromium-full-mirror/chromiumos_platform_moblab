@@ -37,7 +37,11 @@ COPY --chown=moblab --from=build /etc/moblab/remote_agent \
     /etc/moblab/remote_agent
 
 RUN apt-get update && apt-get install -yq \
-    mariadb-client
+    mariadb-client \
+    libssl-dev \
+    zlib1g-dev \
+    gcc-multilib \
+    cmake
 
 COPY --chown=moblab src/dockerfiles/remote_agent/requirements.txt ./
 RUN pip install --upgrade pip
@@ -55,6 +59,10 @@ RUN python -m pip install .
 RUN rm -rf /moblab
 
 RUN mkdir /var/log/moblab
+
+RUN apt purge -yq cmake libssl-dev zlib1g-dev gcc-multilib
+RUN apt autoremove -yq
+RUN apt-get clean
 
 WORKDIR /moblab
 USER moblab
