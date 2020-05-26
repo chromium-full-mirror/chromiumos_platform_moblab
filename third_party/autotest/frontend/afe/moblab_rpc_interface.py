@@ -13,6 +13,7 @@ import logging
 import multiprocessing
 import os
 import re
+import requests
 import shutil
 import socket
 import StringIO
@@ -480,16 +481,27 @@ def update_moblab():
 @rpc_utils.moblab_only
 def update_docker():
     """ RPC call to update and reboot moblab """
-    label = os.environ.get('LABEL', 'release')
     client = docker.from_env(timeout=300)
+    try:
+        container = client.containers.get('update')
+        raise error.RPCException("Already updating please wait.")
+    except docker.errors.NotFound:
+        pass
+
+    label = os.environ.get('LABEL', 'release')
     container = client.containers.run(
         'gcr.io/chromeos-partner-moblab/watchtower:%s' % label,
         volumes=['/var/run/docker.sock:/var/run/docker.sock'],
         name='update',
         detach=True,
         command='--run-once')
-    container.wait()
-    container.remove()
+    try:
+        container.wait(timeout=120)
+    except requests.exceptions.ReadTimeout:
+        container.stop()
+    finally:
+        container.remove()
+    return rpc_utils.prepare_for_serialization("All Done")
 
 
 def _check_for_system_update():
