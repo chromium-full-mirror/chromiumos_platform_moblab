@@ -778,21 +778,17 @@ class host_create(BaseHostModCreate):
                 'host_info_store': store
         }
         try:
-            if bin_utils.ping(host, tries=1, deadline=1) == 0:
-                serials = self.attributes.get('serials', '').split(',')
-                adb_serial = self.attributes.get('serials')
-                host_dut = hosts.create_host(machine,
-                                             adb_serial=adb_serial)
+            serials = self.attributes.get('serials', '').split(',')
+            adb_serial = self.attributes.get('serials')
+            host_dut = hosts.create_host(machine,
+                                            adb_serial=adb_serial)
 
-                info = HostInfo(host, host_dut.get_platform(),
-                                host_dut.get_labels())
-                # Clean host to make sure nothing left after calling it,
-                # e.g. tunnels.
-                if hasattr(host_dut, 'close'):
-                    host_dut.close()
-            else:
-                # Can't ping the host, use default information.
-                info = HostInfo(host, None, [])
+            info = HostInfo(host, host_dut.get_platform(),
+                            host_dut.get_labels())
+            # Clean host to make sure nothing left after calling it,
+            # e.g. tunnels.
+            if hasattr(host_dut, 'close'):
+                host_dut.close()
         except (socket.gaierror, error.AutoservRunError,
                 error.AutoservSSHTimeout):
             # We may be adding a host that does not exist yet or we can't
