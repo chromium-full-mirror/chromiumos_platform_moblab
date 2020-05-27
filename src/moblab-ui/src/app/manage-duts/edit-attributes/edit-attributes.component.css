@@ -25,8 +25,8 @@
   display:inline-block;
   border: 1px solid #ebebeb;
   font-size:13px;
-  padding: 0px 5px 0px 5px;
-  margin: 0px 10px 0px 10px;
+  padding: 5px 5px 0px 5px;
+  margin: 5px 10px 5px 10px;
 }
 
 .key-form-field {
