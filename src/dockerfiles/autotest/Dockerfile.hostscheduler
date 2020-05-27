@@ -16,4 +16,6 @@ RUN ln -s /usr/local/lib/python2.7/site-packages/* \
 COPY host_scheduler.sh /
 RUN chmod uog+rx /host_scheduler.sh
 
+RUN ln -sf /usr/local/bin/py* /usr/bin
+
 CMD ["/host_scheduler.sh"]

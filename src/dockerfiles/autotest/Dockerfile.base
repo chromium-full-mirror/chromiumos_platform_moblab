@@ -52,6 +52,8 @@ COPY --chown=moblab --from=protobuild /moblab/third_party/autotest/tko/*pb2* /mo
 RUN rm -rf /moblab/third_party/autotest/site-packages
 RUN mkdir -p /moblab/third_party/autotest/site-packages
 
+RUN ln -sf /usr/local/bin/py* /usr/bin
+
 RUN apt-get update && apt-get install --no-install-recommends -yq  \
     cmake \
     default-libmysqlclient-dev \
@@ -71,7 +73,7 @@ COPY --chown=moblab --from=source /chromite /chromite
 COPY src/dockerfiles/autotest/setup_chromite.py /
 RUN python2.7 /setup_chromite.py install
 
-RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev zlib1g-dev
+RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev
 RUN apt autoremove -yq
 RUN apt-get clean
 

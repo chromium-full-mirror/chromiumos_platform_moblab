@@ -58,6 +58,8 @@ RUN apt purge -yq python-pip libcap2-bin
 RUN apt autoremove -yq
 RUN apt-get clean
 
+RUN ln -sf /usr/local/bin/py* /usr/bin
+
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 CMD ["/monitor_db.sh"]

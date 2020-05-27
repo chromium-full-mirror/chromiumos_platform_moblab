@@ -38,4 +38,6 @@ RUN apt purge -yq python-pip
 RUN apt autoremove -yq
 RUN apt-get clean
 
+RUN ln -sf /usr/local/bin/py* /usr/bin
+
 CMD ["/job_aborter.sh"]
