@@ -160,7 +160,7 @@ services:
       - ALL
 
     environment:
-      - LABEL=$ATMONITORDB
+      - LABEL=$AT_MONITORDB
 
     ulimits:
       nofile:
