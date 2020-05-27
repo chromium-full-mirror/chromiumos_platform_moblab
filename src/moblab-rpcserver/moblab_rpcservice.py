@@ -431,7 +431,7 @@ class MoblabService(object):
 
         if failures:
             response_message += "Failures on the following DUTs:\n"
-            for dut_hostname, message in failures.iteritems():
+            for dut_hostname, message in failures.items():
                 response_message += "{}: {}\n".format(dut_hostname, message)
 
         return response_message
