@@ -19,12 +19,18 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.i18n.shared.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
+import com.google.gwt.core.client.JsDate;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Date;
+import java.util.Calendar;
 
 /**
  * Utility methods.
@@ -35,6 +41,8 @@ public class AfeUtils {
     public static final ClassFactory factory = new SiteClassFactory();
 
     private static StaticDataRepository staticData = StaticDataRepository.getRepository();
+
+    public static int timezoneOffset = 0;
 
     public static String formatStatusCounts(JSONObject counts, String joinWith) {
         StringBuilder result = new StringBuilder();
@@ -354,12 +362,11 @@ public class AfeUtils {
                                                   String sourceFieldName,
                                                   String targetFieldName) {
         JSONValue dateValue = row.get(sourceFieldName);
-        String date = "";
-        if (dateValue.isNull() == null) {
-            date = dateValue.isString().stringValue();
-            date = date.substring(0, date.length() - 3);
-        }
-        row.put(targetFieldName, new JSONString(date));
+        DateTimeFormat in_format = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormat out_format = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
+        Date date = in_format.parse(dateValue.isString().stringValue());
+        TimeZone tz = TimeZone.createTimeZone(timezoneOffset);
+        row.put(targetFieldName, new JSONString(out_format.format(date, tz)));
     }
 
     public static void callGetJobHistory(JSONObject params,

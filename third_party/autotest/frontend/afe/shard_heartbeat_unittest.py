@@ -161,7 +161,7 @@ def _past_timestamp(delta=None):
     @param delta: A datetime.timedelta object.
     @return: A datetime.datetime object.
     """
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     if delta is None:
         return now
     return now - delta

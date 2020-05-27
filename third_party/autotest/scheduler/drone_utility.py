@@ -377,7 +377,7 @@ class DroneUtility(object):
                 try:
                     file_object.write('%s:%s\n%s\n%s' %
                                       (hostname, destination_path,
-                                       datetime.datetime.now(),
+                                       datetime.datetime.utcnow(),
                                        traceback.format_exc()))
                 finally:
                     file_object.close()

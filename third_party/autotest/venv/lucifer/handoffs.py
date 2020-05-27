@@ -33,7 +33,7 @@ def incomplete():
     Q = autotest.deps_load('django.db.models').Q
     # Time ---*---------|---------*-------|--->
     #    incomplete   cutoff   newborn   now
-    cutoff = (datetime.datetime.now()
+    cutoff = (datetime.datetime.utcnow()
               - datetime.timedelta(seconds=_JOB_GRACE_SECS))
     return (models.JobHandoff.objects
             .filter(completed=False, created__lt=cutoff)
@@ -66,7 +66,7 @@ def _clean_up_hqes(hqes):
                 active=False,
                 status=models.HostQueueEntry.Status.FAILED)
     (hqes.exclude(started_on=None)
-     .update(finished_on=datetime.datetime.now()))
+     .update(finished_on=datetime.datetime.utcnow()))
 
 
 def _clean_up_hosts(host_ids):

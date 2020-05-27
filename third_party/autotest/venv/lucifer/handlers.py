@@ -63,7 +63,7 @@ class EventHandler(object):
         models = autotest.load('frontend.afe.models')
         self._job.hostqueueentry_set.all().update(
                 status=models.HostQueueEntry.Status.RUNNING,
-                started_on=datetime.datetime.now())
+                started_on=datetime.datetime.utcnow())
 
     def _handle_gathering(self, _msg):
         models = autotest.load('frontend.afe.models')
@@ -209,7 +209,7 @@ class EventHandler(object):
         hqe.active = False
         hqe.complete = True
         if hqe.started_on:
-            hqe.finished_on = datetime.datetime.now()
+            hqe.finished_on = datetime.datetime.utcnow()
         hqe.save(update_fields=['status', 'active', 'complete', 'finished_on'])
 
 

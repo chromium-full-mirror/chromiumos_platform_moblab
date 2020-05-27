@@ -40,7 +40,7 @@ def canonicalize_suite_name(suite_name):
 
 def _formatted_now():
     """Format the current datetime."""
-    return datetime.datetime.now().strftime(time_utils.TIME_FMT)
+    return datetime.datetime.utcnow().strftime(time_utils.TIME_FMT)
 
 
 def make_builds_from_options(options):

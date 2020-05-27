@@ -596,7 +596,7 @@ def _run_suite(
     @param bug_template: A template dictionary specifying the default bug
                          filing options for failures in this suite.
     """
-    timestamp = datetime.datetime.now().strftime(time_utils.TIME_FMT)
+    timestamp = datetime.datetime.utcnow().strftime(time_utils.TIME_FMT)
     utils.write_keyval(
         job.resultdir,
         {constants.ARTIFACT_FINISHED_TIME: timestamp})

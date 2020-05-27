@@ -225,7 +225,7 @@ def generate_suite_report(suite_job_id, afe=None, tko=None,
 
         if reset_finish_time:
             suite_timeout_time = suite_start_time + DEFAULT_SUITE_TIMEOUT
-            current_time = to_epoch_time_int(datetime.datetime.now())
+            current_time = to_epoch_time_int(datetime.datetime.utcnow())
             suite_finish_time = min(current_time, suite_timeout_time)
 
         histories = [HostJobHistory.get_host_history(afe, hostname,

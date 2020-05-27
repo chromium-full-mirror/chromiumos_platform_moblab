@@ -39,7 +39,7 @@ class TelemetrySanity(object):
 
 
   def Run(self):
-    start = datetime.datetime.now()
+    start = datetime.datetime.utcnow()
 
     for i in range(self.count):
       if self.count > 1:
@@ -51,7 +51,7 @@ class TelemetrySanity(object):
       if self.run_screenlock:
         self.RunScreenlockTest()
 
-    elapsed = datetime.datetime.now() - start
+    elapsed = datetime.datetime.utcnow() - start
     logging.info('Tests succeeded in %s seconds.', elapsed.seconds)
 
 

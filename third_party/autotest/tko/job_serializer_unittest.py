@@ -29,7 +29,7 @@ class JobSerializerUnittest(unittest.TestCase):
                                         123456))
 
         tko_kernel = models.kernel('My Computer', tko_patches, '1234567')
-        tko_time = datetime.now()
+        tko_time = datetime.utcnow()
 
         tko_job = models.job('/tmp/', 'autotest', 'test', 'My Computer',
                              tko_time, tko_time, tko_time, 'root',
