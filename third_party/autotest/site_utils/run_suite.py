@@ -1602,7 +1602,7 @@ def create_suite(afe, options):
     @return: The afe_job_id of the new suite job.
     """
     logging.info('%s Submitted create_suite_job rpc',
-                 diagnosis_utils.JobTimer.format_time(datetime.now()))
+                 diagnosis_utils.JobTimer.format_time(datetime.utcnow()))
 
     return afe.run(
         'create_suite_job',
@@ -1760,7 +1760,7 @@ def _handle_job_wait(afe, job_id, options, job_timer, is_real_time):
                          job_timer.timeout_hours - job_timer.elapsed_time())
         time.sleep(10)
     logging.info('%s Suite job is finished.',
-                 diagnosis_utils.JobTimer.format_time(datetime.now()))
+                 diagnosis_utils.JobTimer.format_time(datetime.utcnow()))
     # For most cases, ResultCollector should be able to determine whether
     # a suite has timed out by checking information in the test view.
     # However, occationally tko parser may fail on parsing the
@@ -1781,7 +1781,7 @@ def _handle_job_wait(afe, job_id, options, job_timer, is_real_time):
                                                   options.suite_args)
     # Start collecting test results.
     logging.info('%s Start collecting test results and dump them to json.',
-                 diagnosis_utils.JobTimer.format_time(datetime.now()))
+                 diagnosis_utils.JobTimer.format_time(datetime.utcnow()))
     TKO = frontend_wrappers.RetryingTKO(server=instance_server,
                                         timeout_min=options.afe_timeout_mins,
                                         delay_sec=options.delay_sec)
@@ -1824,7 +1824,7 @@ def _handle_job_wait(afe, job_id, options, job_timer, is_real_time):
         logging.info('Reason: %s', result.message)
 
     logging.info('\n %s Output below this line is for buildbot consumption:',
-                 diagnosis_utils.JobTimer.format_time(datetime.now()))
+                 diagnosis_utils.JobTimer.format_time(datetime.utcnow()))
     return result.suite_result(output_dict)
 
 
@@ -1860,7 +1860,7 @@ def _should_run(options):
                           options.test_source_build, str(ex))
         return False
 
-    start_time = str(datetime.now() -
+    start_time = str(datetime.utcnow() -
                      timedelta(days=_SEARCH_JOB_MAX_DAYS))
     afe = _create_afe(options)
     afe_jobs = afe.get_jobs(

@@ -448,7 +448,7 @@ class UpdateEngineUtil(object):
 
         # The log does not include the year, so set it as this year.
         # This assumption could cause incorrect behavior, but is unlikely to.
-        current_year = datetime.datetime.now().year
+        current_year = datetime.datetime.utcnow().year
         log_datetime = datetime.datetime.strptime(match, LOG_TIMESTAMP_FORMAT)
         log_datetime = log_datetime.replace(year=current_year)
 

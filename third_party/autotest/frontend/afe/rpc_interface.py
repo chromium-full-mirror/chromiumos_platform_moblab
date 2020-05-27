@@ -371,7 +371,7 @@ def modify_host(id, **kwargs):
     # This is required to make `lock_time` for a host be exactly same
     # between the master and a shard.
     if kwargs.get('locked', None) and 'lock_time' not in kwargs:
-        kwargs['lock_time'] = datetime.datetime.now()
+        kwargs['lock_time'] = datetime.datetime.utcnow()
 
     # force_modifying_locking is not an internal field in database, remove.
     shard_kwargs = dict(kwargs)
@@ -445,7 +445,7 @@ def modify_hosts(host_filter_data, update_data):
     # This is required to make `lock_time` for a host be exactly same
     # between the master and a shard.
     if update_data.get('locked', None) and 'lock_time' not in update_data:
-        update_data['lock_time'] = datetime.datetime.now()
+        update_data['lock_time'] = datetime.datetime.utcnow()
     for host in hosts:
         host.update_object(update_data)
 
@@ -1753,7 +1753,7 @@ def get_static_data():
 
 
 def get_server_time():
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    return datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
 
 
 def ping_db():

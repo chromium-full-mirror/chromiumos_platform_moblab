@@ -32,7 +32,7 @@ def is_job_expired(age_limit, timestamp):
     return True
   job_time = time_utils.time_string_to_datetime(timestamp)
   expiration = job_time + datetime.timedelta(days=age_limit)
-  return datetime.datetime.now() >= expiration
+  return datetime.datetime.utcnow() >= expiration
 
 
 def get_job_id_or_task_id(result_dir):

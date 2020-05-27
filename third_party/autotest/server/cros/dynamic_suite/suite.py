@@ -1004,7 +1004,7 @@ class _BaseSuite(object):
         if retry_for:
             msg = msg + ', to retry afe job %d' % retry_for
         logging.debug(msg)
-        begin_time_str = datetime.datetime.now().strftime(time_utils.TIME_FMT)
+        begin_time_str = datetime.datetime.utcnow().strftime(time_utils.TIME_FMT)
         try:
             job = self._job_creator.create_job(test, retry_for=retry_for)
         except (error.NoEligibleHostException, proxy.ValidationError) as e:

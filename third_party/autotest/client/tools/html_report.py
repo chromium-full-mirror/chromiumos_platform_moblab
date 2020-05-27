@@ -1420,7 +1420,7 @@ return true;
     print >> output, '<h2 id=\"page_title\">Autotest job execution report</h2>'
 
     # formating date and time to print
-    t = datetime.datetime.now()
+    t = datetime.datetime.utcnow()
 
     epoch_sec = time.mktime(t.timetuple())
     now = datetime.datetime.fromtimestamp(epoch_sec)

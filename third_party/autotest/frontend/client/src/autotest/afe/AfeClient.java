@@ -14,12 +14,23 @@ import autotest.common.ui.CustomTabPanel;
 import autotest.common.ui.NotifyManager;
 import autotest.common.ui.TabView;
 
+import static autotest.afe.AfeUtils.timezoneOffset;
+
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.Window.Location;
 
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.core.client.JsDate;
 
 public class AfeClient implements EntryPoint {
     private JobListView jobList;
@@ -38,9 +49,9 @@ public class AfeClient implements EntryPoint {
         NotifyManager.getInstance().initialize();
 
         // initialize static data, and don't show main UI until that's done
-        StaticDataRepository.getRepository().refresh(
-                                 new StaticDataRepository.FinishedCallback() {
+        StaticDataRepository.getRepository().refresh(new StaticDataRepository.FinishedCallback() {
             public void onFinished() {
+                timezoneOffset = JsDate.create().getTimezoneOffset() * 2;
                 finishLoading();
             }
         });
@@ -55,15 +66,12 @@ public class AfeClient implements EntryPoint {
     protected void finishLoading() {
         SiteCommonClassFactory.globalInitialize();
 
-
-        boolean is_moblab = StaticDataRepository.getRepository().getData(
-            "is_moblab").isBoolean().booleanValue();
+        boolean is_moblab = StaticDataRepository.getRepository().getData("is_moblab").isBoolean().booleanValue();
         mainTabPanel = new CustomTabPanel(is_moblab);
 
         Document.get().getElementById("moblab_setup").removeClassName("hidden");
         Document.get().getElementById("mobmonitor_link").setAttribute("href",
-            "http://" + Location.getHostName() + ":9991");
-
+                "http://" + Location.getHostName() + ":9991");
 
         jobList = new JobListView(new JobSelectListener() {
             public void onJobSelected(int jobId) {
@@ -98,8 +106,7 @@ public class AfeClient implements EntryPoint {
             }
         }, jobCreateListener);
 
-        TabView[] tabViews = new TabView[] {jobList, jobDetail, createJob,
-                                            hostListView, hostDetailView};
+        TabView[] tabViews = new TabView[] { jobList, jobDetail, createJob, hostListView, hostDetailView };
         for (TabView tabView : tabViews) {
             mainTabPanel.addTabView(tabView);
         }

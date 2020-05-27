@@ -36,10 +36,13 @@ import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.i18n.shared.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Date;
 
 public class JobDetailView extends DetailView implements TableWidgetFactory {
     private static final String[][] JOB_HOSTS_COLUMNS = {
@@ -167,7 +170,11 @@ public class JobDetailView extends DetailView implements TableWidgetFactory {
                 double priorityValue = jobObject.get("priority").isNumber().getValue();
                 String priorityName = staticData.getPriorityName(priorityValue);
                 showText(priorityName, "view_priority");
-                showField(jobObject, "created_on", "view_created");
+                DateTimeFormat in_format = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormat out_format = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
+                Date date = in_format.parse(jobObject.get("created_on").isString().stringValue());
+                TimeZone tz = TimeZone.createTimeZone(AfeUtils.timezoneOffset);
+                showText(out_format.format(date, tz), "view_created");
                 showField(jobObject, "timeout_mins", "view_timeout");
                 String imageUrlString = "";
                 if (jobObject.containsKey("image")) {
