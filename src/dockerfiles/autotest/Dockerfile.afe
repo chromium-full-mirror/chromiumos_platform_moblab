@@ -84,6 +84,9 @@ RUN apt-get clean
 
 RUN ln -s /usr/local/lib/python2.7/site-packages/* /moblab/third_party/autotest/site-packages
 
+COPY afe_startup.sh /
+RUN chmod uog+rx /afe_startup.sh
+
 RUN addgroup --gid 412 docker
 USER moblab
 ENV USER=moblab
@@ -96,5 +99,7 @@ RUN chmod -R 600 /home/moblab/.ssh/*
 COPY ssh_config /home/moblab/.ssh/config
 RUN touch /home/moblab/.boto
 RUN sudo usermod -aG docker $USER
+
+
 EXPOSE 8888
-CMD ["/usr/sbin/apache2ctl", "-DFOREGROUND"]
+CMD ["/afe_startup.sh"]
