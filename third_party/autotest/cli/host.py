@@ -828,20 +828,21 @@ class host_create(BaseHostModCreate):
     def execute(self):
         """Execute 'atest host create'."""
         successful_hosts = []
-        for host in self.hosts:
-            try:
-                self._execute_add_one_host(host)
-                successful_hosts.append(host)
-            except topic_common.CliError:
-                raise
+        try:
+            for host in self.hosts:
+                try:
+                    self._execute_add_one_host(host)
+                    successful_hosts.append(host)
+                except topic_common.CliError:
+                    raise
 
-        if successful_hosts:
-            self._set_acls(successful_hosts, self.acls)
-
+            if successful_hosts:
+                self._set_acls(successful_hosts, self.acls)
+        finally:
             if not self.locked:
                 for host in successful_hosts:
                     self.execute_rpc('modify_host', id=host, locked=False,
-                                     lock_reason='')
+                                    lock_reason='')
         return successful_hosts
 
 
