@@ -31,15 +31,15 @@ import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
 import {TableHeaderSelectorComponent} from '../widgets/table-header-selector/table-header-selector.component';
 
-const JOB_NAME = 'name';
-const JOB_ID = 'id';
-const JOB_PRIORITY = 'priority';
-const QUEUE_STATUS = 'queueStatus';
-const JOB_RELATIONSHIP = 'relationship';
-const JOB_START_TIME_FROM_FILTER = 'startTimeFromFilter';
-const JOB_START_TIME_TO_FILTER = 'startTimeToFilter';
-const PARENT_JOB_ID = 'parent_job_id';
-const DUT_RUN_ON = 'dut_run_on';
+export const JOB_NAME = 'name';
+export const JOB_ID = 'id';
+export const JOB_PRIORITY = 'priority';
+export const QUEUE_STATUS = 'queueStatus';
+export const JOB_RELATIONSHIP = 'relationship';
+export const JOB_START_TIME_FROM_FILTER = 'startTimeFromFilter';
+export const JOB_START_TIME_TO_FILTER = 'startTimeToFilter';
+export const PARENT_JOB_ID = 'parent_job_id';
+export const DUT_RUN_ON = 'dut_run_on';
 const FILTER_PARAMETERS = [
   JOB_NAME,
   JOB_ID,

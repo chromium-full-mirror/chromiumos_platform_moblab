@@ -16,6 +16,7 @@ describe('BuildSelectFormsComponent', () => {
   let component: BuildSelectFormsComponent;
   let fixture: ComponentFixture<BuildSelectFormsComponent>;
 
+  let listMilestonesSpy: jasmine.Spy;
   let listModelsSpy: jasmine.Spy;
   let listBuildTargetsSpy: jasmine.Spy;
   let listBuildVersionsSpy: jasmine.Spy;
@@ -24,11 +25,12 @@ describe('BuildSelectFormsComponent', () => {
 
   let boardSelectorComponent: BasicSelectorComponent;
   let modelSelectorComponent: BasicSelectorComponent;
+  let milestoneSelectorComponent: BasicSelectorComponent;
   let buildSelectorComponent: BasicSelectorComponent;
   let poolSelectorComponent: BasicSelectorComponent;
 
   function applySelection(targetComponent: BasicSelectorComponent, value: string) {
-    targetComponent.onChange({'value' : value});
+    targetComponent.onChange(new Event('mock event'));
   }
 
   beforeEach(async(() => {
@@ -59,6 +61,10 @@ describe('BuildSelectFormsComponent', () => {
       component.updateModels(['Model1', 'Model2']);
     });
     // @ts-ignore
+    listMilestonesSpy = spyOn<any>(component.moblabGrpcService, 'listMilestones').and.callFake(() => {
+      component.updateModels(['R01', 'R02']);
+    });
+    // @ts-ignore
     listBuildTargetsSpy = spyOn<any>(component.moblabGrpcService, 'listBuildTargets').and.callFake(() => {
       component.updateBuildTargets(['BuildTarget1', 'BuildTarget2']);
     });
@@ -77,6 +83,8 @@ describe('BuildSelectFormsComponent', () => {
 
     modelSelectorComponent = fixture.debugElement.query(By.css(
       '#modelSelector')).componentInstance;
+    milestoneSelectorComponent = fixture.debugElement.query(By.css(
+      '#milestoneSelector')).componentInstance;
     boardSelectorComponent = fixture.debugElement.query(By.css(
       '#boardSelector')).componentInstance;
     buildSelectorComponent = fixture.debugElement.query(By.css(
@@ -97,6 +105,9 @@ describe('BuildSelectFormsComponent', () => {
 
     applySelection(modelSelectorComponent, 'MockModel1');
     expect(boardSelectorComponent.isDisabled()).toBe(false);
+
+    applySelection(milestoneSelectorComponent, 'R01');
+    expect(milestoneSelectorComponent.isDisabled()).toBe(false);
 
     applySelection(boardSelectorComponent, 'BuildTarget1');
     expect(buildSelectorComponent.isDisabled()).toBe(false);
