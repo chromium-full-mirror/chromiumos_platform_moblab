@@ -155,8 +155,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def list_build_versions(self, request, _context):
-        response = moblabrpc_pb2.ListBuildsResponse(
-            builds=self.build_connector.get_builds_for_milestone(
+        response = moblabrpc_pb2.ListBuildVersionsResponse(
+            build_versions=self.build_connector.get_builds_for_milestone(
                 request.build_target, request.milestone))
         return response
 

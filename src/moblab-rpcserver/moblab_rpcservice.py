@@ -231,7 +231,7 @@ class MoblabService(object):
         # Get the intersection of build_target available to this moblab and
         # the build_target on the devices connected.
         available_build_targets = \
-            self.build_connector.get_build_targets_available()
+            self.build_connector.get_boards_available()
         connected_build_targets = self.list_connected_dut_build_targets()
         return list(
             set(available_build_targets).intersection(connected_build_targets))
