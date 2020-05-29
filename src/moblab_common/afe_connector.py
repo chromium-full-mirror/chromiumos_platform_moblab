@@ -243,6 +243,7 @@ class AFEConnector(object):
         params = {
             "query_start": query_start,
             "query_limit": query_limit,
+            'sort_by': ['-created_on']
         }
 
         if id_filter:
