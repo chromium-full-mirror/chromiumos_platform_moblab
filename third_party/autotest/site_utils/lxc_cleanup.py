@@ -34,7 +34,7 @@ AFE = frontend_wrappers.RetryingAFE(timeout_min=0.1, delay_sec=10)
 # The cutoff time to declare a test job is completed and container is orphaned.
 # This is to avoid a race condition that scheduler aborts a job and autoserv
 # is still in the process of destroying the container it used.
-FINISHED_JOB_CUTOFF_TIME = datetime.datetime.now() - datetime.timedelta(hours=1)
+FINISHED_JOB_CUTOFF_TIME = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
 
 def is_container_orphaned(container):
     """Check if a container is orphaned.

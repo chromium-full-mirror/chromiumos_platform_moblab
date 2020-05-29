@@ -740,7 +740,7 @@ class Host(model_logic.ModelWithInvalid, rdb_model_extensions.AbstractHostModel,
         if self.locked and not self.locked_by:
             self.locked_by = User.current_user()
             if not self.lock_time:
-                self.lock_time = datetime.now()
+                self.lock_time = datetime.utcnow()
             self.dirty = True
         elif not self.locked and self.locked_by:
             self.locked_by = None
@@ -1626,7 +1626,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
             reboot_before=options.get('reboot_before'),
             reboot_after=options.get('reboot_after'),
             parse_failed_repair=options.get('parse_failed_repair'),
-            created_on=datetime.now(),
+            created_on=datetime.utcnow(),
             drone_set=drone_set,
             parent_job=options.get('parent_job_id'),
             test_retry=options.get('test_retry'),
@@ -1763,7 +1763,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
         """
         if cls.SKIP_JOBS_CREATED_BEFORE <= 0:
             return ''
-        cutoff = datetime.now()- timedelta(hours=cls.SKIP_JOBS_CREATED_BEFORE)
+        cutoff = datetime.utcnow()- timedelta(hours=cls.SKIP_JOBS_CREATED_BEFORE)
         return (cls.EXCLUDE_OLD_JOBS_CLAUSE %
                 {'cutoff': cutoff.strftime('%Y-%m-%d %H:%M:%S')})
 
@@ -2074,7 +2074,7 @@ class HostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
         existing_hqe_ids = set(AbortedHostQueueEntry.objects.
                                filter(queue_entry_id__in=child_ids).
                                values_list('queue_entry_id', flat=True))
-        now = datetime.now()
+        now = datetime.utcnow()
         user = User.current_user()
         aborted_hqes = [AbortedHostQueueEntry(queue_entry=hqe,
                 aborted_by=user, aborted_on=now) for hqe in children
@@ -2152,7 +2152,7 @@ class AbortedHostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
 
 
     def save(self, *args, **kwargs):
-        self.aborted_on = datetime.now()
+        self.aborted_on = datetime.utcnow()
         super(AbortedHostQueueEntry, self).save(*args, **kwargs)
 
     class Meta:
@@ -2256,7 +2256,7 @@ class SpecialTask(dbmodels.Model, model_logic.ModelExtensions):
         """
         logging.info('Starting: %s', self)
         self.is_active = True
-        self.time_started = datetime.now()
+        self.time_started = datetime.utcnow()
         self.save()
 
 
@@ -2270,7 +2270,7 @@ class SpecialTask(dbmodels.Model, model_logic.ModelExtensions):
         self.is_complete = True
         self.success = success
         if self.time_started:
-            self.time_finished = datetime.now()
+            self.time_finished = datetime.utcnow()
         self.save()
 
 

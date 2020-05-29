@@ -127,7 +127,7 @@ class NewDatetime(datetime.datetime):
 
     datetime.datetime cannot be patched directly since it's a built-in
     type that is immutable. NewDatetime is created here for patching
-    datetime.datetime.now.
+    datetime.datetime.utcnow.
     """
     @classmethod
     def utcnow(cls):

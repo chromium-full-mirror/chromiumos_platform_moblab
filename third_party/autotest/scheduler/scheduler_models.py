@@ -899,11 +899,11 @@ class HostQueueEntry(DBObject):
 
 
     def set_started_on_now(self):
-        self.update_field('started_on', datetime.datetime.now())
+        self.update_field('started_on', datetime.datetime.utcnow())
 
 
     def set_finished_on_now(self):
-        self.update_field('finished_on', datetime.datetime.now())
+        self.update_field('finished_on', datetime.datetime.utcnow())
 
 
     def is_hostless(self):

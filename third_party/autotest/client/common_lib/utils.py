@@ -2982,10 +2982,10 @@ def background_sample_until_condition(
     """
     log = []
 
-    end_time = datetime.datetime.now() + datetime.timedelta(
+    end_time = datetime.datetime.utcnow() + datetime.timedelta(
             seconds = timeout + sleep_interval)
 
-    while condition() and datetime.datetime.now() < end_time:
+    while condition() and datetime.datetime.utcnow() < end_time:
         log.append(function())
         time.sleep(sleep_interval)
     return log

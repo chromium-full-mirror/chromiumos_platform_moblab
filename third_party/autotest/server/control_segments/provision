@@ -53,14 +53,14 @@ def provision_machine(machine):
         # Don't fail while updating the labels, provision is flaky enough by
         # itself.
         label_update_success = True
-        start_time = datetime.datetime.now()
+        start_time = datetime.datetime.utcnow()
         try:
             host.labels.update_labels(host, keep_pool=True)
         except Exception:
             logging.exception('Exception while updating labels.')
             label_update_success = False
 
-        end_time = datetime.datetime.now()
+        end_time = datetime.datetime.utcnow()
         duration = (end_time - start_time).total_seconds()
 
         fields = {'success': label_update_success,

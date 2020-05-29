@@ -1272,7 +1272,7 @@ class job(base_client_job):
                 # This is a NOOP if the the test isn't running in a VM or
                 # if the VM is not properly configured to save state.
                 _group, testname = self.pkgmgr.get_package_name(url, 'test')
-                now = datetime.now().strftime('%I:%M:%S.%f')
+                now = datetime.utcnow().strftime('%I:%M:%S.%f')
                 checkpoint_name = '%s-%s' % (testname, now)
                 utils.save_vm_state(checkpoint_name)
         finally:

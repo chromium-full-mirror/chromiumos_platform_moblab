@@ -471,10 +471,10 @@ class TpmController(object):
                       'hSrk = 0x%x, hSrkPolicy = 0x%x',
                       well_known_secret.value, hSrk.value, hSrkPolicy.value)
 
-        start_time = datetime.datetime.now()
+        start_time = datetime.datetime.utcnow()
         result = self.tspi_lib.Tspi_TPM_TakeOwnership(self.hTpm, hSrk,
                                                       c_uint(0))
-        end_time = datetime.datetime.now()
+        end_time = datetime.datetime.utcnow()
         if result != 0:
             logging.info('Tspi_TPM_TakeOwnership error')
             self._closeContextObject(hSrk)

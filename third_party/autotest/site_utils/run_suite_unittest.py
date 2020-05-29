@@ -641,7 +641,7 @@ class SimpleTimerUnittests(unittest.TestCase):
         deadline = t.deadline
         self.assertTrue(deadline is not None and
                         t.interval_hours == interval_hours)
-        min_deadline = (datetime.now() +
+        min_deadline = (datetime.utcnow() +
                         datetime_base.timedelta(hours=interval_hours))
         time.sleep(interval_hours * 3600)
         self.assertTrue(t.poll())
