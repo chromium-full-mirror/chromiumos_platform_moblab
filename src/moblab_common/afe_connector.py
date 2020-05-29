@@ -449,22 +449,19 @@ class AFEConnector(object):
             suite_args (string, optional): Defaults to None. delimited
                 key=val pairs passed to suite control file.
             test_args (string, optional): Defaults to None.  delimited
+            test_args (string, optional): Defaults to None.  delimited
                 key=val pairs passed to test control file.
             suite_timeout_mins (integer, optional): Number of minutes until the
                 suite times out.
             pool (string, optional): Pool label to target suite on.
         """
-
-        test_build = '%s-%s/%s' % (board, 'release', build)
-        test_builds = {'cros-version': test_build}
-
         params = {
             "board": board,
-            "builds": test_builds,
+            "builds": builds,
             "name": suite,
             "pool": pool,
             "run_prod_code": False,
-            "test_source_build": test_build,
+            "test_source_build": build,
             "wait_for_results": True,
             "suite_args": suite_args,
             "test_args": test_args,

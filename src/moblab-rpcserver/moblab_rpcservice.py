@@ -21,6 +21,8 @@ _SUITE_TIMEOUT_MAP = {
     'hardware_storagequal_quick': 40320
 }
 
+HARDWARE_AVL_BUG_ID = 'bug_id'
+HARDWARE_AVL_PART_NO = 'part_id'
 
 class MoblabRpcError(Exception):
     pass
@@ -97,43 +99,104 @@ class MoblabService(object):
 
         return connected_duts
 
-    def run_suite_storage_qual(self,
+    def run_storage_qual_suite(self,
                                build_target,
+                               model,
+                               milestone,
                                build_version,
-                               suite,
-                               model=None,
+                               bug_id,
+                               part_id,
                                pool=None,
-                               bug_id=None,
-                               part_id=None):
-        suite_args = {}
-        if bug_id:
-            suite_args['bug_id'] = bug_id
-        if part_id:
-            suite_args['part_id'] = part_id
-        suite_args['bug_id'] = bug_id or ''
-        suite_args['part_id'] = part_id or ''
+    ):
+        """Starts storage qual suite run. Formats arguments s.t. they can be
+        ingested by AFE.
 
-    def run_suite_memory_qual(self,
+        Args:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            avl_process_bug_id: Numeric string identifying the associated
+            buganizer issue.
+            avl_part_number: Numeric string identifying relevant part number.
+        Returns:
+          String response message.
+        """
+        suite_args = {
+            HARDWARE_AVL_BUG_ID: bug_id,
+            HARDWARE_AVL_PART_NO: part_id
+        }
+
+        return self.run_suite(
+            build_target,
+            model,
+            milestone,
+            build_version,
+            'hardware_storagequal', # suite
+            pool,
+            suite_args=suite_args
+        )
+
+    def run_memory_qual_suite(self,
                               build_target,
+                              model,
+                              milestone,
                               build_version,
-                              suite,
-                              model=None,
+                              bug_id,
+                              part_id,
                               pool=None,
-                              bug_id=None,
-                              part_id=None):
-        pass
+    ):
+        """Starts memory qual suite run. Formats arguments s.t. they can be
+        ingested by AFE.
+
+        Args:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            avl_process_bug_id: Numeric string identifying the associated
+            buganizer issue.
+            avl_part_number: Numeric string identifying relevant part number.
+        Returns:
+          String response message.
+        """
+        suite_args = {
+            HARDWARE_AVL_BUG_ID: bug_id,
+            HARDWARE_AVL_PART_NO: part_id
+        }
+        return self.run_suite(
+            build_target,
+            model,
+            milestone,
+            build_version,
+            'hardware_memoryqual', # suite
+            pool,
+            suite_args=suite_args)
 
     def run_cts_suite(self,
                       build_target,
+                      model,
+                      milestone,
                       build_version,
                       suite,
-                      model,
                       pool=None,
                       autotest_tests=None):
-        test_args = {}
-        ap_name, ap_pass = self.config_connector.get_test_wifi_ap_and_password()
-        test_args['ssid'] = ap_name
-        test_args['wifipass'] = ap_pass
+        """Starts cts suite run. Formats arguments s.t. they can be ingested by
+        AFE.
+
+        Args:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            specific_modules: Comma-separated string of specific module names to
+            run.
+        Returns:
+          String response message.
+        """
 
         suite_args = {}
         if autotest_tests:
@@ -143,12 +206,48 @@ class MoblabService(object):
 
         return self.run_suite(
             build_target,
+            model,
+            milestone,
             build_version,
             suite,
-            model,
             pool,
-            suite_args=suite_args,
-            test_args=test_args)
+            suite_args=suite_args)
+
+    def run_gts_suite(self,
+                      build_target,
+                      model,
+                      milestone,
+                      build_version,
+                      pool=None,
+                      autotest_tests=None):
+        """Starts gts suite run. Formats arguments s.t. they can be ingested by
+        AFE.
+
+        Args:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            specific_modules: Comma-separated string of specific module names to
+            run.
+        Returns:
+          String response message.
+        """
+        suite_args = {}
+        if autotest_tests:
+            suite_args['tests'] = [
+                test.strip() for test in autotest_tests.split(',')
+            ]
+
+        return self.run_suite(
+            build_target,
+            model,
+            milestone,
+            build_version,
+            'gts', # suite
+            pool,
+            suite_args=suite_args)
 
     def run_suite_faft(
             self,
@@ -168,17 +267,40 @@ class MoblabService(object):
 
     def run_suite(self,
                   build_target,
+                  model,
+                  milestone,
                   build_version,
                   suite,
-                  model=None,
                   pool=None,
-                  suite_args=None,
-                  test_args=None,
+                  suite_args={},
+                  test_args={},
                   suite_timeout_mins=_DEFAULT_SUITE_TIMEOUT_MINS,
-                  extra_build_versions={}):
+                  extra_builds={}):
+        """Starts suite run. Formats input arguments s.t. that they can be used
+        by an AFE suite run command.
 
-        build_versions = {'cros-version': build}
-        build_versions.update(extra_build_versions)
+        Args:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            suite: String identifier for the suite to be run.
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            suite_args: Dict containing key=val pairs to be used by suite control
+              file.
+            test_args: Dict containing key=val pairs to be used by test control
+              file.
+        Returns:
+          String response message.
+        """
+        build = '{}-release/{}-{}'.format(build_target, milestone, build_version)
+        builds = {'cros-version': build}
+
+        builds.update(extra_builds)
+
+        ap_name, ap_pass = self.config_connector.get_test_wifi_ap_and_password()
+        test_args['ssid'] = ap_name
+        test_args['wifipass'] = ap_pass
 
         # TODO(mattmallett b/92031054) Standardize bug id, part id passing
         # for memory/storage qual
@@ -190,20 +312,10 @@ class MoblabService(object):
         if len(processed_suite_args) == 0:
             processed_suite_args = None
 
-        logging.debug('Test args %s', test_args)
-        #if test_args:
-        #    try:
-        #        processed_test_args['args'] = [test_args]
-        ##        for line in test_args.split('\n'):
-        #            key, value = line.strip().split('=')
-        #            processed_test_args[key] = value
-        #    except:
-        #        raise MoblabRpcError('Could not parse test args.')
-
         return self.afe_connector.run_suite(
             build_target,
-            build_version,
-            build_versions,
+            build,
+            builds,
             suite,
             suite_timeout_mins,
             pool,

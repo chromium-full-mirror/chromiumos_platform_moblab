@@ -49,7 +49,6 @@ import {
   ReverifyHostRequest,
   ReverifyHostResponse,
   RunCtsSuiteRequest,
-  RunCtsSuiteResponse,
   RunGtsSuiteRequest,
   RunMemoryQualificationSuiteRequest,
   RunStorageQualificationSuiteRequest,
@@ -120,6 +119,7 @@ export class MoblabGrpcService {
     error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
     suite_name: string,
     build: string,
+    milestone: string,
     buildtarget: string,
     model: string,
     pool: string,
@@ -127,6 +127,7 @@ export class MoblabGrpcService {
     const request = new RunSuiteRequest();
     request.setSuite(suite_name);
     request.setBuildVersion(build);
+    request.setMilestone(milestone);
     request.setBuildTarget(buildtarget);
     request.setModel(model);
     request.setPool(pool);
@@ -136,6 +137,8 @@ export class MoblabGrpcService {
       {},
       error_callback
     );
+
+    call.on("data", callback);
   }
 
   /** Starts CTS suite run.
@@ -153,10 +156,11 @@ export class MoblabGrpcService {
    *    part of suite execution.
    * */
   runCtsSuite(
-    callback: (response: RunCtsSuiteResponse) => void,
-    error_callback: (err: grpcWeb.Error, response: RunCtsSuiteResponse) => void,
+    callback: (response: RunSuiteResponse) => void,
+    error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
     android_version: string,
     build: string,
+    milestone: string,
     buildtarget: string,
     model: string,
     pool: string,
@@ -166,6 +170,7 @@ export class MoblabGrpcService {
     request.setAndroidVersion(android_version);
     request.setBuildVersion(build);
     request.setBuildTarget(buildtarget);
+    request.setMilestone(milestone);
     request.setModel(model);
     request.setPool(pool);
     request.setSpecificModulesList(specific_modules_list);
@@ -195,6 +200,7 @@ export class MoblabGrpcService {
     callback: (response: RunSuiteResponse) => void,
     error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
     build: string,
+    milestone: string,
     buildtarget: string,
     model: string,
     pool: string,
@@ -204,6 +210,7 @@ export class MoblabGrpcService {
     request.setBuildVersion(build);
     request.setBuildTarget(buildtarget);
     request.setModel(model);
+    request.setMilestone(milestone);
     request.setPool(pool);
     request.setSpecificModulesList(specific_modules_list);
 
@@ -233,6 +240,7 @@ export class MoblabGrpcService {
     callback: (response: RunSuiteResponse) => void,
     error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
     build: string,
+    milestone: string,
     buildtarget: string,
     model: string,
     pool: string,
@@ -241,6 +249,7 @@ export class MoblabGrpcService {
   ) {
     const request = new RunStorageQualificationSuiteRequest();
     request.setBuildVersion(build);
+    request.setMilestone(milestone);
     request.setBuildTarget(buildtarget);
     request.setModel(model);
     request.setPool(pool);
@@ -273,15 +282,16 @@ export class MoblabGrpcService {
     callback: (response: RunSuiteResponse) => void,
     error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
     build: string,
+    milestone: string,
     buildtarget: string,
     model: string,
-    suite: string,
     pool: string,
     avl_process_bug_id: number,
     avl_part_number: string
   ) {
     const request = new RunMemoryQualificationSuiteRequest();
     request.setBuildVersion(build);
+    request.setMilestone(milestone);
     request.setBuildTarget(buildtarget);
     request.setModel(model);
     request.setPool(pool);
