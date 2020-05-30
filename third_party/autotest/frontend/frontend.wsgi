@@ -12,6 +12,7 @@ for p in path_list:
        sys.path.append(p)
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'frontend.settings'
+os.environ['DEBUG'] = 'True'
 
 import django.core.handlers.wsgi
 

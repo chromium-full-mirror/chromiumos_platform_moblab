@@ -337,6 +337,63 @@ class HWIDVerifier(hosts.Verifier):
         return 'The host should have valid HWID and Serial Number'
 
 
+class EnrollmentStateVerifier(hosts.Verifier):
+    """Verify that the device's enrollment state is clean.
+
+    There are two "flags" that generate 3 possible enrollment states here.
+    Flag 1 - The presence of install attributes file in
+             /home/.shadow/install_attributes.pb
+
+    Flag 2 - The value of "check_enrollment" from VPD. Can be obtained by
+             reading the cache file in
+             /mnt/stateful_partition/unencrypted/cache/vpd/full-v2.txt
+
+    The states:
+    State 1 - Device is enrolled, means flag 1 is true and in
+              flag 2 check_enrollment=1
+    State 2 - Device is consumer owned, means flag 1 is true and in
+              flag 2 check_enrollment=0
+    State 3 - Device is enrolled and has been powerwashed, means flag 1 is
+              false. If the value in flag 2 is check_enrollment=1 then the
+              device will perform forced re-enrollment check and depending
+              on the response from the server might force the device to enroll
+              again. If the value is check_enrollment=0, then device can be
+              used like a new device.
+
+    We consider state 1, and first scenario(check_enrollment=1) of state 3
+    as unacceptable state here as they may interfere with normal tests.
+    """
+
+    VPD_CACHE = '/mnt/stateful_partition/unencrypted/cache/vpd/full-v2.txt'
+
+    def verify(self, host):
+        # pylint: disable=missing-docstring
+        if self._get_enrollment_state(host):
+            raise hosts.AutoservVerifyError('The device is enrolled.')
+
+    def _get_enrollment_state(self, host):
+        logging.debug('checking enrollment state from VPD cache...')
+        response = host.run('grep "check_enrollment" %s' % self.VPD_CACHE)
+        if response.exit_status == 0:
+            result = response.stdout.strip()
+            logging.info('Enrollment state in VPD cache: %s', result)
+            return result == '"check_enrollment"="1"'
+
+        logging.error('Unexpected error occured during verify enrollment state'
+                      ' in VPD cache, skipping verify process.')
+        return True
+
+    def _is_applicable(self, host):
+        info = host.host_info_store.get()
+        # if os type is missing from host_info, then we assume it's cros.
+        return getattr(info, 'os', 'cros') in ('', 'cros')
+
+    @property
+    def description(self):
+        # pylint: disable=missing-docstring
+        return 'The enrollment state is clean on the host'
+
+
 class JetstreamTpmVerifier(hosts.Verifier):
     """Verify that Jetstream TPM is in a good state."""
 
@@ -567,6 +624,30 @@ class ServoResetRepair(_ResetRepairAction):
         return 'Reset the DUT via servo'
 
 
+class ServoCr50RebootRepair(_ResetRepairAction):
+    """
+    Repair a Chrome device by resetting cr50 by servo.
+
+    Reset cr50 which is ec+ccd reset.
+    """
+
+    def repair(self, host):
+        # pylint: disable=missing-docstring
+        host.servo.get_power_state_controller().cr50_reset()
+        self._check_reset_success(host)
+
+    def _is_applicable(self, host):
+        if host.servo:
+            if host.servo.has_control('cr50_reboot'):
+                return True
+        return False
+
+    @property
+    def description(self):
+        # pylint: disable=missing-docstring
+        return 'Reset(cr50) the DUT via servo'
+
+
 class DevDefaultBootRepair(hosts.RepairAction):
     """Repair a CrOS target by setting dev_default_boot to 'disk'"""
 
@@ -597,6 +678,28 @@ class CrosRebootRepair(repair_utils.RebootRepair):
     def description(self):
         # pylint: disable=missing-docstring
         return 'Reset GBB flags and Reboot the host'
+
+
+class EnrollmentCleanupRepair(hosts.RepairAction):
+    """Cleanup enrollment state on ChromeOS device"""
+
+    def repair(self, host):
+        # Reset VPD enrollment state.
+        host.run('/usr/sbin/update_rw_vpd check_enrollment 0')
+
+        # Clear TPM Owner state.
+        tpm_utils.ClearTPMOwnerRequest(host, wait_for_ready=True,
+                                       timeout=host.BOOT_TIMEOUT)
+
+    def _is_applicable(self, host):
+        info = host.host_info_store.get()
+        # if os type is missing from host_info, then we assume it's cros.
+        return getattr(info, 'os', 'cros') in ('', 'cros')
+
+    @property
+    def description(self):
+        # pylint: disable=missing-docstring
+        return 'Cleanup enrollment state and reboot the host'
 
 
 class AutoUpdateRepair(hosts.RepairAction):
@@ -655,7 +758,14 @@ class ServoInstallRepair(hosts.RepairAction):
     def repair(self, host):
         # pylint: disable=missing-docstring
         repair_utils.require_servo(host)
-        image_name, update_url = host.stage_image_for_servo()
+        image_name = host.get_cros_repair_image_name()
+        update_url = None
+        if host._servo_host.validate_image_usbkey() != image_name:
+            logging.info('Downloading %s to usbkey.', image_name)
+            _, update_url = host.stage_image_for_servo()
+        else:
+            logging.info('Required image %s is already on usbkey,'
+                         ' skipping download.', image_name)
         afe_utils.clean_provision_labels(host)
         host.servo_install(update_url)
         afe_utils.add_provision_labels(host, host.VERSION_PREFIX, image_name)
@@ -729,6 +839,7 @@ def _cros_verify_base_dag():
         (ServoTypeVerifier,               'servo_type', ()),
         (DevDefaultBootVerifier,          'dev_default_boot', ('ssh',)),
         (DevModeVerifier,                 'devmode',  ('ssh',)),
+        (EnrollmentStateVerifier,         'enrollment_state', ('ssh',)),
         (HWIDVerifier,                    'hwid',     ('ssh',)),
         (ACPowerVerifier,                 'power',    ('ssh',)),
         (EXT4fsErrorVerifier,             'ext4',     ('ssh',)),
@@ -760,6 +871,7 @@ def _cros_basic_repair_actions():
         (repair_utils.RPMCycleRepair, 'rpm', (), ('ssh', 'power',)),
         (ServoSysRqRepair, 'sysrq', (), ('ssh',)),
         (ServoResetRepair, 'servoreset', (), ('ssh',)),
+        (ServoCr50RebootRepair, 'cr50_reset', (), ('ssh',)),
 
         # N.B. FirmwareRepair can't fix a 'good_au' failure directly,
         # because it doesn't remove the flag file that triggers the
@@ -773,13 +885,13 @@ def _cros_basic_repair_actions():
          'set_default_boot', ('ssh',), ('dev_default_boot',)),
 
         (CrosRebootRepair, 'reboot', ('ssh',), ('devmode', 'writable',)),
-
-        (ColdRebootRepair, 'coldboot', ('ssh',), ('ec_reset',)),
+        (EnrollmentCleanupRepair, 'cleanup_enrollment', ('ssh',),
+         ('enrollment_state',)),
     )
     return repair_actions
 
 
-def _cros_extended_repair_actions(au_triggers=_CROS_EXTENDED_AU_TRIGGERS,
+def _cros_extended_repair_actions(au_triggers=_CROS_AU_TRIGGERS,
                                   powerwash_triggers=_CROS_POWERWASH_TRIGGERS,
                                   usb_triggers=_CROS_USB_TRIGGERS):
     """Return the extended repair actions for a `CrosHost`"""

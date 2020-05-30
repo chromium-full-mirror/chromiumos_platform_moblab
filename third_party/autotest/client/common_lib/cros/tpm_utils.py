@@ -117,6 +117,11 @@ def ClearTPMOwnerRequest(client, wait_for_ready=False, timeout=60):
                     ignore_status=True).stdout.strip()
             logging.debug(status)
             time.sleep(1)
+        # Verify if the TPM is unowned.
+        tpm_status = TPMStatus(client)
+        logging.info('TPM status: %s', tpm_status)
+        if tpm_status['Owned']:
+            raise error.TestFail('Failed to clear TPM.')
 
 
 def ClearTPMIfOwned(client):
@@ -135,7 +140,7 @@ def CleanupAndReboot(client):
 
     @param client: client object to run commands on.
     """
-    full_rm = ' rm -rf ' + ' '.join(_RM_FILES + _RM_DIRS)
+    full_rm = 'rm -rf ' + ' '.join(_RM_FILES + _RM_DIRS)
     client.run(full_rm, ignore_status=True)
     client.run('sync', ignore_status=True)
     client.reboot()

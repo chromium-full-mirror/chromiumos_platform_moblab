@@ -6,8 +6,8 @@
 
 import collections
 import logging
-import os
 import re
+import os
 
 import common
 
@@ -17,7 +17,7 @@ from autotest_lib.client.cros.audio import cras_utils
 from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
 from autotest_lib.server.hosts import base_label
 from autotest_lib.server.hosts import common_label
-from autotest_lib.server.hosts import servo_host
+from autotest_lib.server.hosts import servo_constants
 from autotest_lib.site_utils import hwid_lib
 
 # pylint: disable=missing-docstring
@@ -25,6 +25,10 @@ LsbOutput = collections.namedtuple('LsbOutput', ['unibuild', 'board'])
 
 # fallback values if we can't contact the HWID server
 HWID_LABELS_FALLBACK = ['sku', 'phase', 'touchscreen', 'touchpad', 'variant', 'stylus']
+
+# Repair and Deploy taskName
+REPAIR_TASK_NAME = 'repair'
+DEPLOY_TASK_NAME = 'deploy'
 
 
 def _parse_lsb_output(host):
@@ -397,9 +401,13 @@ class AudioLoopbackDongleLabel(base_label.BaseLabel):
                               ignore_status=True).stdout
         if (cras_utils.node_type_is_plugged('HEADPHONE', nodes_info) and
             cras_utils.node_type_is_plugged('MIC', nodes_info)):
-                return True
+            return True
         return False
 
+    def update_for_task(self, task_name):
+        # This label is stored in the state config, so only repair tasks update
+        # it or when no task name is mentioned.
+        return task_name in (REPAIR_TASK_NAME, '')
 
 class PowerSupplyLabel(base_label.StringPrefixLabel):
     """
@@ -563,6 +571,7 @@ class ServoLabel(base_label.BaseLabel):
 
         @returns True if a servo host is detected, False otherwise.
         """
+        return False
         servo_host_hostname = None
         servo_args = servo_host.get_servo_args_for_host(host)
         if servo_args:
