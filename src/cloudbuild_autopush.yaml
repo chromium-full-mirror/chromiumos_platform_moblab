@@ -43,6 +43,9 @@ steps:
   - id: pull13
     name: "docker:19.03.8"
     args: ["pull", "node:12-buster"]
+  - id: pull14
+    name: "docker:19.03.8"
+    args: ["pull", "node:12"]
 
   - id: protoc
     name: "docker:19.03.8"
