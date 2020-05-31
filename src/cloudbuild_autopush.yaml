@@ -485,7 +485,25 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-      - "WATCHTOWER_CMD=${_WATCHTOWER_CMD}"
+
+  - id: mobmonitor
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/mobmonitor/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/mobmonitor:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
 
 images:
   [
@@ -511,6 +529,7 @@ images:
     "${_REGISTRY_URI}/moblab-autotest-afe:${_LABEL}",
     "${_REGISTRY_URI}/moblab-ssp:${_LABEL}",
     "${_REGISTRY_URI}/moblab-dev-environment:${_LABEL}",
+    "${_REGISTRY_URI}/mobmonitor:${_LABEL}",
   ]
 
 options:
