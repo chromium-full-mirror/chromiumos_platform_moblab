@@ -1,6 +1,16 @@
-import {Component, EventEmitter, Input, Output, ViewChild, OnInit} from '@angular/core';
-import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
+
 import {BuildSettings} from '../base_suite/base-suite.component';
+import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 
 
 /**
@@ -13,8 +23,9 @@ import {BuildSettings} from '../base_suite/base-suite.component';
   templateUrl: './build-select-forms.component.html',
   styleUrls: ['./build-select-forms.component.css']
 })
-export class BuildSelectFormsComponent implements OnInit {
+export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   @ViewChild('modelSelector') modelSelector;
+  @ViewChild('milestoneSelector') milestoneSelector;
   @ViewChild('boardSelector') boardSelector;
   @ViewChild('buildSelector') buildSelector;
   @ViewChild('poolSelector') poolSelector;
@@ -36,17 +47,22 @@ export class BuildSelectFormsComponent implements OnInit {
   private milestone = '';
   private buildVersionName = '';
 
-  constructor(private moblabGrpcService: MoblabGrpcService) {}
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+    private moblabGrpcService: MoblabGrpcService,
+  ) {}
 
   ngOnInit() {
-    this.modelSelector.disable('Models not loaded.');
+    this.moblabGrpcService.listModels((models: string[]) => {
+      this.updateModels(models);
+    });
+  }
+
+  ngAfterViewInit() {
     this.boardSelector.disable('Please select model.');
     this.buildSelector.disable('Please select build target.');
     this.poolSelector.disable('Please select build.');
-
-    this.moblabGrpcService.listModels((boards: string[]) => {
-      this.updateModels(boards);
-    });
+    this.changeDetector.detectChanges();
   }
 
   updateModels(newModels: string[]) {
@@ -68,6 +84,19 @@ export class BuildSelectFormsComponent implements OnInit {
 
   buildTargetChanged(newBuildTarget: string): void {
     this.buildTargetName = newBuildTarget;
+    this.milestoneSelector.enable();
+    this.moblabGrpcService.listMilestones(this.buildTargetName, (milestones : string[]) => {
+      this.updateMilestones(milestones)
+    })
+  }
+
+  updateMilestones(newMilestones: string[]) {
+    this.milestones = newMilestones;
+    this.buildSelector.enable();
+  }
+
+  milestoneChanged(newMilestone: string): void {
+    this.milestone = newMilestone;
     this.buildSelector.enable();
     this.moblabGrpcService.listBuildVersions(
       this.buildTargetName, this.milestone, (builds: string[]) => {
@@ -96,7 +125,7 @@ export class BuildSelectFormsComponent implements OnInit {
   }
 
   updatePools(newPools: string[]) {
-    this.pools = newPools;
+    this.pools = [''].concat(newPools);
   }
 
   poolChanged(pool: string) {

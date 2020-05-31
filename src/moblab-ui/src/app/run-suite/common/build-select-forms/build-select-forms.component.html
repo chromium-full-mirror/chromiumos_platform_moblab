@@ -19,6 +19,16 @@
 </app-basic-selector>
 
 <app-basic-selector
+    #milestoneSelector
+    id="milestoneSelector"
+    [title]="'Select milestone:'"
+    [placeholder]="['Pick from milestones']"
+    [options]="milestones"
+    [isShown]="true"
+    (update)="milestoneChanged($event.value)">
+</app-basic-selector>
+
+<app-basic-selector
     #buildSelector
     id="buildSelector"
     [title]="'Select build:'"

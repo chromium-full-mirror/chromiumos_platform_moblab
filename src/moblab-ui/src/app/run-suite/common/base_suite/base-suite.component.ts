@@ -1,7 +1,9 @@
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 
+import {JOB_START_TIME_FROM_FILTER} from '../../../view-jobs/view-jobs.component';
 import {MoblabGrpcService} from '../../../services/moblab-grpc.service';
+import {normalizeTimestamp} from '../../../utils/date';
 
 
 export interface BuildSettings {
@@ -52,7 +54,15 @@ export abstract class BaseSuite {
   abstract onRunSuite();
 
   redirectToViewJobs() {
-    this.router.navigate(['/view_jobs']);
+    const params = {};
+    params[JOB_START_TIME_FROM_FILTER] = normalizeTimestamp(
+      new Date().setTime(
+        new Date().getTime()
+        - 1000 /* 1 second */
+        - new Date().getTimezoneOffset() * 60 * 1000
+      )
+    );
+    this.router.navigate(['/view_jobs'], { queryParams: params });
   }
 
   setOffPopup(dialogue: string) {
