@@ -12,8 +12,13 @@ ENV LABEL="${LABEL}"
 ENV REGISTRY_URI="${REGISTRY_URI}"
 ENV WATCHTOWER_CMD="${WATCHTOWER_CMD}"
 
+WORKDIR /
 COPY docker-compose.yaml .
 COPY .env .
+COPY compose_startup.sh .
+RUN chmod u+x compose_startup.sh
+
+ENTRYPOINT ["/compose_startup.sh"]
 
 # Test the config for syntax errors
 RUN docker-compose config
