@@ -2,6 +2,7 @@ substitutions:
   _REGISTRY_URI: gcr.io/chromeos-partner-moblab
   _LABEL: autopush
   _WATCHTOWER_CMD: "--interval 1"
+  _SSH_PORT: "22"
 
 steps:
   - id: pull
@@ -377,6 +378,8 @@ steps:
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
         "LABEL=${_LABEL}",
+        "--build-arg",
+        "SSH_PORT=${_SSH_PORT}",
         "-f",
         "/workspace/src/dockerfiles/remote_access/Dockerfile",
         "-t",
