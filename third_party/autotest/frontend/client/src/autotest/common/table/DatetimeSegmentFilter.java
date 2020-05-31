@@ -24,7 +24,7 @@ public class DatetimeSegmentFilter extends SimpleFilter {
 
     // only allow queries of at most 2 weeks of data to reduce the load on the
     // database.
-    private static final long MAXIMUM_TIME_RANGE_MS = 14 * 1000 * 60 * 60 * 24;
+    private static final long MAXIMUM_TIME_RANGE_MS = 16 * 1000 * 60 * 60 * 24;
     private static final DateTimeFormat dateTimeFormat =
         DateTimeFormat.getFormat("yyyy-MM-dd");
     private static final DateTimeFormat parseFormat =
@@ -46,7 +46,7 @@ public class DatetimeSegmentFilter extends SimpleFilter {
         // not close to endTime (see updateStartDateConstraint). So, we must
         // first set endTime to really get the startTime we want.
         // We want all entries from today, so advance end date to tomorrow.
-        placeHolderEndDatetime = getDateTimeStringOffsetFromToday(1);
+        placeHolderEndDatetime = getDateTimeStringOffsetFromToday(2);
         setEndTimeToPlaceHolderValue();
         placeHolderStartDatetime = getDateTimeStringOffsetFromToday(-6);
         setStartTimeToPlaceHolderValue();
