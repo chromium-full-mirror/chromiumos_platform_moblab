@@ -451,6 +451,8 @@ steps:
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
         "LABEL=${_LABEL}",
+        "--build-arg",
+        "SSH_PORT=${_SSH_PORT}",
         "-f",
         "/workspace/src/dockerfiles/compose/Dockerfile",
         "-t",
