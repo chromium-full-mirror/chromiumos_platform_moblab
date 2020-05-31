@@ -480,7 +480,7 @@ steps:
         "-f",
         "/workspace/src/dockerfiles/local-dev-environment/Dockerfile.base",
         "-t",
-        "${_REGISTRY_URI}moblab-dev-environment:${_LABEL}",
+        "${_REGISTRY_URI}/moblab-dev-environment:${_LABEL}",
         "/workspace/src/dockerfiles/local-dev-environment",
       ]
     env:
