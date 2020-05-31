@@ -481,7 +481,7 @@ def update_moblab():
 @rpc_utils.moblab_only
 def update_docker():
     """ RPC call to update and reboot moblab """
-    client = docker.from_env(timeout=300)
+    client = docker.from_env(timeout=600)
     try:
         container = client.containers.get('update')
         raise error.RPCException("Already updating please wait.")
@@ -496,7 +496,7 @@ def update_docker():
         detach=True,
         command='--run-once')
     try:
-        container.wait(timeout=120)
+        container.wait(timeout=600)
     except requests.exceptions.ReadTimeout:
         container.stop()
     finally:
