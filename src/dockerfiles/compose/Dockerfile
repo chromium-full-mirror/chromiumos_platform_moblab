@@ -7,10 +7,12 @@ FROM docker/compose:alpine-1.25.4
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 ARG WATCHTOWER_CMD="--interval 3600 --monitor-only"
+ARG SSH_PORT
 
 ENV LABEL="${LABEL}"
 ENV REGISTRY_URI="${REGISTRY_URI}"
 ENV WATCHTOWER_CMD="${WATCHTOWER_CMD}"
+ENV SSH_PORT="${SSH_PORT}"
 
 WORKDIR /
 COPY docker-compose.yaml .
