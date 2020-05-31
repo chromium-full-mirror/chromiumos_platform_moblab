@@ -83,4 +83,4 @@ ENV AUTOTEST_WEB=autotest:8888
 # For SSP containers - we start them, execute commands then kill the container
 # to mimic the lxc behaviour an artifical sleep is requried to keep the docker
 # container running between commands.
-CMD ["sleep", "infinity"]
+CMD ["sleep", "1814400"]
