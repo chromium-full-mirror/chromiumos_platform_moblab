@@ -40,6 +40,9 @@ steps:
   - id: pull12
     name: "docker:19.03.8"
     args: ["pull", "docker/compose:alpine-1.25.4"]
+  - id: pull13
+    name: "docker:19.03.8"
+    args: ["pull", "node:12-buster"]
 
   - id: protoc
     name: "docker:19.03.8"
@@ -461,6 +464,26 @@ steps:
       - "DOCKER_BUILDKIT=1"
       - "WATCHTOWER_CMD=${_WATCHTOWER_CMD}"
 
+  - id: local-dev-environment
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/local-dev-environment/Dockerfile.base",
+        "-t",
+        "${_REGISTRY_URI}moblab-dev-environment:${_LABEL}",
+        "/workspace/src/dockerfiles/local-dev-environment",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+      - "WATCHTOWER_CMD=${_WATCHTOWER_CMD}"
+
 images:
   [
     "${_REGISTRY_URI}/protoc:${_LABEL}",
@@ -484,6 +507,7 @@ images:
     "${_REGISTRY_URI}/moblab-db:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-afe:${_LABEL}",
     "${_REGISTRY_URI}/moblab-ssp:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-dev-environment:${_LABEL}",
   ]
 
 options:
