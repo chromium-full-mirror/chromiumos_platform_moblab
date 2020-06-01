@@ -2,6 +2,7 @@ substitutions:
   _REGISTRY_URI: gcr.io/chromeos-partner-moblab
   _LABEL: beta
   _WATCHTOWER_CMD: "--interval 3600 --monitor-only"
+  _SSH_PORT: "22"
 
 steps:
   - id: pull
