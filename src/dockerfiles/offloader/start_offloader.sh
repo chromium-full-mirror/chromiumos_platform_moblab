@@ -8,5 +8,7 @@ set -x
       -l /var/log/moblab/offloader.log \
       run \
       --credentials-file /home/moblab/.service_account.json \
-      --min-age-to-prune 1 \
+      --min-age-to-upload 0 \
+      --timeout-days 3
+      --min-age-to-prune 4 \
       --jobs 100
