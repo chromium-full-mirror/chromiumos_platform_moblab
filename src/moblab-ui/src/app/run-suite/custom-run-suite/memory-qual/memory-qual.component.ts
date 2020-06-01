@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 
 import {BaseSuite} from '../../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
@@ -7,32 +7,44 @@ import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-fo
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
+
+/** Component owns logic for hardware memory qualification suite run form.
+ * */
 @Component({
   selector: 'app-memory-qual',
   templateUrl: './memory-qual.component.html',
   styleUrls: ['./memory-qual.component.scss']
 })
-export class MemoryQualComponent extends BaseSuite implements OnInit {
+export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
-  constructor(moblabGrpcService: MoblabGrpcService,
+  constructor(private changeDetector: ChangeDetectorRef,
+              moblabGrpcService: MoblabGrpcService,
               router: Router,
               snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
-  ngOnInit(): void {
+  /** Sets initial form enable/disable states.
+   * */
+  ngAfterViewInit(): void {
     this.bugIdInput.disable('Please select build.');
     this.partNumberInput.disable('Please select build.');
+    this.changeDetector.detectChanges();
   }
 
+  /** Method triggered on complete setting of build-related arguments.
+   * ( model, build-target, milestone, build-version ).
+   * */
   onBuildSetCustom(event) {
     this.bugIdInput.enable();
     this.partNumberInput.enable();
   }
 
+  /** Method triggered on change of either bug ID or part number.
+   * */
   avlInputChanged(event) {
     if (this.bugIdInput.getInput() && this.partNumberInput.getInput()) {
       this.runSuiteButton.enable();
@@ -41,13 +53,16 @@ export class MemoryQualComponent extends BaseSuite implements OnInit {
     }
   }
 
+  /** Method triggered on run-suite button press. Invokes
+   *  runMemoryQualificationSuite RPC call.
+   * */
   onRunSuite() {
-    this.moblabGrpcService.runStorageQualificationSuite(
+    this.moblabGrpcService.runMemoryQualificationSuite(
       (response) => {
         this.redirectToViewJobs();
       },
       (err, response) => {
-        this.setOffPopup(response.getMessage());
+        this.setOffPopup(err.message);
       },
       this.selectedBuild,
       this.selectedMilestone,
