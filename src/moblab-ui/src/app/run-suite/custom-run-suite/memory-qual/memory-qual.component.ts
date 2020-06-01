@@ -50,6 +50,7 @@ export class MemoryQualComponent extends BaseSuite implements OnInit {
         this.setOffPopup(response.getMessage());
       },
       this.selectedBuild,
+      this.selectedMilestone,
       this.selectedBoard,
       this.selectedModel,
       this.selectedPool,

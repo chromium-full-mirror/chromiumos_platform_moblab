@@ -25,6 +25,7 @@ export abstract class BaseSuite {
 
   selectedBuild: string;
   selectedBoard: string;
+  selectedMilestone: string;
   selectedModel: string;
   selectedPool: string;
 
@@ -36,6 +37,7 @@ export abstract class BaseSuite {
   onBuildSet(event: BuildSettings) {
     this.selectedModel = event.model;
     this.selectedBuild = event.build;
+    this.selectedMilestone = event.milestone;
     this.selectedBoard = event.board;
     this.selectedPool = event.pool;
     this.onBuildSetCustom(event);

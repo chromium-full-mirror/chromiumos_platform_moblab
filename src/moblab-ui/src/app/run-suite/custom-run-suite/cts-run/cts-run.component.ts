@@ -51,6 +51,7 @@ export class CtsRunComponent extends BaseSuite implements OnInit {
       },
       this.selectedAndroidVersion,
       this.selectedBuild,
+      this.selectedMilestone,
       this.selectedBoard,
       this.selectedModel,
       this.selectedPool,
