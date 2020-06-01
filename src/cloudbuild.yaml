@@ -40,6 +40,9 @@ steps:
   - id: pull12
     name: "docker:19.03.8"
     args: ["pull", "docker/compose:alpine-1.25.4"]
+  - id: pull14
+    name: "docker:19.03.8"
+    args: ["pull", "node:12"]
 
   - id: protoc
     name: "docker:19.03.8"
