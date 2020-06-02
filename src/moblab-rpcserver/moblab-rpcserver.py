@@ -84,14 +84,146 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def run_suite(self, request, _context):
+        """Generic run suite method. Accepts suite as a custom argument, allows
+        for run of any suite but with no custom arguments.
+
+        Args:
+          request: RunSuiteRequest object with parameters describing suite to be
+          run and arguments for suite run.
+          _context: grpc.server.Context
+        Returns:
+          RunSuiteResponse object with a string result message.
+        """
         return moblabrpc_pb2.RunSuiteResponse(
-            message='Hello, %s!' % request.name)
+            message=self.service.run_suite(
+                  request.build_target,
+                  request.model,
+                  request.milestone,
+                  request.build_version,
+                  request.suite,
+                  pool=request.pool,
+            )
+        )
 
     def run_cts_suite(self, request, _context):
-        response = moblabrpc_pb2.RunCtsSuiteResponse(
+        """Sets off CTS suite run.
+
+        Args:
+          request: RunCtsSuiteRequest object with parameters describing suite to be
+          run and arguments for suite run:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            android_version: A string specifying which android version suite to
+             run ( Ex. cts_X )
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            specific_modules: Comma-separated string of specific module names to
+            run.
+          _context: grpc.server.Context
+        Returns:
+          RunSuiteResponse object with a string result message.
+        """
+        response = moblabrpc_pb2.RunSuiteResponse(
             message=self.service
-            .run_cts_suite(request.build_target, request.build, request.suite,
-                           request.model, request.pool))
+            .run_cts_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.android_version,
+                request.pool,
+                request.specific_modules
+            ))
+        return response
+
+    def run_gts_suite(self, request, _context):
+        """Sets off GTS suite run.
+
+            Args:
+              request: RunGtsSuiteRequest object with parameters describing
+              arguments for suite run:
+                build_target: Ex. octopus
+                milestone: Ex. R80
+                build_version: A numeric version string of the form: '00000.00.0'
+                model: String identfier for the specific model to be run.
+                pool: String identifier for which pool of DUT's to run tests with.
+                specific_modules: Comma-separated string of specific module names to
+                run.
+              _context: grpc.server.Context
+            Returns:
+              RunSuiteResponse object with a string result message.
+            """
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message=self.service
+                .run_gts_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.pool,
+                request.specific_modules
+            ))
+        return response
+
+    def run_storage_qualification_suite(self, request, _context):
+        """Sets off hardware storage qualification suite run.
+
+        Args:
+          request: RunStorageQualificationSuiteRequest object with parameters
+          describing arguments for suite run:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identifier for the specific model to be run.
+            avl_process_bug_id: Numeric string identifying the associated
+            buganizer issue.
+            avl_part_number: Numeric string identifying relevant part number.
+          _context: grpc.server.Context
+        Returns:
+          RunSuiteResponse object with a string result message.
+        """
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message = self.service.run_storage_qual_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.avl_process_bug_id,
+                request.avl_part_number,
+                request.pool,
+            )
+        )
+        return response
+
+    def run_memory_qualification_suite(self, request, _context):
+        """Sets off hardware memory qualification suite run.
+
+        Args:
+          request: RunMemoryQualificationSuiteRequest object with parameters
+          describing arguments for suite run:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identifier for the specific model to be run.
+            avl_process_bug_id: Numeric string identifying the associated
+            buganizer issue.
+            avl_part_number: Numeric string identifying relevant part number.
+          _context: grpc.server.Context
+        Returns:
+          RunSuiteResponse object with a string result message.
+        """
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message = self.service.run_memory_qual_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.avl_process_bug_id,
+                request.avl_part_number,
+                request.pool,
+            )
+        )
         return response
 
     def get_connected_dut_from_dict(self, dut_dict):

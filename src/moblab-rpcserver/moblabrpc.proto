@@ -5,7 +5,7 @@ package moblab;
 service MoblabRpcService {
   // Run a test suite
   rpc run_suite (RunSuiteRequest) returns (RunSuiteResponse) {}
-  rpc run_cts_suite (RunCtsSuiteRequest) returns (RunCtsSuiteResponse) {}
+  rpc run_cts_suite (RunCtsSuiteRequest) returns (RunSuiteResponse) {}
   rpc run_gts_suite (RunGtsSuiteRequest) returns (RunSuiteResponse) {}
   rpc run_storage_qualification_suite (RunStorageQualificationSuiteRequest)
     returns (RunSuiteResponse) {}
@@ -63,13 +63,14 @@ message SendMoblabScreenshotResponse {
   string message = 1;
 }
 
-// NEXT_TAG = 6
+// NEXT_TAG = 7
 message RunSuiteRequest {
   string suite = 1;
   string build_target = 2;
-  string build_version = 3;
-  string model = 4;
-  string pool = 5;
+  string milestone = 3;
+  string build_version = 4;
+  string model = 5;
+  string pool = 6;
 }
 
 // NEXT_TAG = 2
@@ -77,52 +78,51 @@ message RunSuiteResponse {
   string message = 1;
 }
 
-// NEXT_TAG = 7
+// NEXT_TAG = 8
 message RunCtsSuiteRequest {
   string android_version = 1;
   string build_target = 2;
   string build_version = 3;
-  string model = 4;
-  string pool = 5;
+  string milestone = 4;
+  string model = 5;
+  string pool = 6;
   // Comma separated list of modules which, if specified, will be the only
   // CTS suite modules to be run.
-  repeated string specific_modules = 6;
+  repeated string specific_modules = 7;
 }
 
-// NEXT_TAG = 6
+// NEXT_TAG = 7
 message RunGtsSuiteRequest {
   string build_target = 1;
   string build_version = 2;
   string model = 3;
-  string pool = 4;
+  string milestone = 4;
+  string pool = 5;
   // Comma separated list of modules which, if specified, will be the only
   // GTS suite modules to be run.
-  repeated string specific_modules = 5;
+  repeated string specific_modules = 6;
 }
 
-// NEXT_TAG = 7
+// NEXT_TAG = 8
 message RunStorageQualificationSuiteRequest {
   string build_target = 1;
   string build_version = 2;
   string model = 3;
-  string pool = 4;
-  int32 avl_process_bug_id = 5;
-  string avl_part_number = 6;
+  string milestone = 4;
+  string pool = 5;
+  int32 avl_process_bug_id = 6;
+  string avl_part_number = 7;
 }
 
-// NEXT_TAG = 7
+// NEXT_TAG = 8
 message RunMemoryQualificationSuiteRequest {
   string build_target = 1;
   string build_version = 2;
   string model = 3;
-  string pool = 4;
-  int32 avl_process_bug_id = 5;
-  string avl_part_number = 6;
-}
-
-// NEXT_TAG = 2
-message RunCtsSuiteResponse {
-  string message = 1;
+  string milestone = 4;
+  string pool = 5;
+  int32 avl_process_bug_id = 6;
+  string avl_part_number = 7;
 }
 
 // NEXT_TAG = 16
