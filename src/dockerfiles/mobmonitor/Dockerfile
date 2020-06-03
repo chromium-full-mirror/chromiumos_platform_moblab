@@ -21,6 +21,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 # install and cache app dependencies
 # doing the package files first allows for faster compiles when developing
 # as docker will cache the npm packages
+RUN mkdir -p /app
 COPY src/mobmonitor-ui/package.json /app
 COPY src/mobmonitor-ui/package-lock.json /app
 RUN npm install
