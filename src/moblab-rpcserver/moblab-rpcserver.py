@@ -428,6 +428,36 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 response.jobs.extend([job_proto])
         return response
 
+    def get_job_ids(self, request, _context):
+        """Returns the job ID's that match the request filters.
+
+        Args:
+          request: GetJobIdsRequest
+          _context:
+
+        Returns:
+          GetJobIdsResponse object with a list of ID numerics.
+        """
+        job_ids = self.service.get_job_ids(
+            request.query_start,
+            request.query_limit,
+            request.id_filter,
+            request.name_filter,
+            request.created_time_lt,
+            request.created_time_gt,
+            request.rel_filter == moblabrpc_pb2.Job.CHILD,
+            request.rel_filter == moblabrpc_pb2.Job.SUITE,
+            request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
+            request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            request.parent_id_filter,
+            request.dut_hostname_filter,
+        )
+        response = moblabrpc_pb2.GetJobIdsResponse(
+            job_ids = job_ids
+        )
+        return response
+
     def abort_jobs(self, request, _context):
         message = self.service.abort_jobs(
             # converting proto RepeatedScalarFieldContainer type to python list

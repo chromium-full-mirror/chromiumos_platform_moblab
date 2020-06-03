@@ -16,20 +16,21 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
-import {Router} from '@angular/router';
 
 import {forbiddenDateValidator, forbiddenIDValidator} from '../utils/validators';
 import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
 import {Job, Execution} from '../services/moblabrpc_pb';
 import {JobActionComponent} from './job-action/job-action.component';
-import {KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
 import {TableHeaderSelectorComponent} from '../widgets/table-header-selector/table-header-selector.component';
+
 
 export const JOB_NAME = 'name';
 export const JOB_ID = 'id';
@@ -40,7 +41,7 @@ export const JOB_START_TIME_FROM_FILTER = 'startTimeFromFilter';
 export const JOB_START_TIME_TO_FILTER = 'startTimeToFilter';
 export const PARENT_JOB_ID = 'parent_job_id';
 export const DUT_RUN_ON = 'dut_run_on';
-const FILTER_PARAMETERS = [
+export const FILTER_PARAMETERS = [
   JOB_NAME,
   JOB_ID,
   JOB_PRIORITY,
@@ -51,19 +52,19 @@ const FILTER_PARAMETERS = [
   PARENT_JOB_ID,
   DUT_RUN_ON
 ];
-const FILTER_VALIDATORS = {}
+const FILTER_VALIDATORS = {};
 
-FILTER_VALIDATORS[JOB_START_TIME_FROM_FILTER] = [forbiddenDateValidator]
-FILTER_VALIDATORS[JOB_START_TIME_TO_FILTER] = [forbiddenDateValidator]
-FILTER_VALIDATORS[JOB_ID] = [forbiddenIDValidator]
+FILTER_VALIDATORS[JOB_START_TIME_FROM_FILTER] = [forbiddenDateValidator];
+FILTER_VALIDATORS[JOB_START_TIME_TO_FILTER] = [forbiddenDateValidator];
+FILTER_VALIDATORS[JOB_ID] = [forbiddenIDValidator];
 
-const START_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE = 20;
 
 /*
   For handling multiple filter forms without having to repeat logic per
   FormControl.
 */
-class MultiFilterForm {
+export class MultiFilterForm {
   formControls = {};
 
   constructor(private filterParameters: string[]) {
@@ -106,23 +107,16 @@ class MultiFilterForm {
   selector: 'app-view-jobs',
   templateUrl: './view-jobs.component.html',
   styleUrls: ['./view-jobs.component.css'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0px'})),
-      state('expanded', style({height: '*', minHeight: '100px'})),
-      transition(
-        'expanded <=> collapsed',
-        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
-      ),
-    ]),
-  ],
   providers: [DatePipe]
 })
-export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   @Input() input: string;
   @Input() manualPopulate: boolean;
+  @Input() hideActionBar: boolean;
   @Input() hideFilters: boolean;
   @Input() hideSelectors: boolean;
+  @Input() pageSizeOverride: number;
+  @Input() filtersOverride: MultiFilterForm;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(JobActionComponent) jobActionRef: JobActionComponent;
   @ViewChild(TableHeaderSelectorComponent) tableHeadSelectorRef: TableHeaderSelectorComponent;
@@ -135,11 +129,13 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     'finished_time_sec_utc',
     'job_status',
   ];
-  jobSelectOptions: string[] = [];
+  jobSelectOptions: string[] = ['Visible'];
   jobs = new MatTableDataSource<Job>();
-  loadingJobs = false;
+
+  loading = false;
   numJobs = 0;
   expandedElement: Job|null;
+  startingPageSize: number;
 
   filters = new MultiFilterForm(FILTER_PARAMETERS);
   jobId: string = JOB_ID;
@@ -151,8 +147,6 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
   jobStartTimeToFilter: string = JOB_START_TIME_TO_FILTER;
 
   normalizeTimestamp = normalizeTimestamp;
-
-  pageSize: number = START_PAGE_SIZE;
 
   // Removing the first, default value of each enum ( which represent the 'unset'
   // state.
@@ -167,9 +161,26 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly moblabGrpcService: MoblabGrpcService,
     private changeDetectorRefs: ChangeDetectorRef,
     private datePipe: DatePipe,
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.applyFilters(params);
+    });
+
+    this.startingPageSize = this.pageSizeOverride ?
+      this.pageSizeOverride : DEFAULT_PAGE_SIZE;
+
+    if (this.paginator) {
+      this.paginator.pageSize = this.startingPageSize;
+    }
+
+    if (this.filtersOverride) {
+      this.filters = this.filtersOverride;
+    }
+
     if (!this.hideSelectors) {
       this.displayedColumns = ['job_checkboxes'].concat(this.displayedColumns);
     }
@@ -188,48 +199,30 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  applyFilters(params) {
+    for (const filter_id of FILTER_PARAMETERS) {
+      if (filter_id in params) {
+        this.filters.getFormControl(filter_id).setValue(params[filter_id]);
+      }
+    }
+  }
+
   selectionChanged(event) {
     if (event.selection === "All") {
-      this.jobs.filteredData.forEach(this.jobActionRef.selectJob, this.jobActionRef);
+      this.selectAllJobs();
+    } else if (event.selection === "Visible") {
+      this.jobs.data.forEach(this.jobActionRef.selectJob, this.jobActionRef);
     } else if (event.selection === "None") {
       this.jobActionRef.clearSelectedJobs();
     }
   }
 
-  getPriorityFromNum(priorityNum) {
-    return INT_TO_PRIORITY[priorityNum];
-  }
-  getStatusFromNum(statusNum) {
-    return INT_TO_JOBSTATUS[statusNum];
-  }
-
-  assignJobs(jobs) {
-    this.jobs = new MatTableDataSource(jobs);
-    this.loadingJobs = false;
-  }
-
-  resetPagination() {
-    if (this && this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
-  }
-
-  filterSubmission() {
-    this.resetPagination();
-    this.getNextPageJobs()
-  }
-
-  refreshJobs(parentJobId?: string, dutRunOn?: string) {
-    this.filters.reset();
-    this.filters.setFormValue(PARENT_JOB_ID, parentJobId);
-    this.filters.setFormValue(DUT_RUN_ON, dutRunOn);
-    this.resetPagination();
-    this.getNextPageJobs();
-  }
-
-  getNextPageJobs() {
-    this.loadingJobs = true;
-
+  getJobFilters() {
+    /**
+     * Method that collects and returns all filters relevant to querying jobs.
+     * These filters are shared between getJobs, getNumJobs, and getJobIds
+     * calls.
+     */
     const job_id_filter = this.filters.getFormValue(JOB_ID);
     const job_name_filter = this.filters.getFormValue(JOB_NAME);
     const job_start_lt_filter = datestringToSecondsTimestamp(
@@ -244,20 +237,108 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.filters.getFormValue(JOB_RELATIONSHIP) ?
         Number(Job.Relationship[this.filters.getFormValue(JOB_RELATIONSHIP)]) : 0;
     const parent_id_filter = this.filters.getFormValue(PARENT_JOB_ID);
+    const dut_filter = this.filters.getFormValue(DUT_RUN_ON);
+    return [job_id_filter, job_name_filter, job_start_lt_filter,
+      job_start_gt_filter, job_queue_status_filter, job_relationship_filter,
+      parent_id_filter, dut_filter]
+  }
 
-    this.moblabGrpcService.getJobs(
-      (jobs: Job[]) => this.assignJobs(jobs),
-      this.paginator ?
-        this.paginator.pageIndex * this.paginator.pageSize : 0,
-      this.paginator ?
-        this.paginator.pageSize : this.pageSize,
+  selectJobIds(job_ids: number[]) {
+    this.jobActionRef.selectJobs(job_ids);
+    this.getNextPageJobs();
+    this.jobs.filteredData.forEach(this.jobActionRef.selectJob, this.jobActionRef);
+  }
+
+  selectAllJobs() {
+    /**
+     * Queries backend for list of job ids that meet filter parameters and
+     * selects all returned jobs in job action component.
+     */
+    this.loading = true;
+
+    let [job_id_filter, job_name_filter, job_start_lt_filter,
+      job_start_gt_filter, job_queue_status_filter, job_relationship_filter,
+      parent_id_filter, dut_filter] = this.getJobFilters();
+
+    this.moblabGrpcService.getJobIds(
+      (job_ids: number[]) => {
+        this.selectJobIds(job_ids)
+      },
+      this.errorHandling,
+      // get all jobs, so index 0
+      0,
+      // TO-DO: optimize get_ids so that cancelling 1000+ jobs wont be so
+      // slow.
+      1000,
       job_id_filter,
       job_name_filter,
       job_start_lt_filter,
       job_start_gt_filter,
       job_queue_status_filter,
       job_relationship_filter,
-      parent_id_filter
+      parent_id_filter,
+      dut_filter,
+    );
+  }
+
+  getPriorityFromNum(priorityNum) {
+    return INT_TO_PRIORITY[priorityNum];
+  }
+  getStatusFromNum(statusNum) {
+    return INT_TO_JOBSTATUS[statusNum];
+  }
+
+  assignJobs(jobs) {
+    this.jobs = new MatTableDataSource(jobs);
+    this.loading = false;
+  }
+
+  resetPagination() {
+    if (this && this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+  }
+
+  filterSubmission() {
+    this.resetPagination();
+    this.getNextPageJobs()
+  }
+
+  clearFilters() {
+    this.filters.reset();
+  }
+
+  refreshJobs(parentJobId?: string, dutRunOn?: string) {
+    this.filters.setFormValue(PARENT_JOB_ID, parentJobId);
+    this.filters.setFormValue(DUT_RUN_ON, dutRunOn);
+    this.resetPagination();
+    this.getNextPageJobs();
+  }
+
+  getNextPageJobs() {
+    /**
+     * Refreshes jobs table according to filter and paginator parameters.
+     */
+    this.loading = true;
+    const [job_id_filter, job_name_filter, job_start_lt_filter,
+      job_start_gt_filter, job_queue_status_filter, job_relationship_filter,
+      parent_id_filter, dut_filter] = this.getJobFilters();
+
+    this.moblabGrpcService.getJobs(
+      (jobs: Job[]) => this.assignJobs(jobs),
+      (message: string) => this.errorHandling(message),
+      this.paginator && this.paginator.pageIndex ?
+        this.paginator.pageIndex * this.paginator.pageSize : 0,
+      this.paginator && this.paginator.pageSize ?
+        this.paginator.pageSize : DEFAULT_PAGE_SIZE,
+      job_id_filter,
+      job_name_filter,
+      job_start_lt_filter,
+      job_start_gt_filter,
+      job_queue_status_filter,
+      job_relationship_filter,
+      parent_id_filter,
+      dut_filter,
     );
 
     this.moblabGrpcService.getNumJobs(
@@ -268,7 +349,8 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
       job_start_gt_filter,
       job_queue_status_filter,
       job_relationship_filter,
-      parent_id_filter
+      parent_id_filter,
+      dut_filter,
     )
   }
 
@@ -288,11 +370,28 @@ export class ViewJobsComponent implements OnInit, OnDestroy, AfterViewInit {
     e.stopPropagation();
   }
 
+  errorHandling(message: string) {
+    this.loading = false;
+    this.setOffPopup(message);
+  }
+
   isAllJobsSelected() {
     return this.jobActionRef.getNumSelectedJobs() === this.jobs.data.length;
   }
 
   ngOnDestroy(): void {
     this.paginator.page.unsubscribe();
+  }
+
+  setDutFilter(dut: string) {
+    this.filters.setFormValue(DUT_RUN_ON, dut);
+  }
+
+  setOffPopup(dialogue) {
+    const snackBarRef = this.snackBar.open(dialogue, '', {
+      duration: 5000,
+      verticalPosition: 'top',
+      panelClass: ['action-submission-popup'],
+    });
   }
 }

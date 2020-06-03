@@ -27,6 +27,7 @@ service MoblabRpcService {
 
   rpc get_num_jobs(GetNumJobsRequest) returns (GetNumJobsResponse)  {}
   rpc get_jobs(GetJobsRequest) returns (GetJobsResponse)  {}
+  rpc get_job_ids(GetJobIdsRequest) returns (GetJobIdsResponse)  {}
   rpc get_job_details(GetJobDetailsRequest) returns (GetJobDetailsResponse)  {}
 
   rpc abort_jobs(AbortJobsRequest) returns (AbortJobsResponse)  {}
@@ -350,6 +351,27 @@ message GetJobsRequest {
 // NEXT_TAG = 2
 message GetJobsResponse {
   repeated Job jobs = 1;
+}
+
+// NEXT_TAG = 11
+message GetJobIdsRequest {
+  uint32 query_start = 1;
+  uint32 query_limit = 2;
+  string id_filter = 3;
+  string name_filter = 4;
+  // Timestamp int's are in second granularity.
+  uint64 created_time_lt = 5;
+  uint64 created_time_gt = 6;
+  Job.QueueStatus status_filter = 7;
+  // Relationship denotes whether a job is a parent/suite or child.
+  Job.Relationship rel_filter = 8;
+  string parent_id_filter = 9;
+  string dut_hostname_filter = 10;
+}
+
+// NEXT_TAG = 2
+message GetJobIdsResponse {
+  repeated int32 job_ids = 1;
 }
 
 // NEXT_TAG = 2

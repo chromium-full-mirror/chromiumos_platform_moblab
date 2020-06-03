@@ -15,21 +15,27 @@ export class JobActionComponent {
 
   actions = ['', 'Abort'];
   selectedAction = '';
-  jobSelections = new SelectionModel<Job>(true, []);
+  jobSelections = new SelectionModel<number>(true, []);
   numSelectedJobs = 0;
 
   constructor(private moblabGrpcService: MoblabGrpcService, private snackBar: MatSnackBar,) {}
 
   toggleJobSelection(element) {
-    this.jobSelections.toggle(element);
+    this.jobSelections.toggle(element.getJobId());
   }
 
   isSelected(element) {
-    return this.jobSelections.hasValue() && this.jobSelections.isSelected(element);
+    return this.jobSelections.hasValue() && this.jobSelections.isSelected(element.getJobId());
   }
 
   selectJob(element) {
-    this.jobSelections.select(element);
+    this.jobSelections.select(element.getJobId());
+  }
+
+  selectJobs(jobs: number[]) {
+    jobs.forEach((job_id) => {
+      this.jobSelections.select(job_id);
+    })
   }
 
   clearSelectedJobs() {
@@ -41,20 +47,15 @@ export class JobActionComponent {
   }
 
   doAction() {
-    const jobIds = [];
-      this.jobSelections.selected.forEach(
-      (job) => {
-        jobIds.push(job.getJobId());
-      }
-    );
+    const jobIds = this.jobSelections.selected;
 
     if (this.selectedAction) {
       this.moblabGrpcService.abortJobs(
-        (msg) => {
-          this.setOffPopup(msg)
+        (resultMsg) => {
+          this.setOffPopup(resultMsg);
         },
         (errorMsg) => {
-          this.setOffPopup(errorMsg)
+          this.setOffPopup(errorMsg);
         },
         jobIds
       );
@@ -62,6 +63,10 @@ export class JobActionComponent {
     this.selectedAction = '';
     this.clearSelectedJobs();
     this.actionSubmitted.emit();
+  }
+
+  refresh() {
+    this.clearSelectedJobs();
   }
 
   setOffPopup(message) {

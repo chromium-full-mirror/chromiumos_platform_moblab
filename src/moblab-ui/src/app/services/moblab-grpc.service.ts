@@ -20,6 +20,8 @@ import {
   GetDutTasksResponse,
   GetJobDetailsRequest,
   GetJobDetailsResponse,
+  GetJobIdsRequest,
+  GetJobIdsResponse,
   GetJobsRequest,
   GetJobsResponse,
   GetNumDutTasksRequest,
@@ -395,7 +397,9 @@ export class MoblabGrpcService {
     });
   }
 
-  getJobs(callback: (x: Job[]) => void,
+  getJobs(
+    callback: (x: Job[]) => void,
+    errorHandlingCallback: (errorMsg: string) => void,
     queryStart: number, queryLimit: number, id_filter?: string,
     name_filter?: string, created_time_lt?: number, created_time_gt?: number,
     status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
@@ -432,12 +436,8 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: GetJobsResponse) => {
-        console.log(
-          "Failed get_num_jobs RPC call. Request: ",
-          request,
-          "Response: ",
-          err
-        );
+        errorHandlingCallback(err.message);
+        console.log('Failed get_jobs RPC call. Request: ', request, 'Response: ', err);
       }
     );
     call.on("data", (response: GetJobsResponse) => {
@@ -445,9 +445,79 @@ export class MoblabGrpcService {
     });
   }
 
-  abortJobs(callback: (message: string) => void,
+  getJobIds(
+    callback: (job_ids: Number[]) => void,
     errorHandlingCallback: (errorMsg: string) => void,
-    jobIds: number[]) {
+    queryStart: number,
+    queryLimit: number,
+    id_filter?: string,
+    name_filter?: string,
+    created_time_lt?: number,
+    created_time_gt?: number,
+    status_filter?: Job.QueueStatus,
+    rel_filter?: Job.Relationship,
+    parent_id_filter?: string,
+    dut_hostname_filter?: string
+  ) {
+    /**
+     *  Calls moblab RPC for a list of job IDs matching given query parameters.
+     *  @param callback: Invoked on successful return of job IDs.
+     *  @param errorCallback: Invoked on call failures.
+     *  @param queryStart: Number representing index for start of returned values.
+     *  @param queryLimit: Number representing max number of values to return.
+     *  @param id_filter: String filter for job id.
+     *  @param name_filter: String filter for job name.
+     *  @param created_time_lt: A unix timestamp in seconds granularity the sets
+     *         upper bound for jobs returned.
+     *  @param created_time_gt: A unix timestamp in seconds granularity the sets
+     *         lower bound for jobs returned.
+     *  @param status_filter: Job.QueueStatus filter for returned jobs.
+     *  @param rel_filter: Job.Relationship (child vs parent) for returned jobs.
+     *  @param parent_id_filter: String that filters jobs by parent job id.
+     *  @param dut_hostname_filter: String that filters jobs by associated
+     *         DUT.
+     */
+    const request = new GetJobsRequest();
+    request.setQueryStart(queryStart);
+    request.setQueryLimit(queryLimit);
+    if (id_filter) {
+      request.setIdFilter(id_filter)
+    }
+    if (name_filter) {
+      request.setNameFilter(name_filter)
+    }
+    if (created_time_lt) {
+      request.setCreatedTimeLt(created_time_lt)
+    }
+    if (created_time_gt) {
+      request.setCreatedTimeGt(created_time_gt)
+    }
+    if (status_filter) {
+      request.setStatusFilter(status_filter)
+    }
+    if (rel_filter) {
+      request.setRelFilter(rel_filter)
+    }
+    if (parent_id_filter) {
+      request.setParentIdFilter(parent_id_filter);
+    }
+    if (dut_hostname_filter) {
+      request.setDutHostnameFilter(dut_hostname_filter);
+    }
+
+    const call = this.moblabRpcService.get_job_ids(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetJobIdsResponse) => errorHandlingCallback(err.message)
+    );
+    call.on('data', (response: GetJobIdsResponse) => {
+      callback(response.getJobIdsList())
+    });
+  }
+
+  abortJobs(callback: (resultMsg: string) => void,
+                errorHandlingCallback: (errorMsg: string) => void,
+                jobIds: number[]) {
     const request = new AbortJobsRequest();
     request.setJobIdsList(jobIds);
 
@@ -455,12 +525,6 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: AbortJobsResponse) => {
-        console.log(
-          "Failed abort jobs RPC call. Request: ",
-          request,
-          "Response: ",
-          err
-        );
         errorHandlingCallback(err.message);
       }
     );
