@@ -330,7 +330,6 @@ class CheckFileManager(object):
       # Import the package.
       try:
         file_, path, desc = imp.find_module(service_name, [self.checkdir])
-        print(imp.load_module(service_name, file_, path, desc))
       except Exception as e:
         LOGGER.warning('Failed to import package %s: %s', service_name, e,
                        exc_info=True)
@@ -341,7 +340,6 @@ class CheckFileManager(object):
         filepath = os.path.join(service_package, file_)
         if os.path.isfile(filepath) and file_.endswith(CHECKFILE_ENDING):
           try:
-            print(file_)
             healthchecks, mtime = ImportFile(service_name, filepath)
             self.Update(service_name, healthchecks, mtime)
           except Exception as e:

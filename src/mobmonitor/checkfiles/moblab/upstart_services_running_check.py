@@ -68,7 +68,7 @@ def ServiceRunning(service):
     output = osutils.run_command(cmd, error_code_ok=True).strip()
 
     for line in output.splitlines():
-        if service in line:
+        if service in line.encode:
             return True
 
     return False
@@ -111,44 +111,25 @@ class UpstartServiceRunning(object):
         return ('Unknown error reached with error code: %s' % errcode, [])
 
 
-class DockerRunning(UpstartServiceRunning):
-    """Verifies that gs_offloader is running."""
+# class DHCPRunning(UpstartServiceRunning):
+#     """Verifies that scheduler is running."""
 
-    SERVICES = ['moblab-dockerd']
-    SERVICE_SEARCH = 'dockerd'
-
-    def Check(self):
-        """Verifies that apache is running on moblab.
-
-        Returns:
-          0 if apache is running.
-          -1 if apache is not running.
-        """
-        if not ServiceRunning(self.SERVICE_SEARCH):
-            return -1
-
-        return 0
+#     SERVICES = ['moblab-dhcp']
 
 
-class DHCPRunning(UpstartServiceRunning):
-    """Verifies that scheduler is running."""
+# class HostServicesRunning(UpstartServiceRunning):
+#     """Verifies that devserver is running."""
 
-    SERVICES = ['moblab-dhcp']
-
-
-class HostServicesRunning(UpstartServiceRunning):
-    """Verifies that devserver is running."""
-
-    SERVICES = ['moblab-host-services']
+#     SERVICES = ['moblab-host-services']
 
 
-class ComposeURunning(UpstartServiceRunning):
-    """Verifies that database is up."""
+# class ComposeURunning(UpstartServiceRunning):
+#     """Verifies that database is up."""
 
-    SERVICES = ['moblab-compose-up']
+#     SERVICES = ['moblab-compose-up']
 
 
-class JobAborterRunning(UpstartServiceRunning):
-    """Verifies that job_aborter is up."""
+# class JobAborterRunning(UpstartServiceRunning):
+#     """Verifies that job_aborter is up."""
 
-    SERVICES = ['job_aborter']
+#     SERVICES = ['job_aborter']

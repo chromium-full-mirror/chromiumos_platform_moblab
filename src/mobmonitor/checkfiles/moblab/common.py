@@ -11,7 +11,7 @@
 # Boto file constants.
 #
 BOTO_PATH = '/home/moblab/.boto'
-
+SERVICE_ACCOUNT_PATH = '/home/moblab/.service_account.json'
 #
 # disk_check constants.
 #

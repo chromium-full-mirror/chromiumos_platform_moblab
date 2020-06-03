@@ -17,7 +17,11 @@ import argparse
 from cherrypy.lib.static import serve_file
 from checkfile import manager as cf_manager
 from util import collect_logs
+from util import feedback_connector
 from diagnostic_checks import manager as dc_manager
+
+from moblab_common import afe_connector
+from moblab_common import config_connector
 
 
 STATICDIR = '/etc/moblab/mobmonitor/static/'
@@ -74,7 +78,7 @@ class MobMonitorRoot(object):
       service_statuses = [service_statuses]
 
     result = [
-        manager.MapServiceStatusToDict(status) for status in service_statuses]
+        cf_manager.MapServiceStatusToDict(status) for status in service_statuses]
     return json.dumps(result)
 
   @cherrypy.expose
@@ -91,7 +95,7 @@ class MobMonitorRoot(object):
       TBD
     """
     result = self.checkfile_manager.ActionInfo(service, healthcheck, action)
-    return json.dumps(manager.MapActionInfoToDict(result))
+    return json.dumps(cf_manager.MapActionInfoToDict(result))
 
   @cherrypy.expose
   def RepairService(self, service, healthcheck, action, params):
@@ -111,13 +115,25 @@ class MobMonitorRoot(object):
 
     status = self.checkfile_manager.RepairService(service, healthcheck, action,
                                                   params)
-    return json.dumps(manager.MapServiceStatusToDict(status))
+    return json.dumps(cf_manager.MapServiceStatusToDict(status))
 
   @cherrypy.expose
   def CollectLogs(self):
     tarfile = collect_logs.collect_logs()
     return serve_file(tarfile, 'application/x-download',
                       'attachment', os.path.basename(tarfile))
+
+  @cherrypy.expose
+  def UploadLogs(self):
+    afe = afe_connector.AFEConnector()
+    conf = config_connector.MoblabConfigConnector(afe)
+    conf.load_config()
+    conn = feedback_connector.MoblabFeedbackConnector(conf.get_cloud_bucket())
+    feedback_dir_path, url = conn.upload_feedback()
+    return ("Your logs have been uploaded to your Google Cloud bucket "
+            "<a href=\"https://console.developers.google.com/storage/%s/%s\">Link to Logs</a>" % (conf.get_cloud_bucket(), feedback_dir_path))
+
+
 
   @cherrypy.expose
   def ListDiagnosticChecks(self):

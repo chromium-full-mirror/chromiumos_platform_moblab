@@ -33,80 +33,80 @@ def GetIp():
   return 'localhost'
 
 
-class GsBucket(object):
-  """Verify that we have access to the correct Google Storage bucket."""
+# class GsBucket(object):
+#   """Verify that we have access to the correct Google Storage bucket."""
 
-  def __init__(self):
-    self.bucket = None
+#   def __init__(self):
+#     self.bucket = None
 
-  def BucketReachable(self, gs_url):
-    """Check if we can reach the image server.
+#   def BucketReachable(self, gs_url):
+#     """Check if we can reach the image server.
 
-    Args:
-      gs_url: The url of the Google Storage image server.
+#     Args:
+#       gs_url: The url of the Google Storage image server.
 
-    Returns:
-      True if |gs_url| can be reached.
-      False otherwise.
-    """
-    # If our boto key is non-existent or is not configured correctly
-    # for access to the right bucket, this check may take ~45 seconds.
-    # This really ruins the monitor's performance as we do not yet
-    # intelligently handle long running checks.
-    #
-    # Additionally, we cannot use chromite's timeout_util as it is
-    # based on Python's signal module, which cannot be used outside
-    # of the main thread. These checks are executed in a separate
-    # thread handled by the monitor.
-    #
-    # To handle this, we rely on the linux utility 'timeout' and
-    # forcefully kill our gsutil invocation if it is taking too long.
+#     Returns:
+#       True if |gs_url| can be reached.
+#       False otherwise.
+#     """
+#     # If our boto key is non-existent or is not configured correctly
+#     # for access to the right bucket, this check may take ~45 seconds.
+#     # This really ruins the monitor's performance as we do not yet
+#     # intelligently handle long running checks.
+#     #
+#     # Additionally, we cannot use chromite's timeout_util as it is
+#     # based on Python's signal module, which cannot be used outside
+#     # of the main thread. These checks are executed in a separate
+#     # thread handled by the monitor.
+#     #
+#     # To handle this, we rely on the linux utility 'timeout' and
+#     # forcefully kill our gsutil invocation if it is taking too long.
 
-    cmd = ['timeout', '-s', '9', str(GSUTIL_TIMEOUT_SEC),
-           'gsutil', 'ls', '-b', gs_url]
-    try:
-        osutils.sudo_run_command(cmd, user=GSUTIL_USER)
-    except osutils.RunCommandError:
-        return False
+#     cmd = ['timeout', '-s', '9', str(GSUTIL_TIMEOUT_SEC),
+#            'gsutil', 'ls', '-b', gs_url]
+#     try:
+#         osutils.sudo_run_command(cmd, user=GSUTIL_USER)
+#     except osutils.RunCommandError:
+#         return False
 
-    return True
+#     return True
 
-  def Check(self):
-    """Verifies Google storage bucket access.
+#   def Check(self):
+#     """Verifies Google storage bucket access.
 
-    Returns:
-      0 if we can access the correct bucket for our given Boto key.
-      -1 if a configuration file could not be found.
-      -2 if the configuration files did not contain the appropriate
-        information.
-    """
+#     Returns:
+#       0 if we can access the correct bucket for our given Boto key.
+#       -1 if a configuration file could not be found.
+#       -2 if the configuration files did not contain the appropriate
+#         information.
+#     """
 
-    gs_url = config.Config().get('image_storage_server')
+#     gs_url = config.Config().get('image_storage_server')
 
-    if not (gs_url and self.BucketReachable(gs_url)):
-      self.bucket = gs_url
-      return -2
+#     if not (gs_url and self.BucketReachable(gs_url)):
+#       self.bucket = gs_url
+#       return -2
 
-    if gs_url in GSUTIL_INTERNAL_BUCKETS:
-      self.bucket = gs_url
-      return 1
+#     if gs_url in GSUTIL_INTERNAL_BUCKETS:
+#       self.bucket = gs_url
+#       return 1
 
-    return 0
+#     return 0
 
-  def Diagnose(self, errcode):
-    if 1 == errcode:
-      return ('Using an internal Google Storage bucket %s' % self.bucket, [])
+#   def Diagnose(self, errcode):
+#     if 1 == errcode:
+#       return ('Using an internal Google Storage bucket %s' % self.bucket, [])
 
-    elif -1 == errcode:
-      return ('An autotest configuration file is missing.', [])
+#     elif -1 == errcode:
+#       return ('An autotest configuration file is missing.', [])
 
-    elif -2 == errcode:
-      return ('Moblab is not configured to access Google Storage.'
-              ' The current bucket name is set to %s. Please'
-              ' navigate to http://%s/moblab_setup/ and update'
-              ' the image_storage_server variable. For more information,'
-              ' please see https://www.chromium.org/chromium-os/testing/'
-              'moblab/setup#TOC-Setting-up-the-boto-key-for-partners' % (
-                  self.bucket, GetIp()), [])
+#     elif -2 == errcode:
+#       return ('Moblab is not configured to access Google Storage.'
+#               ' The current bucket name is set to %s. Please'
+#               ' navigate to http://%s/moblab_setup/ and update'
+#               ' the image_storage_server variable. For more information,'
+#               ' please see https://www.chromium.org/chromium-os/testing/'
+#               'moblab/setup#TOC-Setting-up-the-boto-key-for-partners' % (
+#                   self.bucket, GetIp()), [])
 
-    return ('Unknown error reached with error code: %s' % errcode, [])
+#     return ('Unknown error reached with error code: %s' % errcode, [])
