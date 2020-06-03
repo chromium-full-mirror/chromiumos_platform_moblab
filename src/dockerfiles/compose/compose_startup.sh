@@ -17,7 +17,7 @@ then
     docker-compose down -t 30
 else
     docker-compose pull remote_access
-    docker-compose up -d --no-recreate -e SSH_PORT=${SSH_PORT} remote_access
+    docker-compose up -d --no-recreate remote_access
 
     docker-compose pull db db-init autotest autotest-dbsetup
     docker-compose up -d --no-recreate db db-init autotest autotest-dbsetup
