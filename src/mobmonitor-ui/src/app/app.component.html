@@ -5,13 +5,24 @@
 </header>
 
 <div class="container">
-  <p *ngIf="!lostConnection">last updated {{updated | date:'medium'}}</p>
-  <p *ngIf="lostConnection" class="error">
-    failed to update, last updated {{(updated | date:'medium') || 'never'}}
-  </p>
-  <a href="/CollectLogs" target="_blank" mat-raised-button color="primary">
-    Download Logs
-  </a>
+  <mat-grid-list cols="4" rowHeight="60px">
+    <mat-grid-tile colspan=2 *ngIf="!lostConnection">
+      last updated {{updated | date:'medium'}}
+    </mat-grid-tile>
+    <mat-grid-tile colspan=2 *ngIf="lostConnection" class="error">
+      failed to update, last updated {{(updated | date:'medium') || 'never'}}
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <a href="/CollectLogs" target="_blank" mat-raised-button color="primary">
+        Download Logs
+      </a>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <a href="/UploadLogs" target="_blank" mat-raised-button color="primary">
+        Send Logs
+      </a>
+    </mat-grid-tile>
+  </mat-grid-list>
   <mob-health-checks></mob-health-checks>
 
   <mob-diagnostics></mob-diagnostics>

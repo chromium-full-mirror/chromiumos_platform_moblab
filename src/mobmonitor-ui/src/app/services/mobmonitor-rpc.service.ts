@@ -1,6 +1,6 @@
-import { catchError } from 'rxjs/operators';
-import { Injectable, OnDestroy } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import {catchError} from 'rxjs/operators';
+import {Injectable, OnDestroy} from '@angular/core';
+import {HttpClient, HttpParams, HttpHeaders} from '@angular/common/http';
 import {
   Observable,
   Subject,
@@ -10,16 +10,16 @@ import {
   throwError,
   of
 } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { HealthCheck } from '../shared/health-check';
-import { Action } from '../shared/action';
-import { ActionInfo } from '../shared/action-info';
-import { RepairServiceInfo } from '../shared/repair-service-info';
-import { ActionsParamDialogComponent } from './actions-param-dialog/actions-param-dialog.component';
-import { MobmonitorError, wrapError } from '../shared/mobmonitor-error';
-import { Diagnostic } from '../shared/diagnostic';
-import { DiagnosticResult } from '../shared/diagnostic-result';
-import { RunDiagnosticParams } from '../shared/run-diagnostic-params';
+import {MatDialog} from '@angular/material/dialog';
+import {HealthCheck} from '../shared/health-check';
+import {Action} from '../shared/action';
+import {ActionInfo} from '../shared/action-info';
+import {RepairServiceInfo} from '../shared/repair-service-info';
+import {ActionsParamDialogComponent} from './actions-param-dialog/actions-param-dialog.component';
+import {MobmonitorError, wrapError} from '../shared/mobmonitor-error';
+import {Diagnostic} from '../shared/diagnostic';
+import {DiagnosticResult} from '../shared/diagnostic-result';
+import {RunDiagnosticParams} from '../shared/run-diagnostic-params';
 
 @Injectable()
 export class MobmonitorRpcService implements OnDestroy {
@@ -59,7 +59,7 @@ export class MobmonitorRpcService implements OnDestroy {
     // all components that need the status will be pushed
     // updates and not need to issue extra HTTP requests
     this.getStatusSubject = new Subject<Array<HealthCheck>>();
-    this.timerSub = timer(50, 1000).subscribe(() => {
+    this.timerSub = timer(50, 10000).subscribe(() => {
       if (this.repairing) {
         return;
       }
@@ -234,7 +234,7 @@ export class MobmonitorRpcService implements OnDestroy {
       .set('action', action.action)
       .set('healthcheck', action.healthCheck)
       .set('service', action.service);
-    return this.http.get<ActionInfo>('/ActionInfo', { params: params });
+    return this.http.get<ActionInfo>('/ActionInfo', {params: params});
   }
 
   /**
@@ -253,7 +253,7 @@ export class MobmonitorRpcService implements OnDestroy {
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
-    return this.http.post('/RepairService', params.toString(), { headers });
+    return this.http.post('/RepairService', params.toString(), {headers});
   }
 
   /**

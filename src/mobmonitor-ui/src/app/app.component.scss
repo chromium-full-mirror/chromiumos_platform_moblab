@@ -27,7 +27,7 @@ header {
 
 p {
   margin: 0;
-  margin-bottom: 24px;
+  // margin-bottom: 24px;
   @include subtext;
 
   &.error {
@@ -35,8 +35,13 @@ p {
   }
 }
 
-a {
-  position: absolute;
-  top: -14px;
-  right: 0;
+// a {
+//   position: absolute;
+//   top: -14px;
+//   right: 0;
+// }
+
+.mat-grid-tile .mat-figure {
+  justify-content: flex-start !important ;
+  align-items: flex-start !important;
 }

@@ -19,8 +19,10 @@ WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
 # install and cache app dependencies
-# add app
-COPY src/mobmonitor-ui /app
+# doing the package files first allows for faster compiles when developing
+# as docker will cache the npm packages
+COPY src/mobmonitor-ui/package.json /app
+COPY src/mobmonitor-ui/package-lock.json /app
 RUN npm install
 
 # run tests
@@ -28,6 +30,7 @@ RUN npm install
 #RUN ng e2e --port 4202
 
 # generate build
+COPY src/mobmonitor-ui /app
 RUN ng build --output-path=dist
 
 #########################################################################################3
@@ -51,7 +54,8 @@ RUN apt-get update && apt-get install -yq \
     libssl-dev \
     zlib1g-dev \
     gcc-multilib \
-    cmake
+    cmake \
+    curl
 
 COPY src/dockerfiles/mobmonitor/requirements.txt ./
 RUN pip install --upgrade pip
@@ -69,6 +73,9 @@ COPY --chown=moblab --from=build /app/dist /etc/moblab/mobmonitor/static/
 
 RUN mkdir -p /var/log/mobmonitor/
 RUN chown -R moblab /var/log/mobmonitor
+
+RUN addgroup --gid 412 docker
+RUN usermod -aG docker moblab
 
 RUN apt purge -yq cmake zlib1g-dev gcc-multilib
 RUN apt autoremove -yq
