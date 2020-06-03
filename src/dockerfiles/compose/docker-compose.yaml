@@ -232,7 +232,7 @@ services:
       - moblab
 
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json=
+      - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
 
     ports:
       - 6010:6010
@@ -412,12 +412,12 @@ services:
 
     volumes:
       - logs:/var/log/moblab
-      - /sys:/sys:ro
-      - /dev/disk/:/dev/disk:ro
-      - moblab_home:/home/moblab
-      - logs:/logs
-      - /var/log/bootup:/bootup
+      - apache_logs:/var/log/apache:ro
+      - moblab_home:/home/moblab:ro
+      - /var/log/bootup:/var/log/bootup:ro
+      - leases:/leases:ro
       - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /etc/lsb-release:/etc/lsb-release:ro
 
     networks:
       - moblab
@@ -427,6 +427,9 @@ services:
 
     extra_hosts:
       - "dockerhost:192.168.100.1"
+
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
 
 ##############################################################################
 volumes:
