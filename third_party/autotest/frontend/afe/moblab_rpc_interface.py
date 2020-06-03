@@ -192,6 +192,7 @@ def update_config_handler(config_values):
     if not _CONFIG.shadow_file or not os.path.exists(_CONFIG.shadow_file):
         raise error.RPCException('Shadow config file does not exist.')
     _write_config_file(_CONFIG.shadow_file, new_shadow, True)
+    reboot_moblab()
 
 
 @rpc_utils.moblab_only
