@@ -1,19 +1,67 @@
 .configuration-label {
-  min-width: 250px;
+  min-width: 400px;
   margin: 10px;
 }
 .configuration-input {
   margin-right: 15px;
-  min-width: 400px;
+  min-width: 500px;
 }
 .configuration {
   flex-direction: row;
   layout-margin: 50px;
 }
-mat-form-field .ng-invalid {
-  border:3px solid red;
+
+#submit-button {
+  margin-top: 25px;
+  margin-bottom: 20px;
 }
+
 mat-card-header {
   text-decoration: underline;
+  font-family: Roboto, sans-serif;
+  color:rgba(0, 0, 0, 0.87);
   font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 30px;
+}
+
+mat-card {
+  border: 1px solid #ebebeb;
+  box-shadow: none !important;
+  max-width: 650px;
+  margin: 16px;
+  padding: 8px;
+}
+
+#gcsLink {
+  margin-left:10px;
+  font-family: Roboto, sans-serif;
+}
+
+#loading-overlay {
+  background-color: #fafafa;
+  height: 100%;
+  opacity: .8;
+  position: absolute;
+  top: 0px;
+  margin-left: -8px;
+  width: 100%;
+  z-index: 100;
+}
+
+.list-row {
+  margin-top:15px;
+  margin-bottom:15px;
+}
+
+.loading-spinner-wrapper {
+  display: inline-flex;
+  margin-bottom: 20px;
+  margin-top: 10px;
+  overflow: hidden;
+  position: absolute;
+  top:25%;
+  /*min-height: 300px;*/
+  margin-left:180px;
+  z-index: 101;
 }

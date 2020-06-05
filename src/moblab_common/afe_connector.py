@@ -595,3 +595,138 @@ class AFEConnector(object):
         """
         response = self.send_rpc_command('repair_hosts', {'id': host_id})
         return self.decode_response(response, 'result')
+
+    def get_network_info(self):
+        """
+            Gets network info of Moblab from AFE.
+        Returns:
+            A dict of network information ( specifically, a 'server_ips' list
+            and 'is_connected' which is true iff Moblab is connected to internet.
+        """
+        response = self.send_rpc_command(
+            "get_network_info", {}
+        )
+        return self.decode_response(response, "result")
+
+    def get_cloud_storage_info(self):
+        """
+            Gets cloud configuration info from AFE.
+        Returns:
+            A dict of cloud configuration info  ( specifically, 'gs_access_key_id',
+            'gs_secret_access_key', 'image_storage_server' )
+        """
+        response = self.send_rpc_command(
+            "get_cloud_storage_info", {}
+        )
+        return self.decode_response(response, "result")
+
+    def get_version_info(self):
+        """
+            Gets version info of Moblab from AFE.
+        Returns:
+            A dict of ChromeOS and Moblab information (ex. serial number,
+            release version )
+        """
+        response = self.send_rpc_command(
+            "get_version_info", {}
+        )
+        return self.decode_response(response, "result")
+
+    def _format_cloud_configuration_dict(
+        self,
+        gs_access_key_id,
+        gs_secret_access_key,
+        image_storage_server,
+        include_wifi=False
+    ):
+        """
+            Helper method for returning params shared between calls to set cloud
+            config and validate cloud config.
+        Args:
+            gs_access_key_id (string): boto ID string
+            gs_secret_access_key (string): boto secret string
+            image_storage_server (string): GCS bucket URL
+            include_wifi (boolean): True iff wifi_info attribute entry needs to
+            be added.
+        Returns:
+            A dictionary of cloud configuration parameters.
+        """
+        cloud_configuration_dict = {
+            "cloud_storage_info" : {
+                "gs_access_key_id": gs_access_key_id,
+                "gs_secret_access_key": gs_secret_access_key,
+                "image_storage_server": image_storage_server,
+                "results_storage_server": "",
+                # AFE backend services configuration of other values in addition
+                # to cloud configs, but Moblab only needs to change these values,
+                # so this value is always False.
+                "use_existing_boto_file": False
+            }
+        }
+
+        if include_wifi:
+            cloud_configuration_dict["wifi_info"] = {
+                "wifi_dut_ap_name": None,
+                "wifi_dut_ap_pass": None
+            }
+
+        return cloud_configuration_dict
+
+
+    def set_cloud_storage_info(self, gs_access_key_id, gs_secret_access_key,
+        image_storage_server):
+        """
+            Applies given configuration values to AFE.
+        Args:
+            gs_access_key_id (string): boto ID string
+            gs_secret_access_key (string): boto secret string
+            image_storage_server (string): GCS bucket URL
+        Returns:
+            A boolean, true IFF application of new cloud configurations
+            succeeded.
+        """
+        response = self.send_rpc_command(
+            'submit_wizard_config_info',
+            self._format_cloud_configuration_dict(
+                gs_access_key_id,
+                gs_secret_access_key,
+                image_storage_server,
+                include_wifi=True
+            )
+        )
+
+        response = self.decode_response(response, "result")
+        if 'status_ok' in response and response['status_ok']:
+            return True
+        else:
+            return False
+
+    def validate_cloud_storage_info(
+        self,
+        gs_access_key_id,
+        gs_secret_access_key,
+        image_storage_server
+    ):
+        """
+            Calls through to AFE to check validity of boto and bucket
+            configuration, returns true iff configurations are valid, and if
+            false returns a reason that configuration is not valid.
+        Args:
+            gs_access_key_id (string): boto ID string
+            gs_secret_access_key (string): boto secret string
+            image_storage_server (string): GCS bucket URL
+        Returns:
+            A tuple (boolean, string).
+        """
+        response = self.send_rpc_command(
+            'validate_cloud_storage_info',
+            self._format_cloud_configuration_dict(
+                gs_access_key_id,
+                gs_secret_access_key,
+                image_storage_server
+            )
+        )
+
+        result = self.decode_response(response, "result")
+        return result['status_ok'], result.get('status_details', '')
+

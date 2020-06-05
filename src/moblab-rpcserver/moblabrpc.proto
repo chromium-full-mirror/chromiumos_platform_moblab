@@ -44,6 +44,11 @@ service MoblabRpcService {
   rpc add_attribute_to_duts(AddAttributeToDutsRequest) returns (AddAttributeToDutsResponse) {};
   rpc remove_attribute_from_duts(RemoveAttributeFromDutsRequest) returns (RemoveAttributeFromDutsResponse) {};
 
+  rpc get_network_info(GetNetworkInfoRequest) returns (GetNetworkInfoResponse) {};
+  rpc get_cloud_configuration(GetCloudConfigurationRequest) returns (GetCloudConfigurationResponse) {};
+  rpc set_cloud_configuration(SetCloudConfigurationRequest) returns (SetCloudConfigurationResponse) {};
+  rpc get_version_info(GetVersionInfoRequest) returns (GetVersionInfoResponse) {};
+
   // Sends screenshot and feedback information to GCS bucket.
   rpc send_moblab_screenshot(SendMoblabScreenshotRequest) returns (SendMoblabScreenshotResponse) {};
 }
@@ -504,4 +509,47 @@ message RemoveAttributeFromDutsRequest {
 // NEXT_TAG = 2
 message RemoveAttributeFromDutsResponse {
   string message = 1;
+}
+
+// NEXT_TAG = 1;
+message GetNetworkInfoRequest {}
+
+// NEXT_TAG = 3;
+message GetNetworkInfoResponse {
+  string moblab_hostname = 1;
+  bool is_connected = 2;
+}
+
+// NEXT_TAG = 1;
+message GetCloudConfigurationRequest {}
+
+// NEXT_TAG = 4;
+message GetCloudConfigurationResponse {
+  string boto_key_id = 1;
+  string boto_key_secret = 2;
+  string gcs_bucket_url = 3;
+}
+
+// NEXT_TAG = 4;
+message SetCloudConfigurationRequest {
+  string boto_key_id = 1;
+  string boto_key_secret = 2;
+  string gcs_bucket_url = 3;
+}
+
+// NEXT_TAG = 2;
+message SetCloudConfigurationResponse {
+  string message = 1;
+}
+
+// NEXT_TAG = 1;
+message GetVersionInfoRequest {}
+
+// NEXT_TAG = 6;
+message GetVersionInfoResponse {
+  string chromeos_release_version = 1;
+  string chromeos_release_track = 2;
+  string chromeos_release_description = 3;
+  string moblab_id = 4;
+  string moblab_serial_number = 5;
 }

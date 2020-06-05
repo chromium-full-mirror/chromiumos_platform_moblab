@@ -708,3 +708,68 @@ class MoblabService(object):
             self.afe_connector.repair_host(dut_id)
 
         return 'Successfully set off repair on {}'.format(dut_hostname)
+
+    def get_network_info(self):
+        """
+            Gets network info of Moblab.
+        Returns:
+            A dict of network information ( specifically, a 'server_ip' and
+            'is_connected' which is true iff Moblab is connected to internet.
+        """
+        network_info = self.afe_connector.get_network_info()
+        if len(network_info['server_ips']) != 1:
+            raise MoblabRpcError(
+                'Unable to determine ip of Moblab, found {} candidates'.format(
+                len(network_info['server_ips'])
+            ))
+
+        network_info['server_ip'] = network_info['server_ips'][0]
+        return network_info
+
+    def get_cloud_configuration(self):
+        """
+            Gets cloud configuration info.
+        Returns:
+            A dict of cloud configuration info  ( specifically, 'gs_access_key_id',
+            'gs_secret_access_key', 'image_storage_server' )
+        """
+        return self.afe_connector.get_cloud_storage_info()
+
+    def set_cloud_configuration(self, boto_key_id, boto_key_secret, gcs_bucket_url):
+        """
+            Attempts to set configuration values to Moblab.
+        Args:
+            boto_key_id (string): boto ID string
+            boto_key_secret (string): boto secret string
+            gcs_bucket_url (string): GCS bucket URL
+        Returns:
+            A result message string.
+        """
+        is_valid, details = self.afe_connector.validate_cloud_storage_info(
+            boto_key_id, boto_key_secret, gcs_bucket_url)
+
+        if is_valid:
+            if self.afe_connector.set_cloud_storage_info(boto_key_id, boto_key_secret, gcs_bucket_url):
+                return 'Successfully applied cloud configuration changes.'
+            else:
+                return 'Failed to apply cloud configuration changes.'
+        else:
+            return details
+
+    def get_version_info(self):
+        """
+            Gets cloud version info of Moblab.
+        Returns:
+            A dict of ChromeOS and Moblab information (ex. serial number,
+            release version )
+        """
+        version_info = self.afe_connector.get_version_info()
+        try:
+            version_info['CHROMEOS_RELEASE_VERSION'] =\
+                version_info['CHROMEOS_RELEASE_BUILDER_PATH'].split('/')[1].strip()
+        except IndexError:
+            msg = 'Unable to parse ChromeOS release version.'
+            logging.error(msg)
+            raise MoblabRpcError(msg)
+
+        return version_info

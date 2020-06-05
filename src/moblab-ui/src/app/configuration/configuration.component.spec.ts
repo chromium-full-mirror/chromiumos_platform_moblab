@@ -1,0 +1,159 @@
+/* tslint:disable:no-unused-variable */
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {CommonModule} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
+import {MatCardModule} from '@angular/material/card';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatListModule} from '@angular/material/list';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+
+import {ConfigurationComponent} from './configuration.component';
+
+
+describe('ConfigurationComponent', () => {
+  let component: ConfigurationComponent;
+  let fixture: ComponentFixture<ConfigurationComponent>;
+
+  let getNetworkInfoSpy: jasmine.Spy;
+  let getVersionInfoSpy: jasmine.Spy;
+  let getCloudConfigurationSpy: jasmine.Spy;
+
+  function inputConfiguration(inputIdentifier: string, input: string) {
+    const inputEl = fixture.debugElement.nativeElement.querySelector(
+      '#' + inputIdentifier
+    );
+    inputEl.value = input;
+    inputEl.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  }
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+        imports: [
+          BrowserAnimationsModule,
+          CommonModule,
+          FormsModule,
+          HttpClientModule,
+          MatCardModule,
+          MatFormFieldModule,
+          MatInputModule,
+          MatListModule,
+          MatPaginatorModule,
+          MatProgressSpinnerModule,
+          MatProgressSpinnerModule,
+          MatSnackBarModule,
+          ReactiveFormsModule,
+        ],
+        declarations: [ConfigurationComponent]})
+      .compileComponents();
+  }));
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ConfigurationComponent);
+    component = fixture.componentInstance;
+
+    getNetworkInfoSpy = spyOn<any>(component, 'getNetworkInfo').and.callFake(
+      function() {
+        component.setNetworkInfo(
+          '000.000.000.000',
+          true
+          )
+      });
+
+    getVersionInfoSpy = spyOn<any>(component, 'getVersionInfo').and.callFake(
+      function() {
+        component.setVersionInfo(
+          'R00-00000.00.0',
+          'mock-release',
+          'Mock description.',
+          'xxxxxxxxxxxxxxxxxxxxxx',
+          'XXXXXXXXXXXX'
+        )
+      });
+
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('network and version info populated on init', () => {
+    expect(component.moblabHostname).toBeTruthy();
+    expect(component.chromeosReleaseVersion).toBeTruthy();
+    expect(component.chromeosReleaseDescription).toBeTruthy();
+    expect(component.chromeosReleaseTrack).toBeTruthy();
+  });
+
+  it('empty configuration fields show error', () => {
+    const errorItems = fixture.debugElement.nativeElement.querySelectorAll(
+      '.mat-error'
+    );
+
+    expect(errorItems.length).toBe(3);
+    expect(component.botoKeyIDForm.hasError('required')).toBeTruthy();
+    expect(component.botoKeySecretForm.hasError('required')).toBeTruthy();
+    expect(component.bucketURLForm.hasError('required')).toBeTruthy();
+  });
+
+  it('bad GCS URL shows error', () => {
+    inputConfiguration('botoKeyIdInput', 'fake-boto-key');
+    inputConfiguration('botoKeySecretInput', 'fake-secret-key');
+    inputConfiguration('imageStorageUrlInput', 'gs://xxx/');
+
+    expect(fixture.debugElement.nativeElement.querySelectorAll(
+      '.mat-error'
+    ).length).toBe(0);
+
+    inputConfiguration('imageStorageUrlInput', 'gs:/xxx/');
+    expect(fixture.debugElement.nativeElement.querySelectorAll(
+      '.mat-error'
+    ).length).toBe(1);
+
+    inputConfiguration('imageStorageUrlInput', 'gs://xxx');
+    expect(fixture.debugElement.nativeElement.querySelectorAll(
+      '.mat-error'
+    ).length).toBe(1);
+  });
+
+  describe('configuration set tests', function () {
+    const MOCK_NUM_JOBS = 100;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(ConfigurationComponent);
+      component = fixture.componentInstance;
+      getCloudConfigurationSpy = spyOn<any>(component, 'getCloudConfiguration').and.callFake(
+        function() {
+          component.setCloudConfiguration(
+            'fake-boto-key',
+            'fake-secret-key',
+            'gs://xxx/',
+          )
+        });
+      fixture.detectChanges();
+    });
+
+    it('submit button only enabled on diff', () => {
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#submit-button'
+      ).disabled).toBeTruthy();
+
+      inputConfiguration('imageStorageUrlInput', 'gs://xxxx/');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#submit-button'
+      ).disabled).toBeFalsy();
+
+      inputConfiguration('imageStorageUrlInput', 'gs://xxx/');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#submit-button'
+      ).disabled).toBeTruthy();
+    });
+  });
+});
