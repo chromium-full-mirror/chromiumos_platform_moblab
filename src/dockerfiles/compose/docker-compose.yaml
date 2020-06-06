@@ -357,7 +357,7 @@ services:
       - moblab
   ##############################################################################
   remote_access:
-    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/remote-access:${REMOTE_ACCESS:-release}
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/remote_access:${REMOTE_ACCESS:-release}
     restart: on-failure
     volumes:
       - logs:/var/log/moblab
