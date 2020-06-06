@@ -433,6 +433,49 @@ class MoblabService(object):
                 created_time_lt, created_time_gt, sub, suite, not_yet_run,
                 running, finished, parent_id_filter)
 
+    def get_job_ids(self,
+                    query_start,
+                    query_limit,
+                    id_filter=None,
+                    name_filter=None,
+                    created_time_lt=None,
+                    created_time_gt=None,
+                    sub=False,
+                    suite=False,
+                    not_yet_run=False,
+                    running=False,
+                    finished=False,
+                    parent_id_filter=None,
+                    dut_hostname_filter=None):
+        """Returns the job ID's that match the request filters.
+
+        Args:
+            query_start: Int index for start of returned values.
+            query_limit: Int for max number of values to return.
+            id_filter: String filter for job id.
+            name_filter: String filter for job name.
+            created_time_lt: A unix timestamp in seconds granularity the sets
+                upper bound for jobs returned.
+            created_time_gt: A unix timestamp in seconds granularity the sets
+                lower bound for jobs returned.
+            sub: Boolean, true iff child jobs to be returned.
+            suite: Boolean, true iff parent jobs to be returned.
+            not_yet_run: Boolean, true iff queued jobs to be returned.
+            running: Boolean, true iff running jobs to be returned.
+            finished: Boolean, true iff only finished jobs to be returned.
+            parent_id_filter: String filter for parent job id.
+            dut_hostname_filter: String filter for DUT associated with job.
+
+        Returns:
+          List of job ID numbers.
+        """
+        return [job['id'] for job in
+                self.get_jobs(query_start, query_limit, id_filter, name_filter,
+                              created_time_lt, created_time_gt, sub, suite,
+                              not_yet_run, running, finished, parent_id_filter,
+                              dut_hostname_filter)]
+
+
     def abort_jobs(self, job_ids):
         result = self.afe_connector.abort_host_queue_entries(job_ids)
         if result:

@@ -70,7 +70,7 @@
             </mat-select>
           </mat-form-field>
           <button id="filter-button" mat-raised-button color="primary"
-                  [disabled]="this.filters.anyErrors()"
+                  [disabled]="this.filters.anyErrors() || this.loading"
                   (click)="filterSubmission()"> Filter
           </button>
           <button mat-raised-button
@@ -88,6 +88,7 @@
       </div>
       <mat-divider></mat-divider>
       <app-job-action
+        *ngIf="!hideActionBar"
         (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
       </app-job-action>
   </div>
@@ -186,13 +187,13 @@
     </div>
     <div>
       <mat-paginator [length]="numJobs"
-                     [pageSize]="pageSize"
+                     [pageSize]="startingPageSize"
                      [pageSizeOptions]=[10,20,100,1000]
                      [showFirstLastButtons]="true">
       </mat-paginator>
     </div>
 
-    <div id="loading-overlay" *ngIf="loadingJobs">
+    <div id="loading-overlay" *ngIf="loading">
       <div class="loading-spinner-wrapper">
         <mat-spinner></mat-spinner>
       </div>

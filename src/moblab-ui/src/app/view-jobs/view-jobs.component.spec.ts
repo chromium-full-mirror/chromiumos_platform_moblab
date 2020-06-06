@@ -1,31 +1,33 @@
-import { Component } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBarModule } from '@angular/material';
-import { MatSortModule } from '@angular/material/sort';
-import { MatTableModule } from '@angular/material/table';
-import { WidgetsModule } from '../widgets/widgets.module';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {By} from '@angular/platform-browser';
+import {CommonModule} from '@angular/common';
+import {Component} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
+import {MatListModule} from '@angular/material/list';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSelectModule} from '@angular/material/select';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSortModule} from '@angular/material/sort';
+import {MatTableModule} from '@angular/material/table';
 
-import { Job } from '../services/moblabrpc_pb';
-import { ViewJobsComponent } from './view-jobs.component';
 import {
   CHECKBOX_ID
 } from '../widgets/table-header-selector/table-header-selector.component';
+import {JobActionComponent} from './job-action/job-action.component';
+import {Job} from '../services/moblabrpc_pb';
+import {RouterModule} from '@angular/router';
+import {ViewJobsComponent} from './view-jobs.component';
+import {WidgetsModule} from '../widgets/widgets.module';
+
 
 const NUM_NAMES = 2;
 const NUM_IDS = 2;
@@ -46,13 +48,13 @@ function createMockJobs(id_filter?: string, name_filter?: string,
     for (let j = 0; j < NUM_IDS; j++) {
       for (let k = 0; k < NUM_PRIORITIES; k++) {
         for (let l = 0; l < NUM_STATUS; l++) {
-          running_timestamp += TIME_OFFSET_SEC
+          running_timestamp += TIME_OFFSET_SEC;
           const startTimestamp = running_timestamp ;
-          running_timestamp += TIME_OFFSET_SEC
+          running_timestamp += TIME_OFFSET_SEC;
           const finishedTimestamp = running_timestamp;
           const mockJob = new Job();
           mockJob.setName('Job' + i.toString());
-          mockJob.setJobId(j);
+          mockJob.setJobId(mockFilterJobs.length);
           mockJob.setStartTimeSecUtc(startTimestamp);
           mockJob.setCreatedTimeSecUtc(startTimestamp);
           mockJob.setFinishedTimeSecUtc(finishedTimestamp);
@@ -80,6 +82,17 @@ function createMockJobs(id_filter?: string, name_filter?: string,
   return mockFilterJobs;
 }
 
+function createMockJobIds(id_filter?: string, name_filter?: string,
+                          created_time_lt?: number, created_time_gt?: number) {
+  const jobs = createMockJobs(id_filter, name_filter, created_time_lt,
+    created_time_gt);
+  const jobIds = [];
+  jobs.forEach((job) => {
+    jobIds.push(job.getJobId());
+  });
+  return jobIds;
+}
+
 @Component({
   selector: 'view-jobs-test-wrapper',
   template:
@@ -92,6 +105,7 @@ describe('ViewJobsComponent', () => {
   let component: ViewJobsComponent;
   let fixture: ComponentFixture<ViewJobsComponent>;
 
+  let getJobIdsSpy: jasmine.Spy;
   let getJobsSpy: jasmine.Spy;
   let getNumJobsSpy: jasmine.Spy;
 
@@ -105,7 +119,6 @@ describe('ViewJobsComponent', () => {
           MatCardModule,
           MatCheckboxModule,
           MatChipsModule,
-          MatExpansionModule,
           MatFormFieldModule,
           MatIconModule,
           MatInputModule,
@@ -117,65 +130,84 @@ describe('ViewJobsComponent', () => {
           MatSortModule,
           MatTableModule,
           ReactiveFormsModule,
+          RouterModule,
+          RouterModule.forRoot([]),
           WidgetsModule,
         ],
         declarations: [
+          JobActionComponent,
           ViewJobsComponent,
-          ViewJobsTestWrapperComponent,
+          ViewJobsTestWrapperComponent
         ]})
-        .compileComponents();
+      .compileComponents();
   });
 
-  describe('Tests of @Input argument functionality.', function () {
+  describe('tests of @Input argument functionality', function () {
     let wrapperFixture: ComponentFixture<ViewJobsTestWrapperComponent>
 
     beforeEach(() => {
-      wrapperFixture = TestBed.createComponent(ViewJobsTestWrapperComponent);
-      component = wrapperFixture.debugElement.children[0].componentInstance;
-      wrapperFixture.detectChanges();
     });
 
     // The ViewJobsTestWrapperComponent used in this test group is templated to
     // have the manualPopulate flag set to true on initialization.
-    it ('Checking jobs are not auto-loaded when manual populate flag is set.',
+    it('jobs are not auto-loaded when manual populate flag is set',
       () => {
-      expect(component.getNumVisibleJobs()).toBe(0);
-    });
+        expect(component.getNumVisibleJobs()).toBe(0);
+      });
 
-    it ('Check hide filters and hide selectors flags work.',
+    it('hide filters and hide selectors flags work',
       () => {
         expect(wrapperFixture.debugElement.query(By.css('.filter-box'))).toBeDefined();
         expect(wrapperFixture.debugElement.query(By.css('.job_checkboxes'))).toBeDefined();
         component.hideFilters = true;
         component.hideSelectors = true;
-        wrapperFixture.detectChanges();
+        wrapperFixture.detectChanges()
         expect(wrapperFixture.debugElement.query(By.css('.filter-box'))).toBeNull();
         expect(wrapperFixture.debugElement.query(By.css('.job_checkboxes'))).toBeNull();
       });
 
   });
 
-  describe('Basic/Filtering/Checkbox tests.', function () {
+  describe('basic/filtering/checkbox tests', function () {
     beforeEach(() => {
       fixture = TestBed.createComponent(ViewJobsComponent);
       component = fixture.componentInstance;
+      this.hideActionBar = false;
+
       // @ts-ignore
       getJobsSpy = spyOn<any>(component.moblabGrpcService, 'getJobs')
         .and.callFake(
           function(
             callback: (x: Job[]) => void,
-            queryStart: number,
-            queryLimit: number,
-            id_filter?: string,
-            name_filter?: string,
-            created_time_lt?: number,
-            created_time_gt?: number
+            errorHandlingCallback: (errorMsg: string) => void,
+            queryStart: number, queryLimit: number, id_filter?: string,
+            name_filter?: string, created_time_lt?: number, created_time_gt?: number,
+            status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
+            parent_id_filter?: string, dut_hostname_filter?: string
           ) {
-        component.assignJobs(
-          createMockJobs(
-            id_filter, name_filter, created_time_lt, created_time_gt
-          ));
-      });
+            component.assignJobs(
+              createMockJobs(
+                id_filter, name_filter, created_time_lt, created_time_gt
+              ));
+          });
+
+      // @ts-ignore
+      getJobIdsSpy = spyOn<any>(component.moblabGrpcService, 'getJobIds')
+        .and.callFake(
+          function(
+            callback: (x: Job[]) => void,
+            errorHandlingCallback: (errorMsg: string) => void,
+            queryStart: number, queryLimit: number, id_filter?: string,
+            name_filter?: string, created_time_lt?: number, created_time_gt?: number,
+            status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
+            parent_id_filter?: string, dut_hostname_filter?: string
+          ) {
+            component.selectJobIds(
+              createMockJobIds(
+                id_filter, name_filter, created_time_lt, created_time_gt
+              ))
+          });
+
       // @ts-ignore
       getNumJobsSpy = spyOn<any>(component.moblabGrpcService, 'getNumJobs')
         .and.callFake(function() {
@@ -184,51 +216,59 @@ describe('ViewJobsComponent', () => {
       fixture.detectChanges();
     });
 
-    it('Minimal, creation test.', () => {
+    it('minimal, creation test', () => {
+      const childDebugElement = fixture.debugElement.query(By.directive(JobActionComponent));
       expect(component).toBeTruthy();
     });
 
-    it ('Checking that jobs are loaded in.', () => {
+    it('jobs are loaded in', () => {
       expect(component.getNumVisibleJobs()).toBe(createMockJobs().length);
     });
 
     /* Checkbox tests */
-    it('Verifying no jobs checked initially.', () => {
+    it('no jobs checked initially', () => {
       expect(component.getNumSelectedJobs()).toBe(0);
     });
 
-    it ('Checking all jobs then un-checking all jobs.',
+    function toggleJobSelection(jobId) {
+      const jobCheckbox = fixture.debugElement.nativeElement.querySelector(
+        '#job_' + jobId.toString()
+      );
+      jobCheckbox.dispatchEvent(new Event('change'));
+    }
+
+    it('all jobs then un-checking all jobs',
       () => {
+        const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
+          '#' + CHECKBOX_ID
+        );
+        expect(component.getNumSelectedJobs()).toBe(0);
+        selectJobsButton.dispatchEvent(new Event('change'));
+
+        expect(component.getNumSelectedJobs()).toBe(component.getNumVisibleJobs());
+
+        selectJobsButton.dispatchEvent(new Event('change'));
+        expect(component.getNumSelectedJobs()).toBe(0);
+      });
+
+    it('checking one job, then checking all jobs', () => {
       const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
         '#' + CHECKBOX_ID
       );
-      expect(component.getNumSelectedJobs()).toBe(0);
-      selectJobsButton.dispatchEvent(new Event('change'));
-
-      expect(component.getNumSelectedJobs()).toBe(component.getNumVisibleJobs());
-
-      selectJobsButton.dispatchEvent(new Event('change'));
-      expect(component.getNumSelectedJobs()).toBe(0);
-    });
-
-    it ('Checking one job, then checking all jobs.', () => {
-      const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
-        '#' + CHECKBOX_ID
-      );
-      component.job_selections.select(component.jobs.data[0]);
+      toggleJobSelection(0);
       expect(component.getNumSelectedJobs()).toBe(1);
       selectJobsButton.dispatchEvent(new Event('change'));
       expect(component.getNumSelectedJobs()).toBe(component.getNumVisibleJobs());
     });
 
-    it ('Checking all jobs, then unchecking one job, then' +
-      ' unchecking all jobs, then re-checking all jobs.', () => {
+    it('checking all jobs, then unchecking one job, then' +
+      ' unchecking all jobs, then re-checking all jobs', () => {
       const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
         '#' + CHECKBOX_ID
       );
       selectJobsButton.dispatchEvent(new Event('change'));
       expect(component.getNumSelectedJobs()).toBe(component.getNumVisibleJobs());
-      component.job_selections.deselect(component.jobs.data[0]);
+      toggleJobSelection(0);
       expect(component.getNumSelectedJobs()).toBe(
         component.getNumVisibleJobs() - 1
       );
@@ -238,15 +278,15 @@ describe('ViewJobsComponent', () => {
       expect(component.getNumSelectedJobs()).toBe(component.getNumVisibleJobs());
     });
 
-    it ('Testing multiple single selections.', () => {
-      component.job_selections.select(component.jobs.data[0]);
+    it('multiple single selections', () => {
+      toggleJobSelection(0);
       expect(component.getNumSelectedJobs()).toBe(1);
-      component.job_selections.select(component.jobs.data[1]);
+      toggleJobSelection(1);
       expect(component.getNumSelectedJobs()).toBe(2);
     });
 
     /* Refresh tests */
-    it ('Testing that refresh successfully reloads data.', function(done) {
+    it('refresh successfully reloads data', function(done) {
       // @ts-ignore
       expect(component.moblabGrpcService.getJobs)
         .toHaveBeenCalledTimes(1);
@@ -270,12 +310,12 @@ describe('ViewJobsComponent', () => {
 
     /* Filter tests */
 
-    it('Testing start date lower and upper bound filters.', function () {
+    it('start date lower and upper bound filters work', function () {
       // Setting up lower bound start filter to get rid of half of the jobs.
       const startFromFilterInput =
         fixture.debugElement.nativeElement.querySelector(
-        '#startFromTimeInput'
-      );
+          '#startFromTimeInput'
+        );
       startFromFilterInput.value = new Date(
         // TS timestamps need to be milisecond granularity, hence * 1000.
         (BASELINE_TIME_SEC + createMockJobs().length * TIME_OFFSET_SEC) * 1000
@@ -292,8 +332,8 @@ describe('ViewJobsComponent', () => {
       // Setting up upper bound as well, to let only one job through.
       const startToFilterInput =
         fixture.debugElement.nativeElement.querySelector(
-        '#startToTimeInput'
-      );
+          '#startToTimeInput'
+        );
       startToFilterInput.value = new Date(
         // TS timestamps need to be milisecond granularity, hence * 1000.
         (BASELINE_TIME_SEC + (createMockJobs().length + 2) * TIME_OFFSET_SEC)
@@ -305,7 +345,7 @@ describe('ViewJobsComponent', () => {
       expect(component.getNumVisibleJobs()).toBe(1);
     });
 
-    it('Test2 that NaN dates do not have any filtering effect.', function () {
+    it('NaN dates do not have any filtering effect', function () {
       const startFromFilterInput =
         fixture.debugElement.nativeElement.querySelector(
           '#startFromTimeInput'
@@ -331,7 +371,7 @@ describe('ViewJobsComponent', () => {
       fixture.detectChanges();
     }
 
-    it('Verify invalid inputs disable filter submission.', function () {
+    it('invalid inputs disable filter submission', function () {
       const filterButton =
         fixture.debugElement.nativeElement.querySelector(
           '#filter-button'
@@ -366,9 +406,37 @@ describe('ViewJobsComponent', () => {
       expect(filterButton.disabled).toBeTruthy();
     });
 
-    it('Verifying that refresh clears filters.', function () {
+    it('refresh preserves filters', function () {
       const initialNumVisibleJobs = component.getNumVisibleJobs();
       // create a filter event that filters out all jobs.
+      expect(component.getNumVisibleJobs()).toBe(initialNumVisibleJobs);
+
+      const refreshButton = fixture.debugElement.nativeElement.querySelector(
+        '.job-refresh-button'
+      );
+      refreshButton.dispatchEvent(new Event('click'));
+      expect(component.getNumVisibleJobs()).toBe(initialNumVisibleJobs);
+
+      const nameFilterInput = fixture.debugElement.nativeElement.querySelector(
+        '#nameInput'
+      );
+      nameFilterInput.value = 'This will not match with any jobs';
+      nameFilterInput.dispatchEvent(new Event('input'));
+      const filterButton = fixture.debugElement.nativeElement.querySelector(
+        '#filter-button'
+      );
+      filterButton.dispatchEvent(new Event('click'));
+      expect(component.getNumVisibleJobs()).toBe(0);
+
+      refreshButton.dispatchEvent(new Event('click'));
+      expect(component.getNumVisibleJobs()).toBe(0);
+    });
+
+    it('clear button clears filters', function () {
+      const initialNumVisibleJobs = component.getNumVisibleJobs();
+
+      expect(component.getNumVisibleJobs()).toBe(initialNumVisibleJobs);
+
       const nameFilterInput = fixture.debugElement.nativeElement.querySelector(
         '#nameInput'
       );
@@ -381,16 +449,17 @@ describe('ViewJobsComponent', () => {
 
       expect(component.getNumVisibleJobs()).toBe(0);
 
-      const refreshButton = fixture.debugElement.nativeElement.querySelector(
-        '.job-refresh-button'
+      const clearButton = fixture.debugElement.nativeElement.querySelector(
+        '#clear-filters-button'
       );
-      refreshButton.dispatchEvent(new Event('click'));
-
-      // verify that after refresh all jobs are visible again
+      clearButton.dispatchEvent(new Event('click'));
+      component.refreshJobs();
+      // verify that after clear all jobs are visible again
       expect(component.getNumVisibleJobs()).toBe(initialNumVisibleJobs);
     });
   });
-  describe('Pagination tests.', function () {
+
+  describe('pagination tests', function () {
     const MOCK_NUM_JOBS = 100;
 
     // Pagination tests need getJobs RPC calls to be mocked differently than
@@ -446,20 +515,22 @@ describe('ViewJobsComponent', () => {
       // @ts-ignore
       getJobsSpy = spyOn<any>(component.moblabGrpcService, 'getJobs')
         .and.callFake(
-          function(callback: (x: Job[]) => void, queryStart: number,
-                   queryLimit: number, id_filter?: string,
-                   name_filter?: string, created_time_lt?: number,
-                   created_time_gt?: number) {
-        const mockJobs = getRandomJobs(
-          queryStart,
-          queryLimit,
-          id_filter,
-          name_filter,
-          created_time_lt,
-          created_time_gt
-        );
-        component.assignJobs(mockJobs);
-      });
+          function(callback: (x: Job[]) => void,
+                   errorHandlingCallback: (errorMsg: string) => void,
+                   queryStart: number, queryLimit: number, id_filter?: string,
+                   name_filter?: string, created_time_lt?: number, created_time_gt?: number,
+                   status_filter?: Job.QueueStatus, rel_filter?: Job.Relationship,
+                   parent_id_filter?: string, dut_hostname_filter?: string) {
+            const mockJobs = getRandomJobs(
+              queryStart,
+              queryLimit,
+              id_filter,
+              name_filter,
+              created_time_lt,
+              created_time_gt
+            );
+            component.assignJobs(mockJobs);
+          });
 
       // @ts-ignore
       getNumJobsSpy = spyOn<any>(component.moblabGrpcService, 'getNumJobs')
@@ -469,7 +540,7 @@ describe('ViewJobsComponent', () => {
       fixture.detectChanges();
     });
 
-    it('Test pagination from start to end to start of jobs list.', () => {
+    it('pagination from start to end to start of jobs list', () => {
       const pageNextButton =
         fixture.debugElement.nativeElement.querySelector(
           '.mat-paginator-navigation-next'
@@ -485,7 +556,7 @@ describe('ViewJobsComponent', () => {
       // Going forwards in pages.
       for (let i = 0; i < MOCK_NUM_JOBS / component.paginator.pageSize - 2; i++) {
         pageNextButton.dispatchEvent(new Event('click'));
-        expect(component.jobs.data.length).toBe(component.paginator.pageSize);
+        expect(component.getNumVisibleJobs()).toBe(component.paginator.pageSize);
         fixture.detectChanges();
         expect(pageNextButton.disabled).toBe(false);
         expect(pagePrevButton.disabled).toBe(false);
