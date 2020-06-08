@@ -17,9 +17,11 @@ from pssh.clients import ParallelSSHClient
 # Location where dhcp leases are stored.
 _DHCPD_LEASES = '/leases/dnsmasq.leases'
 
+
 class MoblabDUTConnectorException(Exception):
     """Generic exception for this module."""
     pass
+
 
 class DUTInfo(object):
     """Class to encapsulate the information for a single DUT."""
@@ -30,6 +32,7 @@ class DUTInfo(object):
         ip_address = ip_address
         mac_address = mac_address
 
+
 class MoblabDUTConnector(object):
     """TODO ADD DOC"""
 
@@ -38,25 +41,25 @@ class MoblabDUTConnector(object):
         self.connected_duts = cachetools.TTLCache(25, 30 * 60)
 
     def find_duts(self):
-         logging.info(list(self._get_dhcp_dut_leases()))
-         self.connected_ip_addresses = list(self._get_dhcp_dut_leases())
+        logging.info(list(self._get_dhcp_dut_leases()))
+        self.connected_ip_addresses = list(self._get_dhcp_dut_leases())
 
     def _get_dhcp_dut_leases(self):
-     """ Extract information about connected duts from the dhcp server.
+        """ Extract information about connected duts from the dhcp server.
 
-     @return: A dict of ipaddress to mac address for each device connected.
-     """
-     if not os.path.exists(_DHCPD_LEASES):
-         return {}
-     lease_lines = open(_DHCPD_LEASES).readlines()
+        @return: A dict of ipaddress to mac address for each device connected.
+        """
+        if not os.path.exists(_DHCPD_LEASES):
+            return {}
+        lease_lines = open(_DHCPD_LEASES).readlines()
 
-     # Lease lines look like this:
-     # 1584225109 60:38:e0:e3:10:bd 192.168.231.113 * 01:60:38:e0:e3:10:bd
-     leases = {}
-     for lease in lease_lines:
-         items = lease.strip().split(' ')
-         leases[items[2]] = items[1]
-     return leases
+        # Lease lines look like this:
+        # 1584225109 60:38:e0:e3:10:bd 192.168.231.113 * 01:60:38:e0:e3:10:bd
+        leases = {}
+        for lease in lease_lines:
+            items = lease.strip().split(' ')
+            leases[items[2]] = items[1]
+        return leases
 
     def reload_cache(self):
         for (ip, mac_address) in self.get_all_connected_mac():
@@ -74,7 +77,7 @@ class MoblabDUTConnector(object):
             pool_size=20,
             user='root',
             num_retries=1,
-            timeout=10,
+            timeout=20,
             pkey='/home/moblab/.ssh/testing_rsa')
         command_results = []
 
@@ -82,12 +85,16 @@ class MoblabDUTConnector(object):
 
         for ip, host_output in output.items():
             stdout = ''
+            exit_code = host_output.exit_code
             if host_output.stdout:
                 stdout = [line for line in host_output.stdout]
             stderr = ''
             if host_output.exception:
-                stderr = host_output.exception[0] % host_output.exception[1:]
-            command_results.append((ip, stdout, stderr))
+                exception_msg = host_output.exception.args[0]
+                exception_args = host_output.exception.args[1:]
+                stderr = exception_msg % exception_args
+                exit_code = 1
+            command_results.append((ip, stdout, stderr, exit_code))
         logging.info('Running command %s on %s resulted in %s', command,
                      ip_addresses, command_results)
         return command_results
@@ -108,8 +115,11 @@ class MoblabDUTConnector(object):
         def extract_model(output):
             return output[0] if output else 'Unknown'
 
-        return [(host, extract_model(stdout), is_dut_connected(stdout), stderr)
-                for (host, stdout, stderr) in command_results]
+        results = []
+        for (host, stdout, stderr, exit_code) in command_results:
+            results.append((host, extract_model(stdout),
+                            is_dut_connected(stdout), stderr))
+        return results
 
     def get_connected_dut_firmware(self):
         command_results = self.run_command_on_connected_duts(
@@ -118,19 +128,30 @@ class MoblabDUTConnector(object):
              'chromeos-firmwareupdate --manifest'))
 
         def get_rw_firmware(command_output, model):
-            logging.info(model)
             json_data = json.loads(''.join(command_output))
             return json_data[model]['host']['versions']['rw']
-            return None
-
-        return [(host, output[0], get_rw_firmware(output[2:], output[1]))
-                for (host, output, stderr) in command_results]
+        results = []
+        for (host, stdout, stderr, exit_code) in command_results:
+            if exit_code:
+                results.append((host, stderr, stderr))
+            else:
+                results.append(
+                    (host, stdout[0], get_rw_firmware(stdout[2:], stdout[1])))
+        return results
 
     def update_firmware(self, ip_addresses):
-        return self.run_command_on_ips(
-            'chromeos-firmwareupdate -m autoupdate; reboot', ip_addresses)
+        command_results = self.run_command_on_ips(
+            'chromeos-firmwareupdate -m autoupdate --force', ip_addresses)
+        self.run_command_on_ips('reboot', ip_addresses)
+        return command_results
 
     def get_connected_dut_serialno(self):
         command_results = self.run_command_on_connected_duts(
             'timeout 20 vpd -g serial_number', timeout=20)
-        return [(host, output[0]) for (host, output, stderr) in command_results]
+        results = []
+        for (host, stdout, stderr, exit_code) in command_results:
+            if exit_code:
+                results.append((host, stderr))
+            else:
+                results.append((host, stdout[0]))
+        return results
