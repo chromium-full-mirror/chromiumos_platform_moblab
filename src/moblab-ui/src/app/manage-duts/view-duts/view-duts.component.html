@@ -7,7 +7,7 @@
     <mat-icon>refresh</mat-icon>
   </button>
 </div>
-
+<div>
 <table mat-table id="view-duts-table" [dataSource]="duts" matSort>
   <ng-container matColumnDef="select">
     <th width="10%" mat-header-cell *matHeaderCellDef>
@@ -22,7 +22,8 @@
         class="select-cb"
         (click)="$event.stopPropagation()"
         (change)="$event ? selection.toggle(row) : null"
-        [checked]="selection.isSelected(row)">
+        [checked]="selection.isSelected(row)"
+        [disabled]="!row.getIsConnected()">
       </mat-checkbox>
     </td>
   </ng-container>
@@ -68,6 +69,14 @@
   </ng-container>
   <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns"
-      [routerLink]="['/dut_detail', row.getIp()]"
-      [hidden]="this.hideUnenrolledDuts && !row.getIsEnrolled()"></tr>
+      matTooltip="{{this.getDisabledReason(row)}}"
+      [routerLink]="row.getIsConnected() ? ['/dut_detail', row.getIp()] : []"
+      [attr.notConnected]="!row.getIsConnected()"
+      [hidden]="this.hideUnenrolledDuts && !row.getIsEnrolled() "></tr>
 </table>
+  <div id="loading-overlay" *ngIf="loading">
+    <div class="loading-spinner-wrapper">
+      <mat-spinner class="spinner"></mat-spinner>
+    </div>
+  </div>
+</div>

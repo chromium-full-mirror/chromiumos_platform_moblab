@@ -126,7 +126,7 @@ message RunMemoryQualificationSuiteRequest {
   string avl_part_number = 7;
 }
 
-// NEXT_TAG = 16
+// NEXT_TAG = 17
 message ConnectedDutInfo {
   string name = 1;
   string ip = 2;
@@ -136,6 +136,7 @@ message ConnectedDutInfo {
   repeated string models  = 6;
   bool is_enrolled = 7;
   bool is_locked = 8;
+  bool is_connected = 16;
   string lock_reason = 9;
   repeated string labels = 10;
   repeated string attributes= 11;

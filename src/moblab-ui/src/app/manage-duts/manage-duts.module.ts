@@ -17,6 +17,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatSortModule} from '@angular/material/sort';
 import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
@@ -53,6 +54,7 @@ import {PipesModule} from 'app/pipes/pipes.module';
     MatSortModule,
     MatTableModule,
     MatTabsModule,
+    MatTooltipModule,
     PipesModule,
     ReactiveFormsModule,
     RouterModule,

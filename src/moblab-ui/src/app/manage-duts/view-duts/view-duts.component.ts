@@ -8,6 +8,9 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {TableHeaderSelectorComponent} from
     '../../widgets/table-header-selector/table-header-selector.component';
 
+const NOT_CONNECTED_MESSAGE = 'DUT not reachable by SSH';
+
+
 @Component({
   selector: 'app-view-duts',
   templateUrl: './view-duts.component.html',
@@ -26,6 +29,8 @@ export class ViewDutsComponent implements OnInit {
     'status',
     'labels'
   ];
+
+  loading = false;
 
   selectOptions: string[] = ['All Enrolled', 'All Unenrolled'];
 
@@ -61,14 +66,24 @@ export class ViewDutsComponent implements OnInit {
   }
 
   getConnectedDuts() {
+    this.loading = true;
     this.moblabGrpcService.listConnectedDuts(
       (connectedDuts: ConnectedDutInfo[]) => {
+        this.loading = false;
         this.assignDuts(connectedDuts);
         this.calculateLabelFilter();
         this.duts.data.forEach((dut) => {
         })
       }
     );
+  }
+
+  getDisabledReason(dut: ConnectedDutInfo) {
+    if (!dut.getIsConnected()) {
+      return NOT_CONNECTED_MESSAGE;
+    } else {
+      return '';
+    }
   }
 
   setHideUnenrolledDuts(hide: boolean) {

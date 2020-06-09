@@ -239,6 +239,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 dut_dict.get('labels', [])),
             status=dut_dict['status'],
             is_enrolled=True,
+            is_connected=dut_dict.get('isConnected', True),
             labels=dut_dict.get('labels', []),
             attributes=dut_dict.get('attributes', []),
             error=dut_dict.get('error', '')

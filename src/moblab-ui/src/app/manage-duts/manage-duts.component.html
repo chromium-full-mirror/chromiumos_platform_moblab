@@ -1,13 +1,19 @@
 <mat-card>
   <mat-tab-group >
     <mat-tab label="Enrollment">
+      <ng-template matTabContent>
       <app-enrollment></app-enrollment>
+      </ng-template>
     </mat-tab>
     <mat-tab label="Firmware">
+      <ng-template matTabContent>
       <app-firmware></app-firmware>
+      </ng-template>
     </mat-tab>
     <mat-tab label="Attributes/Labels">
+      <ng-template matTabContent>
       <app-edit-attributes></app-edit-attributes>
+      </ng-template>
     </mat-tab>
   </mat-tab-group>
 </mat-card>
