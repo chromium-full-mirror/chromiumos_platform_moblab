@@ -17,10 +17,11 @@ import argparse
 from cherrypy.lib.static import serve_file
 from checkfile import manager as cf_manager
 from util import collect_logs
-from util import feedback_connector
+
 from diagnostic_checks import manager as dc_manager
 
 from moblab_common import afe_connector
+from moblab_common import feedback_connector
 from moblab_common import config_connector
 
 
@@ -129,7 +130,8 @@ class MobMonitorRoot(object):
     conf = config_connector.MoblabConfigConnector(afe)
     conf.load_config()
     conn = feedback_connector.MoblabFeedbackConnector(conf.get_cloud_bucket())
-    feedback_dir_path, url = conn.upload_feedback()
+    tarfile = collect_logs.collect_logs()
+    feedback_dir_path, url = conn.upload_feedback(filenames=[tarfile])
     return ("Your logs have been uploaded to your Google Cloud bucket "
             "<a href=\"https://console.developers.google.com/storage/%s/%s\">Link to Logs</a>" % (conf.get_cloud_bucket(), feedback_dir_path))
 

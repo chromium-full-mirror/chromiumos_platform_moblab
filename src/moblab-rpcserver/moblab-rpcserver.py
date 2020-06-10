@@ -15,7 +15,6 @@ import time
 from concurrent import futures
 from dateutil.tz import tzlocal
 
-import feedback_connector
 import moblab_rpcservice
 # pylint: disable=import-error
 import moblabrpc_pb2
@@ -26,12 +25,9 @@ from moblab_common import afe_connector
 from moblab_common import build_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
+from moblab_common import feedback_connector
 
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    import logging
-
+import logging
 
 model_re = re.compile(r'^model:(.*)')
 pool_re = re.compile(r'^pool:(.*)')

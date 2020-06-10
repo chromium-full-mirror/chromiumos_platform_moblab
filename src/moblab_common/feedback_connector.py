@@ -12,10 +12,7 @@ from moblab_common import moblab_info
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import storage
 
-try:
-  from chromite.lib import cros_logging as logging
-except ImportError:
-  import logging
+import logging
 
 class FeedbackPath():
   FEEDBACK = 'feedback'
@@ -33,7 +30,7 @@ class MoblabFeedbackConnector(object):
     # TODO: Feedback will eventually be extended to include additional data beyond image and feedback text.
     raise NotImplementedError
 
-  def upload_feedback(self, feedback, screenshot):
+  def upload_feedback(self, feedback=None, screenshot=None, filenames=[]):
     """Uploads image and feedback text to GCS.
 
     Args:
@@ -48,11 +45,17 @@ class MoblabFeedbackConnector(object):
     timestamp_str = str(datetime.datetime.utcnow()).split('.')[0]
     feedback_dir_path = '/'.join([FeedbackPath.FEEDBACK, moblab_info.get_serial_number(), timestamp_str])
 
-    screenshot_blob = storage.Blob(feedback_dir_path + '/' + FeedbackPath.SCREENSHOT, bucket)
-    screenshot_blob.upload_from_string(base64.b64decode(screenshot), content_type='image/png')
+    if screenshot:
+      screenshot_blob = storage.Blob(feedback_dir_path + '/' + FeedbackPath.SCREENSHOT, bucket)
+      screenshot_blob.upload_from_string(base64.b64decode(screenshot), content_type='image/png')
 
-    feedback_blob = storage.Blob(feedback_dir_path + '/' + FeedbackPath.FEEDBACK, bucket)
-    feedback_blob.upload_from_string(feedback)
+    if feedback:
+      feedback_blob = storage.Blob(feedback_dir_path + '/' + FeedbackPath.FEEDBACK, bucket)
+      feedback_blob.upload_from_string(feedback)
 
-    url = FeedbackPath.GCS_URL + '/' + self.moblab_bucket_name + '/' + FeedbackPath.FEEDBACK + '/' + moblab_info.get_serial_number() + '/' + urllib.quote(timestamp_str) + FeedbackPath.SCREENSHOT
+    for filename in filenames:
+      filename_blob = storage.Blob(feedback_dir_path + filename, bucket)
+      filename_blob.upload_from_filename(filename)
+
+    url = FeedbackPath.GCS_URL + '/' + self.moblab_bucket_name + '/' + FeedbackPath.FEEDBACK + '/' + moblab_info.get_serial_number() + '/' + urllib.parse.quote(timestamp_str) + FeedbackPath.SCREENSHOT
     return feedback_dir_path, url
