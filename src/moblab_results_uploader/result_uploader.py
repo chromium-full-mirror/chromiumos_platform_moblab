@@ -98,7 +98,9 @@ class Uploader(processing_step.ProcessStep):
 
             if self.uploading_queue.empty():
                 for a in awaitables:
+                    _LOGGER.debug("Awaiting")
                     await a
+                    _LOGGER.debug("Awaited")
             self.uploading_queue.task_done()
 
     def _upload_file(self, result_file):
