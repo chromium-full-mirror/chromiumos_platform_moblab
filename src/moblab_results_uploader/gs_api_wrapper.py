@@ -10,10 +10,14 @@
 
 import logging  # pylint: disable=cros-logging-import
 import os
+import time
+import requests
+import urllib3
 
 from google.cloud import exceptions as gcp_exceptions
 from google.cloud import storage as gs
 
+from retry.api import retry_call
 
 ENV_GOOGLE_APP_CREDENTIALS = 'GOOGLE_APPLICATION_CREDENTIALS'
 _LOGGER = logging.getLogger(__name__)
@@ -57,6 +61,7 @@ def _get_gs_bucket(gs_bucket, credentials_file):
 
 class GsApiWrapper(object):
     """A wrapper of Google Cloud Storage API."""
+
     def __init__(self, gs_bucket, credentials_file):
         """Constructor.
 
@@ -66,7 +71,9 @@ class GsApiWrapper(object):
         """
         self._bucket_name = gs_bucket
         self._credentials_file = credentials_file
-        self._gs_bucket = _get_gs_bucket(self._bucket_name, self._credentials_file)
+        self._gs_bucket = _get_gs_bucket(
+            self._bucket_name, self._credentials_file)
+        self._client = gs.Client()
 
     def upload_from_filename(self, *, local_name, remote_name):
         """Upload the file `local_name` to GS as a blob named `remote_name`."""
@@ -75,8 +82,13 @@ class GsApiWrapper(object):
             return
         if local_name.is_symlink():
             return
-        blob = self._gs_bucket.blob(remote_name)
-        blob.upload_from_filename(str(local_name))
+        blob = self._gs_bucket.blob(
+            remote_name, chunk_size=(1024 * 1024 * 100))
+        retry_call(blob.upload_from_filename,
+                   fargs=[str(local_name)], fkwargs={"client": self._client},
+                   exceptions=(requests.exceptions.ConnectionError,
+                               urllib3.exceptions.ProtocolError),
+                   tries=20, delay=1, backoff=1.25)
 
     @property
     def bucket_name(self):

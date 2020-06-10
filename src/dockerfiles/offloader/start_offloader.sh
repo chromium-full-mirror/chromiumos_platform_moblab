@@ -9,6 +9,6 @@ set -x
       run \
       --credentials-file /home/moblab/.service_account.json \
       --min-age-to-upload 0 \
-      --timeout-days 14
+      --timeout-days 14 \
       --min-age-to-prune 15 \
-      --jobs 50
+      --jobs 30
