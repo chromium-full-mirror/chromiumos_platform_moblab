@@ -577,3 +577,21 @@ class AFEConnector(object):
             "delete_host_attrib", {"ipaddress": dut_hostname, "attribute": key,}
         )
         return self._package_edit_action_results(response)
+
+    def reverify_host(self, host_id):
+        """
+            Sets off reverify job on DUT of given ID.
+        Args:
+            host_id(int): ID of DUT in AFE backend.
+        """
+        response = self.send_rpc_command('reverify_hosts', {'id': host_id})
+        return self.decode_response(response, 'result')
+
+    def repair_host(self, host_id):
+        """
+            Sets off repair job on DUT of given ID.
+        Args:
+            host_id(int): ID of DUT in AFE backend.
+        """
+        response = self.send_rpc_command('repair_hosts', {'id': host_id})
+        return self.decode_response(response, 'result')

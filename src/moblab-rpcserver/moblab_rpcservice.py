@@ -40,6 +40,19 @@ class MoblabService(object):
         self.setup_devserver_connector()
         self.dut_connector = dut_connector.MoblabDUTConnector()
 
+    def _find_dut_id_given_ip(self, dut_hostname):
+        """
+            Given an ip address, will return the id given to the DUT by AFE;
+            else will raise an error.
+        """
+        try:
+            return self.afe_connector.get_connected_devices(
+                hostname=dut_hostname)[0]['id']
+        except (IndexError, KeyError):
+            msg = 'Unable to find AFE id for dut: {}'.format(dut_hostname)
+            logging.error(msg)
+            raise MoblabRpcError(msg)
+
     def setup_devserver_connector(self):
         self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
         logging.info('Using bucket: %s', self.moblab_bucket_name)
@@ -670,3 +683,27 @@ class MoblabService(object):
             "Successfully removed label {}",
             label,
         )
+
+    def reverify_host(self, dut_hostname):
+        """Starts repair run on given DUT hostname.
+
+        Args:
+            dut_hostname(string): String hostname (ex. IP address)
+        """
+        dut_id = self._find_dut_id_given_ip(dut_hostname)
+        if dut_id:
+            self.afe_connector.reverify_host(dut_id)
+
+        return 'Successfully set off reverify on {}'.format(dut_hostname)
+
+    def repair_host(self, dut_hostname):
+        """Starts repair run on given DUT hostname.
+
+        Args:
+            dut_hostname(string): String hostname (ex. IP address)
+        """
+        dut_id = self._find_dut_id_given_ip(dut_hostname)
+        if dut_id:
+            self.afe_connector.repair_host(dut_id)
+
+        return 'Successfully set off repair on {}'.format(dut_hostname)
