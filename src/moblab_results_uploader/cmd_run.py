@@ -62,18 +62,13 @@ async def _prune_test_result(dry_run, test_result):
         _LOGGER.debug('DRYRUN: Removed: %s', test_result)
         return
 
-    rm_tasks = []
-    for d in test_result.abs_path.iterdir():
-        if d.name == result_dir_status.MARKER_FILE:
-            continue
-        # Some files/dirs may owned by root, so remove them with sudo.
-        process = await asyncio.create_subprocess_exec('sudo', 'rm', '-rf',
-                                                       str(d))
-        rm_tasks.append(process.wait())
-    await asyncio.gather(*rm_tasks)
-    process = await asyncio.create_subprocess_exec('sudo', 'rm', '-rf',
-                                                   str(test_result.abs_path))
-    await process.wait()
+    # To be safe - delete all the subdirs first, then the whole directory
+    # which will leave the marker file to last.
+    _, topdirs, _ = next(os.walk(test_result.abs_path), [])
+    for topdir in topdirs:
+        shutil.rmtree(os.path.join(test_result.abs_path, topdir))
+
+    shutil.rmtree(test_result.abs_path)
     del _TEST_RESULT_CACHE[test_result.abs_path]
     _LOGGER.debug('Removed: %s', test_result)
 
