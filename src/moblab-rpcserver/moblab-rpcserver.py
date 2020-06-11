@@ -689,6 +689,39 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response.message = response_msg
         return response
 
+    def reverify_host(self, request, _context):
+        """
+            Sets of reverify job on specified DUT.
+        Args:
+            request: ReverifyHostRequest with parameter:
+                dut_hostname(string)
+            _context: grpc.server.Context
+        Returns:
+            ReverifyHostResponse
+        """
+        message = self.service.reverify_host(request.dut_hostname)
+        response =  moblabrpc_pb2.ReverifyHostResponse(
+            message=message
+        )
+        return response
+
+    def repair_host(self, request, _context):
+        """
+            Sets of repair job on specified DUT.
+        Args:
+            request: RepairHostRequest with parameter:
+                dut_hostname(string)
+            _context: grpc.server.Context
+        Returns:
+            RepairHostResponse
+        """
+        message = self.service.repair_host(request.dut_hostname)
+        response =  moblabrpc_pb2.RepairHostResponse(
+            message=message
+        )
+        return response
+
+
 def setup_logging(level):
     """Enable the correct level of logging.
 
