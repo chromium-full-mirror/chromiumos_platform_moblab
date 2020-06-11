@@ -48,14 +48,24 @@ class MoblabBuildConnector(object):
         possible_boards = [
             board for board in possible_boards if board.endswith('-release/')
         ]
-        return [board[:-len('-release/')] for board in possible_boards]
+        available_boards = [
+            board[:-len('-release/')] for board in possible_boards
+        ]
+        available_boards.sort(key = lambda x: x)
+        return available_boards
 
     def get_milestones_available(self, board):
         prefix = '%s-release/R' % board
         milestones = self.get_partial_object_path(prefix, '-')
-        return [milestone[len(prefix) - 1:-1] for milestone in milestones]
+        milestones = [
+            milestone[len(prefix) - 1:-1] for milestone in milestones
+        ]
+        milestones.sort(key = lambda x: x)
+        return milestones
 
     def get_builds_for_milestone(self, board, milestone):
         prefix = '%s-release/%s-' % (board, milestone)
         builds = self.get_partial_object_path(prefix, '/')
-        return [build[len(prefix):-1] for build in builds]
+        builds = [build[len(prefix):-1] for build in builds]
+        builds.sort(key = lambda x: x)
+        return builds
