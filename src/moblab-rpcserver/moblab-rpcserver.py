@@ -729,8 +729,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
         network_info = self.service.get_network_info()
         response = moblabrpc_pb2.GetNetworkInfoResponse(
-            moblab_hostname = network_info['server_ip'],
-            is_connected = network_info['is_connected']
+            moblab_hostname=network_info['server_ip'],
+            is_connected=network_info['is_connected']
         )
         return response
 
