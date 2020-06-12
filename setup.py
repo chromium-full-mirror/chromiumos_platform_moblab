@@ -65,7 +65,8 @@ setuptools.setup(
         'google-cloud-storage',
         'google-cloud-pubsub',
         'docker',
-        'parallel-ssh'
+        'parallel-ssh',
+        'python-nmap'
 
     ],
     scripts=[

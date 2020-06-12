@@ -10,8 +10,10 @@ import os
 import re
 import subprocess
 
+
 import cachetools
-from pssh.clients import ParallelSSHClient
+import nmap
+from pssh.clients.native import ParallelSSHClient
 
 
 # Location where dhcp leases are stored.
@@ -41,8 +43,14 @@ class MoblabDUTConnector(object):
         self.connected_duts = cachetools.TTLCache(25, 30 * 60)
 
     def find_duts(self):
-        logging.info(list(self._get_dhcp_dut_leases()))
-        self.connected_ip_addresses = list(self._get_dhcp_dut_leases())
+        active_hosts = self._get_active_network_devices()
+        self.connected_ip_addresses = []
+        for host in list(self._get_dhcp_dut_leases()):
+            if host in active_hosts:
+                self.connected_ip_addresses.append(host)
+            else:
+                logging.info("Rejecting %s %s", host, active_hosts)
+
 
     def _get_dhcp_dut_leases(self):
         """ Extract information about connected duts from the dhcp server.
@@ -71,17 +79,19 @@ class MoblabDUTConnector(object):
         return self.run_command_on_ips(command, self.connected_ip_addresses,
                                        timeout)
 
-    def run_command_on_ips(self, command, ip_addresses, timeout=300):
+    def run_command_on_ips(self, command, ip_addresses, timeout=10):
         client = ParallelSSHClient(
             ip_addresses,
             pool_size=20,
             user='root',
             num_retries=1,
-            timeout=20,
+            timeout=timeout,
             pkey='/home/moblab/.ssh/testing_rsa')
         command_results = []
 
-        output = client.run_command(command, stop_on_errors=False, timeout=10)
+        output = client.run_command(command, stop_on_errors=False,
+                                    timeout=timeout)
+        client.join(output)
 
         for ip, host_output in output.items():
             stdout = ''
@@ -101,7 +111,30 @@ class MoblabDUTConnector(object):
 
     def get_all_connected_mac(self):
         leases = self._get_dhcp_dut_leases()
-        return [(host, output) for (host, output) in leases.items()]
+        active_hosts = self._get_active_network_devices()
+        return [(host, output) for (host, output) in leases.items() if host in active_hosts]
+
+    def _get_active_network_devices(self):
+        """Use the tool nmap to find devices currently alive on the network.
+
+        Nmap docs https://nmap.org/docs.html
+        It is a network port scanner.
+
+        Docker containers have issues with ping, considered a admin tool
+        it is unreliable for containers not running as root.
+
+        nmap command:   Pn - do not use ping discovery
+                        T 5 - be fast / fewer retries
+                        22 scan only port 22
+                        Scan the full DUT IP range 192.168.231.0/24'
+
+        Returns:
+            list: A list of IP addresses with port 22 open and active.
+        """
+        nm = nmap.PortScanner()
+        nm.scan('192.168.231.0/24', '22', '-T 5 --open -Pn')
+        hosts = nm.all_hosts()
+        return hosts
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
@@ -130,6 +163,7 @@ class MoblabDUTConnector(object):
         def get_rw_firmware(command_output, model):
             json_data = json.loads(''.join(command_output))
             return json_data[model]['host']['versions']['rw']
+
         results = []
         for (host, stdout, stderr, exit_code) in command_results:
             if exit_code:
@@ -141,7 +175,9 @@ class MoblabDUTConnector(object):
 
     def update_firmware(self, ip_addresses):
         command_results = self.run_command_on_ips(
-            'chromeos-firmwareupdate -m autoupdate --force', ip_addresses)
+            ('/usr/sbin/chromeos-firmwareupdate --mode autoupdate '
+             '--force --verbose'),
+            ip_addresses, timeout=300)
         self.run_command_on_ips('reboot', ip_addresses)
         return command_results
 

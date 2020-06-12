@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -yq \
     curl \
     gcc-multilib \
     libssl-dev \
-    sudo \
+    nmap \
     unzip \
     zlib1g-dev
 
@@ -56,7 +56,7 @@ COPY --chown=moblab ./src/host_services /moblab/src/host_services
 COPY --chown=moblab ./setup.py /moblab/
 
 WORKDIR /moblab
-RUN python -m pip install .
+RUN python3 -m pip install .
 
 RUN rm -rf /moblab
 
@@ -66,7 +66,7 @@ RUN mkdir /var/log/moblab
 WORKDIR /tmp/moblab_api_client_library
 RUN curl https://storage.googleapis.com/moblab-api-distribution/google-chromeos-moblab.tar.gz -o google-chromeos-moblab.tar.gz
 RUN tar -xvzf google-chromeos-moblab.tar.gz
-RUN python -m pip install .
+RUN python3 -m pip install .
 RUN rm -rf /tmp/moblab_api_client_library
 
 RUN apt purge -yq unzip cmake libssl-dev zlib1g-dev curl gcc-multilib
