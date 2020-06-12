@@ -596,18 +596,6 @@ class AFEConnector(object):
         response = self.send_rpc_command('repair_hosts', {'id': host_id})
         return self.decode_response(response, 'result')
 
-    def get_network_info(self):
-        """
-            Gets network info of Moblab from AFE.
-        Returns:
-            A dict of network information ( specifically, a 'server_ips' list
-            and 'is_connected' which is true iff Moblab is connected to internet.
-        """
-        response = self.send_rpc_command(
-            "get_network_info", {}
-        )
-        return self.decode_response(response, "result")
-
     def get_cloud_storage_info(self):
         """
             Gets cloud configuration info from AFE.
@@ -617,18 +605,6 @@ class AFEConnector(object):
         """
         response = self.send_rpc_command(
             "get_cloud_storage_info", {}
-        )
-        return self.decode_response(response, "result")
-
-    def get_version_info(self):
-        """
-            Gets version info of Moblab from AFE.
-        Returns:
-            A dict of ChromeOS and Moblab information (ex. serial number,
-            release version )
-        """
-        response = self.send_rpc_command(
-            "get_version_info", {}
         )
         return self.decode_response(response, "result")
 
