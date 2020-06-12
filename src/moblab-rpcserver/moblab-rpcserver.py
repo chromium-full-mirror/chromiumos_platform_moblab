@@ -718,6 +718,79 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
+    def get_network_info(self, request, _context):
+        """
+            Gets network info of Moblab.
+        Args:
+            request: GetNetworkInfoRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetNetworkInfoResponse
+        """
+        network_info = self.service.get_network_info()
+        response = moblabrpc_pb2.GetNetworkInfoResponse(
+            moblab_hostname = network_info['server_ip'],
+            is_connected = network_info['is_connected']
+        )
+        return response
+
+    def get_cloud_configuration(self, request, _context):
+        """
+            Get cloud configuration info of Moblab.
+        Args:
+            request: GetCloudConfigurationRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetCloudConfigurationResponse
+        """
+        cloud_configuration = self.service.get_cloud_configuration()
+        response = moblabrpc_pb2.GetCloudConfigurationResponse(
+            boto_key_id=cloud_configuration['gs_access_key_id'],
+            boto_key_secret=cloud_configuration['gs_secret_access_key'],
+            gcs_bucket_url=cloud_configuration['image_storage_server']
+        )
+        return response
+
+    def set_cloud_configuration(self, request, _context):
+        """
+            Set cloud configuration info of Moblab.
+        Args:
+            request: SetCloudConfigurationRequest object with parameters:
+                boto_key_id,
+                boto_key_secret,
+                gcs_bucket_url
+            _context: grpc.server.Context
+        Returns:
+            GetCloudConfigurationResponse
+        """
+        msg = cloud_configuration = self.service.set_cloud_configuration(
+            request.boto_key_id,
+            request.boto_key_secret,
+            request.gcs_bucket_url
+        )
+        response = moblabrpc_pb2.SetCloudConfigurationResponse(
+            message = msg
+        )
+        return response
+
+    def get_version_info(self, request, _context):
+        """
+            Get version info of Moblab.
+        Args:
+            request: GetVersionInfoRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetVersionInfoResponse
+        """
+        version_info = self.service.get_version_info()
+        response = moblabrpc_pb2.GetVersionInfoResponse(
+            chromeos_release_version=version_info['CHROMEOS_RELEASE_VERSION'],
+            chromeos_release_track=version_info['CHROMEOS_RELEASE_TRACK'],
+            chromeos_release_description=version_info['CHROMEOS_RELEASE_DESCRIPTION'],
+            moblab_id=version_info['MOBLAB_ID'],
+            moblab_serial_number=version_info['MOBLAB_SERIAL_NUMBER']
+        )
+        return response
 
 def setup_logging(level):
     """Enable the correct level of logging.

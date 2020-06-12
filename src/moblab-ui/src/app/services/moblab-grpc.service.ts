@@ -14,6 +14,8 @@ import {
   DutTask,
   EnrollDutsRequest,
   EnrollDutsResponse,
+  GetCloudConfigurationRequest,
+  GetCloudConfigurationResponse,
   GetDutDetailsRequest,
   GetDutDetailsResponse,
   GetDutTasksRequest,
@@ -24,10 +26,14 @@ import {
   GetJobIdsResponse,
   GetJobsRequest,
   GetJobsResponse,
+  GetNetworkInfoRequest,
+  GetNetworkInfoResponse,
   GetNumDutTasksRequest,
   GetNumDutTasksResponse,
   GetNumJobsRequest,
   GetNumJobsResponse,
+  GetVersionInfoRequest,
+  GetVersionInfoResponse,
   Job,
   ListBuildTargetsRequest,
   ListBuildTargetsResponse,
@@ -58,6 +64,8 @@ import {
   RunSuiteResponse,
   SendMoblabScreenshotRequest,
   SendMoblabScreenshotResponse,
+  SetCloudConfigurationRequest,
+  SetCloudConfigurationResponse,
   UpdateDutsFirmwareRequest,
   UpdateDutsFirmwareResponse
 } from "./moblabrpc_pb";
@@ -863,6 +871,98 @@ export class MoblabGrpcService {
     );
     call.on("data", (response: RemoveLabelFromDutsResponse) => {
       callback(response.getMessage());
+    });
+  }
+
+  get_network_info(callback: (moblab_hostname: string, is_connected: boolean) => void,
+            errorHandlingCallback: (errorMsg: string) => void) {
+    const request = new GetNetworkInfoRequest();
+    const call = this.moblabRpcService.get_network_info(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetNetworkInfoResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: GetNetworkInfoResponse) => {
+      callback(response.getMoblabHostname(), response.getIsConnected());
+    });
+  }
+
+  get_cloud_configuration(callback: (
+                            boto_key_id: string,
+                            boto_key_secret: string,
+                            gcs_bucket_url: string
+                          ) => void,
+                          errorHandlingCallback: (errorMsg: string) => void) {
+    const request = new GetCloudConfigurationRequest();
+
+    const call = this.moblabRpcService.get_cloud_configuration(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetCloudConfigurationResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: GetCloudConfigurationResponse) => {
+      callback(
+        response.getBotoKeyId(),
+        response.getBotoKeySecret(),
+        response.getGcsBucketUrl()
+      );
+    });
+  }
+
+  set_cloud_configuration(callback: (message: string) => void,
+                          errorHandlingCallback: (errorMsg: string) => void,
+                          boto_key_id: string,
+                          boto_key_secret: string,
+                          gcs_bucket_url: string) {
+    const request = new SetCloudConfigurationRequest();
+    request.setBotoKeyId(boto_key_id);
+    request.setBotoKeySecret(boto_key_secret);
+    request.setGcsBucketUrl(gcs_bucket_url);
+
+    const call = this.moblabRpcService.set_cloud_configuration(
+      request,
+      {},
+      (err: grpcWeb.Error, response: SetCloudConfigurationResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: SetCloudConfigurationResponse) => {
+      callback(
+        response.getMessage()
+      )
+    });
+  }
+
+  get_version_info(callback: (
+                      chromeos_release_version: string,
+                      chromeos_release_track: string,
+                      chromeos_release_description: string,
+                      moblab_id: string,
+                      moblab_serial_number: string
+                   ) => void,
+                   errorHandlingCallback: (errorMsg: string) => void) {
+    const request = new GetVersionInfoRequest();
+
+    const call = this.moblabRpcService.get_version_info(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetVersionInfoResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+
+    call.on('data', (response: GetVersionInfoResponse) => {
+      callback(
+        response.getChromeosReleaseVersion(),
+        response.getChromeosReleaseTrack(),
+        response.getChromeosReleaseDescription(),
+        response.getMoblabId(),
+        response.getMoblabSerialNumber()
+      );
     });
   }
 }

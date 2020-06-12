@@ -37,6 +37,7 @@ export class GlobalInfoService {
     Feature.VIEW_JOBS,
     Feature.JOB_DETAIL,
     Feature.DUT_DETAIL,
+    Feature.SYSTEM_CONFIGURATION
   ];
 
   constructor() {};
