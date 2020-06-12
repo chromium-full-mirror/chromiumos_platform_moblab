@@ -5,6 +5,8 @@ import autotest.common.ui.CustomTabPanel;
 import autotest.common.ui.NotifyManager;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.RootPanel;
 
 
@@ -40,5 +42,10 @@ public class MoblabSetupClient implements EntryPoint {
     rootPanel.add(mainTabPanel);
     mainTabPanel.initialize();
     rootPanel.setStyleName("");
+
+    Document.get().getElementById("mobmonitor_link").setAttribute("href",
+    "http://" + Location.getHostName() + ":9991");
+    Document.get().getElementById("newui").setAttribute("href",
+    "http://" + Location.getHostName() + ":6010");
   }
 }
