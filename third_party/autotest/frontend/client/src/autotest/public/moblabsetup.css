@@ -95,3 +95,13 @@
 .run_suite_spacer {
   min-width: 5px;
 }
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+  padding-top: 5px;
+  padding-right: 10px;
+}
