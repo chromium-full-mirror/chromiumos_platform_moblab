@@ -362,6 +362,7 @@ services:
       - LOGS_DIRECTORIES=/bootup /var/log/docker /logs
       - LOGROTATE_INTERVAL=yearly
       - LOGROTATE_SIZE=50M
+      - LOGROTATE_CRONSCHEDULE=5 * * * * *
 
     networks:
       - moblab
@@ -399,6 +400,8 @@ services:
 
     networks:
       - moblab
+    extra_hosts:
+      - "dockerhost:192.168.100.1"
 ##############################################################################
   remote-scheduler:
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-remote-scheduler:${REMOTE_SCHEDULER:-release}
