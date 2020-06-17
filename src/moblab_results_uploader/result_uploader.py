@@ -98,9 +98,13 @@ class Uploader(processing_step.ProcessStep):
 
             if self.uploading_queue.empty():
                 for a in awaitables:
-                    _LOGGER.debug("Awaiting")
-                    await a
-                    _LOGGER.debug("Awaited")
+                    _LOGGER.debug('Awaiting')
+                    # It should not take more than 20 mins for any one file
+                    # to upload.
+                    asyncio.sleep(0.01)
+                    asyncio.wait_for(a, timeout=1200)
+                    _LOGGER.debug('Awaited')
+                awaitables = []
             self.uploading_queue.task_done()
 
     def _upload_file(self, result_file):
