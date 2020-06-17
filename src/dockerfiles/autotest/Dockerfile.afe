@@ -30,13 +30,11 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     libapache2-mod-wsgi \
     libcap2-bin \
     mariadb-client \
-    ncdu  \
     pbzip2 \
     rsync \
     ssh \
     sudo \
     unzip \
-    vim \
     xz-utils
 
 RUN python2.7 -m pip install docker
