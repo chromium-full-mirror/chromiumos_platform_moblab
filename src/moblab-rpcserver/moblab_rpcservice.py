@@ -206,7 +206,7 @@ class MoblabService(object):
             build_version: A numeric version string of the form: '00000.00.0'
             model: String identfier for the specific model to be run.
             pool: String identifier for which pool of DUT's to run tests with.
-            specific_modules: Comma-separated string of specific module names to
+            specific_modules: List of strings of specific module names to
             run.
         Returns:
           String response message.
@@ -215,7 +215,7 @@ class MoblabService(object):
         suite_args = {}
         if autotest_tests:
             suite_args['tests'] = [
-                test.strip() for test in autotest_tests.split(',')
+                test.strip() for test in autotest_tests
             ]
 
         return self.run_suite(
