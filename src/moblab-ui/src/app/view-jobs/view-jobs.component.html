@@ -182,7 +182,7 @@
     <tr mat-row *matRowDef="let element; columns: displayedColumns;" [routerLink]="['/job_detail',element.getJobId()]">
     </tr>
   </table>
-    <div id="no-jobs-label" *ngIf="jobs.data.length === 0">
+    <div id="no-jobs-label" *ngIf="jobs.data.length === 0 && !loading">
       <p>No Jobs fetched.</p>
     </div>
     <div>
