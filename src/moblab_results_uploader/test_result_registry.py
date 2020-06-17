@@ -30,7 +30,8 @@ REGISTRY.append(
     TestResultRegisteryEntry(
         root_dir=autotest_result.ROOT_DIR,
         classes=[
-            autotest_result.AutotestTestJob
+            autotest_result.AutotestTestJob,
+            autotest_result.AutotestHostTask
         ]
     )
 )
