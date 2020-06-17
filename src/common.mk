@@ -125,7 +125,7 @@ envoy:
 remote-access: export DOCKER_BUILDKIT=1
 remote-access:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/remote_access:${LABEL} \
-		-f dockerfiles/remote_access/Dockerfile dockerfiles/remote_access
+		-f dockerfiles/remote_access/Dockerfile ..
 	docker push ${REGISTRY_URI}/remote_access:${LABEL}
 
 watchtower: export DOCKER_BUILDKIT=1
