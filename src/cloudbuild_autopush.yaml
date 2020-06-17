@@ -382,7 +382,7 @@ steps:
         "/workspace/src/dockerfiles/remote_access/Dockerfile",
         "-t",
         "${_REGISTRY_URI}/remote_access:${_LABEL}",
-        "/workspace/src/dockerfiles/remote_access",
+        "/workspace/",
       ]
     env:
       - "DOCKER_BUILDKIT=1"
