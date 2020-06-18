@@ -279,7 +279,7 @@ message Job {
     CHILD = 2;
   }
 
-  // NEXT_TAG = 9
+  // NEXT_TAG = 10
   enum JobStatus {
     STATUS_NOT_SET = 0;
     CREATED = 1;
@@ -290,6 +290,7 @@ message Job {
     FAILED = 6;
     TIMED_OUT = 7;
     ABORTED = 8;
+    ABORTING = 9;
   }
 
   // NEXT_TAG = 4

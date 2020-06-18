@@ -377,6 +377,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             return moblabrpc_pb2.Job.FAILED
         elif status_str == 'Aborted':
             return moblabrpc_pb2.Job.ABORTED
+        elif re.match('Aborted \(\s*\w+\s*\)', status_str):
+            # Ex. Aborted (Running)
+            return moblabrpc_pb2.Job.ABORTING
         else:
             logging.error(
                 'Encountered unexpected status "{}"'.format(status_str))
