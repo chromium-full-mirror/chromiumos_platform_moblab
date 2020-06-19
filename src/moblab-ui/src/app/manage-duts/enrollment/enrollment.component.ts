@@ -16,22 +16,42 @@ export class EnrollmentComponent implements OnInit {
   @ViewChild(ViewDutsComponent) dutsTableRef: ViewDutsComponent;
   duts = new MatTableDataSource<ConnectedDutInfo>();
 
-  constructor(private moblabGrpcService: MoblabGrpcService) {}
+  constructor(
+    private moblabGrpcService: MoblabGrpcService,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit() {
   }
 
   enrollSelected() {
     const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
-    this.moblabGrpcService.enrollDuts(hostnames, () => {
+    this.moblabGrpcService.enrollDuts(
+      hostnames,
+      () => {
       this.dutsTableRef.getConnectedDuts();
-    });
+      },
+      (msg: string) => {
+        this.reportError(msg);
+        this.dutsTableRef.stopLoadingSpinner();
+      });
   }
 
   unenrollSelected() {
     const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
-    this.moblabGrpcService.unenrollDuts(hostnames, () => {
-      this.dutsTableRef.getConnectedDuts();
+      this.moblabGrpcService.unenrollDuts(hostnames, () => {
+        this.dutsTableRef.getConnectedDuts();
+      },
+      (msg: string) => {
+        this.reportError(msg);
+        this.dutsTableRef.stopLoadingSpinner();
+      });
+  }
+
+  reportError(dialogue) {
+    const snackBarRef = this.snackBar.open(dialogue, '', {
+      duration: 5000,
+      verticalPosition: 'top'
     });
   }
 }

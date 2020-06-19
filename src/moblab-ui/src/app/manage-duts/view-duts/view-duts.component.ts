@@ -99,6 +99,14 @@ export class ViewDutsComponent implements OnInit {
     this.getConnectedDuts();
   }
 
+  startLoadingSpinner() {
+    this.loading = true;
+  }
+
+  stopLoadingSpinner() {
+    this.loading = false;
+  }
+
   toggleFilterLabels() {
     this.filterLabels = !this.filterLabels;
   }

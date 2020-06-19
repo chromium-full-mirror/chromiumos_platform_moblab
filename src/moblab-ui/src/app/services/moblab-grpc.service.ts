@@ -648,14 +648,16 @@ export class MoblabGrpcService {
     });
   }
 
-  enrollDuts(ips: string[], callback: () => void) {
+  enrollDuts(ips: string[],
+             callback: () => void,
+             errorCallback: (msg: string) => void) {
     const request = new EnrollDutsRequest();
     request.setIpsList(ips);
     const call = this.moblabRpcService.enroll_duts(
       request,
       {},
       (err: grpcWeb.Error, response: EnrollDutsResponse) => {
-        console.log(err);
+        errorCallback(err.message);
       }
     );
     call.on("data", (response: EnrollDutsResponse) => {
@@ -663,14 +665,16 @@ export class MoblabGrpcService {
     });
   }
 
-  unenrollDuts(ips: string[], callback: () => void) {
+  unenrollDuts(ips: string[],
+               callback: () => void,
+               errorCallback: (msg: string) => void) {
     const request = new EnrollDutsRequest();
     request.setIpsList(ips);
     const call = this.moblabRpcService.unenroll_duts(
       request,
       {},
       (err: grpcWeb.Error, response: EnrollDutsResponse) => {
-        console.log(err);
+        errorCallback(err.message);
       }
     );
     call.on("data", (response: EnrollDutsResponse) => {
