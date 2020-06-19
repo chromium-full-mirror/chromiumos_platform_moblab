@@ -748,9 +748,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
         cloud_configuration = self.service.get_cloud_configuration()
         response = moblabrpc_pb2.GetCloudConfigurationResponse(
-            boto_key_id=cloud_configuration['gs_access_key_id'],
-            boto_key_secret=cloud_configuration['gs_secret_access_key'],
-            gcs_bucket_url=cloud_configuration['image_storage_server']
+            boto_key_id=cloud_configuration.get('gs_access_key_id', ''),
+            boto_key_secret=cloud_configuration.get('gs_secret_access_key', ''),
+            gcs_bucket_url=cloud_configuration.get('image_storage_server', '')
         )
         return response
 
