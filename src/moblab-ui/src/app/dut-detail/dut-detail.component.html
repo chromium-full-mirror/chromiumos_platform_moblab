@@ -39,7 +39,7 @@
   <div id="dut-not-found-label" *ngIf="isDutInfoTableEmpty()">
     <p>No DUT data fetched.</p>
   </div>
-  <app-keyval-table></app-keyval-table>
+  <app-keyval-table #dut_info_table></app-keyval-table>
   <mat-divider></mat-divider>
   <mat-accordion>
     <mat-expansion-panel>
@@ -48,7 +48,7 @@
           <b>Jobs Associated with this DUT</b>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <app-view-jobs
+      <app-view-jobs #associated_jobs_table
         manualPopulate=true
         hideActionBar=true
         hideFilters=false
@@ -65,7 +65,7 @@
           <b>DUT Actions History</b>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <app-dut-task-table></app-dut-task-table>
+      <app-dut-task-table #dut_task_table></app-dut-task-table>
     </mat-expansion-panel>
   </mat-accordion>
   <mat-divider></mat-divider>

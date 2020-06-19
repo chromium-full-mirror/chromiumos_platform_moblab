@@ -17,9 +17,9 @@ import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
   animations: [],
 })
 export class DutDetailComponent {
-  @ViewChild(KeyValTableComponent) dutInfoTableRef: KeyValTableComponent;
-  @ViewChild(DutTaskTableComponent) dutTaskTableRef: DutTaskTableComponent;
-  @ViewChild(ViewJobsComponent) associatedJobsTableRef: ViewJobsComponent;
+  @ViewChild('dut_info_table') dutInfoTableRef: KeyValTableComponent;
+  @ViewChild('dut_task_table') dutTaskTableRef: DutTaskTableComponent;
+  @ViewChild('associated_jobs_table') associatedJobsTableRef: ViewJobsComponent;
 
   serverControlFile = '';
   dutQuery = new FormControl(
@@ -39,6 +39,7 @@ export class DutDetailComponent {
       if (this.dutQuery.value) {
         this.fetchDutDetails();
       }
+      this.dutTaskTableRef.setDutIp(this.dutQuery.value);
     });
   }
 
@@ -56,7 +57,10 @@ export class DutDetailComponent {
   }
 
   fetchDutDetails() {
-    this.dutTaskTableRef.setDutIp(this.dutQuery.value);
+    if (this.dutTaskTableRef) {
+      this.dutTaskTableRef.setDutIp(this.dutQuery.value);
+    }
+
     this.moblabGrpcService.getDutDetails(
       (dutInfo: ConnectedDutInfo) => {
         this.setDutDetails(dutInfo);

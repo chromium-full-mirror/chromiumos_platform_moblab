@@ -22,8 +22,8 @@ import {KeyVal, KeyValTableComponent} from '../widgets/keyval-table/keyval-table
   viewProviders: [MatExpansionPanel]
 })
 export class JobDetailComponent implements OnInit {
-  @ViewChild(ViewJobsComponent) childViewJobsTableRef: ViewJobsComponent;
-  @ViewChild(KeyValTableComponent) jobInfoTableRef: KeyValTableComponent;
+  @ViewChild('child_view_jobs_table') childViewJobsTableRef: ViewJobsComponent;
+  @ViewChild('job_info_table') jobInfoTableRef: KeyValTableComponent;
   jobQuery = new FormControl(
     '',
     [Validators.minLength(1), forbiddenIDValidator]

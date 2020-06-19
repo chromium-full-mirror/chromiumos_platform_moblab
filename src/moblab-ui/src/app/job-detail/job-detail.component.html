@@ -20,7 +20,7 @@
   <div id="job-not-found-label" *ngIf="isJobInfoTableEmpty()">
     <p>No job data fetched.</p>
   </div>
-  <app-keyval-table></app-keyval-table>
+  <app-keyval-table #job_info_table></app-keyval-table>
   <table mat-table id="job-detail-table" [dataSource]="jobInfoTable">
     <ng-container matColumnDef="key">
       <th mat-header-cell *matHeaderCellDef>Key</th>
@@ -111,7 +111,7 @@
           <b>Child Jobs</b>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <app-view-jobs
+      <app-view-jobs #child_view_jobs_table
         manualPopulate=true
         hideActionBar=true
         hideFilters=true
