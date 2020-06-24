@@ -33,7 +33,7 @@ RUN apk add --no-cache --upgrade \
     zlib-dev \
     libffi-dev \
     py-pip \
-    libstdc++ 
+    libstdc++
 
 RUN pip3 install --upgrade pip setuptools
 RUN pip3 install six wheel
