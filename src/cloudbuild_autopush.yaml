@@ -5,6 +5,20 @@ substitutions:
   _SSH_PORT: "22"
 
 steps:
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: 'bash'
+    args: [ '-c', 'gcloud secrets versions access latest --secret=SourceSyncServiceAccountKey > /root/auth/auth.json' ]
+    volumes:
+    - name: 'root'
+      path: /root/auth
+
+  - name: gcr.io/chromeos-partner-moblab/moblab-autopush-sync:latest
+    volumes:
+    - name: 'root'
+      path: /root/auth
+    env:
+        - REPO_NAME=$REPO_NAME
+        - BRANCH_NAME=$BRANCH_NAME
   - id: pull
     name: "docker:19.03.8"
     args: ["pull", "debian:buster-slim"]
