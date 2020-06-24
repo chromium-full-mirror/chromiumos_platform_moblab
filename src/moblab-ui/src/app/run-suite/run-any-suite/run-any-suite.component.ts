@@ -51,12 +51,16 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
   /** Method triggered on run-suite button press. Invokes runSuite RPC call.
    * */
   onRunSuite() {
+    this.setOffPopup('Starting suite run.');
+    this.runSuiteButton.disable();
+
     this.moblabGrpcService.runSuite(
       (response) => {
         this.redirectToViewJobs();
       },
       (err, response) => {
         this.setOffPopup(err.message);
+        this.runSuiteButton.enable();
       },
       this.suiteInput.getInput(),
       this.selectedBuild,
