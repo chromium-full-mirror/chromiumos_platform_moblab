@@ -33,6 +33,10 @@ mat-card {
   padding: 8px;
 }
 
+mat-list-item {
+  margin-bottom: 20px;
+}
+
 #gcsLink {
   margin-left:10px;
   font-family: Roboto, sans-serif;
