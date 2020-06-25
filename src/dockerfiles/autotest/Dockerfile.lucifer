@@ -5,7 +5,7 @@
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
-FROM ${REGISTRY_URI}/protoc:release as protoc
+FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 
