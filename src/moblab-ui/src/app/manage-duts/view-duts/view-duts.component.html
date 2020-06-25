@@ -70,7 +70,7 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns"
       matTooltip="{{this.getDisabledReason(row)}}"
-      [routerLink]="row.getIsConnected() ? ['/dut_detail', row.getIp()] : []"
+      [routerLink]="row.getIsConnected() && row.getIsEnrolled() ? ['/dut_detail', row.getIp()] : []"
       [attr.notConnected]="!row.getIsConnected()"
       [hidden]="this.hideUnenrolledDuts && !row.getIsEnrolled() "></tr>
 </table>
