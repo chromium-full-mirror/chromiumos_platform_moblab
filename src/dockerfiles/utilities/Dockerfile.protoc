@@ -18,7 +18,7 @@ WORKDIR /
 RUN curl -L -o protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protoc-3.12.3-linux-x86_64.zip
 RUN unzip protobuf.zip
 
-RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.2.0/protoc-gen-grpc-web-1.2.0-linux-x86_64
+RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.2.0/protoc-gen-grpc-web-1.2.000-linux-x86_64
 RUN chmod uog+x /usr/local/bin/protoc-gen-grpc-web
 
 # install grpc_python_plugin
