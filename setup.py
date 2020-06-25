@@ -70,7 +70,7 @@ setuptools.setup(
         'docker==4.2.1',
         'enum34==1.1.10',
         'future==0.18.2',
-        'futures==3.3.0;python_version<"3.0"',
+        'futures==3.3.0',
         'gevent==20.6.2',
         'google-api-core[grpc]==1.21.0',
         'google-auth==1.18.0',
