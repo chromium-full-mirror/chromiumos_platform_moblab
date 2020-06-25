@@ -48,12 +48,16 @@ export class GtsRunComponent extends BaseSuite implements AfterViewInit {
   /** Method triggered on run-suite button press. Invokes runGtsSuite RPC call.
    * */
   onRunSuite() {
+    this.setOffPopup('Starting GTS suite run.');
+    this.runSuiteButton.disable();
+
     this.moblabGrpcService.runGtsSuite(
       (response) => {
         this.redirectToViewJobs();
       },
       (err, response) => {
         this.setOffPopup(err.message);
+        this.runSuiteButton.enable();
       },
       this.selectedBuild,
       this.selectedMilestone,
