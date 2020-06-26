@@ -9,6 +9,13 @@ set -x
 
 echo "Enviroment variable LABEL is ${LABEL}"
 
+# The checked in code assumes autopush build, convert this to a beta/release
+# build container on startup.  Autopush/custom builds can be overridden by the
+# user and those .env files should not be changed.
+if [ "${LABEL}" == "release" ] || [ "${LABEL}" == "beta" ]; then
+  sed -i.bak s/autopush/${LABEL}/g .env
+fi
+
 echo "Command is ${1}"
 
 if [ "${1}" == "down" ]
