@@ -1,0 +1,28 @@
+steps:
+  - id: getsecret
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: 'bash'
+    args: [ '-c', 'gcloud secrets versions access latest --secret=SourceSyncServiceAccountKey > /root/auth/auth.json' ]
+    volumes:
+    - name: 'root'
+      path: /root/auth
+    waitFor: ['-']
+
+  - id: getcode
+    name: gcr.io/chromeos-partner-moblab/moblab-autopush-sync:latest
+    volumes:
+    - name: 'root'
+      path: /root/auth
+    waitFor:
+      - "getsecret"
+    env:
+        - REPO_NAME=$REPO_NAME
+        - BRANCH_NAME=$BRANCH_NAME
+
+
+options:
+  # Use higher CPU machines so the caching and build steps are faster.
+  machineType: "N1_HIGHCPU_32"
+  substitution_option: "ALLOW_LOOSE"
+
+timeout: 600s

@@ -5,24 +5,42 @@ substitutions:
   _SSH_PORT: "22"
 
 steps:
-  - id: getsecret
-    name: gcr.io/cloud-builders/gcloud
-    entrypoint: 'bash'
-    args: [ '-c', 'gcloud secrets versions access latest --secret=SourceSyncServiceAccountKey > /root/auth/auth.json' ]
-    volumes:
-    - name: 'root'
-      path: /root/auth
-
-  - id: getcode
-    name: gcr.io/chromeos-partner-moblab/moblab-autopush-sync:latest
-    volumes:
-    - name: 'root'
-      path: /root/auth
-    waitFor:
-      - "getsecret"
+  - id: protoc
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
+        "-t",
+        "${_REGISTRY_URI}/protoc:${_LABEL}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
     env:
-        - REPO_NAME=$REPO_NAME
-        - BRANCH_NAME=$BRANCH_NAME
+      - "DOCKER_BUILDKIT=1"
+    waitFor: ['-']
+
+  - id: remote_access
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/remote_access/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/remote_access:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor: ['-']
+
   - id: pull
     name: "docker:19.03.8"
     args: ["pull", "debian:buster-slim"]
@@ -80,21 +98,6 @@ steps:
     args: ["pull", "node:12"]
     waitFor: ['-']
 
-  - id: protoc
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--no-cache",
-        "-f",
-        "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
-        "-t",
-        "${_REGISTRY_URI}/protoc:${_LABEL}",
-        "/workspace/src/dockerfiles/utilities/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-
   - id: autotest-lucifer
     name: "docker:19.03.8"
     args:
@@ -113,7 +116,6 @@ steps:
       ]
     waitFor:
       - "protoc"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -135,8 +137,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: autotest-base
     name: "docker:19.03.8"
@@ -156,7 +157,6 @@ steps:
       ]
     waitFor:
       - "protoc"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -179,7 +179,6 @@ steps:
     waitFor:
       - "autotest-base"
       - "autotest-gwt"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -201,7 +200,6 @@ steps:
       ]
     waitFor:
       - "autotest-base"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -224,7 +222,6 @@ steps:
     waitFor:
       - "autotest-base"
       - "autotest-lucifer"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -246,7 +243,6 @@ steps:
       ]
     waitFor:
       - "autotest-base"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -268,7 +264,6 @@ steps:
       ]
     waitFor:
       - "autotest-base"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -290,8 +285,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: db-init
     name: "docker:19.03.8"
@@ -311,8 +305,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: devserver
     name: "docker:19.03.8"
@@ -332,8 +325,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: ui
     name: "docker:19.03.8"
@@ -353,7 +345,6 @@ steps:
       ]
     waitFor:
       - "protoc"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -375,8 +366,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: offloader
     name: "docker:19.03.8"
@@ -396,7 +386,6 @@ steps:
       ]
     waitFor:
       - "protoc"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -418,8 +407,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: remote_access
     name: "docker:19.03.8"
@@ -439,8 +427,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: remote-agent
     name: "docker:19.03.8"
@@ -460,8 +447,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: remote-scheduler
     name: "docker:19.03.8"
@@ -481,7 +467,6 @@ steps:
       ]
     waitFor:
       - "protoc"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -503,7 +488,6 @@ steps:
       ]
     waitFor:
       - "protoc"
-      - "getcode"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -528,8 +512,7 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
       - "WATCHTOWER_CMD=${_WATCHTOWER_CMD}"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: local-dev-environment
     name: "docker:19.03.8"
@@ -549,8 +532,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
   - id: mobmonitor
     name: "docker:19.03.8"
@@ -570,8 +552,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "getcode"
+    waitFor: ['-']
 
 images:
   [
