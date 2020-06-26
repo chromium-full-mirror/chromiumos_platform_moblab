@@ -565,14 +565,17 @@ export class MoblabGrpcService {
     });
   }
 
-  listBuildTargets(callback: (x: string[]) => void) {
+  listBuildTargets(
+    callback: (x: string[]) => void,
+    errorHandlingCallback: (err_msg: string) => void
+  ) {
     const request = new ListBuildTargetsRequest();
 
     const call = this.moblabRpcService.list_build_targets(
       request,
       {},
       (err: grpcWeb.Error, response: ListBuildTargetsResponse) => {
-        console.log(err);
+        errorHandlingCallback(err.message);
       }
     );
     call.on("data", (response: ListBuildTargetsResponse) => {
@@ -581,7 +584,11 @@ export class MoblabGrpcService {
     });
   }
 
-  listMilestones(buildtarget: string, callback: (x: string[]) => void) {
+  listMilestones(
+    buildtarget: string,
+    callback: (x: string[]) => void,
+    errorHandlingCallback: (err_msg: string) => void
+    ) {
     const request = new ListMilestonesRequest();
     request.setBuildTarget(buildtarget);
 
@@ -589,8 +596,8 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: ListMilestonesResponse) => {
-        console.log(err);
-      }
+        errorHandlingCallback(err.message);
+      },
     );
     call.on("data", (response: ListMilestonesResponse) => {
       callback(response.getMilestonesList());
@@ -600,7 +607,8 @@ export class MoblabGrpcService {
   listBuildVersions(
     buildtarget: string,
     milestone: string,
-    callback: (x: string[]) => void
+    callback: (x: string[]) => void,
+    errorHandlingCallback: (err_msg: string) => void
   ) {
     const request = new ListBuildVersionsRequest();
     request.setBuildTarget(buildtarget);
@@ -610,7 +618,7 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, response: ListBuildVersionsResponse) => {
-        console.log(err);
+        errorHandlingCallback(err.message);
       }
     );
     call.on("data", (response: ListBuildVersionsResponse) => {
@@ -618,14 +626,17 @@ export class MoblabGrpcService {
     });
   }
 
-  listModels(callback: (x: string[]) => void) {
+  listModels(
+    callback: (x: string[]) => void,
+    errorHandlingCallback: (err_msg: string) => void
+  ) {
     const request = new ListModelsRequest();
 
     const call = this.moblabRpcService.list_models(
       request,
       {},
       (err: grpcWeb.Error, response: ListModelsResponse) => {
-        console.log(err);
+        errorHandlingCallback(err.message);
       }
     );
     call.on("data", (response: ListModelsResponse) => {
@@ -633,14 +644,17 @@ export class MoblabGrpcService {
     });
   }
 
-  listPools(callback: (x: string[]) => void) {
+  listPools(
+    callback: (x: string[]) => void,
+    errorHandlingCallback: (err_msg: string) => void
+    ) {
     const request = new ListPoolsRequest();
 
     const call = this.moblabRpcService.list_pools(
       request,
       {},
       (err: grpcWeb.Error, response: ListPoolsResponse) => {
-        console.log(err);
+        errorHandlingCallback(err.message);
       }
     );
     call.on("data", (response: ListPoolsResponse) => {

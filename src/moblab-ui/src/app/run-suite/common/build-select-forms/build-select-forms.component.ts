@@ -11,6 +11,7 @@ import {
 
 import {BuildSettings} from '../base_suite/base-suite.component';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 /**
@@ -50,12 +51,17 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private moblabGrpcService: MoblabGrpcService,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit() {
-    this.moblabGrpcService.listModels((models: string[]) => {
-      this.updateModels(models);
-    });
+    this.moblabGrpcService.listModels(
+      (models: string[]) => {
+        this.updateModels(models);
+      },
+      (error_msg: string) => {
+        this.setErrorReason(this.modelSelector, error_msg);
+      });
   }
 
   ngAfterViewInit() {
@@ -65,47 +71,93 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
     this.changeDetector.detectChanges();
   }
 
+  setOffPopup(dialogue: string) {
+    const snackBarRef = this.snackBar.open(dialogue, '', {
+      duration: 5000,
+      verticalPosition: 'top'
+    });
+  }
+
+  setErrorReason(selector, msg: string) {
+    msg = 'Failed to fetch items: ' + msg;
+    selector.disable(msg);
+    this.setOffPopup(msg);
+  }
+
   updateModels(newModels: string[]) {
-    this.modelSelector.enable();
     this.models = newModels;
+
+    if (this.models.length === 0) {
+      this.modelSelector.disable('No working DUT\'s detected.');
+    } else {
+      this.modelSelector.enable();
+    }
   }
 
   modelChanged(model: string) {
     this.selectedModel = model;
-    this.boardSelector.enable();
-    this.moblabGrpcService.listBuildTargets((buildTarget: string[]) => {
-      this.updateBuildTargets(buildTarget);
-    });
+    this.moblabGrpcService.listBuildTargets(
+      (buildTarget: string[]) => {
+        this.updateBuildTargets(buildTarget);
+      },
+      (error_msg: string) => {
+        this.setErrorReason(this.boardSelector, error_msg);
+      });
   }
 
   updateBuildTargets(newBuildTargets: string[]) {
     this.buildTargets = newBuildTargets;
+
+    if (this.buildTargets.length === 0) {
+      this.boardSelector.disable('No build targets found in configured bucket.');
+    } else {
+      this.boardSelector.enable();
+    }
   }
 
   buildTargetChanged(newBuildTarget: string): void {
     this.buildTargetName = newBuildTarget;
-    this.milestoneSelector.enable();
-    this.moblabGrpcService.listMilestones(this.buildTargetName, (milestones : string[]) => {
-      this.updateMilestones(milestones)
-    })
+    this.moblabGrpcService.listMilestones(this.buildTargetName,
+        (milestones : string[]) => {
+        this.updateMilestones(milestones);
+      },
+      (error_msg: string) => {
+        this.setErrorReason(this.milestoneSelector, error_msg);
+      },
+    )
   }
 
   updateMilestones(newMilestones: string[]) {
     this.milestones = newMilestones;
-    this.buildSelector.enable();
+
+    if (this.buildTargets.length === 0) {
+      this.milestoneSelector.disable('No milestones found in configured bucket.');
+    } else {
+      this.milestoneSelector.enable();
+    }
   }
 
   milestoneChanged(newMilestone: string): void {
     this.milestone = newMilestone;
-    this.buildSelector.enable();
     this.moblabGrpcService.listBuildVersions(
-      this.buildTargetName, this.milestone, (builds: string[]) => {
+      this.buildTargetName, this.milestone,
+      (builds: string[]) => {
         this.updateBuildVersions(builds);
-      });
+      },
+      (error_msg: string) => {
+        this.setErrorReason(this.buildSelector, error_msg);
+      }
+      );
   }
 
   updateBuildVersions(newBuildVersions: string[]) {
     this.buildVersions = newBuildVersions;
+
+    if (this.buildTargets.length === 0) {
+      this.buildSelector.disable('No builds found in configured bucket.');
+    } else {
+      this.buildSelector.enable();
+    }
   }
 
   buildVersionChanged(newBuildVersion: string): void {
@@ -118,9 +170,13 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   buildChanged(build: string, board: string) {
     if (build) {
       this.selectedBuild = build;
-      this.moblabGrpcService.listPools((pools: string[]) => {
-        this.updatePools(pools);
-      });
+      this.moblabGrpcService.listPools(
+        (pools: string[]) => {
+          this.updatePools(pools);
+        },
+        (error_msg: string) => {
+          this.setErrorReason(this.poolSelector, error_msg);
+        });
     }
   }
 
