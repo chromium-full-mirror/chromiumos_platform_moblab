@@ -4,43 +4,6 @@ substitutions:
   _WATCHTOWER_CMD: "--interval 1"
   _SSH_PORT: "22"
 
-steps:
-  - id: protoc
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--no-cache",
-        "-f",
-        "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
-        "-t",
-        "${_REGISTRY_URI}/protoc:${_LABEL}",
-        "/workspace/src/dockerfiles/utilities/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull']
-
-  - id: remote_access
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--no-cache",
-        "--build-arg",
-        "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg",
-        "LABEL=${_LABEL}",
-        "-f",
-        "/workspace/src/dockerfiles/remote_access/Dockerfile",
-        "-t",
-        "${_REGISTRY_URI}/remote_access:${_LABEL}",
-        "/workspace/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-    waitFor: ['-']
-
   - id: pull
     name: "docker:19.03.8"
     args: ["pull", "debian:buster-slim"]
@@ -97,6 +60,45 @@ steps:
     name: "docker:19.03.8"
     args: ["pull", "node:12"]
     waitFor: ['-']
+
+  steps:
+  - id: protoc
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
+        "-t",
+        "${_REGISTRY_URI}/protoc:${_LABEL}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull']
+
+  - id: remote_access
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--no-cache",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/remote_access/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/remote_access:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - 'pull3'
+      - 'pull10'
 
   - id: autotest-lucifer
     name: "docker:19.03.8"
