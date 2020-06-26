@@ -65,7 +65,7 @@ setuptools.setup(
         'chardet==3.0.4',            # via requests
         'enum34==1.1.10',            # via google-cloud-pubsub, grpcio
         'future==0.18.2',            # via -r requirements.txt
-        'futures==3.3.0',            # via google-api-core, grpcio
+        'futures==3.3.0;python_version<"3.0"',            # via google-api-core, grpcio
         'google-api-core[grpc]==1.16.0',  # via google-cloud-core, google-cloud-pubsub
         'google-auth==1.14.1',       # via -r requirements.txt, google-api-core, google-cloud-storage
         'google-cloud-core==1.3.0',  # via google-cloud-storage
