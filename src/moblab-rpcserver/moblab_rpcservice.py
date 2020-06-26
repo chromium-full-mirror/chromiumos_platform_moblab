@@ -58,11 +58,26 @@ class MoblabService(object):
         logging.info('Using bucket: %s', self.moblab_bucket_name)
         self.devserver_connector = devserver_connector.DevserverConnector(
             self.moblab_bucket_name)
+        self._init_build_connector(raise_error=False)
+
+    def _init_build_connector(self, raise_error=True):
         try:
-            self.build_connector = build_connector.MoblabBuildConnector(
-                self.moblab_bucket_name)
+            self._build_connector = build_connector.MoblabBuildConnector(
+                self.moblab_bucket_name
+            )
         except build_connector.MoblabBuildConnectorException as e:
-            self.build_connector = None
+            logging.exception('Failed to initialize MoblabBuildConnector.')
+            if raise_error:
+                raise
+
+    @property
+    def build_connector(self):
+        current_moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
+
+        if not self._build_connector or current_moblab_bucket_name != self.moblab_bucket_name:
+            self.moblab_bucket_name = current_moblab_bucket_name
+            self._init_build_connector()
+        return self._build_connector
 
     def extract_model_from_labels(self, labels):
         return self.extract_from_labels(self.model_re, labels)
@@ -361,6 +376,14 @@ class MoblabService(object):
         connected_build_targets = self.list_connected_dut_build_targets()
         return list(
             set(available_build_targets).intersection(connected_build_targets))
+
+    def list_usable_milestones(self, build_target):
+        return self.build_connector.get_milestones_available(
+            build_target)
+
+    def list_usable_build_versions(self, build_target, milestone):
+        return self.build_connector.get_builds_for_milestone(
+            build_target, milestone)
 
     def list_connected_dut_build_targets(self):
         afe_hosts = self.afe_connector.get_connected_devices()

@@ -44,7 +44,7 @@ class MoblabConfigConnector(object):
             return default
         return self.config[section].get(key, default)
 
-    def get_cloud_bucket(self):
+    def get_cloud_bucket(self, force_reload=False):
         """Get the configured cloud storage bucket name.
 
         Returns:
@@ -52,7 +52,7 @@ class MoblabConfigConnector(object):
         """
 
         # The bucket setting has gs:// and ends in /, so remove them
-        image_server = self.get("CROS", "image_storage_server")
+        image_server = self.get("CROS", "image_storage_server", force_reload=force_reload)
         if image_server and len(image_server) > 5:
             return image_server[5:-1]
         else:
