@@ -60,14 +60,30 @@ setuptools.setup(
         'grpcio-tools',
     ],
     install_requires=[
-        'future',
-        'requests',
-        'google-cloud-storage',
-        'google-cloud-pubsub',
-        'docker',
-        'parallel-ssh',
-        'python-nmap'
-
+        'cachetools==3.1.1',         # via google-auth
+        'certifi==2020.6.20',        # via requests
+        'chardet==3.0.4',            # via requests
+        'enum34==1.1.10',            # via google-cloud-pubsub, grpcio
+        'future==0.18.2',            # via -r requirements.txt
+        'futures==3.3.0',            # via google-api-core, grpcio
+        'google-api-core[grpc]==1.16.0',  # via google-cloud-core, google-cloud-pubsub
+        'google-auth==1.14.1',       # via -r requirements.txt, google-api-core, google-cloud-storage
+        'google-cloud-core==1.3.0',  # via google-cloud-storage
+        'google-cloud-pubsub==1.5.0',  # via -r requirements.txt
+        'google-cloud-storage==1.28.1',  # via -r requirements.txt
+        'google-resumable-media==0.5.1',  # via google-cloud-storage
+        'googleapis-common-protos[grpc]==1.52.0',  # via google-api-core, grpc-google-iam-v1
+        'grpc-google-iam-v1==0.12.3',  # via google-cloud-pubsub
+        'grpcio==1.30.0',            # via google-api-core, googleapis-common-protos, grpc-google-iam-v1
+        'idna==2.9',                 # via requests
+        'protobuf==3.12.2',          # via google-api-core, googleapis-common-protos
+        'pyasn1-modules==0.2.8',     # via google-auth
+        'pyasn1==0.4.8',             # via pyasn1-modules, rsa
+        'pytz==2020.1',              # via google-api-core
+        'requests==2.24.0',          # via -r requirements.txt, google-api-core
+        'rsa==4.0',                  # via google-auth
+        'six==1.15.0',               # via google-api-core, google-auth, google-resumable-media, grpcio, protobuf
+        'urllib3==1.25.9',           # via requests
     ],
     scripts=[
         'src/tools/create-moblab-id.py',
