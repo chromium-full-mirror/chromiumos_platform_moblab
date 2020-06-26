@@ -4,6 +4,7 @@ substitutions:
   _WATCHTOWER_CMD: "--interval 1"
   _SSH_PORT: "22"
 
+steps:
   - id: pull
     name: "docker:19.03.8"
     args: ["pull", "debian:buster-slim"]
@@ -61,7 +62,6 @@ substitutions:
     args: ["pull", "node:12"]
     waitFor: ['-']
 
-  steps:
   - id: protoc
     name: "docker:19.03.8"
     args:
