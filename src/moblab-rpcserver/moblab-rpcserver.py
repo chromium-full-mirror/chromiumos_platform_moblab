@@ -483,20 +483,24 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             _context.set_code(grpc.StatusCode.NOT_FOUND)
             _context.set_details(error_msg)
         else:
-            execution_history = [
-                moblabrpc_pb2.Execution(
-                    name=item.get('name', ''),
-                    job_id=item.get('id', ''),
-                    status=self._extract_status(item),
-                    start_time_utc=self._convert_timestamp_to_utc_secs(
-                        item.get('start_time', '')),
-                    end_time_utc=self._convert_timestamp_to_utc_secs(
-                        item.get('end_time', '')),
-                    used_time=self._convert_timedelta_to_miliseconds(
-                        seconds=item.get('time_used', '')),
-                    dut=item.get('hostname', ''))
-                for item in self.service.get_job_history(request.id)
-            ]
+            execution_history = []
+            job_history_dicts = self.service.get_job_history(request.id)
+            if job_history_dicts:
+                execution_history = [
+                    moblabrpc_pb2.Execution(
+                        name=item.get('name', ''),
+                        job_id=item.get('id', ''),
+                        status=self._extract_status(item),
+                        start_time_utc=self._convert_timestamp_to_utc_secs(
+                            item.get('start_time', '')),
+                        end_time_utc=self._convert_timestamp_to_utc_secs(
+                            item.get('end_time', '')),
+                        used_time=self._convert_timedelta_to_miliseconds(
+                            seconds=item.get('time_used', '')),
+                        dut=item.get('hostname', ''))
+                    for item in job_history_dicts
+
+                ]
 
             associated_duts = []
             for item in self.service.get_associated_duts(request.id):
