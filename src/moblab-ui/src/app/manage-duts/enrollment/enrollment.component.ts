@@ -26,6 +26,7 @@ export class EnrollmentComponent implements OnInit {
   }
 
   enrollSelected() {
+    this.dutsTableRef.startLoadingSpinner();
     const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
     this.moblabGrpcService.enrollDuts(
       hostnames,
@@ -39,6 +40,7 @@ export class EnrollmentComponent implements OnInit {
   }
 
   unenrollSelected() {
+    this.dutsTableRef.startLoadingSpinner();
     const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
       this.moblabGrpcService.unenrollDuts(hostnames, () => {
         this.dutsTableRef.getConnectedDuts();
