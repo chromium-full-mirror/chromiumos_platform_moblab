@@ -2,13 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-#TODO fix the versions of each package.
-PyYAML
-crcmod
-lxml
-numpy
-pip
-pyparsing
-setuptools
-wheel
-mock
+crcmod==1.7               # via -r requirements.in
+funcsigs==1.0.2           # via mock
+lxml==4.5.1               # via -r requirements.in
+mock==3.0.5               # via -r requirements.in
+numpy==1.16.6             # via -r requirements.in
+pyparsing==2.4.7          # via -r requirements.in
+pyyaml==5.3.1             # via -r requirements.in
+six==1.15.0               # via mock
+wheel==0.34.2             # via -r requirements.in

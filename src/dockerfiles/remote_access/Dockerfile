@@ -35,8 +35,8 @@ RUN apk add --no-cache --upgrade \
     py-pip \
     libstdc++ 
 
-RUN pip3 install --upgrade pip setuptools
-RUN pip3 install six wheel
+COPY src/dockerfiles/remote_access/requirements.txt ./
+RUN pip3 install --upgrade pip && pip3 install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /home/moblab
 RUN mkdir -p /home/moblab/.ssh
