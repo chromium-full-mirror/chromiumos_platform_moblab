@@ -409,26 +409,6 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor: ['-']
 
-  - id: remote_access
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--no-cache",
-        "--build-arg",
-        "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg",
-        "LABEL=${_LABEL}",
-        "-f",
-        "/workspace/src/dockerfiles/remote_access/Dockerfile",
-        "-t",
-        "${_REGISTRY_URI}/remote_access:${_LABEL}",
-        "/workspace/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-    waitFor: ['-']
-
   - id: remote-agent
     name: "docker:19.03.8"
     args:
