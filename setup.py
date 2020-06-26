@@ -57,7 +57,7 @@ setuptools.setup(
         'build_py': custom_build_py,
     },
     setup_requires=[
-        'grpcio-tools',
+        'grpcio-tools==1.29.0',
     ],
     install_requires=[
         'future',
@@ -66,8 +66,7 @@ setuptools.setup(
         'google-cloud-pubsub',
         'docker',
         'parallel-ssh',
-        'python-nmap'
-
+        'python-nmap',
     ],
     scripts=[
         'src/tools/create-moblab-id.py',
