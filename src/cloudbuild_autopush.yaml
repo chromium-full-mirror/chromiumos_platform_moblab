@@ -19,7 +19,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['-']
+    waitFor: ['pull']
 
   - id: remote_access
     name: "docker:19.03.8"
