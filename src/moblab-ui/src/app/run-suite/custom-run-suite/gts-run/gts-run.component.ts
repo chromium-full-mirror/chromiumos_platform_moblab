@@ -64,7 +64,7 @@ export class GtsRunComponent extends BaseSuite implements AfterViewInit {
       this.selectedBoard,
       this.selectedModel,
       this.selectedPool,
-      this.modulesTextForm.getText(),
+      this.modulesTextForm.getCsvList(),
     );
   }
 }

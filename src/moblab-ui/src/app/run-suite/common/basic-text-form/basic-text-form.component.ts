@@ -19,6 +19,16 @@ export class BasicTextFormComponent extends BaseForm {
     return this.text.value;
   }
 
+  getCsvList() {
+    const csv_list = [];
+    for (const value of this.getText().split(',')) {
+      if (value) {
+        csv_list.push(value);
+      }
+    }
+    return csv_list;
+  }
+
   getTextFormControl() {
     return this.text;
   }
