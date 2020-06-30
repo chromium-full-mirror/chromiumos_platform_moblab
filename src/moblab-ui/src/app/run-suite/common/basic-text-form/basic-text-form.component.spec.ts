@@ -14,6 +14,10 @@ describe('BasicTextFormComponent', () => {
   let component: BasicTextFormComponent;
   let fixture: ComponentFixture<BasicTextFormComponent>;
 
+  const MOCK_MODULE_1 = 'MockModule1';
+  const MOCK_MODULE_2 = 'MockModule2';
+  const MODULES_LIST_STR = MOCK_MODULE_1 + ','  + MOCK_MODULE_2;
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
@@ -50,9 +54,26 @@ describe('BasicTextFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Basic input test.', () => {
-    const modules_list_str = 'MockModule1, MockModule2';
-    setInput(modules_list_str);
-    expect(component.getText()).toBe(modules_list_str);
+  it('should pass through input str', () => {
+    setInput(MODULES_LIST_STR);
+    expect(component.getText()).toBe(MODULES_LIST_STR);
+  });
+
+  it('should parse input str into CSV list', () => {
+    setInput(MODULES_LIST_STR);
+    expect(component.getCsvList().toString()).toBe(
+      [MOCK_MODULE_1, MOCK_MODULE_2].toString());
+  });
+
+  it('should parse no-comma input str into 1-item list', () => {
+    setInput(MOCK_MODULE_1);
+    expect(component.getCsvList().toString()).toBe(
+      [MOCK_MODULE_1].toString());
+  });
+
+  it('should parse empty input str into 0-item list', () => {
+    setInput('');
+    expect(component.getCsvList().toString()).toBe(
+      [].toString());
   });
 });

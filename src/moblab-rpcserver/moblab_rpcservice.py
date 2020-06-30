@@ -228,7 +228,7 @@ class MoblabService(object):
         """
 
         suite_args = {}
-        if autotest_tests:
+        if autotest_tests and len(autotest_tests):
             suite_args['tests'] = [
                 test.strip() for test in autotest_tests
             ]
@@ -266,7 +266,7 @@ class MoblabService(object):
         suite_args = {}
         if autotest_tests:
             suite_args['tests'] = [
-                test.strip() for test in autotest_tests.split(',')
+                test.strip() for test in autotest_tests
             ]
 
         return self.run_suite(
@@ -331,16 +331,6 @@ class MoblabService(object):
         test_args['ssid'] = ap_name
         test_args['wifipass'] = ap_pass
 
-        # TODO(mattmallett b/92031054) Standardize bug id, part id passing
-        # for memory/storage qual
-        processed_suite_args = dict()
-        processed_test_args = dict()
-
-        # set processed_suite_args to None instead of empty dict when there
-        # is no argument in processed_suite_args
-        if len(processed_suite_args) == 0:
-            processed_suite_args = None
-
         return self.afe_connector.run_suite(
             build_target,
             build,
@@ -349,7 +339,7 @@ class MoblabService(object):
             suite_timeout_mins,
             pool,
             model,
-            suite_args=processed_suite_args,
+            suite_args=suite_args,
             test_args=test_args)
 
     def enroll_duts(self, ip_addresses):
