@@ -95,7 +95,6 @@ class MoblabService(object):
         return list(set(result))
 
     def get_connected_devices(self):
-        self.dut_connector.find_duts()
         connected_duts = self.dut_connector.get_connected_duts()
         afe_formatted_duts = []
         for dut in connected_duts:
