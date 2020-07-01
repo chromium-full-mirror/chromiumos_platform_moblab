@@ -4,9 +4,12 @@
 # found in the LICENSE file.
 
 import re
+import socket
 
 from moblab_common import build_connector
 from moblab_common import dut_connector
+from moblab_common import host_connector
+from moblab_common import moblab_info
 try:
     from chromite.lib import cros_logging as logging
 except ImportError:
@@ -14,6 +17,9 @@ except ImportError:
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
+
+# File where information about the current device is stored.
+_ETC_LSB_RELEASE = '/etc/lsb-release'
 
 _DEFAULT_SUITE_TIMEOUT_MINS = 1440
 _SUITE_TIMEOUT_MAP = {
@@ -721,23 +727,6 @@ class MoblabService(object):
 
         return 'Successfully set off repair on {}'.format(dut_hostname)
 
-    def get_network_info(self):
-        """
-            Gets network info of Moblab.
-        Returns:
-            A dict of network information ( specifically, a 'server_ip' and
-            'is_connected' which is true iff Moblab is connected to internet.
-        """
-        network_info = self.afe_connector.get_network_info()
-        if len(network_info['server_ips']) != 1:
-            raise MoblabRpcError(
-                'Unable to determine ip of Moblab, found {} candidates'.format(
-                len(network_info['server_ips'])
-            ))
-
-        network_info['server_ip'] = network_info['server_ips'][0]
-        return network_info
-
     def get_cloud_configuration(self):
         """
             Gets cloud configuration info.
@@ -768,6 +757,40 @@ class MoblabService(object):
         else:
             return details
 
+    def _get_public_ip_address(self):
+        """Gets the public IP address.
+
+        @return: public ip address as string.
+        """
+        try:
+            return host_connector.HostServicesConnector.get_ip()
+        except host_connector.HostServicesException:
+            logging.exception("Failed to get ip address from host.")
+        return "No IP Address"
+
+    def get_network_info(self):
+        """
+            Gets network info of Moblab.
+
+            TCP socket is used to test the connectivity. If there is no connectivity,
+            try to get the public IP with UDP socket.
+
+        Returns:
+            A dict of network information ( specifically, a 'server_ip' and
+            'is_connected' which is true iff Moblab is connected to internet.
+        """
+        ip = self._get_public_ip_address()
+        if ip is not None:
+            logging.info('Established TCP connection with well known server.')
+            return {
+                'server_ip': ip,
+                'is_connected': True
+            }
+        return {
+            'server_ip': None,
+            'is_connected': False
+        }
+
     def get_version_info(self):
         """
             Gets cloud version info of Moblab.
@@ -775,7 +798,12 @@ class MoblabService(object):
             A dict of ChromeOS and Moblab information (ex. serial number,
             release version )
         """
-        version_info = self.afe_connector.get_version_info()
+        lines = open(_ETC_LSB_RELEASE).readlines()
+        version_info = {
+            x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}
+        version_info['MOBLAB_ID'] = moblab_info.get_or_create_id();
+        version_info['MOBLAB_SERIAL_NUMBER'] = moblab_info.get_serial_number();
+
         try:
             version_info['CHROMEOS_RELEASE_VERSION'] =\
                 version_info['CHROMEOS_RELEASE_BUILDER_PATH'].split('/')[1].strip()
