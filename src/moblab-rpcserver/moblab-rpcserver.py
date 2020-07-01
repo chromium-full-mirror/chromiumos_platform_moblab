@@ -22,7 +22,6 @@ import moblabrpc_pb2
 import moblabrpc_pb2_grpc
 
 from moblab_common import afe_connector
-from moblab_common import build_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
 from moblab_common import feedback_connector
@@ -45,20 +44,12 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             self.afe_connector)
         self.service = moblab_rpcservice.MoblabService()
         self.setup_devserver_connector()
-        self.has_credentials = True
 
     def setup_devserver_connector(self):
         self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
         logging.info('Using bucket: %s', self.moblab_bucket_name)
         self.devserver_connector = devserver_connector.DevserverConnector(
             self.moblab_bucket_name)
-        try:
-            self.build_connector = build_connector.MoblabBuildConnector(
-                self.moblab_bucket_name)
-        except build_connector.MoblabBuildConnectorException as e:
-            self.build_connector = None
-            logging.info('Setting has_credentials to false')
-            self.has_credentials = False
 
     def send_moblab_screenshot(self, request, _context):
         """Uploads image and feedback text to GCS.
@@ -279,13 +270,14 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def list_milestones(self, request, _context):
         response = moblabrpc_pb2.ListMilestonesResponse(
-            milestones=self.build_connector.get_milestones_available(
-                request.build_target))
+            milestones=self.service.list_usable_milestones(
+                request.build_target
+            ))
         return response
 
     def list_build_versions(self, request, _context):
         response = moblabrpc_pb2.ListBuildVersionsResponse(
-            build_versions=self.build_connector.get_builds_for_milestone(
+            build_versions=self.service.list_usable_build_versions(
                 request.build_target, request.milestone))
         return response
 
