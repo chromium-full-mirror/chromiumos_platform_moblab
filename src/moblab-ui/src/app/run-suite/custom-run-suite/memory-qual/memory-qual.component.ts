@@ -57,12 +57,16 @@ export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
    *  runMemoryQualificationSuite RPC call.
    * */
   onRunSuite() {
+    this.setOffPopup('Starting memory qualification suite run.');
+    this.runSuiteButton.disable();
+
     this.moblabGrpcService.runMemoryQualificationSuite(
       (response) => {
         this.redirectToViewJobs();
       },
       (err, response) => {
         this.setOffPopup(err.message);
+        this.runSuiteButton.enable();
       },
       this.selectedBuild,
       this.selectedMilestone,
