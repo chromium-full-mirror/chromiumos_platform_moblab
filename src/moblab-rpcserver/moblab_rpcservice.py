@@ -74,7 +74,9 @@ class MoblabService(object):
     def build_connector(self):
         current_moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
 
-        if not self._build_connector or current_moblab_bucket_name != self.moblab_bucket_name:
+        if not hasattr(self, '_build_connector') or \
+                not self._build_connector or \
+                current_moblab_bucket_name != self.moblab_bucket_name:
             self.moblab_bucket_name = current_moblab_bucket_name
             self._init_build_connector()
         return self._build_connector
