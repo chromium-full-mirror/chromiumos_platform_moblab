@@ -283,20 +283,20 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def list_pools(self, _request, _context):
         afe_hosts = self.afe_connector.get_connected_devices()
-        pools = []
+        pools = set()
         for host in afe_hosts:
-            pools.extend(
+            pools = pools.union(
                 self.service.extract_pool_from_labels(host.get('labels', [])))
-        response = moblabrpc_pb2.ListPoolsResponse(pools=pools)
+        response = moblabrpc_pb2.ListPoolsResponse(pools=list(pools))
         return response
 
     def list_models(self, _request, _context):
         afe_hosts = self.afe_connector.get_connected_devices()
-        models = []
+        models = set()
         for host in afe_hosts:
-            models.extend(
+            models = models.union(
                 self.service.extract_model_from_labels(host.get('labels', [])))
-        response = moblabrpc_pb2.ListModelsResponse(models=models)
+        response = moblabrpc_pb2.ListModelsResponse(models=list(models))
         return response
 
     def enroll_duts(self, request, _context):
