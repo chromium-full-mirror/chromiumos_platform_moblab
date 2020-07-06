@@ -9,8 +9,10 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTableModule} from '@angular/material/table';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import {RouterModule} from '@angular/router';
 
 import {ConnectedDutInfo, Job} from '../../services/moblabrpc_pb';
@@ -38,6 +40,8 @@ describe('EditAttributesComponent', () => {
   let removeAttributeFromDutsSpy: jasmine.Spy;
   let addLabelToDutsSpy: jasmine.Spy;
   let removeLabelFromDutsSpy: jasmine.Spy;
+  let addPoolToDutsSpy: jasmine.Spy;
+  let removePoolFromDutsSpy: jasmine.Spy;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -49,8 +53,10 @@ describe('EditAttributesComponent', () => {
           MatFormFieldModule,
           MatIconModule,
           MatInputModule,
+          MatProgressSpinnerModule,
           MatSnackBarModule,
           MatTableModule,
+          MatTooltipModule,
           PipesModule,
           ReactiveFormsModule,
           RouterModule,
@@ -76,7 +82,12 @@ describe('EditAttributesComponent', () => {
     // @ts-ignore
     removeLabelFromDutsSpy = spyOn<any>(component.moblabGrpcService,
       'removeLabelFromDuts');
-
+    // @ts-ignore
+    addPoolToDutsSpy = spyOn<any>(component.moblabGrpcService,
+      'addPoolToDuts');
+    // @ts-ignore
+    removePoolFromDutsSpy = spyOn<any>(component.moblabGrpcService,
+      'removePoolFromDuts');
     fixture.detectChanges();
   });
 
@@ -101,7 +112,7 @@ describe('EditAttributesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Test that action will not be done with no selected DUTs.', () => {
+  it('expect that action will not be done with no selected DUTs', () => {
     inputEditValue('#label-input', 'test-label');
     dispatchButtonClick('#add-label-button');
 
@@ -114,21 +125,21 @@ describe('EditAttributesComponent', () => {
         .and.callFake(createMockDuts);
     });
 
-    it('Test that add label submission gets passed through.', () => {
+    it('expect that add label submission gets passed through.', () => {
       inputEditValue('#label-input', 'test-label');
       dispatchButtonClick('#add-label-button');
 
       expect(addLabelToDutsSpy).toHaveBeenCalled();
     });
 
-    it('Test that remove label submission gets passed through.', () => {
+    it('expect that remove label submission gets passed through.', () => {
       inputEditValue('#label-input', 'test-label');
       dispatchButtonClick('#remove-label-button');
 
       expect(removeLabelFromDutsSpy).toHaveBeenCalled();
     });
 
-    it('Test that add attribute submission gets passed through.', () => {
+    it('expect that add attribute submission gets passed through.', () => {
       inputEditValue('#attribute-key-input', 'test-key');
       inputEditValue('#attribute-value-input', 'test-value');
       dispatchButtonClick('#add-attribute-button');
@@ -136,11 +147,25 @@ describe('EditAttributesComponent', () => {
       expect(addAttributeToDutsSpy).toHaveBeenCalled();
     });
 
-    it('Test that remove attribute submission gets passed through.', () => {
+    it('expect that remove attribute submission gets passed through.', () => {
       inputEditValue('#attribute-key-input', 'test-key');
       dispatchButtonClick('#remove-attribute-button');
 
       expect(removeAttributeFromDutsSpy).toHaveBeenCalled();
+    });
+
+    it('expect that add pool submission gets passed through.', () => {
+      inputEditValue('#pool-input', 'test-pool');
+      dispatchButtonClick('#add-pool-button');
+
+      expect(addPoolToDutsSpy).toHaveBeenCalled();
+    });
+
+    it('expect that remove pool submission gets passed through.', () => {
+      inputEditValue('#pool-input', 'test-pool');
+      dispatchButtonClick('#remove-pool-button');
+
+      expect(removePoolFromDutsSpy).toHaveBeenCalled();
     });
   });
 });

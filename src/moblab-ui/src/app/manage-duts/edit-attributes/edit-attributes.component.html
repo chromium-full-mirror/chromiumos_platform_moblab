@@ -15,14 +15,14 @@
     </mat-form-field>
 
     <button mat-raised-button color="primary"
-            id="add-label-button"
+            id="add-attribute-button"
             (click)="doEdit(addAttribute)"
             [disabled]="attribute_key.value === '' || attribute_value.value === ''"
             class="edit-box-contents">
       Add
     </button>
     <button mat-raised-button
-            id="remove-label-button"
+            id="remove-attribute-button"
             (click)="doEdit(removeAttribute)"
             [disabled]="attribute_key.value === '' || attribute_value.value !== ''"
             class="edit-box-contents">
@@ -31,24 +31,48 @@
   </div>
 
   <div class="filter edit-box-contents form-wrapper">
-    <b class="edit-box-contents"> Label: </b>
-    <mat-form-field id="dateInputFormField"
+    <b class="edit-box-contents"> Pool: </b>
+    <mat-form-field
                     class="edit-box-contents filter key-form-field"
                     floatLabel="never">
-      <input id="label-input" matInput
-             [formControl]="label"
-             placeholder='key'>
+      <input id="pool-input" matInput
+             [formControl]="pool">
     </mat-form-field>
 
     <button mat-raised-button color="primary"
-            id="add-attribute-button"
+            id="add-pool-button"
+            (click)="doEdit(addPool)"
+            [disabled]="pool.value === ''"
+            class="edit-box-contents">
+      Add
+    </button>
+    <button mat-raised-button
+            id="remove-pool-button"
+            (click)="doEdit(removePool)"
+            [disabled]="pool.value === ''"
+            class="edit-box-contents">
+      Remove
+    </button>
+  </div>
+
+  <div class="filter edit-box-contents form-wrapper">
+    <b class="edit-box-contents"> Label: </b>
+    <mat-form-field
+                    class="edit-box-contents filter key-form-field"
+                    floatLabel="never">
+      <input id="label-input" matInput
+             [formControl]="label">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary"
+            id="add-label-button"
             (click)="doEdit(addLabel)"
             [disabled]="label.value === ''"
             class="edit-box-contents">
       Add
     </button>
     <button mat-raised-button
-            id="remove-attribute-button"
+            id="remove-label-button"
             (click)="doEdit(removeLabel)"
             [disabled]="label.value === ''"
             class="edit-box-contents">

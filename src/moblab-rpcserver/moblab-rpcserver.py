@@ -685,6 +685,40 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response.message = response_msg
         return response
 
+    def add_pool_to_duts(self, request, _context):
+        """
+            Given a AddPoolToDutsRequest, returns a
+            AddPoolDutsResponse obj which wraps a message indicating
+            which duts the pool was successfully added on.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.add_pool_to_duts(
+            request.dut_hostnames,
+            request.pool,
+        )
+
+        response = moblabrpc_pb2.AddPoolToDutsResponse()
+        response.message = response_msg
+        return response
+
+    def remove_pool_from_duts(self, request, _context):
+        """
+            Given a RemovePoolFromDutsRequest, returns a
+            RemovePoolFromDutsResponse obj which wraps a message indicating
+            which duts the pool was successfully removed from.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.remove_pool_from_duts(
+            request.dut_hostnames,
+            request.pool,
+        )
+
+        response = moblabrpc_pb2.RemovePoolFromDutsResponse()
+        response.message = response_msg
+        return response
+
     def reverify_host(self, request, _context):
         """
             Sets of reverify job on specified DUT.

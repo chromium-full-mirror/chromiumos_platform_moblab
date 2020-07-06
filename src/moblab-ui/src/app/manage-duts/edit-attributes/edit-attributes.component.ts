@@ -17,6 +17,7 @@ export class EditAttributesComponent {
   attribute_key = new FormControl('');
   attribute_value = new FormControl('');
   label = new FormControl('');
+  pool = new FormControl('');
 
   constructor(
     private moblabGrpcService: MoblabGrpcService,
@@ -122,6 +123,50 @@ export class EditAttributesComponent {
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.label.value,
+    );
+  }
+
+  addPool(dut_hostnames: string[], context)
+  /** Initiates Moblab RPC request to add pool label to given DUTs.
+   *  Will trigger popup on either success or failure.
+   *  @param dut_hostnames: List of DUT hostnames.
+   *  @param context: 'this'
+   *  */
+  {
+    const confirmation_message = 'Adding pool ' + context.pool.value + 'to ' +
+      context.get_confirmation_message_suffix(dut_hostnames);
+    context.setOffPopup(confirmation_message);
+
+    context.moblabGrpcService.addPoolToDuts(
+      (message) => {
+        context.setOffPopup(message)
+      },
+      (message) => {
+        context.setOffPopup(message)
+      },
+      context.dutsTableRef.getSelectedDutHostnames(),
+      context.pool.value,
+    );
+  }
+
+  removePool(dut_hostnames: string[], context)
+  /** Initiates Moblab RPC request to remove pool label to given DUTs.
+   *  Will trigger popup on either success or failure.
+   *  @param dut_hostnames: List of DUT hostnames.
+   *  @param context: 'this'
+   *  */
+  {
+    const confirmation_message = 'Removing pool ' + context.pool.value + 'from ' +
+      context.get_confirmation_message_suffix(dut_hostnames);
+    context.moblabGrpcService.removePoolFromDuts(
+      (message) => {
+        context.setOffPopup(message)
+      },
+      (message) => {
+        context.setOffPopup(message)
+      },
+      context.dutsTableRef.getSelectedDutHostnames(),
+      context.pool.value,
     );
   }
 

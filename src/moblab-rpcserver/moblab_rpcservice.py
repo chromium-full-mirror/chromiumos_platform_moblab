@@ -705,6 +705,34 @@ class MoblabService(object):
             label,
         )
 
+    def add_pool_to_duts(self, dut_hostnames, pool):
+        """
+            Adds  pool to the selected dut_hostnames. Returns a message summarizing
+            how many DUT's the  pool was successfully added to as well for which
+            DUT's the addition failed.
+        Args:
+            dut_hostnames(string[]): A list of strings representing the hostnames
+            of the DUT's to be targeted.
+            pool (string): Pool to be added.
+        Returns:
+            String message summarizing results.
+        """
+        return self.add_label_to_duts(dut_hostnames, 'pool:' + pool)
+
+    def remove_pool_from_duts(self, dut_hostnames, pool):
+        """
+            Remove  pool from the selected dut_hostnames. Returns a message summarizing
+            how many DUT's the  pool was successfully removed from as well as for
+            which DUT's the remove failed.
+        Args:
+            dut_hostnames(string[]): A list of strings representing the hostnames
+            of the DUT's to be targeted.
+             pool (string): Pool to be removed.
+        Returns:
+            String message summarizing results.
+        """
+        return self.remove_label_from_duts(dut_hostnames, 'pool:' + pool)
+
     def reverify_host(self, dut_hostname):
         """Starts repair run on given DUT hostname.
 

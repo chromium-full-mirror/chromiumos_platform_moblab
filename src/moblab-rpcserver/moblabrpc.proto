@@ -41,6 +41,8 @@ service MoblabRpcService {
 
   rpc add_label_to_duts(AddLabelToDutsRequest) returns (AddLabelToDutsResponse) {};
   rpc remove_label_from_duts(RemoveLabelFromDutsRequest) returns (RemoveLabelFromDutsResponse) {};
+  rpc add_pool_to_duts(AddPoolToDutsRequest) returns (AddPoolToDutsResponse) {};
+  rpc remove_pool_from_duts(RemovePoolFromDutsRequest) returns (RemovePoolFromDutsResponse) {};
   rpc add_attribute_to_duts(AddAttributeToDutsRequest) returns (AddAttributeToDutsResponse) {};
   rpc remove_attribute_from_duts(RemoveAttributeFromDutsRequest) returns (RemoveAttributeFromDutsResponse) {};
 
@@ -486,6 +488,28 @@ message RemoveLabelFromDutsRequest {
 
 // NEXT_TAG = 2
 message RemoveLabelFromDutsResponse {
+  string message = 1;
+}
+
+// NEXT_TAG = 3
+message AddPoolToDutsRequest {
+  repeated string dut_hostnames = 1;
+  string pool = 2;
+}
+
+// NEXT_TAG = 2
+message AddPoolToDutsResponse {
+  string message = 1;
+}
+
+// NEXT_TAG = 3
+message RemovePoolFromDutsRequest {
+  repeated string dut_hostnames = 1;
+  string pool = 2;
+}
+
+// NEXT_TAG = 2
+message RemovePoolFromDutsResponse {
   string message = 1;
 }
 

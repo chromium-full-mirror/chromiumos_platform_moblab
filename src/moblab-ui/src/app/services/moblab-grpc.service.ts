@@ -9,6 +9,8 @@ import {
   AddAttributeToDutsResponse,
   AddLabelToDutsRequest,
   AddLabelToDutsResponse,
+  AddPoolToDutsRequest,
+  AddPoolToDutsResponse,
   ConnectedDutFirmwareInfo,
   ConnectedDutInfo,
   DutTask,
@@ -52,6 +54,8 @@ import {
   RemoveAttributeFromDutsResponse,
   RemoveLabelFromDutsRequest,
   RemoveLabelFromDutsResponse,
+  RemovePoolFromDutsRequest,
+  RemovePoolFromDutsResponse,
   RepairHostRequest,
   RepairHostResponse,
   ReverifyHostRequest,
@@ -888,6 +892,52 @@ export class MoblabGrpcService {
       }
     );
     call.on("data", (response: RemoveLabelFromDutsResponse) => {
+      callback(response.getMessage());
+    });
+  }
+
+  addPoolToDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+                 dut_ips: string[], pool: string) {
+    /** Sends request to add pool label to given DUTs.
+     *  @param callback: function invoked in success scenarios.
+     *  @param error_callback: function invoked in failure scenarios.
+     *  @param pool: Pool name to be associated with given DUT's
+     *  @param dut_ips: Ip's of DUTs who will receive pool label.
+     *  */
+    const request = new AddPoolToDutsRequest();
+    request.setDutHostnamesList(dut_ips);
+    request.setPool(pool);
+    const call = this.moblabRpcService.add_pool_to_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: AddPoolToDutsResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on("data", (response: AddPoolToDutsResponse) => {
+      callback(response.getMessage());
+    });
+  }
+
+  removePoolFromDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
+                      dut_ips: string[], pool: string) {
+    /** Sends request to remove pool label to given DUTs.
+     *  @param callback: function invoked in success scenarios.
+     *  @param error_callback: function invoked in failure scenarios.
+     *  @param pool: Pool name to be associated with given DUT's
+     *  @param dut_ips: Ip's of DUTs who will have pool label removed.
+     *  */
+    const request = new RemovePoolFromDutsRequest();
+    request.setDutHostnamesList(dut_ips);
+    request.setPool(pool);
+    const call = this.moblabRpcService.remove_pool_from_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, response: RemovePoolFromDutsResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on("data", (response: RemovePoolFromDutsResponse) => {
       callback(response.getMessage());
     });
   }

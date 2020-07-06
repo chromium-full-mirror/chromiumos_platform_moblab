@@ -27,14 +27,13 @@ export class ViewDutsComponent implements OnInit {
     'buildtarget',
     'model',
     'status',
-    'labels'
+    'pools',
   ];
 
   loading = false;
 
   selectOptions: string[] = ['All Enrolled', 'All Unenrolled'];
 
-  labelFilterSet: Set<string> = new Set();
 
   filterLabels = true;
 
@@ -71,7 +70,6 @@ export class ViewDutsComponent implements OnInit {
       (connectedDuts: ConnectedDutInfo[]) => {
         this.loading = false;
         this.assignDuts(connectedDuts);
-        this.calculateLabelFilter();
         this.duts.data.forEach((dut) => {
         })
       }
@@ -111,18 +109,6 @@ export class ViewDutsComponent implements OnInit {
     this.filterLabels = !this.filterLabels;
   }
 
-  calculateLabelFilter() {
-    this.labelFilterSet = new Set<string>();
-    this.duts.data.forEach(dut => {
-      dut.getLabelsList().forEach(label => {
-        if (!label.startsWith('model:') &&
-          !label.startsWith('pool:') &&
-          !label.startsWith('board:')) {
-          this.labelFilterSet.add(label);
-        }
-      });
-    });
-  }
 
   getSelectedDutHostnames() {
     const hostnames: string[] = [];
