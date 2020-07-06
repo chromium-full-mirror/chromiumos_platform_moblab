@@ -125,8 +125,10 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     'name',
     'priority',
     'created_time_sec_utc',
-    'start_time_sec_utc',
-    'finished_time_sec_utc',
+    //TO-DO(wangmichael) reintroduce these columns once backend is swapped from
+    // AFE to something that actually returns these values.
+    // 'start_time_sec_utc',
+    // 'finished_time_sec_utc',
     'job_status',
   ];
   jobSelectOptions: string[] = ['Visible'];
@@ -360,6 +362,10 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   getNumSelectedJobs() {
     return this.jobActionRef.getNumSelectedJobs();
+  }
+
+  displayColumn(columnName: string) {
+    return this.displayedColumns.includes(columnName);
   }
 
   /*
