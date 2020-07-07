@@ -108,9 +108,8 @@ class MoblabService(object):
         for dut in connected_duts:
             afe_formatted_duts.append({
                 'ip': dut[0],
-                'labels': ['model:' + dut[1]],
-                'isConnected': dut[2],
-                'error': dut[3]
+                'isConnected': dut[1],
+                'error': dut[2]
             })
         return afe_formatted_duts
 

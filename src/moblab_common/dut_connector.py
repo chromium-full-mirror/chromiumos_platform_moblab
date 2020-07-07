@@ -94,16 +94,15 @@ class MoblabDUTConnector(object):
         client.join(output)
 
         for ip, host_output in output.items():
-            stdout = ''
+            stdout = '{}'.format(''.join(host_output.stdout)) if host_output.stdout else ''
+            stderr = '{}'.format(''.join(host_output.stderr)) if host_output.stderr else ''
+
             exit_code = host_output.exit_code
-            if host_output.stdout:
-                stdout = [line for line in host_output.stdout]
-            stderr = ''
+
             if host_output.exception:
                 exception_msg = host_output.exception.args[0]
                 exception_args = host_output.exception.args[1:]
-                stderr = exception_msg % exception_args
-                exit_code = 1
+                stderr += exception_msg % exception_args
             command_results.append((ip, stdout, stderr, exit_code))
         logging.info('Running command %s on %s resulted in %s', command,
                      ip_addresses, command_results)
@@ -138,7 +137,7 @@ class MoblabDUTConnector(object):
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
-            'timeout 100 mosys platform model', timeout=100)
+            'timeout 2 cat /etc/lsb-release', timeout=100)
 
         def is_dut_connected(output):
             if output:
@@ -150,8 +149,7 @@ class MoblabDUTConnector(object):
 
         results = []
         for (host, stdout, stderr, exit_code) in command_results:
-            results.append((host, extract_model(stdout),
-                            is_dut_connected(stdout), stderr))
+            results.append((host, is_dut_connected(stdout), stderr))
         return results
 
     def get_connected_dut_firmware(self):
