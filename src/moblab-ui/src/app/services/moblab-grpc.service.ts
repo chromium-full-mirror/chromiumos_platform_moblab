@@ -258,7 +258,7 @@ export class MoblabGrpcService {
     buildtarget: string,
     model: string,
     pool: string,
-    avl_process_bug_id: number,
+    avl_process_bug_id: string,
     avl_part_number: string
   ) {
     const request = new RunStorageQualificationSuiteRequest();
@@ -300,7 +300,7 @@ export class MoblabGrpcService {
     buildtarget: string,
     model: string,
     pool: string,
-    avl_process_bug_id: number,
+    avl_process_bug_id: string,
     avl_part_number: string
   ) {
     const request = new RunMemoryQualificationSuiteRequest();

@@ -135,6 +135,12 @@ class MoblabService(object):
 
         return connected_duts
 
+    def _default_suite_timeout_mins(self, suite):
+        if suite in _SUITE_TIMEOUT_MAP:
+            return _SUITE_TIMEOUT_MAP[suite]
+        else:
+            return _DEFAULT_SUITE_TIMEOUT_MINS
+
     def run_storage_qual_suite(self,
                                build_target,
                                model,
@@ -159,7 +165,7 @@ class MoblabService(object):
         Returns:
           String response message.
         """
-        suite_args = {
+        avl_args = {
             HARDWARE_AVL_BUG_ID: bug_id,
             HARDWARE_AVL_PART_NO: part_id
         }
@@ -171,7 +177,8 @@ class MoblabService(object):
             build_version,
             'hardware_storagequal', # suite
             pool,
-            suite_args=suite_args
+            suite_args=avl_args,
+            test_args=avl_args
         )
 
     def run_memory_qual_suite(self,
@@ -310,7 +317,7 @@ class MoblabService(object):
                   pool=None,
                   suite_args={},
                   test_args={},
-                  suite_timeout_mins=_DEFAULT_SUITE_TIMEOUT_MINS,
+                  suite_timeout_mins=None,
                   extra_builds={}):
         """Starts suite run. Formats input arguments s.t. that they can be used
         by an AFE suite run command.
@@ -333,6 +340,9 @@ class MoblabService(object):
         builds = {'cros-version': build}
 
         builds.update(extra_builds)
+
+        if not suite_timeout_mins:
+            suite_timeout_mins = self._default_suite_timeout_mins(suite)
 
         ap_name, ap_pass = self.config_connector.get_test_wifi_ap_and_password()
         test_args['ssid'] = ap_name

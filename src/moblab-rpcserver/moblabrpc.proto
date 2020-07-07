@@ -118,7 +118,7 @@ message RunStorageQualificationSuiteRequest {
   string model = 3;
   string milestone = 4;
   string pool = 5;
-  int32 avl_process_bug_id = 6;
+  string avl_process_bug_id = 6;
   string avl_part_number = 7;
 }
 
@@ -129,7 +129,7 @@ message RunMemoryQualificationSuiteRequest {
   string model = 3;
   string milestone = 4;
   string pool = 5;
-  int32 avl_process_bug_id = 6;
+  string avl_process_bug_id = 6;
   string avl_part_number = 7;
 }
 
