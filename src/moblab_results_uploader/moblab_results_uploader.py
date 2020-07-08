@@ -10,6 +10,7 @@
 import argparse
 import logging
 import logging.handlers as logging_handlers
+import os
 import pathlib
 import sys
 
@@ -20,6 +21,9 @@ import cmd_try_file_filter
 import result_file_filter
 
 from moblab_common import config_connector
+
+# This is useful when debugging asyncio issues
+#os.environ['PYTHONASYNCIODEBUG'] = '1'
 
 _LOG_FILE_BACKUP_COUNT = 14
 _LOGGER = logging.getLogger(pathlib.Path(__file__).stem)

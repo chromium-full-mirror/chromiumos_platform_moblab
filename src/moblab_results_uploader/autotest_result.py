@@ -120,7 +120,6 @@ class _AutotestResult(test_result_interface.TestResult):
     def finished_time(self):
         if not self._finished_time:
             result = self._afe_query
-            _LOGGER.debug(result)
             self._finished_time = next(self._afe_query)
             _LOGGER.debug("%s", self._finished_time)
 
