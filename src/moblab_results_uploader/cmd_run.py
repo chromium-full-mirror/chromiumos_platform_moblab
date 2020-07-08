@@ -11,6 +11,7 @@ import functools
 import logging  # pylint: disable=cros-logging-import
 import os
 import shutil
+import stat
 import yaml
 
 from moblab_common import afe_connector
@@ -55,22 +56,56 @@ async def _enumerate_test_results(test_result_registry):
 
 async def _prune_test_result(dry_run, test_result):
     """Check the `test_result` and try to prune it if we should."""
-    # Remove all other files/directories first, and then remove the marker file
-    # at last.
-    _LOGGER.debug('Removing test result %s', test_result)
-    if dry_run:
-        _LOGGER.debug('DRYRUN: Removed: %s', test_result)
-        return
+    # In the results directory remove all subdirectores before deleting the
+    # root directory as that is where the marker file is assumed to be.
+    # Leaving the marker file to as late as possible in the process ensures
+    # that cleanup will resume in the event of a process crash.
+    try:
+        _LOGGER.debug('Removing test result %s', test_result)
+        if dry_run:
+            _LOGGER.debug('DRYRUN: Removed: %s', test_result)
 
-    # To be safe - delete all the subdirs first, then the whole directory
-    # which will leave the marker file to last.
-    _, topdirs, _ = next(os.walk(test_result.abs_path), [])
-    for topdir in topdirs:
-        shutil.rmtree(os.path.join(test_result.abs_path, topdir))
+        def log_error(func, path, _):
+            "Log prune failures, catching them preventing them being raised."
+            # Even the chmod failed to fix the issue, just log and leave
+            # the problem behind, nothing we can do.
+            _LOGGER.error('PRUNE: Failed to remove file %s', path)
 
-    shutil.rmtree(test_result.abs_path)
-    del _TEST_RESULT_CACHE[test_result.abs_path]
-    _LOGGER.debug('Removed: %s', test_result)
+        def remove_readonly(func, path, _):
+            "Clear the readonly bit and re-attempt the removal"
+            _LOGGER.error('PRUNE: Fixing read only %s', path)
+            try:
+                os.chmod(path, stat.S_IWRITE | stat.S_IREAD | stat.S_IEXEC)
+            # If the process is not the owner of the file then just give up
+            # with out crashing.
+            except PermissionError as e:
+                _LOGGER.exception(e)
+            else:
+                # Successful chmod on the problem file, retry the delete.
+                func(path, onerror=log_error)
+
+        # To be safe - delete all the subdirs first, then the whole directory
+        # which will leave the marker file to last.
+        # example structure
+        #  1-moblab/
+        #       .uploader_status
+        #       192.168.238.100/
+        #           status.log
+        #            debug/
+
+        _, topdirs, _ = next(os.walk(test_result.abs_path), [])
+        # In the example this will delete directory 192.168.23.100 and all
+        # the subdirs, it will also delete any sibling directores - there are
+        # none in this example.
+        for topdir in topdirs:
+            shutil.rmtree(os.path.join(test_result.abs_path, topdir),
+                        onerror=remove_readonly)
+        # This will remove 1-moblab and all its subdirs
+        shutil.rmtree(test_result.abs_path,  onerror=remove_readonly)
+        del _TEST_RESULT_CACHE[test_result.abs_path]
+        _LOGGER.debug('Removed: %s', test_result)
+    except Exception as e:
+        _LOGGER.exception(e)
 
 
 async def _async_prune(args, registry):
@@ -130,7 +165,7 @@ async def _async_upload(args, registry):
         min_age_to_prune=args.min_age_to_prune
     )
     uploader = result_uploader.Uploader(
-        timeout=args.upload_timeout,
+        timeout=datetime.timedelta(minutes=60),
         gs_api=args.gs_api)
     file_filter = result_file_filter.ResultFileFilter(
         filter_config=args.uploading_filter_config)
@@ -246,7 +281,6 @@ def _post_parse_args(arg_parser, args):
     """massage input arguments."""
     _LOGGER.debug('Input arguments: %s', args)
     if not args.gs_bucket:
-        arg_parser.info('GS Bucket not specified.')
         config_connector.MoblabConfigConnector()
         gs_bucket = config_connector.get_cloud_bucket()
         if not gs_bucket:

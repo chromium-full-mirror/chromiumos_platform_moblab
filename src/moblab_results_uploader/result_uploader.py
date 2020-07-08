@@ -50,7 +50,7 @@ class Uploader(processing_step.ProcessStep):
         self._gs_path_prefix = os.path.join(_GS_BUCKET_ROOT, _SERIAL_NUMBER,
                                             _MOBLAB_ID)
         self._uploading_context = None
-        self.uploading_queue = asyncio.Queue(maxsize=200)
+        self.uploading_queue = asyncio.Queue(maxsize=0)
 
     def uploading_context(self, ctx):
         self._uploading_context = ctx
@@ -60,9 +60,15 @@ class Uploader(processing_step.ProcessStep):
     async def try_upload_dir(self, test_result):
         try:
             async with self._uploading_context(test_result) as ctx:
-                ctx.gs_path = await self._try_upload_dir(test_result)
+                try:
+                    ctx.gs_path = await self._try_upload_dir(test_result)
+                    _LOGGER.exception("%s Try upload dir success %s", test_result, ctx.gs_path)
+                except Exception as e:
+                    ctx.gs_path = None
+                    _LOGGER.exception("Try upload dir failed")
         except _TestResultExpiredError as err:
             _LOGGER.info(err)
+
 
     async def _try_upload_dir(self, test_result):
         """Try to upload a directory with timeout checking."""
@@ -73,8 +79,9 @@ class Uploader(processing_step.ProcessStep):
             await self._next_step(test_result)
             await asyncio.wait_for(self.uploading_queue.join(),
                                    self._timeout.total_seconds())
-            test_result_gs_path = os.path.join(self._gs_path_prefix,
-                                               test_result.name)
+            if not self._uploading_context.error:
+                test_result_gs_path = os.path.join(self._gs_path_prefix,
+                                                   test_result.name)
         except (asyncio.TimeoutError, KeyboardInterrupt) as err:
             _LOGGER.error(
                 'Error occurs when uploading %s: %s', test_result, type(err))
@@ -93,19 +100,39 @@ class Uploader(processing_step.ProcessStep):
             if dry_run:
                 _LOGGER.debug('DRYRUN: Uploading %s', f)
             else:
-                _LOGGER.debug('Uploading %s', f)
                 awaitables.append(loop.run_in_executor(executor, self._upload_file, f))
+                _LOGGER.debug('Uploading %s, awaitables %d', f, len(awaitables))
 
-            if self.uploading_queue.empty():
-                for a in awaitables:
-                    _LOGGER.debug('Awaiting')
-                    # It should not take more than 20 mins for any one file
-                    # to upload.
-                    asyncio.sleep(0.01)
-                    asyncio.wait_for(a, timeout=1200)
-                    _LOGGER.debug('Awaited')
-                awaitables = []
-            self.uploading_queue.task_done()
+            _LOGGER.debug('%s Queue Len %d', self._uploading_context._test_result, self.uploading_queue.qsize())
+            if self.uploading_queue.empty() or len(awaitables) >= jobs:
+                _LOGGER.debug('%s Gathering Queue len %d, awaitables %d', self._uploading_context._test_result, self.uploading_queue.qsize(), len(awaitables))
+                try:
+                    results = await asyncio.gather(*awaitables, return_exceptions=True)
+                    _LOGGER.debug('%s Gathering Results %s', self._uploading_context._test_result, results)
+                    for result in results:
+                        # If we got an error uploading a single file give up.
+                        if result:
+                            # One file returned error mark the upload as bad
+                            self._uploading_context.error = True
+                            # The only way to end the queue join is to empty
+                            # the queue.
+                            for _ in range(self.uploading_queue.qsize()):
+                                # Depending on your program, you may want to
+                                # catch QueueEmpty
+                                try:
+                                    self.uploading_queue.get_nowait()
+                                    self.uploading_queue.task_done()
+                                except asyncio.QueueEmpty:
+                                    # This should be impossible to happen, we
+                                    # have only one loop removing items from
+                                    # the queue.
+                                    _LOGGER.error('Error trying to remove item from empty queue.')
+                                    pass
+                                _LOGGER.debug('%s Canceling Queue len %d, awaitables %d', self._uploading_context._test_result, self.uploading_queue.qsize(), len(awaitables))
+                        self.uploading_queue.task_done()
+                    awaitables = []
+                except Exception as e:
+                    _LOGGER.debug('%s Exception thrown %s', self._uploading_context._test_result, str(e))
 
     def _upload_file(self, result_file):
         """Upload a file to GS."""
@@ -125,6 +152,7 @@ class UploadingContext(object):
         self.gs_path = None
         self._dry_run = dry_run
         self._resume_aborted = resume_aborted
+        self.error = False
 
     def __call__(self, test_result):
         self._test_result = test_result
@@ -135,6 +163,8 @@ class UploadingContext(object):
         return bool(self.gs_path)
 
     async def __aenter__(self):
+        self.error = False
+
         if self._resume_aborted:
             return self
 
@@ -148,8 +178,11 @@ class UploadingContext(object):
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
-        if not self.uploaded:
+        if not self.uploaded or self.error:
             # TODO(guocb) Report failures.
+            _LOGGER.debug('%s Directory upload timed out, or failed uploaded=%s error=%s', self._test_result, self.uploaded, self.error)
+            return await result_dir_status.mark_uploading_result(
+                self._test_result, succeeded=False)
             return
 
         if self._dry_run:
@@ -160,6 +193,7 @@ class UploadingContext(object):
             return
 
         if not self._test_result.pubsub_when_uploaded:
+            _LOGGER.debug('%s Pubsub not requested', self._test_result)
             return await result_dir_status.mark_uploading_result(
                 self._test_result, succeeded=self.uploaded)
 

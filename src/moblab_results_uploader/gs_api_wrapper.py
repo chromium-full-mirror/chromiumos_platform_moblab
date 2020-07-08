@@ -13,6 +13,9 @@ import os
 import time
 import requests
 import urllib3
+import random
+
+import asyncio
 
 from google.cloud import exceptions as gcp_exceptions
 from google.cloud import storage as gs
@@ -79,11 +82,24 @@ class GsApiWrapper(object):
         """Upload the file `local_name` to GS as a blob named `remote_name`."""
         # We just upload regular files.
         if not local_name.is_file():
+            _LOGGER.debug("Not attempting upload - not a file %s", local_name)
             return
         if local_name.is_symlink():
+            _LOGGER.debug("Not attempting upload - symlink %s", local_name)
             return
         blob = self._gs_bucket.blob(
             remote_name, chunk_size=(1024 * 1024 * 100))
+        _LOGGER.debug("Attempting upload %s", local_name)
+
+        # dice = random.uniform(0, 1) * 100
+        # if dice > 99.8:
+        #     dice = random.uniform(0, 1) * 100
+        #     if dice > 50:
+        #         _LOGGER.debug("You win!!! Single file exception %s", local_name)
+        #         raise requests.exceptions.ConnectionError("Fail")
+        #     else:
+        #         _LOGGER.debug("You win!!! Long sleep %s", local_name)
+        #         asyncio.sleep(60*60)
         retry_call(blob.upload_from_filename,
                    fargs=[str(local_name)], fkwargs={"client": self._client},
                    exceptions=(requests.exceptions.ConnectionError,
