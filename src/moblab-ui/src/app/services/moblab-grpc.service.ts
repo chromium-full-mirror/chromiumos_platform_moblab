@@ -249,6 +249,8 @@ export class MoblabGrpcService {
    *    storage qualification run.
    *  @param avl_part_number: Number identifier of part for which qualification
    *    is being run.
+   *  @param variation: Number enum that identifies a variation of storage qual
+   *    to run.
    *  */
   runStorageQualificationSuite(
     callback: (response: RunSuiteResponse) => void,
@@ -259,7 +261,8 @@ export class MoblabGrpcService {
     model: string,
     pool: string,
     avl_process_bug_id: string,
-    avl_part_number: string
+    avl_part_number: string,
+    variation: number
   ) {
     const request = new RunStorageQualificationSuiteRequest();
     request.setBuildVersion(build);
@@ -269,6 +272,7 @@ export class MoblabGrpcService {
     request.setPool(pool);
     request.setAvlProcessBugId(avl_process_bug_id);
     request.setAvlPartNumber(avl_part_number);
+    request.setVariation(variation);
 
     const call = this.moblabRpcService.run_storage_qualification_suite(
       request,

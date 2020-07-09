@@ -111,8 +111,13 @@ message RunGtsSuiteRequest {
   repeated string specific_modules = 6;
 }
 
-// NEXT_TAG = 8
+// NEXT_TAG = 9;
 message RunStorageQualificationSuiteRequest {
+  // NEXT_TAG = 2;
+  enum Variation {
+    VARIATION_NOT_SET = 0;
+    QUICK = 1;
+  }
   string build_target = 1;
   string build_version = 2;
   string model = 3;
@@ -120,6 +125,7 @@ message RunStorageQualificationSuiteRequest {
   string pool = 5;
   string avl_process_bug_id = 6;
   string avl_part_number = 7;
+  Variation variation = 8;
 }
 
 // NEXT_TAG = 8
