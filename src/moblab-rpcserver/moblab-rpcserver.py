@@ -509,18 +509,21 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 try:
                     dut = item['host']['hostname']
                 except (KeyError, TypeError):
-                    dut = 'unknown'
+                    dut = 'hostless'
 
                 try:
                     dut_status = item['host']['status']
                 except (KeyError, TypeError):
                     dut_status = ''
 
+                job_id = int(item.get('id', ''))
+
                 status = self._extract_status(item)
                 associated_duts.append(moblabrpc_pb2.Execution(
                         dut=dut,
                         dut_status=dut_status,
-                        status=status
+                        job_id=job_id,
+                        status=status,
                     )
                 )
 

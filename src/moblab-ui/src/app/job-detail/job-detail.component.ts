@@ -13,6 +13,7 @@ import {INT_TO_JOBSTATUS, INT_TO_PRIORITY} from '../utils/proto_helpers';
 import {forbiddenIDValidator} from '../utils/validators';
 import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
 import {KeyVal, KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
+import JobStatus = Job.JobStatus;
 
 
 @Component({
@@ -104,6 +105,27 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
       new MatTableDataSource<Execution>(job.getAssociatedDutsList());
     this.serverControlFile = job.getServerControlFile();
     this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
+  }
+
+  getLogsLink(execution: Execution, isDebugLink: boolean) {
+    let link = `http://localhost/tko/retrieve_logs.cgi?job=/results/${execution.getJobId()}-moblab/${execution.getDut()}/`
+    if (isDebugLink) {
+      link += 'debug';
+    }
+    return link
+  }
+
+  getAllLogsLink(execution: Execution) {
+    return this.getLogsLink(execution, false);
+  }
+
+  getDebugLogLinks(execution: Execution) {
+    return this.getLogsLink(execution, true);
+  }
+
+  showLogLinks(status: JobStatus) {
+    return status === Job.JobStatus.SUCCESS ||
+      status === Job.JobStatus.FAILED
   }
 
   reportError(dialogue) {
