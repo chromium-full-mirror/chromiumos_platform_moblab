@@ -50,6 +50,8 @@ import {
   ListModelsResponse,
   ListPoolsRequest,
   ListPoolsResponse,
+  RebootMoblabRequest,
+  RebootMoblabResponse,
   RemoveAttributeFromDutsRequest,
   RemoveAttributeFromDutsResponse,
   RemoveLabelFromDutsRequest,
@@ -1036,5 +1038,15 @@ export class MoblabGrpcService {
         response.getMoblabSerialNumber()
       );
     });
+  }
+
+  reboot_moblab(error_callback: (msg: string) => void) {
+    const call = this.moblabRpcService.reboot_moblab(
+      new RebootMoblabRequest(),
+      {},
+      (err: grpcWeb.Error, response: RebootMoblabResponse) => {
+          error_callback(err.message);
+      }
+    );
   }
 }

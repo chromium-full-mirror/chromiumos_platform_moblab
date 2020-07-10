@@ -25,6 +25,7 @@ from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
 from moblab_common import feedback_connector
+from moblab_common import host_connector
 
 import logging
 
@@ -829,6 +830,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             moblab_serial_number=version_info['MOBLAB_SERIAL_NUMBER']
         )
         return response
+
+    def reboot_moblab(self, request, _context):
+        host_connector.HostServicesConnector.reboot()
 
 def setup_logging(level):
     """Enable the correct level of logging.

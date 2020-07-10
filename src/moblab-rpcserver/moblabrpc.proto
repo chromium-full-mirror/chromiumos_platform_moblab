@@ -39,6 +39,8 @@ service MoblabRpcService {
   rpc reverify_host(ReverifyHostRequest) returns (ReverifyHostResponse) {};
   rpc repair_host(RepairHostRequest) returns (RepairHostResponse) {};
 
+  rpc reboot_moblab(RebootMoblabRequest) returns (RebootMoblabResponse) {};
+
   rpc add_label_to_duts(AddLabelToDutsRequest) returns (AddLabelToDutsResponse) {};
   rpc remove_label_from_duts(RemoveLabelFromDutsRequest) returns (RemoveLabelFromDutsResponse) {};
   rpc add_pool_to_duts(AddPoolToDutsRequest) returns (AddPoolToDutsResponse) {};
@@ -583,4 +585,13 @@ message GetVersionInfoResponse {
   string chromeos_release_description = 3;
   string moblab_id = 4;
   string moblab_serial_number = 5;
+}
+
+// NEXT_TAG = 1;
+message RebootMoblabRequest {
+}
+
+// NEXT_TAG = 2;
+message RebootMoblabResponse {
+  string error_message = 1;
 }

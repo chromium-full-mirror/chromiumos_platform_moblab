@@ -69,3 +69,8 @@ mat-list-item {
   margin-left:180px;
   z-index: 101;
 }
+
+.reboot-button-wrapper {
+  margin-left: 40px;
+  margin-top: 10px;
+}

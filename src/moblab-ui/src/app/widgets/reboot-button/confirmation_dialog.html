@@ -1,0 +1,14 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<div mat-dialog-content>
+  <p>{{message}}</p>
+</div>
+<div mat-dialog-actions>
+  <button
+    id="reboot-ok-button"
+    mat-button
+    cdkFocusInitial
+    [mat-dialog-close]
+    (click)="onClick()">
+    Ok
+  </button>
+</div>
