@@ -61,7 +61,6 @@ export abstract class BaseSuite {
       new Date().setTime(
         new Date().getTime()
         - 1000 /* 1 second */
-        - new Date().getTimezoneOffset() * 60 * 1000
       )
     );
     this.router.navigate(['/view_jobs'], { queryParams: params });
