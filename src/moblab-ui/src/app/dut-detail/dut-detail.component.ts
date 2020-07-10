@@ -1,5 +1,5 @@
 import {ActivatedRoute} from '@angular/router';
-import {Component, ViewChild} from '@angular/core';
+import {AfterContentInit, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
@@ -16,7 +16,7 @@ import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
   styleUrls: ['./dut-detail.component.css'],
   animations: [],
 })
-export class DutDetailComponent {
+export class DutDetailComponent implements OnInit, AfterContentInit {
   @ViewChild('dut_info_table') dutInfoTableRef: KeyValTableComponent;
   @ViewChild('dut_task_table') dutTaskTableRef: DutTaskTableComponent;
   @ViewChild('associated_jobs_table') associatedJobsTableRef: ViewJobsComponent;
@@ -28,6 +28,7 @@ export class DutDetailComponent {
   );
 
   constructor(
+    private cd: ChangeDetectorRef,
     private readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar
@@ -36,11 +37,14 @@ export class DutDetailComponent {
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.dutQuery.setValue(params.get('dut_hostname'));
-      if (this.dutQuery.value) {
-        this.fetchDutDetails();
-      }
-      this.dutTaskTableRef.setDutIp(this.dutQuery.value);
     });
+  }
+
+  ngAfterContentInit() {
+    if (this.dutQuery.value) {
+      this.fetchDutDetails();
+    }
+    this.cd.detectChanges();
   }
 
   setDutDetails(dutInfo: ConnectedDutInfo) {
@@ -54,6 +58,8 @@ export class DutDetailComponent {
         ['Current DUT Task', dutInfo.getCurrentDutTask()],
       ]
     )
+    this.dutTaskTableRef.setDutIp(this.dutQuery.value);
+    this.associatedJobsTableRef.refreshJobs(undefined, this.dutQuery.value);
   }
 
   fetchDutDetails() {
@@ -70,8 +76,6 @@ export class DutDetailComponent {
       },
       this.dutQuery.value
     );
-
-    this.associatedJobsTableRef.refreshJobs(undefined, this.dutQuery.value);
   }
 
   repairDut() {

@@ -1,5 +1,6 @@
 import {ActivatedRoute} from '@angular/router';
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterContentInit, Component, Input, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef} from '@angular/core';
 import {MatExpansionPanel} from '@angular/material/expansion';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
@@ -21,7 +22,7 @@ import {KeyVal, KeyValTableComponent} from '../widgets/keyval-table/keyval-table
   animations: [],
   viewProviders: [MatExpansionPanel]
 })
-export class JobDetailComponent implements OnInit {
+export class JobDetailComponent implements OnInit, AfterContentInit {
   @ViewChild('child_view_jobs_table') childViewJobsTableRef: ViewJobsComponent;
   @ViewChild('job_info_table') jobInfoTableRef: KeyValTableComponent;
   jobQuery = new FormControl(
@@ -41,6 +42,7 @@ export class JobDetailComponent implements OnInit {
   associatedDutsTableColumns: string[] = ['dut', 'dut_status', 'status'];
 
   constructor(
+    private cd: ChangeDetectorRef,
     private readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar
@@ -49,10 +51,14 @@ export class JobDetailComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.jobQuery.setValue(params.get('job_id'));
-      if (this.jobQuery.value) {
-        this.fetchJobDetails()
-      }
     });
+  }
+
+  ngAfterContentInit(): void {
+    if (this.jobQuery.value) {
+      this.fetchJobDetails()
+    }
+    this.cd.detectChanges();
   }
 
   getPriorityFromInt(enum_int) {
@@ -76,7 +82,6 @@ export class JobDetailComponent implements OnInit {
       },
       this.jobQuery.value
     );
-    this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
   }
 
   unpackJobInfoToTable(job: Job) {
@@ -98,6 +103,7 @@ export class JobDetailComponent implements OnInit {
     this.associatedDutsTable =
       new MatTableDataSource<Execution>(job.getAssociatedDutsList());
     this.serverControlFile = job.getServerControlFile();
+    this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
   }
 
   reportError(dialogue) {
@@ -119,5 +125,9 @@ export class JobDetailComponent implements OnInit {
 
   isJobInfoTableEmpty() {
     return !this.jobInfoTableRef || this.jobInfoTableRef.isEmpty();
+  }
+
+  isJobQueryEmpty() {
+    return !this.jobInfoTableRef || !this.jobQuery.value;
   }
 }

@@ -13,6 +13,15 @@
   <button id="job-query-button" mat-raised-button color="primary"
           [disabled]="!this.jobQuery.value || this.jobQuery.errors" (click)="fetchJobDetails()"> Go
   </button>
+
+  <button
+    id="dut-refresh-button"
+    matTooltip="Refresh"
+    mat-icon-button
+    [disabled]="isJobQueryEmpty()"
+    (click)="fetchJobDetails()">
+    <mat-icon>refresh</mat-icon>
+  </button>
 </div>
 <div id="job-detail-table-wrapper">
   <div id="loading-overlay" *ngIf="isJobInfoTableEmpty()">
