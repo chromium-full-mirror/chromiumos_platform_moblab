@@ -27,6 +27,11 @@ _SUITE_TIMEOUT_MAP = {
     'hardware_storagequal_quick': 40320
 }
 
+_STORAGE_QUAL_VARIATIONS = {
+    0: 'hardware_storagequal',
+    1: 'hardware_storagequal_quick'
+}
+
 HARDWARE_AVL_BUG_ID = 'bug_id'
 HARDWARE_AVL_PART_NO = 'part_id'
 
@@ -147,6 +152,7 @@ class MoblabService(object):
                                build_version,
                                bug_id,
                                part_id,
+                               variation,
                                pool=None,
     ):
         """Starts storage qual suite run. Formats arguments s.t. they can be
@@ -161,6 +167,8 @@ class MoblabService(object):
             avl_process_bug_id: Numeric string identifying the associated
             buganizer issue.
             avl_part_number: Numeric string identifying relevant part number.
+            variation: RunStorageQualificationSuiteRequest.Variation
+            pool: String test pool identifier.
         Returns:
           String response message.
         """
@@ -174,7 +182,7 @@ class MoblabService(object):
             model,
             milestone,
             build_version,
-            'hardware_storagequal', # suite
+            _STORAGE_QUAL_VARIATIONS[variation],
             pool,
             suite_args=avl_args,
             test_args=avl_args

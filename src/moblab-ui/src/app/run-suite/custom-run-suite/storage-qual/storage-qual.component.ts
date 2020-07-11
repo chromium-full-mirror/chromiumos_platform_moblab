@@ -10,6 +10,7 @@ import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {RunStorageQualificationSuiteRequest} from '../../../services/moblabrpc_pb';
 
 @Component({
   selector: 'app-storage-qual',
@@ -20,6 +21,11 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
+
+  readonly variationOptions = [''].concat(
+    Object.keys(RunStorageQualificationSuiteRequest.Variation).slice(1)
+  );
+  variationSelection = 0;
 
   constructor(private changeDetector: ChangeDetectorRef,
               moblabGrpcService: MoblabGrpcService,
@@ -39,7 +45,6 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
   onBuildSetCustom(event) {
     this.bugIdInput.enable();
     this.partNumberInput.enable();
-    this.runSuiteButton.enable();
   }
 
   /** Method triggered on change of either bug ID or part number.
@@ -50,6 +55,13 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
     } else {
       this.runSuiteButton.disable();
     }
+  }
+
+  /** Method triggered on change of variation selector
+   * */
+  variationChanged(newVariation) {
+    this.variationSelection = newVariation ? Number(
+      RunStorageQualificationSuiteRequest.Variation[newVariation]) : 0;
   }
 
   /** Method triggered on run-suite button press. Invokes
@@ -73,7 +85,8 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
       this.selectedModel,
       this.selectedPool,
       this.bugIdInput.getInput(),
-      this.partNumberInput.getInput()
+      this.partNumberInput.getInput(),
+      this.variationSelection
     );
   }
 }

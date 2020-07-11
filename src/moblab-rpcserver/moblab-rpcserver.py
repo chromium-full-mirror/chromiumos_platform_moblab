@@ -166,6 +166,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             avl_process_bug_id: Numeric string identifying the associated
             buganizer issue.
             avl_part_number: Numeric string identifying relevant part number.
+            variation: RunStorageQualificationSuiteRequest.Variation
           _context: grpc.server.Context
         Returns:
           RunSuiteResponse object with a string result message.
@@ -178,7 +179,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 request.build_version,
                 request.avl_process_bug_id,
                 request.avl_part_number,
-                request.pool,
+                request.variation,
+                request.pool
             )
         )
         return response

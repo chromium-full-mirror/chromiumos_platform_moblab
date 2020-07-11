@@ -1,6 +1,15 @@
 <mat-card>
   <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"></app-build-select-forms>
 
+  <app-basic-selector
+      #variationInput
+      [title]="'Select suite variation (Optional):'"
+      [options]="variationOptions"
+      [placeholder]="['Select a variation']"
+      [isShown]="true"
+      (update)="variationChanged($event.value)">
+  </app-basic-selector>
+
   <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'"
                    [isNumeric]="true"
                    (update)="avlInputChanged($event.value)">
