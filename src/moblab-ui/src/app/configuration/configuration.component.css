@@ -22,7 +22,7 @@ mat-card-header {
   color:rgba(0, 0, 0, 0.87);
   font-size: 18px;
   font-weight: 500;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 mat-card {
@@ -73,4 +73,9 @@ mat-list-item {
 .reboot-button-wrapper {
   margin-left: 40px;
   margin-top: 10px;
+}
+
+#link-off-icon {
+  padding-left: 10px;
+  padding-bottom: 5px;
 }

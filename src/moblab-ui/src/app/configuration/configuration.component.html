@@ -14,7 +14,7 @@
       <mat-list>
         <div class="listrow" flex-direction="row">
           <mat-list-item>
-            <mat-form-field class="configuration-input">
+            <mat-form-field class="configuration-input" appearance="legacy">
               <input id="botoKeyIdInput" matInput required placeholder="Boto Key ID"
                      [formControl]="botoKeyIDForm"
                      name="botoKeyId" [disabled]="true">
@@ -27,7 +27,7 @@
         </div>
         <div class="listrow" flex-direction="row">
           <mat-list-item>
-            <mat-form-field class="configuration-input">
+            <mat-form-field class="configuration-input" appearance="legacy">
               <input id="botoKeySecretInput" matInput type="password" required password placeholder="Boto Key Secret"
                      [formControl]="botoKeySecretForm"
                      name="botoKeySecret">
@@ -39,7 +39,7 @@
           </mat-list-item>
         </div>
         <mat-list-item>
-          <mat-form-field class="configuration-input">
+          <mat-form-field class="configuration-input" appearance="legacy">
             <input id="imageStorageUrlInput" matInput required placeholder="Image Storage Bucket URL"
                    [formControl]="bucketURLForm"
                    name="imageStorageUrl">
@@ -52,7 +52,10 @@
               Not a valid bucket URL not set (Ex. gs://xxx/)
             </mat-error>
           </mat-form-field>
-          <a id="gcsLink" *ngIf="this.bucketLink" href={{bucketLink}} target="_blank">GCS link</a>
+          <mat-icon id="link-off-icon" *ngIf="!enableLink()">link_off</mat-icon>
+          <a *ngIf="enableLink()" id="gcsLink" href={{bucketLink}} target="_blank">
+            <mat-icon id="link-on-icon" *ngIf="enableLink()">link</mat-icon>
+          </a>
         </mat-list-item>
         <mat-list-item>
           <button id="submit-button" mat-raised-button color="primary"

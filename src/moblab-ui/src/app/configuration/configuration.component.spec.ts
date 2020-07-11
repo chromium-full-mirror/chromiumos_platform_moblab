@@ -7,6 +7,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatCardModule} from '@angular/material/card';
 import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
 import {MatPaginatorModule} from '@angular/material/paginator';
@@ -14,6 +15,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 import {ConfigurationComponent} from './configuration.component';
+import {RebootButtonComponent} from '../widgets/reboot-button/reboot-button';
+import {MatDialogModule} from '@angular/material/dialog';
 
 
 describe('ConfigurationComponent', () => {
@@ -41,7 +44,9 @@ describe('ConfigurationComponent', () => {
           FormsModule,
           HttpClientModule,
           MatCardModule,
+          MatDialogModule,
           MatFormFieldModule,
+          MatIconModule,
           MatInputModule,
           MatListModule,
           MatPaginatorModule,
@@ -50,7 +55,10 @@ describe('ConfigurationComponent', () => {
           MatSnackBarModule,
           ReactiveFormsModule,
         ],
-        declarations: [ConfigurationComponent]})
+        declarations: [
+          ConfigurationComponent,
+          RebootButtonComponent
+        ]})
       .compileComponents();
   }));
   beforeEach(() => {
@@ -62,7 +70,7 @@ describe('ConfigurationComponent', () => {
         component.setNetworkInfo(
           '000.000.000.000',
           true
-          )
+        )
       });
 
     getVersionInfoSpy = spyOn<any>(component, 'getVersionInfo').and.callFake(
@@ -119,6 +127,26 @@ describe('ConfigurationComponent', () => {
     expect(fixture.debugElement.nativeElement.querySelectorAll(
       '.mat-error'
     ).length).toBe(1);
+  });
+
+  it('good GCS URL shows link', () => {
+    inputConfiguration('imageStorageUrlInput', 'gs://xxx/');
+    expect(fixture.debugElement.nativeElement.querySelector(
+      '#link-on-icon'
+    )).toBeTruthy();
+    expect(fixture.debugElement.nativeElement.querySelector(
+      '#link-off-icon'
+    )).toBeFalsy();
+  });
+
+  it('bad GCS URL does not show link', () => {
+    inputConfiguration('imageStorageUrlInput', 'xxx');
+    expect(fixture.debugElement.nativeElement.querySelector(
+      '#link-on-icon'
+    )).toBeFalsy();
+    expect(fixture.debugElement.nativeElement.querySelector(
+      '#link-off-icon'
+    )).toBeTruthy();
   });
 
   describe('configuration set tests', function () {

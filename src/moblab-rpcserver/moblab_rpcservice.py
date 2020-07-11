@@ -530,13 +530,17 @@ class MoblabService(object):
     def abort_jobs(self, job_ids):
         result = self.afe_connector.abort_host_queue_entries(job_ids)
         if result:
-            return str(result)
+            aborted_jobs = [str(item['Job']) for item in result]
+            if len(aborted_jobs) > 15:
+                return 'Aborted {} jobs, please refresh table to see results.'.format(
+                    len(aborted_jobs)
+                )
+            else:
+                return 'Aborted the following jobs: {}\nPlease refresh table to see results.'.format(
+                    ', '.join(aborted_jobs)
+                )
         else:
-            # AFE implementation of aborting jobs does not seem to return
-            # anything in success scenarios, so we need this placeholder
-            # message until a more descriptive replacement is used.
-            return 'Successfully applied abort action to selected jobs. ' +\
-                'Please refresh jobs list to see results.'
+            return 'No jobs aborted (were selected jobs already aborted/finished)?'
 
     def get_job_details(self, job_id):
         return self.afe_connector.get_jobs_by_ids([job_id])
