@@ -77,7 +77,6 @@ def _query_job_finished_time(id_):
         hqes_finished_time = [
             t.replace(tzinfo=datetime.timezone.utc) for t in hqes_finished_time]
         if hqes_finished_time:
-            _LOGGER.debug('Determined the HQEs for job id %s are complete', id_)
             yield max(hqes_finished_time)
         else:
             # TODO(haddowk) investigate why the HQE's are not showing as running
