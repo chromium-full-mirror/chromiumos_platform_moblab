@@ -63,7 +63,7 @@ class Uploader(processing_step.ProcessStep):
                 try:
                     ctx.gs_path = await self._try_upload_dir(test_result)
                     if test_result.is_logged:
-                        _LOGGER.exception("%s Try upload dir success %s", test_result, ctx.gs_path)
+                        _LOGGER.debug("%s Try upload dir success %s", test_result, ctx.gs_path)
                 except Exception as e:
                     ctx.gs_path = None
                     _LOGGER.exception("Try upload dir failed")
