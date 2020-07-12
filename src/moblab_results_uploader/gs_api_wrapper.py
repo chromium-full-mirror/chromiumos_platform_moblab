@@ -23,7 +23,7 @@ from google.cloud import storage as gs
 from retry.api import retry_call
 
 ENV_GOOGLE_APP_CREDENTIALS = 'GOOGLE_APPLICATION_CREDENTIALS'
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger('moblab_uploader')
 
 
 class GsAccessError(Exception):
@@ -89,7 +89,6 @@ class GsApiWrapper(object):
             return
         blob = self._gs_bucket.blob(
             remote_name, chunk_size=(1024 * 1024 * 100))
-        _LOGGER.debug("Attempting upload %s", local_name)
 
         # dice = random.uniform(0, 1) * 100
         # if dice > 99.8:

@@ -42,7 +42,7 @@ import yaml
 
 import processing_step
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger('moblab_uploader')
 
 
 class ResultFile(collections.namedtuple('ResultFile', ['test_result',

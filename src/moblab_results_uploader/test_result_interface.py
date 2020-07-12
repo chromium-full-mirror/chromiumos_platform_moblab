@@ -90,3 +90,8 @@ class TestResult(abc.ABC):
     def skip_uploading_when_succeeded(self):
         """Skip the uploading when the result succeeded."""
         return False
+
+    @property
+    def is_logged(self):
+        """Log information about this result type."""
+        return True
