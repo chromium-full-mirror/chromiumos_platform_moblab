@@ -9,7 +9,6 @@
 
 import argparse
 import logging
-import logging.handlers as logging_handlers
 import os
 import pathlib
 import sys
@@ -26,15 +25,13 @@ from moblab_common import config_connector
 #os.environ['PYTHONASYNCIODEBUG'] = '1'
 
 _LOG_FILE_BACKUP_COUNT = 14
-_LOGGER = logging.getLogger(pathlib.Path(__file__).stem)
+_LOGGER = logging.getLogger('moblab_uploader')
 
 
 def _logging_file_type(logfile_path):
     """Wrap the input file path as a logging handler object."""
     try:
-        return logging_handlers.TimedRotatingFileHandler(
-            logfile_path, when='D', interval=1,
-            backupCount=_LOG_FILE_BACKUP_COUNT)
+        return logging.FileHandler(logfile_path)
     except PermissionError as err:
         raise argparse.ArgumentTypeError(str(err))
 
@@ -45,7 +42,7 @@ def _setup_logging(handler):
     Args:
         handler: The logging handler object.
     """
-    logger = logging.getLogger()
+    logger = logging.getLogger('moblab_uploader')
     logger.setLevel(logging.DEBUG)
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(logging.Formatter(

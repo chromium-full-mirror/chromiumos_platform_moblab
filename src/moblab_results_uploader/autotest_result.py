@@ -22,7 +22,7 @@ import test_result_interface
 _AUTOTEST_ROOT = pathlib.Path('/usr/local/autotest')
 ROOT_DIR = _AUTOTEST_ROOT / 'results'
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger('moblab_uploader')
 _LOGGER.setLevel(logging.DEBUG)
 _TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
 _STATUS_LOG = 'status.log'
@@ -56,11 +56,8 @@ def _query_speical_task_finished_time(id_):
 
 def _query_job_finished_time(id_):
     """Query AFE with job id and yield the finished time."""
-    _LOGGER.setLevel(logging.DEBUG)
-    _LOGGER.debug('_query_job_finished_time %s', id_)
     afe = afe_connector.AFEConnector()
     while True:
-        _LOGGER.debug('Query job finished time %s', id_)
         result = afe.get_jobs_by_ids([id_])
         if not result:
             raise test_result_interface.TestResultError(
@@ -80,7 +77,7 @@ def _query_job_finished_time(id_):
         hqes_finished_time = [
             t.replace(tzinfo=datetime.timezone.utc) for t in hqes_finished_time]
         if hqes_finished_time:
-            _LOGGER.debug('Determined the HQEs %s are complete', id_)
+            _LOGGER.debug('Determined the HQEs for job id %s are complete', id_)
             yield max(hqes_finished_time)
         else:
             # TODO(haddowk) investigate why the HQE's are not showing as running
@@ -96,7 +93,7 @@ def _query_job_finished_time(id_):
             #     yield datetime.datetime.strptime(create_on_str,
             #                                      _TIMESTAMP_FORMAT)
             # else:
-            _LOGGER.debug("No job finish time")
+            _LOGGER.debug("No job finish time job id %s", id_)
             yield None
 
 
@@ -121,7 +118,6 @@ class _AutotestResult(test_result_interface.TestResult):
         if not self._finished_time:
             result = self._afe_query
             self._finished_time = next(self._afe_query)
-            _LOGGER.debug("%s", self._finished_time)
 
         return self._finished_time
 
@@ -195,6 +191,11 @@ class AutotestHostTask(_AutotestResult):
     def skip_uploading_when_succeeded(self):
         """Don't upload the task directory when it succeeded."""
         return True
+
+    @property
+    def is_logged(self):
+        """No need to log information about non job results."""
+        return False
 
 
 class AutotestTestJob(_AutotestResult):

@@ -23,7 +23,7 @@ import test_result_registry
 
 SUB_COMMAND_NAME = 'try_filter'
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger('moblab_uploader')
 _RC_NO_MATCHED_CLASS = 1
 _PRINT_FILE_LIST_LIMIT = 100
 

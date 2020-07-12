@@ -19,7 +19,7 @@ from moblab_common import pubsub_client
 import processing_step
 import result_dir_status
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger('moblab_uploader')
 _SERIAL_NUMBER = moblab_info.get_serial_number()
 _MOBLAB_ID = moblab_info.get_or_create_id()
 _GS_BUCKET_ROOT = 'results'
@@ -62,7 +62,8 @@ class Uploader(processing_step.ProcessStep):
             async with self._uploading_context(test_result) as ctx:
                 try:
                     ctx.gs_path = await self._try_upload_dir(test_result)
-                    _LOGGER.exception("%s Try upload dir success %s", test_result, ctx.gs_path)
+                    if test_result.is_logged:
+                        _LOGGER.exception("%s Try upload dir success %s", test_result, ctx.gs_path)
                 except Exception as e:
                     ctx.gs_path = None
                     _LOGGER.exception("Try upload dir failed")
@@ -72,7 +73,8 @@ class Uploader(processing_step.ProcessStep):
 
     async def _try_upload_dir(self, test_result):
         """Try to upload a directory with timeout checking."""
-        _LOGGER.info('Try to upload dir %s', test_result)
+        if test_result.is_logged:
+            _LOGGER.info('Try to upload dir %s', test_result)
         # The GS path of uploaded test result.
         test_result_gs_path = ''
         try:
@@ -101,11 +103,12 @@ class Uploader(processing_step.ProcessStep):
                 _LOGGER.debug('DRYRUN: Uploading %s', f)
             else:
                 awaitables.append(loop.run_in_executor(executor, self._upload_file, f))
-                _LOGGER.debug('Uploading %s, awaitables %d', f, len(awaitables))
+                if self._uploading_context._test_result.is_logged:
+                    _LOGGER.debug('Uploading %s, awaitables %d', f, len(awaitables))
 
-            _LOGGER.debug('%s Queue Len %d', self._uploading_context._test_result, self.uploading_queue.qsize())
             if self.uploading_queue.empty() or len(awaitables) >= jobs:
-                _LOGGER.debug('%s Gathering Queue len %d, awaitables %d', self._uploading_context._test_result, self.uploading_queue.qsize(), len(awaitables))
+                if self._uploading_context._test_result.is_logged:
+                    _LOGGER.debug('%s Gathering Queue len %d, awaitables %d', self._uploading_context._test_result, self.uploading_queue.qsize(), len(awaitables))
                 try:
                     results = await asyncio.gather(*awaitables, return_exceptions=True)
                     _LOGGER.debug('%s Gathering Results %s', self._uploading_context._test_result, results)
@@ -116,6 +119,7 @@ class Uploader(processing_step.ProcessStep):
                             self._uploading_context.error = True
                             # The only way to end the queue join is to empty
                             # the queue.
+                            _LOGGER.debug('%s Error found abandoning upload. Error %s', self._uploading_context._test_result, result)
                             for _ in range(self.uploading_queue.qsize()):
                                 # Depending on your program, you may want to
                                 # catch QueueEmpty
@@ -128,7 +132,6 @@ class Uploader(processing_step.ProcessStep):
                                     # the queue.
                                     _LOGGER.error('Error trying to remove item from empty queue.')
                                     pass
-                                _LOGGER.debug('%s Canceling Queue len %d, awaitables %d', self._uploading_context._test_result, self.uploading_queue.qsize(), len(awaitables))
                         self.uploading_queue.task_done()
                     awaitables = []
                 except Exception as e:
@@ -193,15 +196,19 @@ class UploadingContext(object):
             return
 
         if not self._test_result.pubsub_when_uploaded:
-            _LOGGER.debug('%s Pubsub not requested', self._test_result)
+            if self._test_result.is_logged:
+                _LOGGER.debug('%s Pubsub not requested', self._test_result)
             return await result_dir_status.mark_uploading_result(
                 self._test_result, succeeded=self.uploaded)
 
         loop = asyncio.get_event_loop()
         console_client = pubsub_client.PubSubBasedClient()
+        pubsub_uri = os.path.join('gs://', self._gs_bucket, self.gs_path)
+        _LOGGER.debug("Sending pubsub %s serialno %s moblab_id %s", pubsub_uri,
+             _SERIAL_NUMBER, _MOBLAB_ID)
         posted = await loop.run_in_executor(
             None, console_client.send_test_job_offloaded_message,
-            os.path.join('gs://', self._gs_bucket, self.gs_path),
+            pubsub_uri,
             _SERIAL_NUMBER, _MOBLAB_ID)
 
         return await result_dir_status.mark_uploading_result(

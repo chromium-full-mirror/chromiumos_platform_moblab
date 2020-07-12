@@ -25,7 +25,7 @@ import result_uploader
 import test_result_registry as test_result_registry_module
 
 SUB_COMMAND_NAME = 'run'
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger('moblab_uploader')
 
 _DEFAULT_UPLOAD_TIMEOUT = datetime.timedelta(days=3)
 _DEFAULT_MIN_AGE_TO_UPLOAD = datetime.timedelta(days=0)
