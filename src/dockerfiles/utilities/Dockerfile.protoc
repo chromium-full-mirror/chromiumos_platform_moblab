@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 	unzip
 
 WORKDIR /
-RUN curl -L -o protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protoc-3.10.0-linux-x86_64.zip
+RUN curl -L -o protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-x86_64.zip
 RUN unzip protobuf.zip
 
 RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.0.7/protoc-gen-grpc-web-1.0.7-linux-x86_64

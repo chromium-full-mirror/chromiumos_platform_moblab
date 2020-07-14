@@ -22,6 +22,7 @@ COPY --from=protoc /protoc/* /usr/local/bin/
 COPY src/remote_agent/ /etc/moblab/remote_agent
 RUN protoc -I=/etc/moblab/remote_agent \
     --python_out=:/etc/moblab/remote_agent \
+    --experimental_allow_proto3_optional \
     --grpc_python_out=:/etc/moblab/remote_agent \
     --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin \
     remoteagentrpc.proto
@@ -41,11 +42,26 @@ RUN apt-get update && apt-get install -yq \
     libssl-dev \
     zlib1g-dev \
     gcc-multilib \
-    cmake
+    cmake \
+    curl \
+    gnupg
 
 COPY --chown=moblab src/dockerfiles/remote_agent/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Install the google cloud sdk
+RUN echo \
+    "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
+    http://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    apt-key --keyring /usr/share/keyrings/cloud.google.gpg  \
+    add - && apt-get update -y && apt-get install google-cloud-sdk -y
+
+RUN pip install --upgrade google-cloud-pubsub
+
+RUN DEBIAN_FRONTEND='noninteractive' apt-get -y install nmap
 
 # moblab_common
 COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
@@ -63,6 +79,9 @@ RUN mkdir /var/log/moblab
 RUN apt purge -yq cmake libssl-dev zlib1g-dev gcc-multilib
 RUN apt autoremove -yq
 RUN apt-get clean
+
+RUN chown -R moblab /moblab
+RUN chown -R moblab /var/log/moblab
 
 WORKDIR /moblab
 USER moblab
