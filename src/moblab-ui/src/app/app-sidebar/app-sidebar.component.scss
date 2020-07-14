@@ -55,6 +55,20 @@ mat-toolbar {
   text-decoration: none;
 }
 
+#links-box {
+  float:right;
+  font-size: 17px;
+}
+
+.link-box-item {
+  display:inline-block;
+  vertical-align: middle;
+}
+
+.feedback-icon-wrapper {
+  margin-top: 10px;
+}
+
 .list-item-active {
   font-weight: bold;
   color: mat-color($accent, darker) !important;

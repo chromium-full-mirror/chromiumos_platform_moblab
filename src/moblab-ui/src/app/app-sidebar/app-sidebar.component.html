@@ -22,9 +22,18 @@
         Page Information Here
         <mat-icon class="problem-icon">report_problem</mat-icon>
       </div>
-      <div style="float:right;" *ngIf="this.isFeedbackEnabled()">
-        <app-feedback></app-feedback>
-      </div>
+
+      <span id="links-box">
+        <div class="link-box-item">
+          <a style="color: white;" href="http://www.localhost/afe" target="_blank">Old UI</a>
+        </div>
+        |
+        <div class="link-box-item">
+          <a style="color: white;" href="http://www.localhost:9991/static/index.html" target="_blank">Mobmonitor</a>
+        </div>
+        |
+        <div class="link-box-item feedback-icon-wrapper"><app-feedback></app-feedback></div>
+      </span>
     </div>
   </mat-toolbar>
 
