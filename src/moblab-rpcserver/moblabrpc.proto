@@ -51,6 +51,8 @@ service MoblabRpcService {
   rpc get_network_info(GetNetworkInfoRequest) returns (GetNetworkInfoResponse) {};
   rpc get_cloud_configuration(GetCloudConfigurationRequest) returns (GetCloudConfigurationResponse) {};
   rpc set_cloud_configuration(SetCloudConfigurationRequest) returns (SetCloudConfigurationResponse) {};
+  rpc get_dut_wifi_info(GetDutWifiInfoRequest) returns (GetDutWifiInfoResponse) {};
+  rpc set_dut_wifi_info(SetDutWifiInfoRequest) returns (SetDutWifiInfoResponse) {};
   rpc get_version_info(GetVersionInfoRequest) returns (GetVersionInfoResponse) {};
 
   // Sends screenshot and feedback information to GCS bucket.
@@ -571,6 +573,26 @@ message GetCloudConfigurationResponse {
   string boto_key_id = 1;
   string boto_key_secret = 2;
   string gcs_bucket_url = 3;
+}
+
+// NEXT_TAG = 1;
+message GetDutWifiInfoRequest {}
+
+// NEXT_TAG = 3;
+message GetDutWifiInfoResponse {
+  string dut_wifi_name = 1;
+  string dut_wifi_password = 2;
+}
+
+// NEXT_TAG = 3;
+message SetDutWifiInfoRequest {
+  string dut_wifi_name = 1;
+  string dut_wifi_password = 2;
+}
+
+// NEXT_TAG = 2;
+message SetDutWifiInfoResponse {
+  string message = 1;
 }
 
 // NEXT_TAG = 4;

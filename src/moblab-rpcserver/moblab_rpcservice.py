@@ -45,6 +45,8 @@ class MoblabService(object):
     build_target_re = re.compile(r'^board:(.*)')
     pool_re = re.compile(r'^pool:(.*)')
 
+    afe_connector = None
+
     def __init__(self):
         self.afe_connector = afe_connector.AFEConnector()
         self.config_connector = config_connector.MoblabConfigConnector(
@@ -788,6 +790,31 @@ class MoblabService(object):
         """
         return self.afe_connector.get_cloud_storage_info()
 
+    def get_dut_wifi_info(self):
+        """
+            Gets DUT wifi info.
+        Returns:
+            A dict with dut_wifi_name, dut_wifi_password
+        """
+        return self.afe_connector.get_dut_wifi_info()
+
+    def set_dut_wifi_info(self, dut_wifi_name, dut_wifi_password):
+        """
+            Attempts to set DUT wifi on Moblab.
+        Args:
+            dut_wifi_name (string): Wifi name
+            dut_wifi_password (string): Wifi password
+        Returns:
+            A result message string.
+        """
+        if self.afe_connector.set_configuration_info(
+            dut_wifi_name=dut_wifi_name,
+            dut_wifi_password=dut_wifi_password,
+        ):
+            return 'Successfully applied DUT Wifi info changes.'
+        else:
+            return 'Failed to apply DUT Wifi info changes.'
+
     def set_cloud_configuration(self, boto_key_id, boto_key_secret, gcs_bucket_url):
         """
             Attempts to set configuration values to Moblab.
@@ -802,7 +829,7 @@ class MoblabService(object):
             boto_key_id, boto_key_secret, gcs_bucket_url)
 
         if is_valid:
-            if self.afe_connector.set_cloud_storage_info(boto_key_id, boto_key_secret, gcs_bucket_url):
+            if self.afe_connector.set_configuration_info(boto_key_id, boto_key_secret, gcs_bucket_url):
                 return 'Successfully applied cloud configuration changes.'
             else:
                 return 'Failed to apply cloud configuration changes.'

@@ -46,6 +46,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   lastFetchedBotoKeySecret = '';
   lastFetchedBucketURL = '';
 
+  dutWifiInfoLoading = false;
+  dutWifiNameForm = new FormControl('');
+  dutWifiPasswordForm = new FormControl('');
+  lastFetchedDutWifiName = '';
+  lastFetchedDutWifiPassword = '';
+
   chromeosReleaseVersion: string;
   chromeosReleaseTrack: string;
   chromeosReleaseDescription: string;
@@ -55,7 +61,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   moblabHostname: string;
   isConnectedToInternet: boolean;
 
-  loading = false;
+  configurationLoading = false;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -70,6 +76,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.getNetworkInfo();
     this.getCloudConfiguration();
     this.getVersionInfo();
+    this.getDutWifiInfo();
   }
 
   getNetworkInfo() {
@@ -83,7 +90,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   }
 
   getCloudConfiguration() {
-    this.loading = true;
+    this.configurationLoading = true;
     this.moblabRpcService.get_cloud_configuration(
       (
         boto_key_id: string,
@@ -93,9 +100,39 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         this.setCloudConfiguration(boto_key_id, boto_key_secret, gcs_bucket_url);
       },
       (errorMsg: string) => {
-        this.loading = false;
+        this.configurationLoading = false;
         this.setOffPopup('Failed to get cloud configuration: ' + errorMsg);
       });
+  }
+
+  getDutWifiInfo() {
+    this.dutWifiInfoLoading = true;
+    this.moblabRpcService.get_dut_wifi_info(
+      (
+        dut_wifi_name: string,
+        dut_wifi_password: string,
+      ) => {
+        this.setDutWifiInfo(dut_wifi_name, dut_wifi_password);
+      },
+      (errorMsg: string) => {
+        this.dutWifiInfoLoading = false;
+        this.setOffPopup('Failed to get DUT wifi info: ' + errorMsg);
+      });
+  }
+
+  onDutWifiInfoSubmit(formValue) {
+    this.dutWifiInfoLoading = true;
+    this.moblabRpcService.set_dut_wifi_info(
+      (message: string) => {
+        this.setOffPopup(message);
+        this.getDutWifiInfo();
+      },
+      (errorMsg: string) => {
+        this.dutWifiInfoLoading = false;
+        this.setOffPopup(errorMsg);
+      },
+      this.dutWifiNameForm.value,
+      this.dutWifiPasswordForm.value,);
   }
 
   getVersionInfo() {
@@ -120,6 +157,11 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.lastFetchedBucketURL != this.bucketURLForm.value
   }
 
+  isDutWifiInfoChanged() {
+    return this.lastFetchedDutWifiName != this.dutWifiNameForm.value ||
+      this.lastFetchedDutWifiPassword != this.dutWifiPasswordForm.value;
+  }
+
   setCloudConfiguration(boto_key_id, boto_key_secret, gcs_bucket_url) {
     console.log('setting');
     this.botoKeyIDForm.setValue(boto_key_id);
@@ -130,7 +172,17 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.lastFetchedBotoKeySecret = boto_key_secret;
     this.lastFetchedBucketURL = gcs_bucket_url;
 
-    this.loading = false;
+    this.configurationLoading = false;
+  }
+
+  private setDutWifiInfo(dut_wifi_name: string, dut_wifi_password: string) {
+    this.dutWifiNameForm.setValue(dut_wifi_name);
+    this.dutWifiPasswordForm.setValue(dut_wifi_password);
+
+    this.lastFetchedDutWifiName = dut_wifi_name;
+    this.lastFetchedDutWifiPassword = dut_wifi_password;
+
+    this.dutWifiInfoLoading = false;
   }
 
   setNetworkInfo(moblab_hostname: string, is_connected: boolean) {
@@ -152,7 +204,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.moblabSerialNumber = moblab_serial_number;
   }
 
-  disableSubmissionButton() {
+  disableCloudConfigSubmissionButton() {
     return !this.isCloudConfigurationChanged() ||
       this.botoKeySecretForm.errors ||
       this.botoKeyIDForm.errors ||
@@ -179,17 +231,15 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.changeDetector.detectChanges();
   }
 
-  onSubmit(formValue) {
-    this.loading = true;
+  onCloudConfigSubmit(formValue) {
+    this.configurationLoading = true;
     this.moblabRpcService.set_cloud_configuration(
-      (
-        message: string
-      ) => {
+      (message: string) => {
         this.setOffPopup(message);
         this.getCloudConfiguration();
       },
       (errorMsg: string) => {
-        this.loading = false;
+        this.configurationLoading = false;
         this.setOffPopup(errorMsg);
       },
       this.botoKeyIDForm.value,

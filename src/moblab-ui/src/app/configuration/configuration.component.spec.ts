@@ -26,6 +26,7 @@ describe('ConfigurationComponent', () => {
   let getNetworkInfoSpy: jasmine.Spy;
   let getVersionInfoSpy: jasmine.Spy;
   let getCloudConfigurationSpy: jasmine.Spy;
+  let getDutWifiInfoSpy: jasmine.Spy;
 
   function inputConfiguration(inputIdentifier: string, input: string) {
     const inputEl = fixture.debugElement.nativeElement.querySelector(
@@ -163,24 +164,50 @@ describe('ConfigurationComponent', () => {
             'gs://xxx/',
           )
         });
+      getDutWifiInfoSpy = spyOn<any>(component, 'getDutWifiInfo').and.callFake(
+        function() {
+          // ts-ignore
+          component.setDutWifiInfo(
+            'fake-wifi-name',
+            'fake-wifi-pass',
+          )
+        });
       fixture.detectChanges();
     });
 
-    it('submit button only enabled on diff', () => {
+    it('cloud submit button only enabled on diff', () => {
       expect(fixture.debugElement.nativeElement.querySelector(
-        '#submit-button'
+        '#cloud-config-submit-button'
       ).disabled).toBeTruthy();
 
       inputConfiguration('imageStorageUrlInput', 'gs://xxxx/');
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.querySelector(
-        '#submit-button'
+        '#cloud-config-submit-button'
       ).disabled).toBeFalsy();
 
       inputConfiguration('imageStorageUrlInput', 'gs://xxx/');
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.querySelector(
-        '#submit-button'
+        '#cloud-config-submit-button'
+      ).disabled).toBeTruthy();
+    });
+
+    it('dut wifi info submit button only enabled on diff', () => {
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#dut-wifi-info-submit-button'
+      ).disabled).toBeTruthy();
+
+      inputConfiguration('dutWifiNameInput', 'fake-wifi-nam');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#dut-wifi-info-submit-button'
+      ).disabled).toBeFalsy();
+
+      inputConfiguration('dutWifiNameInput', 'fake-wifi-name');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#dut-wifi-info-submit-button'
       ).disabled).toBeTruthy();
     });
   });

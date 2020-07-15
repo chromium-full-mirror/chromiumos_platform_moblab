@@ -18,6 +18,8 @@ import {
   EnrollDutsResponse,
   GetCloudConfigurationRequest,
   GetCloudConfigurationResponse,
+  GetDutWifiInfoRequest,
+  GetDutWifiInfoResponse,
   GetDutDetailsRequest,
   GetDutDetailsResponse,
   GetDutTasksRequest,
@@ -72,6 +74,8 @@ import {
   SendMoblabScreenshotResponse,
   SetCloudConfigurationRequest,
   SetCloudConfigurationResponse,
+  SetDutWifiInfoRequest,
+  SetDutWifiInfoResponse,
   UpdateDutsFirmwareRequest,
   UpdateDutsFirmwareResponse
 } from "./moblabrpc_pb";
@@ -1005,6 +1009,47 @@ export class MoblabGrpcService {
       }
     );
     call.on('data', (response: SetCloudConfigurationResponse) => {
+      callback(
+        response.getMessage()
+      )
+    });
+  }
+
+  get_dut_wifi_info(callback: (dut_wifi_name: string, dut_wifi_password: string) => void,
+                          errorHandlingCallback: (errorMsg: string) => void) {
+    const request = new GetDutWifiInfoRequest();
+
+    const call = this.moblabRpcService.get_dut_wifi_info(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetDutWifiInfoResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: GetDutWifiInfoResponse) => {
+      callback(
+        response.getDutWifiName(),
+        response.getDutWifiPassword(),
+      );
+    });
+  }
+
+  set_dut_wifi_info(callback: (message: string) => void,
+                          errorHandlingCallback: (errorMsg: string) => void,
+                          dut_wifi_name: string,
+                          dut_wifi_password: string) {
+    const request = new SetDutWifiInfoRequest();
+    request.setDutWifiName(dut_wifi_name);
+    request.setDutWifiPassword(dut_wifi_password);
+
+    const call = this.moblabRpcService.set_dut_wifi_info(
+      request,
+      {},
+      (err: grpcWeb.Error, response: SetDutWifiInfoResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+    call.on('data', (response: SetDutWifiInfoResponse) => {
       callback(
         response.getMessage()
       )

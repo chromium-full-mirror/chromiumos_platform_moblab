@@ -409,24 +409,29 @@ def validate_cloud_storage_info(cloud_storage_info):
 
 
 @rpc_utils.moblab_only
-def submit_wizard_config_info(cloud_storage_info, wifi_info):
+def submit_wizard_config_info(
+    cloud_storage_info=None,
+    wifi_info=None):
     """RPC handler to submit the cloud storage info.
 
     @param cloud_storage_info: The JSON RPC object for cloud storage info.
     @param wifi_info: The JSON RPC object for DUT wifi info.
     """
     config_update = {}
-    config_update['CROS'] = [
-        (_IMAGE_STORAGE_SERVER, cloud_storage_info[_IMAGE_STORAGE_SERVER]),
-        (_RESULT_STORAGE_SERVER, cloud_storage_info[_RESULT_STORAGE_SERVER])
-    ]
-    config_update['MOBLAB'] = [
-        (_WIFI_AP_NAME, wifi_info.get(_WIFI_AP_NAME) or ''),
-        (_WIFI_AP_PASS, wifi_info.get(_WIFI_AP_PASS) or '')
-    ]
+    if cloud_storage_info:
+        config_update['CROS'] = [
+            (_IMAGE_STORAGE_SERVER, cloud_storage_info[_IMAGE_STORAGE_SERVER]),
+            (_RESULT_STORAGE_SERVER, cloud_storage_info[_RESULT_STORAGE_SERVER])
+        ]
+
+    if wifi_info:
+        config_update['MOBLAB'] = [
+            (_WIFI_AP_NAME, wifi_info.get(_WIFI_AP_NAME) or ''),
+            (_WIFI_AP_PASS, wifi_info.get(_WIFI_AP_PASS) or '')
+        ]
     _update_partial_config(config_update)
 
-    if not cloud_storage_info[_USE_EXISTING_BOTO_FILE]:
+    if cloud_storage_info and not cloud_storage_info[_USE_EXISTING_BOTO_FILE]:
         boto_config = ConfigParser.RawConfigParser()
         boto_config.add_section('Credentials')
         boto_config.set('Credentials', _GS_ACCESS_KEY_ID,

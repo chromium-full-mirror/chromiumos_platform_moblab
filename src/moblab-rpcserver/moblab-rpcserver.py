@@ -780,6 +780,42 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
+    def get_dut_wifi_info(self, request, _context):
+        """
+            Gets DUT wifi info configured for Moblab.
+        Args:
+            request: GetDutWifiInfoRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetDutWifiInfoResponse
+        """
+        dut_wifi_info = self.service.get_dut_wifi_info()
+        response = moblabrpc_pb2.GetDutWifiInfoResponse(
+            dut_wifi_name=dut_wifi_info.get('wifi_dut_ap_name', ''),
+            dut_wifi_password=dut_wifi_info.get('wifi_dut_ap_pass', ''),
+        )
+        return response
+
+    def set_dut_wifi_info(self, request, _context):
+        """
+            Set DUT wifi info configured for Moblab.
+        Args:
+            request: SetDutWifiInfoRequest object with parameters:
+                dut_wifi_name,
+                dut_wifi_password
+            _context: grpc.server.Context
+        Returns:
+            GetDutWifiInfoResponse
+        """
+        msg = self.service.set_dut_wifi_info(
+            request.dut_wifi_name,
+            request.dut_wifi_password,
+        )
+        response = moblabrpc_pb2.SetDutWifiInfoResponse(
+            message = msg
+        )
+        return response
+
     def get_cloud_configuration(self, request, _context):
         """
             Get cloud configuration info of Moblab.

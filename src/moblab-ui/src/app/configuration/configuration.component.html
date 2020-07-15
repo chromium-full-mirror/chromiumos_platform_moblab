@@ -3,14 +3,14 @@
 </div>
 
 <mat-card id="configuration-information-card">
-  <div id="loading-overlay" *ngIf="loading">
+  <div class="loading-overlay" *ngIf="configurationLoading">
     <div class="loading-spinner-wrapper">
       <mat-spinner></mat-spinner>
     </div>
   </div>
   <mat-card-header>Configuration Information</mat-card-header>
   <mat-card-content layout-padding>
-    <form #formRef="ngForm" (ngSubmit)="onSubmit(formRef.value)">
+    <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
       <mat-list>
         <div class="listrow" flex-direction="row">
           <mat-list-item>
@@ -58,8 +58,8 @@
           </a>
         </mat-list-item>
         <mat-list-item>
-          <button id="submit-button" mat-raised-button color="primary"
-                  [disabled]="disableSubmissionButton()"
+          <button id="cloud-config-submit-button" mat-raised-button color="primary"
+                  [disabled]="disableCloudConfigSubmissionButton()"
                   type="submit">Submit Changes
           </button>
         </mat-list-item>
@@ -111,5 +111,44 @@
         <td>{{moblabSerialNumber}}</td>
       </tr>
     </table>
+  </mat-card-content>
+</mat-card>
+
+<mat-card id="dut-wifi-card">
+  <div class="loading-overlay" *ngIf="dutWifiInfoLoading">
+    <div class="loading-spinner-wrapper">
+      <mat-spinner></mat-spinner>
+    </div>
+  </div>
+  <mat-card-header>DUT Wifi Configuration</mat-card-header>
+  <mat-card-content layout-padding>
+    <form #formRef="ngForm" (ngSubmit)="onDutWifiInfoSubmit(formRef.value)">
+      <mat-list>
+        <div class="listrow" flex-direction="row">
+          <mat-list-item>
+            <mat-form-field class="configuration-input" appearance="legacy">
+              <input id="dutWifiNameInput" matInput required placeholder="Wifi Name"
+                     [formControl]="dutWifiNameForm"
+                     name="dutWifiName" [disabled]="true">
+            </mat-form-field>
+          </mat-list-item>
+        </div>
+        <div class="listrow" flex-direction="row">
+          <mat-list-item>
+            <mat-form-field class="configuration-input" appearance="legacy">
+              <input id="dutWifiPasswordInput" matInput type="password" required password placeholder="Wifi Password"
+                     [formControl]="dutWifiPasswordForm"
+                     name="dutWifiPassword">
+            </mat-form-field>
+          </mat-list-item>
+        </div>
+        <mat-list-item>
+          <button id="dut-wifi-info-submit-button" mat-raised-button color="primary"
+                  [disabled]="!isDutWifiInfoChanged()"
+                  type="submit">Submit Changes
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </form>
   </mat-card-content>
 </mat-card>

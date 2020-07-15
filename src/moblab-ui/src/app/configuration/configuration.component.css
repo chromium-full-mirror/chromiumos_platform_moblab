@@ -42,7 +42,7 @@ mat-list-item {
   font-family: Roboto, sans-serif;
 }
 
-#loading-overlay {
+.loading-overlay {
   background-color: #fafafa;
   height: 100%;
   opacity: .8;
