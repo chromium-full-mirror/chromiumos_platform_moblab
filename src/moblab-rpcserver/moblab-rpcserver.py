@@ -35,6 +35,23 @@ pool_re = re.compile(r'^pool:(.*)')
 os.environ.setdefault('GOOGLE_APPLICATION_CREDENTIALS',
                       '%s/.service_account.json' % os.environ['HOME'])
 
+AFE_TO_MOBLAB_STATUS_MAPPINGS =  {
+    'Queued' : moblabrpc_pb2.Job.QUEUED,
+    'Provisioning' : moblabrpc_pb2.Job.PROVISIONING,
+    'Running' : moblabrpc_pb2.Job.RUNNING,
+    'Completed' : moblabrpc_pb2.Job.SUCCESS,
+    'Failed' : moblabrpc_pb2.Job.FAILED,
+    'Aborted' : moblabrpc_pb2.Job.ABORTED,
+    'Starting' : moblabrpc_pb2.Job.STARTING,
+    'Pending' : moblabrpc_pb2.Job.PENDING,
+    'Resetting' : moblabrpc_pb2.Job.RESETTING,
+    'Verifying' : moblabrpc_pb2.Job.VERIFYING,
+    'Gathering' : moblabrpc_pb2.Job.GATHERING,
+    'Parsing' : moblabrpc_pb2.Job.PARSING,
+    'Stopped' : moblabrpc_pb2.Job.STOPPED,
+    'Cleaning' : moblabrpc_pb2.Job.CLEANING,
+    'Template' : moblabrpc_pb2.Job.TEMPLATE
+}
 
 class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
@@ -360,18 +377,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             return None
 
     def _extract_status_enum(self, status_str):
-        if status_str == 'Queued':
-            return moblabrpc_pb2.Job.QUEUED
-        elif status_str == 'Provisioned':
-            return moblabrpc_pb2.Job.PROVISIONED
-        elif status_str == 'Running':
-            return moblabrpc_pb2.Job.RUNNING
-        elif status_str == 'Completed':
-            return moblabrpc_pb2.Job.SUCCESS
-        elif status_str == 'Failed':
-            return moblabrpc_pb2.Job.FAILED
-        elif status_str == 'Aborted':
-            return moblabrpc_pb2.Job.ABORTED
+        if status_str in AFE_TO_MOBLAB_STATUS_MAPPINGS:
+            return AFE_TO_MOBLAB_STATUS_MAPPINGS[status_str]
         elif re.match('Aborted \(\s*\w+\s*\)', status_str):
             # Ex. Aborted (Running)
             return moblabrpc_pb2.Job.ABORTING
