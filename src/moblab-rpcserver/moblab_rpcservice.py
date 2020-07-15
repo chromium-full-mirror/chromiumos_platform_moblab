@@ -29,7 +29,8 @@ _SUITE_TIMEOUT_MAP = {
 
 _STORAGE_QUAL_VARIATIONS = {
     0: 'hardware_storagequal',
-    1: 'hardware_storagequal_quick'
+    1: 'hardware_storagequal_quick',
+    2: 'hardware_storagequal_external'
 }
 
 HARDWARE_AVL_BUG_ID = 'bug_id'

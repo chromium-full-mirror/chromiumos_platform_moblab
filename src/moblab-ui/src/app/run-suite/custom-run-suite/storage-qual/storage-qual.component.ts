@@ -23,7 +23,7 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
   readonly variationOptions = [''].concat(
-    Object.keys(RunStorageQualificationSuiteRequest.Variation).slice(1)
+    Object.keys(RunStorageQualificationSuiteRequest.Variation).slice(1,3)
   );
   variationSelection = 0;
 

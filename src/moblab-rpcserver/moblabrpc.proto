@@ -115,10 +115,11 @@ message RunGtsSuiteRequest {
 
 // NEXT_TAG = 9;
 message RunStorageQualificationSuiteRequest {
-  // NEXT_TAG = 2;
+  // NEXT_TAG = 3;
   enum Variation {
     VARIATION_NOT_SET = 0;
     QUICK = 1;
+    REMOVABLE = 2;
   }
   string build_target = 1;
   string build_version = 2;
