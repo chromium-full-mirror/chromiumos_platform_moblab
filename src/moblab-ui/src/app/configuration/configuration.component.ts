@@ -63,6 +63,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private moblabRpcService: MoblabGrpcService) {}
 
   ngOnInit(): void {
+    this.bucketURLForm.valueChanges.subscribe(value => {
+      this.formatBucketLink();
+    });
+
     this.getNetworkInfo();
     this.getCloudConfiguration();
     this.getVersionInfo();
@@ -122,8 +126,6 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.botoKeySecretForm.setValue(boto_key_secret);
     this.bucketURLForm.setValue(gcs_bucket_url);
 
-    this.bucketLink = 'https://console.cloud.google.com/storage/browser/' + gcs_bucket_url.split('//')[1];
-
     this.lastFetchedBotoKeyID = boto_key_id;
     this.lastFetchedBotoKeySecret = boto_key_secret;
     this.lastFetchedBucketURL = gcs_bucket_url;
@@ -155,6 +157,19 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.botoKeySecretForm.errors ||
       this.botoKeyIDForm.errors ||
       this.bucketURLForm.errors;
+  }
+
+  enableLink() {
+    return !this.bucketURLForm.errors;
+  }
+
+  private formatBucketLink() {
+    if (this.enableLink()) {
+      this.bucketLink = 'https://console.cloud.google.com/storage/browser/' +
+        this.bucketURLForm.value.split('//')[1];
+    } else {
+      this.bucketLink = '';
+    }
   }
 
   ngAfterContentInit(): void {
