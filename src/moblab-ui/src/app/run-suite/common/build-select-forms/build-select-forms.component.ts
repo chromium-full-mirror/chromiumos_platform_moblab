@@ -66,7 +66,8 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.boardSelector.disable('Please select model.');
-    this.buildSelector.disable('Please select build target.');
+    this.milestoneSelector.disable('Please select build target.');
+    this.buildSelector.disable('Please select milestone.');
     this.poolSelector.disable('Please select build.');
     this.changeDetector.detectChanges();
   }
@@ -118,7 +119,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   buildTargetChanged(newBuildTarget: string): void {
     this.buildTargetName = newBuildTarget;
     this.moblabGrpcService.listMilestones(this.buildTargetName,
-        (milestones : string[]) => {
+      (milestones: string[]) => {
         this.updateMilestones(milestones);
       },
       (error_msg: string) => {
@@ -147,7 +148,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
       (error_msg: string) => {
         this.setErrorReason(this.buildSelector, error_msg);
       }
-      );
+    );
   }
 
   updateBuildVersions(newBuildVersions: string[]) {
@@ -186,6 +187,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
 
   poolChanged(pool: string) {
     this.selectedPool = pool;
+    this.emitBuildSelections();
   }
 
   getBuildFormattedString(): string {
@@ -199,7 +201,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
       model: this.selectedModel,
       milestone: this.milestone,
       buildVersionName: this.buildVersionName,
-      pool: this.pools
+      pool: this.selectedPool
     })
   }
 }
