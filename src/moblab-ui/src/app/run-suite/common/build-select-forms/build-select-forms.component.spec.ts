@@ -8,6 +8,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatSelectModule} from '@angular/material/select';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 import {BasicSelectorComponent} from '../basic-selector/basic-selector.component';
 import {BuildSelectFormsComponent} from './build-select-forms.component';
@@ -42,6 +43,7 @@ describe('BuildSelectFormsComponent', () => {
           MatIconModule,
           MatInputModule,
           MatSelectModule,
+          MatSnackBarModule,
           MatTooltipModule,
           ReactiveFormsModule,
         ],
@@ -62,7 +64,7 @@ describe('BuildSelectFormsComponent', () => {
     });
     // @ts-ignore
     listMilestonesSpy = spyOn<any>(component.moblabGrpcService, 'listMilestones').and.callFake(() => {
-      component.updateModels(['R01', 'R02']);
+      component.updateMilestones(['R01', 'R02']);
     });
     // @ts-ignore
     listBuildTargetsSpy = spyOn<any>(component.moblabGrpcService, 'listBuildTargets').and.callFake(() => {
@@ -70,7 +72,7 @@ describe('BuildSelectFormsComponent', () => {
     });
     // @ts-ignore
     listBuildVersionsSpy = spyOn<any>(component.moblabGrpcService, 'listBuildVersions').and.callFake(() => {
-      component.updateBuildTargets(['BuildVersion/1', 'BuildVersion/2']);
+      component.updateBuildVersions(['BuildVersion/1', 'BuildVersion/2']);
     });
     // @ts-ignore
     listPoolsSpy = spyOn<any>(component.moblabGrpcService, 'listPools').and.callFake(() => {
@@ -97,23 +99,33 @@ describe('BuildSelectFormsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Check that selections work in order.', () => {
+  it('selections work in order', () => {
     expect(modelSelectorComponent.isDisabled()).toBe(false);
     expect(boardSelectorComponent.isDisabled()).toBe(true);
+    expect(milestoneSelectorComponent.isDisabled()).toBe(true);
     expect(buildSelectorComponent.isDisabled()).toBe(true);
     expect(poolSelectorComponent.isDisabled()).toBe(true);
 
     applySelection(modelSelectorComponent, 'MockModel1');
     expect(boardSelectorComponent.isDisabled()).toBe(false);
 
-    applySelection(milestoneSelectorComponent, 'R01');
+    applySelection(boardSelectorComponent, 'BuildTarget1');
     expect(milestoneSelectorComponent.isDisabled()).toBe(false);
 
-    applySelection(boardSelectorComponent, 'BuildTarget1');
+    applySelection(milestoneSelectorComponent, 'R01');
     expect(buildSelectorComponent.isDisabled()).toBe(false);
 
     applySelection(buildSelectorComponent, 'BuildVersion/1');
     expect(poolSelectorComponent.isDisabled()).toBe(false);
     expect(allRequiredFieldsEmitter).toHaveBeenCalledTimes(1);
+  });
+
+  it('updating pool will re-emit build values', () => {
+    applySelection(modelSelectorComponent, 'MockModel1');
+    applySelection(milestoneSelectorComponent, 'R01');
+    applySelection(boardSelectorComponent, 'BuildTarget1');
+    applySelection(buildSelectorComponent, 'BuildVersion/1');
+    applySelection(poolSelectorComponent, 'TestPool1');
+    expect(allRequiredFieldsEmitter).toHaveBeenCalledTimes(2);
   });
 });
