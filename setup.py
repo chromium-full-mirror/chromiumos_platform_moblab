@@ -50,7 +50,7 @@ class custom_build_py(_build_py, object):
 setuptools.setup(
     name='moblab',
     version='0.1',
-    packages=['moblab_common', 'host_services'],
+    packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
     cmdclass={
         'build_package_protos': build_package_protos,
