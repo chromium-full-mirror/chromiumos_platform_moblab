@@ -73,8 +73,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """Uploads image and feedback text to GCS.
 
         Args:
-          request: SendMoblabRequest object with a string description and a
-            Base64 serialized png image screenshot.
+          request: SendMoblabRequest object with a string email, string
+          description and a Base64 serialized png image screenshot.
           _context: grpc.server.Context
 
         Returns:
@@ -82,9 +82,14 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
           uploaded feedback.
         """
         fc = feedback_connector.MoblabFeedbackConnector(self.moblab_bucket_name)
-        path, url = fc.upload_feedback(request.description, request.screenshot)
+        path, url = fc.upload_feedback(
+            request.contact_email,
+            request.description,
+            request.screenshot,
+        )
         response = moblabrpc_pb2.SendMoblabScreenshotResponse(
-            message='Feedback uploaded to bucket {} under {}. URL to screenshot: {}'.format(self.moblab_bucket_name, path, url)
+            message='Feedback uploaded to bucket {} under {}. URL to screenshot: {}'
+                .format(self.moblab_bucket_name, path, url)
         )
         return response
 

@@ -112,10 +112,12 @@ export class MoblabGrpcService {
   sendMoblabScreenshot(
     callback: (message: string) => void,
     error_callback: (message: string) => void,
+    contact_email,
     description,
     screenshot
   ) {
     const request = new SendMoblabScreenshotRequest();
+    request.setContactEmail(contact_email);
     request.setDescription(description);
     request.setScreenshot(screenshot.substring(screenshot.indexOf(',') + 1));
 

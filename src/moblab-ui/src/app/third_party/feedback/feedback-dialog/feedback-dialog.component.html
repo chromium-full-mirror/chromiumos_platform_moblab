@@ -4,6 +4,21 @@
       {{vars['title']}}
     </div>
   </div>
+  <div>
+    <form #formRef="ngForm">
+      <mat-form-field class="configuration-input" appearance="legacy">
+        <mat-label>Contact Email</mat-label>
+        <input id="dutWifiNameInput" matInput required
+               [(ngModel)]="feedback.contactEmail"
+               type="email"
+               name="name"
+               email>
+        <mat-error>
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </div>
   <div class="dialog-content">
     <div class="description-tips">
       <div *ngIf="feedback.description==''">{{vars['placeholder']}}</div>

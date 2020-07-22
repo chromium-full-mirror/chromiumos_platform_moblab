@@ -2,7 +2,7 @@ import {from, fromEvent as observableFromEvent, Observable, Subscription} from '
 
 import {takeUntil, finalize, map, mergeMap, timeout, skipWhile, filter, scan, first} from 'rxjs/operators';
 import {Component, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef, HostListener, Renderer2} from '@angular/core';
-// import {MatDialogRef} from '@angular/material';
+import {FormControl} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 
 import {Feedback} from '../entity/feedback';
@@ -21,6 +21,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
   public showToolbar = false;
   public vars: object = {};
   public feedback = new Feedback();
+  public contactEmailForm = new FormControl();
   public includeScreenshot: boolean = true;
   public showSpinner = true;
   public screenshotEle: HTMLElement;
@@ -46,6 +47,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
               private el: ElementRef) {
     this.feedback = new Feedback();
     this.feedback.description = '';
+    this.feedback.contactEmail = '';
     this.vars = this.feedbackService.initialVariables;
   }
 

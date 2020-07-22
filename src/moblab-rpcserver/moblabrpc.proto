@@ -62,8 +62,9 @@ service MoblabRpcService {
 }
 
 
-// NEXT_TAG = 3
+// NEXT_TAG = 4
 message SendMoblabScreenshotRequest {
+  string contact_email = 3;
   // Text description of issue motivating screenshot submission.
   string description = 1;
   // Serialized Base64 png image.

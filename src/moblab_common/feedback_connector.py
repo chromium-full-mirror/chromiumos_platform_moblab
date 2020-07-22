@@ -4,11 +4,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 import base64
-import datetime
-import urllib
+import urllib.parse
 
 from moblab_common import moblab_info
 
+from datetime import datetime
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import storage
 
@@ -17,7 +17,7 @@ import logging
 class FeedbackPath():
   FEEDBACK = 'feedback'
   SCREENSHOT= 'screenshot'
-  GCS_URL = 'https://storage.cloud.google.com'
+  GCS_URL = 'https://pantheon.corp.google.com/storage/browser/_details'
 
 
 class MoblabFeedbackConnector(object):
@@ -30,10 +30,11 @@ class MoblabFeedbackConnector(object):
     # TODO: Feedback will eventually be extended to include additional data beyond image and feedback text.
     raise NotImplementedError
 
-  def upload_feedback(self, feedback=None, screenshot=None, filenames=[]):
+  def upload_feedback(self, contact_email=None, feedback=None, screenshot=None, filenames=[]):
     """Uploads image and feedback text to GCS.
 
     Args:
+      contact_email: string email by which feedback submitter can be contacted.
       feedback: Text string of feedback.
       screenshot: Base 64 byte string representing a png screenshot image.
 
@@ -42,7 +43,7 @@ class MoblabFeedbackConnector(object):
       URL is a direct link to the uploaded screenshot.
     """
     bucket = self.storage_client.bucket(self.moblab_bucket_name)
-    timestamp_str = str(datetime.datetime.utcnow()).split('.')[0]
+    timestamp_str = str(datetime.utcnow()).split('.')[0]
     feedback_dir_path = '/'.join([FeedbackPath.FEEDBACK, moblab_info.get_serial_number(), timestamp_str])
 
     if screenshot:
@@ -51,11 +52,17 @@ class MoblabFeedbackConnector(object):
 
     if feedback:
       feedback_blob = storage.Blob(feedback_dir_path + '/' + FeedbackPath.FEEDBACK, bucket)
-      feedback_blob.upload_from_string(feedback)
+      feedback_blob.upload_from_string("Contact email: " + contact_email + "\n" + feedback)
 
     for filename in filenames:
       filename_blob = storage.Blob(feedback_dir_path + filename, bucket)
       filename_blob.upload_from_filename(filename)
 
-    url = FeedbackPath.GCS_URL + '/' + self.moblab_bucket_name + '/' + FeedbackPath.FEEDBACK + '/' + moblab_info.get_serial_number() + '/' + urllib.parse.quote(timestamp_str) + FeedbackPath.SCREENSHOT
+    url = FeedbackPath.GCS_URL + '/' +\
+          self.moblab_bucket_name + '/' +\
+          FeedbackPath.FEEDBACK + '%2F' +\
+          moblab_info.get_serial_number() + '%2F' +\
+          timestamp_str.replace(' ', '%20') + '%2F' +\
+          FeedbackPath.SCREENSHOT
+
     return feedback_dir_path, url

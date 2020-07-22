@@ -1,12 +1,13 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {FeedbackDialogComponent} from './feedback-dialog/feedback-dialog.component';
 import {FeedbackToolbarComponent} from './feedback-toolbar/feedback-toolbar.component';
 import {FeedbackRectangleComponent} from './feedback-rectangle/feedback-rectangle.component';
 
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -26,13 +27,15 @@ import {FeedbackDirective} from './feedback.directive';
   imports: [
     MatDialogModule,
     MatButtonModule,
+    MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatTooltipModule,
     CommonModule,
     FormsModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    ReactiveFormsModule
   ],
   exports: [
     FeedbackDirective

@@ -25,6 +25,20 @@
   margin: 0px;
 }
 
+.configuration-input {
+  margin-top: 10px;
+  margin-left: 10px;
+  min-width: 340px;
+}
+
+.contact-email-input {
+  display: -webkit-flex;
+  flex-grow: 1;
+  height: 30px;
+  width: 152px;
+  position: relative;
+}
+
 .dialog-content {
   display: -webkit-flex;
   flex-grow: 1;

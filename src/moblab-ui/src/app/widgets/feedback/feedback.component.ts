@@ -66,6 +66,7 @@ export class FeedbackComponent {
           message + DEFAULT_ERROR_SUFFIX,
           'Feedback Submission Failed');
       },
+      event.contactEmail,
       event.description,
       event.screenshot
     );
