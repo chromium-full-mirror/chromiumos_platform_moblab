@@ -267,6 +267,7 @@ services:
 
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
+      - WATCHTOWER_TAG=${WATCHTOWER}
   ##############################################################################
   remote_agent:
     image: gcr.io/chromeos-partner-moblab/moblab-remote-agent:${REMOTE_AGENT:-release}

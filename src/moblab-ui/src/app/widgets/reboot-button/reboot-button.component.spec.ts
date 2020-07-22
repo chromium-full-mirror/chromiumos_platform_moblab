@@ -9,17 +9,16 @@ import {
 } from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
-import {ConfirmationDialog, RebootButtonComponent} from './reboot-button';
+import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.component';
+import {RebootButtonComponent} from './reboot-button.component';
 
 
 describe('RebootButtonComponent', () => {
-  const mock_dialog_ref = { afterClosed : () => {}, close: () => {} }
-  const dialogRefSpyObj = jasmine.createSpyObj(mock_dialog_ref);
+  const mockDialogRef = { afterClosed : () => {}, close: () => {} }
+  const dialogRefSpyObj = jasmine.createSpyObj(mockDialogRef);
 
   let buttonComponent: RebootButtonComponent;
-  let dialogComponent: ConfirmationDialog;
   let buttonFixture: ComponentFixture<RebootButtonComponent>;
-  let dialogFixture: ComponentFixture<ConfirmationDialog>;
 
   let dialogSpy: jasmine.Spy;
   let rebootMoblabSpy: jasmine.Spy;
@@ -38,7 +37,7 @@ describe('RebootButtonComponent', () => {
         ],
         providers: [
           { provide: MAT_DIALOG_DATA, useValue: {} },
-          { provide: MatDialogRef, useValue: mock_dialog_ref }
+          { provide: MatDialogRef, useValue: mockDialogRef }
         ],
       })
       .compileComponents();
@@ -60,6 +59,11 @@ describe('RebootButtonComponent', () => {
 
       dialogSpy = spyOn(TestBed.get(MatDialog), 'open')
         .and.returnValue(dialogRefSpyObj);
+      rebootMoblabSpy = spyOn<any>(
+        //ts-ignore
+        buttonComponent.moblabGrpcService,
+        'reboot_moblab'
+      );
     });
 
     it('should compile', () => {
@@ -70,29 +74,9 @@ describe('RebootButtonComponent', () => {
       dispatchButtonClick(buttonFixture, '#reboot-button');
       expect(dialogSpy).toHaveBeenCalled();
     });
-  });
 
-  describe('dialog tests', function () {
-    beforeEach(() => {
-      dialogFixture = TestBed.createComponent(ConfirmationDialog);
-      dialogComponent = dialogFixture.componentInstance;
-      dialogFixture.detectChanges();
-
-      dialogSpy = spyOn(TestBed.get(MatDialog), 'open')
-        .and.returnValue(dialogRefSpyObj);
-      // @ts-ignore
-      rebootMoblabSpy = spyOn<any>(
-        dialogComponent.moblabGrpcService,
-        'reboot_moblab'
-      );
-    });
-
-    it('should compile', () => {
-      expect(dialogComponent).toBeTruthy();
-    });
-
-    it('should invoke reboot', () => {
-      dispatchButtonClick(dialogFixture,'#reboot-ok-button');
+    it('reboot command should call-through to moblabGRPC', () => {
+      buttonComponent.rebootMoblab();
       expect(rebootMoblabSpy).toHaveBeenCalled();
     });
   });

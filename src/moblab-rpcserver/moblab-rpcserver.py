@@ -877,6 +877,37 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def reboot_moblab(self, request, _context):
         host_connector.HostServicesConnector.reboot()
 
+    def get_is_update_available(self, request, _context):
+        """
+            Get whether an update is available for user to pull.
+        Args:
+            request: GetIsUpdateAvailableRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetIsUpdateAvailableResponse ( with a boolean true iff an update is
+            available ).
+        """
+        is_update_available = self.service.get_is_update_available()
+        response = moblabrpc_pb2.GetIsUpdateAvailableResponse(
+            is_update_available=is_update_available
+        )
+        return response
+
+    def update_moblab(self, request, _context):
+        """
+            Set off an update of moblab.
+        Args:
+            request: UpdateMoblabRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            UpdateMoblabResponse ( with a string result message ).
+        """
+        message = self.service.update_docker()
+        response = moblabrpc_pb2.UpdateMoblabResponse(
+            message=message
+        )
+        return response
+
 def setup_logging(level):
     """Enable the correct level of logging.
 

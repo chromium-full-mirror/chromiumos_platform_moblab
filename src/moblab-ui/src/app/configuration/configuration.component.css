@@ -71,8 +71,15 @@ mat-list-item {
 }
 
 .reboot-button-wrapper {
+  display: inline-flex;
   margin-left: 40px;
   margin-top: 10px;
+}
+
+.update-button-wrapper {
+  display: inline-flex;
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 #link-off-icon {

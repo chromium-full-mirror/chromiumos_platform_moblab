@@ -9,9 +9,15 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock
 
+class MockNotFoundError(Exception):
+  pass
 
+MOCKED_DOCKER = MagicMock()
+MOCKED_DOCKER.errors.NotFound = MockNotFoundError
+sys.modules['docker'] = MOCKED_DOCKER
 sys.modules['moblab_common'] = MagicMock()
-from moblab_rpcservice import MoblabService
+
+from moblab_rpcservice import MoblabService, MoblabRpcError
 
 
 class MoblabRPCServiceTest(unittest.TestCase):
@@ -41,6 +47,62 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
     afe_set_configuration_info_mock.assert_called_once()
     assert isinstance(result_msg, str)
+
+  def _create_mock_container(self, tags=[]):
+    mock_container = MagicMock()
+    mock_container.image.__str__.return_value = 'gcr.io/chromeos-partner-moblab/mock-moblab-image'
+    mock_container.image.tags = tags
+    return mock_container
+
+  @mock.patch("moblab_rpcservice.docker.from_env")
+  def test_get_is_update_available(self, mock_docker_from_env):
+    mock_docker_client = MagicMock()
+    # A single tagless container should cause update to show as available.
+    mock_docker_client.containers.list.return_value = \
+      [self._create_mock_container(['tag']) for _ in range(3)] + \
+      [self._create_mock_container()]
+    mock_docker_from_env.return_value = mock_docker_client
+
+    is_update_available = self.service.get_is_update_available()
+    assert(is_update_available)
+
+  @mock.patch("moblab_rpcservice.docker.from_env")
+  def test_get_is_update_not_available(self, mock_docker_from_env):
+    mock_docker_client = MagicMock()
+    mock_docker_client.containers.list.return_value = \
+      [self._create_mock_container(['tag']) for _ in range(3)]
+    mock_docker_from_env.return_value = mock_docker_client
+
+    is_update_available = self.service.get_is_update_available()
+    assert(is_update_available == False)
+
+  @mock.patch("moblab_rpcservice.docker.from_env")
+  def test_update_docker(self, mock_docker_from_env):
+    mock_docker_client = MagicMock()
+    mock_container_run = MagicMock()
+    mock_docker_client.containers.get.side_effect = [MockNotFoundError]
+    mock_docker_client.containers.run = mock_container_run
+    mock_docker_from_env.return_value = mock_docker_client
+
+    result_msg = self.service.update_docker()
+
+    mock_container_run.assert_called_once_with(
+        'gcr.io/chromeos-partner-moblab/watchtower:release',
+        command='--run-once',
+        detach=True,
+        name='update',
+        volumes=['/var/run/docker.sock:/var/run/docker.sock']
+    )
+
+    assert(result_msg == 'Update finished.')
+
+  @mock.patch("moblab_rpcservice.docker.from_env")
+  def test_update_docker_already_running(self, mock_docker_from_env):
+    mock_docker_from_env.return_value = MagicMock()
+
+    with self.assertRaises(MoblabRpcError) as context:
+      result_msg = self.service.update_docker()
+
 
 if __name__ == "__main__":
   unittest.main()

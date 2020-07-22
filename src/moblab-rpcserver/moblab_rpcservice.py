@@ -3,7 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import docker
+import os
 import re
+import requests
 import socket
 
 from moblab_common import build_connector
@@ -35,6 +38,8 @@ _STORAGE_QUAL_VARIATIONS = {
 
 HARDWARE_AVL_BUG_ID = 'bug_id'
 HARDWARE_AVL_PART_NO = 'part_id'
+
+MOBLAB_DOCKER_REGISTRY = 'gcr.io/chromeos-partner-moblab/'
 
 class MoblabRpcError(Exception):
     pass
@@ -869,6 +874,57 @@ class MoblabService(object):
             'server_ip': None,
             'is_connected': False
         }
+
+    def get_is_update_available(self):
+        """
+            Check to see if there are any containers that have updated images.
+
+            Scan the running containers, if the watchtower program has pulled down
+            a newer image then the container to image reference tag is broken.
+
+            Detect these image tag link breaks and assume that means we have an update.
+            Looking through update tools and forums, it seems this is the way
+            all update tools work.
+
+        Returns:
+            True iff there is an update available.
+        """
+        client = docker.from_env(timeout=300)
+        for container in client.containers.list():
+            if len(container.image.tags) == 0:
+                return True
+        return False
+
+    def update_docker(self):
+        """
+            Sets off an update of all docker containers, using watchtower
+
+        Returns: String result message.
+        """
+        client = docker.from_env(timeout=600)
+
+        try:
+            container = client.containers.get('update')
+            raise MoblabRpcError("Already updating please wait.")
+        except docker.errors.NotFound:
+            pass
+
+        label = os.environ.get('WATCHTOWER_TAG', 'release')
+        container = client.containers.run(
+            MOBLAB_DOCKER_REGISTRY + 'watchtower:%s' % label,
+            volumes=['/var/run/docker.sock:/var/run/docker.sock'],
+            name='update',
+            detach=True,
+            command='--run-once'
+        )
+
+        try:
+            container.wait(timeout=600)
+        except requests.exceptions.ReadTimeout:
+            container.stop()
+        finally:
+            container.remove()
+        return 'Update finished.'
 
     def get_version_info(self):
         """

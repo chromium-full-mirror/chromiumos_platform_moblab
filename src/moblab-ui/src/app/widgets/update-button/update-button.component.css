@@ -1,0 +1,10 @@
+.update-status-message {
+  display:inline-block;
+  font-family:'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size:12px;
+  font-weight:400;
+}
+
+.update-button {
+  margin-right: 10px;
+}

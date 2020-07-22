@@ -40,6 +40,8 @@ service MoblabRpcService {
   rpc repair_host(RepairHostRequest) returns (RepairHostResponse) {};
 
   rpc reboot_moblab(RebootMoblabRequest) returns (RebootMoblabResponse) {};
+  rpc get_is_update_available(GetIsUpdateAvailableRequest) returns (GetIsUpdateAvailableResponse) {};
+  rpc update_moblab(UpdateMoblabRequest) returns (UpdateMoblabResponse) {};
 
   rpc add_label_to_duts(AddLabelToDutsRequest) returns (AddLabelToDutsResponse) {};
   rpc remove_label_from_duts(RemoveLabelFromDutsRequest) returns (RemoveLabelFromDutsResponse) {};
@@ -626,4 +628,22 @@ message RebootMoblabRequest {
 // NEXT_TAG = 2;
 message RebootMoblabResponse {
   string error_message = 1;
+}
+
+// NEXT_TAG = 1;
+message GetIsUpdateAvailableRequest {
+}
+
+// NEXT_TAG = 2;
+message GetIsUpdateAvailableResponse {
+  bool is_update_available = 1;
+}
+
+// NEXT_TAG = 1;
+message UpdateMoblabRequest {
+}
+
+// NEXT_TAG = 2;
+message UpdateMoblabResponse {
+  string message = 1;
 }

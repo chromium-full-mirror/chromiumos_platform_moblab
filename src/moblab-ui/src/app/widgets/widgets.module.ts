@@ -1,7 +1,7 @@
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BrowserModule} from '@angular/platform-browser';
 import {CommonModule} from '@angular/common';
-import {ConfirmationDialog} from './reboot-button/reboot-button';
+import {ConfirmationDialog} from './confirmation-dialog/confirmation-dialog.component';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -15,8 +15,9 @@ import {MatTableModule} from '@angular/material/table';
 import {NgModule} from '@angular/core';
 
 import {KeyValTableComponent} from './keyval-table/keyval-table.component'
-import {RebootButtonComponent} from './reboot-button/reboot-button';
+import {RebootButtonComponent} from './reboot-button/reboot-button.component';
 import {TableHeaderSelectorComponent} from './table-header-selector/table-header-selector.component';
+import {UpdateButtonComponent} from './update-button/update-button.component';
 
 import {FeedbackComponent, SubmissionResultDialog} from './feedback/feedback.component';
 import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedback/feedback.module';
@@ -29,13 +30,15 @@ import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedbac
     KeyValTableComponent,
     RebootButtonComponent,
     SubmissionResultDialog,
-    TableHeaderSelectorComponent
+    TableHeaderSelectorComponent,
+    UpdateButtonComponent,
   ],
   exports: [
     FeedbackComponent,
     KeyValTableComponent,
     RebootButtonComponent,
-    TableHeaderSelectorComponent
+    TableHeaderSelectorComponent,
+    UpdateButtonComponent,
   ],
   imports: [
     BrowserAnimationsModule,

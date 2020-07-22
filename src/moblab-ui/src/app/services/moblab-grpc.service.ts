@@ -24,6 +24,8 @@ import {
   GetDutDetailsResponse,
   GetDutTasksRequest,
   GetDutTasksResponse,
+  GetIsUpdateAvailableRequest,
+  GetIsUpdateAvailableResponse,
   GetJobDetailsRequest,
   GetJobDetailsResponse,
   GetJobIdsRequest,
@@ -77,7 +79,9 @@ import {
   SetDutWifiInfoRequest,
   SetDutWifiInfoResponse,
   UpdateDutsFirmwareRequest,
-  UpdateDutsFirmwareResponse
+  UpdateDutsFirmwareResponse,
+  UpdateMoblabRequest,
+  UpdateMoblabResponse,
 } from "./moblabrpc_pb";
 
 @Injectable({providedIn: "root"})
@@ -1093,5 +1097,53 @@ export class MoblabGrpcService {
           error_callback(err.message);
       }
     );
+  }
+
+  get_is_update_available(
+    /**
+     * Get whether an update is available for the Moblab to pull.
+     *  @param callback: function invoked in success scenarios.
+     *  @param error_callback: function invoked in failure scenarios.
+     *  */
+    callback: (isUpdateAvailable: boolean) => void,
+    error_callback: (msg: string) => void
+  ) {
+    const call = this.moblabRpcService.get_is_update_available(
+      new GetIsUpdateAvailableRequest(),
+      {},
+      (err: grpcWeb.Error, response: GetIsUpdateAvailableResponse) => {
+        error_callback(err.message);
+      }
+    );
+
+    call.on('data', (response: GetIsUpdateAvailableResponse) => {
+      callback(
+        response.getIsUpdateAvailable(),
+      );
+    });
+  }
+
+  update_moblab(
+    callback: (message: string) => void,
+    error_callback: (msg: string) => void
+  ) {
+    /**
+     *  Invoke a moblab update.
+     *  @param callback: function invoked in success scenarios.
+     *  @param error_callback: function invoked in failure scenarios.
+     *  */
+    const call = this.moblabRpcService.update_moblab(
+      new UpdateMoblabRequest(),
+      {},
+      (err: grpcWeb.Error, response: UpdateMoblabResponse) => {
+        error_callback(err.message);
+      }
+    );
+
+    call.on('data', (response: UpdateMoblabResponse) => {
+      callback(
+        response.getMessage(),
+      );
+    });
   }
 }
