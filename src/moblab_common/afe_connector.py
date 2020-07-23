@@ -608,27 +608,42 @@ class AFEConnector(object):
         )
         return self.decode_response(response, "result")
 
-    def _format_cloud_configuration_dict(
+    def get_dut_wifi_info(self):
+        """
+            Gets DUT wifi info from AFE.
+        Returns:
+            A dict of DUT wifi info  ( specifically, 'dut_wifi_name,
+            'dut_wifi_password' )
+        """
+        response = self.send_rpc_command(
+            "get_dut_wifi_info", {}
+        )
+        return self.decode_response(response, "result")
+
+    def _format_configuration_dict(
         self,
-        gs_access_key_id,
-        gs_secret_access_key,
-        image_storage_server,
-        include_wifi=False
+        gs_access_key_id=None,
+        gs_secret_access_key=None,
+        image_storage_server=None,
+        dut_wifi_name=None,
+        dut_wifi_password=None,
     ):
         """
-            Helper method for returning params shared between calls to set cloud
+            Helper method for returning params shared between calls to set
             config and validate cloud config.
         Args:
             gs_access_key_id (string): boto ID string
             gs_secret_access_key (string): boto secret string
             image_storage_server (string): GCS bucket URL
-            include_wifi (boolean): True iff wifi_info attribute entry needs to
-            be added.
+            dut_wifi_name (string): Wifi name for DUTs
+            dut_wifi_password (string): Wifi password for DUTs
         Returns:
             A dictionary of cloud configuration parameters.
         """
-        cloud_configuration_dict = {
-            "cloud_storage_info" : {
+        configuration_dict = {}
+
+        if gs_access_key_id and gs_secret_access_key and image_storage_server:
+            configuration_dict["cloud_storage_info"] = {
                 "gs_access_key_id": gs_access_key_id,
                 "gs_secret_access_key": gs_secret_access_key,
                 "image_storage_server": image_storage_server,
@@ -638,36 +653,44 @@ class AFEConnector(object):
                 # so this value is always False.
                 "use_existing_boto_file": False
             }
-        }
 
-        if include_wifi:
-            cloud_configuration_dict["wifi_info"] = {
-                "wifi_dut_ap_name": None,
-                "wifi_dut_ap_pass": None
+        if dut_wifi_name and dut_wifi_password:
+            configuration_dict["wifi_info"] = {
+                "wifi_dut_ap_name": dut_wifi_name,
+                "wifi_dut_ap_pass": dut_wifi_password
             }
 
-        return cloud_configuration_dict
+        return configuration_dict
 
 
-    def set_cloud_storage_info(self, gs_access_key_id, gs_secret_access_key,
-        image_storage_server):
+    def set_configuration_info(
+        self,
+        gs_access_key_id=None,
+        gs_secret_access_key=None,
+        image_storage_server=None,
+        dut_wifi_name=None,
+        dut_wifi_password=None,
+    ):
         """
             Applies given configuration values to AFE.
         Args:
             gs_access_key_id (string): boto ID string
             gs_secret_access_key (string): boto secret string
             image_storage_server (string): GCS bucket URL
+            dut_wifi_name (string): Wifi name for DUTs
+            dut_wifi_password (string): Wifi password for DUTs
         Returns:
             A boolean, true IFF application of new cloud configurations
             succeeded.
         """
         response = self.send_rpc_command(
             'submit_wizard_config_info',
-            self._format_cloud_configuration_dict(
+            self._format_configuration_dict(
                 gs_access_key_id,
                 gs_secret_access_key,
                 image_storage_server,
-                include_wifi=True
+                dut_wifi_name,
+                dut_wifi_password
             )
         )
 
@@ -696,7 +719,7 @@ class AFEConnector(object):
         """
         response = self.send_rpc_command(
             'validate_cloud_storage_info',
-            self._format_cloud_configuration_dict(
+            self._format_configuration_dict(
                 gs_access_key_id,
                 gs_secret_access_key,
                 image_storage_server

@@ -2,14 +2,14 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Unit tests for the mob-remote-scheduler"""
+"""Unit tests for the AFE connector"""
 
 import http.client
 import json
 import time
 import unittest
 
-from . import afe_connector
+import afe_connector
 
 from datetime import datetime
 from unittest import mock
@@ -220,6 +220,57 @@ class AFEConnectorTest(unittest.TestCase):
                 "wait_for_results": True,
             },
         )
+
+    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    def test_get_dut_wifi_info(self, mock_send_rpc_command):
+        self.afe_conn.get_dut_wifi_info()
+        mock_send_rpc_command.assert_called_once_with("get_dut_wifi_info", {})
+
+    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    def test_set_configuration_info_cloud(self, mock_send_rpc_command):
+        MOCK_BOTO_ACCESS_ID = 'GOOGRKMVD3VCFI51JHWM'
+        MOCK_BOTO_ACCESS_KEY = 'QlZThtrb9hNfWL2R6MHbUfU7tjHUwAZPy8nyQ3c86'
+        MOCK_BUCKET_NAME = 'not-a-real-moblab-bucket'
+
+        self.afe_conn.set_configuration_info(
+            gs_access_key_id=MOCK_BOTO_ACCESS_ID,
+            gs_secret_access_key=MOCK_BOTO_ACCESS_KEY,
+            image_storage_server=MOCK_BUCKET_NAME,
+        )
+
+        mock_send_rpc_command.assert_called_once_with(
+            "submit_wizard_config_info",
+            {
+                'cloud_storage_info' : {
+                    'gs_access_key_id' : MOCK_BOTO_ACCESS_ID,
+                    'gs_secret_access_key' : MOCK_BOTO_ACCESS_KEY,
+                    'image_storage_server' : MOCK_BUCKET_NAME,
+                    'results_storage_server' : '',
+                    'use_existing_boto_file' : False
+                }
+            }
+         )
+
+    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    def test_set_configuration_info_dut_wifi(self, mock_send_rpc_command):
+        MOCK_DUT_WIFI_NAME = 'Fake Wifi'
+        MOCK_DUT_WIFI_PASSWORD = 'perhaps934999linux'
+
+        self.afe_conn.set_configuration_info(
+            dut_wifi_name=MOCK_DUT_WIFI_NAME,
+            dut_wifi_password=MOCK_DUT_WIFI_PASSWORD,
+        )
+
+        mock_send_rpc_command.assert_called_once_with(
+            "submit_wizard_config_info",
+            {
+                'wifi_info' : {
+                    'wifi_dut_ap_name' : MOCK_DUT_WIFI_NAME,
+                    'wifi_dut_ap_pass' : MOCK_DUT_WIFI_PASSWORD,
+                }
+            }
+        )
+
 
 
 if __name__ == "__main__":
