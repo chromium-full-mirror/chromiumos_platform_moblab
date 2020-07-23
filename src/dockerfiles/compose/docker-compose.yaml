@@ -82,7 +82,7 @@ services:
     restart: on-failure
     user: moblab
     ports:
-      - 80:8888
+      - 6010:8888
 
     volumes:
       - logs:/var/log/moblab
@@ -236,7 +236,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
 
     ports:
-      - 6010:6010
+      - 80:6010
   ##############################################################################
   moblab-rpcserver:
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-rpcserver:${MOBLAB_RPCSERVER:-release}
