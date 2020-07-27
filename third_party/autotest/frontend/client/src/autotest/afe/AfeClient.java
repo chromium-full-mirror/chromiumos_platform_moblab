@@ -73,7 +73,7 @@ public class AfeClient implements EntryPoint {
         Document.get().getElementById("mobmonitor_link").setAttribute("href",
                 "http://" + Location.getHostName() + ":9991");
         Document.get().getElementById("newui").setAttribute("href",
-                "http://" + Location.getHostName() + ":6010");
+                "http://" + Location.getHostName() + ":80");
 
         jobList = new JobListView(new JobSelectListener() {
             public void onJobSelected(int jobId) {
