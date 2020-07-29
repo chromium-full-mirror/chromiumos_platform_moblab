@@ -10,6 +10,14 @@ import {Feature} from 'app/services/services.module';
 export class AppSidebarComponent implements OnInit {
   appErrorMessage = 'This is where error messages go';
 
+  // TODO(crbug.com/1111126) Reference actual Dockerfile var for these port numbers
+  // (so we don't hardcode these numbers in multiple places)
+  afe_port = '6010';
+  mobmonitor_port = '9991';
+
+  afe_link = this._format_afe_link(window.location.hostname, this.afe_port);
+  mobmonitor_link = this._format_mobmonitor_link(window.location.hostname, this.mobmonitor_port);
+
   navTabs = [];
   navTestRunMenuOptions = [];
 
@@ -74,6 +82,14 @@ export class AppSidebarComponent implements OnInit {
     if (this.isFeatureEnabled(feature)) {
       entryList.push(sidebarEntry);
     }
+  }
+
+  _format_afe_link(hostname: string, port: string) {
+    return `http://${hostname}:${port}/afe`;
+  }
+
+  _format_mobmonitor_link(hostname: string, port: string) {
+    return `http://${hostname}:${port}/static/index.html`;
   }
 
   ngOnInit() {}
