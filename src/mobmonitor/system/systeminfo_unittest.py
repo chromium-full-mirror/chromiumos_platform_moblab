@@ -14,8 +14,11 @@ import os
 import time
 import unittest
 
-# necessary in order to get systeminfo.py to import osutils correctly
+from unittest.mock import MagicMock
+
+# necessary in order to get systeminfo.py to import cli correctly
 import sys
+sys.modules['moblab_common.utils'] = MagicMock()
 sys.path.append('../') # we can run the test from mobmonitor/system/
 sys.path.append('.') # or from mobmonitor/
 import systeminfo
@@ -359,8 +362,9 @@ class DiskTest(unittest.TestCase):
 
     self.assertEqual(disk.BlockDevices(device), data)
 
-  @mock.patch('systeminfo.osutils')
-  def testBlockDevice(self, MockOsUtils):
+  @mock.patch('systeminfo.list_block_devices')
+  @mock.patch('systeminfo.cli')
+  def testBlockDevice(self, mock_cli, mock_list_block_devices):
     """Test block device info when there is no record or a record is stale."""
     disk = self._CreateDisk(1)
 
@@ -372,9 +376,9 @@ class DiskTest(unittest.TestCase):
     keys = ['NAME', 'RM', 'TYPE', 'SIZE']
     BlockDevice = collections.namedtuple('BlockDevice', keys)
     mock_lsblk = BlockDevice('sda1', 'RM', 'TYPE', mock_size)
-    systeminfo.osutils.list_block_devices.return_value = [mock_lsblk]
+    systeminfo.list_block_devices.return_value = [mock_lsblk]
 
-    systeminfo.osutils.resolve_symlink.return_value = '/dev/sda1'
+    systeminfo.cli.resolve_symlink.return_value = '/dev/sda1'
 
     def side_effect(*args, **kwargs):
       cmd = args[0]
@@ -382,7 +386,7 @@ class DiskTest(unittest.TestCase):
         return '\n'.join(mock_ids)
       if systeminfo.SYSTEMFILE_DEV_DISKBY['labels'] in cmd:
         return '\n'.join(mock_labels)
-    systeminfo.osutils.run_command.side_effect = side_effect
+    systeminfo.cli.run_command.side_effect = side_effect
 
     mock_blockdevice = [systeminfo.RESOURCE_BLOCKDEVICE(mock_device,
                                                         mock_size,

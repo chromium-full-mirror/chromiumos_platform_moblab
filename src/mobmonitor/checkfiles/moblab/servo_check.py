@@ -6,7 +6,7 @@
 
 
 
-from util import osutils
+from moblab_common.utils import cli
 
 SERVO_VID = b'18d1'
 SERVO_PID = [b'5002', b'501b']
@@ -23,7 +23,7 @@ SERVO_PID = [b'5002', b'501b']
 #       1 if a Servo device could not be found.
 #     """
 #     cmd = ['lsusb']
-#     usbs = osutils.sudo_run_command(cmd).strip()
+#     usbs = cli.sudo_run_command(cmd).strip()
 #     for pid in SERVO_PID:
 #       servo_id = b'%s:%s' % (SERVO_VID, pid)
 #       for usb in usbs.split(b'\n'):

@@ -4,17 +4,16 @@
 # found in the LICENSE file.
 
 import docker
-from util import config
-from util import osutils
-from .diagnostic_error import DiagnosticError
-from .abstract_diagnostic_check import AbstractDiagnosticCheck
 import json
+import logging
 import sys
+
+from .abstract_diagnostic_check import AbstractDiagnosticCheck
+from .diagnostic_error import DiagnosticError
 
 from moblab_common import afe_connector
 from moblab_common import config_connector
 
-import logging
 
 sys.path.append('..')
 

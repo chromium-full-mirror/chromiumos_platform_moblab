@@ -11,7 +11,7 @@
 # from moblab import moblab_actions
 # from moblab import common
 
-# from util import osutils
+# from moblab_common.utils import cli
 # from system import systeminfo
 
 # class DISK_DEVICE_CODES:
@@ -87,7 +87,7 @@
 #     usbs = []
 #     for usb in self.useable_usbs:
 #       cmd = ['file', '-L', '-s', usb.device]
-#       output = osutils.sudo_run_command(
+#       output = cli.sudo_run_command(
 #             cmd, error_code_ok=True).strip()
 #       if common.MOBLAB_FILESYSTEM in output:
 #         usbs.append(usb)

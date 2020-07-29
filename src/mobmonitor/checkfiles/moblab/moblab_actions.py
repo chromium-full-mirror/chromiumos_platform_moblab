@@ -4,15 +4,10 @@
 
 """Repair actions for moblab health checks."""
 
-
-
-from moblab import common
-
 import os
 import re
 
-from util import osutils
-
+from moblab_common.utils import cli
 
 class AbstractAction:
 
@@ -49,7 +44,7 @@ class ClearOldDbRecords(AbstractAction):
 
     def run(self, params):
         cmd = ['/usr/local/autotest/contrib/db_cleanup.py', params['date']]
-        osutils.sudo_run_command(cmd)
+        cli.sudo_run_command(cmd)
 
 
 class ClearLogs(AbstractAction):
@@ -70,7 +65,7 @@ class ClearLogs(AbstractAction):
 
         if files_to_remove:
           cmd = ['rm'] + files_to_remove
-          osutils.sudo_run_command(cmd)
+          cli.sudo_run_command(cmd)
 
 
 #
@@ -86,4 +81,4 @@ class LaunchUpstartService(AbstractAction):
 
     def run(self, params):
         cmd = ['start', self.service]
-        osutils.sudo_run_command(cmd)
+        cli.sudo_run_command(cmd)

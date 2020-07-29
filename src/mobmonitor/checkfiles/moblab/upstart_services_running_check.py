@@ -4,13 +4,11 @@
 
 """Ensure essential moblab services are up and running."""
 
+import os
+import logging
 
 from moblab import moblab_actions
-
-import os
-
-from util import osutils
-import logging
+from moblab_common.utils import cli
 
 
 LOGGER = logging.getLogger(__name__)
@@ -37,7 +35,7 @@ def UpstartRunning(service):
       False otherwise.
     """
     # cmd = ['status', service]
-    # output = osutils.sudo_run_command(cmd, error_code_ok=True)
+    # output = cli.sudo_run_command(cmd, error_code_ok=True)
 
     # if output is not None and 'start/running' in output:
     #   return True
@@ -65,7 +63,7 @@ def ServiceRunning(service):
       False otherwise.
     """
     cmd = ['ps', 'aux']
-    output = osutils.run_command(cmd, error_code_ok=True).strip()
+    output = cli.run_command(cmd, error_code_ok=True).strip()
 
     for line in output.splitlines():
         if service in line.encode:

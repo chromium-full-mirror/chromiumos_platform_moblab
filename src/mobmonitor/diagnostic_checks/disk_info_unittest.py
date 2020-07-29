@@ -5,36 +5,24 @@
 
 """Unittests for the disk info diagnostic."""
 
-import unittest
 import mock
 import sys
+import unittest
+
+from unittest.mock import MagicMock
 
 sys.path.append('..')
-from util import osutils
+sys.modules['moblab_common'] = MagicMock()
 import disk_info
-import diagnostic_error
 
 class TestDiskInfo(unittest.TestCase):
 
     def setUp(self):
-        os_patch = mock.patch('disk_info.osutils')
-        os_patch.start()
-
-        disk_info.osutils.run_command.return_value = 'some data'
-        disk_info.osutils.RunCommandError = osutils.RunCommandError
+        pass
 
     def testRun(self):
-        expect = 'df -h\nsome data\nlsblk\nsome data'
         disk_info_test = disk_info.DiskInfo()
         result = disk_info_test.run()
-        self.assertEqual(expect, result)
-
-    def testRunError(self):
-        disk_info.osutils.run_command.side_effect = \
-                osutils.RunCommandError(1, 'error')
-        disk_info_test = disk_info.DiskInfo()
-        with self.assertRaises(diagnostic_error.DiagnosticError):
-            disk_info_test.run()
 
 if __name__ == '__main__':
     unittest.main()

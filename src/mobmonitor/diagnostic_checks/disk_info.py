@@ -3,11 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from moblab_common import host_connector
-from util import osutils
-from .diagnostic_error import DiagnosticError
-from .abstract_diagnostic_check import AbstractDiagnosticCheck
 import sys
+
+from .abstract_diagnostic_check import AbstractDiagnosticCheck
+from moblab_common import host_connector
+
 
 sys.path.append('..')
 

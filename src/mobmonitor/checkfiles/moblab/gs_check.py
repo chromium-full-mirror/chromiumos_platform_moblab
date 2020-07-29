@@ -9,7 +9,7 @@
 import netifaces
 import os
 
-from util import osutils
+from moblab_common.utils import cli
 from util import config
 
 
@@ -65,8 +65,8 @@ def GetIp():
 #     cmd = ['timeout', '-s', '9', str(GSUTIL_TIMEOUT_SEC),
 #            'gsutil', 'ls', '-b', gs_url]
 #     try:
-#         osutils.sudo_run_command(cmd, user=GSUTIL_USER)
-#     except osutils.RunCommandError:
+#         cli.sudo_run_command(cmd, user=GSUTIL_USER)
+#     except cli.RunCommandError:
 #         return False
 
 #     return True

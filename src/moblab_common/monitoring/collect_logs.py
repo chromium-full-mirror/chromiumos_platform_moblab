@@ -5,18 +5,16 @@
 
 """Simple log collection script for Mob* Monitor"""
 
-
-
 import glob
 import os
 import tempfile
 import shutil
 
-from util import osutils
-
-from moblab_common import host_connector
 from moblab_common import afe_connector
 from moblab_common import config_connector
+from moblab_common import host_connector
+from moblab_common.utils import cli
+
 
 TMPDIR = '/tmp'
 TMPDIR_PREFIX = 'moblab_logs_'
@@ -36,7 +34,7 @@ def remove_old_tarballs():
 
 def collect_logs():
   remove_old_tarballs()
-  osutils.safe_mkdir(TMPDIR)
+  cli.safe_mkdir(TMPDIR)
   tempdir = tempfile.mkdtemp(prefix=TMPDIR_PREFIX, dir=TMPDIR)
   os.chmod(tempdir, 0o777)
 
@@ -50,7 +48,7 @@ def collect_logs():
         shutil.copyfile(path, os.path.join(tempdir, name), follow_symlinks=False)
 
     status_file = os.path.join(tempdir, 'mobmonitor_getstatus')
-    status = osutils.run_command([
+    status = cli.run_command([
             'curl', 'http://localhost:9991/GetStatus', '-o', status_file])
 
     serialfile = os.path.join(tempdir, 'serialno')
@@ -66,6 +64,6 @@ def collect_logs():
 
   finally:
     tarball = '%s.tgz' % tempdir
-    osutils.create_tarball(tarball, tempdir)
-    osutils.rm_dir(tempdir, ignore_missing=True)
+    cli.create_tarball(tarball, tempdir)
+    cli.rm_dir(tempdir, ignore_missing=True)
   return tarball

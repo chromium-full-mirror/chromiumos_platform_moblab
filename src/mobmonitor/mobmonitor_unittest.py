@@ -15,7 +15,6 @@ import mock
 import mobmonitor
 
 from checkfile import manager
-from util import osutils
 
 
 class MockCheckFileManager(object):

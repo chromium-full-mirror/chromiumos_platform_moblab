@@ -8,7 +8,7 @@
 
 import netifaces
 
-from util import osutils
+from moblab_common.utils import cli
 
 
 # class InternetAccess(object):
@@ -33,9 +33,9 @@ from util import osutils
 #     for dns in self.DNS:
 #       cmd = ['ping', '-W', self.PING_WAIT_SEC, '-c', self.PING_COUNT, dns]
 #       try:
-#           osutils.run_command(cmd)
+#           cli.run_command(cmd)
 #           return 0
-#       except osutils.RunCommandError as e:
+#       except cli.RunCommandError as e:
 #           pass
 
 #     return -1

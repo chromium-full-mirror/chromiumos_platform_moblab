@@ -39,10 +39,11 @@ redundant system checks being performed.
 import collections
 import functools
 import itertools
+import re
 import os
 import time
 
-from util import osutils
+from moblab_common.utils import cli
 
 
 SYSTEMFILE_PROC_MOUNTS = '/proc/mounts'
@@ -89,6 +90,30 @@ CPU_ATTRS = ('cpu', 'user', 'nice', 'system', 'idle', 'iowait', 'irq',
 CPU_IDLE_ATTRS = frozenset(['idle', 'iowait'])
 CPU_NONIDLE_ATTRS = frozenset(['user', 'nice', 'system', 'irq', 'softirq'])
 
+
+def list_block_devices():
+  """Lists all block devices.
+
+  Returns:
+      A list of BlockDevice items with attributes 'NAME', 'RM', 'TYPE',
+      'SIZE' (RM stands for removable).
+  """
+  keys = ['NAME', 'RM', 'TYPE', 'SIZE']
+  BlockDevice = collections.namedtuple('BlockDevice', keys)
+
+  cmd = ['lsblk', '--pairs', '--bytes']
+  cmd += ['--output', ','.join(keys)]
+
+  output = cli.run_command(cmd).strip()
+  devices = []
+  for line in output.splitlines():
+    d = {}
+    for k, v in re.findall(r'(\S+?)=\"(\w*?)\"', line.decode('utf-8')):
+      d[k] = v
+
+    devices.append(BlockDevice(**d))
+
+  return devices
 
 def CheckStorage(resource_basename):
   """Decorate information functions to retrieve stored records if valid.
@@ -340,7 +365,7 @@ class Disk(SystemInfoStorage):
 
     This method combines information from:
       (1) Reading through the SYSTEMFILE_DEV_DISKBY directories.
-      (2) Executing the 'lsblk' command provided by osutils.ListBlockDevices.
+      (2) Executing the 'lsblk' command provided by list_block_devices.
 
     Returns:
       A list of named tuples. Each tuple has the following fields:
@@ -362,14 +387,14 @@ class Disk(SystemInfoStorage):
     for prop, diskdir in SYSTEMFILE_DEV_DISKBY.items():
       cmd = ['find', diskdir, '-lname', '*%s' % devicefilter]
 
-      output = osutils.run_command(cmd)
+      output = cli.run_command(cmd)
 
       if not output:
         continue
 
       results = output.split()
       for result in results:
-        devicename = os.path.abspath(osutils.resolve_symlink(result))
+        devicename = os.path.abspath(cli.resolve_symlink(result))
         result = os.path.basename(result)
 
         # Ensure that each of our data dicts have the same keys.
@@ -383,7 +408,7 @@ class Disk(SystemInfoStorage):
           labels[devicename].append(result)
 
     # Collect lsblk information.
-    for device in osutils.list_block_devices():
+    for device in list_block_devices():
       devicename = os.path.join('/dev', device.NAME)
       if devicename in ids:
         sizes[devicename] = int(device.SIZE)

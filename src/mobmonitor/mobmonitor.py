@@ -16,13 +16,14 @@ import argparse
 
 from cherrypy.lib.static import serve_file
 from checkfile import manager as cf_manager
-from util import collect_logs
 
 from diagnostic_checks import manager as dc_manager
 
 from moblab_common import afe_connector
-from moblab_common import feedback_connector
+from moblab_common.monitoring import collect_logs
 from moblab_common import config_connector
+from moblab_common import feedback_connector
+
 
 
 STATICDIR = '/etc/moblab/mobmonitor/static/'
