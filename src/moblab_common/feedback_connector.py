@@ -4,15 +4,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 import base64
+import logging
 import urllib.parse
-
-from moblab_common import moblab_info
 
 from datetime import datetime
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import storage
 
-import logging
+from moblab_common import moblab_info
+from moblab_common.utils.cli import CopyFile
+
 
 class FeedbackPath():
   FEEDBACK = 'feedback'
@@ -30,13 +31,15 @@ class MoblabFeedbackConnector(object):
     # TODO: Feedback will eventually be extended to include additional data beyond image and feedback text.
     raise NotImplementedError
 
-  def upload_feedback(self, contact_email=None, feedback=None, screenshot=None, filenames=[]):
+  def upload_feedback(self, contact_email=None, feedback=None, screenshot=None, files=[]):
     """Uploads image and feedback text to GCS.
 
     Args:
       contact_email: string email by which feedback submitter can be contacted.
       feedback: Text string of feedback.
       screenshot: Base 64 byte string representing a png screenshot image.
+      files: A list of CopyFile tuples (src, name) where src is the location of the
+      file on the local machine, and name is the desired name to upload as.
 
     Returns:
       A tuple (path, url) where path is the directory of the uploaded info, and
@@ -54,9 +57,9 @@ class MoblabFeedbackConnector(object):
       feedback_blob = storage.Blob(feedback_dir_path + '/' + FeedbackPath.FEEDBACK, bucket)
       feedback_blob.upload_from_string("Contact email: " + contact_email + "\n" + feedback)
 
-    for filename in filenames:
-      filename_blob = storage.Blob(feedback_dir_path + filename, bucket)
-      filename_blob.upload_from_filename(filename)
+    for path, filename in files:
+      filename_blob = storage.Blob(feedback_dir_path + '/' + filename, bucket)
+      filename_blob.upload_from_filename(path)
 
     url = FeedbackPath.GCS_URL + '/' +\
           self.moblab_bucket_name + '/' +\

@@ -32,7 +32,11 @@ class MoblabFeedbackConnectorTest(unittest.TestCase):
     mock_moblab_info.get_serial_number.return_value = MOCK_MOBLAB_SERIAL_NO
     mock_datetime.utcnow.return_value = '2020-01-01 11:11:11'
 
-    screenshot_path, screenshot_url = self.feedback_connector.upload_feedback()
+    screenshot_path, screenshot_url = self.feedback_connector.upload_feedback(
+        contact_email='fake@email.com',
+        feedback='Feedback feedback feedback.',
+        files=[('/mock/path/to/tar', 'files.tgz')]
+    )
     assert(screenshot_path == 'feedback/4HBWUSIE15646458/2020-01-01 11:11:11')
     assert(screenshot_url ==
            'https://pantheon.corp.google.com/storage/browser/_details/moblab-mock-bucket/' +
