@@ -47,11 +47,17 @@ FROM nginx:alpine
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
      --disabled-password --gecos "" moblab
 
+RUN mkdir -p /var/cache/nginx/client_temp
+RUN mkdir -p /var/cache/nginx/proxy_temp
+RUN chown -R moblab /var/cache/nginx
+RUN chmod -R uog+rw /var/run
+
 # copy artifact build from the 'build environment'
 COPY --chown=moblab --from=build /app/dist /etc/nginx/html/
 
 COPY --chown=moblab moblab-ui/nginx.conf /etc/nginx
 RUN rm -f /etc/nginx/conf.d/*
+RUN rm -f /docker-entrypoint.d/*
 
 EXPOSE 6010
 
