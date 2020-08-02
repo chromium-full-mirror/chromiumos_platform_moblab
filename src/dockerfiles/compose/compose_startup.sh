@@ -26,7 +26,7 @@ then
 else
     # This is in case the device was not shutdown cleanly there might be
     # restarted containers (restarted by dockerd)
-    docker-compose down -t 300
+    docker-compose down
 
     docker-compose pull remote_access
     docker-compose up -d remote_access
