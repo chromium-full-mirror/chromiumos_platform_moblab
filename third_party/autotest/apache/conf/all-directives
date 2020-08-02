@@ -4,6 +4,13 @@
 
 DocumentRoot /usr/local/autotest/apache/www/
 
+<FilesMatch "\.*\.*">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, must-revalidate"
+    </IfModule>
+</FilesMatch>
+
+
 Include "/usr/local/autotest/apache/conf/logging-directives"
 Include "/usr/local/autotest/apache/conf/cgi-directives"
 Include "/usr/local/autotest/apache/conf/gwt-directives"
