@@ -33,7 +33,7 @@ packaging==19.2           # via -r requirements.in, pytest
 parallel-ssh==1.9.1       # via -r requirements.in
 paramiko==2.7.1           # via parallel-ssh
 pluggy==0.13.0            # via -r requirements.in, pytest
-protobuf==3.10.0          # via -r requirements.in, google-api-core, googleapis-common-protos
+protobuf==3.12.2          # via -r requirements.in, google-api-core, googleapis-common-protos
 py==1.8.0                 # via -r requirements.in, pytest, retry
 pyasn1-modules==0.2.7     # via -r requirements.in, google-auth
 pyasn1==0.4.7             # via -r requirements.in, pyasn1-modules, rsa
