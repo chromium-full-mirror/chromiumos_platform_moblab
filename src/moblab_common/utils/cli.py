@@ -15,6 +15,11 @@ import re
 
 LOGGER = logging.getLogger(__name__)
 
+# tuple for carrying holding arguments for a cp operation.
+# src: path to file to copy on local machine
+# name: filename of the copy
+CopyFile = collections.namedtuple('CopyFile', ['src', 'name'])
+
 class RunCommandError(subprocess.CalledProcessError):
     def __init__(self, returncode, cmd):
         super(RunCommandError, self).__init__(returncode, cmd)
@@ -63,14 +68,20 @@ def sudo_run_command(cmd, user='root', error_code_ok=False, shell=False):
     return run_command(cmd, log=True, error_code_ok=error_code_ok,
             shell=shell)
 
-def create_tarball(tarball_name, directory):
+def create_tarball(tarball_name, directory, starting_directory=None):
     """Creates a gzipped tar archive
 
     Args:
         tarball_name: string name for the tarball
         directory: directory to archive the contents of
+        starting_directory: context directory to find directory within (
+          useful for hiding undesired parent directory structures )
     """
-    run_command(['tar', '-czf', tarball_name, directory])
+    args = ['-czf', tarball_name, directory]
+    if starting_directory:
+      args = ['-C', starting_directory] + args
+    args = ['tar'] + args
+    run_command(args)
 
 def safe_mkdir(path):
     """Create a directory and any parent directories if they don't exist.
