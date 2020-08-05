@@ -11,3 +11,4 @@ pyparsing
 setuptools
 wheel
 mock
+python-dateutil
