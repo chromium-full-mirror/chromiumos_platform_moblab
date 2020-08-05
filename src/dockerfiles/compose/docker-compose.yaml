@@ -270,7 +270,7 @@ services:
       - WATCHTOWER_TAG=${WATCHTOWER}
   ##############################################################################
   remote_agent:
-    image: gcr.io/chromeos-partner-moblab/moblab-remote-agent:${REMOTE_AGENT:-release}
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-remote-agent:${REMOTE_AGENT:-release}
     user: moblab
     hostname: moblab-remote-agent
     restart: on-failure
