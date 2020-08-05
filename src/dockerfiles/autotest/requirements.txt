@@ -45,7 +45,7 @@ mysqlclient==1.4.6        # via -r requirements.txt
 netifaces==0.10.9         # via -r requirements.txt
 parallel-ssh==1.9.1       # via -r requirements.txt
 paramiko==2.7.1           # via -r requirements.txt, parallel-ssh
-protobuf==3.11.3          # via -r requirements.txt, google-api-core, googleapis-common-protos
+protobuf==3.12.2          # via -r requirements.txt, google-api-core, googleapis-common-protos
 pyasn1-modules==0.2.8     # via -r requirements.txt, google-auth
 pyasn1==0.4.8             # via -r requirements.txt, pyasn1-modules, rsa
 pycparser==2.20           # via -r requirements.txt, cffi
