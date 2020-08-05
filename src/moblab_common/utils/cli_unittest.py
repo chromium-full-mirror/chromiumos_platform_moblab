@@ -131,6 +131,21 @@ class TestResolveSymlink(unittest.TestCase):
         with self.assertRaises(ValueError):
             cli.resolve_symlink('file')
 
+class TestRunGcloudBucketDiagnosis(unittest.TestCase):
+    @mock.patch('cli.run_command')
+    def test_run_gcloud_bucket_diagnosis_called_with_correct_args(self, mock_run_cmd):
+        cli.run_gcloud_bucket_diagnosis('test.json', 'test_bucket')
+        mock_run_cmd.assert_called_with(['gsutil perfdiag -o test.json gs://test_bucket'],
+                                        log=True, shell=True)
+
+    @mock.patch('cli.subprocess.check_output')
+    def test_run_gcloud_bucket_diagnosis_raises_exception(self, mock_check_output):
+        mock_check_output.side_effect=cli.subprocess.CalledProcessError(1, 'bad_cmd')
+        with self.assertRaises(cli.subprocess.CalledProcessError), self.assertLogs('cli') as log:
+            cli.run_gcloud_bucket_diagnosis('test.json', 'test_bucket')
+        self.assertIn("Failed to run performance diagnosis on given google storage bucket: "
+                      "Command 'bad_cmd' returned non-zero exit status 1.", log.output[2])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+collectors:
+    MOBLAB_BASIC:
+        attributes:
+            - bucket_name
+            - moblab_host_id
+            - moblab_install_id
+            - milestone
+            - build_version
+            - ip_address
+            - channel
+            - description
+            - last_update_time
+        frequency:
+            # The unit of frequency is minutes/collection
+            DEFAULT: 60
+            WARNING: 120
+            ALERT: 480
+
+    DUT_BASIC:
+        attributes:
+            - bucket_name
+            - moblab_host_id
+            - moblab_install_id
+            - moblab_dut_id
+            - build_target
+            - model
+            - label
+            - is_locked
+            - lock_reason
+            - last_update_time
+        frequency:
+            # The unit of frequency is minutes/collection
+            DEFAULT: 60
+            WARNING: 120
+            ALERT: 480
+
+    DISK:
+        attributes:
+            - bucket_name
+            - moblab_host_id
+            - last_update_time
+            - disk_stats
+        frequency:
+            # The unit of frequency is minute
+            DEFAULT: 3
+            WARNING: 10
+            ALERT: 20
+
+    NETWORK:
+        attributes:
+            - bucket_name
+            - moblab_host_id
+            - last_update_time
+            - network_stats
+        frequency:
+            # The unit of frequency is minutes/collection
+            DEFAULT: 4
+            WARNING: 8
+            ALERT: 15
+
+    DUT_STATUS:
+        attributes:
+            - bucket_name
+            - moblab_host_id
+            - moblab_install_id
+            - moblab_dut_id
+            - last_update_time
+            - status
+        frequency:
+            # The unit of frequency is minutes/collection
+            DEFAULT: 2
+            WARNING: 4
+            ALERT: 10
+
+network_thresholds:
+    upload_bits_per_second:
+        low: 0              # low = [0Mbps, 1.2Mbps)
+        medium: 1200000     # medium = [1.2Mbps, 10Mbps)
+        high: 10000000      # high = [10Mbps, infinity)
+
+memory_usage_thresholds:
+    low: 0              # low = [0GB/32GB, 30GB/32GB)
+    medium: 0.9375      # medium = [30GB/32GB, 31GB/32GB)
+    high: 0.96875       # high = [31GB/32GB, 32GB/32GB]

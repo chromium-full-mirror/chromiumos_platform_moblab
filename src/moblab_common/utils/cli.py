@@ -145,3 +145,22 @@ def resolve_symlink(file_name, root='/'):
         else:
             file_name = os.path.join(os.path.dirname(file_name), link)
     return file_name
+
+# TODO(chromium:1114972): Consolidate perfdiag usage in the Moblab code base.
+def run_gcloud_bucket_diagnosis(output_file, bucket_name):
+    """Run performance diagnosis on the given google storage bucket.
+
+    Args:
+        output_file: A path to the output file.
+        bucket_name: The google storage bucket name.
+
+    Raises:
+        RunCommandError if the command fails to run.
+    """
+    try:
+        run_command(['gsutil perfdiag -o %s gs://%s' % (output_file, bucket_name)],
+                     log=True, shell=True)
+    except RunCommandError as err:
+        LOGGER.exception('Failed to run performance diagnosis on given google storage bucket: %s'
+                         % err)
+        raise

@@ -18,13 +18,13 @@ class Constants:
     LAST_UPDATE_TIME = 'last_update_time'
     MOBLAB_HOST_ID = 'moblab_host_id'
     MOBLAB_INSTALL_ID = 'moblab_install_id'
+    IP_ADDRESS = 'ip_address'
 
     # The proto fields of MoblabHost
     BUILD_VERSION = 'build_version'
     CHANNEL = 'channel'
     DESCRIPTION = 'description'
     DISK_STATS = 'disk_stats'
-    IP_ADDRESS = 'ip_address'
     MILESTONE = 'milestone'
     NETWORK_STATS = 'network_stats'
 
@@ -34,7 +34,6 @@ class Constants:
     LABEL = 'label'
     LOCK_REASON = 'lock_reason'
     MOBLAB_DUT_ID = 'moblab_dut_id'
-    MOBLAB_DUT_IP = 'moblab_dut_ip'
     MODEL = 'model'
     STATUS = 'status'
 

@@ -3,29 +3,25 @@
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 import argparse
 import sys
-import time
+
 from concurrent import futures
 
+import logging
 import grpc
 
 # pylint: disable=import-error
-import remoteagentrpc_pb2
-# pylint: disable=import-error
 import remoteagentrpc_pb2_grpc
 
-import logging
+from services.scheduler.scheduler import Scheduler
 
 
 class RemoteLoggingAgent(remoteagentrpc_pb2_grpc.RemoteLoggingAgentServicer):
 
     def __init__(self):
         super(RemoteLoggingAgent, self).__init__()
-
-    def hello_world(self, request, _context):
-        response = remoteagentrpc_pb2.HelloWorldResponse(message="Hello World")
-        return response
 
 
 def setup_logging(level):
@@ -36,13 +32,14 @@ def setup_logging(level):
     """
     logging.getLogger().handlers = []
     logging.getLogger().setLevel(level)
-    fh = logging.FileHandler('/var/log/moblab/remote_agent.log')
-    fh.setLevel(level)
+    file_handler = logging.FileHandler('/var/log/moblab/remote_agent.log')
+    file_handler.setLevel(level)
+
     # create formatter and add it to the handlers
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    logging.getLogger().addHandler(fh)
+    file_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(file_handler)
 
 
 def parse_arguments(argv):
@@ -55,6 +52,7 @@ def parse_arguments(argv):
 
 
 def serve():
+    """Starts the moblab remote agent server."""
     options = parse_arguments(sys.argv[1:])
     logging_severity = logging.INFO
     if options.verbose:
@@ -65,18 +63,15 @@ def serve():
 
     remoteLoggingAgent = RemoteLoggingAgent()
 
-    try:
-        remoteagentrpc_pb2_grpc.add_RemoteLoggingAgentServicer_to_server(
-            remoteLoggingAgent, server)
+    remoteagentrpc_pb2_grpc.add_RemoteLoggingAgentServicer_to_server(
+        remoteLoggingAgent, server)
 
-        server.add_insecure_port('[::]:6050')
-        logging.info('Starting server')
-        server.start()
-        while True:
-            logging.info('Server sleeping')
-            time.sleep(60 * 60 * 24)
-    except KeyboardInterrupt:
-        server.stop(0)
+    server.add_insecure_port('[::]:6050')
+    logging.info('Starting server')
+    server.start()
+
+    scheduler = Scheduler()
+    scheduler.schedule()
 
 
 if __name__ == '__main__':

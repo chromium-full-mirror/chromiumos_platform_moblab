@@ -38,28 +38,30 @@ message NetworkStats {
 }
 
 message MoblabHost {
- string moblab_host_id = 1;
- string moblab_install_id = 2;
- optional uint32 milestone = 3;
- optional string build_version = 4;
- optional string ip_address = 5;
- optional string channel = 6;
- optional string description = 7;
- optional DiskStats disk_stats = 8;
- optional NetworkStats network_stats = 9;
- optional uint64 last_update_time = 10; // in millisecond
+string moblab_host_id = 1;
+string moblab_install_id = 2;
+string bucket_name = 3;
+optional uint32 milestone = 4;
+optional string build_version = 5;
+optional string ip_address = 6;
+optional string channel = 7;
+optional string description = 8;
+optional DiskStats disk_stats = 9;
+optional NetworkStats network_stats = 10;
+optional uint64 last_update_time = 11; // in millisecond
 }
 
 message MoblabDut {
- string moblab_host_id = 1;
- string moblab_install_id = 2;
- string moblab_dut_id = 3;
- optional string moblab_dut_ip = 4;
- optional string build_target = 5;
- optional string model = 6;
- optional DutStatus status = 7;
- repeated string label = 8;
- optional bool is_locked = 9;
- optional string lock_reason = 10;
- optional uint64 last_update_time = 11; // in millisecond
+string moblab_host_id = 1;
+string moblab_install_id = 2;
+string bucket_name = 3;
+string moblab_dut_id = 4;
+optional string ip_address = 5;
+optional string build_target = 6;
+optional string model = 7;
+optional DutStatus status = 8;
+repeated string label = 9;
+optional bool is_locked = 10;
+optional string lock_reason = 11;
+optional uint64 last_update_time = 12; // in millisecond
 }

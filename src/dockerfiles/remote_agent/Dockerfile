@@ -44,7 +44,8 @@ RUN apt-get update && apt-get install -yq \
     gcc-multilib \
     cmake \
     curl \
-    gnupg
+    gnupg \
+    sudo
 
 COPY --chown=moblab src/dockerfiles/remote_agent/requirements.txt ./
 RUN pip install --upgrade pip
@@ -62,6 +63,11 @@ RUN echo \
 RUN pip install --upgrade google-cloud-pubsub
 
 RUN DEBIAN_FRONTEND='noninteractive' apt-get -y install nmap
+
+RUN pip install pyyaml
+
+RUN sudo apt-get -y install gcc python3-dev
+RUN sudo pip3 install psutil
 
 # moblab_common
 COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
