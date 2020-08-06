@@ -161,6 +161,7 @@ services:
 
     environment:
       - LABEL=$AT_MONITORDB
+      - REGISTRY_URI=$REGISTRY_URI
 
     ulimits:
       nofile:
