@@ -137,3 +137,24 @@ class PubSubBasedClient(object):
             gcs_uri, serial_number, moblab_id
         )
         return self.pubsub_client.publish_notifications(_PUBSUB_TOPIC, [message])
+
+    def send_messages_with_attributes(self, pubsub_topic, msg_attributes_list, data):
+        """Publishes a list of pubsub messages containing the 'attributes' field
+           to the cloud console.
+
+        For each message, the 'data' field is the same but the 'attributes' field
+        is individualized.
+
+        Args:
+            pubsub_topic: The cloud pubsub topic.
+            msg_attributes_list: A list of pubsub message attribute maps.
+            data: The message data as a string; can't be none or empty.
+
+        Returns:
+            A list of pubsub message ids, and empty if fails.
+
+        Raises:
+            KeyError if data is none or empty.
+        """
+        messages = [self._create_message(data, attr) for attr in msg_attributes_list]
+        return self.pubsub_client.publish_notifications(pubsub_topic, messages)
