@@ -7,6 +7,7 @@ import argparse
 import calendar
 import datetime
 import grpc
+import logging
 import os
 import re
 import sys
@@ -26,8 +27,8 @@ from moblab_common import config_connector
 from moblab_common import devserver_connector
 from moblab_common import feedback_connector
 from moblab_common import host_connector
+from moblab_common import moblab_info
 
-import logging
 
 model_re = re.compile(r'^model:(.*)')
 pool_re = re.compile(r'^pool:(.*)')
@@ -778,7 +779,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
             GetNetworkInfoResponse
         """
-        network_info = self.service.get_network_info()
+        network_info = moblab_info.get_network_info()
         response = moblabrpc_pb2.GetNetworkInfoResponse(
             moblab_hostname=network_info['server_ip'],
             is_connected=network_info['is_connected']
@@ -869,7 +870,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
             GetVersionInfoResponse
         """
-        version_info = self.service.get_version_info()
+        version_info = moblab_info.get_version_info()
         response = moblabrpc_pb2.GetVersionInfoResponse(
             chromeos_release_version=version_info['CHROMEOS_RELEASE_VERSION'],
             chromeos_release_track=version_info['CHROMEOS_RELEASE_TRACK'],

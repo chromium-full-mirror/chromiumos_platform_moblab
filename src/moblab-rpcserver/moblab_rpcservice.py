@@ -12,7 +12,6 @@ import socket
 from moblab_common import build_connector
 from moblab_common import dut_connector
 from moblab_common import host_connector
-from moblab_common import moblab_info
 try:
     from chromite.lib import cros_logging as logging
 except ImportError:
@@ -21,8 +20,6 @@ from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
 
-# File where information about the current device is stored.
-_ETC_LSB_RELEASE = '/etc/lsb-release'
 
 _DEFAULT_SUITE_TIMEOUT_MINS = 1440
 _SUITE_TIMEOUT_MAP = {
@@ -925,26 +922,3 @@ class MoblabService(object):
         finally:
             container.remove()
         return 'Update finished.'
-
-    def get_version_info(self):
-        """
-            Gets cloud version info of Moblab.
-        Returns:
-            A dict of ChromeOS and Moblab information (ex. serial number,
-            release version )
-        """
-        lines = open(_ETC_LSB_RELEASE).readlines()
-        version_info = {
-            x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}
-        version_info['MOBLAB_ID'] = moblab_info.get_or_create_id();
-        version_info['MOBLAB_SERIAL_NUMBER'] = moblab_info.get_serial_number();
-
-        try:
-            version_info['CHROMEOS_RELEASE_VERSION'] =\
-                version_info['CHROMEOS_RELEASE_BUILDER_PATH'].split('/')[1].strip()
-        except IndexError:
-            msg = 'Unable to parse ChromeOS release version.'
-            logging.error(msg)
-            raise MoblabRpcError(msg)
-
-        return version_info
