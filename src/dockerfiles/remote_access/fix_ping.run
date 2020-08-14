@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv bash
+
+exec /fix_ping.sh >> /var/log/moblab/fix_ping.log 2>&1

@@ -66,10 +66,17 @@ RUN echo "export \$HOME=/home/\"\$USER_NAME\"" >> /etc/cont-init.d/10-adduser
 RUN echo "addgroup --gid 412 docker" >> /etc/cont-init.d/10-adduser
 RUN echo "usermod -aG docker moblab" >> /etc/cont-init.d/10-adduser
 
+COPY src/dockerfiles/remote_access/fix_ping.sh /
+RUN chmod u+x /fix_ping.sh
+WORKDIR /etc/services.d/fix_ping
+COPY src/dockerfiles/remote_access/fix_ping.run ./run
+
 COPY src/tools/reboot /usr/local/bin
 COPY src/tools/factory_reset /usr/local/bin
 COPY src/tools/host_command.py /usr/local/bin
 RUN chmod uog+x /usr/local/bin/reboot
 RUN chmod uog+x /usr/local/bin/factory_reset
+
+WORKDIR /var/log
 
 #RUN echo "LogLevel DEBUG3" >> /etc/ssh/sshd_config
