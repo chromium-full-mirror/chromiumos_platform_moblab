@@ -74,8 +74,7 @@ class MoblabDUTConnector(object):
             self.connected_duts[ip] = DUTInfo(ip, mac_address)
 
     def run_command_on_connected_duts(self, command, timeout=300):
-        if not self.connected_ip_addresses:
-            self.find_duts()
+        self.find_duts()
         return self.run_command_on_ips(command, self.connected_ip_addresses,
                                        timeout)
 
@@ -187,5 +186,5 @@ class MoblabDUTConnector(object):
             if exit_code:
                 results.append((host, stderr))
             else:
-                results.append((host, stdout[0]))
+                results.append((host, stdout))
         return results
