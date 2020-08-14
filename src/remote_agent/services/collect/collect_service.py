@@ -1,4 +1,8 @@
-"""A collect service for collecting moblab and dut data"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 import subprocess
 import time
@@ -7,10 +11,13 @@ import json
 
 import remoteagentrpc_pb2
 
+from constants import Constants
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import dut_connector
 from moblab_common import host_connector
+from moblab_common.moblab_info import get_version_info
+from moblab_common.utils.cli import run_gcloud_bucket_diagnosis, RunCommandError
 
 # pylint: disable=no-member
 # pylint: disable=no-self-use
@@ -19,7 +26,7 @@ from moblab_common import host_connector
 _LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-class CollectService:
+class CollectService(Constants):
     """Class that collects data about moblab and its connected, enrolled duts.
 
     Attributes:
@@ -34,14 +41,8 @@ class CollectService:
         moblab_version_info: A dictionary of moblab version info obtained from afe connector.
         moblab_host_id: The host id of moblab.
         moblab_install_id: The install id of moblab.
+        bucket_name: The google storage cloud bucket name.
     """
-
-    HOST_ID = 'MOBLAB_SERIAL_NUMBER'
-    INSTALL_ID = 'MOBLAB_ID'
-    MILESTONE = 'CHROMEOS_RELEASE_CHROME_MILESTONE'
-    BUILD_VERSION = 'CHROMEOS_RELEASE_VERSION'
-    CHANNEL = 'CHROMEOS_RELEASE_TRACK'
-    DESCRIPTION = 'CHROMEOS_RELEASE_DESCRIPTION'
 
     def __init__(self):
         self.afe_connector = afe_connector.AFEConnector()
@@ -51,6 +52,7 @@ class CollectService:
         self.moblab_version_info = None
         self.moblab_host_id = None
         self.moblab_install_id = None
+        self.bucket_name = None
 
     def collect_moblab_key_attributes(self):
         """Collects the required attributes shared by moblab and duts.
@@ -59,10 +61,16 @@ class CollectService:
             A bool indicating whether the function has successfully
             collected key attributes.
         """
+        self.bucket_name = self.config_connector.get_cloud_bucket()
+        if not self.bucket_name:
+            _LOGGER.exception('Failed to get moblab key attributes because'
+                              ' cloud bucket name is none.')
+            return False
+
         try:
-            self.moblab_version_info = self.afe_connector.get_version_info()
-            self.moblab_host_id = self.moblab_version_info[self.HOST_ID].rstrip()
-            self.moblab_install_id = self.moblab_version_info[self.INSTALL_ID].rstrip()
+            self.moblab_version_info = get_version_info()
+            self.moblab_host_id = self.moblab_version_info[self.MOBLAB_HOST_ID_NAME].rstrip()
+            self.moblab_install_id = self.moblab_version_info[self.MOBLAB_INSTALL_ID_NAME].rstrip()
             return True
         except KeyError as err:
             _LOGGER.exception("Failed to get moblab key attributes for missing key: %s", err)
@@ -73,16 +81,18 @@ class CollectService:
 
         Returns: A MoblabHost protobuf message instance.
         """
-        if None in (self.moblab_host_id, self.moblab_install_id):
+        if None in (self.moblab_host_id, self.moblab_install_id, self.bucket_name):
             err_msg_1 = ' moblab_host_id' if self.moblab_host_id is None else ''
             err_msg_2 = ' moblab_install_id' if self.moblab_install_id is None else ''
+            err_msg_3 = ' bucket_name' if self.bucket_name is None else ''
             _LOGGER.exception("Failed to initiate moblab message because"
-                              "%s%s is/are none.", err_msg_1, err_msg_2)
+                              "%s%s%s is/are none.", err_msg_1, err_msg_2, err_msg_3)
             return None
 
         moblab = remoteagentrpc_pb2.MoblabHost()
         moblab.moblab_host_id = self.moblab_host_id
         moblab.moblab_install_id = self.moblab_install_id
+        moblab.bucket_name = self.bucket_name
         return moblab
 
     def create_moblab_basic_message(self):
@@ -97,11 +107,11 @@ class CollectService:
             return None
 
         try:
-            moblab.milestone = int(self.moblab_version_info[self.MILESTONE].rstrip())
-            moblab.build_version = self.moblab_version_info[self.BUILD_VERSION].rstrip()
+            moblab.milestone = int(self.moblab_version_info[self.MILESTONE_NAME].rstrip())
+            moblab.build_version = self.moblab_version_info[self.BUILD_VERSION_NAME].rstrip()
             moblab.ip_address = self.host_connector.get_ip()
-            moblab.channel = self.moblab_version_info[self.CHANNEL].rstrip()
-            moblab.description = self.moblab_version_info[self.DESCRIPTION].rstrip()
+            moblab.channel = self.moblab_version_info[self.CHANNEL_NAME].rstrip()
+            moblab.description = self.moblab_version_info[self.DESCRIPTION_NAME].rstrip()
         except KeyError as err:
             _LOGGER.exception("Failed to get moblab version attributes for missing key: %s", err)
         return moblab
@@ -199,44 +209,42 @@ class CollectService:
         if moblab is None:
             return None
 
-        bucket_name = self.config_connector.get_cloud_bucket()
-        if bucket_name is None:
-            _LOGGER.exception('Cloud bucket name is none.')
-            return None
+        try:
+            output_file = '/moblab/output.json'
+            run_gcloud_bucket_diagnosis(output_file, self.bucket_name)
 
-        cmd = ['gsutil perfdiag -o /moblab/output.json gs://{}' \
-            .format(bucket_name)]
-        cmd_result = subprocess.run(cmd, shell=True, check=True)
-        if cmd_result is None or cmd_result.returncode != 0:
-            _LOGGER.exception('Failed to obtain network status: %s', cmd_result.stderr)
-            return None
+            with open(output_file) as output:
+                network_json = json.load(output)
+            moblab.network_stats.upload_bits_per_second \
+                = int(network_json["write_throughput"]["bytes_per_second"] * 8)
+            moblab.network_stats.download_bits_per_second \
+                = int(network_json["read_throughput"]["bytes_per_second"] * 8)
+            moblab.network_stats.server_errors = network_json["request_errors"]
+            moblab.network_stats.broken_connections = network_json["connection_breaks"]
+            return moblab
 
-        with open('/moblab/output.json') as output:
-            network_json = json.load(output)
-        moblab.network_stats.upload_bits_per_second \
-            = int(network_json["write_throughput"]["bytes_per_second"] * 8)
-        moblab.network_stats.download_bits_per_second \
-            = int(network_json["read_throughput"]["bytes_per_second"] * 8)
-        moblab.network_stats.server_errors = network_json["request_errors"]
-        moblab.network_stats.broken_connections = network_json["connection_breaks"]
-        return moblab
+        except (RunCommandError, KeyError) as err:
+            _LOGGER.exception('Failed to get network status from network diagonosis: %s', err)
+            return None
 
     def _initiate_dut_message(self, dut_id):
         """Creates an initial dut message with required attributes.
 
         Returns: A MoblabDut protobuf message instance.
         """
-        if None in (self.moblab_host_id, self.moblab_install_id):
+        if None in (self.moblab_host_id, self.moblab_install_id, self.bucket_name):
             err_msg_1 = ' moblab_host_id' if self.moblab_host_id is None else ''
             err_msg_2 = ' moblab_install_id' if self.moblab_install_id is None else ''
+            err_msg_3 = ' bucket_name' if self.bucket_name is None else ''
             _LOGGER.exception("Failed to initiate dut message because"
-                              "%s%s is/are none.", err_msg_1, err_msg_2)
+                              "%s%s%s is/are none.", err_msg_1, err_msg_2, err_msg_3)
             return None
 
         moblab_dut = remoteagentrpc_pb2.MoblabDut()
         moblab_dut.moblab_host_id = self.moblab_host_id
         moblab_dut.moblab_install_id = self.moblab_install_id
         moblab_dut.moblab_dut_id = dut_id
+        moblab_dut.bucket_name = self.bucket_name
         return moblab_dut
 
     def _get_attribute_from_labels(self, attr, labels):
@@ -367,28 +375,35 @@ class CollectService:
 
         if not connected_devices or len(connected_devices) == 0 \
             or not moblab_dut_ids or len(moblab_dut_ids) == 0:
+            _LOGGER.exception('Dut serial numbers or connected devices list is empty/none.')
             return duts
 
         message_attributes = {'DUT_BASIC': self.create_dut_basic_message,
                               'DUT_STATUS': self.create_dut_status_message}
 
-        if attribute_type in message_attributes:
-            create_msg_func = message_attributes[attribute_type]
-
-            moblab_duts_ids_map = {}
-            for dut in moblab_dut_ids:
-                moblab_duts_ids_map[dut[0]] = dut[1] # dut[0] is the dut ip, dut[1] is the dut id
-
-            for dut_info_dict in connected_devices:
-                dut_ip = dut_info_dict['hostname']
-                if dut_ip in moblab_duts_ids_map:
-                    dut_id = moblab_duts_ids_map[dut_ip]
-                    dut = create_msg_func(dut_info_dict, dut_id)
-                    if dut:
-                        dut.moblab_dut_ip = dut_ip
-                        dut.last_update_time = round(time.time() * 1000) # in millisecond
-                        duts.append(dut)
-        else:
+        if attribute_type not in message_attributes:
             _LOGGER.exception('Dut does not have attribute type: %s', attribute_type)
+            return duts
+
+        create_msg_func = message_attributes[attribute_type]
+
+        moblab_duts_ids_map = {}
+        for dut in moblab_dut_ids:
+            # dut[0] is the dut ip, dut[1] is the dut id
+            if dut[1]:
+                moblab_duts_ids_map[dut[0]] = dut[1]
+
+        if not moblab_duts_ids_map:
+            return duts
+
+        for dut_info_dict in connected_devices:
+            dut_ip = dut_info_dict['hostname']
+            if dut_ip in moblab_duts_ids_map:
+                dut_id = moblab_duts_ids_map[dut_ip]
+                dut = create_msg_func(dut_info_dict, dut_id)
+                if dut:
+                    dut.ip_address = dut_ip
+                    dut.last_update_time = round(time.time() * 1000) # in millisecond
+                    duts.append(dut)
 
         return duts

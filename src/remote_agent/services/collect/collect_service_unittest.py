@@ -1,9 +1,16 @@
-"""Unit tests for collect_service module"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
+from io import StringIO
 from unittest import TestCase, main
 from unittest.mock import patch, call
 
 import collect_service
+
+from remote_agent.constants import Constants
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=no-member
@@ -11,12 +18,13 @@ import collect_service
 # pylint: disable=too-many-public-methods
 
 
-class CollectServiceTest(TestCase):
+class CollectServiceTest(TestCase, Constants):
     """Testing the CollectService code."""
 
     MOBLAB_IP = '100.1.1.1'
     HOST_ID = 'test_host_id'
     INSTALL_ID = 'test_install_id'
+    BUCKET_NAME = 'test_bucket'
     MILESTONE = 80
     BUILD_VERSION = '10000.1.0'
     CHANNEL = 'dev-channel'
@@ -39,6 +47,7 @@ class CollectServiceTest(TestCase):
         self.test_collect_service = collect_service.CollectService()
         self.test_collect_service.moblab_host_id = self.HOST_ID
         self.test_collect_service.moblab_install_id = self.INSTALL_ID
+        self.test_collect_service.bucket_name = self.BUCKET_NAME
         self.test_collect_service.moblab_version_info = {
             "CHROMEOS_RELEASE_CHROME_MILESTONE": str(self.MILESTONE) + '\n',
             "CHROMEOS_RELEASE_TRACK": self.CHANNEL + '\n',
@@ -69,8 +78,9 @@ class CollectServiceTest(TestCase):
         self.host_connector_patcher.stop()
         self.config_connector_patcher.stop()
 
-    def test_collect_moblab_key_attributes_succeeds(self):
-        self._set_moblab_version_info(self.test_collect_service.moblab_version_info)
+    @patch('collect_service.get_version_info')
+    def test_collect_moblab_key_attributes_succeeds(self, mock_get_version_info):
+        mock_get_version_info.return_value = self.test_collect_service.moblab_version_info
         self.test_collect_service.moblab_host_id = None
         self.test_collect_service.moblab_install_id = None
 
@@ -80,8 +90,9 @@ class CollectServiceTest(TestCase):
         self.assertEqual(self.test_collect_service.moblab_host_id, self.HOST_ID)
         self.assertEqual(self.test_collect_service.moblab_install_id, self.INSTALL_ID)
 
-    def test_collect_moblab_key_attributes_fails_with_key_error(self):
-        self._set_moblab_version_info({})
+    @patch('collect_service.get_version_info')
+    def test_collect_moblab_key_attributes_fails_with_key_error(self, mock_get_version_info):
+        mock_get_version_info.return_value = {}
 
         with self.assertLogs('collect_service', level='INFO') as log:
             collect_succeeds = self.test_collect_service.collect_moblab_key_attributes()
@@ -184,50 +195,43 @@ class CollectServiceTest(TestCase):
         self.assertIn("Disk space calculation failed for the error: "
                       "could not convert string to float: '36%'", log.output[0])
 
-    @patch('collect_service.json.load')
+    @patch('collect_service.run_gcloud_bucket_diagnosis')
     @patch('collect_service.open')
-    @patch('collect_service.subprocess.run')
-    def test_create_moblab_network_message_succeeds(self, mock_subprocess_run, \
-                                            mock_open, mock_json_load):
-        self.test_collect_service.config_connector.get_cloud_bucket.return_value \
-            = 'test_bucket_name'
-        mock_subprocess_run.return_value.returncode = 0
-        mock_json_load.return_value = {
-            "write_throughput": {"bytes_per_second": 1000},
-            "read_throughput": {"bytes_per_second": 2000.11},
-            "request_errors": 0,
-            "connection_breaks": 1
-        }
+    def test_create_moblab_network_message_succeeds(self, mock_open, mock_run_diagnosis):
+        network_diagnosis_res = '{"write_throughput": {"bytes_per_second": 1000},' \
+                                '"read_throughput": {"bytes_per_second": 2000.11},' \
+                                '"request_errors": 0,' \
+                                '"connection_breaks": 1}'
+        network_diagnosis_file = StringIO(network_diagnosis_res)
+        mock_open.return_value.__enter__.return_value = network_diagnosis_file
 
         moblab = self.test_collect_service.create_moblab_network_message()
 
-        mock_open.assert_called_with('/moblab/output.json')
         self.assertEqual(moblab.network_stats.upload_bits_per_second, 8000)
         self.assertEqual(moblab.network_stats.download_bits_per_second, 16000)
         self.assertEqual(moblab.network_stats.server_errors, 0)
         self.assertEqual(moblab.network_stats.broken_connections, 1)
 
     def test_create_moblab_network_message_fails_with_no_cloud_bucket(self):
-        self.test_collect_service.config_connector.get_cloud_bucket.return_value = None
+        self.test_collect_service.bucket_name = None
 
         with self.assertLogs('collect_service', level='INFO') as log:
             moblab = self.test_collect_service.create_moblab_network_message()
 
         self.assertIsNone(moblab)
-        self.assertIn("Cloud bucket name is none", log.output[0])
+        self.assertIn("Failed to initiate moblab message because bucket_name is/are none.",
+                      log.output[0])
 
-    @patch('collect_service.subprocess.run')
-    def test_create_moblab_network_message_fails_to_get_network_stats(self, mock_subprocess_run):
-        self.test_collect_service.config_connector.get_cloud_bucket.return_value \
-            = 'test_bucket_name'
-        mock_subprocess_run.return_value.returncode = 1
-        mock_subprocess_run.return_value.stderr = 'test_stderr'
+    @patch('collect_service.run_gcloud_bucket_diagnosis')
+    def test_create_moblab_network_message_fails_to_get_network_stats(self, mock_run_diagnosis):
+        mock_run_diagnosis.side_effect = collect_service.RunCommandError(1, 'bad_cmd')
 
         with self.assertLogs('collect_service', level='INFO') as log:
             moblab = self.test_collect_service.create_moblab_network_message()
 
         self.assertIsNone(moblab)
-        self.assertIn("Failed to obtain network status: test_stderr", log.output[0])
+        self.assertIn("Failed to get network status from network diagonosis: Command 'bad_cmd'"
+                      " returned non-zero exit status 1.", log.output[0])
 
     def test_create_dut_basic_message_succeeds_with_all_attributes(self):
         labels = ['cts_cpu_x86', 'board:test_board', 'model:test_model']
@@ -331,7 +335,11 @@ class CollectServiceTest(TestCase):
             dut_ids=None
         )
 
-        self.assertEqual(self.test_collect_service.collect_attr_for_duts('DUT_BASIC'), [])
+        with self.assertLogs('collect_service', level='INFO') as log:
+            duts = self.test_collect_service.collect_attr_for_duts('DUT_BASIC')
+
+        self.assertEqual(duts, [])
+        self.assertIn('Dut serial numbers or connected devices list is empty/none.', log.output[0])
 
     @patch('collect_service.CollectService.collect_moblab_key_attributes')
     def test_collect_attr_for_duts_fails_with_unknown_attribute_type(self, mock_key_attr):

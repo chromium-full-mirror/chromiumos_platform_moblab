@@ -21,6 +21,7 @@ enum DutStatus {
  DUT_STATUS_PENDING = 6;
  DUT_STATUS_RESETTING = 7;
  DUT_STATUS_PROVISIONING = 8;
+ DUT_STATUS_VERIFYING = 9;
 }
 
 message DiskStats {

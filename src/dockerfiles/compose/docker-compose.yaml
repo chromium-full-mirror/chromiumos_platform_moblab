@@ -280,6 +280,7 @@ services:
       - logs:/var/log/moblab
       - moblab_home:/home/moblab
       - leases:/leases:ro
+      - /etc/lsb-release:/etc/lsb-release:ro
 
     networks:
       - moblab

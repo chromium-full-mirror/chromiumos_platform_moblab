@@ -45,8 +45,9 @@ def callback(message_future):
 class PubSubClient(object):
     """A generic pubsub client."""
 
-    def __init__(self):
-        self.publisher = pubsub_v1.PublisherClient()
+    def __init__(self, batch_settings=()):
+        self.publisher = pubsub_v1.PublisherClient() if len(batch_settings) == 0 \
+            else pubsub_v1.PublisherClient(batch_settings)
 
     def publish_notifications(self, topic, messages=None):
         """Publishes a test result notification to a given pubsub topic.
@@ -76,7 +77,7 @@ class PubSubBasedClient(object):
     """A Cloud PubSub based implementation of the CloudConsoleClient interface.
     """
 
-    def __init__(self):
+    def __init__(self, batch_settings=()):
         """Constructor.
 
         Args:
@@ -84,7 +85,7 @@ class PubSubBasedClient(object):
             '/home/moblab/.service_account.json'.
             pubsub_topic: The cloud pubsub topic name to use.
         """
-        self.pubsub_client = PubSubClient()
+        self.pubsub_client = PubSubClient(batch_settings)
 
     def _create_message(self, data, msg_attributes):
         """Creates a cloud pubsub notification object.
