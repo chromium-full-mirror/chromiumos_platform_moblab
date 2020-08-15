@@ -54,6 +54,8 @@ class CollectService(Constants):
         self.moblab_install_id = None
         self.bucket_name = None
 
+    # TODO(chromium:1116710):Rewrite unit test for this function because the way of getting
+    # cloud bucket name is changed.
     def collect_moblab_key_attributes(self):
         """Collects the required attributes shared by moblab and duts.
 
@@ -61,10 +63,19 @@ class CollectService(Constants):
             A bool indicating whether the function has successfully
             collected key attributes.
         """
-        self.bucket_name = self.config_connector.get_cloud_bucket()
-        if not self.bucket_name:
+        cloud_storage_info = self.afe_connector.get_cloud_storage_info()
+        try:
+            bucket = cloud_storage_info['image_storage_server'][5:-1]
+        except KeyError:
             _LOGGER.exception('Failed to get moblab key attributes because'
-                              ' cloud bucket name is none.')
+                              ' could bucket is not fetched.')
+            return False
+
+        if bucket:
+            self.bucket_name = bucket
+        else:
+            _LOGGER.exception('Failed to get moblab key attributes because'
+                              ' cloud bucket name is wrong.')
             return False
 
         try:

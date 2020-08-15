@@ -117,6 +117,8 @@ class Scheduler(Constants):
                     = self.config['collectors'][attr_type]['frequency'][self.freq_level.name]
                 minutes_passed += 1
 
+    # TODO(chromium:1116710):Rewrite unit test for this function because the way of getting
+    # cloud bucket name is changed.
     def update_freq_level(self, update_interval=2):
         """Updates the value of the freq_level attribute.
 
@@ -153,8 +155,15 @@ class Scheduler(Constants):
             RunCommandError if it fails to run internet diagnosis.
             KeyError if the json returned by network dianosis lacks required keys.
         """
-        bucket_name = self.collect_service.config_connector.get_cloud_bucket()
-        if bucket_name is None:
+        cloud_storage_info = self.collect_service.afe_connector.get_cloud_storage_info()
+        try:
+            bucket_name = cloud_storage_info['image_storage_server'][5:-1]
+        except KeyError:
+            _LOGGER.exception('Failed to get network stats because'
+                              ' cloud bucket is not fetched.')
+            raise
+
+        if not bucket_name:
             raise NoneCloudBucketException('Cloud bucket name is none.')
 
         try:
@@ -205,9 +214,20 @@ class Scheduler(Constants):
         """Schedules the collection and upload of moblab and duts data according to
            the their respective message types and frequencies.
         """
+        from concurrent.futures import as_completed
+        future_list = []
         with ThreadPoolExecutor(max_workers=15) as executor:
             for attr_type in self.moblab_attr_types:
-                executor.submit(self.collect_and_upload, self.MOBLAB, attr_type)
+                future_list.append(
+                    executor.submit(self.collect_and_upload, self.MOBLAB,
+                                    attr_type))
             for attr_type in self.dut_attr_types:
-                executor.submit(self.collect_and_upload, self.DUT, attr_type)
-            executor.submit(self.update_freq_level)
+                future_list.append(
+                    executor.submit(self.collect_and_upload, self.DUT, attr_type))
+            future_list.append(executor.submit(self.update_freq_level))
+
+            for future in as_completed(future_list):
+                try:
+                    future.result()
+                except Exception:
+                    _LOGGER.exception('Scheduler exception caught.')
