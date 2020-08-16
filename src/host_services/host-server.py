@@ -164,9 +164,10 @@ class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
     def factory_reset(self, unused_request, unused_context):
         """Powerwash the moblab."""
         response = hostservices_pb2.FactoryResetResponse()
-        subprocess.check_call(['echo', 'safe fast keepimg', '>',
-             '/mnt/stateful_partition/factory_install_reset'])
+        with open('/mnt/stateful_partition/factory_install_reset', 'w+') as reset:
+            reset.write('safe fast keepimg')
         subprocess.check_call(['reboot'])
+        return response
 
 
 def setup_logging(level):
