@@ -13,6 +13,7 @@ service MoblabHostService {
   rpc reboot(RebootRequest) returns (RebootResponse) {}
   rpc factory_reset(FactoryResetRequest) returns (FactoryResetResponse) {}
   rpc get_system_version(SystemVersionRequest) returns (SystemVersionResponse) {}
+  rpc get_api_version(GetApiVersionRequest) returns (GetApiVersionResponse) {}
 }
 
 // NEXT_TAG = 1
@@ -107,4 +108,13 @@ message SystemVersionResponse{
   string version = 1;
   string track = 2;
   string description = 3;
+}
+
+// NEXT_TAG = 1
+message GetApiVersionRequest {
+}
+
+// NEXT_TAG = 2
+message GetApiVersionResponse {
+  int32 version = 1;
 }

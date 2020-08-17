@@ -185,6 +185,21 @@ class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
 
         return response
 
+    def get_api_version(self, unused_request, unused_context):
+        """If the interface to the API changes in any way increment this number.
+
+        Assumptions can not be made that a block of code that uses the host
+        services is upgraded at the same time as the host services.
+
+        Calling code should check the version of the API to make sure the
+        version is greater or equal to the version that has the interface change
+        before using the new feature.
+        """
+        response = hostservices_pb2.GetApiVersionResponse()
+        response.version = 2
+        return response
+
+
 def setup_logging(level):
     """Enable the correct level of logging.
 
