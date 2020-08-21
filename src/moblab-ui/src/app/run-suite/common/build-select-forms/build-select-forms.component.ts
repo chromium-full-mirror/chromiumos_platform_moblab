@@ -14,6 +14,11 @@ import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
 
+const SELECT_MODEL_PROMPT = 'Please select model.';
+const SELECT_BUILD_TARGET_PROMPT = 'Please select build target.';
+const SELECT_MILESTONE_PROMPT = 'Please select milestone.';
+const SELECT_BUILD_VERSION_PROMPT = 'Please select build.';
+
 /**
  * Component packages form items for selecting model, board, build, and pool.
  * These are always set in custom suite forms, and therefore packaged together
@@ -65,10 +70,10 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.boardSelector.disable('Please select model.');
-    this.milestoneSelector.disable('Please select build target.');
-    this.buildSelector.disable('Please select milestone.');
-    this.poolSelector.disable('Please select build.');
+    this.boardSelector.disable(SELECT_MODEL_PROMPT);
+    this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
+    this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
+    this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
     this.changeDetector.detectChanges();
   }
 
@@ -203,5 +208,31 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
       buildVersionName: this.buildVersionName,
       pool: this.selectedPool
     })
+  }
+
+  unselectModel() {
+    this.selectedModel = null;
+    this.boardSelector.clearSelection();
+    this.boardSelector.disable(SELECT_MODEL_PROMPT);
+    this.unselectBuildTarget();
+  }
+
+  unselectBuildTarget() {
+    this.buildTargetName = null;
+    this.milestoneSelector.clearSelection();
+    this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
+    this.unselectMilestone();
+  }
+
+  unselectMilestone() {
+    this.milestone = null;
+    this.buildSelector.clearSelection();
+    this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
+    this.unselectBuildVersion();
+  }
+
+  unselectBuildVersion() {
+    this.buildTargetName = null;
+    this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
   }
 }

@@ -1,10 +1,15 @@
-<div *ngIf="isShown" class=moblab-selector matTooltip="{{this.getDisabledReason()}}">
+<div *ngIf="isShown"
+     class=moblab-selector
+     matTooltip="{{this.getDisabledReason()}}"
+     [class.enabled]="!isDisabled()">
   <mat-label class="moblab-selector-label"> {{title}} </mat-label>
   <mat-select (selectionChange)="onChange($event)"
               [disabled]="this.isDisabled()"
               [ngModel]="selected"
               disableOptionCentering
-              placeholder="{{placeholder}}">
+              placeholder="{{placeholder}}"
+  >
+
     <mat-option *ngFor="let option of options" [value]="option">
       {{option}}
     </mat-option>

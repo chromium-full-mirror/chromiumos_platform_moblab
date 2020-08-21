@@ -1,0 +1,50 @@
+@import '../../../../theme.scss';
+
+.autocomplete-selector {
+  margin: 10px;
+}
+
+.autocomplete-form {
+  width: 290px;
+}
+
+::ng-deep .enabled .mat-form-field-label {
+  /*change color of label*/
+  color: mat-color($primary, default) !important;
+}
+
+::ng-deep .next-up .mat-form-field-underline {
+  /*change color of underline*/
+  background-color: mat-color($primary, default) !important;
+}
+
+::ng-deep .error .mat-form-field-label {
+  /*change color of label*/
+  color: mat-color($warn, default) !important;
+}
+
+::ng-deep .error .mat-form-field-underline {
+  /*change color of underline*/
+  background-color: mat-color($warn, default) !important;
+}
+
+input[type="text"][disabled] {
+  color: black;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown:after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  right: 10px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid grey;
+}

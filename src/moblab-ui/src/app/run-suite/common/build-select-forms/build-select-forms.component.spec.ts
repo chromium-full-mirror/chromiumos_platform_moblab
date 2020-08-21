@@ -2,7 +2,9 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
+import {MatOption} from '@angular/material/core';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -10,7 +12,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
-import {BasicSelectorComponent} from '../basic-selector/basic-selector.component';
+import {BasicAutocompleteSelectorComponent} from '../basic-autocomplete-selector/basic-autocomplete-selector.component';
 import {BuildSelectFormsComponent} from './build-select-forms.component';
 
 describe('BuildSelectFormsComponent', () => {
@@ -24,14 +26,17 @@ describe('BuildSelectFormsComponent', () => {
   let listPoolsSpy: jasmine.Spy;
   let allRequiredFieldsEmitter: jasmine.Spy;
 
-  let boardSelectorComponent: BasicSelectorComponent;
-  let modelSelectorComponent: BasicSelectorComponent;
-  let milestoneSelectorComponent: BasicSelectorComponent;
-  let buildSelectorComponent: BasicSelectorComponent;
-  let poolSelectorComponent: BasicSelectorComponent;
+  let boardSelectorComponent: BasicAutocompleteSelectorComponent;
+  let modelSelectorComponent: BasicAutocompleteSelectorComponent;
+  let milestoneSelectorComponent: BasicAutocompleteSelectorComponent;
+  let buildSelectorComponent: BasicAutocompleteSelectorComponent;
+  let poolSelectorComponent: BasicAutocompleteSelectorComponent;
 
-  function applySelection(targetComponent: BasicSelectorComponent, value: string) {
-    targetComponent.onChange(new Event('mock event'));
+  function applySelection(targetComponent: BasicAutocompleteSelectorComponent, value: string) {
+    targetComponent.onOptionSelect(new MatAutocompleteSelectedEvent(
+      this,
+      new MatOption(fixture.nativeElement, null, null, null)
+    ));
   }
 
   beforeEach(async(() => {
@@ -48,7 +53,7 @@ describe('BuildSelectFormsComponent', () => {
           ReactiveFormsModule,
         ],
         declarations: [
-          BasicSelectorComponent,
+          BasicAutocompleteSelectorComponent,
           BuildSelectFormsComponent,
         ]})
       .compileComponents();
