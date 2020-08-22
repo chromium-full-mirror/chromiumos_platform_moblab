@@ -60,13 +60,12 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
 
   /** Method triggered on run-suite button press. Invokes runCtsSuite RPC call.
    * */
-  onRunSuite() {
-    this.setOffPopup('Starting CTS suite run.');
-    this.runSuiteButton.disable();
+  onRunSuiteClick() {
+    super.onRunSuiteClick('Starting CTS suite run.');
 
     this.moblabGrpcService.runCtsSuite(
       (response) => {
-        this.redirectToViewJobs();
+        this.onSuiteStarted();
       },
       (err, response) => {
         this.setOffPopup(err.message);

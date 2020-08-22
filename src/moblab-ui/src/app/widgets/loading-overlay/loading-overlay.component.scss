@@ -1,0 +1,22 @@
+#overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left:0px;
+  top:0px;
+  background-color: rgba(250, 250, 250, 0.7);
+  z-index: 100;
+}
+
+.loading-wrapper {
+  display: inline-block;
+  margin-top: 50%;
+  margin-left: 10%;
+  width: 80%;
+}
+.loading-card {
+  border: 1px solid #ebebeb;
+  box-shadow: none !important;
+  text-align: center;
+  padding: 3px;
+}

@@ -67,13 +67,12 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
   /** Method triggered on run-suite button press. Invokes
    *  runStorageQualificationSuite RPC call.
    * */
-  onRunSuite() {
-    this.setOffPopup('Starting storage qualification suite run.');
-    this.runSuiteButton.disable();
+  onRunSuiteClick() {
+    super.onRunSuiteClick('Starting storage qualification suite run.');
 
     this.moblabGrpcService.runStorageQualificationSuite(
       (response) => {
-        this.redirectToViewJobs();
+        this.onSuiteStarted();
       },
       (err, response) => {
         this.setOffPopup(err.message);

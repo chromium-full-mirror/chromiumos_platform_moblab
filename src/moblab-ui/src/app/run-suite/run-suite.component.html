@@ -1,39 +1,46 @@
-<mat-card>
-  <mat-tab-group>
-    <mat-tab label="CTS">
-      <ng-template matTabContent>
-        <div class="suite-form-wrapper">
-          <app-cts-run></app-cts-run>
-        </div>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="GTS">
-      <ng-template matTabContent>
-        <div class="suite-form-wrapper">
-          <app-gts-run></app-gts-run>
-        </div>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="Memory Qualification">
-      <ng-template matTabContent>
-        <div class="suite-form-wrapper">
-          <app-memory-qual></app-memory-qual>
-        </div>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="Storage Qualification">
-      <ng-template matTabContent>
-        <div class="suite-form-wrapper">
-          <app-storage-qual></app-storage-qual>
-        </div>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="Other">
-      <ng-template matTabContent>
-        <div class="suite-form-wrapper">
-          <app-run-any-suite></app-run-any-suite>
-        </div>
-      </ng-template>
-    </mat-tab>
-  </mat-tab-group>
-</mat-card>
+<div id="card-wrapper">
+  <mat-card id="outer-card">
+    <mat-tab-group>
+      <mat-tab label="CTS">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper" style="position: relative;">
+            <app-loading-overlay></app-loading-overlay>
+            <app-cts-run (suiteStarted)="onSuiteStart()"></app-cts-run>
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="GTS">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper">
+            <app-loading-overlay></app-loading-overlay>
+            <app-gts-run (suiteStarted)="onSuiteStart()"></app-gts-run>
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Memory Qualification">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper">
+            <app-loading-overlay></app-loading-overlay>
+            <app-memory-qual (suiteStarted)="onSuiteStart()"></app-memory-qual>
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Storage Qualification">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper">
+            <app-loading-overlay></app-loading-overlay>
+            <app-storage-qual (suiteStarted)="onSuiteStart()"></app-storage-qual>
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Other">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper">
+            <app-loading-overlay></app-loading-overlay>
+            <app-run-any-suite (suiteStarted)="onSuiteStart()"></app-run-any-suite>
+          </div>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>

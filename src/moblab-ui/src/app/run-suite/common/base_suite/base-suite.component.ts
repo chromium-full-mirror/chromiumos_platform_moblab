@@ -1,10 +1,14 @@
+import {
+  EventEmitter,
+  Output
+} from '@angular/core';
+
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 
 import {JOB_START_TIME_FROM_FILTER} from '../../../view-jobs/view-jobs.component';
 import {MoblabGrpcService} from '../../../services/moblab-grpc.service';
 import {normalizeTimestamp} from '../../../utils/date';
-
 
 export interface BuildSettings {
   build: string;
@@ -15,12 +19,13 @@ export interface BuildSettings {
   pool: string;
 }
 
-
 /**
  * Base class meant to parent all implementations of run suite logic. Contains
  * some logic that is common to all suites.
  */
 export abstract class BaseSuite {
+  @Output() suiteStarted = new EventEmitter();
+
   runSuiteButtonDisabled = true;
 
   selectedBuild: string;
@@ -49,11 +54,14 @@ export abstract class BaseSuite {
    */
   abstract onBuildSetCustom(event: BuildSettings);
 
-  /**
-   * Method that defines when the runSuite button is pressed, generally is a
-   * Moblab RPC call.
-   */
-  abstract onRunSuite();
+  onRunSuiteClick(submitMessage?: string) {
+    this.setOffPopup(submitMessage);
+    this.suiteStarted.emit();
+  }
+
+  onSuiteStarted() {
+    this.redirectToViewJobs();
+  }
 
   redirectToViewJobs() {
     const params = {};
