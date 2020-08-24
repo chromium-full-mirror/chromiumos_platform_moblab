@@ -180,7 +180,10 @@ class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
         version_response = {
             x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}
 
-        response.version = version_response['CHROMEOS_RELEASE_CHROME_MILESTONE']
+        response.version = "R%s-%s" % (
+            version_response['CHROMEOS_RELEASE_CHROME_MILESTONE'].strip(),
+            version_response['CHROMEOS_RELEASE_VERSION'].strip())
+        response.track = version_response['CHROMEOS_RELEASE_TRACK']
         response.description = version_response['CHROMEOS_RELEASE_DESCRIPTION']
 
         return response
@@ -233,7 +236,8 @@ def serve():
         logging_severity = logging.DEBUG
     setup_logging(logging_severity)
 
-    server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=500))
+    server = grpc.server(
+        concurrent.futures.ThreadPoolExecutor(max_workers=500))
 
     host_service = HostService()
 
