@@ -14,6 +14,7 @@ import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 
+import {BasicAutocompleteSelectorComponent} from './common/basic-autocomplete-selector/basic-autocomplete-selector.component';
 import {BasicInputFormComponent} from './common/basic-input-form/basic-input.component';
 import {BasicSelectorComponent} from './common/basic-selector/basic-selector.component';
 import {BasicTextFormComponent} from './common/basic-text-form/basic-text-form.component';
@@ -31,6 +32,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
 
 @NgModule({
   declarations: [
+    BasicAutocompleteSelectorComponent,
     BasicInputFormComponent,
     BasicSelectorComponent,
     BasicTextFormComponent,

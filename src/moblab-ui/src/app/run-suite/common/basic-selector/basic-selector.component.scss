@@ -1,7 +1,15 @@
 @import '../../../../theme.scss';
 
 .moblab-selector {
-    color: mat-color($primary, default);
-    width: 300px;
+    color: grey;
+    width: 290px;
     margin: 10px;
+}
+
+.mat-select-arrow { visibility: hidden; }
+
+.enabled {
+  /*change color of label*/
+  color: mat-color($primary, default);
+
 }
