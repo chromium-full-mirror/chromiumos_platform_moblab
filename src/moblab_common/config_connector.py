@@ -73,3 +73,9 @@ class MoblabConfigConnector(object):
         ap_name = self.get("MOBLAB", "wifi_dut_ap_name", default=None)
         ap_pass = self.get("MOBLAB", "wifi_dut_ap_pass", default="")
         return (ap_name, ap_pass)
+
+    def get_is_remote_agent_enabled(self):
+        """Return if the remote agent is enabled otherwise false."""
+        is_enable = self.get("REMOTE_AGENT", "enabled", default=False,
+                             force_reload=True)
+        return True if is_enable == 'True' else False

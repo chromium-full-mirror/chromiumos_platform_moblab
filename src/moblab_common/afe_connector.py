@@ -729,3 +729,20 @@ class AFEConnector(object):
         result = self.decode_response(response, "result")
         return result['status_ok'], result.get('status_details', '')
 
+    def set_is_remote_agent_enabled(self, is_enabled=False):
+        """
+            Applies given remote agent configuration values to AFE.
+        Args:
+            is_enabled (bool): enable the remote agent or not
+        Returns:
+            A boolean, true IFF application of remote agent configurations
+            succeeded.
+        """
+        response = self.send_rpc_command(
+            'set_remote_agent_config',
+            {'enabled': is_enabled}
+        )
+
+        response = self.decode_response(response, "result")
+        return True if 'status_ok' in response and response['status_ok'] \
+            else False

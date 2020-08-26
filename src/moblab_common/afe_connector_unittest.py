@@ -271,6 +271,17 @@ class AFEConnectorTest(unittest.TestCase):
             }
         )
 
+    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    def test_set_is_remote_agent_enabled(self, mock_send_rpc_command):
+        MOCK_IS_ENABLED = True
+        self.afe_conn.set_is_remote_agent_enabled(
+            is_enabled=MOCK_IS_ENABLED
+        )
+
+        mock_send_rpc_command.assert_called_once_with(
+            'set_remote_agent_config',
+            {'enabled': MOCK_IS_ENABLED}
+        )
 
 
 if __name__ == "__main__":

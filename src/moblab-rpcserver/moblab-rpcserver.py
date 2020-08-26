@@ -914,6 +914,35 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
+    def get_remote_agent_configuration(self, request, _context):
+        """
+            Get remote agent configuration info of Moblab.
+        Args:
+            request: GetRemoteAgentConfigurationRequest object
+                (with no parameters)
+            _context: grpc.server.Context
+        Returns:
+            GetRemoteAgentConfigurationResponse
+        """
+        return moblabrpc_pb2.GetRemoteAgentConfigurationResponse(
+            is_enabled=self.service.get_is_remote_agent_enabled()
+        )
+
+    def set_remote_agent_configuration(self, request, _context):
+        """
+            Set remote agent configuration info of Moblab.
+        Args:
+            request: SetRemoteAgentConfigurationRequest object with a parameter:
+                is_enabled
+            _context: grpc.server.Context
+        Returns:
+            SetRemoteAgentConfigurationResponse
+        """
+        is_succeeded = self.service.set_is_remote_agent_enabled(
+            is_enabled=request.is_enabled)
+        return moblabrpc_pb2.SetRemoteAgentConfigurationResponse(
+            is_succeeded=is_succeeded)
+
 def setup_logging(level):
     """Enable the correct level of logging.
 

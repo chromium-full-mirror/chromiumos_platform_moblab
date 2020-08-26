@@ -9,8 +9,10 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock
 
+
 class MockNotFoundError(Exception):
   pass
+
 
 MOCKED_DOCKER = MagicMock()
 MOCKED_DOCKER.errors.NotFound = MockNotFoundError
@@ -102,6 +104,28 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
     with self.assertRaises(MoblabRpcError) as context:
       result_msg = self.service.update_docker()
+
+  @mock.patch.object(MoblabService, 'config_connector',
+                     new_callable=PropertyMock)
+  def test_get_is_remote_agent_enabled(self, mock_config_connector):
+    config_get_is_remote_agent_enabled_mock = MagicMock()
+    mock_config_connector.return_value.get_is_remote_agent_enabled = \
+      config_get_is_remote_agent_enabled_mock
+
+    self.service.get_is_remote_agent_enabled()
+
+    config_get_is_remote_agent_enabled_mock.assert_called_once()
+
+  @mock.patch.object(MoblabService, 'afe_connector',
+                     new_callable=PropertyMock)
+  def test_set_is_remote_agent_enabled(self, mock_afe_connector):
+    afe_set_is_remote_agent_enabled_mock = MagicMock()
+    mock_afe_connector.return_value.set_is_remote_agent_enabled = \
+      afe_set_is_remote_agent_enabled_mock
+
+    self.service.set_is_remote_agent_enabled(True)
+
+    afe_set_is_remote_agent_enabled_mock.assert_called_once()
 
 
 if __name__ == "__main__":

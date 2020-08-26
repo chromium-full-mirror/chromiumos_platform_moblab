@@ -56,6 +56,8 @@ service MoblabRpcService {
   rpc get_dut_wifi_info(GetDutWifiInfoRequest) returns (GetDutWifiInfoResponse) {};
   rpc set_dut_wifi_info(SetDutWifiInfoRequest) returns (SetDutWifiInfoResponse) {};
   rpc get_version_info(GetVersionInfoRequest) returns (GetVersionInfoResponse) {};
+  rpc get_remote_agent_configuration(GetRemoteAgentConfigurationRequest) returns (GetRemoteAgentConfigurationResponse) {};
+  rpc set_remote_agent_configuration(SetRemoteAgentConfigurationRequest) returns (SetRemoteAgentConfigurationResponse) {};
 
   // Sends screenshot and feedback information to GCS bucket.
   rpc send_moblab_screenshot(SendMoblabScreenshotRequest) returns (SendMoblabScreenshotResponse) {};
@@ -647,4 +649,22 @@ message UpdateMoblabRequest {
 // NEXT_TAG = 2;
 message UpdateMoblabResponse {
   string message = 1;
+}
+
+// NEXT_TAG = 1;
+message GetRemoteAgentConfigurationRequest {}
+
+// NEXT_TAG = 2;
+message GetRemoteAgentConfigurationResponse {
+  bool is_enabled = 1;
+}
+
+// NEXT_TAG = 2;
+message SetRemoteAgentConfigurationRequest {
+  bool is_enabled = 1;;
+}
+
+// NEXT_TAG = 2;
+message SetRemoteAgentConfigurationResponse {
+  bool is_succeeded = 1;
 }

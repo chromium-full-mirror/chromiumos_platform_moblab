@@ -9,6 +9,7 @@ import logging
 import json
 
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from enum import Enum
 
 import psutil
@@ -17,6 +18,8 @@ import yaml
 from constants import Constants
 from services.collect.collect_service import CollectService
 from services.upload.message_handler import MessageHandler
+from moblab_common import afe_connector
+from moblab_common import config_connector
 from moblab_common.utils.cli import run_gcloud_bucket_diagnosis, RunCommandError
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,6 +56,9 @@ class Scheduler(Constants):
     RUNNING = True
 
     def __init__(self):
+        self.afe_connector = afe_connector.AFEConnector()
+        self.config_connector = config_connector.MoblabConfigConnector(
+            self.afe_connector)
         self.config = self._get_scheduler_config()
         self.collect_service = CollectService()
         self.upload_service = MessageHandler()
@@ -79,26 +85,41 @@ class Scheduler(Constants):
     def collect_and_upload(self, msg_type, attr_type):
         """Collects and uploads moblab or duts data at the required frequency.
 
-        Checks the update of the required collection frequency level every minute and
-        adjusts the actual collection and upload frequency accordingly.
+        Checks the update of the required collection frequency level every
+        minute and adjusts the actual collection and upload frequency
+        accordingly.
 
         Args:
-            msg_type: A string representing the message type of the data to be collected,
-                either 'moblab' or 'dut'.
+            msg_type: A string representing the message type of the data to be
+                collected, either 'moblab' or 'dut'.
             attr_type: A string representing the attribute type of the data to be
-                collected. Attribute types include 'MOBLAB_BASIC', 'DISK', 'NETWORK',
-                'DUT_BASIC', and 'DUT_STATUS'.
+                collected. Attribute types include 'MOBLAB_BASIC', 'DISK',
+                'NETWORK', 'DUT_BASIC', and 'DUT_STATUS'.
         """
-        collect_func = self.collect_service.collect_attr_for_moblab
-        if msg_type == self.DUT:
+        if msg_type == self.MOBLAB:
+            collect_func = self.collect_service.collect_attr_for_moblab
+        elif msg_type == self.DUT:
             collect_func = self.collect_service.collect_attr_for_duts
-        elif msg_type != self.MOBLAB:
+        else:
             _LOGGER.exception("Wrong message type, %s. "
-                              "Message type should be 'moblab' or 'dut'.", msg_type)
+                              "Message type should be 'moblab' or 'dut'.",
+                              msg_type)
             return
 
         while self.RUNNING:
-            device_attrs = collect_func(attr_type)
+            # Checks if the remote agent is enabled. If not enabled, sleep
+            # 1 minute and then check again.
+            is_enabled = self.config_connector.get_is_remote_agent_enabled()
+            if not is_enabled:
+                time.sleep(60)
+                continue
+
+            try:
+                device_attrs = collect_func(attr_type)
+            except Exception:
+                _LOGGER.exception('Failed to collect Moblab or DUT data.')
+                return
+
             if not isinstance(device_attrs, list):
                 device_attrs = [device_attrs]
 
@@ -123,17 +144,19 @@ class Scheduler(Constants):
         """Updates the value of the freq_level attribute.
 
         Args:
-            update_interval: An int representing the time interval of frequency update in minute.
+            update_interval: An int representing the time interval of frequency
+            update in minute.
 
-        Updates the required scheduler frequency level every update_interval minutes.
+        Updates the required scheduler frequency level every update_interval
+        minutes.
         """
         while self.RUNNING:
             self.freq_level = self.get_freq_level()
             time.sleep(60 * update_interval)
 
     def get_freq_level(self):
-        """Obtains the current required frequency level based on the current network and
-           memory status.
+        """Obtains the current required frequency level based on the current
+            network and memory status.
         """
         freq_based_on_memory_stats = self._get_freq_based_on_memory_stats()
         try:
@@ -145,7 +168,8 @@ class Scheduler(Constants):
             return freq_based_on_memory_stats
 
     def _get_freq_based_on_network_stats(self):
-        """Obtains a scheduler frequency level that suits the current network status.
+        """Obtains a scheduler frequency level that suits the current network
+            status.
 
         Returns:
             A Frequency enum.
@@ -153,9 +177,11 @@ class Scheduler(Constants):
         Raises:
             NoneCloudBucketException if cloud bucket is none.
             RunCommandError if it fails to run internet diagnosis.
-            KeyError if the json returned by network dianosis lacks required keys.
+            KeyError if the json returned by network dianosis lacks required
+            keys.
         """
-        cloud_storage_info = self.collect_service.afe_connector.get_cloud_storage_info()
+        cloud_storage_info = \
+            self.collect_service.afe_connector.get_cloud_storage_info()
         try:
             bucket_name = cloud_storage_info['image_storage_server'][5:-1]
         except KeyError:
@@ -193,7 +219,9 @@ class Scheduler(Constants):
         return Frequency.DEFAULT
 
     def _get_freq_based_on_memory_stats(self):
-        """Obtains a scheduler frequency level that suits the current memory status.
+        """
+            Obtains a scheduler frequency level that suits the current memory
+            status.
 
         Returns:
             A Frequency enum.
@@ -211,23 +239,25 @@ class Scheduler(Constants):
         return Frequency.DEFAULT
 
     def schedule(self):
-        """Schedules the collection and upload of moblab and duts data according to
-           the their respective message types and frequencies.
         """
-        from concurrent.futures import as_completed
-        future_list = []
+            Schedules the collection and upload of moblab and duts data
+            according to the their respective message types and frequencies.
+        """
+        job_list = []
         with ThreadPoolExecutor(max_workers=15) as executor:
             for attr_type in self.moblab_attr_types:
-                future_list.append(
-                    executor.submit(self.collect_and_upload, self.MOBLAB,
+                job_list.append(
+                    executor.submit(self.collect_and_upload,
+                                    self.MOBLAB,
                                     attr_type))
             for attr_type in self.dut_attr_types:
-                future_list.append(
-                    executor.submit(self.collect_and_upload, self.DUT, attr_type))
-            future_list.append(executor.submit(self.update_freq_level))
+                job_list.append(
+                    executor.submit(self.collect_and_upload, self.DUT,
+                                    attr_type))
+            job_list.append(executor.submit(self.update_freq_level))
 
-            for future in as_completed(future_list):
+            for job in as_completed(job_list):
                 try:
-                    future.result()
+                    job.result()
                 except Exception:
-                    _LOGGER.exception('Scheduler exception caught.')
+                    _LOGGER.exception('Failed to start the scheduler.')

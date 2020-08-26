@@ -48,6 +48,7 @@ class MoblabService(object):
     pool_re = re.compile(r'^pool:(.*)')
 
     afe_connector = None
+    config_connector = None
 
     def __init__(self):
         self.afe_connector = afe_connector.AFEConnector()
@@ -922,3 +923,23 @@ class MoblabService(object):
         finally:
             container.remove()
         return 'Update finished.'
+
+    def get_is_remote_agent_enabled(self):
+        """
+            Check to see if the remote agent is enabled.
+
+        Returns:
+            True iff remote agent is enabled.
+        """
+        return self.config_connector.get_is_remote_agent_enabled()
+
+    def set_is_remote_agent_enabled(self, is_enabled):
+        """
+             Attempts to set if the remote agent is enabled.
+
+         Args:
+             is_enabled (bool): enable the remote agent or not
+         Returns:
+             True iff the set operation successfully.
+         """
+        return self.afe_connector.set_is_remote_agent_enabled(is_enabled)

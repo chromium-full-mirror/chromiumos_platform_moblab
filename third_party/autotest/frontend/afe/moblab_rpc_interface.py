@@ -1110,3 +1110,15 @@ def get_dut_wifi_info():
     if value is not None:
         dut_wifi_info[_WIFI_AP_PASS] = value
     return rpc_utils.prepare_for_serialization(dut_wifi_info)
+
+@rpc_utils.moblab_only
+def set_remote_agent_config(enabled=False):
+    """RPC handler to get the remote agent information.
+    """
+    remote_agent_info = {'REMOTE_AGENT': [('enabled', enabled)]}
+
+    _update_partial_config(remote_agent_info)
+    _CONFIG.parse_config_file()
+
+    logging.info('Set remote agent config successfully: %s', remote_agent_info)
+    return _create_operation_status_response(True, None)

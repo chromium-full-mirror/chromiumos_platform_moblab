@@ -12,6 +12,9 @@ from google.cloud import pubsub_v1
 
 _PUBSUB_TOPIC = "moblab-notification"
 
+_LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
 # Current notification version.
 CURRENT_MESSAGE_VERSION = "1"
 
@@ -39,7 +42,7 @@ def callback(message_future):
             )
         )
     else:
-        logging.info(message_future.result())
+        _LOGGER.info(message_future.result())
 
 
 class PubSubClient(object):
@@ -63,14 +66,18 @@ class PubSubClient(object):
             PubSubException if failed to publish the notification.
         """
         topic_path = self.publisher.topic_path("chromeos-partner-moblab", topic)
-        fs = []
+        message_ids = []
         for message in messages:
             resp = self.publisher.publish(
                 topic_path, message["data"], **message["attributes"]
             )
             resp.add_done_callback(callback)
-            fs.append(resp)
-        return list([x.result() for x in fs])
+
+            try:
+                message_ids.append(resp.result())
+            except Exception:
+                _LOGGER.exception('Failed to publish notification: %s', resp)
+        return message_ids
 
 
 class PubSubBasedClient(object):
@@ -133,7 +140,7 @@ class PubSubBasedClient(object):
             True if the notification is successfully sent.
             Otherwise, False.
         """
-        logging.info("Notification on gcs_uri %s", gcs_uri)
+        _LOGGER.info("Notification on gcs_uri %s", gcs_uri)
         message = self._create_test_job_offloaded_message(
             gcs_uri, serial_number, moblab_id
         )
