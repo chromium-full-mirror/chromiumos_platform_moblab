@@ -606,11 +606,13 @@ export class MoblabGrpcService {
 
   listMilestones(
     buildtarget: string,
-    callback: (x: string[]) => void,
+    model: string,
+    callback: (milestones: string[], isIncomplete: boolean) => void,
     errorHandlingCallback: (err_msg: string) => void
-    ) {
+  ) {
     const request = new ListMilestonesRequest();
     request.setBuildTarget(buildtarget);
+    request.setModel(model);
 
     const call = this.moblabRpcService.list_milestones(
       request,
@@ -620,20 +622,25 @@ export class MoblabGrpcService {
       },
     );
     call.on("data", (response: ListMilestonesResponse) => {
-      callback(response.getMilestonesList());
+      var milestoneNames = [];
+      for (var item of response.getMilestonesList()) {
+        milestoneNames.push(item.getValue());
+      }
+      callback(milestoneNames, response.getIsIncomplete());
     });
   }
 
   listBuildVersions(
     buildtarget: string,
+    model: string,
     milestone: string,
-    callback: (x: string[]) => void,
+    callback: (buildVersions: string[], isIncomplete: boolean) => void,
     errorHandlingCallback: (err_msg: string) => void
   ) {
     const request = new ListBuildVersionsRequest();
     request.setBuildTarget(buildtarget);
+    request.setModel(model);
     request.setMilestone(milestone);
-
     const call = this.moblabRpcService.list_build_versions(
       request,
       {},
@@ -641,8 +648,13 @@ export class MoblabGrpcService {
         errorHandlingCallback(err.message);
       }
     );
+
     call.on("data", (response: ListBuildVersionsResponse) => {
-      callback(response.getBuildVersionsList());
+      var buildVersionNames = [];
+      for (var item of response.getBuildVersionsList()) {
+        buildVersionNames.push(item.getValue());
+      }
+      callback(buildVersionNames, response.getIsIncomplete());
     });
   }
 

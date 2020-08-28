@@ -123,7 +123,9 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
 
   buildTargetChanged(newBuildTarget: string): void {
     this.buildTargetName = newBuildTarget;
-    this.moblabGrpcService.listMilestones(this.buildTargetName,
+    this.moblabGrpcService.listMilestones(
+      this.buildTargetName,
+      this.selectedModel,
       (milestones: string[]) => {
         this.updateMilestones(milestones);
       },
@@ -146,7 +148,9 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   milestoneChanged(newMilestone: string): void {
     this.milestone = newMilestone;
     this.moblabGrpcService.listBuildVersions(
-      this.buildTargetName, this.milestone,
+      this.buildTargetName,
+      this.selectedModel,
+      this.milestone,
       (builds: string[]) => {
         this.updateBuildVersions(builds);
       },
@@ -232,7 +236,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   }
 
   unselectBuildVersion() {
-    this.buildTargetName = null;
+    this.buildVersionName = null;
     this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
   }
 }

@@ -295,16 +295,35 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def list_milestones(self, request, _context):
+        milestones = self.service.list_usable_milestones(
+            request.build_target,
+            request.model
+        )
         response = moblabrpc_pb2.ListMilestonesResponse(
-            milestones=self.service.list_usable_milestones(
-                request.build_target
-            ))
+                milestones=[moblabrpc_pb2.BuildItem(
+                value=i.milestone,
+                is_staged=i.is_staged
+            ) for i in milestones.results],
+            is_incomplete=milestones.is_incomplete
+        )
         return response
 
     def list_build_versions(self, request, _context):
+        build_versions=self.service.list_usable_build_versions(
+            request.build_target,
+            request.milestone,
+            request.model
+        )
+
         response = moblabrpc_pb2.ListBuildVersionsResponse(
-            build_versions=self.service.list_usable_build_versions(
-                request.build_target, request.milestone))
+            build_versions=[
+                moblabrpc_pb2.BuildItem(
+                    value=i.build_version,
+                    is_staged=i.is_staged
+                ) for i in build_versions.results
+            ],
+            is_incomplete=build_versions.is_incomplete
+        )
         return response
 
     def list_pools(self, _request, _context):

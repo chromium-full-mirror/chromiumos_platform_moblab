@@ -185,25 +185,35 @@ message ListBuildTargetsResponse {
   repeated string build_targets = 1;
 }
 
-// NEXT_TAG = 2
+// NEXT_TAG = 3
 message ListMilestonesRequest {
   string build_target = 1;
-}
-
-// NEXT_TAG = 2
-message ListMilestonesResponse {
-  repeated string milestones = 1;
+  string model = 2;
 }
 
 // NEXT_TAG = 3
+message BuildItem {
+  string value = 1;
+  bool is_staged = 2;
+}
+
+// NEXT_TAG = 3
+message ListMilestonesResponse {
+  repeated BuildItem milestones = 1;
+  bool is_incomplete = 2;
+}
+
+// NEXT_TAG = 4
 message ListBuildVersionsRequest {
   string build_target = 1;
+  string model = 3;
   string milestone = 2;
 }
 
-// NEXT_TAG = 2
+// NEXT_TAG = 3
 message ListBuildVersionsResponse {
-  repeated string build_versions = 1;
+  repeated BuildItem build_versions = 1;
+  bool is_incomplete = 2;
 }
 
 message ListModelsRequest {

@@ -17,6 +17,7 @@ class MockNotFoundError(Exception):
 MOCKED_DOCKER = MagicMock()
 MOCKED_DOCKER.errors.NotFound = MockNotFoundError
 sys.modules['docker'] = MOCKED_DOCKER
+sys.modules['google.cloud'] = MOCKED_DOCKER
 sys.modules['moblab_common'] = MagicMock()
 
 from moblab_rpcservice import MoblabService, MoblabRpcError
