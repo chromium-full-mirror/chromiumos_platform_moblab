@@ -8,6 +8,7 @@ EXTRA_ARGS+= --build-arg LABEL=${LABEL}
 EXTRA_ARGS+= --build-arg WATCHTOWER_CMD="${WATCHTOWER_CMD}"
 EXTRA_ARGS+= --build-arg SSH_PORT="${SSH_PORT}"
 
+
 all:	autotest \
 		compose \
 		db devserver \
@@ -23,8 +24,8 @@ all:	autotest \
 		ssp \
 		ui \
 		watchtower \
-		dhcp
-
+		dhcp \
+		dns
 
 #TODO refactor the common rules into a single rule.
 
@@ -184,6 +185,12 @@ dhcp:
 		-f dockerfiles/dhcp/Dockerfile dockerfiles/dhcp
 	docker push ${REGISTRY_URI}/moblab-dhcp:${LABEL}
 
+dns: export DOCKER_BUILDKIT=1
+dns:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-dns:${LABEL} \
+		-f dockerfiles/dns/Dockerfile dockerfiles/dns
+	docker push ${REGISTRY_URI}/moblab-dns:${LABEL}
+
 .PHONY: autotest \
 		compose \
 		db devserver \
@@ -199,5 +206,5 @@ dhcp:
 		ssp \
 		ui \
 		watchtower \
-		dhcp 
-
+		dhcp \
+		dns
