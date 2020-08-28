@@ -6,7 +6,7 @@ import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectionModel} from '@angular/cdk/collections';
 
 import {TableHeaderSelectorComponent} from
-    '../../widgets/table-header-selector/table-header-selector.component';
+  '../../widgets/table-header-selector/table-header-selector.component';
 
 const NOT_CONNECTED_MESSAGE = 'DUT not reachable by SSH';
 
@@ -60,8 +60,8 @@ export class ViewDutsComponent implements OnInit {
     this.getConnectedDuts();
   }
 
-  assignDuts(duts) {
-    this.duts = new MatTableDataSource<ConnectedDutInfo>(duts)
+  assignDuts(duts: ConnectedDutInfo[]) {
+    this.duts = new MatTableDataSource<ConnectedDutInfo>(duts);
   }
 
   getConnectedDuts() {
@@ -70,8 +70,6 @@ export class ViewDutsComponent implements OnInit {
       (connectedDuts: ConnectedDutInfo[]) => {
         this.loading = false;
         this.assignDuts(connectedDuts);
-        this.duts.data.forEach((dut) => {
-        })
       }
     );
   }
@@ -108,7 +106,6 @@ export class ViewDutsComponent implements OnInit {
   toggleFilterLabels() {
     this.filterLabels = !this.filterLabels;
   }
-
 
   getSelectedDutHostnames() {
     const hostnames: string[] = [];

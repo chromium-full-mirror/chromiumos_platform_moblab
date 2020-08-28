@@ -239,7 +239,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
-    def get_connected_dut_from_dict(self, dut_dict):
+    def _get_connected_dut_from_dict(self, dut_dict):
         return moblabrpc_pb2.ConnectedDutInfo(
             name=dut_dict.get('platform', ''),
             ip=dut_dict.get('hostname', ''),
@@ -251,7 +251,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             pools=self.service.extract_pool_from_labels(
                 dut_dict.get('labels', [])),
             status=dut_dict['status'],
-            is_enrolled=True,
+            is_enrolled=dut_dict.get('enrolled', False),
             is_connected=dut_dict.get('isConnected', True),
             labels=dut_dict.get('labels', []),
             attributes=dut_dict.get('attributes', []),
@@ -262,7 +262,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response = moblabrpc_pb2.ListConnectedDutsResponse()
         duts = self.service.list_duts()
         for dut in duts:
-            dut_info = self.get_connected_dut_from_dict(dut)
+            dut_info = self._get_connected_dut_from_dict(dut)
             response.duts.extend([dut_info])
         return response
 
@@ -276,7 +276,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             _context.set_details(error_msg)
         else:
             response = moblabrpc_pb2.GetDutDetailsResponse(
-                dut_detail=self.get_connected_dut_from_dict(dut)
+                dut_detail=self._get_connected_dut_from_dict(dut)
             )
             if 'current_job' in dut:
                 response.dut_detail.current_job = dut['current_job'] if dut['current_job'] else 0
