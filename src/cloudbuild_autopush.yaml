@@ -429,7 +429,9 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull10']
+    waitFor:
+      - "pull10"
+      - "protoc"
 
   - id: remote-scheduler
     name: "docker:19.03.8"
@@ -514,7 +516,9 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull3']
+    waitFor: 
+      - "pull3"
+      - "protoc"
 
   - id: mobmonitor
     name: "docker:19.03.8"
