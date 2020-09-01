@@ -59,6 +59,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull']
 
   - id: autotest-lucifer
     name: "docker:19.03.8"
@@ -99,6 +100,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull']
 
   - id: autotest-base
     name: "docker:19.03.8"
@@ -246,6 +248,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull6']
 
   - id: db-init
     name: "docker:19.03.8"
@@ -265,6 +268,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull']
 
   - id: devserver
     name: "docker:19.03.8"
@@ -284,6 +288,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull']
 
   - id: ui
     name: "docker:19.03.8"
@@ -324,6 +329,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull']
 
   - id: offloader
     name: "docker:19.03.8"
@@ -364,6 +370,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull9']
 
   - id: remote_access
     name: "docker:19.03.8"
@@ -383,7 +390,10 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-
+    waitFor:
+      - 'pull3'
+      - 'pull10'
+      
   - id: remote-agent
     name: "docker:19.03.8"
     args:
@@ -402,6 +412,9 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "pull10"
+      - "protoc"
 
   - id: remote-scheduler
     name: "docker:19.03.8"
@@ -466,6 +479,7 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
       - "WATCHTOWER_CMD=${_WATCHTOWER_CMD}"
+    waitFor: ['pull12']
 
   - id: mobmonitor
     name: "docker:19.03.8"
@@ -485,6 +499,7 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
+    waitFor: ['pull']
 
 images:
   [
