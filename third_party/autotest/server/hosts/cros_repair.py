@@ -23,12 +23,17 @@ from autotest_lib.server import afe_utils
 from autotest_lib.server import crashcollect
 from autotest_lib.server.cros import autoupdater
 from autotest_lib.server.cros.dynamic_suite import tools
+from autotest_lib.server.hosts import cros_constants
 from autotest_lib.server.hosts import cros_firmware
 from autotest_lib.server.hosts import repair_utils
+from autotest_lib.site_utils.admin_audit import constants as audit_const
 from six.moves import range
 
 metrics = utils.metrics_mock
 
+
+
+from chromite.lib import timeout_util
 
 MIN_BATTERY_LEVEL = 50.0
 
@@ -69,7 +74,7 @@ _DEV_MODE_ALWAYS_ALLOWED = global_config.global_config.get_config_value(
 # usb:
 #   - triggers: _CROS_USB_TRIGGERS + _CROS_POWERWASH_TRIGGERS +
 #               _CROS_PROVISION_TRIGGERS
-#   - no dependencies
+#   - depends on: _CROS_USB_DEPENDENCIES
 #
 # N.B. AC power detection depends on software on the DUT, and there
 # have been bugs where detection failed even though the DUT really
@@ -85,6 +90,7 @@ _CROS_PROVISION_TRIGGERS = ('power', 'rwfw', 'python', 'cros',
 _CROS_POWERWASH_TRIGGERS = ('tpm', 'good_provision', 'ext4',)
 _CROS_USB_TRIGGERS = ('ssh', 'writable', 'stop_start_ui',)
 _JETSTREAM_USB_TRIGGERS = ('ssh', 'writable',)
+_CROS_USB_DEPENDENCIES = ('usb_drive', )
 
 
 class ACPowerVerifier(hosts.Verifier):
@@ -93,6 +99,7 @@ class ACPowerVerifier(hosts.Verifier):
     # Battery discharging state in power_supply_info file.
     BATTERY_DISCHARGING = 'Discharging'
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         info = self._load_info(host)
@@ -158,6 +165,8 @@ class CrosVerisionVerifier(hosts.Verifier):
     on the same host gets an unexpected OS version and yields false
     positive test result.
     """
+
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         label_match = True
         try:
@@ -204,6 +213,7 @@ class WritableVerifier(hosts.Verifier):
     # encrypted stateful if unencrypted fails.
     _TEST_DIRECTORIES = ['/mnt/stateful_partition', '/var/tmp']
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         # This deliberately stops looking after the first error.
@@ -223,6 +233,8 @@ class EXT4fsErrorVerifier(hosts.Verifier):
     """
     Confirm we have not seen critical file system kernel errors.
     """
+
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         # grep for stateful FS errors of the type "EXT4-fs error (device sda1):"
@@ -263,6 +275,8 @@ class UpdateSuccessVerifier(hosts.Verifier):
     The verifier tests for the existence of the marker file and fails if
     it still exists.
     """
+
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         result = host.run('test -f %s' % autoupdater.PROVISION_FAILED,
@@ -280,6 +294,7 @@ class UpdateSuccessVerifier(hosts.Verifier):
 class TPMStatusVerifier(hosts.Verifier):
     """Verify that the host's TPM is in a good state."""
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         if _is_virtual_machine(host):
@@ -322,6 +337,7 @@ class TPMStatusVerifier(hosts.Verifier):
 class PythonVerifier(hosts.Verifier):
     """Confirm the presence of a working Python interpreter."""
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         result = host.run('python -c "import json"',
@@ -344,6 +360,7 @@ class PythonVerifier(hosts.Verifier):
 class DevModeVerifier(hosts.Verifier):
     """Verify that the host is not in dev mode."""
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         # Some pools are allowed to be in dev mode
@@ -365,6 +382,7 @@ class DevModeVerifier(hosts.Verifier):
 class DevDefaultBootVerifier(hosts.Verifier):
     """Verify that the host is set to boot the internal disk by default."""
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         result = host.run('crossystem dev_default_boot', ignore_status=True)
@@ -383,6 +401,7 @@ class DevDefaultBootVerifier(hosts.Verifier):
 class HWIDVerifier(hosts.Verifier):
     """Verify that the host has HWID & serial number."""
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         try:
@@ -438,6 +457,7 @@ class EnrollmentStateVerifier(hosts.Verifier):
 
     VPD_CACHE = '/mnt/stateful_partition/unencrypted/cache/vpd/full-v2.txt'
 
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         if self._get_enrollment_state(host):
@@ -473,6 +493,7 @@ class JetstreamTpmVerifier(hosts.Verifier):
     """Verify that Jetstream TPM is in a good state."""
 
     @retry.retry(error.AutoservError, timeout_min=2, delay_sec=10)
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         try:
@@ -505,6 +526,7 @@ class JetstreamAttestationVerifier(hosts.Verifier):
     """Verify that Jetstream attestation client has a certificate."""
 
     @retry.retry(error.AutoservError, timeout_min=2, delay_sec=10)
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         try:
@@ -533,6 +555,7 @@ class JetstreamServicesVerifier(hosts.Verifier):
 
     # Retry for b/62576902
     @retry.retry(error.AutoservError, timeout_min=1, delay_sec=10)
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
         try:
@@ -563,6 +586,8 @@ class StopStartUIVerifier(hosts.Verifier):
     this verifier to ensure it works and will trigger reimaging to a good
     version if it fails.
     """
+
+    @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         try:
             host.run('stop ui && start ui', ignore_status=True, timeout=10)
@@ -573,6 +598,53 @@ class StopStartUIVerifier(hosts.Verifier):
     @property
     def description(self):
         return 'The DUT image works fine when stop ui/start ui.'
+
+
+class ServoUSBDriveVerifier(hosts.Verifier):
+    """Verify that USB drive on Servo is good to use.
+
+    Check if USB drive is detected on servo and verified on servohost and
+    USB is not marked for replacement.
+    """
+
+    def verify(self, host):
+        # pylint: disable=missing-docstring
+        usb_dev = ''
+        try:
+            usb_dev = host._servo_host._probe_and_validate_usb_dev()
+        except hosts.AutoservRepairError as e:
+            # We USB drive not detected by servod
+            logging.debug('(Not critical) %s', e)
+        host_info = host.host_info_store.get()
+        if not usb_dev:
+            host_info.set_version_label(audit_const.SERVO_USB_STATE_PREFIX,
+                                        audit_const.HW_STATE_NOT_DETECTED)
+            host.host_info_store.commit(host_info)
+            raise hosts.AutoservNonCriticalVerifyError(
+                    'USB-drive is not detected or bad')
+
+        # Check if USB-drive marked for replacement.
+        usb_state = host_info.get_label_value(
+                audit_const.SERVO_USB_STATE_PREFIX)
+        if usb_state and usb_state == audit_const.HW_STATE_NEED_REPLACEMENT:
+            raise hosts.AutoservNonCriticalVerifyError(
+                    'USB-drive marked for replacement')
+
+        if usb_state and usb_state == audit_const.HW_STATE_NOT_DETECTED:
+            # if previous state was NOT_DETECTED and now we can detect the USB
+            # then set state to UNKNOWN for future audit.
+            host_info.set_version_label(audit_const.SERVO_USB_STATE_PREFIX,
+                                        audit_const.HW_STATE_UNKNOWN)
+            host.host_info_store.commit(host_info)
+
+    def _is_applicable(self, host):
+        if host.servo:
+            return True
+        return False
+
+    @property
+    def description(self):
+        return 'Ensure USB drive on Servo is in good state.'
 
 
 class _ResetRepairAction(hosts.RepairAction):
@@ -662,8 +734,15 @@ class ServoCr50RebootRepair(_ResetRepairAction):
 
     def repair(self, host):
         # pylint: disable=missing-docstring
-        host.servo.get_power_state_controller().cr50_reset()
-        self._check_reset_success(host)
+        try:
+            host.servo.get_power_state_controller().cr50_reset()
+            self._check_reset_success(host)
+        finally:
+            # cr50 reset will clear some some init like `ccd testlab open`
+            # so we want to re-initialize servo after cr50 reset if the main
+            # device is ccd.
+            if host.servo.main_device_is_ccd():
+                host.servo.initialize_dut()
 
     def _is_applicable(self, host):
         if host.servo:
@@ -868,30 +947,29 @@ def _cros_verify_base_dag():
     FirmwareStatusVerifier = cros_firmware.FirmwareStatusVerifier
     FirmwareVersionVerifier = cros_firmware.FirmwareVersionVerifier
     verify_dag = (
-        (repair_utils.SshVerifier,        'ssh',        ()),
-        (DevDefaultBootVerifier,          'dev_default_boot', ('ssh',)),
-        (DevModeVerifier,                 'devmode',  ('ssh',)),
-        (EnrollmentStateVerifier,         'enrollment_state', ('ssh',)),
-        (HWIDVerifier,                    'hwid',     ('ssh',)),
-        (ACPowerVerifier,                 'power',    ('ssh',)),
-        (EXT4fsErrorVerifier,             'ext4',     ('ssh',)),
-        (WritableVerifier,                'writable', ('ssh',)),
-        (TPMStatusVerifier,               'tpm',      ('ssh',)),
-        (UpdateSuccessVerifier,           'good_provision',  ('ssh',)),
-        (FirmwareStatusVerifier,          'fwstatus', ('ssh',)),
-        (FirmwareVersionVerifier,         'rwfw',     ('ssh',)),
-        (PythonVerifier,                  'python',   ('ssh',)),
-        (repair_utils.LegacyHostVerifier, 'cros',     ('ssh',)),
-        (CrosVerisionVerifier,            'cros_version_label', ('ssh',)),
+            (repair_utils.SshVerifier, 'ssh', ()),
+            (ServoUSBDriveVerifier, 'usb_drive', ()),
+            (DevDefaultBootVerifier, 'dev_default_boot', ('ssh', )),
+            (DevModeVerifier, 'devmode', ('ssh', )),
+            (EnrollmentStateVerifier, 'enrollment_state', ('ssh', )),
+            (HWIDVerifier, 'hwid', ('ssh', )),
+            (ACPowerVerifier, 'power', ('ssh', )),
+            (EXT4fsErrorVerifier, 'ext4', ('ssh', )),
+            (WritableVerifier, 'writable', ('ssh', )),
+            (TPMStatusVerifier, 'tpm', ('ssh', )),
+            (UpdateSuccessVerifier, 'good_provision', ('ssh', )),
+            (FirmwareStatusVerifier, 'fwstatus', ('ssh', )),
+            (FirmwareVersionVerifier, 'rwfw', ('ssh', )),
+            (PythonVerifier, 'python', ('ssh', )),
+            (repair_utils.LegacyHostVerifier, 'cros', ('ssh', )),
+            (CrosVerisionVerifier, 'cros_version_label', ('ssh', )),
     )
     return verify_dag
 
 
 def _cros_verify_extended_dag():
     """Return the extended verification DAG for a `CrosHost`."""
-    return (
-        (StopStartUIVerifier, 'stop_start_ui', ('ssh',)),
-    )
+    return ((StopStartUIVerifier, 'stop_start_ui', ('ssh', )), )
 
 
 def _cros_basic_repair_actions(
@@ -932,7 +1010,8 @@ def _cros_basic_repair_actions(
 
 def _cros_extended_repair_actions(provision_triggers=_CROS_PROVISION_TRIGGERS,
                                   powerwash_triggers=_CROS_POWERWASH_TRIGGERS,
-                                  usb_triggers=_CROS_USB_TRIGGERS):
+                                  usb_triggers=_CROS_USB_TRIGGERS,
+                                  usb_dependencies=_CROS_USB_DEPENDENCIES):
     """Return the extended repair actions for a `CrosHost`"""
 
     # The dependencies and triggers for the 'provision', 'powerwash', and 'usb'
@@ -941,12 +1020,12 @@ def _cros_extended_repair_actions(provision_triggers=_CROS_PROVISION_TRIGGERS,
     # the progression.
 
     repair_actions = (
-        (ProvisionRepair, 'provision',
-                usb_triggers + powerwash_triggers, provision_triggers),
-        (PowerWashRepair, 'powerwash',
-                usb_triggers, powerwash_triggers + provision_triggers),
-        (ServoInstallRepair, 'usb',
-                (), usb_triggers + powerwash_triggers + provision_triggers),
+            (ProvisionRepair, 'provision', usb_triggers + powerwash_triggers,
+             provision_triggers),
+            (PowerWashRepair, 'powerwash', usb_triggers,
+             powerwash_triggers + provision_triggers),
+            (ServoInstallRepair, 'usb', usb_dependencies,
+             usb_triggers + powerwash_triggers + provision_triggers),
     )
     return repair_actions
 
@@ -998,7 +1077,7 @@ def create_moblab_repair_strategy():
 
     'good_provision':  This verifier can't pass, because the Moblab provision
         procedure doesn't properly delete the PROVISION_FAILED file.
-        TODO(jrbarnette) We should refactor ChromiumOSUpdater so
+        TODO(jrbarnette) We should refactor ChromiumOSProvisioner so
         that it can be different for Moblab.
 
     'firmware':  Moblab DUTs shouldn't be in FAFT pools, so we don't try
