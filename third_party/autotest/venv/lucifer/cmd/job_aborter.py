@@ -124,6 +124,18 @@ def _abort_jobs_marked_aborting(active_leases):
         if job.id in active_leases:
             logger.info('Job %d is marked for aborting; aborting', job.id)
             active_leases[job.id].maybe_abort()
+        else:
+            # In this situation we have an job, lucifer no longer has an
+            # active lease.  If it exist clean up the database row in the
+            # JobHandoff table that signals to Autotest that lucifer is
+            # controlling the job.
+            # This can happen on a reboot.  After the reboot the file lock on
+            # the lease is lost, Lucifer treats this as an expired job and
+            # cleans up the lease files.  However autotest still has an indication
+            # for that job that Lucifer is controlling the job so disables
+            # functionality like abort.
+            models = autotest.load('frontend.afe.models')
+            models.JobHandoff.objects.filter(job_id=job.id).delete()
 
 
 def _abort_special_tasks_marked_aborted():
