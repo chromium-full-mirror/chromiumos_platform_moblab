@@ -3,15 +3,24 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import distutils
 import docker
 import os
 import re
 import requests
 import socket
+import time
+
+from collections import namedtuple
+from google.cloud import storage
+
+from collections import namedtuple
+from google.cloud import storage
 
 from moblab_common import build_connector
 from moblab_common import dut_connector
 from moblab_common import host_connector
+from moblab_common import moblab_build_connector
 try:
     from chromite.lib import cros_logging as logging
 except ImportError:
@@ -20,6 +29,9 @@ from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
 
+MilestonePair = namedtuple('MilestonePair', ['milestone', 'is_staged'])
+BuildVersionPair = namedtuple('BuildVersionPair', ['build_version', 'is_staged'])
+BuildResults = namedtuple('BuildResults', ['results', 'is_incomplete'])
 
 _DEFAULT_SUITE_TIMEOUT_MINS = 1440
 _SUITE_TIMEOUT_MAP = {
@@ -35,6 +47,8 @@ _STORAGE_QUAL_VARIATIONS = {
 
 HARDWARE_AVL_BUG_ID = 'bug_id'
 HARDWARE_AVL_PART_NO = 'part_id'
+
+MAX_BUILD_RESULTS_PAGE = 1000
 
 MOBLAB_DOCKER_REGISTRY = 'gcr.io/chromeos-partner-moblab/'
 
@@ -87,8 +101,31 @@ class MoblabService(object):
             if raise_error:
                 raise
 
+    def _init_moblab_build_connector(self, raise_error=True):
+        """
+            Creates a MoblabBuildConnector for Moblab API calls to get build items.
+            Args:
+                raise_error: if true, will raise any exception encountered during
+                init attempt.
+            Returns:
+              MoblabBuildConnector.
+        """
+        try:
+            self._moblab_build_connector = moblab_build_connector.MoblabBuildConnector()
+        except build_connector.MoblabBuildConnectorException as e:
+            logging.exception('Failed to initialize MoblabBuildConnector.')
+            if raise_error:
+                raise
+
     @property
     def build_connector(self):
+        """
+            Returns a build_connector.MoblabBuildConnector instance ( distinct from
+            moblab_build_connector.MoblabBuildConnector ),
+
+            TODO(wangmichael) change naming so that difference between two connectors is more
+            clear.
+        """
         current_moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
 
         if not hasattr(self, '_build_connector') or \
@@ -97,6 +134,30 @@ class MoblabService(object):
             self.moblab_bucket_name = current_moblab_bucket_name
             self._init_build_connector()
         return self._build_connector
+
+    @property
+    def moblab_build_connector(self):
+        """
+            Returns a moblab.build_connector.MoblabBuildConnector instance ( distinct from
+            build_connector.MoblabBuildConnector ),
+        """
+        current_moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
+
+        if not hasattr(self, '_moblab_build_connector') or \
+            not self._moblab_build_connector or \
+            current_moblab_bucket_name != self.moblab_bucket_name:
+            self.moblab_bucket_name = current_moblab_bucket_name
+            self._init_moblab_build_connector()
+
+        return self._moblab_build_connector
+
+    def _is_moblab_bucket_in_asia(self):
+        if not self.moblab_bucket_name:
+            raise MoblabRpcError('Attempted to check bucket location while bucket has not been configured.')
+
+        bucket = storage.Client().bucket(self.moblab_bucket_name)
+        bucket.reload()
+        return 'asia' in bucket.location.lower()
 
     def extract_model_from_labels(self, labels):
         return self.extract_from_labels(self.model_re, labels)
@@ -397,13 +458,81 @@ class MoblabService(object):
         return list(
             set(available_build_targets).intersection(connected_build_targets))
 
-    def list_usable_milestones(self, build_target):
-        return self.build_connector.get_milestones_available(
-            build_target)
+    def list_usable_milestones(self, build_target, model):
+        """
+            Returns milestones available for a given model/build_target, both staged and unstaged (if target bucket is in
+            US, otherwise will only return staged milestones).
 
-    def list_usable_build_versions(self, build_target, milestone):
-        return self.build_connector.get_builds_for_milestone(
-            build_target, milestone)
+            Args:
+                build_target(string): build_target (AKA board) to fetch milestones for.
+                model(string): model to fetch milestones for.
+            Returns:
+                A list of tuples where the first item is the milestone and the second is a boolean which is true iff at least
+                one build of the milestone is staged.
+        """
+        bucket_milestones = self.build_connector.get_milestones_available(build_target)
+        if not self._is_moblab_bucket_in_asia():
+            remote_milestones = self.moblab_build_connector.list_available_milestones(
+                build_target,
+                model,
+            )
+        else:
+            remote_milestones = []
+
+        milestone_results = [MilestonePair(milestone=milestone, is_staged=True)
+                                for milestone in bucket_milestones]
+        milestone_results.extend(
+            [
+                MilestonePair(milestone=milestone, is_staged=False) for milestone in
+                list(set(remote_milestones).difference(set(bucket_milestones)))
+            ]
+        )
+
+        milestone_results.sort(key=lambda x: int(x[0].strip('R')), reverse=True)
+        return BuildResults(results=milestone_results[:-1], is_incomplete=(len(remote_milestones) == MAX_BUILD_RESULTS_PAGE))
+
+    def list_usable_build_versions(self, build_target, milestone, model):
+        """
+            Returns build versions available for a given model/build_target/milestone, both staged and unstaged (if target bucket is in
+            US, otherwise will only return staged build versions).
+
+            Args:
+                build_target(string): build_target (AKA board) to return build versions for.
+                model(string): model to return build versions for.
+                milestone(string): milestone to return build versions for.
+            Returns:
+                A list of tuples where the first item is the build_version and the second is a boolean which is true iff the build is staged.
+        """
+        if (milestone and milestone[0] == 'R'):
+            milestone = milestone[1:]
+
+        bucket_build_versions = self.build_connector.get_builds_for_milestone(
+            build_target,
+            int(milestone)
+        )
+
+        build_version_results = [
+            BuildVersionPair(build_version=build_version, is_staged=True) for build_version in bucket_build_versions
+        ]
+
+        if not self._is_moblab_bucket_in_asia():
+            remote_build_versions = self.moblab_build_connector.list_builds_for_milestone(
+                build_target,
+                model,
+                milestone
+            )
+        else:
+            remote_build_versions = []
+
+        build_version_results.extend(
+            [
+                BuildVersionPair(build_version=build_version, is_staged=False) for build_version in
+                list(set(remote_build_versions).difference(set(bucket_build_versions)))
+            ]
+        )
+
+        build_version_results.sort(key=lambda x: distutils.version.LooseVersion(x[0]), reverse=True)
+        return BuildResults(results=build_version_results, is_incomplete=(len(remote_build_versions) == MAX_BUILD_RESULTS_PAGE))
 
     def list_connected_dut_build_targets(self):
         afe_hosts = self.afe_connector.get_connected_devices()
@@ -433,7 +562,7 @@ class MoblabService(object):
         if dut_hostname_filter:
             try:
                 dut_id = self.afe_connector.get_connected_devices(
-                hostname=dut_hostname_filter)[0]['id']
+                    hostname=dut_hostname_filter)[0]['id']
             except (IndexError, KeyError):
                 logging.error('Unable to find AFE id for dut: {}'.format(dut_hostname_filter))
                 return
@@ -640,10 +769,10 @@ class MoblabService(object):
             if not is_success:
                 failures[dut_hostname] = message
 
-        response_message = success_msg.format(*args) +\
-            " to {} DUTs\n".format(
-                len(dut_hostnames) - len(failures.keys())
-            )
+        response_message = success_msg.format(*args) + \
+                           " to {} DUTs\n".format(
+                               len(dut_hostnames) - len(failures.keys())
+                           )
 
         if failures:
             response_message += "Failures on the following DUTs:\n"

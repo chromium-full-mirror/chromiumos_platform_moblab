@@ -8,6 +8,7 @@ API.
 """
 
 import logging
+import re
 
 import google.api_core.path_template
 
@@ -49,6 +50,13 @@ class MoblabBuildConnector(object):
             artifact=artifact,
         )
 
+    def _parse_milestone(self, milestone):
+        if re.match('\Amilestones\/(\d+)$', milestone):
+            return 'R' + milestone.split('/')[1]
+        else:
+            raise MoblabBuildConnectorException(
+                'Encountered unexpected format while reading milestones: {}'.format(milestone))
+
     def __init__(self, build_service_client=None):
         """Instantiates the build connector and sets up the build service
         client. The service account is set in the global environment.
@@ -74,8 +82,7 @@ class MoblabBuildConnector(object):
                 page.
 
         Returns:
-            build_service.ListBuildsResponse: Response message for listing
-            builds with milestones.
+            List of strings representing milestones.
         """
         milestone_field = field_mask.FieldMask(paths=["milestone"])
         request = build_service.ListBuildsRequest(
@@ -85,7 +92,8 @@ class MoblabBuildConnector(object):
             read_mask=milestone_field,
             group_by=milestone_field
         )
-        return self.build_service_client.list_builds(request)
+        build_results = self.build_service_client.list_builds(request).builds
+        return [self._parse_milestone(build.milestone) for build in build_results]
 
     def list_builds_for_milestone(self, build_target, model, milestone,
         page_size=50, page_token=None):
@@ -103,17 +111,18 @@ class MoblabBuildConnector(object):
                 page.
 
         Returns:
-            build_service.ListBuildsResponse: Response message for listing
-            builds.
+            List of strings representing build versions.
         """
         milestone_filter = "milestone=milestones/" + str(milestone)
+
         request = build_service.ListBuildsRequest(
             parent=self.model_path(build_target, model),
             page_size=page_size,
             page_token=page_token,
             filter=milestone_filter
         )
-        return self.build_service_client.list_builds(request)
+        build_results = self.build_service_client.list_builds(request).builds
+        return [build.build_version for build in build_results]
 
     def check_build_stage_status(self, build_target, model, build, bucket_name):
         """Checks the stage status for a given build artifact in a partner

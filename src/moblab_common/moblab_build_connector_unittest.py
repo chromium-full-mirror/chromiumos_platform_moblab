@@ -18,7 +18,8 @@ class MoblabBuildConnectorTest(unittest.TestCase):
 
     BUILD_TARGET = 'octopus'
     MODEL = 'bobba'
-    MILESTONE = 80
+    MILESTONE_NO = '80'
+    MILESTONE = 'milestones/' + MILESTONE_NO
     BUILD_VERSION = '1234.5.6'
     SOURCE_BUCKET = 'source_bucket'
     DESTINATION_BUCKET = 'destination bucket'
@@ -42,7 +43,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
         response = self.moblab_build_connector.list_available_milestones(
             self.BUILD_TARGET, self.MODEL)
 
-        self.assertEqual(response.builds, expect.builds)
+        self.assertEqual(response, ['R' + self.MILESTONE_NO])
         self.mock_build_service_client.list_builds.assert_called_once()
 
     def test_list_builds_for_milestone(self):
@@ -60,7 +61,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
         response = self.moblab_build_connector.list_builds_for_milestone(
             self.BUILD_TARGET, self.MODEL, self.MILESTONE)
 
-        self.assertEqual(response.builds, expect.builds)
+        self.assertEqual(response, [self.BUILD_VERSION])
         self.mock_build_service_client.list_builds.assert_called_once()
 
     def test_check_build_stage_status(self):
