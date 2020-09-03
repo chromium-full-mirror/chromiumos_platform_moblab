@@ -14,9 +14,6 @@ import time
 from collections import namedtuple
 from google.cloud import storage
 
-from collections import namedtuple
-from google.cloud import storage
-
 from moblab_common import build_connector
 from moblab_common import dut_connector
 from moblab_common import host_connector
@@ -51,6 +48,8 @@ HARDWARE_AVL_PART_NO = 'part_id'
 MAX_BUILD_RESULTS_PAGE = 1000
 
 MOBLAB_DOCKER_REGISTRY = 'gcr.io/chromeos-partner-moblab/'
+
+MAX_BUILD_STAGING_SECONDS = 300 # 5 minutes
 
 class MoblabRpcError(Exception):
     pass
@@ -410,6 +409,10 @@ class MoblabService(object):
         Returns:
           String response message.
         """
+
+        if not self._is_build_staged(build_version, build_target, milestone):
+            self._stage_build(model, build_target, build_version)
+
         build = '{}-release/{}-{}'.format(build_target, milestone, build_version)
         builds = {'cros-version': build}
 
@@ -448,6 +451,42 @@ class MoblabService(object):
 
     def update_duts_firmware(self, ip_addresses):
         self.dut_connector.update_firmware(ip_addresses)
+
+    def _is_build_staged(self, build_version, build_target, milestone):
+        """
+            Applies the specified build artifacts to the bucket configured for this Moblab.
+
+        Args:
+            build_target (string): AKA board of the target DUT.
+            build_version (string): Build version to be applied to DUT for testing.
+            milestone (string): Milestone the build version belongs to.
+        Returns:
+            Boolean which is true iff build is already staged on Moblab.
+        """
+        return build_version in self.build_connector.get_builds_for_milestone(build_target, milestone)
+
+    def _stage_build(self, model, build_target, build_version):
+        """
+            Applies the specified build artifacts to the bucket configured for this Moblab.
+
+        Args:
+            model (string): Model of the target DUT.
+            build_target (string): AKA board of the target DUT.
+            build_version (string): Build version to be applied to DUT for testing.
+        Returns:
+            Nothing.
+        """
+        self.moblab_build_connector.stage_build(build_target, model, build_version, self.moblab_bucket_name)
+
+        sleep_interval = 1
+        end_time = time.time() + MAX_BUILD_STAGING_SECONDS
+        while time.time() < end_time:
+            if self.moblab_build_connector.check_build_stage_status(build_target, model, build_version, self.moblab_bucket_name):
+                break
+            time.sleep(sleep_interval)
+            # every failure, increase wait interval by 1.5 times ( exponential backoff, of sorts )
+            sleep_interval *= 1.5
+        raise MoblabRpcError('Build stage did not finish within {} seconds.'.format(MAX_BUILD_STAGING_SECONDS))
 
     def list_usable_build_targets(self):
         # Get the intersection of build_target available to this moblab and
