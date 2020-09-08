@@ -38,6 +38,8 @@ import {
   GetNumDutTasksResponse,
   GetNumJobsRequest,
   GetNumJobsResponse,
+  GetRemoteAgentConfigurationRequest,
+  GetRemoteAgentConfigurationResponse,
   GetVersionInfoRequest,
   GetVersionInfoResponse,
   Job,
@@ -78,6 +80,8 @@ import {
   SetCloudConfigurationResponse,
   SetDutWifiInfoRequest,
   SetDutWifiInfoResponse,
+  SetRemoteAgentConfigurationRequest,
+  SetRemoteAgentConfigurationResponse,
   UpdateDutsFirmwareRequest,
   UpdateDutsFirmwareResponse,
   UpdateMoblabRequest,
@@ -1158,6 +1162,57 @@ export class MoblabGrpcService {
       callback(
         response.getMessage(),
       );
+    });
+  }
+
+  /**
+   *  Gets the Remote Agent configuration.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  */
+  get_remote_agent_configuration(
+    callback: (is_enabled: boolean) => void,
+    errorHandlingCallback: (errorMsg: string) => void
+  ) {
+    const request = new GetRemoteAgentConfigurationRequest();
+
+    const call = this.moblabRpcService.get_remote_agent_configuration(request, {},
+      (err: grpcWeb.Error, response: GetCloudConfigurationResponse) => {
+        errorHandlingCallback(err.message);
+      });
+
+    call.on("data", (response: GetRemoteAgentConfigurationResponse) => {
+      callback(response.getIsEnabled());
+    });
+  }
+
+  /**
+   *  Sets the Remote Agent configuration.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param is_enabled: if remote agent is enabled or not.
+   *  */
+  set_remote_agent_configuration(
+    callback: (is_succeeded: boolean) => void,
+    errorHandlingCallback: (errorMsg: string) => void,
+    is_enabled: boolean
+  ) {
+    const request = new SetRemoteAgentConfigurationRequest();
+    request.setIsEnabled(is_enabled);
+
+    const call = this.moblabRpcService.set_remote_agent_configuration(
+      request,
+      {},
+      (err: grpcWeb.Error,
+       response: SetRemoteAgentConfigurationResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+
+    call.on('data', (response: SetRemoteAgentConfigurationResponse) => {
+      callback(
+        response.getIsSucceeded()
+      )
     });
   }
 }
