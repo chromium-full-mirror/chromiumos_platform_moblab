@@ -1,5 +1,8 @@
-<mat-card>
-  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"></app-build-select-forms>
+<mat-card style="padding-top:35px;">
+  <app-build-select-forms
+    (allRequiredFieldsSet)="onBuildSet($event)"
+    (formLoading)="onFormLoading($event.message)"
+    (formLoaded)="onFormLoaded()"></app-build-select-forms>
   <app-basic-input #suiteInput [name]="'Custom Suite Name'" (update)="suiteChanged($event.value)"></app-basic-input>
   <app-run-suite-button (click)="onRunSuiteClick()"></app-run-suite-button>
 </mat-card>

@@ -3,9 +3,13 @@
     <mat-tab-group>
       <mat-tab label="CTS">
         <ng-template matTabContent>
-          <div class="suite-form-wrapper" style="position: relative;">
+          <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-cts-run (suiteStarted)="onSuiteStart()"></app-cts-run>
+            <app-cts-run
+              (suiteStarted)="onSuiteStart()"
+              (formLoadingStart)="onLoadingStart($event.message)"
+              (formLoadingFinish)="onLoadingFinish()">
+            </app-cts-run>
           </div>
         </ng-template>
       </mat-tab>
@@ -13,7 +17,11 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-gts-run (suiteStarted)="onSuiteStart()"></app-gts-run>
+            <app-gts-run
+              (suiteStarted)="onSuiteStart()"
+              (formLoadingStart)="onLoadingStart($event.message)"
+              (formLoadingFinish)="onLoadingFinish()">
+            </app-gts-run>
           </div>
         </ng-template>
       </mat-tab>
@@ -21,7 +29,11 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-memory-qual (suiteStarted)="onSuiteStart()"></app-memory-qual>
+            <app-memory-qual
+              (suiteStarted)="onSuiteStart()"
+              (formLoadingStart)="onLoadingStart($event.message)"
+              (formLoadingFinish)="onLoadingFinish()">
+            </app-memory-qual>
           </div>
         </ng-template>
       </mat-tab>
@@ -29,7 +41,11 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-storage-qual (suiteStarted)="onSuiteStart()"></app-storage-qual>
+            <app-storage-qual
+              (suiteStarted)="onSuiteStart()"
+              (formLoadingStart)="onLoadingStart($event.message)"
+              (formLoadingFinish)="onLoadingFinish()">
+            </app-storage-qual>
           </div>
         </ng-template>
       </mat-tab>
@@ -37,7 +53,11 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-run-any-suite (suiteStarted)="onSuiteStart()"></app-run-any-suite>
+            <app-run-any-suite
+              (suiteStarted)="onSuiteStart()"
+              (formLoadingStart)="onLoadingStart($event.message)"
+              (formLoadingFinish)="onLoadingFinish()">
+            </app-run-any-suite>
           </div>
         </ng-template>
       </mat-tab>

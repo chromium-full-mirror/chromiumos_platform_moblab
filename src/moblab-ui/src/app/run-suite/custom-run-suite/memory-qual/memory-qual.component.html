@@ -1,5 +1,9 @@
 <mat-card>
-  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"></app-build-select-forms>
+  <app-build-select-forms
+    (allRequiredFieldsSet)="onBuildSet($event)"
+    (formLoading)="onFormLoading($event.message)"
+    (formLoaded)="onFormLoaded()">
+  </app-build-select-forms>
 
   <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'"
                    [isNumeric]="true"

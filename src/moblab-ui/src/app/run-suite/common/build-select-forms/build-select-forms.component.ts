@@ -10,8 +10,8 @@ import {
 } from '@angular/core';
 
 import {BuildSettings} from '../base_suite/base-suite.component';
-import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 
 
 const SELECT_MODEL_PROMPT = 'Please select model.';
@@ -36,6 +36,8 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   @ViewChild('buildSelector') buildSelector;
   @ViewChild('poolSelector') poolSelector;
 
+  @Output() formLoading = new EventEmitter();
+  @Output() formLoaded = new EventEmitter();
   @Output() allRequiredFieldsSet = new EventEmitter();
 
   // TODO(haddowk) Allow tryjobs and other build types.
@@ -60,13 +62,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.moblabGrpcService.listModels(
-      (models: string[]) => {
-        this.updateModels(models);
-      },
-      (error_msg: string) => {
-        this.setErrorReason(this.modelSelector, error_msg);
-      });
+    this.getModels();
   }
 
   ngAfterViewInit() {
@@ -90,10 +86,24 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
     this.setOffPopup(msg);
   }
 
+  getModels() {
+    this.formLoading.emit({message: 'fetching models...'});
+    this.moblabGrpcService.listModels(
+      (models: string[]) => {
+        this.updateModels(models);
+        this.formLoaded.emit();
+      },
+      (error_msg: string) => {
+        this.setErrorReason(this.modelSelector, error_msg);
+        this.formLoaded.emit();
+      }
+    );
+  }
+
   updateModels(newModels: string[]) {
     this.models = newModels;
 
-    if (this.models.length === 0) {
+    if (newModels.length === 0) {
       this.modelSelector.disable('No working DUT\'s detected.');
     } else {
       this.modelSelector.enable();
@@ -102,13 +112,21 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
 
   modelChanged(model: string) {
     this.selectedModel = model;
+    this.getBuildTargets();
+  }
+
+  getBuildTargets() {
+    this.formLoading.emit({message:'fetching build targets...'});
     this.moblabGrpcService.listBuildTargets(
-      (buildTarget: string[]) => {
-        this.updateBuildTargets(buildTarget);
+      (buildTargets: string[]) => {
+        this.updateBuildTargets(buildTargets);
+        this.formLoaded.emit();
       },
       (error_msg: string) => {
         this.setErrorReason(this.boardSelector, error_msg);
-      });
+        this.formLoaded.emit();
+      }
+    );
   }
 
   updateBuildTargets(newBuildTargets: string[]) {
@@ -123,22 +141,29 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
 
   buildTargetChanged(newBuildTarget: string): void {
     this.buildTargetName = newBuildTarget;
+    this.getMilestones();
+  }
+
+  getMilestones() {
+    this.formLoading.emit({message:'fetching milestones...'});
     this.moblabGrpcService.listMilestones(
       this.buildTargetName,
       this.selectedModel,
       (milestones: string[]) => {
-        this.updateMilestones(milestones);
+      this.updateMilestones(milestones);
+      this.formLoaded.emit();
       },
       (error_msg: string) => {
         this.setErrorReason(this.milestoneSelector, error_msg);
-      },
+        this.formLoaded.emit();
+      }
     )
   }
 
   updateMilestones(newMilestones: string[]) {
     this.milestones = newMilestones;
 
-    if (this.buildTargets.length === 0) {
+    if (this.milestones.length === 0) {
       this.milestoneSelector.disable('No milestones found in configured bucket.');
     } else {
       this.milestoneSelector.enable();
@@ -147,15 +172,22 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
 
   milestoneChanged(newMilestone: string): void {
     this.milestone = newMilestone;
+    this.getBuildVersions();
+  }
+
+  getBuildVersions() {
+    this.formLoading.emit({message:'fetching build versions...'});
     this.moblabGrpcService.listBuildVersions(
       this.buildTargetName,
       this.selectedModel,
       this.milestone,
       (builds: string[]) => {
         this.updateBuildVersions(builds);
+        this.formLoaded.emit();
       },
       (error_msg: string) => {
         this.setErrorReason(this.buildSelector, error_msg);
+        this.formLoaded.emit();
       }
     );
   }
@@ -163,7 +195,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   updateBuildVersions(newBuildVersions: string[]) {
     this.buildVersions = newBuildVersions;
 
-    if (this.buildTargets.length === 0) {
+    if (this.buildVersions.length === 0) {
       this.buildSelector.disable('No builds found in configured bucket.');
     } else {
       this.buildSelector.enable();
