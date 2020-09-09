@@ -38,6 +38,7 @@ os.environ.setdefault(
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class MoblabTestScheduler(object):
     """Service that regularly checks for remote commands and executes them."""
 
@@ -154,7 +155,8 @@ class MoblabTestScheduler(object):
 
         def has_been_executed(executed, request):
             if request.unique_id in executed:
-                _LOGGER.debug("Rejecting request %s as executed", request.unique_id)
+                _LOGGER.debug("Rejecting request %s as executed",
+                              request.unique_id)
                 return False
             return True
 
@@ -162,7 +164,8 @@ class MoblabTestScheduler(object):
             return request.can_be_executed(attached_boards)
 
         # Filter out all commands that can or should not run on this moblab.
-        self.requests.filter_requests(functools.partial(has_been_executed, executed))
+        self.requests.filter_requests(
+            functools.partial(has_been_executed, executed))
         self.requests.filter_requests(
             functools.partial(can_be_executed, attached_boards)
         )
@@ -207,6 +210,9 @@ class MoblabTestScheduler(object):
             logging_severity = logging.DEBUG
         _setup_logging(logging_severity)
 
+        _LOGGER.info("enabled %s delay %d debug %s",
+                     is_enabled, delay_mins, debug_enabled)
+
         if not is_enabled:
             _LOGGER.info("The scheduler is not enabled")
             return False
@@ -219,14 +225,14 @@ class MoblabTestScheduler(object):
                 if self.obtain_lock(request):
                     _LOGGER.info("Executing request. %s", request.unique_id)
                     # TODO - return an enum SUCCESS/FAIL/RETRY.
-                    request.execute(self.devserver_connector, self.afe_connector)
+                    result = request.execute(self.devserver_connector,
+                                             self.afe_connector)
             else:
                 _LOGGER.debug("No requests to run.")
             if options.single_run:
                 break
             _LOGGER.debug("Sleeping for %d mins", delay_mins)
-            # time.sleep(delay_mins * 60)
-            time.sleep(60)
+            time.sleep(delay_mins * 60)
 
 
 def _setup_logging(level):

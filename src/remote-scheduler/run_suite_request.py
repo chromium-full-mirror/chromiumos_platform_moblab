@@ -8,6 +8,7 @@ import logging
 import time
 import json
 
+import moblabrpc_connector
 import remote_request
 
 _LOGGER = logging.getLogger(__name__)
@@ -171,19 +172,23 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
             autotest_connector (object): Instanciated API object to access the
                 autotest server.
         """
-        _LOGGER.debug("Running suite %s", self)
+        _LOGGER.info("Running suite %s", self)
         # if the request has expired then don't run the suite
         if self.expires_at_sec_utc and int(time.time()) > self.expires_at_sec_utc:
             return
 
         if devserver_connector.stage_build(self.board, self.build):
-            autotest_connector.run_suite(
-                board=self.board,
-                build=self.build,
-                builds=[],
-                suite=self.suite,
+            # TODO Change run_suite_request proto to have a milestone,
+            # build version and build_target depricate build and board.
+            milestone = self.build.split('-')[0]
+            build_version = self.build.split('-')[1]
+            # TODO plumb through suite_args and test_args.
+            reponse = moblabrpc_connector.MoblabRpcConnector.run_suite(
+                build_target=self.board,
                 model=self.model,
-                suite_timeout_mins=60*24*21,
-                suite_args=self.suite_args,
-                test_args=self.test_args,
-            )
+                milestone=milestone,
+                build_version=build_version,
+                suite=self.suite)
+            return json.loads(reponse.message)["error"]
+        else:
+            _LOGGER.error("Unable to stage build for suite %s", self)

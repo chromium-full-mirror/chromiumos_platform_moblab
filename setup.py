@@ -23,7 +23,8 @@ class build_package_protos(setuptools.Command):
 
 
 excluded = {'moblab_common': ['*unittest*'],
-            'host_services': ['*host-ser*'] # Only need the pb2 files
+            'host_services': ['*host-ser*'], # Only need the pb2 files
+            'moblab_rpcserver': ['*moblab-rpc*'] # Only need the pb2 files
            }
 
 

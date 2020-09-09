@@ -24,7 +24,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 # install and cache app dependencies
 # add app
 COPY ./moblab-ui /app
-COPY ./moblab-rpcserver/moblabrpc.proto /app
+COPY ./moblab_rpcserver/moblabrpc.proto /app
 
 COPY --from=protoc /protoc/* /usr/local/bin/
 RUN protoc -I=/app --js_out=import_style=commonjs:/app/src/app/services \

@@ -50,6 +50,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
 COPY --chown=moblab ./src/tools /moblab/src/tools
 COPY --chown=moblab ./src/host_services /moblab/src/host_services
+COPY --chown=moblab ./src/moblab_rpcserver /moblab/src/moblab_rpcserver
 COPY --chown=moblab ./setup.py /moblab/
 
 WORKDIR /moblab

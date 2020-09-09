@@ -16,13 +16,13 @@ FROM python:3.8-buster as build
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-WORKDIR /etc/moblab/moblab-rpcserver
+WORKDIR /etc/moblab/moblab_rpcserver
 
 COPY --from=protoc /protoc/* /usr/local/bin/
-COPY src/moblab-rpcserver/ /etc/moblab/moblab-rpcserver
-RUN protoc -I=/etc/moblab/moblab-rpcserver \
-    --python_out=:/etc/moblab/moblab-rpcserver \
-    --grpc_python_out=:/etc/moblab/moblab-rpcserver \
+COPY src/moblab_rpcserver/ /etc/moblab/moblab_rpcserver
+RUN protoc -I=/etc/moblab/moblab_rpcserver \
+    --python_out=:/etc/moblab/moblab_rpcserver \
+    --grpc_python_out=:/etc/moblab/moblab_rpcserver \
     --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin \
     moblabrpc.proto
 
@@ -33,8 +33,8 @@ FROM python:3.8-slim-buster
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-COPY --chown=moblab --from=build /etc/moblab/moblab-rpcserver \
-    /etc/moblab/moblab-rpcserver
+COPY --chown=moblab --from=build /etc/moblab/moblab_rpcserver \
+    /etc/moblab/moblab_rpcserver
 RUN apt-get update && apt-get install -yq \
     cmake \
     curl \
@@ -91,4 +91,4 @@ USER moblab
 
 EXPOSE 6002
 
-CMD ["/etc/moblab/moblab-rpcserver/moblab-rpcserver.py", "-v"]
+CMD ["/etc/moblab/moblab_rpcserver/moblab-rpcserver.py", "-v"]
