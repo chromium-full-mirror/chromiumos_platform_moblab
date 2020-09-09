@@ -226,15 +226,14 @@ class MoblabService(object):
 
         Args:
             build_target: Ex. octopus
-            milestone: Ex. R80
+            model: String identifier for the specific model to be run.
+            milestone: String, Ex. R80
             build_version: A numeric version string of the form: '00000.00.0'
-            model: String identfier for the specific model to be run.
-            pool: String identifier for which pool of DUT's to run tests with.
-            avl_process_bug_id: Numeric string identifying the associated
+            bug_id: Numeric string identifying the associated
             buganizer issue.
-            avl_part_number: Numeric string identifying relevant part number.
+            part_id: Numeric string identifying relevant part number.
             variation: RunStorageQualificationSuiteRequest.Variation
-            pool: String test pool identifier.
+            pool: String identifier for which pool of DUT's to run tests with.
         Returns:
           String response message.
         """
@@ -268,17 +267,16 @@ class MoblabService(object):
 
         Args:
             build_target: Ex. octopus
-            milestone: Ex. R80
-            build_version: A numeric version string of the form: '00000.00.0'
             model: String identfier for the specific model to be run.
+            milestone: String,  Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            bug_id: Numeric string identifying the associated buganizer issue.
+            part_id: Numeric string identifying relevant part number.
             pool: String identifier for which pool of DUT's to run tests with.
-            avl_process_bug_id: Numeric string identifying the associated
-            buganizer issue.
-            avl_part_number: Numeric string identifying relevant part number.
         Returns:
           String response message.
         """
-        suite_args = {
+        avl_args = {
             HARDWARE_AVL_BUG_ID: bug_id,
             HARDWARE_AVL_PART_NO: part_id
         }
@@ -289,7 +287,9 @@ class MoblabService(object):
             build_version,
             'hardware_memoryqual', # suite
             pool,
-            suite_args=suite_args)
+            suite_args=avl_args,
+            test_args=avl_args
+        )
 
     def run_cts_suite(self,
                       build_target,
