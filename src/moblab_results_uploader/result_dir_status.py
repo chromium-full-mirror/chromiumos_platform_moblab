@@ -100,7 +100,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
             if test_result.is_logged:
                 _LOGGER.debug("%s Status not ready age %s", test_result, age)
 
-        if age > self._min_age_to_prune:
+        if age > self._min_age_to_prune and previous_status in [Status.UPLOADED]:
             if test_result.is_logged:
                 _LOGGER.debug("%s Job is past the max age - expire", test_result)
             return Status.EXPIRED
