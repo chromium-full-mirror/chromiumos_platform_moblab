@@ -34,13 +34,13 @@ export class BasicAutocompleteSelectorComponent extends BaseForm implements OnCh
 
   private errorMsg = '';
   private optionSelected = false;
+  selectFormControl = new FormControl('');
   private selectValueOnUnlock = '';
 
   filteredOptions: Observable<string[]>;
-  selectFormControl = new FormControl();
 
   // Sets up the subscription to the input form control which generates the
-  // filtered options dropwdown.
+  // filtered options dropdown.
   private setFilterOptions() {
     this.filteredOptions = this.selectFormControl.valueChanges
       .pipe(
@@ -133,7 +133,9 @@ export class BasicAutocompleteSelectorComponent extends BaseForm implements OnCh
   }
 
   private setError(message: string) {
-    this.errorMsg = message;
+    if (!this.isDisabled()) {
+      this.errorMsg = message;
+    }
   }
 
   clearError() {
@@ -146,7 +148,7 @@ export class BasicAutocompleteSelectorComponent extends BaseForm implements OnCh
 
   clearSelection() {
     this.clearError();
-    this.selectFormControl = new FormControl();
+    this.selectFormControl.setValue('');
   }
 
   getSelectedValue() {

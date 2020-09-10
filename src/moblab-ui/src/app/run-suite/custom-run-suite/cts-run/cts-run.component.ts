@@ -20,6 +20,7 @@ import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-b
 @Component({
   selector: 'app-cts-run',
   templateUrl: './cts-run.component.html',
+  styleUrls: ['./cts-run.component.scss'],
 })
 export class CtsRunComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('versionSelector') versionSelectForm;

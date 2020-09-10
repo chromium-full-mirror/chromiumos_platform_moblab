@@ -4,7 +4,7 @@ import {
   ViewChild
 } from '@angular/core';
 
-import {LoadingOverlayComponent} from '../widgets/loading-overlay/loading-overlay.component';
+import {LoadingOverlayComponent, LoadingOverlayStyle} from '../widgets/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-run-suite',
@@ -17,6 +17,14 @@ export class RunSuiteComponent {
   onSuiteStart() {
     this.onSuiteStatusUpdate('submitting');
     this.loadingOverlay.show();
+  }
+
+  onLoadingStart(message) {
+    this.loadingOverlay.updateStatus(message, LoadingOverlayStyle.Top);
+  }
+
+  onLoadingFinish() {
+    this.loadingOverlay.hide();
   }
 
   onSuiteStatusUpdate(current_state: string) {

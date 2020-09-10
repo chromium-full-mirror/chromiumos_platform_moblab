@@ -18,6 +18,7 @@ import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-b
 @Component({
   selector: 'app-gts-run',
   templateUrl: './gts-run.component.html',
+  styleUrls: ['./gts-run.component.css'],
 })
 export class GtsRunComponent extends BaseSuite implements AfterViewInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;

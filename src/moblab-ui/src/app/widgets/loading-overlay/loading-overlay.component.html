@@ -1,4 +1,6 @@
-<div id="overlay" *ngIf="!hideOverlay">
+<div id="overlay" *ngIf="!hideOverlay"
+     [class.center]="isCenterOverlay()"
+     [class.top]="isTopOverlay()">
   <div class="loading-wrapper">
     <mat-card class="loading-card">
       <div id="loading-message">{{message}}</div>

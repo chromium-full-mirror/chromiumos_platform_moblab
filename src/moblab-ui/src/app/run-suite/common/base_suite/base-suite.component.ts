@@ -25,6 +25,8 @@ export interface BuildSettings {
  */
 export abstract class BaseSuite {
   @Output() suiteStarted = new EventEmitter();
+  @Output() formLoadingStart = new EventEmitter();
+  @Output() formLoadingFinish = new EventEmitter();
 
   runSuiteButtonDisabled = true;
 
@@ -53,6 +55,14 @@ export abstract class BaseSuite {
    * for suite run. Generally is enabling of another, suite-specific form.
    */
   abstract onBuildSetCustom(event: BuildSettings);
+
+  onFormLoading(event) {
+    this.formLoadingStart.emit({message: event});
+  }
+
+  onFormLoaded() {
+    this.formLoadingFinish.emit();
+  }
 
   onRunSuiteClick(submitMessage?: string) {
     this.setOffPopup(submitMessage);
