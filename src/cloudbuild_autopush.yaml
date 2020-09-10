@@ -378,7 +378,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor:
       - "buster-slim"
-      - "apline-git"
+      - "alpine-git"
 
   - id: offloader
     name: "docker:19.03.8"
