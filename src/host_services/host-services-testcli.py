@@ -5,8 +5,8 @@
 # found in the LICENSE file.
 
 import grpc
-import hostservices_pb2
-import hostservices_pb2_grpc
+from moblab_common.proto import hostservices_pb2
+from moblab_common.proto import hostservices_pb2_grpc
 
 
 def get_host_identifier(st):

@@ -5,7 +5,7 @@ from google.protobuf.json_format import MessageToDict
 from google.cloud import pubsub_v1
 
 from moblab_common import pubsub_client
-from remoteagentrpc_pb2 import MoblabHost, MoblabDut
+from moblab_common.proto.remoteagentrpc_pb2 import MoblabHost, MoblabDut
 from constants import Constants
 
 

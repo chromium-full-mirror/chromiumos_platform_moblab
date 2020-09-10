@@ -4,23 +4,19 @@
 # found in the LICENSE file.
 """Tests for the remote requests module."""
 
-
 # pylint: disable=no-name-in-module, import-error
 from google.cloud import exceptions
 
 from moblab_common import versioned_upload
+from moblab_common.proto import moblab_request_pb2
 
-import moblab_request_pb2
 import run_suite_request
 
 import logging
 
-
 class UnknownRequestType(Exception):
     """Custom Exception Type for Unknown Request Type."""
-
     pass
-
 
 class MoblabRemoteRequests(object):
     """Class the wraps around a list of remote requests."""

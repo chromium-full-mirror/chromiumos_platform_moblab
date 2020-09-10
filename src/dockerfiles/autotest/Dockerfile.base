@@ -11,6 +11,10 @@ FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 
+FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
+
+######################################################################
+
 FROM alpine/git as source
 
 WORKDIR /
@@ -24,7 +28,7 @@ RUN git reset --hard 94aa4ea0dd9f79d59f491572f8892ab25e2e07db
 
 FROM debian:buster-slim as protobuild
 
-COPY --from=protoc /protoc/* /usr/local/bin
+COPY --from=protoc /protoc/* /usr/local/bin/
 
 COPY ./third_party/autotest/tko/ /moblab/third_party/autotest/tko/
 
@@ -40,13 +44,7 @@ FROM python:2.7-slim-buster
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
     --uid 246 --disabled-password --gecos "" moblab
 
-COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
-COPY --chown=moblab ./src/dockerfiles /moblab/src/dockerfiles
-COPY --chown=moblab ./src/host_services /moblab/src/host_services
-COPY --chown=moblab ./src/tools /moblab/src/tools
 COPY --chown=moblab ./third_party/autotest /moblab/third_party/autotest
-COPY --chown=moblab ./setup.py /moblab/
-
 COPY --chown=moblab --from=protobuild /moblab/third_party/autotest/tko/*pb2* /moblab/third_party/autotest/tko/
 
 RUN rm -rf /moblab/third_party/autotest/site-packages
@@ -65,6 +63,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq  \
 
 COPY src/dockerfiles/autotest/requirements.txt ./
 
+RUN python2.7 -m pip install --upgrade pip
 RUN python2.7 -m pip install -r requirements.txt
 
 WORKDIR /
@@ -77,8 +76,10 @@ RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev
 RUN apt autoremove -yq
 RUN apt-get clean
 
-WORKDIR /moblab
-RUN python2.7 ./setup.py install
+WORKDIR /wheels
+COPY --from=common /wheel/*py2* .
+RUN pip install *.whl
+RUN rm -rf /wheels
 
 WORKDIR /shadow_config
 COPY --chown=moblab src/dockerfiles/autotest/shadow_config.ini .
