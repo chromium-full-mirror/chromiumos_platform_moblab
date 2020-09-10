@@ -82,7 +82,6 @@ RUN install  \
         autoupdate.py \
         builder.py \
         nebraska/nebraska.py \
-        stateful_update \
         quick-provision/quick-provision \
         /static_files_to_serve
 
