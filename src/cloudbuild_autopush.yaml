@@ -355,7 +355,7 @@ steps:
     waitFor:
       - "protoc"
       - "node"
-      - "nginx:alpine"
+      - "nginx-alpine"
     env:
       - "DOCKER_BUILDKIT=1"
 
