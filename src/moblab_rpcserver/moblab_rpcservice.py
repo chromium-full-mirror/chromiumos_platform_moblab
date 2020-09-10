@@ -502,6 +502,9 @@ class MoblabService(object):
             Returns milestones available for a given model/build_target, both staged and unstaged (if target bucket is in
             US, otherwise will only return staged milestones).
 
+            In this context, 'remote' means unstaged/from API call (i.e., remote milestones are those that are fetched
+            from the Moblab API rather than from existing build items staged in the partner bucket ).
+
             Args:
                 build_target(string): build_target (AKA board) to fetch milestones for.
                 model(string): model to fetch milestones for.
@@ -510,13 +513,16 @@ class MoblabService(object):
                 one build of the milestone is staged.
         """
         bucket_milestones = self.build_connector.get_milestones_available(build_target)
+
+        remote_milestones = []
         if not self._is_moblab_bucket_in_asia():
-            remote_milestones = self.moblab_build_connector.list_available_milestones(
-                build_target,
-                model,
-            )
-        else:
-            remote_milestones = []
+            try:
+                remote_milestones = self.moblab_build_connector.list_available_milestones(
+                    build_target,
+                    model,
+                )
+            except moblab_build_connector.MoblabBuildConnectorException as e:
+                logging.exception('Encountered error trying to fetch remote milestones.')
 
         milestone_results = [MilestonePair(milestone=milestone, is_staged=True)
                                 for milestone in bucket_milestones]
@@ -535,6 +541,9 @@ class MoblabService(object):
             Returns build versions available for a given model/build_target/milestone, both staged and unstaged (if target bucket is in
             US, otherwise will only return staged build versions).
 
+            In this context, 'remote' means unstaged/from API call (i.e., remote build versions are those that are fetched
+            from the Moblab API rather than from existing build items staged in the partner bucket ).
+
             Args:
                 build_target(string): build_target (AKA board) to return build versions for.
                 model(string): model to return build versions for.
@@ -547,21 +556,23 @@ class MoblabService(object):
 
         bucket_build_versions = self.build_connector.get_builds_for_milestone(
             build_target,
-            int(milestone)
+            milestone
         )
 
         build_version_results = [
             BuildVersionPair(build_version=build_version, is_staged=True) for build_version in bucket_build_versions
         ]
 
+        remote_build_versions = []
         if not self._is_moblab_bucket_in_asia():
-            remote_build_versions = self.moblab_build_connector.list_builds_for_milestone(
-                build_target,
-                model,
-                milestone
-            )
-        else:
-            remote_build_versions = []
+            try:
+                remote_build_versions = self.moblab_build_connector.list_builds_for_milestone(
+                    build_target,
+                    model,
+                    milestone
+                )
+            except moblab_build_connector.MoblabBuildConnectorException as e:
+                logging.exception('Encountered error trying to fetch remote build versions.')
 
         build_version_results.extend(
             [

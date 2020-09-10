@@ -12,6 +12,7 @@ import re
 
 import google.api_core.path_template
 
+from google.api_core.exceptions import GoogleAPICallError
 from google.auth import exceptions as auth_exceptions
 from google.chromeos.moblab_v1beta1.services.build_service.client import \
     BuildServiceClient
@@ -67,6 +68,14 @@ class MoblabBuildConnector(object):
         except auth_exceptions.DefaultCredentialsError as e:
             raise MoblabBuildConnectorException('No credentials loaded') from e
 
+    def _list_builds(self, request):
+        try:
+            return self.build_service_client.list_builds(request).builds
+        except GoogleAPICallError as e:
+            raise MoblabBuildConnectorException(
+                'Encountered API error when attempting to list builds.'
+            ) from e
+
     def list_available_milestones(self, build_target, model, page_size=50,
         page_token=None):
         """Lists the available milestones for the given build target and model.
@@ -92,7 +101,7 @@ class MoblabBuildConnector(object):
             read_mask=milestone_field,
             group_by=milestone_field
         )
-        build_results = self.build_service_client.list_builds(request).builds
+        build_results = self._list_builds(request)
         return [self._parse_milestone(build.milestone) for build in build_results]
 
     def list_builds_for_milestone(self, build_target, model, milestone,
@@ -121,7 +130,7 @@ class MoblabBuildConnector(object):
             page_token=page_token,
             filter=milestone_filter
         )
-        build_results = self.build_service_client.list_builds(request).builds
+        build_results = self._list_builds(request)
         return [build.build_version for build in build_results]
 
     def check_build_stage_status(self, build_target, model, build, bucket_name):
