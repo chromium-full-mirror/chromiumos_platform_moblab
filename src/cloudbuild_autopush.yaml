@@ -567,7 +567,7 @@ steps:
         "/workspace/src/dockerfiles/dns/Dockerfile",
         "-t",
         "${_REGISTRY_URI}/moblab-dns:${_LABEL}",
-        "/workspace/",
+        "/workspace/src/dockerfiles/dns",
       ]
     env:
       - "DOCKER_BUILDKIT=1"
