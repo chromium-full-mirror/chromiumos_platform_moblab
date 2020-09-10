@@ -5,52 +5,76 @@ substitutions:
   _SSH_PORT: "22"
 
 steps:
-  - id: pull
+  - id: buster-slim
     name: "docker:19.03.8"
     args: ["pull", "debian:buster-slim"]
-  - id: pull2
+    waitFor: ['-']
+  - id: alpine-git
     name: "docker:19.03.8"
     args: ["pull", "alpine/git"]
-  - id: pull3
+    waitFor: ['-']
+  - id: dockerfile-copy
     name: "docker:19.03.8"
     args: ["pull", "docker/dockerfile-copy:v0.1.9"]
-  - id: pull4
+    waitFor: ['-']
+  - id: buster
     name: "docker:19.03.8"
     args: ["pull", "debian:buster"]
-  - id: pull5
+    waitFor: ['-']
+  - id: python-2.7-slim
     name: "docker:19.03.8"
     args: ["pull", "python:2.7-slim-buster"]
-  - id: pull6
+    waitFor: ['-']
+  - id: mariadb
     name: "docker:19.03.8"
     args: ["pull", "mariadb:10.2"]
-  - id: pull7
+    waitFor: ['-']
+  - id: python-3.8-slim
     name: "docker:19.03.8"
     args: ["pull", "python:3.8-slim-buster"]
-  - id: pull8
+    waitFor: ['-']
+  - id: python-3.8
     name: "docker:19.03.8"
     args: ["pull", "python:3.8-buster"]
-  - id: pull9
+    waitFor: ['-']
+  - id: envoyproxy
     name: "docker:19.03.8"
     args: ["pull", "envoyproxy/envoy:v1.14.1"]
-  - id: pull10
+    waitFor: ['-']
+  - id: openssh-server
     name: "docker:19.03.8"
     args: ["pull", "linuxserver/openssh-server"]
-  - id: pull11
+    waitFor: ['-']
+  - id: watchtower
     name: "docker:19.03.8"
     args: ["pull", "v2tec/watchtower:latest"]
-  - id: pull12
+    waitFor: ['-']
+  - id: docker-compose
     name: "docker:19.03.8"
     args: ["pull", "docker/compose:alpine-1.25.4"]
-  - id: pull14
+    waitFor: ['-']
+  - id: node-buster
+    name: "docker:19.03.8"
+    args: ["pull", "node:12-buster"]
+    waitFor: ['-']
+  - id: node
     name: "docker:19.03.8"
     args: ["pull", "node:12"]
+    waitFor: ['-']
+  - id: alpine-edge
+    name: "docker:19.03.8"
+    args: ["pull", "alpine:edge"]
+    waitFor: ['-']
+  - id: nginx-alpine
+    name: "docker:19.03.8"
+    args: ["pull", "nginx:alpine"]
+    waitFor: ['-']
 
   - id: protoc
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "-f",
         "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
         "-t",
@@ -59,14 +83,14 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull']
+    waitFor:
+      - "buster-slim"
 
   - id: autotest-lucifer
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -79,15 +103,36 @@ steps:
       ]
     waitFor:
       - "protoc"
+      - "alpine-git"
+      - "buster-slim"
     env:
       - "DOCKER_BUILDKIT=1"
+
+  - id: gwt-compiler
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.gwtcompiler",
+        "-t",
+        "${_REGISTRY_URI}/gwtcompiler:${_LABEL}",
+        "/workspace/src/dockerfiles/utilities",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "buster"
 
   - id: autotest-gwt
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -100,14 +145,15 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull']
+    waitFor:
+      - "buster-slim"
+      - "gwt-compiler"
 
   - id: autotest-base
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -120,6 +166,9 @@ steps:
       ]
     waitFor:
       - "protoc"
+      - "alpine-git"
+      - "buster-slim"
+      - "python-2.7-slim"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -128,7 +177,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -150,7 +198,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -171,7 +218,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -185,6 +231,7 @@ steps:
     waitFor:
       - "autotest-base"
       - "autotest-lucifer"
+      - "alpine-git"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -193,7 +240,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -214,7 +260,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -227,6 +272,7 @@ steps:
       ]
     waitFor:
       - "autotest-base"
+      - "alpine-git"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -235,7 +281,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -248,14 +293,14 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull6']
+    waitFor:
+      - "mariadb"
 
   - id: db-init
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -268,14 +313,14 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull']
+    waitFor:
+      - "buster-slim"
 
   - id: devserver
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -288,14 +333,15 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull']
+    waitFor:
+      - "alpine-git"
+      - "buster-slim"
 
   - id: ui
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -308,6 +354,8 @@ steps:
       ]
     waitFor:
       - "protoc"
+      - "node"
+      - "nginx-alpine"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -316,7 +364,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -329,14 +376,15 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull']
+    waitFor:
+      - "buster-slim"
+      - "alpine-git"
 
   - id: offloader
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -349,6 +397,8 @@ steps:
       ]
     waitFor:
       - "protoc"
+      - "python-3.8"
+      - "python-3.8-slim"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -357,7 +407,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -370,36 +419,14 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull9']
-
-  - id: remote_access
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--no-cache",
-        "--build-arg",
-        "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg",
-        "LABEL=${_LABEL}",
-        "-f",
-        "/workspace/src/dockerfiles/remote_access/Dockerfile",
-        "-t",
-        "${_REGISTRY_URI}/remote_access:${_LABEL}",
-        "/workspace/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
     waitFor:
-      - 'pull3'
-      - 'pull10'
-      
+      - "envoyproxy"
+
   - id: remote-agent
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -413,15 +440,15 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
     waitFor:
-      - "pull10"
       - "protoc"
+      - "python-3.8"
+      - "python-3.8-slim"
 
   - id: remote-scheduler
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -434,6 +461,8 @@ steps:
       ]
     waitFor:
       - "protoc"
+      - "python-3.8"
+      - "python-3.8-slim"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -442,7 +471,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -455,6 +483,8 @@ steps:
       ]
     waitFor:
       - "protoc"
+      - "python-3.8"
+      - "python-3.8-slim"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -463,7 +493,6 @@ steps:
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -479,14 +508,35 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
       - "WATCHTOWER_CMD=${_WATCHTOWER_CMD}"
-    waitFor: ['pull12']
+    waitFor:
+      - "docker-compose"
+
+  - id: local-dev-environment
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/local-dev-environment/Dockerfile.base",
+        "-t",
+        "${_REGISTRY_URI}/moblab-dev-environment:${_LABEL}",
+        "/workspace/src/dockerfiles/local-dev-environment",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "node-buster"
+      - "protoc"
 
   - id: mobmonitor
     name: "docker:19.03.8"
     args:
       [
         "build",
-        "--no-cache",
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
@@ -499,7 +549,52 @@ steps:
       ]
     env:
       - "DOCKER_BUILDKIT=1"
-    waitFor: ['pull']
+    waitFor:
+      - "node"
+      - "buster-slim"
+
+  - id: dns
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/dns/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab-dns:${_LABEL}",
+        "/workspace/src/dockerfiles/dns",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "alpine-edge"
+
+  - id: remote_access
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/remote_access/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/remote_access:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - 'dockerfile-copy'
+      - 'openssh-server'
+      - 'autotest-base'
+
 
 images:
   [
@@ -524,6 +619,10 @@ images:
     "${_REGISTRY_URI}/moblab-db:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-afe:${_LABEL}",
     "${_REGISTRY_URI}/moblab-ssp:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-dev-environment:${_LABEL}",
+    "${_REGISTRY_URI}/mobmonitor:${_LABEL}",
+    "${_REGISTRY_URI}/gwtcompiler:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-dns:${_LABEL}",
   ]
 
 options:
