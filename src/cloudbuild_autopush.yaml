@@ -86,28 +86,6 @@ steps:
     waitFor:
       - "buster-slim"
 
-  - id: remote_access
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--build-arg",
-        "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg",
-        "LABEL=${_LABEL}",
-        "-f",
-        "/workspace/src/dockerfiles/remote_access/Dockerfile",
-        "-t",
-        "${_REGISTRY_URI}/remote_access:${_LABEL}",
-        "/workspace/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - 'dockerfile-copy'
-      - 'openssh-server'
-      - 'autotest-base'
-
   - id: autotest-lucifer
     name: "docker:19.03.8"
     args:
@@ -595,6 +573,28 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor:
       - "alpine-edge"
+
+  - id: remote_access
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/remote_access/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/remote_access:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - 'dockerfile-copy'
+      - 'openssh-server'
+      - 'autotest-base'
 
 
 images:
