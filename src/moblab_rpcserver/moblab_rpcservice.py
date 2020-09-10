@@ -482,7 +482,7 @@ class MoblabService(object):
         end_time = time.time() + MAX_BUILD_STAGING_SECONDS
         while time.time() < end_time:
             if self.moblab_build_connector.check_build_stage_status(build_target, model, build_version, self.moblab_bucket_name):
-                break
+                return
             time.sleep(sleep_interval)
             # every failure, increase wait interval by 1.5 times ( exponential backoff, of sorts )
             sleep_interval *= 1.5
@@ -534,7 +534,7 @@ class MoblabService(object):
         )
 
         milestone_results.sort(key=lambda x: int(x[0].strip('R')), reverse=True)
-        return BuildResults(results=milestone_results[:-1], is_incomplete=(len(remote_milestones) == MAX_BUILD_RESULTS_PAGE))
+        return BuildResults(results=milestone_results, is_incomplete=(len(remote_milestones) == MAX_BUILD_RESULTS_PAGE))
 
     def list_usable_build_versions(self, build_target, milestone, model):
         """

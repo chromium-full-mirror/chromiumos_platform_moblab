@@ -20,7 +20,10 @@ class MoblabBuildConnectorException(Exception):
 
 
 class MoblabBuildConnector(object):
-    """TODO ADD DOC"""
+    """
+        Contains logic for fetching build information from partner Google storage
+        bucket.
+    """
 
     def __init__(self, moblab_bucket_name, storage_client=None):
         if not moblab_bucket_name:
@@ -35,7 +38,7 @@ class MoblabBuildConnector(object):
                 logging.info('No credentials loaded')
                 raise MoblabBuildConnectorException('Invalid Credentials')
 
-    def get_partial_object_path(self, prefix, delimiter):
+    def _get_partial_object_path(self, prefix, delimiter):
         blob_itr = self.storage_client.bucket(
             self.moblab_bucket_name).list_blobs(
                 prefix=prefix, delimiter=delimiter)
@@ -44,7 +47,12 @@ class MoblabBuildConnector(object):
         return [partial_path for partial_path in blob_itr.prefixes]
 
     def get_boards_available(self):
-        possible_boards = self.get_partial_object_path(None, '/')
+        """Lists the available boards, aka build targets, in the partner bucket.
+
+        Returns:
+            List of strings representing boards.
+        """
+        possible_boards = self._get_partial_object_path(None, '/')
         possible_boards = [
             board for board in possible_boards if board.endswith('-release/')
         ]
@@ -55,8 +63,15 @@ class MoblabBuildConnector(object):
         return available_boards
 
     def get_milestones_available(self, board):
+        """Lists the available milestones in the partner bucket.
+
+        Args:
+            board (str): Build target name.
+        Returns:
+            List of strings representing build versions.
+        """
         prefix = '%s-release/R' % board
-        milestones = self.get_partial_object_path(prefix, '-')
+        milestones = self._get_partial_object_path(prefix, '-')
         milestones = [
             milestone[len(prefix) - 1:-1] for milestone in milestones
         ]
@@ -64,8 +79,16 @@ class MoblabBuildConnector(object):
         return milestones
 
     def get_builds_for_milestone(self, board, milestone):
-        prefix = '%s-release/%s-' % (board, milestone)
-        builds = self.get_partial_object_path(prefix, '/')
+        """Lists the available build versions in the partner bucket.
+
+        Args:
+            board (str): Build target name.
+            milestone (str): The milestone number ( must be a valid integer ).
+        Returns:
+            List of strings representing build versions.
+        """
+        prefix = '%s-release/%s-' % (board, 'R%s' % milestone)
+        builds = self._get_partial_object_path(prefix, '/')
         builds = [build[len(prefix):-1] for build in builds]
         builds.sort(key = lambda x: x)
         return builds
