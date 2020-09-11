@@ -76,11 +76,11 @@ class JetstreamHost(cros_host.CrosHost):
         logging.debug('Jetstream: Resetting AP services')
         # This is a 'fake' factory reset which restores the DUT to
         # its default state and restarts AP services.
-        self.run(' ap-configure --factory_reset', ignore_status=False)
+        self.run('ap-configure --factory_reset', ignore_status=False)
         self.wait_up(timeout=RESET_TIMEOUT_SECONDS)
 
         # Stop service ap-update-manager to prevent rebooting during autoupdate.
-        self.run(' stop ap-update-manager', ignore_status=False)
+        self.run('stop ap-update-manager', ignore_status=False)
 
     def prepare_for_update(self):
         """Prepare the host for an update."""

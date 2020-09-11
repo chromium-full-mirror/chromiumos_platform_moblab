@@ -1,3 +1,4 @@
+# Lint as: python2, python3
 # Copyright (c) 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,23 +10,24 @@
 """This is a base host class for servohost and labstation."""
 
 
-import httplib
+import six.moves.http_client
 import logging
 import socket
-import xmlrpclib
+import six.moves.xmlrpc_client
 
 from autotest_lib.client.bin import utils
+from autotest_lib.client.common_lib import enum
 from autotest_lib.client.common_lib import error
 from autotest_lib.client.common_lib import hosts
 from autotest_lib.client.common_lib import lsbrelease_utils
 from autotest_lib.client.common_lib.cros import dev_server
+from autotest_lib.client.common_lib.cros import kernel_utils
 from autotest_lib.client.cros import constants as client_constants
+from autotest_lib.server import autotest
 from autotest_lib.server import site_utils as server_utils
 from autotest_lib.server.cros import autoupdater
 from autotest_lib.server.hosts import ssh_host
-
-
-metrics = utils.metrics_mock
+#from autotest_lib.site_utils.rpm_control_system import rpm_client
 
 
 class BaseServoHost(ssh_host.SSHHost):
@@ -45,6 +47,8 @@ class BaseServoHost(ssh_host.SSHHost):
     # Timeout value to power cycle a servohost, in seconds.
     BOOT_TIMEOUT = 240
 
+    # Constants that reflect current host update state.
+    UPDATE_STATE = enum.Enum('IDLE', 'RUNNING', 'PENDING_REBOOT')
 
     def _initialize(self, hostname, is_in_lab=None, *args, **dargs):
         """Construct a BaseServoHost object.
@@ -75,6 +79,7 @@ class BaseServoHost(ssh_host.SSHHost):
 
         self._is_labstation = None
         self._dut_host_info = None
+        self._dut_hostname = None
 
 
     def get_board(self):
@@ -100,6 +105,21 @@ class BaseServoHost(ssh_host.SSHHost):
         @return A HostInfo object.
         """
         return self._dut_host_info
+
+
+    def set_dut_hostname(self, dut_hostname):
+        """
+        @param dut_hostname: hostname of the DUT that connected to this servo.
+        """
+        logging.info('setting dut_hostname as (%s)', dut_hostname)
+        self._dut_hostname = dut_hostname
+
+
+    def get_dut_hostname(self):
+        """
+        @returns hostname of the DUT that connected to this servo.
+        """
+        return self._dut_hostname
 
 
     def is_labstation(self):
@@ -143,8 +163,33 @@ class BaseServoHost(ssh_host.SSHHost):
 
 
     def _check_update_status(self):
-        dummy_updater = autoupdater.ChromiumOSUpdater(update_url="", host=self)
-        return dummy_updater.check_update_status()
+        """ Check servohost's current update state.
+
+        @returns: one of below state of from self.UPDATE_STATE
+            IDLE -- if the target host is not currently updating and not
+                pending on a reboot.
+            RUNNING -- if there is another updating process that running on
+                target host(note: we don't expect to hit this scenario).
+            PENDING_REBOOT -- if the target host had an update and pending
+                on reboot.
+        """
+        result = self.run('pgrep -f quick-provision | grep -v $$',
+                          ignore_status=True)
+        # We don't expect any output unless there are another quick
+        # provision process is running.
+        if result.exit_status == 0:
+            return self.UPDATE_STATE.RUNNING
+
+        # Determine if we have an update that pending on reboot by check if
+        # the current inactive kernel has priority for the next boot.
+        try:
+            inactive_kernel = kernel_utils.get_kernel_state(self)[1]
+            next_kernel = kernel_utils.get_next_kernel(self)
+            if inactive_kernel == next_kernel:
+                return self.UPDATE_STATE.PENDING_REBOOT
+        except Exception as e:
+            logging.error('Unexpected error while checking kernel info; %s', e)
+        return self.UPDATE_STATE.IDLE
 
 
     def is_in_lab(self):
@@ -179,36 +224,37 @@ class BaseServoHost(ssh_host.SSHHost):
         return result.exit_status == 0
 
 
+    def prepare_for_update(self):
+        """Prepares the DUT for an update.
+        Subclasses may override this to perform any special actions
+        required before updating.
+        """
+        pass
+
+
     def reboot(self, *args, **dargs):
         """Reboot using special servo host reboot command."""
         super(BaseServoHost, self).reboot(reboot_cmd=self.REBOOT_CMD,
                                           *args, **dargs)
 
 
-    def update_image(self, wait_for_update=False, stable_version=None):
+    def update_image(self, stable_version=None):
         """Update the image on the servo host, if needed.
 
         This method recognizes the following cases:
           * If the Host is not running Chrome OS, do nothing.
           * If a previously triggered update is now complete, reboot
             to the new version.
-          * If the host is processing a previously triggered update,
-            do nothing.
+          * If the host is processing an update do nothing.
+          * If the host has an update that pending on reboot, do nothing.
           * If the host is running a version of Chrome OS different
-            from the default for servo Hosts, trigger an update, but
-            don't wait for it to complete.
+            from the default for servo Hosts, start an update.
 
-        @param wait_for_update If an update needs to be applied and
-            this is true, then don't return until the update is
-            downloaded and finalized, and the host rebooted.
         @stable_version the target build number.(e.g. R82-12900.0.0)
 
         @raises dev_server.DevServerException: If all the devservers are down.
         @raises site_utils.ParseBuildNameException: If the devserver returns
             an invalid build name.
-        @raises AutoservRunError: If the update_engine_client isn't present on
-            the host, and the host is a cros_host.
-
         """
         # servod could be running in a Ubuntu workstation.
         if not self.is_cros_host():
@@ -243,51 +289,26 @@ class BaseServoHost(ssh_host.SSHHost):
             return
 
         status = self._check_update_status()
-        if status in autoupdater.UPDATER_PROCESSING_UPDATE:
-            logging.info('servo host %s already processing an update, update '
-                         'engine client status=%s', self.hostname, status)
-        elif status == autoupdater.UPDATER_NEED_REBOOT:
-            logging.info('An update has been completed and pending reboot now.')
+        if status == self.UPDATE_STATE.RUNNING:
+            logging.info('servo host %s already processing an update',
+                         self.hostname)
+            return
+        if status == self.UPDATE_STATE.PENDING_REBOOT:
             # Labstation reboot is handled separately here as it require
-            # synchronized reboot among all managed DUTs.
-            if not self.is_labstation():
-                self._servo_host_reboot()
-        else:
-            # For servo image staging, we want it as more widely distributed as
-            # possible, so that devservers' load can be evenly distributed.
-            # So use hostname instead of target_build as hash.
-            ds = dev_server.ImageServer.resolve(self.hostname,
-                                                hostname=self.hostname)
-            url = ds.get_update_url(target_build)
+            # synchronized reboot among all managed DUTs. For servo_v3, we'll
+            # reboot when initialize Servohost, if there is a update pending.
+            logging.info('An update has been completed and pending reboot.')
+            return
 
-            updater = autoupdater.ChromiumOSUpdater(update_url=url, host=self)
-
-            logging.info('Using devserver url: %s to trigger update on '
-                         'servo host %s, from %s to %s', url, self.hostname,
-                         current_build_number, target_build_number)
-            try:
-                ds.stage_artifacts(target_build,
-                                   artifacts=['full_payload'])
-            except Exception as e:
-                logging.error('Staging artifacts failed: %s', str(e))
-                logging.error('Abandoning update for this cycle.')
-            else:
-                try:
-                    updater.trigger_update()
-                except autoupdater.RootFSUpdateError as e:
-                    trigger_download_status = 'failed with %s' % str(e)
-                    metrics.Counter('chromeos/autotest/servo/'
-                                    'rootfs_update_failed').increment()
-                else:
-                    trigger_download_status = 'passed'
-                logging.info('Triggered download and update %s for %s, '
-                             'update engine currently in status %s',
-                             trigger_download_status, self.hostname,
-                             updater.check_update_status())
-
-        if wait_for_update:
-            logging.info('Waiting for servo update to complete.')
-            self.run('update_engine_client --follow', ignore_status=True)
+        ds = dev_server.ImageServer.resolve(self.hostname,
+                                            hostname=self.hostname)
+        url = ds.get_update_url(target_build)
+        updater = autoupdater.ChromiumOSUpdater(update_url=url, host=self,
+                                                is_servohost=True)
+        logging.info('Using devserver url: %s to trigger update on '
+                     'servo host %s, from %s to %s', url, self.hostname,
+                     current_build_number, target_build_number)
+        updater.run_update()
 
 
     def has_power(self):
@@ -295,6 +316,32 @@ class BaseServoHost(ssh_host.SSHHost):
         # TODO(fdeng): See crbug.com/302791
         # For now, assume all servo hosts in the lab have power.
         return self.is_in_lab()
+
+
+    def _post_update_reboot(self):
+        """ Reboot servohost after an quick provision.
+
+        We need to do some specifal cleanup before and after reboot
+        when there is an update pending.
+        """
+        # Regarding the 'crossystem' command below: In some cases,
+        # the update flow puts the TPM into a state such that it
+        # fails verification.  We don't know why.  However, this
+        # call papers over the problem by clearing the TPM during
+        # the reboot.
+        #
+        # We ignore failures from 'crossystem'.  Although failure
+        # here is unexpected, and could signal a bug, the point of
+        # the exercise is to paper over problems; allowing this to
+        # fail would defeat the purpose.
+        self.run('crossystem clear_tpm_owner_request=1', ignore_status=True)
+        self._servo_host_reboot()
+        logging.debug('Cleaning up autotest directories if exist.')
+        try:
+            installed_autodir = autotest.Autotest.get_installed_autodir(self)
+            self.run('rm -rf ' + installed_autodir)
+        except autotest.AutodirNotFoundError:
+            logging.debug('No autotest installed directory found.')
 
 
     def power_cycle(self):
@@ -305,7 +352,18 @@ class BaseServoHost(ssh_host.SSHHost):
                 servo host.
 
         """
-        logging.info('Skipping power cycling, not a lab device.')
+        if self.has_power():
+            try:
+                rpm_client.set_power(self, 'CYCLE')
+            except (socket.error, six.moves.xmlrpc_client.Error,
+                    six.moves.http_client.BadStatusLine,
+                    rpm_client.RemotePowerException) as e:
+                raise hosts.AutoservRepairError(
+                    'Power cycling %s failed: %s' % (self.hostname, e),
+                    'power_cycle_via_rpm_failed'
+                )
+        else:
+            logging.info('Skipping power cycling, not a lab device.')
 
 
     def _servo_host_reboot(self):
@@ -443,14 +501,20 @@ class BaseServoHost(ssh_host.SSHHost):
                 when servo host is not 'localhost'.
 
         """
-        run_args = {'command': command, 'timeout': timeout,
-                    'ignore_status': ignore_status, 'stdout_tee': stdout_tee,
-                    'stderr_tee': stderr_tee, 'stdin': stdin,
-                    'verbose': verbose, 'args': args}
+        run_args = {
+            'command'             : command,
+            'timeout'             : timeout,
+            'ignore_status'       : ignore_status,
+            'stdout_tee'          : stdout_tee,
+            'stderr_tee'          : stderr_tee,
+            # connect_timeout     n/a for localhost
+            # options             n/a for localhost
+            # ssh_failure_retry_ok n/a for localhost
+            'stdin'               : stdin,
+            'verbose'             : verbose,
+            'args'                : args,
+        }
         if self.is_localhost():
-            if self.__required:
-                run_args['command'] = ' sh -c "%s"' % utils.sh_escape(
-                    command)
             try:
                 return utils.run(**run_args)
             except error.CmdError as e:
@@ -460,4 +524,31 @@ class BaseServoHost(ssh_host.SSHHost):
         else:
             run_args['connect_timeout'] = connect_timeout
             run_args['options'] = options
+            run_args['ssh_failure_retry_ok'] = ssh_failure_retry_ok
             return super(BaseServoHost, self).run(**run_args)
+
+    def _mount_drive(self, src_path, dst_path):
+        """Mount an external drive on servohost.
+
+        @param: src_path  the drive path to mount(e.g. /dev/sda3).
+        @param: dst_path  the destination directory on servohost to mount
+                          the drive.
+
+        @returns: True if mount success otherwise False.
+        """
+        # Make sure the dst dir exists.
+        self.run('mkdir -p %s' % dst_path)
+
+        result = self.run('mount -o ro %s %s' % (src_path, dst_path),
+                          ignore_status=True)
+        return result.exit_status == 0
+
+    def _unmount_drive(self, mount_path):
+        """Unmount a drive from servohost.
+
+        @param: mount_path  the path on servohost to unmount.
+
+        @returns: True if unmount success otherwise False.
+        """
+        result = self.run('umount %s' % mount_path, ignore_status=True)
+        return result.exit_status == 0

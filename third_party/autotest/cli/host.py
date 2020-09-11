@@ -19,6 +19,9 @@ The common options are:
 See topic_common.py for a High Level Design and Algorithm.
 
 """
+
+from __future__ import print_function
+
 import common
 import json
 import random
@@ -28,7 +31,6 @@ import sys
 import time
 
 from autotest_lib.cli import action_common, rpc, topic_common
-from autotest_lib.cli import fair_partition
 from autotest_lib.client.bin import utils as bin_utils
 from autotest_lib.client.common_lib import error, host_protections
 from autotest_lib.server import frontend, hosts
@@ -280,7 +282,7 @@ class host_stat(host):
         @param results: the results to be printed.
         """
         for stats, acls, labels, attributes in results:
-            print '-'*5
+            print('-'*5)
             self.print_fields(stats,
                               keys=['hostname', 'id', 'platform',
                                     'status', 'locked', 'locked_by',
@@ -342,8 +344,7 @@ class host_get_migration_plan(host_stat):
         }
 
     def output(self, results):
-        print json.dumps(results, indent=4, sort_keys=True)
-
+        print(json.dumps(results, indent=4, sort_keys=True))
 
 
 class host_jobs(host):
@@ -402,8 +403,8 @@ class host_jobs(host):
         @param results: the results to be printed.
         """
         for host, jobs in results:
-            print '-'*5
-            print 'Hostname: %s' % host
+            print('-'*5)
+            print('Hostname: %s' % host)
             self.print_table(jobs, keys_header=['job_id',
                                                 'job_owner',
                                                 'job_name',
@@ -669,7 +670,7 @@ class host_mod(BaseHostModCreate):
                 # TODO: Make the AFE return True or False,
                 # especially for lock
                 successes.append(host)
-            except topic_common.CliError, full_error:
+            except topic_common.CliError as full_error:
                 # Already logged by execute_rpc()
                 pass
 
@@ -743,7 +744,7 @@ class host_create(BaseHostModCreate):
         try:
             # Setup stuff needed for afe comm.
             obj.afe = rpc.afe_comm(web_server)
-        except rpc.AuthError, s:
+        except rpc.AuthError as s:
             obj.failure(str(s), fatal=True)
         obj.hosts = hosts
         obj.platform = platform
@@ -828,21 +829,20 @@ class host_create(BaseHostModCreate):
     def execute(self):
         """Execute 'atest host create'."""
         successful_hosts = []
-        try:
-            for host in self.hosts:
-                try:
-                    self._execute_add_one_host(host)
-                    successful_hosts.append(host)
-                except topic_common.CliError:
-                    raise
+        for host in self.hosts:
+            try:
+                self._execute_add_one_host(host)
+                successful_hosts.append(host)
+            except topic_common.CliError:
+                pass
 
-            if successful_hosts:
-                self._set_acls(successful_hosts, self.acls)
-        finally:
+        if successful_hosts:
+            self._set_acls(successful_hosts, self.acls)
+
             if not self.locked:
                 for host in successful_hosts:
                     self.execute_rpc('modify_host', id=host, locked=False,
-                                    lock_reason='')
+                                     lock_reason='')
         return successful_hosts
 
 

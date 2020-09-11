@@ -34,9 +34,7 @@ import subprocess
 import sys
 import types
 
-import autotest_lib
-
-AUTOTEST_DIR = autotest_lib.__path__[0]
+AUTOTEST_DIR = '/usr/local/autotest/'
 _SITEPKG_DIR = os.path.join(AUTOTEST_DIR, 'site-packages')
 _SYSTEM_PYTHON = '/usr/bin/python2.7'
 
@@ -94,13 +92,13 @@ Could not find chromite; adding system packages and retrying \
         importlib.import_module('chromite')
 
     # Set up Django environment variables.
-    importlib.import_module('autotest_lib.frontend.setup_django_environment')
+    importlib.import_module('frontend.setup_django_environment')
 
     # Make Django app paths absolute.
-    settings = importlib.import_module('autotest_lib.frontend.settings')
+    settings = importlib.import_module('frontend.settings')
     settings.INSTALLED_APPS = (
-            'autotest_lib.frontend.afe',
-            'autotest_lib.frontend.tko',
+            'frontend.afe',
+            'frontend.tko',
             'django.contrib.admin',
             'django.contrib.auth',
             'django.contrib.contenttypes',
@@ -109,7 +107,7 @@ Could not find chromite; adding system packages and retrying \
     )
 
     # drone_utility uses this.
-    common = importlib.import_module('autotest_lib.scheduler.common')
+    common = importlib.import_module('scheduler.common')
     common.autotest_dir = AUTOTEST_DIR
 
 
@@ -144,8 +142,7 @@ class _CommonRemovingFinder(object):
         return self
 
     def _is_autotest_common(self, fullname):
-        return (fullname.partition('.')[0] == 'autotest_lib'
-                and fullname.rpartition('.')[-1] == 'common')
+        return fullname == 'common'
 
     def load_module(self, fullname):
         """Load module."""
@@ -166,7 +163,7 @@ def load(name):
 
     @param name: name of module as string, e.g., 'frontend.afe.models'
     """
-    return _load('autotest_lib.%s' % name)
+    return _load('%s' % name)
 
 
 def deps_load(name):
@@ -176,7 +173,6 @@ def deps_load(name):
 
     @param name: name of module as string, e.g., 'metrics'
     """
-    assert not name.startswith('autotest_lib')
     assert not name.startswith('chromite.lib')
     return _load(name)
 
@@ -202,7 +198,7 @@ def deferred_load(name):
 
     @param name: name of module as string, e.g., 'frontend.afe.models'
     """
-    return _DeferredModule('autotest_lib.%s' % name)
+    return _DeferredModule('%s' % name)
 
 
 _UNLOADED_MODULE = object()

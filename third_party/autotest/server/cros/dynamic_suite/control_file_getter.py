@@ -198,9 +198,9 @@ class FileSystemGetter(CacheingAndFilteringControlFileGetter):
         # Some of our callers are ill-considered and request that we
         # search all of /usr/local/autotest (crbug.com/771823).
         # Fixing the callers immediately is somewhere between a
-        # nuisance and hard.  So, we have a blacklist, hoping two
+        # nuisance and hard.  So, we have a denylist, hoping two
         # wrongs will somehow make it right.
-        blacklist = {
+        denylist = {
             'site-packages', 'venv', 'results', 'logs', 'containers',
         }
         while len(directories) > 0:
@@ -209,7 +209,7 @@ class FileSystemGetter(CacheingAndFilteringControlFileGetter):
                 continue
             try:
                 for name in os.listdir(directory):
-                    if name in blacklist:
+                    if name in denylist:
                         continue
                     fullpath = os.path.join(directory, name)
                     if os.path.isfile(fullpath):

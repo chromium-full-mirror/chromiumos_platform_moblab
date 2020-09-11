@@ -75,7 +75,7 @@ options, args = parser.parse_args()
 
 # Check for a control file if not in prebuild mode.
 if len(args) != 1 and options.client_test_setup is None:
-    print "Missing control file!"
+    print("Missing control file!")
     usage()
 
 drop_caches = global_config.global_config.get_config_value('CLIENT',

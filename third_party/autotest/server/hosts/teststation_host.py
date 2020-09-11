@@ -86,7 +86,13 @@ class TestStationHost(base_classes.Host):
         @return: True if the host running adb command is a Moblab, False
                  otherwise.
         """
-        return True
+        if self._is_host_moblab is None:
+            try:
+                self.run('cat %s | grep -q moblab' % cros_constants.LSB_RELEASE)
+                self._is_host_moblab = True
+            except (error.AutoservRunError, error.AutotestHostRunError):
+                self._is_host_moblab = False
+        return self._is_host_moblab
 
 
     def get_tmp_dir(self, parent='/var/tmp'):
@@ -122,9 +128,9 @@ class TestStationHost(base_classes.Host):
                  ignore_timeout is True.
         """
         # TODO (sbasi/kevcheng) - Make teststation_host check if running
-        # on Chrome OS, rather than MobLab when prepending  to fastboot.
-        # if cmd.startswith('fastboot ') and self.is_moblab:
-        #     cmd = ' ' + cmd
+        # on Chrome OS, rather than MobLab when prepending to fastboot.
+        if cmd.startswith('fastboot ') and self.is_moblab:
+            cmd = ' ' + cmd
         if force_tty:
             dargs['options'] = dargs.get('options', '') + ' -t '
         return super(TestStationHost, self).run(cmd, *args, **dargs)

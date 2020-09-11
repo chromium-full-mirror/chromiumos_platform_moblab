@@ -16,7 +16,7 @@ class FAFTCheckers(object):
         self.faft_framework = faft_framework
         self.faft_client = faft_framework.faft_client
         self.faft_config = faft_framework.faft_config
-        self.fw_vboot2 = self.faft_client.System.GetFwVboot2()
+        self.fw_vboot2 = self.faft_client.system.get_fw_vboot2()
 
     def _parse_crossystem_output(self, lines):
         """Parse the crossystem output into a dict.
@@ -69,7 +69,7 @@ class FAFTCheckers(object):
         @return: True if the crossystem value matched; otherwise, False.
         """
         succeed = True
-        lines = self.faft_client.System.RunShellCommandGetOutput(
+        lines = self.faft_client.system.run_shell_command_get_output(
                 'crossystem')
         got_dict = self._parse_crossystem_output(lines)
         for key in expected_dict:
@@ -166,25 +166,6 @@ class FAFTCheckers(object):
             crossystem_dict['fw_try_count'] = str(expected_try_count)
         return self.crossystem_checker(crossystem_dict)
 
-    def vdat_flags_checker(self, mask, value):
-        """Check the flags from VbSharedData matched.
-
-        This function checks the masked flags from VbSharedData using crossystem
-        are matched the given value.
-
-        @param mask: A bitmask of flags to be matched.
-        @param value: An expected value.
-        @return: True if the flags matched; otherwise, False.
-        """
-        lines = self.faft_client.System.RunShellCommandGetOutput(
-                    'crossystem vdat_flags')
-        vdat_flags = int(lines[0], 16)
-        if vdat_flags & mask != value:
-            logging.info("Expected vdat_flags 0x%x mask 0x%x but got 0x%x",
-                         value, mask, vdat_flags)
-            return False
-        return True
-
     def dev_boot_usb_checker(self, dev_boot_usb=True, kernel_key_hash=False):
         """Check the current boot is from a developer USB (Ctrl-U trigger).
 
@@ -206,7 +187,7 @@ class FAFTCheckers(object):
         return (self.crossystem_checker({'mainfw_type': 'developer',
                                          'kernkey_vfy':
                                              expected_kernkey_vfy}) and
-                self.faft_client.System.IsRemovableDeviceBoot() ==
+                self.faft_client.system.is_removable_device_boot() ==
                 dev_boot_usb)
 
     def root_part_checker(self, expected_part):
@@ -217,7 +198,7 @@ class FAFTCheckers(object):
         @return: True if the currect root  partition number matched;
                  otherwise, False.
         """
-        part = self.faft_client.System.GetRootPart()[-1]
+        part = self.faft_client.system.get_root_part()[-1]
         if self.faft_framework.ROOTFS_MAP[expected_part] != part:
             logging.info("Expected root part %s but got %s",
                          self.faft_framework.ROOTFS_MAP[expected_part], part)
@@ -232,7 +213,7 @@ class FAFTCheckers(object):
         @return: True if the current EC running copy matches; otherwise, False.
         """
         cmd = 'ectool version'
-        lines = self.faft_client.System.RunShellCommandGetOutput(cmd)
+        lines = self.faft_client.system.run_shell_command_get_output(cmd)
         pattern = re.compile("Firmware copy: (.*)")
         for line in lines:
             matched = pattern.match(line)

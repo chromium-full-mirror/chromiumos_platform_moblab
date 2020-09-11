@@ -8,7 +8,7 @@ from autotest_lib.server.hosts import ssh_host
 
 RA_SCRIPT = 'sendra.py'
 SCAPY = 'scapy-2.2.0.tar.gz'
-SCAPY_INSTALL_COMMAND = ' python setup.py install'
+SCAPY_INSTALL_COMMAND = 'python setup.py install'
 PROC_NET_SNMP6 = '/proc/net/snmp6'
 MULTICAST_ADDR = '33:33:00:00:00:01'
 IFACE = 'managed0'

@@ -48,4 +48,4 @@ for y in test_data.y_values:
             line.append('%5d / %-5d' % (good, total))
         except:
             line.append('')
-    print format % tuple(line)
+    print(format % tuple(line))

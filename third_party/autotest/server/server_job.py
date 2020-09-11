@@ -1,3 +1,4 @@
+# Lint as: python2, python3
 # pylint: disable-msg=C0111
 
 # Copyright (c) 2011 The Chromium OS Authors. All rights reserved.
@@ -10,6 +11,10 @@ This is the core infrastructure. Derived from the client side job.py
 
 Copyright Martin J. Bligh, Andy Whitcroft 2007
 """
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import errno
 import fcntl
@@ -55,6 +60,7 @@ from autotest_lib.server.hosts import host_info
 from autotest_lib.server.hosts import ssh_multiplex
 from autotest_lib.tko import models as tko_models
 from autotest_lib.tko import parser_lib
+from six.moves import zip
 
 metrics = utils.metrics_mock
 
@@ -637,7 +643,7 @@ class server_job(base_job.base_job):
         results = self.parallel_simple(function, machines, timeout=timeout,
                                        return_results=True)
         success_machines = []
-        for result, machine in itertools.izip(results, machines):
+        for result, machine in zip(results, machines):
             if not isinstance(result, Exception):
                 success_machines.append(machine)
         return success_machines
@@ -821,17 +827,20 @@ class server_job(base_job.base_job):
                     utils.open_write_close(server_control_file, control)
 
                 sync_dir = self._offload_dir_target_path()
-                namespace['synchronous_offload_dir'] = sync_dir
                 if self._sync_offload_dir:
                     logging.info("Preparing synchronous offload dir")
                     self.create_marker_file()
                     logging.info("Offload dir and marker file ready")
+                    logging.debug("Results dir is %s", self.resultdir)
+                    logging.debug("Synchronous offload dir is %s", sync_dir)
                 logging.info("Processing control file")
                 namespace['use_packaging'] = use_packaging
+                namespace['synchronous_offload_dir'] = sync_dir
+                os.environ[OFFLOAD_ENVVAR] = sync_dir
                 self._execute_code(server_control_file, namespace)
                 logging.info("Finished processing control file")
-
-                # If no device error occured, no need to collect crashinfo.
+                self._maybe_retrieve_client_offload_dirs()
+                # If no device error occurred, no need to collect crashinfo.
                 collect_crashinfo = self.failed_with_device_error
             except Exception as e:
                 try:
@@ -1430,7 +1439,7 @@ class server_job(base_job.base_job):
                 existing_machines_text = None
             if machines_text != existing_machines_text:
                 utils.open_write_close(MACHINES_FILENAME, machines_text)
-        execfile(code_file, namespace, namespace)
+        exec(compile(open(code_file, "rb").read(), code_file, 'exec'), namespace, namespace)
 
 
     def preprocess_client_state(self):
@@ -1469,7 +1478,7 @@ class server_job(base_job.base_job):
         try:
             self._state.read_from_file(state_path)
             os.remove(state_path)
-        except OSError, e:
+        except OSError as e:
             # ignore file-not-found errors
             if e.errno != errno.ENOENT:
                 raise

@@ -133,8 +133,8 @@ class PDTester(chrome_ec.ChromeEC):
         except:
             raise PDTesterError('Unsupported servov4 command(%s). '
                                 'Maybe firmware or servod too old? '
-                                ' servo_updater -b servo_v4; '
-                                ' emerge hdctools' % self.USBC_SRC_CAPS)
+                                'servo_updater -b servo_v4; '
+                                'emerge hdctools' % self.USBC_SRC_CAPS)
 
         srccaps = []
         for pdo_str in res:
@@ -167,8 +167,8 @@ class PDTester(chrome_ec.ChromeEC):
         if voltage not in charging_voltages:
             logging.warning('Unsupported voltage(%s) of the adapter. '
                             'Maybe firmware or servod too old? '
-                            ' servo_updater -b servo_v4; '
-                            ' emerge hdctools' % voltage)
+                            'servo_updater -b servo_v4; '
+                            'emerge hdctools' % voltage)
 
         try:
             self.set(self.USBC_PR, self.USBC_CHARGING_VOLTAGES[voltage])
@@ -185,8 +185,8 @@ class PDTester(chrome_ec.ChromeEC):
         except:
             logging.warn('Unsupported control(%s). '
                          'Maybe firmware or servod too old? '
-                         ' servo_updater -b servo_v4; '
-                         ' emerge hdctools' % self.USBC_PR)
+                         'servo_updater -b servo_v4; '
+                         'emerge hdctools' % self.USBC_PR)
             usbc_pr = self.get(self.USBC_ROLE)
         m = re.match(self.RE_USBC_ROLE_VOLTAGE, usbc_pr)
         if m:

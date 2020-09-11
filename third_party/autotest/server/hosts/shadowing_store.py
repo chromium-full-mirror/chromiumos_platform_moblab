@@ -9,8 +9,10 @@ import logging
 
 import common
 from autotest_lib.server.hosts import host_info
-from autotest_lib.server import utils
-metrics = utils.metrics_mock
+from autotest_lib.client.common_lib import utils as client_utils
+
+metrics = client_utils.metrics_mock
+
 
 
 _METRICS_PREFIX = 'chromeos/autotest/autoserv/host_info/shadowing_store/'

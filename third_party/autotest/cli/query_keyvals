@@ -26,22 +26,22 @@ def parse_options():
 def print_keyvals(keyval, format_string, options):
     for key, value in keyval.iteritems():
         if not options.key or key == options.key:
-            print format_string % (key, value)
+            print(format_string % (key, value))
 
 
 def print_views(test_views, options):
     for view in test_views:
         if not options.machine:
-            print "Machine: %s" % view["hostname"]
+            print("Machine: %s" % view["hostname"])
         if not options.test:
-            print "Test: %s" % view["test_name"]
+            print("Test: %s" % view["test_name"])
         if options.show_test_keyvals:
-            print "Test Attributes:"
+            print("Test Attributes:")
             print_keyvals(view["attributes"], "\t%s = %s", options)
         if options.show_iter_keyvals:
-            print "Iteration Attributes:"
+            print("Iteration Attributes:")
             for i, iteration in enumerate(view["iterations"]):
-                print "\tIteration #%d:" % (i + 1)
+                print("\tIteration #%d:" % (i + 1))
                 if options.show_attr_keyvals:
                     print_keyvals(iteration["attr"], "\t\t%s(attr) = %s",
                                   options)
