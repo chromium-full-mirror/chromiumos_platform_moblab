@@ -169,6 +169,21 @@ class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
         subprocess.check_call(['reboot'])
         return response
 
+    def get_system_version(self, unused_request, unused_context):
+        response = hostservices_pb2.SystemVersionResponse()
+
+        response.version = "No Version Number"
+        response.track = ""
+        response.description = ""
+
+        lines = open('/etc/lsb-release').readlines()
+        version_response = {
+            x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}
+
+        response.version = version_response['CHROMEOS_RELEASE_CHROME_MILESTONE']
+        response.description = version_response['CHROMEOS_RELEASE_DESCRIPTION']
+
+        return response
 
 def setup_logging(level):
     """Enable the correct level of logging.

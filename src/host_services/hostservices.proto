@@ -12,6 +12,7 @@ service MoblabHostService {
   rpc install_system_update(SystemUpdateInstallRequest) returns (SystemUpdateInstallResponse) {}
   rpc reboot(RebootRequest) returns (RebootResponse) {}
   rpc factory_reset(FactoryResetRequest) returns (FactoryResetResponse) {}
+  rpc get_system_version(SystemVersionRequest) returns (SystemVersionResponse) {}
 }
 
 // NEXT_TAG = 1
@@ -97,3 +98,13 @@ message FactoryResetRequest {
 message FactoryResetResponse {
 }
 
+// NEXT_TAG = 1
+message SystemVersionRequest{
+}
+
+// NEXT_TAG = 2
+message SystemVersionResponse{
+  string version = 1;
+  string track = 2;
+  string description = 3;
+}
