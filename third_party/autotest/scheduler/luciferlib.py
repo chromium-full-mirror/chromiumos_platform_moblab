@@ -23,8 +23,9 @@ _SECTION = 'LUCIFER'
 # TODO(crbug.com/748234): Move these to shadow_config.ini
 # See also drones.AUTOTEST_INSTALL_DIR
 _ENV = '/usr/bin/env'
-_AUTOTEST_DIR = '/usr/local/autotest'
-_JOB_REPORTER_PATH = os.path.join(_AUTOTEST_DIR, 'bin', 'job_reporter')
+_AUTOTEST_DIR = '/usr/local/autotest/'
+_JOB_REPORTER_PATH = os.path.join(_AUTOTEST_DIR, 'venv/lucifer/cmd/job_reporter.py')
+
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,8 @@ def spawn_starting_job_handler(manager, job):
     drone = manager.pick_drone_to_use()
     results_dir = _results_dir(manager, job)
     args = [
+            'python',
+
             _JOB_REPORTER_PATH,
 
             # General configuration
@@ -144,6 +147,8 @@ def spawn_parsing_job_handler(manager, job, autoserv_exit, pidfile_id=None):
         drone = manager.get_drone_for_pidfile(pidfile_id)
     results_dir = _results_dir(manager, job)
     args = [
+            python,
+
             _JOB_REPORTER_PATH,
 
             # General configuration

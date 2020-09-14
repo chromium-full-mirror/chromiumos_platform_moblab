@@ -14,4 +14,7 @@ while [ -z "${DB_UP}" ]; do
     -e "SELECT 1")
 done
 
-/usr/local/autotest/bin/job_aborter --jobdir /usr/local/autotest/leases
+export PYTHONPATH=/usr/local/autotest/venv:/usr/local/autotest
+
+python /usr/local/autotest/venv/lucifer/cmd/job_aborter.py --jobdir /usr/local/autotest/leases
+

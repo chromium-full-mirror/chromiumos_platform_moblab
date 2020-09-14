@@ -32,3 +32,17 @@ docker
 parallel-ssh
 python-nmap
 python-dateutil
+contextlib2
+coverage
+fabric
+funcsigs
+mock
+oauth2client
+pbr
+psutil
+py
+pytest
+pytest-catchlog
+pytest-cov
+scandir
+subprocess32

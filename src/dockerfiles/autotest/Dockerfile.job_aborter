@@ -5,34 +5,20 @@
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
-FROM alpine/git as source
-
-WORKDIR /infra
-RUN git clone https://chromium.googlesource.com/chromiumos/infra_virtualenv
-
-######################################################################
+# ######################################################################
 
 ARG REGISTRY_URI
 ARG LABEL
 
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
-RUN apt-get update && apt-get install --no-install-recommends -yq    \
+RUN apt-get update && apt-get install --no-install-recommends -yq  \
  python-pip
-
-RUN python2.7 -m pip install virtualenv==16.7.10
-
-COPY --from=source /infra /infra
-RUN ln -s /infra/* /opt
 
 COPY job_aborter.sh /
 RUN chmod uog+rx /job_aborter.sh
 
 RUN ln -s /usr/local/lib/python2.7/site-packages/* /moblab/third_party/autotest/site-packages
-
-ENV CROS_VENV_CACHE=/usr/local/.cros-venv-cache
-RUN mkdir -p /usr/local/.cros-venv-cache
-RUN chown moblab /usr/local/.cros-venv-cache
 
 RUN apt purge -yq python-pip
 RUN apt autoremove -yq
