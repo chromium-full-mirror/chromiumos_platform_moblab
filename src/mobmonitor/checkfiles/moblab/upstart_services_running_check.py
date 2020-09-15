@@ -7,7 +7,7 @@
 import os
 import logging
 
-from moblab import moblab_actions
+from checkfiles.moblab import moblab_actions
 from moblab_common.utils import cli
 
 

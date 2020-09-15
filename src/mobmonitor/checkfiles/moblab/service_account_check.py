@@ -9,7 +9,7 @@
 import netifaces
 import os
 
-from moblab import common
+from checkfiles.moblab import common
 
 from moblab_common import host_connector
 

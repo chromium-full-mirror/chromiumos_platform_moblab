@@ -9,7 +9,7 @@
 import netifaces
 import re
 
-from moblab import common
+from checkfiles.moblab import common
 from moblab_common.utils import cli
 
 class DUT_CHECK_CODES:

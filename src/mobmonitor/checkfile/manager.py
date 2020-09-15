@@ -13,6 +13,7 @@ import imp
 import inspect
 import os
 import time
+import importlib.util
 
 from cherrypy.process import plugins
 import logging
@@ -202,7 +203,9 @@ def ImportFile(service, modulepath):
   objects = []
   modname = '%s.%s' % (service,
                        os.path.basename(os.path.splitext(modulepath)[0]))
-  module = imp.load_source(modname, modulepath)
+  spec = importlib.util.spec_from_file_location(modname, modulepath)
+  module = importlib.util.module_from_spec(spec)
+  spec.loader.exec_module(module)
 
   for name in dir(module):
     obj = getattr(module, name)
@@ -326,13 +329,7 @@ class CheckFileManager(object):
     _, service_dirs, _ = next(os.walk(self.checkdir))
     for service_name in service_dirs:
       service_package = os.path.join(self.checkdir, service_name)
-
-      # Import the package.
-      try:
-        file_, path, desc = imp.find_module(service_name, [self.checkdir])
-      except Exception as e:
-        LOGGER.warning('Failed to import package %s: %s', service_name, e,
-                       exc_info=True)
+      if service_name in ['__pycache__']:
         continue
 
       # Collect all of the service's health checks.
