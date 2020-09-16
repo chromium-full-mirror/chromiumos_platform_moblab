@@ -85,7 +85,7 @@ export abstract class BaseSuite {
 
   onRunSuiteFailed(message: string = null) {
     if (message) {
-      this.setOffPopup(message);
+      this.setOffError(message);
     }
     this.suiteFormChange.emit(
       {changeType: SuiteChangeType.RunSuiteFailed});
@@ -106,11 +106,19 @@ export abstract class BaseSuite {
     this.router.navigate(['/view_jobs'], { queryParams: params });
   }
 
-  setOffPopup(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
+  // sets off a persistent, error-themed popup.
+  setOffError(dialogue: string) {
+    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
       verticalPosition: 'top',
-      panelClass: ['action-submission-popup'],
+      panelClass: ["snack-error"],
+    });
+  }
+
+  // sets off a neutral-themed popup that fades after 'duration' miliseconds
+  setOffPopup(dialogue: string, duration: number = 5000) {
+    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
+      duration: duration,
+      verticalPosition: 'top',
     });
   }
 }
