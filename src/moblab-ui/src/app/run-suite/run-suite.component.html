@@ -6,9 +6,7 @@
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
             <app-cts-run
-              (suiteStarted)="onSuiteStart()"
-              (formLoadingStart)="onLoadingStart($event.message)"
-              (formLoadingFinish)="onLoadingFinish()">
+              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-cts-run>
           </div>
         </ng-template>
@@ -18,9 +16,7 @@
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
             <app-gts-run
-              (suiteStarted)="onSuiteStart()"
-              (formLoadingStart)="onLoadingStart($event.message)"
-              (formLoadingFinish)="onLoadingFinish()">
+              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-gts-run>
           </div>
         </ng-template>
@@ -30,9 +26,7 @@
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
             <app-memory-qual
-              (suiteStarted)="onSuiteStart()"
-              (formLoadingStart)="onLoadingStart($event.message)"
-              (formLoadingFinish)="onLoadingFinish()">
+              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-memory-qual>
           </div>
         </ng-template>
@@ -42,9 +36,7 @@
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
             <app-storage-qual
-              (suiteStarted)="onSuiteStart()"
-              (formLoadingStart)="onLoadingStart($event.message)"
-              (formLoadingFinish)="onLoadingFinish()">
+              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-storage-qual>
           </div>
         </ng-template>
@@ -54,9 +46,7 @@
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
             <app-run-any-suite
-              (suiteStarted)="onSuiteStart()"
-              (formLoadingStart)="onLoadingStart($event.message)"
-              (formLoadingFinish)="onLoadingFinish()">
+              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-run-any-suite>
           </div>
         </ng-template>

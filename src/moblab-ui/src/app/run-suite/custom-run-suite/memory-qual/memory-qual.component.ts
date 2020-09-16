@@ -64,7 +64,7 @@ export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
         this.onSuiteStarted();
       },
       (err, response) => {
-        this.setOffPopup(err.message);
+        this.onRunSuiteFailed(err.message);
         this.runSuiteButton.enable();
       },
       this.selectedBuild,

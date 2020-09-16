@@ -19,14 +19,19 @@ export interface BuildSettings {
   pool: string;
 }
 
+export enum SuiteChangeType{
+  RunSuiteStart = 1,
+  RunSuiteFailed,
+  FormLoadingStart,
+  FormLoadingFinish,
+}
+
 /**
  * Base class meant to parent all implementations of run suite logic. Contains
  * some logic that is common to all suites.
  */
 export abstract class BaseSuite {
-  @Output() suiteStarted = new EventEmitter();
-  @Output() formLoadingStart = new EventEmitter();
-  @Output() formLoadingFinish = new EventEmitter();
+  @Output() suiteFormChange = new EventEmitter();
 
   runSuiteButtonDisabled = true;
 
@@ -57,16 +62,33 @@ export abstract class BaseSuite {
   abstract onBuildSetCustom(event: BuildSettings);
 
   onFormLoading(event) {
-    this.formLoadingStart.emit({message: event});
+    this.suiteFormChange.emit(
+      {
+        changeType: SuiteChangeType.FormLoadingStart,
+        message: event
+      });
   }
 
   onFormLoaded() {
-    this.formLoadingFinish.emit();
+    this.suiteFormChange.emit(
+      {changeType: SuiteChangeType.FormLoadingFinish});
   }
 
-  onRunSuiteClick(submitMessage?: string) {
-    this.setOffPopup(submitMessage);
-    this.suiteStarted.emit();
+  onRunSuiteClick(message: string = null) {
+    if (message) {
+      this.setOffPopup(message);
+    }
+
+    this.suiteFormChange.emit(
+      {changeType: SuiteChangeType.RunSuiteStart});
+  }
+
+  onRunSuiteFailed(message: string = null) {
+    if (message) {
+      this.setOffPopup(message);
+    }
+    this.suiteFormChange.emit(
+      {changeType: SuiteChangeType.RunSuiteFailed});
   }
 
   onSuiteStarted() {
