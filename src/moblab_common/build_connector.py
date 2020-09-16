@@ -10,7 +10,7 @@ except ImportError:
     import logging
 
 # pylint: disable=no-name-in-module, import-error
-from google.cloud import storage
+from google.cloud.storage import Client as GcsClient
 # pylint: disable=no-name-in-module, import-error
 from google.auth import exceptions as auth_exceptions
 
@@ -33,7 +33,7 @@ class MoblabBuildConnector(object):
             self.storage_client = storage_client
         else:
             try:
-                self.storage_client = storage.Client()
+                self.storage_client = GcsClient()
             except auth_exceptions.DefaultCredentialsError as e:
                 logging.info('No credentials loaded')
                 raise MoblabBuildConnectorException('Invalid Credentials')
@@ -73,7 +73,7 @@ class MoblabBuildConnector(object):
         prefix = '%s-release/R' % board
         milestones = self._get_partial_object_path(prefix, '-')
         milestones = [
-            milestone[len(prefix) - 1:-1] for milestone in milestones
+            milestone[len(prefix):-1] for milestone in milestones
         ]
         milestones.sort(key = lambda x: x)
         return milestones
@@ -83,7 +83,7 @@ class MoblabBuildConnector(object):
 
         Args:
             board (str): Build target name.
-            milestone (str): The milestone number ( must be a valid integer ).
+            milestone (str): The milestone number.
         Returns:
             List of strings representing build versions.
         """

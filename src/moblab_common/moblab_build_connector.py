@@ -53,7 +53,7 @@ class MoblabBuildConnector(object):
 
     def _parse_milestone(self, milestone):
         if re.match('\Amilestones\/(\d+)$', milestone):
-            return 'R' + milestone.split('/')[1]
+            return milestone.split('/')[1]
         else:
             raise MoblabBuildConnectorException(
                 'Encountered unexpected format while reading milestones: {}'.format(milestone))
