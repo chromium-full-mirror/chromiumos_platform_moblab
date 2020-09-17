@@ -551,9 +551,6 @@ class MoblabService(object):
             Returns:
                 A list of tuples where the first item is the build_version and the second is a boolean which is true iff the build is staged.
         """
-        if (milestone and milestone[0] == 'R'):
-            milestone = milestone[1:]
-
         bucket_build_versions = self.build_connector.get_builds_for_milestone(
             build_target,
             milestone
