@@ -8,8 +8,8 @@
 import logging
 import grpc
 
-from moblab_common.proto import hostservices_pb2
-from moblab_common.proto import hostservices_pb2_grpc
+from host_services import hostservices_pb2
+from host_services import hostservices_pb2_grpc
 
 DEFAULT_SERVER = "dockerhost:7002"
 

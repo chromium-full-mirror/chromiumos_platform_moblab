@@ -8,8 +8,8 @@
 import logging
 import grpc
 
-from moblab_common.proto import moblabrpc_pb2
-from moblab_common.proto import moblabrpc_pb2_grpc
+from moblab_rpcserver import moblabrpc_pb2
+from moblab_rpcserver import moblabrpc_pb2_grpc
 
 DEFAULT_SERVER = "moblab-rpcserver:6002"
 

@@ -2,16 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL=release
-
-###############################################################################
+#########################################################################################3
+# Node build enviroment
+#########################################################################################3
 FROM node:12 as build
 
 # install chrome for protractor tests
-# RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-# RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-# RUN apt-get update && apt-get install -yq google-chrome-stable
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+RUN apt-get update && apt-get install -yq google-chrome-stable
 
 # set working directory
 WORKDIR /app
@@ -36,9 +35,7 @@ COPY src/mobmonitor-ui /app
 RUN ng build --output-path=dist --output-hashing=all
 
 #########################################################################################3
-
-FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
-
+# Run enviroment
 #########################################################################################3
 
 FROM python:3.8-slim-buster
@@ -47,6 +44,12 @@ WORKDIR /
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
 RUN apt-get update && apt-get install -yq gcc iputils-ping usbutils procps
+
+COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
+COPY --chown=moblab ./src/tools /moblab/src/tools
+COPY --chown=moblab ./src/host_services /moblab/src/host_services
+COPY --chown=moblab ./setup.py /moblab/
+
 
 RUN apt-get update && apt-get install -yq \
     libssl-dev \
@@ -59,10 +62,9 @@ COPY src/dockerfiles/mobmonitor/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip install *.whl
-RUN rm -rf /wheels
+
+WORKDIR /moblab
+RUN python ./setup.py install
 
 WORKDIR /etc/moblab/mobmonitor
 COPY --chown=moblab src/mobmonitor/ /etc/moblab/mobmonitor
