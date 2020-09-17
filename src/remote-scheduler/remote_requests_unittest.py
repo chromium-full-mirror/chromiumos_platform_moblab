@@ -9,7 +9,7 @@ import unittest
 
 import mock
 
-from moblab_common.proto import moblab_request_pb2
+import moblab_request_pb2
 import remote_request
 import remote_requests
 import run_suite_request

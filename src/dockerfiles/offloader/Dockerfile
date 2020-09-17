@@ -11,10 +11,6 @@ FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 
-FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
-
-######################################################################
-
 FROM python:3.8-buster as proto_build
 
 WORKDIR /
@@ -41,15 +37,18 @@ RUN apt-get update && apt-get install -yq \
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN usermod -aG sudo moblab
 
+COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
+COPY --chown=moblab ./src/tools /moblab/src/tools
+COPY --chown=moblab ./src/dockerfiles /moblab/src/dockerfiles
+COPY --chown=moblab ./src/host_services /moblab/src/host_services
+COPY --chown=moblab ./setup.py /moblab/
 COPY --chown=moblab --from=proto_build /usr/local/autotest /usr/local/autotest
 
 COPY src/dockerfiles/offloader/requirements.txt ./
 RUN pip3 install --upgrade pip && pip3 install --no-cache-dir -r requirements.txt
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip3 install *.whl
-RUN rm -rf /wheels
+WORKDIR /moblab
+RUN python3 ./setup.py install
 
 WORKDIR /etc/moblab/moblab_results_uploader
 COPY --chown=moblab src/moblab_results_uploader/ /etc/moblab/moblab_results_uploader

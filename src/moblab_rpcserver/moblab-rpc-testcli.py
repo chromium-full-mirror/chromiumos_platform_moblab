@@ -4,8 +4,8 @@
 # found in the LICENSE file.
 
 import grpc
-from moblab_common.proto import moblabrpc_pb2
-from moblab_common.proto import moblabrpc_pb2_grpc
+import moblabrpc_pb2
+import moblabrpc_pb2_grpc
 
 
 def list_connected_duts(stub):

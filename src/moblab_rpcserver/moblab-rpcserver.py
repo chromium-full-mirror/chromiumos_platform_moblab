@@ -18,9 +18,9 @@ from dateutil.tz import tzlocal
 
 import moblab_rpcservice
 # pylint: disable=import-error
-from moblab_common.proto import moblabrpc_pb2
+import moblabrpc_pb2
 # pylint: disable=import-error
-from moblab_common.proto import moblabrpc_pb2_grpc
+import moblabrpc_pb2_grpc
 
 from moblab_common import afe_connector
 from moblab_common import config_connector

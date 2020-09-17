@@ -9,7 +9,7 @@ import time
 import logging
 import json
 
-from moblab_common.proto import remoteagentrpc_pb2
+import remoteagentrpc_pb2
 
 from constants import Constants
 from moblab_common import afe_connector

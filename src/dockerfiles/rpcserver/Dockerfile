@@ -7,7 +7,24 @@ ARG LABEL=release
 
 ######################################################################
 
-FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
+FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
+
+######################################################################
+
+FROM python:3.8-buster as build
+
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+    --disabled-password --gecos "" moblab
+
+WORKDIR /etc/moblab/moblab_rpcserver
+
+COPY --from=protoc /protoc/* /usr/local/bin/
+COPY src/moblab_rpcserver/ /etc/moblab/moblab_rpcserver
+RUN protoc -I=/etc/moblab/moblab_rpcserver \
+    --python_out=:/etc/moblab/moblab_rpcserver \
+    --grpc_python_out=:/etc/moblab/moblab_rpcserver \
+    --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin \
+    moblabrpc.proto
 
 ######################################################################
 
@@ -16,7 +33,8 @@ FROM python:3.8-slim-buster
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-COPY --chown=moblab src/moblab_rpcserver/ /etc/moblab/moblab_rpcserver
+COPY --chown=moblab --from=build /etc/moblab/moblab_rpcserver \
+    /etc/moblab/moblab_rpcserver
 RUN apt-get update && apt-get install -yq \
     cmake \
     curl \
@@ -40,10 +58,16 @@ COPY --chown=moblab src/dockerfiles/rpcserver/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip install *.whl
-RUN rm -rf /wheels
+# moblab_common
+COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
+COPY --chown=moblab ./src/tools /moblab/src/tools
+COPY --chown=moblab ./src/host_services /moblab/src/host_services
+COPY --chown=moblab ./setup.py /moblab/
+
+WORKDIR /moblab
+RUN python3 -m pip install .
+
+RUN rm -rf /moblab
 
 RUN mkdir /var/log/moblab
 
