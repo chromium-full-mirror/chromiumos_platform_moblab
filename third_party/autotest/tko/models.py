@@ -15,8 +15,8 @@ class job(object):
     """Represents a job."""
 
     def __init__(self, dir, user, label, machine, queued_time, started_time,
-                 finished_time, machine_owner, machine_group, aborted_by,
-                 aborted_on, keyval_dict):
+        finished_time, machine_owner, machine_group, aborted_by,
+        aborted_on, keyval_dict, board=None):
         self.dir = dir
         self.tests = []
         self.user = user
@@ -33,12 +33,13 @@ class job(object):
         self.afe_parent_job_id = None
         self.build_version = None
         self.suite = None
-        self.board = None
+        self.board = board
         self.job_idx = None
         # id of the corresponding tko_task_references entry.
         # This table is used to refer to skylab task / afe job corresponding to
         # this tko_job.
         self.task_reference_id = None
+
 
     @staticmethod
     def read_keyval(dir):
@@ -105,8 +106,8 @@ class test(object):
     """Represents a test."""
 
     def __init__(self, subdir, testname, status, reason, test_kernel,
-                 machine, started_time, finished_time, iterations,
-                 attributes, perf_values, labels):
+        machine, started_time, finished_time, iterations,
+        attributes, perf_values, labels):
         self.subdir = subdir
         self.testname = testname
         self.status = status
@@ -147,7 +148,7 @@ class test(object):
 
     @classmethod
     def parse_test(cls, job, subdir, testname, status, reason, test_kernel,
-                   started_time, finished_time, existing_instance=None):
+        started_time, finished_time, existing_instance=None):
         """
         Parse test result files to construct a complete test instance.
 
@@ -219,7 +220,7 @@ class test(object):
 
     @classmethod
     def parse_partial_test(cls, job, subdir, testname, reason, test_kernel,
-                           started_time):
+        started_time):
         """
         Create a test instance representing a partial test result.
 

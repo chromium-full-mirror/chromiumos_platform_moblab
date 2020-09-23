@@ -33,6 +33,7 @@ class job(models.job):
         started_time = tko_utils.get_timestamp(keyval, "job_started")
         finished_time = tko_utils.get_timestamp(keyval, "job_finished")
         machine = cls.determine_hostname(keyval, dir)
+        board = cls.determine_board(machine, dir)
         machine_group = cls.determine_machine_group(machine, dir)
         machine_owner = keyval.get("owner", None)
 
@@ -43,7 +44,7 @@ class job(models.job):
                 "queued_time": queued_time, "started_time": started_time,
                 "finished_time": finished_time, "machine_owner": machine_owner,
                 "machine_group": machine_group, "aborted_by": aborted_by,
-                "aborted_on": aborted_at, "keyval_dict": keyval}
+                "aborted_on": aborted_at, "keyval_dict": keyval, "board": board}
 
 
     @classmethod
@@ -84,12 +85,12 @@ class job(models.job):
                 # same model, rather than the same platform.
                 labels = host_keyval['labels'].split(',')
                 board_labels = [l[8:] for l in labels
-                               if l.startswith('model%3A')]
+                                if l.startswith('model%3A')]
                 # If the host doesn't have `model:` label, fall back to `board:`
                 # label.
                 if not board_labels:
                     board_labels = [l[8:] for l in labels
-                               if l.startswith('board%3A')]
+                                    if l.startswith('board%3A')]
                 if board_labels:
                     # Multiple board/model labels aren't supposed to
                     # happen, but let's report something sane rather
@@ -105,6 +106,33 @@ class job(models.job):
         machine_group = ",".join(sorted(machine_groups))
         tko_utils.dprint("MACHINE GROUP: %s" % machine_group)
         return machine_group
+
+    @classmethod
+    def determine_board(cls, hostname, job_dir):
+        boards = set()
+        for individual_hostname in hostname.split(","):
+            host_keyval = models.test.parse_host_keyval(job_dir,
+                                                        individual_hostname)
+            if not host_keyval:
+                tko_utils.dprint('Unable to parse host keyval for %s'
+                                 % individual_hostname)
+            elif "labels" in host_keyval:
+                labels = host_keyval["labels"].split(",")
+                board_labels = [l[8:] for l in labels
+                                if l.startswith("board%3A")]
+                if board_labels:
+                    # Multiple board/model labels aren't supposed to
+                    # happen, but let's report something sane rather
+                    # than just failing.
+                    boards.add(",".join(board_labels))
+                else:
+                    error = ("Failed to retrieve board label from host labels: "
+                             "%s" % host_keyval["labels"])
+                    tko_utils.dprint(error)
+                    raise BoardLabelError(error)
+        board = str(",".join(sorted(boards)))
+        tko_utils.dprint("BOARD: %s" % board)
+        return board
 
 
     @staticmethod
@@ -203,8 +231,8 @@ class kernel(models.kernel):
 
 class test(models.test):
     def __init__(self, subdir, testname, status, reason, test_kernel,
-                 machine, started_time, finished_time, iterations,
-                 attributes, labels):
+        machine, started_time, finished_time, iterations,
+        attributes, labels):
         # for backwards compatibility with the original parser
         # implementation, if there is no test version we need a NULL
         # value to be used; also, if there is a version it should
@@ -243,7 +271,7 @@ class iteration(models.iteration):
 
 class status_line(object):
     def __init__(self, indent, status, subdir, testname, reason,
-                 optional_fields):
+        optional_fields):
         # pull out the type & status of the line
         if status == "START":
             self.type = "START"
@@ -371,8 +399,8 @@ class parser(base.parser):
                 stack.start()
                 if line.indent == sought_level:
                     started_time = \
-                                 tko_utils.get_timestamp(
-                        line.optional_fields, "timestamp")
+                        tko_utils.get_timestamp(
+                            line.optional_fields, "timestamp")
                 tko_utils.dprint("start line, ignoring")
                 continue
             # otherwise, update the status on the stack
@@ -408,7 +436,7 @@ class parser(base.parser):
                     line.testname = "CLIENT_JOB"
                 else:
                     tko_utils.dprint("job level event, "
-                                    "ignoring")
+                                     "ignoring")
                     continue
 
             # use the group subdir for END lines
