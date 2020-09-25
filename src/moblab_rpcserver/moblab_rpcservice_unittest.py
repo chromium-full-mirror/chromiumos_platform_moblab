@@ -128,6 +128,28 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
     afe_set_is_remote_agent_enabled_mock.assert_called_once()
 
+  @mock.patch.object(MoblabService, 'config_connector', new_callable=PropertyMock)
+  @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
+  def test_run_suite(self, mock_afe_connector, mock_config_connector):
+    mock_config_connector.return_value.get_test_wifi_ap_and_password.return_value = ('mock_ssid', 'mock_wifi_pass')
+    self.service.run_suite(
+        'mock_build_target',
+        'mock_model',
+        '99',
+        '00000.00.0',
+        'mock_suite'
+    )
+    mock_afe_connector.return_value.run_suite.assert_called_with(
+        'mock_build_target',
+        'mock_build_target-release/R99-00000.00.0',
+        {'cros-version': 'mock_build_target-release/R99-00000.00.0'},
+        'mock_suite',
+        1440,
+        None,
+        'mock_model',
+        suite_args={},
+        test_args={'ssid': 'mock_ssid', 'wifipass': 'mock_wifi_pass'}
+    )
 
 if __name__ == "__main__":
   unittest.main()
