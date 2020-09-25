@@ -397,7 +397,7 @@ class MoblabService(object):
 
         Args:
             build_target: Ex. octopus
-            milestone: Ex. R80
+            milestone: Numeric string Ex. 80
             build_version: A numeric version string of the form: '00000.00.0'
             suite: String identifier for the suite to be run.
             model: String identfier for the specific model to be run.
@@ -413,7 +413,7 @@ class MoblabService(object):
         if not self._is_build_staged(build_version, build_target, milestone):
             self._stage_build(model, build_target, build_version)
 
-        build = '{}-release/{}-{}'.format(build_target, milestone, build_version)
+        build = '{}-release/R{}-{}'.format(build_target, milestone, build_version)
         builds = {'cros-version': build}
 
         builds.update(extra_builds)
