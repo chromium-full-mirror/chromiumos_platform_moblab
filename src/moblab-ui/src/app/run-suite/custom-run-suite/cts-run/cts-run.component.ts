@@ -42,6 +42,7 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
     this.versionSelectForm.disable('Please select build.');
     this.modulesTextForm.disable('Please select build.');
     this.changeDetector.detectChanges();
+    this.runSuiteButton.enable();
   }
 
   /** Method triggered on change of the android version form.

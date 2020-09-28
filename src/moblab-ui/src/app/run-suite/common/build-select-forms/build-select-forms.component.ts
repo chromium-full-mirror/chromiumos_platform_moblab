@@ -73,17 +73,17 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
     this.changeDetector.detectChanges();
   }
 
-  setOffPopup(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top'
+  setOffError(dialogue: string) {
+    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
+      verticalPosition: 'top',
+      panelClass: ['snack-error']
     });
   }
 
   setErrorReason(selector, msg: string) {
     msg = 'Failed to fetch items: ' + msg;
     selector.disable(msg);
-    this.setOffPopup(msg);
+    this.setOffError(msg);
   }
 
   getModels() {
