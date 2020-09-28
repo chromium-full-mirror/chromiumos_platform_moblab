@@ -1,9 +1,6 @@
-import {
-  Component,
-  EventEmitter,
-  ViewChild
-} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 
+import {SuiteChangeType} from './common/base_suite/base-suite.component';
 import {LoadingOverlayComponent, LoadingOverlayStyle} from '../widgets/loading-overlay/loading-overlay.component';
 
 @Component({
@@ -17,6 +14,19 @@ export class RunSuiteComponent {
   onSuiteStart() {
     this.onSuiteStatusUpdate('submitting');
     this.loadingOverlay.show();
+  }
+
+  onSuiteFormChange(changeType: SuiteChangeType, message: string = null) {
+    if (changeType === SuiteChangeType.RunSuiteStart) {
+      this.onSuiteStatusUpdate('submitting');
+      this.loadingOverlay.show();
+    } else if (changeType === SuiteChangeType.RunSuiteFailed) {
+      this.loadingOverlay.hide();
+    } else if (changeType === SuiteChangeType.FormLoadingStart) {
+      this.loadingOverlay.updateStatus(message, LoadingOverlayStyle.Top);
+    } else if (changeType === SuiteChangeType.FormLoadingFinish) {
+      this.loadingOverlay.hide();
+    }
   }
 
   onLoadingStart(message) {
