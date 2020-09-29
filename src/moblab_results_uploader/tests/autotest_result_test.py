@@ -42,8 +42,10 @@ class AutotestHostTaskTest(unittest.TestCase):
 
             task = autotest_result.AutotestHostTask(
                 root_dir='.', relative_path='hosts/foo/123-task')
+            
             self.assertEqual(task.finished_time,
-                             datetime.datetime(2020, 1, 1))
+                            datetime.datetime(2020, 1, 1)
+                            .replace(tzinfo=datetime.timezone.utc))
 
     def test_get_succeeded(self):
         """Test for getting succeeded (exit status) for a host task."""
@@ -89,32 +91,45 @@ class AutotestTestJobTest(unittest.TestCase):
             _ = autotest_result.AutotestTestJob(
                 root_dir='.', relative_path='123-moblab').finished_time
 
-    @mock.patch.object(afe_connector.AFEConnector, 'get_jobs')
+    @mock.patch.object(afe_connector.AFEConnector, 'get_jobs_by_ids')
     @mock.patch.object(afe_connector.AFEConnector, 'get_host_queue_entries')
-    def test_job_finished_time__no_hqe(self, m_get_hqes, m_get_jobs):
+    def test_job_finished_time__no_hqe(self, m_get_hqes, m_get_jobs_by_ids):
         """Test for getting finished time for a job w/o HQE."""
-        m_get_jobs.return_value = [{'created_on': '2020-01-01 00:00:00'}]
+        m_get_jobs_by_ids.return_value = [{'created_on': '2020-01-01 00:00:00'}]
         m_get_hqes.return_value = []
 
         job = autotest_result.AutotestTestJob(
             root_dir='.', relative_path='123-moblab')
         self.assertEqual(job.finished_time,
-                         datetime.datetime(2020, 1, 1))
+                        datetime.datetime(2020, 1, 1))
 
-    @mock.patch.object(afe_connector.AFEConnector, 'get_jobs')
+    @mock.patch.object(afe_connector.AFEConnector, 'get_jobs_by_ids')
     @mock.patch.object(afe_connector.AFEConnector, 'get_host_queue_entries')
-    def test_job_finished_time__with_hqe(self, m_get_hqes, m_get_jobs):
+    def test_job_finished_time__hqe_running(self, m_get_hqes, m_get_jobs_by_ids):
+        """Test for getting finished time for a job w/o HQE."""
+        m_get_jobs_by_ids.return_value = [{'created_on': '2020-01-01 00:00:00'}]
+        m_get_hqes.return_value = [{'complete': False}]
+
+        job = autotest_result.AutotestTestJob(
+            root_dir='.', relative_path='123-moblab')
+        for i in range(3):
+            self.assertEqual(job.finished_time, None)
+
+    @mock.patch.object(afe_connector.AFEConnector, 'get_jobs_by_ids')
+    @mock.patch.object(afe_connector.AFEConnector, 'get_host_queue_entries')
+    def test_job_finished_time__with_hqe(self, m_get_hqes, get_jobs_by_ids):
         """Test for getting finished time for a job with HQE."""
-        m_get_jobs.return_value = [{'created_on': '2020-01-01 00:00:00'}]
+        get_jobs_by_ids.return_value = [{'created_on': '2020-01-01 00:00:00'}]
         m_get_hqes.return_value = [
-            {'finished_on': '2020-01-01 12:00:00'},
-            {'finished_on': '2020-01-01 11:00:00'},
+            {'finished_on': '2020-01-01 12:00:00', 'complete': True},
+            {'finished_on': '2020-01-01 11:00:00', 'complete': True},
         ]
 
         job = autotest_result.AutotestTestJob(
             root_dir='.', relative_path='123-moblab')
         self.assertEqual(job.finished_time,
-                         datetime.datetime(2020, 1, 1, 12))
+                            datetime.datetime(2020, 1, 1, 12)
+                            .replace(tzinfo=datetime.timezone.utc))
 
 
 def test_get_test_result_suite_name(job_serialize_CTS):

@@ -38,7 +38,7 @@ sys.path.pop()
 def _query_speical_task_finished_time(id_):
     """Query AFE with task id and yield the finished time."""
     afe = afe_connector.AFEConnector()
-    while True:
+    def func():
         result = afe.get_special_tasks([id_])
         if not result:
             raise test_result_interface.TestResultError(
@@ -47,17 +47,18 @@ def _query_speical_task_finished_time(id_):
 
         time_finished_str = result[0].get('time_finished')
         if time_finished_str:
-            yield datetime.datetime.strptime(
+            return datetime.datetime.strptime(
                 time_finished_str,
                 _TIMESTAMP_FORMAT).replace(tzinfo=datetime.timezone.utc)
         else:
-            yield None
+            return None
+    return func
 
 
 def _query_job_finished_time(id_):
     """Query AFE with job id and yield the finished time."""
     afe = afe_connector.AFEConnector()
-    while True:
+    def func():
         result = afe.get_jobs_by_ids([id_])
         if not result:
             raise test_result_interface.TestResultError(
@@ -68,7 +69,7 @@ def _query_job_finished_time(id_):
         running_hqes = [hqe for hqe in hqes if not hqe.get('complete')]
         if running_hqes:  # Test job is still running.
             _LOGGER.debug('Determined the HQE for job %s are running', id_)
-            yield None
+            return None
 
         hqes_finished_time = [datetime.datetime.strptime(hqe.get('finished_on'),
                                                          _TIMESTAMP_FORMAT)
@@ -77,24 +78,20 @@ def _query_job_finished_time(id_):
         hqes_finished_time = [
             t.replace(tzinfo=datetime.timezone.utc) for t in hqes_finished_time]
         if hqes_finished_time:
-            yield max(hqes_finished_time)
+            return max(hqes_finished_time)
         else:
-            # TODO(haddowk) investigate why the HQE's are not showing as running
-            # this logic is commented out as it is results in the directory
-            # being uploaded before the job is complete, it is a WIP to fix
-            # correctly.
-            #
-            # # The value of 'finished_on' for failed/aborted HQE is NULL. So use
-            # # the job creating time instead.
-            # _LOGGER.debug('Determined the HQEs %d are complete v2', id_)
-            # create_on_str = result.get('created_on')
-            # if create_on_str:
-            #     yield datetime.datetime.strptime(create_on_str,
-            #                                      _TIMESTAMP_FORMAT)
-            # else:
-            _LOGGER.debug("No job finish time job id %s", id_)
-            yield None
-
+            # The value of 'finished_on' for failed/aborted HQE is NULL. So use
+            # the job creating time instead.
+            _LOGGER.debug('Determined that all HQEs (%d) are completed.'
+                          'No finished_on time, using job created_on time', id_)
+            create_on_str = result.get('created_on')
+            if create_on_str:
+                return datetime.datetime.strptime(create_on_str,
+                                                 _TIMESTAMP_FORMAT)
+            else:
+                _LOGGER.debug("No job finish time job id %s", id_)
+                return None
+    return func
 
 class _AutotestResult(test_result_interface.TestResult):
     """Base class for Autotest job and special tasks."""
@@ -115,8 +112,7 @@ class _AutotestResult(test_result_interface.TestResult):
     @property
     def finished_time(self):
         if not self._finished_time:
-            result = self._afe_query
-            self._finished_time = next(self._afe_query)
+            self._finished_time = self._afe_query()
 
         return self._finished_time
 
