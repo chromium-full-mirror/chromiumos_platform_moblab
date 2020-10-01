@@ -1,11 +1,17 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  async,
+  ComponentFixture,
+  TestBed
+} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatCardModule} from '@angular/material/card';
+import {MatDialogModule} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -15,8 +21,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 import {ConfigurationComponent} from './configuration.component';
-import {RebootButtonComponent} from '../widgets/reboot-button/reboot-button';
-import {MatDialogModule} from '@angular/material/dialog';
+import {RebootButtonComponent} from '../widgets/reboot-button/reboot-button.component';
 
 
 describe('ConfigurationComponent', () => {
@@ -99,39 +104,84 @@ describe('ConfigurationComponent', () => {
     expect(component.chromeosReleaseTrack).toBeTruthy();
   });
 
-  it('empty configuration fields show error', () => {
-    const errorItems = fixture.debugElement.nativeElement.querySelectorAll(
-      '.mat-error'
+  function isFormReadonly(formId: string) {
+    const formElement = fixture.debugElement.nativeElement.querySelector(
+      '#' + formId
     );
+    return formElement.getAttribute('readonly') === 'true'
+  }
 
-    expect(errorItems.length).toBe(3);
+  function toggleCheckbox(checkboxId: string) {
+    fixture.debugElement.query(
+      By.css('#' + checkboxId)
+    ).triggerEventHandler('change', new Event('change'));
+    fixture.detectChanges();
+  }
+
+  it('cloud forms readonly when enable cloud is unchecked', () => {
+    // enable cloud checkbox starts unchecked.
+    expect(isFormReadonly('boto-key-id-input')).toBeTrue();
+    expect(isFormReadonly('boto-key-secret-input')).toBeTrue();
+    expect(isFormReadonly('image-storage-url-input')).toBeTrue();
+  });
+
+  it('cloud forms not readonly when enable cloud is checked', () => {
+    toggleCheckbox('cloud-checkbox');
+
+    expect(isFormReadonly('boto-key-id-input')).toBeFalse();
+    expect(isFormReadonly('boto-key-secret-input')).toBeFalse();
+    expect(isFormReadonly('image-storage-url-input')).toBeFalse();
+  });
+
+  it('remote console integration enabled by default when cloud is enabled', () => {
+    toggleCheckbox('cloud-checkbox');
+
+    expect(component.isRemoteConsoleEnabled).toBe(true);
+  });
+
+  it('cloud forms cleared once enable cloud is unchecked', () => {
+    toggleCheckbox('cloud-checkbox');
+    inputConfiguration('image-storage-url-input', 'gs://xxx');
+    toggleCheckbox('cloud-checkbox');
+
+    expect(
+      fixture.debugElement.nativeElement.querySelector(
+        '#image-storage-url-input'
+      ).value
+    ).toBe('');
+  });
+
+  it('empty configuration fields show error', () => {
     expect(component.botoKeyIDForm.hasError('required')).toBeTruthy();
     expect(component.botoKeySecretForm.hasError('required')).toBeTruthy();
     expect(component.bucketURLForm.hasError('required')).toBeTruthy();
   });
 
   it('bad GCS URL shows error', () => {
-    inputConfiguration('botoKeyIdInput', 'fake-boto-key');
-    inputConfiguration('botoKeySecretInput', 'fake-secret-key');
-    inputConfiguration('imageStorageUrlInput', 'gs://xxx/');
+    inputConfiguration('boto-key-id-input', 'fake-boto-key');
+    inputConfiguration('boto-key-secret-input', 'fake-secret-key');
+    inputConfiguration('image-storage-url-input', 'gs://xxx/');
 
-    expect(fixture.debugElement.nativeElement.querySelectorAll(
-      '.mat-error'
-    ).length).toBe(0);
+    expect(
+      component.bucketURLForm.hasError('notAGSUrl')
+    ).toBeFalse();
 
-    inputConfiguration('imageStorageUrlInput', 'gs:/xxx/');
-    expect(fixture.debugElement.nativeElement.querySelectorAll(
-      '.mat-error'
-    ).length).toBe(1);
 
-    inputConfiguration('imageStorageUrlInput', 'gs://xxx');
-    expect(fixture.debugElement.nativeElement.querySelectorAll(
-      '.mat-error'
-    ).length).toBe(1);
+    inputConfiguration('image-storage-url-input', 'gs:/xxx/');
+    console.log(component.bucketURLForm.hasError('notAGSUrl'));
+    expect(
+      component.bucketURLForm.hasError('notAGSUrl')
+    ).toBeTrue();
+
+    inputConfiguration('image-storage-url-input', 'gs://xxx');
+    console.log(component.bucketURLForm.hasError('notAGSUrl'));
+    expect(
+      component.bucketURLForm.hasError('notAGSUrl')
+    ).toBeTrue();
   });
 
   it('good GCS URL shows link', () => {
-    inputConfiguration('imageStorageUrlInput', 'gs://xxx/');
+    inputConfiguration('image-storage-url-input', 'gs://xxx/');
     expect(fixture.debugElement.nativeElement.querySelector(
       '#link-on-icon'
     )).toBeTruthy();
@@ -141,7 +191,7 @@ describe('ConfigurationComponent', () => {
   });
 
   it('bad GCS URL does not show link', () => {
-    inputConfiguration('imageStorageUrlInput', 'xxx');
+    inputConfiguration('image-storage-url-input', 'xxx');
     expect(fixture.debugElement.nativeElement.querySelector(
       '#link-on-icon'
     )).toBeFalsy();
@@ -158,15 +208,17 @@ describe('ConfigurationComponent', () => {
       component = fixture.componentInstance;
       getCloudConfigurationSpy = spyOn<any>(component, 'getCloudConfiguration').and.callFake(
         function() {
-          component.setCloudConfiguration(
+          component.updateCloudConfigurationForms(
             'fake-boto-key',
             'fake-secret-key',
             'gs://xxx/',
+            true,
+            true
           )
         });
       getDutWifiInfoSpy = spyOn<any>(component, 'getDutWifiInfo').and.callFake(
         function() {
-          // ts-ignore
+          // @ts-ignore
           component.setDutWifiInfo(
             'fake-wifi-name',
             'fake-wifi-pass',
@@ -180,13 +232,13 @@ describe('ConfigurationComponent', () => {
         '#cloud-config-submit-button'
       ).disabled).toBeTruthy();
 
-      inputConfiguration('imageStorageUrlInput', 'gs://xxxx/');
+      inputConfiguration('image-storage-url-input', 'gs://xxxx/');
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.querySelector(
         '#cloud-config-submit-button'
       ).disabled).toBeFalsy();
 
-      inputConfiguration('imageStorageUrlInput', 'gs://xxx/');
+      inputConfiguration('image-storage-url-input', 'gs://xxx/');
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.querySelector(
         '#cloud-config-submit-button'
@@ -198,13 +250,13 @@ describe('ConfigurationComponent', () => {
         '#dut-wifi-info-submit-button'
       ).disabled).toBeTruthy();
 
-      inputConfiguration('dutWifiNameInput', 'fake-wifi-nam');
+      inputConfiguration('dut-wifi-name-input', 'fake-wifi-nam');
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.querySelector(
         '#dut-wifi-info-submit-button'
       ).disabled).toBeFalsy();
 
-      inputConfiguration('dutWifiNameInput', 'fake-wifi-name');
+      inputConfiguration('dut-wifi-name-input', 'fake-wifi-name');
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.querySelector(
         '#dut-wifi-info-submit-button'

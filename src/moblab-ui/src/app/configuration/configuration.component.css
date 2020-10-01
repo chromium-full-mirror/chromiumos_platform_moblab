@@ -1,19 +1,17 @@
-.configuration-label {
-  min-width: 400px;
-  margin: 10px;
-}
-.configuration-input {
-  margin-right: 15px;
-  min-width: 500px;
-}
-.configuration {
-  flex-direction: row;
-  layout-margin: 50px;
+hr {
+  border: 1px solid #ebebeb;
 }
 
-#submit-button {
-  margin-top: 25px;
-  margin-bottom: 20px;
+input[type="text"][readonly] {
+  color: grey;
+}
+
+mat-card {
+  border: 1px solid #ebebeb;
+  box-shadow: none !important;
+  max-width: 650px;
+  margin: 16px;
+  padding: 8px;
 }
 
 mat-card-header {
@@ -25,21 +23,50 @@ mat-card-header {
   margin-bottom: 10px;
 }
 
-mat-card {
-  border: 1px solid #ebebeb;
-  box-shadow: none !important;
-  max-width: 650px;
-  margin: 16px;
-  padding: 8px;
-}
-
 mat-list-item {
   margin-bottom: 20px;
 }
 
-#gcsLink {
-  margin-left:10px;
-  font-family: Roboto, sans-serif;
+::ng-deep .readonly input.mat-input-element {
+  color: grey;
+}
+
+::ng-deep .readonly .mat-form-field-label {
+  /*change color of label*/
+  color: grey;
+}
+
+.checkbox-description {
+  font-size: 11px;
+  color: grey;
+  padding-top: 10px;
+}
+
+.configuration {
+  flex-direction: row;
+  layout-margin: 50px;
+}
+
+.configuration-input {
+  margin-right: 15px;
+  min-width: 500px;
+}
+
+.configuration-label {
+  min-width: 400px;
+  margin: 10px;
+}
+
+.form-text {
+  font-family: "Open Sans", "Helvetica Neue", sans-serif;
+  color:rgba(0, 0, 0, 0.87);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.list-row {
+  margin-top:15px;
+  margin-bottom:15px;
 }
 
 .loading-overlay {
@@ -51,11 +78,6 @@ mat-list-item {
   margin-left: -8px;
   width: 100%;
   z-index: 100;
-}
-
-.list-row {
-  margin-top:15px;
-  margin-bottom:15px;
 }
 
 .loading-spinner-wrapper {
@@ -70,6 +92,14 @@ mat-list-item {
   z-index: 101;
 }
 
+.mat-checkbox.mat-accent .mat-checkbox-inner-container {
+  margin: 22px 88px auto 0;
+}
+
+.mat-list-item {
+  padding-bottom: 18px;
+}
+
 .reboot-button-wrapper {
   display: inline-flex;
   margin-left: 40px;
@@ -82,7 +112,46 @@ mat-list-item {
   margin-right: 15px;
 }
 
+#checkbox-description {
+  font-size: 11px;
+  color: grey;
+  padding-top: 10px;
+}
+
+#cloud-checkbox-description.disabled {
+  color: grey;
+}
+
+#cloud-checkbox-form {
+  padding: 15px;
+}
+
+#cloud-checkbox-label {
+  padding-left: 10px;
+}
+
+#configuration-forms-wrapper {
+  border: 0px;
+}
+
+#console-checkbox-wrapper {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-left: 20px;
+  padding-right: 130px;
+}
+
+#gcs-link {
+  margin-left:10px;
+  font-family: Roboto, sans-serif;
+}
+
 #link-off-icon {
   padding-left: 10px;
   padding-bottom: 5px;
+}
+
+#submit-button {
+  margin-top: 25px;
+  margin-bottom: 20px;
 }
