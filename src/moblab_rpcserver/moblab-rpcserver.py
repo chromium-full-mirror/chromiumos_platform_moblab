@@ -851,10 +851,13 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             GetCloudConfigurationResponse
         """
         cloud_configuration = self.service.get_cloud_configuration()
+        is_remote_agent_enabled = self.service.get_is_remote_agent_enabled()
         response = moblabrpc_pb2.GetCloudConfigurationResponse(
+            is_cloud_enabled=cloud_configuration.get('is_cloud_enabled', 'False') == 'True',
             boto_key_id=cloud_configuration.get('gs_access_key_id', ''),
             boto_key_secret=cloud_configuration.get('gs_secret_access_key', ''),
-            gcs_bucket_url=cloud_configuration.get('image_storage_server', '')
+            gcs_bucket_url=cloud_configuration.get('image_storage_server', ''),
+            is_remote_console_enabled=is_remote_agent_enabled
         )
         return response
 
@@ -863,17 +866,21 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             Set cloud configuration info of Moblab.
         Args:
             request: SetCloudConfigurationRequest object with parameters:
+                is_cloud_enabled,
                 boto_key_id,
                 boto_key_secret,
-                gcs_bucket_url
+                gcs_bucket_url,
+                is_remote_console_enabled
             _context: grpc.server.Context
         Returns:
             GetCloudConfigurationResponse
         """
         msg = cloud_configuration = self.service.set_cloud_configuration(
+            request.is_cloud_enabled,
             request.boto_key_id,
             request.boto_key_secret,
-            request.gcs_bucket_url
+            request.gcs_bucket_url,
+            request.is_remote_console_enabled
         )
         response = moblabrpc_pb2.SetCloudConfigurationResponse(
             message = msg

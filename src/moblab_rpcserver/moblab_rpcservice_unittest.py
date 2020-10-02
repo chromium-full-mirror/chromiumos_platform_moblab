@@ -6,6 +6,7 @@
 import sys
 import unittest
 
+from collections import namedtuple
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock
 
@@ -19,6 +20,7 @@ MOCKED_DOCKER.errors.NotFound = MockNotFoundError
 sys.modules['docker'] = MOCKED_DOCKER
 sys.modules['google.cloud'] = MOCKED_DOCKER
 sys.modules['moblab_common'] = MagicMock()
+sys.modules['requests'] = MagicMock()
 
 from moblab_rpcservice import MoblabService, MoblabRpcError
 
@@ -105,6 +107,105 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
     with self.assertRaises(MoblabRpcError) as context:
       result_msg = self.service.update_docker()
+
+  @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
+  def test_set_cloud_configuration(self, mock_afe_connector):
+    SetCloudConfigurationTestParams = namedtuple(
+        'SetCloudConfigurationTestParams',
+        [
+            # Test inputs for MoblabService.set_cloud_configuration call.
+            'is_cloud_enabled',
+            'boto_key_id',
+            'boto_key_secret',
+            'gcs_bucket_url',
+            'is_remote_agent_enabled',
+            # The follow are bools to set whether mock afe_connector succeeds or fails for the
+            # validate_cloud_storage_info, set_configuration_info, and set_is_remote_agent_enabled.
+            'succeed_validate',
+            'succeed_cloud_configuration_set',
+            'succeed_remote_agent_config_commit',
+            # Expected message to be returned by MoblabService.set_cloud_configuration
+            'expected_message_output'
+        ]
+    )
+
+    def _mock_afe_connector_methods(succeed_validate, succeed_cloud_configuration_set, succeed_remote_agent_config_commit):
+      if params.succeed_validate:
+        mock_afe_connector.return_value.validate_cloud_storage_info.return_value = True, 'Cloud values validated.'
+      else:
+        mock_afe_connector.return_value.validate_cloud_storage_info.return_value = False, 'Cloud validation failed.'
+
+      mock_afe_connector.return_value.set_configuration_info.return_value = params.succeed_cloud_configuration_set
+      mock_afe_connector.return_value.set_is_remote_agent_enabled.return_value = params.succeed_remote_agent_config_commit
+
+    # below is a list of different permutations of potential inputs to set_cloud_configuration + different behaviors for
+    # the mocked afe_connector. Each item includes the expected message output of the set_cloud_configuration that will
+    # be assert'ed against.
+    parameterized_set_cloud_configuration_tests = [
+        # test completely successful set cloud config.
+        SetCloudConfigurationTestParams(
+            is_cloud_enabled=True,
+            boto_key_id='fake-boto-id',
+            boto_key_secret='fake-boto-secret',
+            gcs_bucket_url='gs://bucket/',
+            is_remote_agent_enabled=True,
+            succeed_validate=True,
+            succeed_cloud_configuration_set=True,
+            succeed_remote_agent_config_commit=True,
+            expected_message_output='Successfully applied cloud configuration values. Remote agent has been enabled.'
+        ),
+        # test set only cloud disabled.
+        SetCloudConfigurationTestParams(
+            is_cloud_enabled=False,
+            boto_key_id=None,
+            boto_key_secret=None,
+            gcs_bucket_url=None,
+            is_remote_agent_enabled=None,
+            succeed_validate=True,
+            succeed_cloud_configuration_set=True,
+            succeed_remote_agent_config_commit=True,
+            expected_message_output='Successfully disabled cloud configuration.'
+        ),
+        # test validation failed.
+        SetCloudConfigurationTestParams(
+            is_cloud_enabled=True,
+            boto_key_id='fake-boto-id',
+            boto_key_secret='fake-boto-secret',
+            gcs_bucket_url='gs://bucket/',
+            is_remote_agent_enabled=True,
+            succeed_validate=False,
+            succeed_cloud_configuration_set=True,
+            succeed_remote_agent_config_commit=True,
+            expected_message_output='Cloud validation failed.'
+        ),
+        # test cloud configuration successfully committed but remote agent toggle set failed
+        SetCloudConfigurationTestParams(
+            is_cloud_enabled=True,
+            boto_key_id='fake-boto-id',
+            boto_key_secret='fake-boto-secret',
+            gcs_bucket_url='gs://bucket/',
+            is_remote_agent_enabled=True,
+            succeed_validate=True,
+            succeed_cloud_configuration_set=True,
+            succeed_remote_agent_config_commit=False,
+            expected_message_output='Successfully applied cloud configuration values. But failed to set remote agent as enabled.'
+        )
+    ]
+
+    for params in parameterized_set_cloud_configuration_tests:
+      with self.subTest():
+        _mock_afe_connector_methods(params.succeed_validate, params.succeed_cloud_configuration_set, params.succeed_remote_agent_config_commit)
+
+
+        message = self.service.set_cloud_configuration(
+            params.is_cloud_enabled,
+            params.boto_key_id,
+            params.boto_key_secret,
+            params.gcs_bucket_url,
+            params.is_remote_agent_enabled
+        )
+        print(message)
+        assert(message == params.expected_message_output)
 
   @mock.patch.object(MoblabService, 'config_connector',
                      new_callable=PropertyMock)

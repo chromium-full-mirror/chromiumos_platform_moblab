@@ -994,7 +994,7 @@ class MoblabService(object):
         else:
             return 'Failed to apply DUT Wifi info changes.'
 
-    def set_cloud_configuration(self, boto_key_id, boto_key_secret, gcs_bucket_url):
+    def set_cloud_configuration(self, is_cloud_enabled, boto_key_id, boto_key_secret, gcs_bucket_url, is_remote_agent_enabled):
         """
             Attempts to set configuration values to Moblab.
         Args:
@@ -1004,12 +1004,28 @@ class MoblabService(object):
         Returns:
             A result message string.
         """
-        is_valid, details = self.afe_connector.validate_cloud_storage_info(
-            boto_key_id, boto_key_secret, gcs_bucket_url)
+
+        if is_cloud_enabled:
+            is_valid, details = self.afe_connector.validate_cloud_storage_info(
+                boto_key_id,
+                boto_key_secret,
+                gcs_bucket_url
+            )
+        else:
+            if self.afe_connector.set_configuration_info(is_cloud_enabled):
+                return 'Successfully disabled cloud configuration.'
+            else:
+                return 'Failed to commit disable cloud change.'
+
 
         if is_valid:
-            if self.afe_connector.set_configuration_info(boto_key_id, boto_key_secret, gcs_bucket_url):
-                return 'Successfully applied cloud configuration changes.'
+            if self.afe_connector.set_configuration_info(is_cloud_enabled, boto_key_id, boto_key_secret, gcs_bucket_url):
+                message = 'Successfully applied cloud configuration values. '
+                if self.set_is_remote_agent_enabled(is_remote_agent_enabled):
+                    message += 'Remote agent has been {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
+                else:
+                    message += 'But failed to set remote agent as {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
+                return message
             else:
                 return 'Failed to apply cloud configuration changes.'
         else:
