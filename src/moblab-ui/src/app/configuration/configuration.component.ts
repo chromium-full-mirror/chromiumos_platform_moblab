@@ -3,14 +3,12 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
-  ViewChild
 } from '@angular/core';
-
 import {FormControl} from '@angular/forms';
-import {Validators} from '@angular/forms';
+import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {Validators} from '@angular/forms';
 
-import {FileUploader} from 'ng2-file-upload';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 
 const URL = 'https://google.com/api/';
@@ -30,6 +28,9 @@ function gsURLValidator(control) {
 })
 export class ConfigurationComponent implements OnInit, AfterContentInit {
   errors = false;
+  isCloudEnabled = false;
+  isRemoteConsoleEnabled = false;
+
   botoKeyIDForm = new FormControl('', {
     validators: [Validators.required],
   });
@@ -41,7 +42,15 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   bucketURLForm = new FormControl('', {
     validators: [Validators.required, gsURLValidator],
   });
+
   bucketLink = '';
+  cloudConfigDisabledMessage = "";
+
+  showUncheckWarning = false;
+  configurationLoading = false;
+
+  lastFetchedIsCloudEnabled = false;
+  lastFetchedIsRemoteConsoleEnabled = false;
   lastFetchedBotoKeyID = '';
   lastFetchedBotoKeySecret = '';
   lastFetchedBucketURL = '';
@@ -61,12 +70,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   moblabHostname: string;
   isConnectedToInternet: boolean;
 
-  configurationLoading = false;
-
   constructor(
     private changeDetector: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private moblabRpcService: MoblabGrpcService,
     private snackBar: MatSnackBar,
-    private moblabRpcService: MoblabGrpcService) {}
+  ) {}
 
   ngOnInit(): void {
     this.bucketURLForm.valueChanges.subscribe(value => {
@@ -90,14 +99,26 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   }
 
   getCloudConfiguration() {
+    /**
+     * Method sends RPC command to fetch cloud configuration information and
+     * apply fetched values to the UI forms.
+     */
     this.configurationLoading = true;
     this.moblabRpcService.get_cloud_configuration(
       (
         boto_key_id: string,
         boto_key_secret: string,
-        gcs_bucket_url: string
+        gcs_bucket_url: string,
+        is_cloud_enabled: boolean,
+        is_remote_console_enabled: boolean
       ) => {
-        this.setCloudConfiguration(boto_key_id, boto_key_secret, gcs_bucket_url);
+        this.updateCloudConfigurationForms(
+          boto_key_id,
+          boto_key_secret,
+          gcs_bucket_url,
+          is_cloud_enabled,
+          is_remote_console_enabled
+        )
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
@@ -152,27 +173,20 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   }
 
   isCloudConfigurationChanged() {
+    /**
+     * Returns true IFF there is a change in any of the cloud configuration
+     * values.
+     */
     return this.lastFetchedBotoKeyID != this.botoKeyIDForm.value ||
       this.lastFetchedBotoKeySecret != this.botoKeySecretForm.value ||
-      this.lastFetchedBucketURL != this.bucketURLForm.value
+      this.lastFetchedBucketURL != this.bucketURLForm.value ||
+      this.lastFetchedIsCloudEnabled != this.isCloudEnabled ||
+      this.lastFetchedIsRemoteConsoleEnabled != this.isRemoteConsoleEnabled
   }
 
   isDutWifiInfoChanged() {
     return this.lastFetchedDutWifiName != this.dutWifiNameForm.value ||
       this.lastFetchedDutWifiPassword != this.dutWifiPasswordForm.value;
-  }
-
-  setCloudConfiguration(boto_key_id, boto_key_secret, gcs_bucket_url) {
-    console.log('setting');
-    this.botoKeyIDForm.setValue(boto_key_id);
-    this.botoKeySecretForm.setValue(boto_key_secret);
-    this.bucketURLForm.setValue(gcs_bucket_url);
-
-    this.lastFetchedBotoKeyID = boto_key_id;
-    this.lastFetchedBotoKeySecret = boto_key_secret;
-    this.lastFetchedBucketURL = gcs_bucket_url;
-
-    this.configurationLoading = false;
   }
 
   private setDutWifiInfo(dut_wifi_name: string, dut_wifi_password: string) {
@@ -224,6 +238,36 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     }
   }
 
+  toggleCloudConfigDisabledMessage() {
+    /**
+     * Will set tooltip hover of cloud configuration forms to show that cloud
+     * integration needs to be enabled before any change is made.
+     */
+    if (this.isCloudEnabled) {
+      this.cloudConfigDisabledMessage = "";
+    } else {
+      this.cloudConfigDisabledMessage = "Cloud settings are not enabled, please check 'enable' above if you would " +
+        " like to opt-in to cloud interaction for your Moblab.";
+    }
+  }
+
+  isCloudEnabledCheckboxChange() {
+    /**
+     * Invoked on change of cloud enabled checkbox.
+     */
+    this.isCloudEnabled = !this.isCloudEnabled;
+
+    this.isRemoteConsoleEnabled = this.isCloudEnabled;
+    this.toggleCloudConfigDisabledMessage();
+  }
+
+  isRemoteConsoleEnabledCheckboxChange() {
+    /**
+     * Invoked on change of remote console enabled checkbox.
+     */
+    this.isRemoteConsoleEnabled = !this.isRemoteConsoleEnabled;
+  }
+
   ngAfterContentInit(): void {
     this.botoKeyIDForm.markAsTouched();
     this.botoKeySecretForm.markAsTouched();
@@ -244,7 +288,39 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       },
       this.botoKeyIDForm.value,
       this.botoKeySecretForm.value,
-      this.bucketURLForm.value);
+      this.bucketURLForm.value,
+      this.isCloudEnabled,
+      this.isRemoteConsoleEnabled);
+  }
+
+  cloudCheckboxHoverStart() {
+    /**
+     * Invoked on mouseover of the enable cloud checkbox. Will associate error
+     * messages on cloud configuration forms that unchecking cloud integration
+     * will clear existing cloud config values ( error messages are set only if
+     * the cloud checkbox in enabled during mouseover and there is at least one
+     * non-empty cloud configuration ).
+     */
+    if (this.isCloudEnabled && (this.botoKeyIDForm.value || this.botoKeySecretForm.value || this.bucketURLForm.value)) {
+      this.showUncheckWarning = true;
+      const clearError = {'clearWarning': true}
+
+      this.botoKeyIDForm.setErrors(clearError);
+      this.botoKeySecretForm.setErrors(clearError);
+      this.bucketURLForm.setErrors(clearError);
+    }
+  }
+
+  cloudCheckboxHoverStop() {
+    /**
+     * Invoked on mouseoff of the enable cloud checkbox. Will clear the error
+     * set by cloudCheckboxHoverStart
+     */
+    if (this.isCloudEnabled && (this.botoKeyIDForm.value || this.botoKeySecretForm.value || this.bucketURLForm.value)) {
+      this.botoKeyIDForm.setErrors(null);
+      this.botoKeySecretForm.setErrors(null);
+      this.bucketURLForm.setErrors(null);
+    }
   }
 
   setOffPopup(dialogue: string) {
@@ -252,5 +328,35 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       duration: 5000,
       verticalPosition: 'top'
     });
+  }
+
+  updateCloudConfigurationForms(
+    boto_key_id: string,
+    boto_key_secret: string,
+    gcs_bucket_url: string,
+    is_cloud_enabled: boolean,
+    is_remote_console_enabled: boolean
+  ) {
+    /**
+     * Updates the form values of the cloud configurations. Meant to be called
+     * with values returned from RPC call to get cloud info.
+     */
+    this.botoKeyIDForm.setValue(boto_key_id);
+    this.botoKeySecretForm.setValue(boto_key_secret);
+    this.bucketURLForm.setValue(gcs_bucket_url);
+
+    this.lastFetchedBotoKeyID = boto_key_id;
+    this.lastFetchedBotoKeySecret = boto_key_secret;
+    this.lastFetchedBucketURL = gcs_bucket_url;
+
+    this.isCloudEnabled = is_cloud_enabled;
+    this.isRemoteConsoleEnabled = is_remote_console_enabled;
+
+    this.toggleCloudConfigDisabledMessage();
+
+    this.lastFetchedIsCloudEnabled = this.isCloudEnabled;
+    this.lastFetchedIsRemoteConsoleEnabled = this.isRemoteConsoleEnabled;
+
+    this.configurationLoading = false;
   }
 }

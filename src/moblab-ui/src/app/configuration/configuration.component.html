@@ -8,69 +8,119 @@
 </div>
 
 <mat-card id="configuration-information-card">
-  <div class="loading-overlay" *ngIf="configurationLoading">
-    <div class="loading-spinner-wrapper">
-      <mat-spinner></mat-spinner>
+  <mat-card-header>Cloud Configuration</mat-card-header>
+  <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
+    <div id="cloud-checkbox-form" class="form-text">
+      <mat-checkbox id="cloud-checkbox"
+        (mouseenter)="cloudCheckboxHoverStart()"
+        (mouseleave)="cloudCheckboxHoverStop()"
+        (change)="isCloudEnabledCheckboxChange()"
+        [checked]="this.isCloudEnabled">
+      </mat-checkbox>
+      <span id="cloud-checkbox-label" class="checkbox-label"> Enable Moblab cloud integration </span>
+      <br>
+      <div class="checkbox-description">
+        Cloud integration is necessary for Moblab to fetch Chrome OS test images as well as upload test results for
+        CPCon ingestion. ( The boto and GCS bucket forms below are cloud configurations )
+      </div>
     </div>
-  </div>
-  <mat-card-header>Configuration Information</mat-card-header>
-  <mat-card-content layout-padding>
-    <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
-      <mat-list>
-        <div class="listrow" flex-direction="row">
+    <hr>
+    <div class="loading-overlay" *ngIf="configurationLoading">
+      <div class="loading-spinner-wrapper">
+        <mat-spinner></mat-spinner>
+      </div>
+    </div>
+    <mat-card id="configurations-forms-wrapper">
+      <mat-card-content layout-padding>
+        <mat-list>
+          <div class="listrow" flex-direction="row">
+            <mat-list-item>
+              <mat-form-field class="configuration-input" appearance="legacy"
+                              [class.readonly]="!this.isCloudEnabled"
+                              [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''"
+                              matTooltipPosition="after">
+                <input id="boto-key-id-input" matInput required placeholder="Boto Key ID"
+                       [formControl]="botoKeyIDForm"
+                       [readonly]="!this.isCloudEnabled"
+                       name="botoKeyId">
+                <mat-error
+                  *ngIf="this.botoKeyIDForm.hasError('required')">
+                  Boto key ID not set.
+                </mat-error>
+                <mat-error *ngIf="this.botoKeyIDForm.hasError('clearWarning')">
+                  Unchecking cloud enable will result in boto key value being cleared.
+                </mat-error>
+              </mat-form-field>
+            </mat-list-item>
+          </div>
+          <div class="listrow" flex-direction="row">
+            <mat-list-item>
+              <mat-form-field class="configuration-input" appearance="legacy"
+                              [class.readonly]="!this.isCloudEnabled"
+                              [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''"
+                              matTooltipPosition="after">
+                <input id="boto-key-secret-input" matInput type="password" required password placeholder="Boto Key Secret"
+                       [formControl]="botoKeySecretForm"
+                       [readonly]="!this.isCloudEnabled"
+                       name="botoKeySecret">
+                <mat-error *ngIf="this.botoKeySecretForm.hasError('required')">
+                  Boto key secret not set.
+                </mat-error>
+                <mat-error *ngIf="this.botoKeySecretForm.hasError('clearWarning')">
+                  Unchecking cloud enable will result in boto secret value being cleared.
+                </mat-error>
+              </mat-form-field>
+            </mat-list-item>
+          </div>
           <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy">
-              <input id="botoKeyIdInput" matInput required placeholder="Boto Key ID"
-                     [formControl]="botoKeyIDForm"
-                     name="botoKeyId" [disabled]="true">
-              <mat-error
-                *ngIf="this.botoKeyIDForm.hasError('required')">
-                Boto key ID not set.
+            <mat-form-field class="configuration-input" appearance="legacy"
+                            [class.readonly]="!this.isCloudEnabled"
+                            [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''"
+                            matTooltipPosition="after">
+              <input id="image-storage-url-input" matInput required placeholder="GCS Bucket Root"
+                     [formControl]="bucketURLForm"
+                     [readonly]="!this.isCloudEnabled"
+                     name="imageStorageUrl">
+              <mat-error *ngIf="this.bucketURLForm.hasError('clearWarning')">
+                Unchecking cloud enable will result in GCS bucket value being cleared.
               </mat-error>
             </mat-form-field>
+            <mat-icon id="link-off-icon" *ngIf="!enableLink()">link_off</mat-icon>
+            <a *ngIf="enableLink()" id="gcs-link" href={{bucketLink}} target="_blank"
+               [disabled]="!this.isCloudEnabled">
+              <mat-icon id="link-on-icon" *ngIf="enableLink()">link</mat-icon>
+            </a>
           </mat-list-item>
-        </div>
-        <div class="listrow" flex-direction="row">
+          <hr style="margin-top:0px; margin-bottom: 30px;">
           <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy">
-              <input id="botoKeySecretInput" matInput type="password" required password placeholder="Boto Key Secret"
-                     [formControl]="botoKeySecretForm"
-                     name="botoKeySecret">
-              <mat-error
-                *ngIf="this.botoKeySecretForm.hasError('required')">
-                Boto key secret not set.
-              </mat-error>
-            </mat-form-field>
+            <div id="console-checkbox-wrapper" class="form-text">
+              <mat-checkbox id ="console-checkbox"
+                [disabled]="!this.isCloudEnabled"
+                (change)="isRemoteConsoleEnabledCheckboxChange()"
+                [checked]="this.isRemoteConsoleEnabled"
+                [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="below"
+              ></mat-checkbox>
+              <span id="cloud-checkbox-description" class="checkbox-label"
+                    [class.disabled]="!this.isCloudEnabled"> Enable remote console. </span>
+              <br>
+              <div class="checkbox-description">
+                <!-- TODO chromium:1134371: add an href to the 'here' in the message below -->
+                Remote Console sends data in the background to Chrome OS Partner Console (CPCon) about your Moblab and
+                DUTs to make it easier to manage your fleet. See _here_ for more information.
+              </div>
+            </div>
           </mat-list-item>
-        </div>
-        <mat-list-item>
-          <mat-form-field class="configuration-input" appearance="legacy">
-            <input id="imageStorageUrlInput" matInput required placeholder="Image Storage Bucket URL"
-                   [formControl]="bucketURLForm"
-                   name="imageStorageUrl">
-            <mat-error
-              *ngIf="this.bucketURLForm.hasError('required')">
-              Image bucket URL not set.
-            </mat-error>
-            <mat-error
-              *ngIf="this.bucketURLForm.hasError('notAGSUrl')">
-              Not a valid bucket URL not set (Ex. gs://xxx/)
-            </mat-error>
-          </mat-form-field>
-          <mat-icon id="link-off-icon" *ngIf="!enableLink()">link_off</mat-icon>
-          <a *ngIf="enableLink()" id="gcsLink" href={{bucketLink}} target="_blank">
-            <mat-icon id="link-on-icon" *ngIf="enableLink()">link</mat-icon>
-          </a>
-        </mat-list-item>
-        <mat-list-item>
-          <button id="cloud-config-submit-button" mat-raised-button color="primary"
-                  [disabled]="disableCloudConfigSubmissionButton()"
-                  type="submit">Submit Changes
-          </button>
-        </mat-list-item>
-      </mat-list>
-    </form>
-  </mat-card-content>
+
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+    <mat-list-item>
+      <button id="cloud-config-submit-button" mat-raised-button color="primary"
+              [disabled]="disableCloudConfigSubmissionButton()"
+              type="submit">Submit Changes
+      </button>
+    </mat-list-item>
+  </form>
 </mat-card>
 
 <div><p></p></div>
@@ -132,7 +182,7 @@
         <div class="listrow" flex-direction="row">
           <mat-list-item>
             <mat-form-field class="configuration-input" appearance="legacy">
-              <input id="dutWifiNameInput" matInput required placeholder="Wifi Name"
+              <input id="dut-wifi-name-input" matInput required placeholder="Wifi Name"
                      [formControl]="dutWifiNameForm"
                      name="dutWifiName" [disabled]="true">
             </mat-form-field>
@@ -141,7 +191,7 @@
         <div class="listrow" flex-direction="row">
           <mat-list-item>
             <mat-form-field class="configuration-input" appearance="legacy">
-              <input id="dutWifiPasswordInput" matInput type="password" required password placeholder="Wifi Password"
+              <input id="dut-wifi-password-input" matInput type="password" required password placeholder="Wifi Password"
                      [formControl]="dutWifiPasswordForm"
                      name="dutWifiPassword">
             </mat-form-field>
