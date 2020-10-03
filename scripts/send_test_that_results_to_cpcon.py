@@ -210,6 +210,9 @@ def upload_test_results(args, test_dir, job_keyval, job_id):
         job_keyval: The key-value object of the job.
         job_id: A job id.
     """
+    with open(upload_status_file, "w") as upload_status:
+        upload_status.write("UPLOADING")
+
     fake_moblab_id = args.team_email_address
     fake_moblab_install_id = args.team_email_address
     hostname = job_keyval.get('hostname', '0.0.0.0')  # ip address
@@ -228,13 +231,11 @@ def upload_test_results(args, test_dir, job_keyval, job_id):
             test_dir, gcs_bucket_path)
         upload_status_file = os.path.join(test_dir, UPLOADED_STATUS_FILE)
         with open(upload_status_file, "w") as upload_status:
-            upload_status.write("UPLOADING")
+            upload_status.write("UPLOADED")
 
         cmd = "gsutil -m cp -r %s %s" % (test_dir, gcs_bucket_path)
         subprocess.check_output(shlex.split(cmd))
 
-        with open(upload_status_file, "w") as upload_status:
-            upload_status.write("UPLOADED")
         logging.info(
             "Successfully uploaded test directory: %s to GCS bucket path: %s",
             test_dir, gcs_bucket_path)
