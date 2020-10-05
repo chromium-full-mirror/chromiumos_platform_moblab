@@ -551,7 +551,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor:
       - "node"
-      - "buster-slim"
+      - "python-3.8-slim"
 
   - id: dns
     name: "docker:19.03.8"
