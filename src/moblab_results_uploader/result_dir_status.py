@@ -79,14 +79,15 @@ class ResultStatusChecker(processing_step.ProcessStep):
         # check test_result finished time to determine the status.
         try:
             finished_time = test_result.finished_time
-        except test_result_interface.TestResultError:
+        except test_result_interface.TestResultError as ex:
             _LOGGER.warning(
-                'Cannot get info of %s from scheduler, '
-                'keep retrying.', test_result
+                'Cannot get info of %s from scheduler, keep retrying. '
+                'Exception: %s', test_result, ex
             )
             # TODO(haddowk) Figure out a way to expire these jobs after
             # a certain amount of time.
             return Status.NOT_READY
+
         if not finished_time:
             return Status.NOT_READY
 
@@ -94,11 +95,10 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if previous_status not in [Status.UPLOADED]:
             if test_result.is_logged:
                 _LOGGER.debug('%s finished on %s age %s', test_result, finished_time,
-            age)
+                    age)
+
         if age < self._min_age_to_upload:
             return Status.NOT_READY
-            if test_result.is_logged:
-                _LOGGER.debug("%s Status not ready age %s", test_result, age)
 
         if age > self._min_age_to_prune and previous_status in [Status.UPLOADED]:
             if test_result.is_logged:
@@ -108,10 +108,10 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if previous_status == Status.NOT_READY:
             if test_result.is_logged:
                 _LOGGER.debug("%s Not running and in the age rage to upload.",
-             test_result)
+                    test_result)
             return Status.READY
-        else:
-            return previous_status
+        
+        return previous_status
 
     async def check(self, test_result):
         """Check current status and upload the test result if OK.

@@ -186,7 +186,6 @@ class UploadingContext(object):
             _LOGGER.debug('%s Directory upload timed out, or failed uploaded=%s error=%s', self._test_result, self.uploaded, self.error)
             return await result_dir_status.mark_uploading_result(
                 self._test_result, succeeded=False)
-            return
 
         if self._dry_run:
             if self._test_result.pubsub_when_uploaded:

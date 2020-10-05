@@ -308,7 +308,7 @@ def run(args, test_result_registry=None):
         test_result_registry: A list of TestResultRegisteryEntry which has
             needed test result directory information.
     """
-    _LOGGER.info('Start to scan, upload and prune test results.')
+    _LOGGER.info('Starting to scan, upload and prune test results.')
     _LOGGER.setLevel(logging.DEBUG)
 
     registry = test_result_registry or test_result_registry_module.REGISTRY
@@ -318,6 +318,10 @@ def run(args, test_result_registry=None):
         loop.run_until_complete(asyncio.gather(_async_upload(args, registry),
                                                _async_prune(args, registry)))
     except KeyboardInterrupt:
+        _LOGGER.info('Program is terminated by user.')
         pass
+    except Exception as ex:
+        _LOGGER.error('Program is terminated due to exception: %s.', ex)
     finally:
+        _LOGGER.info('Shutting down. Bye!')
         loop.close()
