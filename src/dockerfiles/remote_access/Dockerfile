@@ -7,6 +7,10 @@ ARG LABEL=release
 
 ###########################################################
 
+FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
+
+###########################################################
+
 FROM docker:latest as docker
 
 ###########################################################
@@ -43,12 +47,10 @@ RUN mkdir -p /home/moblab/.ssh
 COPY --from=autotest /chromite/ssh_keys/* /home/moblab/.ssh/
 RUN chmod -R 600 /home/moblab/.ssh/*
 
-COPY --chown=moblab ./src/moblab_common /moblab/src/moblab_common
-COPY --chown=moblab ./src/tools /moblab/src/tools
-COPY --chown=moblab ./src/host_services /moblab/src/host_services
-COPY --chown=moblab ./setup.py /moblab/
-WORKDIR /moblab
-RUN python3 ./setup.py install
+WORKDIR /wheels
+COPY --from=common /wheel/*py3* .
+RUN pip install *.whl
+RUN rm -rf /wheels
 
 RUN apk del \
     python3-dev \

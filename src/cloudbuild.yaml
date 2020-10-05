@@ -86,6 +86,26 @@ steps:
     waitFor:
       - "buster-slim"
 
+  - id: moblab_common
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/moblab_common/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/moblab_common:${_LABEL}",
+        "/workspace/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "protoc"
+
   - id: autotest-lucifer
     name: "docker:19.03.8"
     args:
@@ -169,6 +189,7 @@ steps:
       - "alpine-git"
       - "buster-slim"
       - "python-2.7-slim"
+      - "moblab_common"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -399,6 +420,7 @@ steps:
       - "protoc"
       - "python-3.8"
       - "python-3.8-slim"
+      - "moblab_common"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -443,6 +465,7 @@ steps:
       - "protoc"
       - "python-3.8"
       - "python-3.8-slim"
+      - "moblab_common"
 
   - id: remote-scheduler
     name: "docker:19.03.8"
@@ -485,6 +508,7 @@ steps:
       - "protoc"
       - "python-3.8"
       - "python-3.8-slim"
+      - "moblab_common"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -552,6 +576,7 @@ steps:
     waitFor:
       - "node"
       - "python-3.8-slim"
+      - "moblab_common"
 
   - id: dns
     name: "docker:19.03.8"
@@ -591,10 +616,10 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
     waitFor:
-      - 'dockerfile-copy'
-      - 'openssh-server'
-      - 'autotest-base'
-
+      - "dockerfile-copy"
+      - "openssh-server"
+      - "autotest-base"
+      - "moblab_common"
 
 images:
   [
@@ -623,6 +648,7 @@ images:
     "${_REGISTRY_URI}/mobmonitor:${_LABEL}",
     "${_REGISTRY_URI}/gwtcompiler:${_LABEL}",
     "${_REGISTRY_URI}/moblab-dns:${_LABEL}",
+    "${_REGISTRY_URI}/moblab_common:${_LABEL}",
   ]
 
 options:

@@ -13,7 +13,7 @@ import logging
 import grpc
 
 # pylint: disable=import-error
-import remoteagentrpc_pb2_grpc
+from moblab_common.proto import remoteagentrpc_pb2_grpc
 
 from services.scheduler.scheduler import Scheduler
 
