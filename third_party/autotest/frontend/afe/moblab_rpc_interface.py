@@ -40,6 +40,7 @@ GOOGLE_STORAGE_BUCKET_URL_PATTERN = re.compile(
         r'gs://(?P<bucket>[a-zA-Z][a-zA-Z0-9-_]*)/?.*')
 
 # Contants used in Json RPC field names.
+_IS_CLOUD_ENABLED = 'is_cloud_enabled'
 _IMAGE_STORAGE_SERVER = 'image_storage_server'
 _GS_ACCESS_KEY_ID = 'gs_access_key_id'
 _GS_SECRET_ACCESS_KEY = 'gs_secret_access_key'
@@ -319,14 +320,11 @@ def _get_boto_config():
 def get_cloud_storage_info():
     """RPC handler to get the cloud storage access information.
     """
-    cloud_storage_info = {}
-    value =_CONFIG.get_config_value('CROS', _IMAGE_STORAGE_SERVER)
-    if value is not None:
-        cloud_storage_info[_IMAGE_STORAGE_SERVER] = value
-    value = _CONFIG.get_config_value('CROS', _RESULT_STORAGE_SERVER,
-            default=None)
-    if value is not None:
-        cloud_storage_info[_RESULT_STORAGE_SERVER] = value
+    cloud_storage_info = {key : value for key, value in [
+        (_IMAGE_STORAGE_SERVER, _CONFIG.get_config_value('CROS', _IMAGE_STORAGE_SERVER)),
+        (_RESULT_STORAGE_SERVER, _CONFIG.get_config_value('CROS', _RESULT_STORAGE_SERVER, default=None)),
+        (_IS_CLOUD_ENABLED, _CONFIG.get_config_value('CROS', _IS_CLOUD_ENABLED, default=None))
+    ] if value}
 
     boto_config = _get_boto_config()
     sections = boto_config.sections()
@@ -420,8 +418,9 @@ def submit_wizard_config_info(
     config_update = {}
     if cloud_storage_info:
         config_update['CROS'] = [
+            (_IS_CLOUD_ENABLED, cloud_storage_info[_IS_CLOUD_ENABLED]),
             (_IMAGE_STORAGE_SERVER, cloud_storage_info[_IMAGE_STORAGE_SERVER]),
-            (_RESULT_STORAGE_SERVER, cloud_storage_info[_RESULT_STORAGE_SERVER])
+            (_RESULT_STORAGE_SERVER, cloud_storage_info[_RESULT_STORAGE_SERVER]),
         ]
 
     if wifi_info:

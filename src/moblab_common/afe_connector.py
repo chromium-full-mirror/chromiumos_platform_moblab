@@ -622,6 +622,7 @@ class AFEConnector(object):
 
     def _format_configuration_dict(
         self,
+        is_cloud_enabled=True,
         gs_access_key_id=None,
         gs_secret_access_key=None,
         image_storage_server=None,
@@ -632,6 +633,8 @@ class AFEConnector(object):
             Helper method for returning params shared between calls to set
             config and validate cloud config.
         Args:
+            is_cloud_enabled (boolean): True iff user has checked 'integrate with
+                cloud' on UI
             gs_access_key_id (string): boto ID string
             gs_secret_access_key (string): boto secret string
             image_storage_server (string): GCS bucket URL
@@ -644,6 +647,7 @@ class AFEConnector(object):
 
         if gs_access_key_id and gs_secret_access_key and image_storage_server:
             configuration_dict["cloud_storage_info"] = {
+                "is_cloud_enabled": is_cloud_enabled,
                 "gs_access_key_id": gs_access_key_id,
                 "gs_secret_access_key": gs_secret_access_key,
                 "image_storage_server": image_storage_server,
@@ -652,6 +656,10 @@ class AFEConnector(object):
                 # to cloud configs, but Moblab only needs to change these values,
                 # so this value is always False.
                 "use_existing_boto_file": False
+            }
+        else:
+            configuration_dict["cloud_storage_info"] = {
+                "is_cloud_enabled": is_cloud_enabled
             }
 
         if dut_wifi_name and dut_wifi_password:
@@ -665,6 +673,7 @@ class AFEConnector(object):
 
     def set_configuration_info(
         self,
+        is_cloud_enabled=True,
         gs_access_key_id=None,
         gs_secret_access_key=None,
         image_storage_server=None,
@@ -674,6 +683,8 @@ class AFEConnector(object):
         """
             Applies given configuration values to AFE.
         Args:
+            is_cloud_enabled (boolean): True iff user has checked 'integrate with
+                cloud' on UI
             gs_access_key_id (string): boto ID string
             gs_secret_access_key (string): boto secret string
             image_storage_server (string): GCS bucket URL
@@ -686,6 +697,7 @@ class AFEConnector(object):
         response = self.send_rpc_command(
             'submit_wizard_config_info',
             self._format_configuration_dict(
+                is_cloud_enabled,
                 gs_access_key_id,
                 gs_secret_access_key,
                 image_storage_server,
@@ -720,9 +732,9 @@ class AFEConnector(object):
         response = self.send_rpc_command(
             'validate_cloud_storage_info',
             self._format_configuration_dict(
-                gs_access_key_id,
-                gs_secret_access_key,
-                image_storage_server
+                gs_access_key_id=gs_access_key_id,
+                gs_secret_access_key=gs_secret_access_key,
+                image_storage_server=image_storage_server
             )
         )
 
