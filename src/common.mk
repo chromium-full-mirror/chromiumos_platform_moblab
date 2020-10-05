@@ -11,7 +11,10 @@ EXTRA_ARGS+= --build-arg SSH_PORT="${SSH_PORT}"
 
 all:	autotest \
 		compose \
+		common \
 		db devserver \
+		dhcp \
+		dns \
 		envoy \
 		local-dev \
 		mobmonitor \
@@ -23,14 +26,13 @@ all:	autotest \
 		rpcserver \
 		ssp \
 		ui \
-		watchtower \
-		dhcp \
-		dns
+		watchtower
+
 
 #TODO refactor the common rules into a single rule.
 
 rpcserver: export DOCKER_BUILDKIT=1
-rpcserver: protoc
+rpcserver: protoc common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-rpcserver:${LABEL} -f \
 		dockerfiles/rpcserver/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-rpcserver:${LABEL}
@@ -45,7 +47,7 @@ autotest: autotest-afe autotest-dbsetup autotest-monitor autotest-gwt \
 	autotest-host autotest-lucifer autotest-abort
 
 autotest-base: export DOCKER_BUILDKIT=1
-autotest-base: protoc
+autotest-base: protoc common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-base:${LABEL} \
 		-f dockerfiles/autotest/Dockerfile.base ..
 	docker push ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
@@ -81,7 +83,7 @@ autotest-gwt: gwtcompiler
 	docker push ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL}
 
 autotest-monitor: export DOCKER_BUILDKIT=1
-autotest-monitor: autotest-base autotest-lucifer
+autotest-monitor: autotest-base autotest-lucifer common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-monitor_db:${LABEL} \
 		-f dockerfiles/autotest/Dockerfile.monitor_db dockerfiles/autotest
 	docker push ${REGISTRY_URI}/moblab-autotest-monitor_db:${LABEL}
@@ -126,7 +128,7 @@ ssp:
 	docker push ${REGISTRY_URI}/moblab-ssp:${LABEL}
 
 offloader: export DOCKER_BUILDKIT=1
-offloader: protoc
+offloader: protoc common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-offloader:${LABEL} \
 		-f dockerfiles/offloader/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-offloader:${LABEL}
@@ -138,7 +140,7 @@ envoy:
 	docker push ${REGISTRY_URI}/envoy-proxy:${LABEL}
 
 remote-access: export DOCKER_BUILDKIT=1
-remote-access: autotest-base
+remote-access: autotest-base common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/remote_access:${LABEL} \
 		-f dockerfiles/remote_access/Dockerfile ..
 	docker push ${REGISTRY_URI}/remote_access:${LABEL}
@@ -156,13 +158,13 @@ local-dev: protoc
 	docker push ${REGISTRY_URI}/moblab-dev-environment:${LABEL}
 
 remote-agent: export DOCKER_BUILDKIT=1
-remote-agent: protoc
+remote-agent: protoc common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-agent:${LABEL} -f \
 		dockerfiles/remote_agent/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-agent:${LABEL}
 
 remote-scheduler: export DOCKER_BUILDKIT=1
-remote-scheduler: protoc
+remote-scheduler: protoc common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL} -f \
 		dockerfiles/remote-scheduler/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL}
@@ -191,9 +193,18 @@ dns:
 		-f dockerfiles/dns/Dockerfile dockerfiles/dns
 	docker push ${REGISTRY_URI}/moblab-dns:${LABEL}
 
-.PHONY: autotest \
+common: export DOCKER_BUILDKIT=1
+common: protoc
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab_common:${LABEL} \
+		-f dockerfiles/moblab_common/Dockerfile ..
+	docker push ${REGISTRY_URI}/moblab_common:${LABEL}
+
+.PHONY:	autotest \
 		compose \
+		common \
 		db devserver \
+		dhcp \
+		dns \
 		envoy \
 		local-dev \
 		mobmonitor \
@@ -205,6 +216,4 @@ dns:
 		rpcserver \
 		ssp \
 		ui \
-		watchtower \
-		dhcp \
-		dns
+		watchtower
