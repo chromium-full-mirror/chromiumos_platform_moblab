@@ -83,7 +83,7 @@ autotest-gwt: gwtcompiler
 	docker push ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL}
 
 autotest-monitor: export DOCKER_BUILDKIT=1
-autotest-monitor: autotest-base autotest-lucifer common
+autotest-monitor: autotest-base autotest-lucifer
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-monitor_db:${LABEL} \
 		-f dockerfiles/autotest/Dockerfile.monitor_db dockerfiles/autotest
 	docker push ${REGISTRY_URI}/moblab-autotest-monitor_db:${LABEL}
