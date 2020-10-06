@@ -32,7 +32,7 @@ all:	autotest \
 #TODO refactor the common rules into a single rule.
 
 rpcserver: export DOCKER_BUILDKIT=1
-rpcserver: protoc common
+rpcserver: common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-rpcserver:${LABEL} -f \
 		dockerfiles/rpcserver/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-rpcserver:${LABEL}
@@ -158,13 +158,13 @@ local-dev: protoc
 	docker push ${REGISTRY_URI}/moblab-dev-environment:${LABEL}
 
 remote-agent: export DOCKER_BUILDKIT=1
-remote-agent: protoc common
+remote-agent: common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-agent:${LABEL} -f \
 		dockerfiles/remote_agent/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-agent:${LABEL}
 
 remote-scheduler: export DOCKER_BUILDKIT=1
-remote-scheduler: protoc common
+remote-scheduler: common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL} -f \
 		dockerfiles/remote-scheduler/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL}
@@ -176,7 +176,7 @@ gwtcompiler:
 	docker push ${REGISTRY_URI}/gwtcompiler:${LABEL}
 
 mobmonitor: export DOCKER_BUILDKIT=1
-mobmonitor:
+mobmonitor: common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/mobmonitor:${LABEL} \
 		-f dockerfiles/mobmonitor/Dockerfile ..
 	docker push ${REGISTRY_URI}/mobmonitor:${LABEL}

@@ -469,7 +469,6 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
     waitFor:
-      - "protoc"
       - "python-3.8"
       - "python-3.8-slim"
       - "moblab_common"
@@ -490,7 +489,6 @@ steps:
         "/workspace/",
       ]
     waitFor:
-      - "protoc"
       - "python-3.8"
       - "python-3.8-slim"
       - "moblab_common"
@@ -513,7 +511,6 @@ steps:
         "/workspace/",
       ]
     waitFor:
-      - "protoc"
       - "python-3.8"
       - "python-3.8-slim"
       - "moblab_common"
