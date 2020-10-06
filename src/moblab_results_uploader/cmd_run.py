@@ -45,12 +45,13 @@ async def _enumerate_test_results(test_result_registry):
         for cls in registry_entry.classes:
             root_dir = registry_entry.root_dir
             for d in root_dir.glob(cls.GLOB_PATTERN):
-                test_result = cls(root_dir=root_dir,
-                                  relative_path=d.relative_to(root_dir))
-                # Give other coroutine chance to run.
-                await asyncio.sleep(.01)
-                yield _TEST_RESULT_CACHE.setdefault(test_result.abs_path,
-                                                    test_result)
+                test_result = cls.create(root_dir=root_dir,
+                                         relative_path=d.relative_to(root_dir))
+                if (test_result):
+                    # Give other coroutine chance to run.
+                    await asyncio.sleep(.01)
+                    yield _TEST_RESULT_CACHE.setdefault(test_result.abs_path,
+                                                        test_result)
 
 
 async def _prune_test_result(dry_run, test_result):
@@ -320,8 +321,6 @@ def run(args, test_result_registry=None):
     except KeyboardInterrupt:
         _LOGGER.info('Program is terminated by user.')
         pass
-    except Exception as ex:
-        _LOGGER.error('Program is terminated due to exception: %s.', ex)
     finally:
         _LOGGER.info('Shutting down. Bye!')
         loop.close()

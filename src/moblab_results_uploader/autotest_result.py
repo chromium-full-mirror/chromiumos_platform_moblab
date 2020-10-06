@@ -96,6 +96,13 @@ def _query_job_finished_time(id_):
 class _AutotestResult(test_result_interface.TestResult):
     """Base class for Autotest job and special tasks."""
 
+    @classmethod
+    def create(cls, *, root_dir, relative_path):
+        pattern_match = re.match(cls.REGEX_PATTERN, str(relative_path))
+        if not pattern_match:
+            return None
+        return cls(root_dir=root_dir, relative_path=relative_path)
+
     def __init__(self, *, description, root_dir, relative_path):
         super().__init__(description=description, root_dir=root_dir,
                          relative_path=relative_path)
@@ -163,19 +170,20 @@ class _AutotestResult(test_result_interface.TestResult):
 
 class AutotestHostTask(_AutotestResult):
     """A class to represent autotest host tasks."""
-    GLOB_PATTERN = 'hosts/*/[0-9]*-*'
+    GLOB_PATTERN = 'hosts/*/[0-9]*-*/'
     REGEX_PATTERN = r'^hosts/[^/]+/(?P<id>(?P<afe_id>\d+)-\S+)$'
 
     def __init__(self, *, root_dir, relative_path):
-        super().__init__(description='Autotest host task', root_dir=root_dir,
+        super().__init__(description='Autotest host task',
+                         root_dir=root_dir,
                          relative_path=relative_path)
-        m = re.match(self.REGEX_PATTERN, str(relative_path))
-        if not m:
+        pattern_match = re.match(self.REGEX_PATTERN, str(relative_path))
+        if not pattern_match:
             raise test_result_interface.TestResultError(
                 'Can\'t get id of {}'.format(self))
 
-        self._id = m.group('id')
-        self._afe_query = _query_speical_task_finished_time(m.group('afe_id'))
+        self._id = pattern_match.group('id')
+        self._afe_query = _query_speical_task_finished_time(pattern_match.group('afe_id'))
 
     @property
     def pubsub_when_uploaded(self):
@@ -195,16 +203,17 @@ class AutotestHostTask(_AutotestResult):
 
 class AutotestTestJob(_AutotestResult):
     """A class to represent autotest test job."""
-    GLOB_PATTERN = '[0-9]*-*'
+    GLOB_PATTERN = '[0-9]*-*/'
     REGEX_PATTERN = r'(?P<afe_id>\d+)-\S+'
 
     def __init__(self, *, root_dir, relative_path):
-        super().__init__(description='Autotest job', root_dir=root_dir,
+        super().__init__(description='Autotest job',
+                         root_dir=root_dir,
                          relative_path=relative_path)
-        m = re.match(self.REGEX_PATTERN, str(relative_path))
-        if not m:
+        pattern_match = re.match(self.REGEX_PATTERN, str(relative_path))
+        if not pattern_match:
             raise test_result_interface.TestResultError(
                 'Can\'t get id of {}'.format(self))
 
         self._id = relative_path
-        self._afe_query = _query_job_finished_time(m.group('afe_id'))
+        self._afe_query = _query_job_finished_time(pattern_match.group('afe_id'))
