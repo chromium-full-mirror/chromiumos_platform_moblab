@@ -69,6 +69,10 @@ steps:
     name: "docker:19.03.8"
     args: ["pull", "nginx:alpine"]
     waitFor: ['-']
+  - id: python-2
+    name: "docker:19.03.8"
+    args: ["pull", "python:2-buster"]
+    waitFor: ['-']
 
   - id: protoc
     name: "docker:19.03.8"
@@ -105,6 +109,9 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor:
       - "protoc"
+      - "python-2"
+      - "buster-slim"
+      - "python-3.8"
 
   - id: autotest-lucifer
     name: "docker:19.03.8"
