@@ -65,5 +65,5 @@ class MoblabRpcConnector(object):
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error getting the host identifier')
-            raise MoblabRpcException('Error getting the host identifier')
+            logging.exception('Error calling run_suite')
+            raise MoblabRpcException('Error calling run_suite')
