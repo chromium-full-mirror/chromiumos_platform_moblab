@@ -257,7 +257,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      */
     this.isCloudEnabled = !this.isCloudEnabled;
 
-    this.isRemoteConsoleEnabled = this.isCloudEnabled;
+    if (!this.isCloudEnabled) {
+      this.isRemoteConsoleEnabled = false;
+    }
     this.toggleCloudConfigDisabledMessage();
   }
 

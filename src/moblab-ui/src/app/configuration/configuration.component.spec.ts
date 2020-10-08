@@ -133,10 +133,10 @@ describe('ConfigurationComponent', () => {
     expect(isFormReadonly('image-storage-url-input')).toBeFalse();
   });
 
-  it('remote console integration enabled by default when cloud is enabled', () => {
+  it('remote console integration disabled by default when cloud is enabled', () => {
     toggleCheckbox('cloud-checkbox');
 
-    expect(component.isRemoteConsoleEnabled).toBe(true);
+    expect(component.isRemoteConsoleEnabled).toBe(false);
   });
 
   it('cloud forms cleared once enable cloud is unchecked', () => {
