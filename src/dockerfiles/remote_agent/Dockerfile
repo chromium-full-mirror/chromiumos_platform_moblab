@@ -56,12 +56,13 @@ COPY --from=common /wheel/*py3* .
 RUN pip install *.whl
 RUN rm -rf /wheels
 
-RUN mkdir /var/log/moblab
-
 RUN apt purge -yq cmake libssl-dev zlib1g-dev gcc-multilib
 RUN apt autoremove -yq
 RUN apt-get clean
 
+RUN mkdir /moblab
+RUN mkdir /var/log/moblab
+RUN chown -R moblab /moblab
 RUN chown -R moblab /var/log/moblab
 
 WORKDIR /moblab
