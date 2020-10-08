@@ -131,18 +131,18 @@ class ResultStatusChecker(processing_step.ProcessStep):
                 previous_status = await _load_status(test_result)
                 if test_result.is_logged and previous_status not in [Status.UPLOADED]:
                     _LOGGER.debug("%s Previous status %s", test_result,
-                 previous_status)
+                        previous_status)
                 current_status = previous_status
                 if previous_status not in [Status.EXPIRED, Status.UPLOADING]:
                     current_status = self._check_latest_status(test_result,
                                                                previous_status)
                 if test_result.is_logged and previous_status != current_status:
                     _LOGGER.debug("%s Current status %s", test_result,
-                    current_status)
+                        current_status)
                 if previous_status != current_status:
                     await _write_status(test_result, current_status)
         except FileNotFoundError:
-            # The directory may be pruned just before checking.
+            _LOGGER.exception('The directory may be pruned just before checking.')
             return
 
         if current_status in [Status.EXPIRED, Status.READY, Status.UPLOADING]:

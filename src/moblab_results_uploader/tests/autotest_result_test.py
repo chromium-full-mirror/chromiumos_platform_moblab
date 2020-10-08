@@ -72,6 +72,35 @@ class AutotestHostTaskTest(unittest.TestCase):
                                    mock.mock_open(read_data='END GOOD YEAH!')):
                 self.assertTrue(task.succeeded)
 
+    def test_job_is_not_created(self):
+        """Test for ignoring ill-named result directories."""
+
+        wrongDirectoryNames = [ 'hosts/a/123a-moblab',
+                                'hosts/a/a123-moblab',
+                                'hosts/a/123moblab',
+                                'hosts/123-moblab',
+                                'hostABC/a/123-moblab',
+                                'host/123-moblab']
+        for relative_path in wrongDirectoryNames:
+            job = autotest_result.AutotestHostTask.create(
+                root_dir='.',
+                relative_path=relative_path)
+            self.assertIsNone(job)
+
+    @mock.patch.object(afe_connector.AFEConnector, 'get_special_tasks')
+    def test_job_is_created_with_correct_job_id(self, m_get_special_tasks):
+        """Test for extracting correct job id."""
+        m_get_special_tasks.return_value = [{'time_finished': '2020-01-01 00:00:00'}]
+
+        job = autotest_result.AutotestHostTask.create(
+            root_dir='.',
+            relative_path='hosts/abc/123-moblab')
+        self.assertIsNotNone(job)
+        self.assertEquals(job.id, '123-moblab'),
+
+        job.finished_time
+        m_get_special_tasks.assert_called_with(['123'])
+
 
 class AutotestTestJobTest(unittest.TestCase):
     """Test cases for AutotestTestJob."""
@@ -128,9 +157,35 @@ class AutotestTestJobTest(unittest.TestCase):
         job = autotest_result.AutotestTestJob(
             root_dir='.', relative_path='123-moblab')
         self.assertEqual(job.finished_time,
-                            datetime.datetime(2020, 1, 1, 12)
+                         datetime
+                            .datetime(2020, 1, 1, 12)
                             .replace(tzinfo=datetime.timezone.utc))
 
+    def test_job_is_not_created(self):
+        """Test for ignoring ill-named result directories."""
+
+        wrongDirectoryNames = [ '123a-moblab',
+                                'a123-moblab',
+                                '123moblab']
+        for relative_path in wrongDirectoryNames:
+            job = autotest_result.AutotestTestJob.create(
+                root_dir='.',
+                relative_path=relative_path)
+            self.assertIsNone(job)
+
+    @mock.patch.object(afe_connector.AFEConnector, 'get_jobs_by_ids')
+    @mock.patch.object(afe_connector.AFEConnector, 'get_host_queue_entries')
+    def test_job_is_created_with_correct_job_id(self, m_get_hqes, m_get_jobs_by_ids):
+        """Test for extracting correct job id."""
+        m_get_jobs_by_ids.return_value = [{'created_on': '2020-01-01 00:00:00'}]
+        m_get_hqes.return_value = []
+
+        job = autotest_result.AutotestTestJob.create(
+            root_dir='.',
+            relative_path='123-moblab')
+        self.assertIsNotNone(job)
+        job.finished_time
+        m_get_hqes.assert_called_with('123')
 
 def test_get_test_result_suite_name(job_serialize_CTS):
     job = autotest_result.AutotestTestJob(
