@@ -82,7 +82,7 @@ def _query_job_finished_time(id_):
         else:
             # The value of 'finished_on' for failed/aborted HQE is NULL. So use
             # the job creating time instead.
-            _LOGGER.debug('Determined that all HQEs (%d) are completed.'
+            _LOGGER.debug('Determined that all HQEs (%s) are completed.'
                           'No finished_on time, using job created_on time', id_)
             create_on_str = result.get('created_on')
             if create_on_str:
