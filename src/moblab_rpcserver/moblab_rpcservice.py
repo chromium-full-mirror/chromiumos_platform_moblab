@@ -12,6 +12,7 @@ import socket
 import time
 
 from collections import namedtuple
+from datetime import datetime
 from google.cloud import storage
 
 from moblab_common import build_connector
@@ -63,10 +64,15 @@ class MoblabService(object):
     afe_connector = None
     config_connector = None
 
+    _last_config_update = None
+    _last_build_connector_update = None
+    _last_moblab_build_connector_update = None
+
     def __init__(self):
         self.afe_connector = afe_connector.AFEConnector()
         self.config_connector = config_connector.MoblabConfigConnector(
             self.afe_connector)
+        _last_config_update = datetime.utcnow()
         self.setup_devserver_connector()
         self.dut_connector = dut_connector.MoblabDUTConnector()
 
@@ -125,13 +131,12 @@ class MoblabService(object):
             TODO(wangmichael) change naming so that difference between two connectors is more
             clear.
         """
-        current_moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
-
         if not hasattr(self, '_build_connector') or \
-                not self._build_connector or \
-                current_moblab_bucket_name != self.moblab_bucket_name:
-            self.moblab_bucket_name = current_moblab_bucket_name
+            not self._build_connector or \
+            self._last_config_update != self._last_build_connector_update:
+            self.moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
             self._init_build_connector()
+            self._last_build_connector_update = self._last_config_update
         return self._build_connector
 
     @property
@@ -140,13 +145,12 @@ class MoblabService(object):
             Returns a moblab.build_connector.MoblabBuildConnector instance ( distinct from
             build_connector.MoblabBuildConnector ),
         """
-        current_moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
-
         if not hasattr(self, '_moblab_build_connector') or \
             not self._moblab_build_connector or \
-            current_moblab_bucket_name != self.moblab_bucket_name:
-            self.moblab_bucket_name = current_moblab_bucket_name
+            self._last_config_update != self._last_moblab_build_connector_update:
+            self.moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
             self._init_moblab_build_connector()
+            self._last_moblab_build_connector_update = self._last_config_update
 
         return self._moblab_build_connector
 
@@ -1004,32 +1008,32 @@ class MoblabService(object):
         Returns:
             A result message string.
         """
-
         if is_cloud_enabled:
             is_valid, details = self.afe_connector.validate_cloud_storage_info(
                 boto_key_id,
                 boto_key_secret,
                 gcs_bucket_url
             )
+
+            if is_valid:
+                if self.afe_connector.set_configuration_info(is_cloud_enabled, boto_key_id, boto_key_secret, gcs_bucket_url):
+                    message = 'Successfully applied cloud configuration values. '
+                    self._last_config_update = datetime.utcnow()
+
+                    if self.set_is_remote_agent_enabled(is_remote_agent_enabled):
+                        message += 'Remote agent has been {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
+                    else:
+                        message += 'But failed to set remote agent as {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
+                    return message
+                else:
+                    return 'Failed to apply cloud configuration changes.'
+            else:
+                return details
         else:
             if self.afe_connector.set_configuration_info(is_cloud_enabled):
                 return 'Successfully disabled cloud configuration.'
             else:
                 return 'Failed to commit disable cloud change.'
-
-
-        if is_valid:
-            if self.afe_connector.set_configuration_info(is_cloud_enabled, boto_key_id, boto_key_secret, gcs_bucket_url):
-                message = 'Successfully applied cloud configuration values. '
-                if self.set_is_remote_agent_enabled(is_remote_agent_enabled):
-                    message += 'Remote agent has been {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
-                else:
-                    message += 'But failed to set remote agent as {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
-                return message
-            else:
-                return 'Failed to apply cloud configuration changes.'
-        else:
-            return details
 
     def _get_public_ip_address(self):
         """Gets the public IP address.

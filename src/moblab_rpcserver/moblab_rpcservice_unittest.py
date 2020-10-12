@@ -108,6 +108,15 @@ class MoblabRPCServiceTest(unittest.TestCase):
     with self.assertRaises(MoblabRpcError) as context:
       result_msg = self.service.update_docker()
 
+  def _mock_afe_connector_methods(self, mock_afe_connector, succeed_validate, succeed_cloud_configuration_set, succeed_remote_agent_config_commit):
+    if succeed_validate:
+      mock_afe_connector.return_value.validate_cloud_storage_info.return_value = True, 'Cloud values validated.'
+    else:
+      mock_afe_connector.return_value.validate_cloud_storage_info.return_value = False, 'Cloud validation failed.'
+
+    mock_afe_connector.return_value.set_configuration_info.return_value = succeed_cloud_configuration_set
+    mock_afe_connector.return_value.set_is_remote_agent_enabled.return_value = succeed_remote_agent_config_commit
+
   @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
   def test_set_cloud_configuration(self, mock_afe_connector):
     SetCloudConfigurationTestParams = namedtuple(
@@ -128,15 +137,6 @@ class MoblabRPCServiceTest(unittest.TestCase):
             'expected_message_output'
         ]
     )
-
-    def _mock_afe_connector_methods(succeed_validate, succeed_cloud_configuration_set, succeed_remote_agent_config_commit):
-      if params.succeed_validate:
-        mock_afe_connector.return_value.validate_cloud_storage_info.return_value = True, 'Cloud values validated.'
-      else:
-        mock_afe_connector.return_value.validate_cloud_storage_info.return_value = False, 'Cloud validation failed.'
-
-      mock_afe_connector.return_value.set_configuration_info.return_value = params.succeed_cloud_configuration_set
-      mock_afe_connector.return_value.set_is_remote_agent_enabled.return_value = params.succeed_remote_agent_config_commit
 
     # below is a list of different permutations of potential inputs to set_cloud_configuration + different behaviors for
     # the mocked afe_connector. Each item includes the expected message output of the set_cloud_configuration that will
@@ -194,7 +194,12 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
     for params in parameterized_set_cloud_configuration_tests:
       with self.subTest():
-        _mock_afe_connector_methods(params.succeed_validate, params.succeed_cloud_configuration_set, params.succeed_remote_agent_config_commit)
+        self._mock_afe_connector_methods(
+            mock_afe_connector,
+            params.succeed_validate,
+            params.succeed_cloud_configuration_set,
+            params.succeed_remote_agent_config_commit
+        )
 
 
         message = self.service.set_cloud_configuration(
@@ -206,6 +211,37 @@ class MoblabRPCServiceTest(unittest.TestCase):
         )
         print(message)
         assert(message == params.expected_message_output)
+
+  @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
+  @mock.patch("moblab_rpcservice.build_connector")
+  @mock.patch("moblab_rpcservice.moblab_build_connector")
+  def test_set_cloud_configuration_updates_build_connectors(self, mock_moblab_build_connector, mock_build_connector, mock_afe_connector):
+    # Mocking setup.
+    self._mock_afe_connector_methods(mock_afe_connector, True, True, True)
+    # Mock and track call-throughs to re-initialize connectors.
+    MockMoblabBuildConnector = MagicMock()
+    mock_moblab_build_connector.MoblabBuildConnector = MockMoblabBuildConnector
+    MockBuildConnector = MagicMock()
+    mock_build_connector.MoblabBuildConnector = MockBuildConnector
+
+    pre_build_connector_call_count = MockBuildConnector.call_count
+    pre_moblab_build_connector_call_count = MockMoblabBuildConnector.call_count
+
+    message = self.service.set_cloud_configuration(
+        True,
+        'mock-boto-key-id',
+        'mock-boto-key-secret',
+        'gs:/mock-gcs-url',
+        True
+    )
+
+    self.service.moblab_build_connector
+    self.service.build_connector
+
+    # Verifies that, after an invokation of set_cloud_configuration, references to the two build connectors results in
+    # a reinitialization of each. This ensures that changes in target bucket or service_account creds gets ingested.
+    assert(MockMoblabBuildConnector.call_count == pre_moblab_build_connector_call_count + 1)
+    assert(MockBuildConnector.call_count == pre_build_connector_call_count + 1)
 
   @mock.patch.object(MoblabService, 'config_connector',
                      new_callable=PropertyMock)
