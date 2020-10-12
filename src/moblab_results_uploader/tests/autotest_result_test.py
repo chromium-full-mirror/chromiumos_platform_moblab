@@ -96,7 +96,7 @@ class AutotestHostTaskTest(unittest.TestCase):
             root_dir='.',
             relative_path='hosts/abc/123-moblab')
         self.assertIsNotNone(job)
-        self.assertEquals(job.id, '123-moblab'),
+        self.assertEqual(job.id, '123-moblab'),
 
         job.finished_time
         m_get_special_tasks.assert_called_with(['123'])
