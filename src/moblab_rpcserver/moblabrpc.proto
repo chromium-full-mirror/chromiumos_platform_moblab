@@ -177,7 +177,9 @@ message ListConnectedDutsResponse {
   repeated ConnectedDutInfo duts = 1;
 }
 
+// NEXT_TAG = 2
 message ListBuildTargetsRequest {
+  string model = 1;
 }
 
 // NEXT_TAG = 2

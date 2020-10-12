@@ -118,6 +118,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   getBuildTargets() {
     this.formLoading.emit({message:'fetching build targets...'});
     this.moblabGrpcService.listBuildTargets(
+      this.selectedModel,
       (buildTargets: string[]) => {
         this.updateBuildTargets(buildTargets);
         this.formLoaded.emit();

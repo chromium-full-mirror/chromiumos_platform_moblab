@@ -590,10 +590,17 @@ export class MoblabGrpcService {
   }
 
   listBuildTargets(
+    model: string,
     callback: (x: string[]) => void,
     errorHandlingCallback: (err_msg: string) => void
   ) {
+    /** Returns the build_target(s) associated with the given model.
+     *  @param model: target model
+     *  @param callback: function invoked in success scenarios.
+     *  @param error_callback: function invoked in failure scenarios.
+     * */
     const request = new ListBuildTargetsRequest();
+    request.setModel(model);
 
     const call = this.moblabRpcService.list_build_targets(
       request,
