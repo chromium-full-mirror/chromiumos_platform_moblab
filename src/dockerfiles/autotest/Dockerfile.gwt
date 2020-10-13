@@ -9,6 +9,12 @@ ARG LABEL=release
 
 FROM ${REGISTRY_URI}/gwtcompiler:${LABEL} as build
 
+RUN apt-get update && apt-get install --no-install-recommends -yq  \
+    python-pip
+
+RUN python2.7 -m pip install --upgrade pip
+RUN python2.7 -m pip install six
+
 COPY ./third_party/autotest/ /moblab/third_party/autotest/
 RUN mkdir -p /usr/local/autotest
 RUN ln -s /moblab/third_party/autotest/* /usr/local/autotest
