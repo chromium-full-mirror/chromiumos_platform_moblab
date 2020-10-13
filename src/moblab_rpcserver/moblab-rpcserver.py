@@ -288,8 +288,18 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def list_test_jobs(self, request, context):
         pass
 
-    def list_build_targets(self, _request, _context):
-        build_targets = self.service.list_usable_build_targets()
+    def list_build_targets(self, request, _context):
+        """
+            Returns build targets associated with the given model.
+        Args:
+            request: ListBuildTargetsRequest object with model parameter.
+            _context: grpc.server.Context
+        Returns:
+            ListBuildTargetsResponse
+        """
+        build_targets = self.service.list_usable_build_targets(
+            request.model
+        )
         response = moblabrpc_pb2.ListBuildTargetsResponse(
             build_targets=build_targets)
         return response
@@ -339,8 +349,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         afe_hosts = self.afe_connector.get_connected_devices()
         models = set()
         for host in afe_hosts:
-            models = models.union(
-                self.service.extract_model_from_labels(host.get('labels', [])))
+            models.add(self.service.extract_model_from_labels(host.get('labels', [])))
         response = moblabrpc_pb2.ListModelsResponse(models=list(models))
         return response
 

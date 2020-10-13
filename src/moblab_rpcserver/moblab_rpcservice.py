@@ -163,7 +163,10 @@ class MoblabService(object):
         return 'asia' in bucket.location.lower()
 
     def extract_model_from_labels(self, labels):
-        return self.extract_from_labels(self.model_re, labels)
+        try:
+            return self.extract_from_labels(self.model_re, labels)[0]
+        except IndexError:
+            logging.exception('Failed to parse model from label tags of DUT.')
 
     def extract_build_target_from_labels(self, labels):
         return self.extract_from_labels(self.build_target_re, labels)
@@ -492,14 +495,23 @@ class MoblabService(object):
             sleep_interval *= 1.5
         raise MoblabRpcError('Build stage did not finish within {} seconds.'.format(MAX_BUILD_STAGING_SECONDS))
 
-    def list_usable_build_targets(self):
-        # Get the intersection of build_target available to this moblab and
-        # the build_target on the devices connected.
-        available_build_targets = \
-            self.build_connector.get_boards_available()
-        connected_build_targets = self.list_connected_dut_build_targets()
-        return list(
-            set(available_build_targets).intersection(connected_build_targets))
+    def list_usable_build_targets(self, model):
+        """
+            Returns build targets associated with the given model.
+        Args:
+            mode(str): DUT model to return associated build_target(s) for.
+        Returns:
+            List of build target strings.
+        """
+        afe_hosts = self.afe_connector.get_connected_devices()
+        build_targets = []
+        for host in afe_hosts:
+            if self.extract_model_from_labels(host.get('labels', [])) == model:
+                build_targets.extend(
+                    self.extract_build_target_from_labels(host.get('labels', []))
+                )
+        # cast into set and back into list to return only unique values
+        return list(set(build_targets))
 
     def list_usable_milestones(self, build_target, model):
         """
@@ -584,14 +596,6 @@ class MoblabService(object):
 
         build_version_results.sort(key=lambda x: distutils.version.LooseVersion(x[0]), reverse=True)
         return BuildResults(results=build_version_results, is_incomplete=(len(remote_build_versions) == MAX_BUILD_RESULTS_PAGE))
-
-    def list_connected_dut_build_targets(self):
-        afe_hosts = self.afe_connector.get_connected_devices()
-        build_targets = []
-        for host in afe_hosts:
-            build_targets.extend(
-                self.extract_build_target_from_labels(host.get('labels', [])))
-        return build_targets
 
     def get_num_jobs(self,
                      id_filter=None,

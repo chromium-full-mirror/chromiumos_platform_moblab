@@ -59,6 +59,16 @@ class MoblabRPCServiceTest(unittest.TestCase):
     mock_container.image.tags = tags
     return mock_container
 
+  @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
+  def test_get_usable_build_targets(self, mock_afe_connector):
+    mock_afe_connector.return_value.get_connected_devices.return_value = [
+        {'labels' : ['hostname:mock_dut_1', 'model:mock_model_1', 'board:mock_build_target_1']},
+        {'labels' : ['hostname:mock_dut_2', 'model:mock_model_2', 'board:mock_build_target_2']},
+        {'labels' : ['hostname:mock_dut_3', 'model:mock_model_1', 'board:mock_build_target_1']}
+    ]
+    build_targets = self.service.list_usable_build_targets('mock_model_1')
+    self.assertEqual(build_targets, ['mock_build_target_1'])
+
   @mock.patch("moblab_rpcservice.docker.from_env")
   def test_get_is_update_available(self, mock_docker_from_env):
     mock_docker_client = MagicMock()
