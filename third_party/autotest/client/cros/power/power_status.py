@@ -19,15 +19,18 @@ import threading
 import time
 
 from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import enum
+from autotest_lib.client.common_lib import autotest_enum
 from autotest_lib.client.common_lib import error
 from autotest_lib.client.common_lib.cros import retry
 from autotest_lib.client.common_lib.utils import poll_for_condition_ex
 from autotest_lib.client.cros import kernel_trace
 from autotest_lib.client.cros.power import power_utils
 
-BatteryDataReportType = enum.Enum('CHARGE', 'ENERGY')
+BatteryDataReportType = autotest_enum.AutotestEnum('CHARGE', 'ENERGY')
 
+# For devices whose full capacity is significantly lower than design full
+# capacity, scale down their design full capacity.
+BATTERY_DESIGN_FULL_SCALE = {'jinlon': 0.95}  # b/161307060
 # battery data reported at 1e6 scale
 BATTERY_DATA_SCALE = 1e6
 # number of times to retry reading the battery in the case of bad data
@@ -313,9 +316,19 @@ class BatteryStat(DevStat):
         if voltage_nominal == 0:
             raise error.TestError('Failed to determine battery voltage')
 
+        battery_design_full_scale = 1
+        model = utils.get_platform()
+        if model in BATTERY_DESIGN_FULL_SCALE:
+            battery_design_full_scale = BATTERY_DESIGN_FULL_SCALE.get(model)
+            logging.info(
+                    'Apply %f scale to design full battery capacity for model '
+                    '%s', battery_design_full_scale, model)
+
         # Since charge data is present, calculate parameters based upon
         # reported charge data.
         if battery_type == BatteryDataReportType.CHARGE:
+            self.charge_full_design *= battery_design_full_scale
+
             self.charge_full = self.charge_full / BATTERY_DATA_SCALE
             self.charge_full_design = self.charge_full_design / \
                                       BATTERY_DATA_SCALE
@@ -337,6 +350,8 @@ class BatteryStat(DevStat):
         # Charge data not present, so calculate parameters based upon
         # reported energy data.
         elif battery_type == BatteryDataReportType.ENERGY:
+            self.energy_full_design *= battery_design_full_scale
+
             self.charge_full = self.energy_full / voltage_nominal
             self.charge_full_design = self.energy_full_design / \
                                       voltage_nominal
@@ -2095,8 +2110,6 @@ class PowerLogger(MeasurementLogger):
             measurements += power_rapl.create_powercap()
         elif power_utils.has_rapl_support():
             measurements += power_rapl.create_rapl()
-        elif power_utils.has_amd_rapl_support():
-            measurements += power_rapl.create_amd_rapl()
         return measurements
 
     def save_results(self, resultsdir, fname_prefix=None):
