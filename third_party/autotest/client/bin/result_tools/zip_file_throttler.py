@@ -13,8 +13,8 @@ import re
 import os
 import tarfile
 
-from . import throttler_lib
-from . import utils_lib
+import throttler_lib
+import utils_lib
 
 
 # File with extensions that can not be zipped or compression won't reduce file

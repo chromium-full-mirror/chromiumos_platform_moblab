@@ -15,9 +15,9 @@ from __future__ import absolute_import
 import os
 import re
 
-from . import result_info_lib
-from . import throttler_lib
-from . import utils_lib
+import result_info_lib
+import throttler_lib
+import utils_lib
 
 
 # Number of files to keep for the oldest files.

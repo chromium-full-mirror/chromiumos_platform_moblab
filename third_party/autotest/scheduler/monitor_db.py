@@ -185,7 +185,8 @@ def main_without_exception_handling():
     except Exception:
         logging.exception('Uncaught exception, terminating monitor_db.')
 
-    _drone_manager.shutdown()
+    if _drone_manager:
+        _drone_manager.shutdown()
     _db_manager.disconnect()
 
 
