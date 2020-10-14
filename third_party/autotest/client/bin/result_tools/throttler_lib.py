@@ -11,7 +11,8 @@ from __future__ import absolute_import
 import os
 import re
 
-import utils_lib
+import common
+from autotest_lib.client.bin.result_tools import utils_lib
 
 
 # A list of file names that should not be throttled, that is, not modified by
