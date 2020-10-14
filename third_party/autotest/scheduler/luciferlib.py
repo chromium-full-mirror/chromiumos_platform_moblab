@@ -147,7 +147,7 @@ def spawn_parsing_job_handler(manager, job, autoserv_exit, pidfile_id=None):
         drone = manager.get_drone_for_pidfile(pidfile_id)
     results_dir = _results_dir(manager, job)
     args = [
-            python,
+            'python',
 
             _JOB_REPORTER_PATH,
 
