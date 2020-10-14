@@ -244,9 +244,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             name=dut_dict.get('platform', ''),
             ip=dut_dict.get('hostname', ''),
             mac_addr='',
-            models=self.service.extract_model_from_labels(
+            model=self.service.extract_model_from_labels(
                 dut_dict.get('labels', [])),
-            build_targets=self.service.extract_build_target_from_labels(
+            build_target=self.service.extract_build_target_from_labels(
                 dut_dict.get('labels', [])),
             pools=self.service.extract_pool_from_labels(
                 dut_dict.get('labels', [])),

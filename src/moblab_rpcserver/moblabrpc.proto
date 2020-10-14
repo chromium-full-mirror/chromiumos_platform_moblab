@@ -155,8 +155,8 @@ message ConnectedDutInfo {
   string ip = 2;
   string mac_addr = 3;
   string status = 4;
-  repeated string build_targets = 5;
-  repeated string models  = 6;
+  string build_target = 5;
+  string model  = 6;
   bool is_enrolled = 7;
   bool is_locked = 8;
   bool is_connected = 16;

@@ -167,9 +167,14 @@ class MoblabService(object):
             return self.extract_from_labels(self.model_re, labels)[0]
         except IndexError:
             logging.exception('Failed to parse model from label tags of DUT.')
+            return ''
 
     def extract_build_target_from_labels(self, labels):
-        return self.extract_from_labels(self.build_target_re, labels)
+        try:
+            return self.extract_from_labels(self.build_target_re, labels)[0]
+        except IndexError:
+            logging.exception('Failed to parse build target from label tags of DUT.')
+            return ''
 
     def extract_pool_from_labels(self, labels):
         return self.extract_from_labels(self.pool_re, labels)
@@ -504,14 +509,13 @@ class MoblabService(object):
             List of build target strings.
         """
         afe_hosts = self.afe_connector.get_connected_devices()
-        build_targets = []
+        build_targets = set()
         for host in afe_hosts:
             if self.extract_model_from_labels(host.get('labels', [])) == model:
-                build_targets.extend(
+                build_targets.add(
                     self.extract_build_target_from_labels(host.get('labels', []))
                 )
-        # cast into set and back into list to return only unique values
-        return list(set(build_targets))
+        return list(build_targets)
 
     def list_usable_milestones(self, build_target, model):
         """
