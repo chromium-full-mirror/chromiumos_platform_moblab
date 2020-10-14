@@ -11,7 +11,7 @@ from __future__ import absolute_import
 import os
 import re
 
-from . import utils_lib
+import utils_lib
 
 
 # A list of file names that should not be throttled, that is, not modified by

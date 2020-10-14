@@ -81,12 +81,21 @@ def _autotest_logging_handle_error(self, record):
         # Avoid recursion as the below output can end up back in here when
         # something has *seriously* gone wrong in autotest.
         logging.raiseExceptions = 0
-        sys.stderr.write('Exception occurred formatting message: '
-                         '%r using args %r\n' % (record.msg, record.args))
+        try:
+            sys.stderr.write('Exception occurred formatting message: '
+                            '%r using args %r\n' % (record.msg, record.args))
+        except IOError:
+            pass
         traceback.print_stack()
-        sys.stderr.write('-' * 50 + '\n')
+        try:
+            sys.stderr.write('-' * 50 + '\n')
+        except IOError:
+            pass
         traceback.print_exc()
-        sys.stderr.write('Future logging formatting exceptions disabled.\n')
+        try:
+            sys.stderr.write('Future logging formatting exceptions disabled.\n')
+        except IOError:
+            pass
 
 
 def _monkeypatch_logging_handle_error():

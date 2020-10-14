@@ -10,8 +10,8 @@ from __future__ import division
 
 import os
 
-from . import throttler_lib
-from . import utils_lib
+import throttler_lib
+import utils_lib
 
 
 # Default threshold of file size in KB for a file to be qualified for deletion.

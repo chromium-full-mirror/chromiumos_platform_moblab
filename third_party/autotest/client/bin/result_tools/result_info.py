@@ -14,8 +14,8 @@ import contextlib
 import json
 import os
 
-from . import result_info_lib
-from . import utils_lib
+import result_info_lib
+import utils_lib
 
 
 class ResultInfoError(Exception):
