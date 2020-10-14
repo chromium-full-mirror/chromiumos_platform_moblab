@@ -13,8 +13,9 @@ import re
 import os
 import tarfile
 
-import throttler_lib
-import utils_lib
+import common
+from autotest_lib.client.bin.result_tools import throttler_lib
+from autotest_lib.client.bin.result_tools import utils_lib
 
 
 # File with extensions that can not be zipped or compression won't reduce file
