@@ -12,10 +12,10 @@
   <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
     <div id="cloud-checkbox-form" class="form-text">
       <mat-checkbox id="cloud-checkbox"
-        (mouseenter)="cloudCheckboxHoverStart()"
-        (mouseleave)="cloudCheckboxHoverStop()"
-        (change)="isCloudEnabledCheckboxChange()"
-        [checked]="this.isCloudEnabled">
+                    (mouseenter)="cloudCheckboxHoverStart()"
+                    (mouseleave)="cloudCheckboxHoverStop()"
+                    (change)="isCloudEnabledCheckboxChange()"
+                    [checked]="this.isCloudEnabled">
       </mat-checkbox>
       <span id="cloud-checkbox-label" class="checkbox-label"> Enable Moblab cloud integration </span>
       <br>
@@ -81,6 +81,12 @@
                      [formControl]="bucketURLForm"
                      [readonly]="!this.isCloudEnabled"
                      name="imageStorageUrl">
+              <mat-error *ngIf="this.bucketURLForm.hasError('required')">
+                GCS bucket not set.
+              </mat-error>
+              <mat-error *ngIf="this.bucketURLForm.hasError('notAGSUrl')">
+                GCS bucket path malformed ( correct syntax: 'gs://bucket_name/' )
+              </mat-error>
               <mat-error *ngIf="this.bucketURLForm.hasError('clearWarning')">
                 Unchecking cloud enable will result in GCS bucket value being cleared.
               </mat-error>

@@ -118,6 +118,20 @@ describe('ConfigurationComponent', () => {
     fixture.detectChanges();
   }
 
+  function triggerCheckboxHoverStart(checkboxId: string) {
+    fixture.debugElement.query(
+      By.css('#' + checkboxId)
+    ).triggerEventHandler('mouseenter', new Event('mouseenter'));
+    fixture.detectChanges();
+  }
+
+  function triggerCheckboxHoverStop(checkboxId: string) {
+    fixture.debugElement.query(
+      By.css('#' + checkboxId)
+    ).triggerEventHandler('mouseleave', new Event('mouseleave'));
+    fixture.detectChanges();
+  }
+
   it('cloud forms readonly when enable cloud is unchecked', () => {
     // enable cloud checkbox starts unchecked.
     expect(isFormReadonly('boto-key-id-input')).toBeTrue();
@@ -178,6 +192,53 @@ describe('ConfigurationComponent', () => {
     expect(
       component.bucketURLForm.hasError('notAGSUrl')
     ).toBeTrue();
+  });
+
+  it('hover over cloud checkbox will show clear warnings', () => {
+    toggleCheckbox('cloud-checkbox');
+
+    inputConfiguration('boto-key-id-input', 'fake-boto-key');
+    inputConfiguration('boto-key-secret-input', 'fake-secret-key');
+    inputConfiguration('image-storage-url-input', 'gs://xxx/');
+
+    triggerCheckboxHoverStart('cloud-checkbox');
+
+    expect(component.botoKeyIDForm.hasError('clearWarning')).toBeTruthy();
+    expect(component.botoKeySecretForm.hasError('clearWarning')).toBeTruthy();
+    expect(component.bucketURLForm.hasError('clearWarning')).toBeTruthy();
+  });
+
+  it('clear warnings will be go away once user mouses-off checkbox', () => {
+    toggleCheckbox('cloud-checkbox');
+
+    inputConfiguration('boto-key-id-input', 'fake-boto-key');
+
+    triggerCheckboxHoverStart('cloud-checkbox');
+    expect(component.botoKeyIDForm.hasError('clearWarning')).toBeTrue();
+
+    triggerCheckboxHoverStop('cloud-checkbox');
+    expect(component.botoKeyIDForm.hasError('clearWarning')).toBeFalse();
+
+    // sequence below verifies that 'clear' warnings are removed even if mouse-off
+    // happens after cloud checkbox is unchecked.
+    triggerCheckboxHoverStart('cloud-checkbox');
+    expect(component.botoKeyIDForm.hasError('clearWarning')).toBeTrue();
+    toggleCheckbox('cloud-checkbox');
+    triggerCheckboxHoverStop('cloud-checkbox');
+    expect(component.botoKeyIDForm.hasError('clearWarning')).toBeFalse();
+  });
+
+  it('hover start and stop wont clear formatting warnings', () => {
+    toggleCheckbox('cloud-checkbox');
+
+    inputConfiguration('image-storage-url-input', 'gs:/malformed');
+
+    expect(component.bucketURLForm.hasError('notAGSUrl')).toBeTrue();
+
+    triggerCheckboxHoverStart('cloud-checkbox');
+    triggerCheckboxHoverStop('cloud-checkbox');
+
+    expect(component.bucketURLForm.hasError('notAGSUrl')).toBeTrue();
   });
 
   it('good GCS URL shows link', () => {

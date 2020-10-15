@@ -263,6 +263,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
     if (!this.isCloudEnabled) {
       this.isRemoteConsoleEnabled = false;
+      // clears boto and GCS bucket configurations, leaves cloud and remote console enable settings unchanged.
+      this.updateCloudConfigurationForms(
+        '', // boto_key_id
+        '', // boto_key_secret
+        '', // gcs_bucket_url
+        this.isCloudEnabled,
+        this.isRemoteConsoleEnabled
+      );
     }
     this.toggleCloudConfigDisabledMessage();
   }
@@ -322,10 +330,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * Invoked on mouseoff of the enable cloud checkbox. Will clear the error
      * set by cloudCheckboxHoverStart
      */
-    if (this.isCloudEnabled && (this.botoKeyIDForm.value || this.botoKeySecretForm.value || this.bucketURLForm.value)) {
+    if (this.botoKeyIDForm.value || this.botoKeySecretForm.value || this.bucketURLForm.value) {
       this.botoKeyIDForm.setErrors(null);
       this.botoKeySecretForm.setErrors(null);
       this.bucketURLForm.setErrors(null);
+
+      this.botoKeyIDForm.updateValueAndValidity();
+      this.botoKeySecretForm.updateValueAndValidity();
+      this.bucketURLForm.updateValueAndValidity();
     }
   }
 
