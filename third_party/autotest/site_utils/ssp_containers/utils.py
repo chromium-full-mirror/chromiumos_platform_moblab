@@ -94,6 +94,7 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
         network='default_moblab',
         cap_add=['ALL'],
         user='moblab',
+        dns=['192.168.100.51'],
         detach=True,
         volumes=['default_results:/results',
                  'default_results:/usr/local/autotest/results',
