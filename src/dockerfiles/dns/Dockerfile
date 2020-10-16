@@ -12,5 +12,11 @@ RUN mkdir -p /etc/default/
 RUN echo -e "ENABLED=1\nIGNORE_RESOLVCONF=yes" > /etc/default/dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf
 
+# We run dnsmasq as the moblab user by passing in --user and --group
+# params to the command in startup.sh.
+COPY startup.sh /
+RUN chmod u+x /startup.sh
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
+    --uid 246 --disabled-password --gecos "" moblab
 
-ENTRYPOINT ["/usr/sbin/dnsmasq","--no-daemon"]
+CMD ["/startup.sh"]
