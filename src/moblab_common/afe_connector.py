@@ -443,17 +443,19 @@ class AFEConnector(object):
             build (string): Software version to run e.g. R73-11647.24.0
             builds (list): Software versions to run e.g. R73-11647.24.0
             suite (string): Test suite to run e.g. cts_P
-            model (string, optional): Specific model to run on e.g. phaser
-            release_type (str, optional): Defaults to 'release'. used to
-                build the full build name octopus-release/R73-11647.24.0
-            suite_args (string, optional): Defaults to None. delimited
-                key=val pairs passed to suite control file.
-            test_args (string, optional): Defaults to None.  delimited
-            test_args (string, optional): Defaults to None.  delimited
-                key=val pairs passed to test control file.
             suite_timeout_mins (integer, optional): Number of minutes until the
                 suite times out.
             pool (string, optional): Pool label to target suite on.
+            model (string, optional): Specific model to run on e.g. phaser
+            suite_args (string, optional): Defaults to None. delimited
+                key=val pairs passed to suite control file.
+            test_args (string, optional): Defaults to None.  delimited
+                key=val pairs passed to test control file.
+        Returns:
+            Tuple (int, string): The first element will be an int representing
+            ID of the created suite job. The second value is an error message.
+            Exactly one of the values will ever not be None. A None ID implies
+            failure of the AFE call-through.
         """
         params = {
             "board": board,
@@ -472,7 +474,10 @@ class AFEConnector(object):
             "max_runtime_mins": suite_timeout_mins,
         }
         response = self.send_rpc_command("create_suite_job", params)
-        return response.text
+        result = self.decode_response(response, "result")
+        error = self.decode_response(response, "error")
+
+        return result, error
 
     def enroll_duts(self, ip_addresses):
         _LOGGER.debug("Enroll hosts %s", ip_addresses)

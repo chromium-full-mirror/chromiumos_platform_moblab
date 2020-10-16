@@ -437,7 +437,7 @@ class MoblabService(object):
         test_args['ssid'] = ap_name
         test_args['wifipass'] = ap_pass
 
-        return self.afe_connector.run_suite(
+        suite_job_id, error = self.afe_connector.run_suite(
             build_target,
             build,
             builds,
@@ -446,7 +446,13 @@ class MoblabService(object):
             pool,
             model,
             suite_args=suite_args,
-            test_args=test_args)
+            test_args=test_args
+        )
+
+        if not suite_job_id:
+            raise MoblabRpcError('Encountered error starting suite\n{}'.format(error))
+
+        return "Suite started (suite job ID: {})".format(suite_job_id)
 
     def enroll_duts(self, ip_addresses):
         self.afe_connector.enroll_duts(ip_addresses)
