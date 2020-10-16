@@ -8,7 +8,8 @@ import logging
 import time
 import json
 
-import moblabrpc_connector
+from moblab_common import moblabrpc_connector
+
 import remote_request
 
 _LOGGER = logging.getLogger(__name__)
@@ -99,7 +100,10 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
             str: Formatted string representing this object.
         """
 
-        return "unique_id=%s, build=%s, board=%s, suite=%s, model=%s, priority=%s," " min_duts=%s" % (
+        return (
+            "unique_id=%s, build=%s, board=%s, suite=%s, model=%s, "
+            "priority=%s, min_duts=%s"
+        ) % (
             self.unique_id,
             self.build,
             self.board,

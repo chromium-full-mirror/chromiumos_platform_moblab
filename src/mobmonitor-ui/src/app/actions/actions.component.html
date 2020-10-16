@@ -1,5 +1,5 @@
-<div *ngIf="actions" class="actions">
-  <button *ngFor="let action of actions" mat-raised-button color="primary"
+<div *ngIf="possibleActions" class="actions">
+  <button *ngFor="let action of possibleActions" mat-raised-button color="primary"
           (click)="onActionClick(action)"
           [disabled]="actionRunning[action.action]"
           id="action-{{action.action}}">

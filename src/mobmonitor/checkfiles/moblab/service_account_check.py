@@ -4,12 +4,10 @@
 
 """Boto file health checks for devserver."""
 
-
-import netifaces
 import os
 
 from checkfiles.moblab import common
-
+from checkfiles.moblab import moblab_actions
 from moblab_common import host_connector
 
 
@@ -18,15 +16,15 @@ def GetIp():
 
 
 class ServiceAccountFile(object):
-    """Verifies that a Boto key exists."""
+    """Verifies that a Service Account key exists."""
 
     def Check(self):
-        """Verifies that moblab has a service acocunt for proper cloud functions.
+        """Verify that moblab has a service account for cloud API calls.
 
         Returns:
-          0 if a Boto key exists.
-          -1 if a Boto key does not exist.
-          -2 if the Boto key is empty.
+          0 if a service account key exists.
+          -1 if a service account key does not exist.
+          -2 if the service account key is empty.
         """
         if not os.path.exists(common.SERVICE_ACCOUNT_PATH):
             return -1
@@ -37,16 +35,15 @@ class ServiceAccountFile(object):
         return 0
 
     def Diagnose(self, errcode):
-        msg = (
-            "Service account is %s. Please rerun the setup config"
-            " at the following address:"
-            " http://%s/moblab_setup/. For more information"
-        )
+        msg = "Service account is %s.  Please download a new version."
 
         if -1 == errcode:
-            return (msg % ("missing", GetIp()), [])
+            return (
+                msg % "missing",
+                [moblab_actions.DownloadServiceAccount()],
+            )
 
         elif -2 == errcode:
-            return (msg % ("empty", GetIp()), [])
+            return (msg % "empty", [moblab_actions.DownloadServiceAccount()])
 
-        return ("Unknown error reached with error code: %s" % errcode, [])
+            return ("Unknown error reached with error code: %s" % errcode, [])

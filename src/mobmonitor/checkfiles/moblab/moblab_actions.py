@@ -4,10 +4,14 @@
 
 """Repair actions for moblab health checks."""
 
+import logging
 import os
 import re
 
+from moblab_common import afe_connector, config_connector, moblabrpc_connector
 from moblab_common.utils import cli
+
+LOGGER = logging.getLogger(__name__)
 
 
 class AbstractAction:
@@ -86,3 +90,25 @@ class LaunchUpstartService(AbstractAction):
     def run(self, params):
         cmd = ["start", self.service]
         cli.sudo_run_command(cmd)
+
+
+class LaunchDockerContainer(AbstractAction):
+    action = "Launch Docker Container"
+    info = """Launch a docker container."""
+    param_info = {}
+
+    def __init__(self, service):
+        self.service = service
+
+    def run(self, params):
+        cmd = ["start", self.service]
+        cli.sudo_run_command(cmd)
+
+
+class DownloadServiceAccount(AbstractAction):
+    action = "Download Service Account"
+    info = """Download Service Account."""
+    param_info = {}
+
+    def run(self, params):
+        moblabrpc_connector.MoblabRpcConnector().download_service_account()

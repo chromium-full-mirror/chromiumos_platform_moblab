@@ -54,6 +54,6 @@ urllib3==1.25.11          # via requests
 websocket-client==0.57.0  # via docker
 zope.event==4.5.0         # via gevent
 zope.interface==5.1.2     # via gevent
-
+gsutil==4.55
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

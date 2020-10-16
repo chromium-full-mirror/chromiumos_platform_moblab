@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package moblab;
 
+import "google/protobuf/empty.proto";
+
 service MoblabRpcService {
   // Run a test suite
   rpc run_suite (RunSuiteRequest) returns (RunSuiteResponse) {}
@@ -61,6 +63,8 @@ service MoblabRpcService {
 
   // Sends screenshot and feedback information to GCS bucket.
   rpc send_moblab_screenshot(SendMoblabScreenshotRequest) returns (SendMoblabScreenshotResponse) {};
+
+  rpc download_service_account(google.protobuf.Empty) returns (google.protobuf.Empty) {} ;
 }
 
 

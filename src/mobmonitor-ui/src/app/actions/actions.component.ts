@@ -1,3 +1,4 @@
+
 import { Component, OnInit, Input } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -17,6 +18,7 @@ export class ActionsComponent implements OnInit {
   actions: Action[];
 
   private actionRunning;
+  public possibleActions: Action[];
 
   constructor(
     private rpc: MobmonitorRpcService,
@@ -26,6 +28,7 @@ export class ActionsComponent implements OnInit {
 
   ngOnInit() {
     this.actionRunning = {};
+    this.possibleActions = this.actions;
     for (const action of this.actions) {
       this.actionRunning[action.action] = false;
     }

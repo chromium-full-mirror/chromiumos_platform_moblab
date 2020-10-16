@@ -24,9 +24,9 @@ class BotoFile(object):
         """Verifies that moblab has a Boto for proper gs_offloader functioning.
 
         Returns:
-          0 if a Boto key exists.
-          -1 if a Boto key does not exist.
-          -2 if the Boto key is empty.
+            0 if a Boto key exists.
+            -1 if a Boto key does not exist.
+            -2 if the Boto key is empty.
         """
         if not os.path.exists(common.BOTO_PATH):
             return -1
@@ -37,18 +37,12 @@ class BotoFile(object):
         return 0
 
     def Diagnose(self, errcode):
-        msg = (
-            "Boto key is %s. Please upload a valid key"
-            " at the following address:"
-            " http://%s/moblab_setup/. For more information"
-            " please see https://www.chromium.org/chromium-os/testing/"
-            "moblab/setup#TOC-Setting-up-the-boto-key-for-partners"
-        )
+        msg = "Boto key is %s. Please ensure your configuration is entered in the main UI"
 
         if -1 == errcode:
-            return (msg % ("missing", GetIp()), [])
+            return (msg % "missing", [])
 
         elif -2 == errcode:
-            return (msg % ("empty", GetIp()), [])
+            return (msg % "empty", [])
 
         return ("Unknown error reached with error code: %s" % errcode, [])

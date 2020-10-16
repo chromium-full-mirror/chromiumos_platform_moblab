@@ -29,6 +29,8 @@ from moblab_common.proto import moblabrpc_pb2_grpc
 # pylint: disable=import-error
 from moblab_common.utils.constants import Constants as MoblabConstants
 
+from google.protobuf import empty_pb2
+
 AFE_TO_MOBLAB_STATUS_MAPPINGS = {
     "Queued": moblabrpc_pb2.Job.QUEUED,
     "Provisioning": moblabrpc_pb2.Job.PROVISIONING,
@@ -94,8 +96,10 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def run_suite(self, request, _context):
-        """Generic run suite method. Accepts suite as a custom argument, allows
-        for run of any suite but with no custom arguments.
+        """Generic run suite method.
+
+        Accepts suite as a custom argument, allows for run of any suite but
+        with no custom arguments.
 
         Args:
           request: RunSuiteRequest object with parameters describing suite to
@@ -1032,3 +1036,12 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return moblabrpc_pb2.SetRemoteAgentConfigurationResponse(
             is_succeeded=is_succeeded
         )
+
+    def download_service_account(self, unused_request, unused_context):
+        """Copy the service account to local machine.
+
+        The service account is stored in the cloud account bucket, copy it
+        to the local drive for use by services.
+        """
+        self.service.download_service_account()
+        return empty_pb2.Empty()

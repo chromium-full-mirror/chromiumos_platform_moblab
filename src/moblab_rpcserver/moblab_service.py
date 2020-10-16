@@ -9,6 +9,7 @@ import google.api_core
 import os
 import re
 import requests
+import subprocess
 import time
 import logging
 
@@ -1391,3 +1392,44 @@ class MoblabService(object):
             True iff the set operation successfully.
         """
         return self.afe_connector.set_is_remote_command_enabled(is_enabled)
+
+    def download_service_account(self):
+        """Download the service account from the account bucket.
+
+        To avoid users having to enter two different credentials, they enter
+        the boto key and secret, then we download the API key from a known
+        file in their bucket.
+
+        This function downloads that file, as it is getting the API key we
+        have to use gsutil vs cloud storage API to download.
+
+        """
+        self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
+        logging.info("Using bucket: %s", self.moblab_bucket_name)
+        if not self.moblab_bucket_name:
+            raise MoblabRpcError(
+                "Need bucket name to copy service account from."
+            )
+        try:
+            subprocess.check_call(
+                [
+                    "gsutil",
+                    "cp",
+                    "gs://%s/%s"
+                    % (
+                        self.moblab_bucket_name,
+                        "pubsub-key-do-not-delete.json",
+                    ),
+                    "/home/moblab/.service_account.json",
+                ],
+            )
+
+        except subprocess.CalledProcessError:
+            logging.exception(
+                "Failed to get the service account from %s",
+                self.moblab_bucket_name,
+            )
+            raise MoblabRpcError(
+                "Failed to get the service account from %s"
+                % self.moblab_bucket_name,
+            )
