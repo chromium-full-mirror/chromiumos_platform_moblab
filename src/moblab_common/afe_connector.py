@@ -628,15 +628,16 @@ class AFEConnector(object):
     def _format_configuration_dict(
         self,
         is_cloud_enabled=True,
-        gs_access_key_id=None,
-        gs_secret_access_key=None,
-        image_storage_server=None,
+        gs_access_key_id='',
+        gs_secret_access_key='',
+        image_storage_server='',
         dut_wifi_name=None,
-        dut_wifi_password=None,
+        dut_wifi_password=''
     ):
         """
             Helper method for returning params shared between calls to set
-            config and validate cloud config.
+            config and validate cloud config. Will assume that submissions
+            are only for either DUT WIFI *or* cloud configurations.
         Args:
             is_cloud_enabled (boolean): True iff user has checked 'integrate with
                 cloud' on UI
@@ -650,7 +651,12 @@ class AFEConnector(object):
         """
         configuration_dict = {}
 
-        if gs_access_key_id and gs_secret_access_key and image_storage_server:
+        if dut_wifi_name:
+            configuration_dict["wifi_info"] = {
+                "wifi_dut_ap_name": dut_wifi_name,
+                "wifi_dut_ap_pass": dut_wifi_password
+            }
+        else:
             configuration_dict["cloud_storage_info"] = {
                 "is_cloud_enabled": is_cloud_enabled,
                 "gs_access_key_id": gs_access_key_id,
@@ -662,16 +668,6 @@ class AFEConnector(object):
                 # so this value is always False.
                 "use_existing_boto_file": False
             }
-        else:
-            configuration_dict["cloud_storage_info"] = {
-                "is_cloud_enabled": is_cloud_enabled
-            }
-
-        if dut_wifi_name and dut_wifi_password:
-            configuration_dict["wifi_info"] = {
-                "wifi_dut_ap_name": dut_wifi_name,
-                "wifi_dut_ap_pass": dut_wifi_password
-            }
 
         return configuration_dict
 
@@ -679,11 +675,11 @@ class AFEConnector(object):
     def set_configuration_info(
         self,
         is_cloud_enabled=True,
-        gs_access_key_id=None,
-        gs_secret_access_key=None,
-        image_storage_server=None,
+        gs_access_key_id='',
+        gs_secret_access_key='',
+        image_storage_server='',
         dut_wifi_name=None,
-        dut_wifi_password=None,
+        dut_wifi_password=''
     ):
         """
             Applies given configuration values to AFE.

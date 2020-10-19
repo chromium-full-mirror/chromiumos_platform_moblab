@@ -262,5 +262,30 @@ describe('ConfigurationComponent', () => {
         '#dut-wifi-info-submit-button'
       ).disabled).toBeTruthy();
     });
+
+    it('dut wifi has to be non-empty', () => {
+      inputConfiguration('dut-wifi-name-input', '');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#dut-wifi-info-submit-button'
+      ).disabled).toBeTruthy();
+    });
+
+    it('dut wifi has to have no leading/trailing whitespace', () => {
+      inputConfiguration('dut-wifi-name-input', ' wifi-name');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#dut-wifi-info-submit-button'
+      ).disabled).toBeTruthy();
+    });
+
+    it('dut wifi password can be empty', () => {
+      inputConfiguration('dut-wifi-name-input', 'wifi-name');
+      inputConfiguration('dut-wifi-password-input', '');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.querySelector(
+        '#dut-wifi-info-submit-button'
+      ).disabled).toBeFalsy();
+    });
   });
 });
