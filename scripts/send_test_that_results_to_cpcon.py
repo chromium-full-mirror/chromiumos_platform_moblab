@@ -9,7 +9,9 @@ from __future__ import print_function
 import argparse
 import logging
 import os
+import re
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -36,6 +38,8 @@ FAKE_PARENT_ID = CURRENT_TIMESTAMP
 CONTROL_FILE = "control"
 JOB_SERIALIZE_FILE = "job.serialize"
 STATUS_FILE = "status"
+KEYVAL_FILE = "keyval"
+NEW_KEYVAL_FILE = "new_keyval"
 UPLOADED_STATUS_FILE = ".uploader_status"
 
 
@@ -56,6 +60,12 @@ def parse_arguments(argv):
         required=True,
         help="The GCS bucket that test results are uploaded to, e.g."
              "'gs://xxxx'.")
+    parser.add_argument(
+        "--bug",
+        type=str,
+        required=False,
+        help="Write bug id to the test results. Each test entry can only have "
+             "at most 1 bug id. Optional.")
     parser.add_argument(
         "-d",
         "--directory",
@@ -88,7 +98,7 @@ def parse_arguments(argv):
 
 
 def fetch_test_dirs(parent_dir, test_dirs):
-    """" Gets all test directories.
+    """ Gets all test directories.
 
     Args:
         parent_dir: The parent directory of one or multiple test directories
@@ -210,6 +220,7 @@ def upload_test_results(args, test_dir, job_keyval, job_id):
         job_keyval: The key-value object of the job.
         job_id: A job id.
     """
+    upload_status_file = os.path.join(test_dir, UPLOADED_STATUS_FILE)
     with open(upload_status_file, "w") as upload_status:
         upload_status.write("UPLOADING")
 
@@ -229,7 +240,6 @@ def upload_test_results(args, test_dir, job_keyval, job_id):
         logging.info(
             "Start to upload test directory: %s to GCS bucket path: %s",
             test_dir, gcs_bucket_path)
-        upload_status_file = os.path.join(test_dir, UPLOADED_STATUS_FILE)
         with open(upload_status_file, "w") as upload_status:
             upload_status.write("UPLOADED")
 
@@ -325,7 +335,78 @@ def _get_partial_object_path(bucket, moblab_id):
 
     for blob in blob_itr:
         if ("job.serialize" in blob.name and "moblab" in blob.name):
-            yield (blob.name)
+            yield blob.name
+
+
+def _confirm_option(question):
+    """
+        Get a yes/no answer from the user via command line.
+
+    Args:
+        question: string, question to ask the user.
+
+    Returns:
+        A boolean. True if yes; False if no.
+    """
+    expected_answers = ['y', 'yes', 'n', 'no']
+    answer = ''
+    while answer not in expected_answers:
+        answer = raw_input(question + "(y/n): ").lower().strip()
+    return answer[0] == "y"
+
+
+def _write_bug_id(test_dir, bug_id):
+    """
+        Write the bug id to the test results.
+
+    Args:
+        test_dir: The test directory for non-moblab test results.
+        bug_id: The bug id to write to the test results.
+    Returns:
+        A boolean. True if the bug id is written successfully or is the same as
+        the old bug id already in test results; False if failed to write the
+        bug id, or if the user decides not to overwrite the old bug id already
+        in test results.
+    """
+    old_bug_id = None
+    new_keyval = list()
+
+    keyval_file = os.path.join(test_dir, KEYVAL_FILE)
+    try:
+        with open(keyval_file, 'r') as keyval_raw:
+            for line in keyval_raw.readlines():
+                match = re.match(r'bug_id=(\d+)', line)
+                if match:
+                    old_bug_id = match.group(1)
+                else:
+                    new_keyval.append(line)
+    except IOError as e:
+        logging.error('Cannot read keyval file from %s, skip writing the bug '
+                      'id %s: %s', test_dir, bug_id, e)
+        return False
+
+    if old_bug_id:
+        if old_bug_id == bug_id:
+            return False
+        overwrite_bug_id = _confirm_option('Would you like to overwrite bug id '
+                                           '%s with new bug id %s?' %
+                                           (old_bug_id, bug_id))
+        if not overwrite_bug_id:
+            return False
+
+    new_keyval.append('bug_id=%s' % bug_id)
+    new_keyval_file = os.path.join(test_dir, NEW_KEYVAL_FILE)
+    try:
+        with open(new_keyval_file, 'w') as new_keyval_raw:
+            for line in new_keyval:
+                new_keyval_raw.write(line)
+            new_keyval_raw.write('\n')
+        shutil.move(new_keyval_file, keyval_file)
+        return True
+    except Exception as e:
+        logging.error('Cannot write bug id to keyval file in %s, skip writing '
+                      'the bug id %s: %s', test_dir, bug_id, e)
+        return False
 
 
 def main(args):
@@ -345,6 +426,8 @@ def main(args):
     for test_dir in test_dirs:
         # Uses a unique timestamp in milliseconds to fake the afe job id and
         # skylab job id.
+        if parsed_args.bug:
+            _write_bug_id(test_dir, parsed_args.bug)
         fake_job_id = str(int(time.time() * 1000))
         job_keyval = models.job.read_keyval(test_dir)
         job = parse_test_job(test_dir, job_keyval, fake_job_id, fake_suite)
