@@ -33,7 +33,7 @@ RUN npm install
 
 # generate build
 COPY src/mobmonitor-ui /app
-RUN ng build --output-path=dist --output-hashing=all
+RUN ng build --output-path=dist --output-hashing=all --configuration=production
 
 #########################################################################################3
 
