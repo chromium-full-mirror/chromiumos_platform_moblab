@@ -80,7 +80,11 @@ class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
         for iface in netifaces.interfaces():
             if 'eth' not in iface:
                 continue
-            addrs = netifaces.ifaddresses(iface).get(netifaces.AF_INET)
+            try:
+                addrs = netifaces.ifaddresses(iface).get(netifaces.AF_INET)
+            except ValueError:
+                logging.warning("Non valid interface %s", iface)
+                continue
             if not addrs:
                 continue
             for addr in addrs:
