@@ -1,17 +1,19 @@
 <mat-card>
   <app-build-select-forms
     (allRequiredFieldsSet)="onBuildSet($event)"
+    (allRequiredFieldsSet)="avlInputChanged()"
+    (buildVersionUnselected)="onBuildVersionUnselected()"
     (formLoading)="onFormLoading($event.message)"
     (formLoaded)="onFormLoaded()">
   </app-build-select-forms>
 
   <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'"
                    [isNumeric]="true"
-                   (update)="avlInputChanged($event.value)">
+                   (update)="avlInputChanged()">
   </app-basic-input>
 
   <app-basic-input #partNumberInput [name]="'AVL Part Number'"
-                   (update)="avlInputChanged($event.value)">
+                   (update)="avlInputChanged()">
   </app-basic-input>
 
   <app-run-suite-button (click)="onRunSuiteClick()"></app-run-suite-button>

@@ -25,9 +25,9 @@ export class GtsRunComponent extends BaseSuite implements AfterViewInit {
   @ViewChild(BasicTextFormComponent) modulesTextForm;
 
   constructor(private changeDetector: ChangeDetectorRef,
-              moblabGrpcService: MoblabGrpcService,
-              router: Router,
-              snackBar: MatSnackBar) {
+    moblabGrpcService: MoblabGrpcService,
+    router: Router,
+    snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -44,6 +44,13 @@ export class GtsRunComponent extends BaseSuite implements AfterViewInit {
   onBuildSetCustom(event) {
     this.modulesTextForm.enable();
     this.runSuiteButton.enable();
+  }
+
+  /** Method is triggered when build version form no longer has a valid
+   * build version selected.
+   * */
+  onBuildVersionUnselected() {
+    this.runSuiteButton.disable();
   }
 
   /** Method triggered on run-suite button press. Invokes runGtsSuite RPC call.

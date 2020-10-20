@@ -13,6 +13,7 @@ import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-fo
 import {BuildSettings} from '../../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
+import {BasicSelectorComponent} from '../../common/basic-selector/basic-selector.component';
 
 
 /** Component owns logic for CTS suite run form.
@@ -26,13 +27,14 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('versionSelector') versionSelectForm;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
   @ViewChild(BasicTextFormComponent) modulesTextForm;
+  @ViewChild(BasicSelectorComponent) ctsVersionSelectorForm;
 
   selectedAndroidVersion: string;
 
   constructor(private changeDetector: ChangeDetectorRef,
-              moblabGrpcService: MoblabGrpcService,
-              router: Router,
-              snackBar: MatSnackBar) {
+    moblabGrpcService: MoblabGrpcService,
+    router: Router,
+    snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -42,12 +44,20 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
     this.versionSelectForm.disable('Please select build.');
     this.modulesTextForm.disable('Please select build.');
     this.changeDetector.detectChanges();
-    this.runSuiteButton.enable();
   }
 
-  /** Method triggered on change of the android version form.
+  /** Method is triggered when build version form no longer has a valid
+   * build version selected.
    * */
-  androidVersionChanged(selectedAndroidVersion: string) {
+  onBuildVersionUnselected() {
+    this.ctsVersionSelectorForm.clearSelection();
+    this.ctsVersionSelectorForm.disable();
+    this.runSuiteButton.disable();
+  }
+
+  /** Method triggered on change of the cts version form.
+   * */
+  ctsVersionChanged(selectedAndroidVersion: string) {
     this.selectedAndroidVersion = selectedAndroidVersion;
     this.runSuiteButton.enable();
   }

@@ -2,7 +2,8 @@
   <app-build-select-forms
     (allRequiredFieldsSet)="onBuildSet($event)"
     (formLoading)="onFormLoading($event.message)"
-    (formLoaded)="onFormLoaded()">
+    (formLoaded)="onFormLoaded()"
+    (buildVersionUnselected)="onBuildVersionUnselected()">
   </app-build-select-forms>
   <app-basic-selector
       #versionSelector
@@ -10,7 +11,7 @@
       [placeholder]="['Pick from CTS versions']"
       [options]="['cts_N', 'cts_P' ]"
       [isShown]="true"
-      (update)="androidVersionChanged($event.value)">
+      (update)="ctsVersionChanged($event.value)">
   </app-basic-selector>
 
   <app-basic-text-form></app-basic-text-form>

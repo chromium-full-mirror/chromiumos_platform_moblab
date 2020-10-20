@@ -37,8 +37,12 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
 
   /** Method triggered on change of suite input form.
    * */
-  suiteChanged(event) {
-    this.runSuiteButton.enable();
+  suiteChanged() {
+    if (this.suiteInput.getInput()) {
+      this.runSuiteButton.enable();
+    } else {
+      this.runSuiteButton.disable();
+    }
   }
 
   /** Method triggered on complete setting of build-related arguments.
@@ -46,6 +50,13 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
    * */
   onBuildSetCustom(event) {
     this.suiteInput.enable();
+  }
+
+  /** Method is triggered when build version form no longer has a valid
+   * build version selected.
+   * */
+  onBuildVersionUnselected() {
+    this.runSuiteButton.disable();
   }
 
   /** Method triggered on run-suite button press. Invokes runSuite RPC call.

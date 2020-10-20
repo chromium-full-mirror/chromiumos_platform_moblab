@@ -39,6 +39,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   @Output() formLoading = new EventEmitter();
   @Output() formLoaded = new EventEmitter();
   @Output() allRequiredFieldsSet = new EventEmitter();
+  @Output() buildVersionUnselected = new EventEmitter();
 
   // TODO(haddowk) Allow tryjobs and other build types.
   buildType = 'release';
@@ -116,7 +117,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   }
 
   getBuildTargets() {
-    this.formLoading.emit({message:'fetching build targets...'});
+    this.formLoading.emit({message: 'fetching build targets...'});
     this.moblabGrpcService.listBuildTargets(
       this.selectedModel,
       (buildTargets: string[]) => {
@@ -146,13 +147,13 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   }
 
   getMilestones() {
-    this.formLoading.emit({message:'fetching milestones...'});
+    this.formLoading.emit({message: 'fetching milestones...'});
     this.moblabGrpcService.listMilestones(
       this.buildTargetName,
       this.selectedModel,
       (milestones: string[]) => {
-      this.updateMilestones(milestones);
-      this.formLoaded.emit();
+        this.updateMilestones(milestones);
+        this.formLoaded.emit();
       },
       (error_msg: string) => {
         this.setErrorReason(this.milestoneSelector, error_msg);
@@ -177,7 +178,7 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   }
 
   getBuildVersions() {
-    this.formLoading.emit({message:'fetching build versions...'});
+    this.formLoading.emit({message: 'fetching build versions...'});
     this.moblabGrpcService.listBuildVersions(
       this.buildTargetName,
       this.selectedModel,
@@ -271,5 +272,6 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
   unselectBuildVersion() {
     this.buildVersionName = null;
     this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
+    this.buildVersionUnselected.emit();
   }
 }

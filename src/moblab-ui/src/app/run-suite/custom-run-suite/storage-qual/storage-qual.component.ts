@@ -23,14 +23,14 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
   readonly variationOptions = [''].concat(
-    Object.keys(RunStorageQualificationSuiteRequest.Variation).slice(1,3)
+    Object.keys(RunStorageQualificationSuiteRequest.Variation).slice(1, 3)
   );
   variationSelection = 0;
 
   constructor(private changeDetector: ChangeDetectorRef,
-              moblabGrpcService: MoblabGrpcService,
-              router: Router,
-              snackBar: MatSnackBar) {
+    moblabGrpcService: MoblabGrpcService,
+    router: Router,
+    snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -49,7 +49,7 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
 
   /** Method triggered on change of either bug ID or part number.
    * */
-  avlInputChanged(event) {
+  avlInputChanged() {
     if (this.bugIdInput.getInput() && this.partNumberInput.getInput()) {
       this.runSuiteButton.enable();
     } else {
@@ -62,6 +62,13 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
   variationChanged(newVariation) {
     this.variationSelection = newVariation ? Number(
       RunStorageQualificationSuiteRequest.Variation[newVariation]) : 0;
+  }
+
+  /** Method is triggered when build version form no longer has a valid
+   * build version selected.
+   * */
+  onBuildVersionUnselected() {
+    this.runSuiteButton.disable();
   }
 
   /** Method triggered on run-suite button press. Invokes

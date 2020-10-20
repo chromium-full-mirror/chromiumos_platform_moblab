@@ -4,9 +4,11 @@ import {
   OnChanges,
   OnInit,
   Output,
-  SimpleChange,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
+
+import {MatSelect} from '@angular/material/select';
 
 import {BaseForm} from '../base-form/base-form.component';
 
@@ -21,6 +23,8 @@ import {BaseForm} from '../base-form/base-form.component';
   styleUrls: ['./basic-selector.component.scss'],
 })
 export class BasicSelectorComponent extends BaseForm implements OnChanges, OnInit {
+  @ViewChild(MatSelect) selector;
+
   @Input() autoselect = true;
   @Input() options: string[];
   @Input() placeholder: string;
@@ -37,6 +41,11 @@ export class BasicSelectorComponent extends BaseForm implements OnChanges, OnIni
       this.options = changes.options.currentValue;
       this.autoSelectedSingleOption();
     }
+  }
+
+  clearSelection() {
+    this.selected = undefined;
+    this.selector.writeValue(null);
   }
 
   autoSelectedSingleOption() {

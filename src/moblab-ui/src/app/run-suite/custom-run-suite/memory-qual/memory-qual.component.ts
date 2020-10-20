@@ -21,9 +21,9 @@ export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
   constructor(private changeDetector: ChangeDetectorRef,
-              moblabGrpcService: MoblabGrpcService,
-              router: Router,
-              snackBar: MatSnackBar) {
+    moblabGrpcService: MoblabGrpcService,
+    router: Router,
+    snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -45,12 +45,19 @@ export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
 
   /** Method triggered on change of either bug ID or part number.
    * */
-  avlInputChanged(event) {
+  avlInputChanged() {
     if (this.bugIdInput.getInput() && this.partNumberInput.getInput()) {
       this.runSuiteButton.enable();
     } else {
       this.runSuiteButton.disable();
     }
+  }
+
+  /** Method is triggered when build version form no longer has a valid
+   * build version selected.
+   * */
+  onBuildVersionUnselected() {
+    this.runSuiteButton.disable();
   }
 
   /** Method triggered on run-suite button press. Invokes
