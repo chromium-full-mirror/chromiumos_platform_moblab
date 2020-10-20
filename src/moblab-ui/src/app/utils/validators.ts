@@ -30,3 +30,11 @@ export function numericValidator(control) {
   }
   return null
 }
+
+export function leadingTrailingWhitespaceValidator(control) {
+  if (control.value.length !== control.value.trim().length) {
+    return { 'leadingTrailingwhitespace': true };
+  } else {
+    return null
+  }
+}

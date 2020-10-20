@@ -6,13 +6,18 @@
 
 import http.client
 import json
+import sys
 import time
 import unittest
 
-import afe_connector
-
 from datetime import datetime
 from unittest import mock
+from unittest.mock import MagicMock, PropertyMock
+
+sys.modules['docker'] = MagicMock()
+sys.modules['requests'] = MagicMock()
+
+import afe_connector
 
 
 class AFEConnectorTest(unittest.TestCase):
@@ -246,10 +251,11 @@ class AFEConnectorTest(unittest.TestCase):
                     'gs_secret_access_key' : MOCK_BOTO_ACCESS_KEY,
                     'image_storage_server' : MOCK_BUCKET_NAME,
                     'results_storage_server' : '',
-                    'use_existing_boto_file' : False
+                    'use_existing_boto_file' : False,
+                    'is_cloud_enabled': True
                 }
             }
-         )
+        )
 
     @mock.patch("afe_connector.AFEConnector.send_rpc_command")
     def test_set_configuration_info_dut_wifi(self, mock_send_rpc_command):

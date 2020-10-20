@@ -9,6 +9,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Validators} from '@angular/forms';
 
+import {leadingTrailingWhitespaceValidator} from '../utils/validators';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 
 const URL = 'https://google.com/api/';
@@ -56,7 +57,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   lastFetchedBucketURL = '';
 
   dutWifiInfoLoading = false;
-  dutWifiNameForm = new FormControl('');
+  dutWifiNameForm = new FormControl('', {validators: [leadingTrailingWhitespaceValidator]});
   dutWifiPasswordForm = new FormControl('');
   lastFetchedDutWifiName = '';
   lastFetchedDutWifiPassword = '';
@@ -184,9 +185,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.lastFetchedIsRemoteConsoleEnabled != this.isRemoteConsoleEnabled
   }
 
-  isDutWifiInfoChanged() {
-    return this.lastFetchedDutWifiName != this.dutWifiNameForm.value ||
-      this.lastFetchedDutWifiPassword != this.dutWifiPasswordForm.value;
+  isDutWifiInfoValidForSubmit() {
+    return this.dutWifiNameForm.value.length && !this.dutWifiNameForm.errors && !this.dutWifiPasswordForm.errors &&
+      (
+        this.lastFetchedDutWifiName != this.dutWifiNameForm.value ||
+        this.lastFetchedDutWifiPassword != this.dutWifiPasswordForm.value
+      );
   }
 
   private setDutWifiInfo(dut_wifi_name: string, dut_wifi_password: string) {
