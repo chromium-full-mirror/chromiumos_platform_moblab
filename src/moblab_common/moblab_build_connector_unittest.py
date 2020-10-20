@@ -43,7 +43,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
         response = self.moblab_build_connector.list_available_milestones(
             self.BUILD_TARGET, self.MODEL)
 
-        self.assertEqual(response, ['R' + self.MILESTONE_NO])
+        self.assertEqual(response, [self.MILESTONE_NO])
         self.mock_build_service_client.list_builds.assert_called_once()
 
     def test_list_builds_for_milestone(self):
