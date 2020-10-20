@@ -422,7 +422,7 @@ class MoblabService(object):
           String response message.
         """
 
-        if not self._is_build_staged(build_version, build_target, milestone):
+        if not self._is_build_staged(build_version, build_target, model):
             self._stage_build(model, build_target, build_version)
 
         build = '{}-release/R{}-{}'.format(build_target, milestone, build_version)
@@ -470,18 +470,23 @@ class MoblabService(object):
     def update_duts_firmware(self, ip_addresses):
         self.dut_connector.update_firmware(ip_addresses)
 
-    def _is_build_staged(self, build_version, build_target, milestone):
+    def _is_build_staged(self, build_version, build_target, model):
         """
             Applies the specified build artifacts to the bucket configured for this Moblab.
 
         Args:
             build_target (string): AKA board of the target DUT.
             build_version (string): Build version to be applied to DUT for testing.
-            milestone (string): Milestone the build version belongs to.
+            model (string): Model of the DUT.
         Returns:
             Boolean which is true iff build is already staged on Moblab.
         """
-        return build_version in self.build_connector.get_builds_for_milestone(build_target, milestone)
+        return self.moblab_build_connector.check_build_stage_status(
+            build_target,
+            model,
+            build_version,
+            self.moblab_bucket_name
+        )
 
     def _stage_build(self, model, build_target, build_version):
         """

@@ -145,14 +145,14 @@ class MoblabBuildConnector(object):
             bucket_name: The destination bucket name .
 
         Returns:
-            build_service.CheckBuildStageStatusResponse: Response message for
-            check the stage status of a build artifact.
+            boolean: True iff build is staged ( recognized by the # of objects in the src build directory
+                equaling the # of objects in the destination build directory )
         """
         request = build_service.CheckBuildStageStatusRequest(
             name=self.build_artifact_path(build_target, model, build,
                                           bucket_name)
         )
-        return self.build_service_client.check_build_stage_status(request)
+        return self.build_service_client.check_build_stage_status(request).is_build_staged
 
     def stage_build(self, build_target, model, build, bucket_name):
         # TODO(zhihuixie): Long running operation cannot returned correctly in

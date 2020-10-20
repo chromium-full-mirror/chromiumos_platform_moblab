@@ -70,19 +70,15 @@ class MoblabBuildConnectorTest(unittest.TestCase):
         )
         source_build_artifact = resources.BuildArtifact(
             bucket=self.SOURCE_BUCKET)
-        expect = self.mock_build_service_client.check_build_stage_status.return_value = \
-            build_service.CheckBuildStageStatusResponse(
-                is_build_staged=True,
-                staged_build_artifact=staged_build_artifact,
-                source_build_artifact=source_build_artifact
+
+        self.assertTrue(
+            self.moblab_build_connector.check_build_stage_status(
+                self.BUILD_TARGET,
+                self.MODEL,
+                self.BUILD_VERSION,
+                self.DESTINATION_BUCKET
             )
-
-        response = self.moblab_build_connector.check_build_stage_status(
-            self.BUILD_TARGET, self.MODEL, self.BUILD_VERSION,
-            self.DESTINATION_BUCKET)
-
-        self.assertEqual(response.staged_build_artifact,
-                         expect.staged_build_artifact)
+        )
         self.mock_build_service_client.check_build_stage_status.assert_called_once()
 
     def test_stage_build(self):
