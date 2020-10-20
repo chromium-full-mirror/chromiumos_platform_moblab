@@ -21,6 +21,16 @@ WORKDIR /app
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
+
+# install and cache app dependencies
+# add app
+COPY ./moblab-ui/package.json /app
+COPY ./moblab-ui/package-lock.json /app
+
+RUN npm install
+
+RUN ngcc
+
 # install and cache app dependencies
 # add app
 COPY ./moblab-ui /app
@@ -31,7 +41,6 @@ RUN protoc -I=/app --js_out=import_style=commonjs:/app/src/app/services \
     --grpc-web_out=import_style=commonjs+dts,mode=grpcwebtext:/app/src/app/services \
     /app/moblabrpc.proto
 
-RUN npm install
 
 # run tests
 #RUN ng test --watch=false
