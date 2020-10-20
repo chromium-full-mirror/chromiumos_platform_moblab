@@ -177,18 +177,18 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
         if self.expires_at_sec_utc and int(time.time()) > self.expires_at_sec_utc:
             return
 
-        if devserver_connector.stage_build(self.board, self.build):
-            # TODO Change run_suite_request proto to have a milestone,
-            # build version and build_target depricate build and board.
-            milestone = self.build.split('-')[0]
-            build_version = self.build.split('-')[1]
-            # TODO plumb through suite_args and test_args.
-            reponse = moblabrpc_connector.MoblabRpcConnector.run_suite(
-                build_target=self.board,
-                model=self.model,
-                milestone=milestone,
-                build_version=build_version,
-                suite=self.suite)
-            return json.loads(reponse.message)["error"]
-        else:
-            _LOGGER.error("Unable to stage build for suite %s", self)
+        # TODO Change run_suite_request proto to have a milestone,
+        # build version and build_target depricate build and board.
+        milestone = self.build.split('-')[0]
+        # TODO fix this upstream so the requests do not have an R on the
+        # milestone.
+        milestone = milestone.strip('R')
+        build_version = self.build.split('-')[1]
+        # TODO plumb through suite_args and test_args.
+        reponse = moblabrpc_connector.MoblabRpcConnector.run_suite(
+            build_target=self.board,
+            model=self.model,
+            milestone=milestone,
+            build_version=build_version,
+            suite=self.suite)
+        return json.loads(reponse.message)["error"]
