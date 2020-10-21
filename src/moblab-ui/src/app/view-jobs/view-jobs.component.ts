@@ -369,7 +369,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   /*
-    Stops job detail expansion from happening when the user selects a job's
+    Stops redirect to job-details page from happening when the user selects a job's
     checkbox.
   */
   checkboxClick(e) {
