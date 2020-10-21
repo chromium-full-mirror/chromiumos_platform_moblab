@@ -130,6 +130,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     // 'start_time_sec_utc',
     // 'finished_time_sec_utc',
     'job_status',
+    'logs',
   ];
   jobSelectOptions: string[] = ['Visible'];
   jobs = new MatTableDataSource<Job>();

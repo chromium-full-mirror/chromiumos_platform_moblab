@@ -233,6 +233,9 @@ services:
     networks:
       - moblab
 
+    volumes:
+      - results:/etc/nginx/html/results:ro
+
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
 
