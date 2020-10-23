@@ -91,7 +91,13 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if not finished_time:
             return Status.NOT_READY
 
-        age = datetime.datetime.now(datetime.timezone.utc) - finished_time
+        age = 0
+        try:
+            age = datetime.datetime.now(datetime.timezone.utc) - finished_time
+        except TypeError:
+            _LOGGER.error("Unable to determine age - default to 0")
+            _LOGGER.error(finished_time)
+
         if previous_status not in [Status.UPLOADED]:
             if test_result.is_logged:
                 _LOGGER.debug('%s finished on %s age %s', test_result, finished_time,
@@ -110,7 +116,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
                 _LOGGER.debug("%s Not running and in the age rage to upload.",
                     test_result)
             return Status.READY
-        
+
         return previous_status
 
     async def check(self, test_result):
