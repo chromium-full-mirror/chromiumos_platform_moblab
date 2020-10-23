@@ -86,8 +86,10 @@ def _query_job_finished_time(id_):
                           'No finished_on time, using job created_on time', id_)
             create_on_str = result.get('created_on')
             if create_on_str:
-                return datetime.datetime.strptime(create_on_str,
-                                                 _TIMESTAMP_FORMAT)
+                created_time = datetime.datetime.strptime(create_on_str,
+                                                          _TIMESTAMP_FORMAT)
+                created_time.replace(tzinfo=datetime.timezone.utc)
+                return created_time
             else:
                 _LOGGER.debug("No job finish time job id %s", id_)
                 return None
