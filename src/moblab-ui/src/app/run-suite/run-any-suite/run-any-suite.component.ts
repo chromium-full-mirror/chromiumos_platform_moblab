@@ -1,10 +1,14 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ViewChild
+} from '@angular/core';
 
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 
 import {BaseSuite} from '../common/base_suite/base-suite.component';
-import {BasicTextFormComponent} from '../common/basic-text-form/basic-text-form.component';
 import {MoblabGrpcService} from './../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../common/run-suite-button/run-suite-button.component';
 

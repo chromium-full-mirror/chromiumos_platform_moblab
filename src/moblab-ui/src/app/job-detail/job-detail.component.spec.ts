@@ -1,29 +1,33 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  async,
+  ComponentFixture,
+  TestBed
+} from '@angular/core/testing';
 
-import {CommonModule} from '@angular/common';
 import {
   FormsModule,
   ReactiveFormsModule
 } from '@angular/forms';
-import {
-  MatButtonModule,
-  MatTableModule,
-} from '@angular/material';
+
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {By} from '@angular/platform-browser';
+import {CommonModule} from '@angular/common';
+import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {By} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MatTableModule} from '@angular/material/table';
+import {RouterModule} from '@angular/router';
 
 import {JobDetailComponent} from './job-detail.component';
 import {Job, Execution} from '../services/moblabrpc_pb';
 import {ViewJobsModule} from '../view-jobs/view-jobs.module';
 import {WidgetsModule} from '../widgets/widgets.module';
-import {RouterModule} from '@angular/router';
+
 
 function createMockJobInfo() {
   const mockJob = new Job();
@@ -113,7 +117,7 @@ describe('JobDetailComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('Test cannot query invalid job id.', () => {
+    it('cannot query invalid job id.', () => {
       const jobQueryButton = fixture.debugElement.nativeElement.querySelector(
         '#job-query-button'
       );
@@ -126,7 +130,7 @@ describe('JobDetailComponent', () => {
       expect(jobQueryButton.disabled).toBeFalsy();
     });
 
-    it('Test successful load of job information.', () => {
+    it('successful load of job information.', () => {
       let jobDetailTableRows =
         fixture.debugElement.nativeElement.querySelectorAll(
         '#job-detail-table .mat-row');
@@ -187,7 +191,7 @@ describe('JobDetailComponent', () => {
         });
     });
 
-    it('Test failure of job information load.', () => {
+    it('failure of job information load is handled correctly.', () => {
       // Loading overlay is visible before a job is loaded.
       expect(fixture.debugElement.query(
         By.css('#loading-overlay'))).toBeDefined();

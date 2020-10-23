@@ -37,20 +37,20 @@ describe('LoadingOverlayComponent', () => {
     fixture.detectChanges();
   });
 
-  fit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  fit('overlay defaults to hidden', () => {
+  it('overlay defaults to hidden', () => {
     expect(isOverlayVisible()).toBeFalsy();
   });
 
-  fit('update call reveals overlay', () => {
+  it('update call reveals overlay', () => {
     component.updateStatus('submitting');
     expect(isOverlayVisible()).toBeTruthy();
   });
 
-  fit('update call will change status message', () => {
+  it('update call will change status message', () => {
     component.updateStatus('staging');
     fixture.detectChanges();
     component.updateStatus('submitting');

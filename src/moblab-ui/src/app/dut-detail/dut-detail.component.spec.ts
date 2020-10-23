@@ -101,7 +101,7 @@ describe('DutDetailComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Check that repair/reverify task buttons disabled prior to DUT load.',
+  it('verify that repair/reverify task buttons disabled prior to DUT load.',
     () => {
       const repairButton = fixture.debugElement.nativeElement.querySelector(
         '#repair-button'
@@ -113,17 +113,20 @@ describe('DutDetailComponent', () => {
       expect(reverifyButton.disabled).toBeTruthy();
   });
 
-  it('Test load and refresh of DUT detail information.',
+  it('load and refresh of DUT detail information works.',
     () => {
-
+      expect(getDutDetailsSpy).not.toHaveBeenCalled();
       inputDutQuery('000.000.000.000');
       expect(getDutDetailsSpy).toHaveBeenCalled();
+
+      getDutDetailsSpy.calls.reset();
+      expect(getDutDetailsSpy).not.toHaveBeenCalled();
 
       fixture.debugElement.nativeElement.querySelector(
         '#dut-refresh-button'
       ).dispatchEvent(new Event('click'));
 
-      expect(getDutDetailsSpy).toHaveBeenCalledTimes(2);
+      expect(getDutDetailsSpy).toHaveBeenCalled();
 
       // Repair and reverify buttons should be clickable after DUT load.
       const repairButton = fixture.debugElement.nativeElement.querySelector(
@@ -136,7 +139,7 @@ describe('DutDetailComponent', () => {
       expect(reverifyButton.disabled).toBeFalsy();
     });
 
-  it('Test repair and reverify submissions.',
+  it('repair and reverify submissions fire.',
     () => {
 
       inputDutQuery('000.000.000.000');

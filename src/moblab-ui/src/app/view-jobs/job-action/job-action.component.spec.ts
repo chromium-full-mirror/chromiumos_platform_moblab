@@ -6,7 +6,7 @@ import {MatButtonModule } from '@angular/material/button';
 import {MatCardModule } from '@angular/material/card';
 import {MatFormFieldModule } from '@angular/material/form-field';
 import {MatSelect, MatSelectModule } from '@angular/material/select';
-import {MatSnackBarModule } from '@angular/material';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 import {Job} from '../../services/moblabrpc_pb';
 import {JobActionComponent} from './job-action.component';
@@ -64,11 +64,11 @@ describe('JobActionComponent', () => {
     fixture.detectChanges();
   }
 
-  it('Minimal, creation test.', () => {
+  it('should create.', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Test is disabled without both job + action select.', () => {
+  it('component is disabled without both job + action select.', () => {
     const actionButton = fixture.debugElement.nativeElement.querySelector(
       '#action-button'
     );
@@ -80,7 +80,7 @@ describe('JobActionComponent', () => {
     expect(actionButton.disabled).toBeTruthy();
   });
 
-  it('Test action button enables after action select + job select.', () => {
+  it('action button enables after action select + job select.', () => {
     applySelection('Abort');
     component.selectJob(getMockJob(0));
     fixture.detectChanges();
@@ -90,7 +90,7 @@ describe('JobActionComponent', () => {
     expect(actionButton.disabled).toBeFalsy();
   });
 
-  it('Test call of abort jobs.', () => {
+  it('call of abort jobs works.', () => {
     applySelection('Abort');
     component.selectJob(getMockJob(0));
     fixture.detectChanges();
@@ -98,7 +98,7 @@ describe('JobActionComponent', () => {
     expect(abortJobsSpy).toHaveBeenCalled();
   });
 
-  it('Test that job selection clears after action submit.', () => {
+  it('job selection clears after action submit.', () => {
     expect(component.getNumSelectedJobs()).toBe(0);
 
     applySelection('Abort');

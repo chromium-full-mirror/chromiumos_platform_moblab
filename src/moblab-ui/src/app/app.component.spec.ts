@@ -1,10 +1,8 @@
 /* tslint:disable:no-unused-variable */
 
 import { async, TestBed } from '@angular/core/testing';
-import {
-  MatIconModule,
-  MatToolbarModule
-} from '@angular/material';
+import {MatIconModule} from '@angular/material/icon';
+import {MatToolbarModule} from '@angular/material/toolbar';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { AppComponent } from './app.component';

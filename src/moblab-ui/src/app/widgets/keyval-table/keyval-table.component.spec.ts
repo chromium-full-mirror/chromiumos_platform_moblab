@@ -31,7 +31,7 @@ describe('KeyValTableComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Test row loading and empty check.', () => {
+  it('row loading and empty check work.', () => {
     expect(component.isEmpty()).toBe(true);
 
     component.loadRows(

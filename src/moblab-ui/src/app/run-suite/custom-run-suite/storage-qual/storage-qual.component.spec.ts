@@ -1,24 +1,33 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import {
+  async,
+  ComponentFixture,
+  TestBed
+} from '@angular/core/testing';
 
-import { StorageQualComponent } from './storage-qual.component';
-import { WidgetsModule } from "app/widgets/widgets.module";
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {RouterModule} from '@angular/router';
+
+import {BasicInputFormComponent} from '../../common/basic-input-form/basic-input.component';
+import {StorageQualComponent} from './storage-qual.component';
+
 
 describe('StorageQualComponent', () => {
   let component: StorageQualComponent;
   let fixture: ComponentFixture<StorageQualComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        MatCardModule,
-        WidgetsModule,
-      ],
-      declarations: [StorageQualComponent]})
-      .compileComponents();
+      TestBed.configureTestingModule({
+          imports: [
+            MatSnackBarModule,
+            RouterModule,
+            RouterModule.forRoot([]),
+          ],
+          declarations: [
+            BasicInputFormComponent,
+            StorageQualComponent
+          ]})
+        .compileComponents();
   }));
 
   beforeEach(() => {

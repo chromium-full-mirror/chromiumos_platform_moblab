@@ -82,7 +82,7 @@ describe('ViewDutsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Basic load-in case.', () => {
+  it('load-in case.', () => {
     const viewDutsTableRows =
       fixture.debugElement.nativeElement.querySelectorAll(
         '#view-duts-table .mat-row');
@@ -91,7 +91,7 @@ describe('ViewDutsComponent', () => {
     expect(getDutsSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('Testing refresh button.', () => {
+  it('refresh button works.', () => {
     applyClickTo('#duts-refresh-button');
 
     const viewDutsTableRows =
@@ -102,7 +102,7 @@ describe('ViewDutsComponent', () => {
     expect(getDutsSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('Test that unenrolled DUTs can be hidden.', () => {
+  it('unenrolled DUTs can be hidden.', () => {
 
     component.setHideUnenrolledDuts(true);
     fixture.detectChanges();
@@ -120,7 +120,7 @@ describe('ViewDutsComponent', () => {
     expect(hiddenDutsCount).toBe(viewDutsTableRows.length / 2);
   });
 
-  it('Test select all and select no DUTs.', () => {
+  it('select all and select no DUTs toggles correctly.', () => {
     expect(component.getSelectedDutHostnames().length).toBe(0);
 
     // Toggling checkbox widget.

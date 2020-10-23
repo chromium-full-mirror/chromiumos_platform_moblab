@@ -64,12 +64,12 @@ describe('UpdateButtonComponent', () => {
 
 
       isUpdateAvailableSpy = spyOn<any>(
-        //ts-ignore
+        // @ts-ignore
         buttonComponent.moblabGrpcService,
         'get_is_update_available'
       );
       updateMoblabSpy = spyOn<any>(
-        //ts-ignore
+        // @ts-ignore
         buttonComponent.moblabGrpcService,
         'update_moblab'
       );
@@ -77,6 +77,11 @@ describe('UpdateButtonComponent', () => {
 
     it('should compile', () => {
       expect(buttonComponent).toBeTruthy();
+    });
+
+    it('update click should invoke dialog.', () => {
+      dispatchButtonClick(buttonFixture, '.update-button');
+      expect(dialogSpy).toHaveBeenCalled();
     });
 
     it('update click should invoke dialog.', () => {

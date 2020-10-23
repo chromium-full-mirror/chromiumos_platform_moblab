@@ -13,6 +13,7 @@ import {EnrollmentComponent} from './enrollment.component';
 import {PipesModule} from 'app/pipes/pipes.module';
 import {WidgetsModule} from 'app/widgets/widgets.module';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 
 describe('EnrollmentComponent', () => {
@@ -26,6 +27,7 @@ describe('EnrollmentComponent', () => {
           MatCardModule,
           MatCheckboxModule,
           MatIconModule,
+          MatSnackBarModule,
           MatTableModule,
           PipesModule,
           RouterModule,
