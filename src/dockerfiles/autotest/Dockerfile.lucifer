@@ -47,6 +47,8 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 RUN sed -i 's#go.opencensus.io/exporter/stackdriver#contrib.go.opencensus.io/exporter/stackdriver#g' lucifer/metrics/metrics.go
 RUN sed -i 's#trace.SetDefaultSampler(trace.AlwaysSample())#//trace.SetDefaultSampler(trace.AlwaysSample())#g' lucifer/metrics/metrics.go
+RUN sed -i 's#c.span.End()#//c.span.End()#g' lucifer/metrics/metrics.go
+RUN sed -i 's#ctx, cl.span = trace.StartSpan(ctx, programName)#//ctx, cl.span = trace.StartSpan(ctx, programName)#g' lucifer/metrics/metrics.go
 
 RUN go get -v go.chromium.org/chromiumos/infra/proto/go/test_platform/side_effects
 RUN protoc \
