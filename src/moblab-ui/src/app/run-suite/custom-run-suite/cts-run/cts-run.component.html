@@ -11,7 +11,7 @@
       [placeholder]="['Pick from CTS versions']"
       [options]="['cts_N', 'cts_P' ]"
       [isShown]="true"
-      (update)="ctsVersionChanged($event.value)">
+      (select)="ctsVersionChanged($event.value)">
   </app-basic-selector>
 
   <app-basic-text-form></app-basic-text-form>

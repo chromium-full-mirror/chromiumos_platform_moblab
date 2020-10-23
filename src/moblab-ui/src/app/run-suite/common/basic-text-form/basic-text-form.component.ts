@@ -1,4 +1,8 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output
+} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {BaseForm} from '../base-form/base-form.component';
 
@@ -13,6 +17,8 @@ import {BaseForm} from '../base-form/base-form.component';
  * This is a more long-form alternative to input forms.
  */
 export class BasicTextFormComponent extends BaseForm {
+  @Output() update = new EventEmitter();
+
   private text = new FormControl('');
 
   getText() {

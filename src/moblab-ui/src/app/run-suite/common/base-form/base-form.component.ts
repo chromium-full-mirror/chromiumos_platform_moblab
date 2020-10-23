@@ -13,7 +13,6 @@ const DISABLED_NAME = 'This form is disabled.';
  */
 export abstract class BaseForm {
   @Input() isShown: boolean;
-  @Output() update = new EventEmitter();
 
   private disabled = false;
   private disabledReasonMessage = DISABLED_NAME;

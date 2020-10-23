@@ -29,7 +29,7 @@ const SELECT_BUILD_VERSION_PROMPT = 'Please select build.';
   templateUrl: './build-select-forms.component.html',
   styleUrls: ['./build-select-forms.component.css']
 })
-export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
+export class BuildSelectFormsComponent implements AfterViewInit {
   @ViewChild('modelSelector') modelSelector;
   @ViewChild('milestoneSelector') milestoneSelector;
   @ViewChild('boardSelector') boardSelector;
@@ -62,11 +62,9 @@ export class BuildSelectFormsComponent implements OnInit, AfterViewInit {
     private snackBar: MatSnackBar,
   ) {}
 
-  ngOnInit() {
-    this.getModels();
-  }
-
   ngAfterViewInit() {
+    this.getModels();
+
     this.boardSelector.disable(SELECT_MODEL_PROMPT);
     this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
     this.buildSelector.disable(SELECT_MILESTONE_PROMPT);

@@ -1,19 +1,19 @@
 /* tslint:disable:no-unused-variable */
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
+import {BasicAutocompleteSelectorComponent} from '../basic-autocomplete-selector/basic-autocomplete-selector.component';
+import {BasicInputFormComponent} from '../basic-input-form/basic-input.component';
+import {BasicSelectorComponent} from '../basic-selector/basic-selector.component';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {BrowserModule, By} from '@angular/platform-browser';
+import {BuildSelectFormsComponent} from './build-select-forms.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatCardModule} from '@angular/material/card';
 import {MatInputModule} from '@angular/material/input';
 import {MatOption} from '@angular/material/core';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
-import {BasicAutocompleteSelectorComponent} from '../basic-autocomplete-selector/basic-autocomplete-selector.component';
-import {BuildSelectFormsComponent} from './build-select-forms.component';
 
 describe('BuildSelectFormsComponent', () => {
   let component: BuildSelectFormsComponent;
@@ -30,31 +30,40 @@ describe('BuildSelectFormsComponent', () => {
   let modelSelectorComponent: BasicAutocompleteSelectorComponent;
   let milestoneSelectorComponent: BasicAutocompleteSelectorComponent;
   let buildSelectorComponent: BasicAutocompleteSelectorComponent;
-  let poolSelectorComponent: BasicAutocompleteSelectorComponent;
+  let poolSelectorComponent: BasicSelectorComponent;
 
-  function applySelection(targetComponent: BasicAutocompleteSelectorComponent, value: string) {
+  function applyAutocompleteSelection(targetComponent: BasicAutocompleteSelectorComponent, value: string) {
     targetComponent.onOptionSelect(new MatAutocompleteSelectedEvent(
       this,
       new MatOption(fixture.nativeElement, null, null, null)
     ));
+    targetComponent.select.emit({value: value});
+    fixture.detectChanges();
+  }
+
+  function applySelection(targetComponent: BasicSelectorComponent, value: string) {
+    targetComponent.select.emit({value: value});
+    fixture.detectChanges();
   }
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
           BrowserAnimationsModule,
+          BrowserModule,
           FormsModule,
-          MatFormFieldModule,
-          MatIconModule,
+          MatAutocompleteModule,
+          MatCardModule,
           MatInputModule,
           MatSelectModule,
           MatSnackBarModule,
-          MatTooltipModule,
           ReactiveFormsModule,
         ],
         declarations: [
           BasicAutocompleteSelectorComponent,
+          BasicInputFormComponent,
           BuildSelectFormsComponent,
+          BasicSelectorComponent,
         ]})
       .compileComponents();
   }));
@@ -111,25 +120,26 @@ describe('BuildSelectFormsComponent', () => {
     expect(buildSelectorComponent.isDisabled()).toBe(true);
     expect(poolSelectorComponent.isDisabled()).toBe(true);
 
-    applySelection(modelSelectorComponent, 'MockModel1');
+    applyAutocompleteSelection(modelSelectorComponent, 'MockModel1');
     expect(boardSelectorComponent.isDisabled()).toBe(false);
 
-    applySelection(boardSelectorComponent, 'BuildTarget1');
+    applyAutocompleteSelection(boardSelectorComponent, 'BuildTarget1');
     expect(milestoneSelectorComponent.isDisabled()).toBe(false);
 
-    applySelection(milestoneSelectorComponent, 'R01');
+    applyAutocompleteSelection(milestoneSelectorComponent, 'R01');
     expect(buildSelectorComponent.isDisabled()).toBe(false);
 
-    applySelection(buildSelectorComponent, 'BuildVersion/1');
+    applyAutocompleteSelection(buildSelectorComponent, 'BuildVersion/1');
     expect(poolSelectorComponent.isDisabled()).toBe(false);
     expect(allRequiredFieldsEmitter).toHaveBeenCalledTimes(1);
   });
 
   it('updating pool will re-emit build values', () => {
-    applySelection(modelSelectorComponent, 'MockModel1');
-    applySelection(milestoneSelectorComponent, 'R01');
-    applySelection(boardSelectorComponent, 'BuildTarget1');
-    applySelection(buildSelectorComponent, 'BuildVersion/1');
+    applyAutocompleteSelection(modelSelectorComponent, 'MockModel1');
+    applyAutocompleteSelection(milestoneSelectorComponent, 'R01');
+    applyAutocompleteSelection(boardSelectorComponent, 'BuildTarget1');
+    applyAutocompleteSelection(buildSelectorComponent, 'BuildVersion/1');
+    expect(allRequiredFieldsEmitter).toHaveBeenCalledTimes(1);
     applySelection(poolSelectorComponent, 'TestPool1');
     expect(allRequiredFieldsEmitter).toHaveBeenCalledTimes(2);
   });

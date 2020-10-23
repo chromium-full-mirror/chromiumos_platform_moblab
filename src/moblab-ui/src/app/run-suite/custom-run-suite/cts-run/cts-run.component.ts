@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  ChangeDetectorRef,
   Component,
   ViewChild
 } from '@angular/core';
@@ -31,19 +30,19 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
 
   selectedAndroidVersion: string;
 
-  constructor(private changeDetector: ChangeDetectorRef,
-    moblabGrpcService: MoblabGrpcService,
-    router: Router,
-    snackBar: MatSnackBar) {
+  constructor(moblabGrpcService: MoblabGrpcService,
+              router: Router,
+              snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
   /** Sets initial form enable/disable states.
    * */
   ngAfterViewInit(): void {
-    this.versionSelectForm.disable('Please select build.');
-    this.modulesTextForm.disable('Please select build.');
-    this.changeDetector.detectChanges();
+    setTimeout(function() {
+      this.versionSelectForm.disable('Please select build.');
+      this.modulesTextForm.disable('Please select build.');
+    }.bind(this));
   }
 
   /** Method is triggered when build version form no longer has a valid

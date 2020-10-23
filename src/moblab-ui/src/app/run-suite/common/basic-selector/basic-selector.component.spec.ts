@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {Component, DebugElement} from '@angular/core';
+import {Component} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatCardModule} from '@angular/material/card';
 import {MatInputModule} from '@angular/material/input';
@@ -20,7 +20,7 @@ import {BasicSelectorComponent} from './basic-selector.component';
         [placeholder]="['Pick from available options']"
         [options]="['MockOption1']"
         [isShown]="true"
-        (update)="selectChanged($event.value)">
+        (select)="selectChanged($event.value)">
     </app-basic-selector>
   `,
 })
@@ -61,7 +61,22 @@ describe('BasicSelectorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Check that one option selector autocompletes.', () => {
+  it('check that one option selector autocompletes.', () => {
     expect(component.getSelectedValue()).toBe('MockOption1');
+  });
+
+  it('expect selected Output to fire on selection', () => {
+    const select = wrapperFixture.debugElement.nativeElement.querySelector(
+      '.mat-select'
+    );
+    // new MatOptionSelectionChange(new MatOption(1,1,1,1))
+    // select.dispatchEvent(new Event('input'));
+    // wrapperFixture.debugElement.query(By.css('mat-select')).triggerEventHandler('selectionChange', { value: { id: 1 } });
+    spyOn(component.select, "emit").and.callThrough();
+
+    select.dispatchEvent(new Event('selectionChange'));
+    wrapperFixture.detectChanges();
+    expect(component.select.emit).toHaveBeenCalledTimes(1);
+
   });
 });

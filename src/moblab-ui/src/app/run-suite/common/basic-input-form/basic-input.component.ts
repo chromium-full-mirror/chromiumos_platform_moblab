@@ -1,4 +1,10 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
 import {BaseForm} from '../base-form/base-form.component';
@@ -16,6 +22,8 @@ import {numericValidator} from '../../../utils/validators';
 export class BasicInputFormComponent extends BaseForm implements OnInit {
   @Input() name: string;
   @Input() isNumeric: boolean;
+  @Output() update = new EventEmitter();
+
   private input = new FormControl('');
 
   ngOnInit(): void {
