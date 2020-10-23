@@ -91,7 +91,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if not finished_time:
             return Status.NOT_READY
 
-        age = 0
+        age = datetime.timedelta()
         try:
             age = datetime.datetime.now(datetime.timezone.utc) - finished_time
         except TypeError:
