@@ -33,6 +33,7 @@ describe('BasicInputFormComponent', () => {
     const inputForm = fixture.debugElement.nativeElement.querySelector(
       '#input'
     );
+    inputForm.focus();
     inputForm.value = inputValue;
     inputForm.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -59,5 +60,15 @@ describe('BasicInputFormComponent', () => {
     setInput('NaN');
 
     expect(component.getInputFormControl().hasError('isNaN')).toBe(true);
+  });
+
+  it('update emitter fires on input change', () => {
+    // the input events fired below don't include a 'blur' event, which is fired
+    // when the user navigates away from a form.
+    setInput('1');
+
+    fixture.whenStable().then(()=>{
+      expect(component.update.emit).toHaveBeenCalledTimes(1);
+    });
   });
 });

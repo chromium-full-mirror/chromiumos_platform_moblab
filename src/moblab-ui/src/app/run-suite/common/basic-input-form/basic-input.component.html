@@ -3,8 +3,7 @@
     <mat-label>{{name}}</mat-label>
     <input id="input" matInput
            [formControl]="this.getInputFormControl()"
-           [disabled]="true"
-           (change)="update.emit('')">
+           [disabled]="true">
     <mat-error
       *ngIf="this.getInputFormControl().hasError('isNaN')">
       Input needs to be numeric.

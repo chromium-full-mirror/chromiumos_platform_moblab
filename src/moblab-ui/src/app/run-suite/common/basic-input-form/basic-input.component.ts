@@ -22,6 +22,10 @@ export class BasicInputFormComponent extends BaseForm implements OnInit {
     if (this.isNumeric) {
       this.setNumericValidation();
     }
+
+    this.input.valueChanges.subscribe(value => {
+      this.update.emit(this.input.value);
+    });
   }
 
   setNumericValidation() {
