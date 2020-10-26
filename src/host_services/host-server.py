@@ -16,9 +16,9 @@ import grpc
 import netifaces
 
 # pylint: disable=import-error
-from moblab_common.proto import hostservices_pb2
+import hostservices_pb2
 # pylint: disable=import-error
-from moblab_common.proto import hostservices_pb2_grpc
+import hostservices_pb2_grpc
 
 
 class HostService(hostservices_pb2_grpc.MoblabHostServiceServicer):
