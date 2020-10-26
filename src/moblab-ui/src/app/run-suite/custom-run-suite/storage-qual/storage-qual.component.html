@@ -13,7 +13,7 @@
       [options]="variationOptions"
       [placeholder]="['Select a variation']"
       [isShown]="true"
-      (update)="variationChanged($event.value)">
+      (select)="variationChanged($event.value)">
   </app-basic-selector>
 
   <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'"

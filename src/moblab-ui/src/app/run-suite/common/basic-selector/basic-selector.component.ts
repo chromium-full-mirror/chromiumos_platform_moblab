@@ -8,9 +8,9 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import {MatSelect} from '@angular/material/select';
-
 import {BaseForm} from '../base-form/base-form.component';
+import {EventEmitter} from '@angular/core';
+import {MatSelect, MatSelectChange} from '@angular/material/select';
 
 
 /**
@@ -30,7 +30,9 @@ export class BasicSelectorComponent extends BaseForm implements OnChanges, OnIni
   @Input() placeholder: string;
   @Input() title: string;
 
-  @Output() selected: string = null;
+  @Output() select = new EventEmitter();
+
+  selected: string = null;
 
   ngOnInit() {
     this.autoSelectedSingleOption();
@@ -52,12 +54,12 @@ export class BasicSelectorComponent extends BaseForm implements OnChanges, OnIni
     // If the drop down only has one item - auto select it.
     if (this.autoselect && this.options.length === 1) {
       this.selected = this.options[0];
-      this.update.emit({value: this.selected});
+      this.select.emit({value: this.selected});
     }
   }
 
-  onChange(event: Event): void {
-    this.update.emit(event);
+  onChange(event: MatSelectChange): void {
+    this.select.emit(event);
   }
 
   getSelectedValue(): string {
