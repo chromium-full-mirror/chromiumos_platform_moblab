@@ -107,11 +107,12 @@
           "options": {
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
+            "polyfills": "src/polyfills.ts",
             "scripts": [],
             "styles": [
               "src/styles.scss"
             ],
-            "tsConfig": "src/tsconfig.json",
+            "tsConfig": "src/tsconfig.spec.json",
             "assets": [
               "src/assets",
               "src/favicon.ico"
