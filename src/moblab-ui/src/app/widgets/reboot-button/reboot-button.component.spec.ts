@@ -60,7 +60,7 @@ describe('RebootButtonComponent', () => {
       dialogSpy = spyOn(TestBed.get(MatDialog), 'open')
         .and.returnValue(dialogRefSpyObj);
       rebootMoblabSpy = spyOn<any>(
-        //ts-ignore
+        // @ts-ignore
         buttonComponent.moblabGrpcService,
         'reboot_moblab'
       );

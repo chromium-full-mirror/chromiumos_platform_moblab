@@ -1,22 +1,13 @@
 import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
-import {
-  AfterContentInit,
   AfterViewInit,
   ChangeDetectorRef,
   Component,
-  HostListener,
   Input,
   OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
@@ -25,7 +16,7 @@ import {MatTableDataSource} from '@angular/material/table';
 
 import {forbiddenDateValidator, forbiddenIDValidator} from '../utils/validators';
 import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
-import {Job, Execution} from '../services/moblabrpc_pb';
+import {Job} from '../services/moblabrpc_pb';
 import {JobActionComponent} from './job-action/job-action.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
@@ -187,19 +178,21 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     if (!this.hideSelectors) {
       this.displayedColumns = ['job_checkboxes'].concat(this.displayedColumns);
     }
+  }
 
+  ngAfterViewInit() {
     if (!this.manualPopulate) {
       this.moblabGrpcService.getNumJobs(
         (numJobs: number) => { this.numJobs = numJobs; }
       )
       this.getNextPageJobs();
     }
-  }
 
-  ngAfterViewInit() {
     this.paginator.page.subscribe(
       () => this.getNextPageJobs()
     );
+
+    this.changeDetectorRefs.detectChanges();
   }
 
   applyFilters(params) {

@@ -96,7 +96,11 @@ function createMockJobIds(id_filter?: string, name_filter?: string,
 @Component({
   selector: 'view-jobs-test-wrapper',
   template:
-      `<app-view-jobs [manualPopulate]="true"></app-view-jobs>`,
+      `<app-view-jobs
+          [manualPopulate]="true"
+          [hideFilters]="true"
+          [hideActionBar]="true"
+      ></app-view-jobs>`,
 })
 class ViewJobsTestWrapperComponent {
 }
@@ -146,6 +150,12 @@ describe('ViewJobsComponent', () => {
     let wrapperFixture: ComponentFixture<ViewJobsTestWrapperComponent>
 
     beforeEach(() => {
+      fixture = TestBed.createComponent(ViewJobsComponent);
+      wrapperFixture = TestBed.createComponent(ViewJobsTestWrapperComponent);
+      component = fixture.componentInstance;
+
+      fixture.detectChanges();
+      wrapperFixture.detectChanges();
     });
 
     // The ViewJobsTestWrapperComponent used in this test group is templated to
@@ -157,15 +167,9 @@ describe('ViewJobsComponent', () => {
 
     it('hide filters and hide selectors flags work',
       () => {
-        expect(wrapperFixture.debugElement.query(By.css('.filter-box'))).toBeDefined();
-        expect(wrapperFixture.debugElement.query(By.css('.job_checkboxes'))).toBeDefined();
-        component.hideFilters = true;
-        component.hideSelectors = true;
-        wrapperFixture.detectChanges()
         expect(wrapperFixture.debugElement.query(By.css('.filter-box'))).toBeNull();
         expect(wrapperFixture.debugElement.query(By.css('.job_checkboxes'))).toBeNull();
       });
-
   });
 
   describe('basic/filtering/checkbox tests', function () {

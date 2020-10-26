@@ -49,13 +49,13 @@ describe('BasicInputFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Basic input test.', () => {
+  it('input works.', () => {
     const input_str = 'TestInput';
     setInput(input_str);
     expect(component.getInput()).toBe(input_str);
   });
 
-  it('Test numeric validator.', () => {
+  it('numeric validator errors non-numbers.', () => {
     component.setNumericValidation();
     setInput('NaN');
 

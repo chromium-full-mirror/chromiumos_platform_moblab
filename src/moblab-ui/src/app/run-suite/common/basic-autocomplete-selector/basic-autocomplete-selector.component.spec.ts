@@ -79,40 +79,40 @@ describe('tests on autocomplete selector', () => {
     fixture.detectChanges();
   });
 
-  fit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  fit('check input and select registers', () => {
+  it('check input and select registers', () => {
     fireInputEvent('autocompleteInput', 'MockOption1');
     expect(component.getSelectedValue()).toBe('MockOption1');
   });
 
-  fit('check ambiguous input will not select', () => {
+  it('check ambiguous input will not select', () => {
     fireInputEvent('autocompleteInput', 'MockOption');
     expect(component.getSelectedValue()).toBe('');
   });
 
-  fit('check non-matching input will not select', () => {
+  it('check non-matching input will not select', () => {
     fireInputEvent('autocompleteInput', 'MockOption3');
     expect(component.getSelectedValue()).toBe('');
   });
 
-  fit('check that selected and then changed input will update', () => {
+  it('check that selected and then changed input will update', () => {
     fireInputEvent('autocompleteInput', 'MockOption1');
     fireEvent('autocomplete-wrapper','focus');
     fireInputEvent('autocompleteInput', 'MockOption2');
     expect(component.getSelectedValue()).toBe('MockOption2');
   });
 
-  fit('check that focus and no change will not change selected value', () => {
+  it('check that focus and no change will not change selected value', () => {
     fireInputEvent('autocompleteInput', 'MockOption1');
     fireEvent('autocomplete-wrapper','focus');
     fireEvent('autocomplete-wrapper','blur');
     expect(component.getSelectedValue()).toBe('MockOption1');
   });
 
-  fit('check that focus and bad change will clear selected value', () => {
+  it('check that focus and bad change will clear selected value', () => {
     fireInputEvent('autocompleteInput', 'MockOption1');
     fireEvent('autocomplete-wrapper','focus');
     fireInputEvent('autocompleteInput', 'MockOption3');
@@ -160,11 +160,11 @@ describe('tests on single-option autocomplete selector', () => {
     wrapperFixture.detectChanges();
   });
 
-  fit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  fit('one option selector autocompletes.', () => {
+  it('one option selector autocompletes.', () => {
     expect(component.getSelectedValue()).toBe('MockOption1');
   });
 });

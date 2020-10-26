@@ -5,11 +5,9 @@ import { By } from '@angular/platform-browser';
 
 import { FirmwareComponent } from './firmware.component';
 
-import {
-  MatCardModule,
-  MatCheckboxModule,
-  MatTableModule
-} from "@angular/material";
+import {MatCardModule} from '@angular/material/card';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatTableModule} from '@angular/material/table';
 
 describe('FirmwareComponent', () => {
   let component: FirmwareComponent;

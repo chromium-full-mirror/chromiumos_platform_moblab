@@ -7,7 +7,6 @@ import {MatSelectModule} from '@angular/material/select'
 import {MatTooltipModule} from '@angular/material/tooltip';
 
 import { TableHeaderSelectorComponent } from './table-header-selector.component';
-import { MoblabSelectorComponent } from '../moblab-selector/moblab-selector.component';
 
 
 describe('TableHeaderSelectorComponent', () => {
@@ -23,7 +22,7 @@ describe('TableHeaderSelectorComponent', () => {
         MatSelectModule,
         MatTooltipModule,
       ],
-      declarations: [ TableHeaderSelectorComponent, MoblabSelectorComponent ]
+      declarations: [ TableHeaderSelectorComponent ]
     })
     .compileComponents();
   }));
