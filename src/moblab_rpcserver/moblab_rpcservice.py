@@ -1,1160 +1,987 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
-import distutils
-import docker
-import os
+import calendar
+import datetime
+import grpc
+import logging
 import re
-import requests
-import socket
 import time
 
-from collections import namedtuple
-from datetime import datetime
-from google.cloud import storage
+import moblab_service
+# pylint: disable=import-error
+from moblab_common.proto import moblabrpc_pb2
+# pylint: disable=import-error
+from moblab_common.proto import moblabrpc_pb2_grpc
 
-from moblab_common import build_connector
-from moblab_common import dut_connector
-from moblab_common import host_connector
-from moblab_common import moblab_build_connector
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    import logging
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
+from moblab_common import feedback_connector
+from moblab_common import host_connector
+from moblab_common import moblab_info
 
-MilestonePair = namedtuple('MilestonePair', ['milestone', 'is_staged'])
-BuildVersionPair = namedtuple('BuildVersionPair', ['build_version', 'is_staged'])
-BuildResults = namedtuple('BuildResults', ['results', 'is_incomplete'])
-
-_DEFAULT_SUITE_TIMEOUT_MINS = 1440
-_SUITE_TIMEOUT_MAP = {
-    'hardware_storagequal': 40320,
-    'hardware_storagequal_quick': 40320
+AFE_TO_MOBLAB_STATUS_MAPPINGS =  {
+    'Queued' : moblabrpc_pb2.Job.QUEUED,
+    'Provisioning' : moblabrpc_pb2.Job.PROVISIONING,
+    'Running' : moblabrpc_pb2.Job.RUNNING,
+    'Completed' : moblabrpc_pb2.Job.SUCCESS,
+    'Failed' : moblabrpc_pb2.Job.FAILED,
+    'Aborted' : moblabrpc_pb2.Job.ABORTED,
+    'Starting' : moblabrpc_pb2.Job.STARTING,
+    'Pending' : moblabrpc_pb2.Job.PENDING,
+    'Resetting' : moblabrpc_pb2.Job.RESETTING,
+    'Verifying' : moblabrpc_pb2.Job.VERIFYING,
+    'Gathering' : moblabrpc_pb2.Job.GATHERING,
+    'Parsing' : moblabrpc_pb2.Job.PARSING,
+    'Stopped' : moblabrpc_pb2.Job.STOPPED,
+    'Cleaning' : moblabrpc_pb2.Job.CLEANING,
+    'Template' : moblabrpc_pb2.Job.TEMPLATE
 }
 
-_STORAGE_QUAL_VARIATIONS = {
-    0: 'hardware_storagequal',
-    1: 'hardware_storagequal_quick',
-    2: 'hardware_storagequal_external'
-}
-
-HARDWARE_AVL_BUG_ID = 'bug_id'
-HARDWARE_AVL_PART_NO = 'part_id'
-
-MAX_BUILD_RESULTS_PAGE = 1000
-
-MOBLAB_DOCKER_REGISTRY = 'gcr.io/chromeos-partner-moblab/'
-
-MAX_BUILD_STAGING_SECONDS = 300 # 5 minutes
-
-class MoblabRpcError(Exception):
-    pass
-
-
-class MoblabService(object):
-    model_re = re.compile(r'^model:(.*)')
-    build_target_re = re.compile(r'^board:(.*)')
-    pool_re = re.compile(r'^pool:(.*)')
-
-    afe_connector = None
-    config_connector = None
-
-    _last_config_update = None
-    _last_build_connector_update = None
-    _last_moblab_build_connector_update = None
+class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def __init__(self):
+        super(MoblabRpcService, self).__init__()
         self.afe_connector = afe_connector.AFEConnector()
         self.config_connector = config_connector.MoblabConfigConnector(
             self.afe_connector)
-        _last_config_update = datetime.utcnow()
+        self.service = moblab_service.MoblabService()
         self.setup_devserver_connector()
-        self.dut_connector = dut_connector.MoblabDUTConnector()
-
-    def _find_dut_id_given_ip(self, dut_hostname):
-        """
-            Given an ip address, will return the id given to the DUT by AFE;
-            else will raise an error.
-        """
-        try:
-            return self.afe_connector.get_connected_devices(
-                hostname=dut_hostname)[0]['id']
-        except (IndexError, KeyError):
-            msg = 'Unable to find AFE id for dut: {}'.format(dut_hostname)
-            logging.error(msg)
-            raise MoblabRpcError(msg)
 
     def setup_devserver_connector(self):
         self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
         logging.info('Using bucket: %s', self.moblab_bucket_name)
         self.devserver_connector = devserver_connector.DevserverConnector(
             self.moblab_bucket_name)
-        self._init_build_connector(raise_error=False)
 
-    def _init_build_connector(self, raise_error=True):
-        try:
-            self._build_connector = build_connector.MoblabBuildConnector(
-                self.moblab_bucket_name
+    def send_moblab_screenshot(self, request, _context):
+        """Uploads image and feedback text to GCS.
+
+        Args:
+          request: SendMoblabRequest object with a string email, string
+          description and a Base64 serialized png image screenshot.
+          _context: grpc.server.Context
+
+        Returns:
+          SendMoblabResponse type with string message indicating location of
+          uploaded feedback.
+        """
+        fc = feedback_connector.MoblabFeedbackConnector(self.moblab_bucket_name)
+        path, url = fc.upload_feedback(
+            request.contact_email,
+            request.description,
+            request.screenshot,
+        )
+        response = moblabrpc_pb2.SendMoblabScreenshotResponse(
+            message='Feedback uploaded to bucket {} under {}. URL to screenshot: {}'
+                .format(self.moblab_bucket_name, path, url)
+        )
+        return response
+
+    def run_suite(self, request, _context):
+        """Generic run suite method. Accepts suite as a custom argument, allows
+        for run of any suite but with no custom arguments.
+
+        Args:
+          request: RunSuiteRequest object with parameters describing suite to be
+          run and arguments for suite run.
+          _context: grpc.server.Context
+        Returns:
+          RunSuiteResponse object with a string result message.
+        """
+        return moblabrpc_pb2.RunSuiteResponse(
+            message=self.service.run_suite(
+                  request.build_target,
+                  request.model,
+                  request.milestone,
+                  request.build_version,
+                  request.suite,
+                  pool=request.pool,
             )
-        except build_connector.MoblabBuildConnectorException as e:
-            logging.exception('Failed to initialize MoblabBuildConnector.')
-            if raise_error:
-                raise
-
-    def _init_moblab_build_connector(self, raise_error=True):
-        """
-            Creates a MoblabBuildConnector for Moblab API calls to get build items.
-            Args:
-                raise_error: if true, will raise any exception encountered during
-                init attempt.
-            Returns:
-              MoblabBuildConnector.
-        """
-        try:
-            self._moblab_build_connector = moblab_build_connector.MoblabBuildConnector()
-        except build_connector.MoblabBuildConnectorException as e:
-            logging.exception('Failed to initialize MoblabBuildConnector.')
-            if raise_error:
-                raise
-
-    @property
-    def build_connector(self):
-        """
-            Returns a build_connector.MoblabBuildConnector instance ( distinct from
-            moblab_build_connector.MoblabBuildConnector ),
-
-            TODO(wangmichael) change naming so that difference between two connectors is more
-            clear.
-        """
-        if not hasattr(self, '_build_connector') or \
-            not self._build_connector or \
-            self._last_config_update != self._last_build_connector_update:
-            self.moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
-            self._init_build_connector()
-            self._last_build_connector_update = self._last_config_update
-        return self._build_connector
-
-    @property
-    def moblab_build_connector(self):
-        """
-            Returns a moblab.build_connector.MoblabBuildConnector instance ( distinct from
-            build_connector.MoblabBuildConnector ),
-        """
-        if not hasattr(self, '_moblab_build_connector') or \
-            not self._moblab_build_connector or \
-            self._last_config_update != self._last_moblab_build_connector_update:
-            self.moblab_bucket_name = self.config_connector.get_cloud_bucket(force_reload=True)
-            self._init_moblab_build_connector()
-            self._last_moblab_build_connector_update = self._last_config_update
-
-        return self._moblab_build_connector
-
-    def _is_moblab_bucket_in_asia(self):
-        if not self.moblab_bucket_name:
-            raise MoblabRpcError('Attempted to check bucket location while bucket has not been configured.')
-
-        bucket = storage.Client().bucket(self.moblab_bucket_name)
-        bucket.reload()
-        return 'asia' in bucket.location.lower()
-
-    def extract_model_from_labels(self, labels):
-        try:
-            return self.extract_from_labels(self.model_re, labels)[0]
-        except IndexError:
-            logging.exception('Failed to parse model from label tags of DUT.')
-            return ''
-
-    def extract_build_target_from_labels(self, labels):
-        try:
-            return self.extract_from_labels(self.build_target_re, labels)[0]
-        except IndexError:
-            logging.exception('Failed to parse build target from label tags of DUT.')
-            return ''
-
-    def extract_pool_from_labels(self, labels):
-        return self.extract_from_labels(self.pool_re, labels)
-
-    def extract_from_labels(self, rexp, labels):
-        result = [
-            m.group(1) for m in [rexp.match(label) for label in labels] if m
-        ]
-        return list(set(result))
-
-    def get_connected_devices(self):
-        connected_duts = self.dut_connector.get_connected_duts()
-        afe_formatted_duts = []
-        for dut in connected_duts:
-            afe_formatted_duts.append({
-                'ip': dut[0],
-                'isConnected': dut[1],
-                'error': dut[2]
-            })
-        return afe_formatted_duts
-
-    def list_duts(self):
-        afe_hosts = self.afe_connector.get_connected_devices()
-        potential_hosts = self.get_connected_devices()
-        connected_ips = []
-        connected_duts = []
-
-        for dut in afe_hosts:
-            dut['enrolled'] = True
-            connected_ips.append(dut['hostname'])
-            connected_duts.append(dut)
-
-        for dut in potential_hosts:
-            if dut['ip'] not in connected_ips:
-                dut['hostname'] = dut['ip']
-                dut['enrolled'] = False
-                dut['status'] = 'Not Enrolled'
-                dut['error'] = dut['error']
-                connected_duts.append(dut)
-
-        return connected_duts
-
-    def _default_suite_timeout_mins(self, suite):
-        if suite in _SUITE_TIMEOUT_MAP:
-            return _SUITE_TIMEOUT_MAP[suite]
-        else:
-            return _DEFAULT_SUITE_TIMEOUT_MINS
-
-    def run_storage_qual_suite(self,
-                               build_target,
-                               model,
-                               milestone,
-                               build_version,
-                               bug_id,
-                               part_id,
-                               variation,
-                               pool=None,
-    ):
-        """Starts storage qual suite run. Formats arguments s.t. they can be
-        ingested by AFE.
-
-        Args:
-            build_target: Ex. octopus
-            model: String identifier for the specific model to be run.
-            milestone: String, Ex. R80
-            build_version: A numeric version string of the form: '00000.00.0'
-            bug_id: Numeric string identifying the associated
-            buganizer issue.
-            part_id: Numeric string identifying relevant part number.
-            variation: RunStorageQualificationSuiteRequest.Variation
-            pool: String identifier for which pool of DUT's to run tests with.
-        Returns:
-          String response message.
-        """
-        avl_args = {
-            HARDWARE_AVL_BUG_ID: bug_id,
-            HARDWARE_AVL_PART_NO: part_id
-        }
-
-        return self.run_suite(
-            build_target,
-            model,
-            milestone,
-            build_version,
-            _STORAGE_QUAL_VARIATIONS[variation],
-            pool,
-            suite_args=avl_args,
-            test_args=avl_args
         )
 
-    def run_memory_qual_suite(self,
-                              build_target,
-                              model,
-                              milestone,
-                              build_version,
-                              bug_id,
-                              part_id,
-                              pool=None,
-    ):
-        """Starts memory qual suite run. Formats arguments s.t. they can be
-        ingested by AFE.
+    def run_cts_suite(self, request, _context):
+        """Sets off CTS suite run.
 
         Args:
-            build_target: Ex. octopus
-            model: String identfier for the specific model to be run.
-            milestone: String,  Ex. R80
-            build_version: A numeric version string of the form: '00000.00.0'
-            bug_id: Numeric string identifying the associated buganizer issue.
-            part_id: Numeric string identifying relevant part number.
-            pool: String identifier for which pool of DUT's to run tests with.
-        Returns:
-          String response message.
-        """
-        avl_args = {
-            HARDWARE_AVL_BUG_ID: bug_id,
-            HARDWARE_AVL_PART_NO: part_id
-        }
-        return self.run_suite(
-            build_target,
-            model,
-            milestone,
-            build_version,
-            'hardware_memoryqual', # suite
-            pool,
-            suite_args=avl_args,
-            test_args=avl_args
-        )
-
-    def run_cts_suite(self,
-                      build_target,
-                      model,
-                      milestone,
-                      build_version,
-                      suite,
-                      pool=None,
-                      autotest_tests=None):
-        """Starts cts suite run. Formats arguments s.t. they can be ingested by
-        AFE.
-
-        Args:
+          request: RunCtsSuiteRequest object with parameters describing suite to be
+          run and arguments for suite run:
             build_target: Ex. octopus
             milestone: Ex. R80
             build_version: A numeric version string of the form: '00000.00.0'
-            model: String identfier for the specific model to be run.
-            pool: String identifier for which pool of DUT's to run tests with.
-            specific_modules: List of strings of specific module names to
-            run.
-        Returns:
-          String response message.
-        """
-
-        suite_args = {}
-        if autotest_tests and len(autotest_tests):
-            suite_args['tests'] = [
-                test.strip() for test in autotest_tests
-            ]
-
-        return self.run_suite(
-            build_target,
-            model,
-            milestone,
-            build_version,
-            suite,
-            pool,
-            suite_args=suite_args)
-
-    def run_gts_suite(self,
-                      build_target,
-                      model,
-                      milestone,
-                      build_version,
-                      pool=None,
-                      autotest_tests=None):
-        """Starts gts suite run. Formats arguments s.t. they can be ingested by
-        AFE.
-
-        Args:
-            build_target: Ex. octopus
-            milestone: Ex. R80
-            build_version: A numeric version string of the form: '00000.00.0'
+            android_version: A string specifying which android version suite to
+             run ( Ex. cts_X )
             model: String identfier for the specific model to be run.
             pool: String identifier for which pool of DUT's to run tests with.
             specific_modules: Comma-separated string of specific module names to
             run.
+          _context: grpc.server.Context
         Returns:
-          String response message.
+          RunSuiteResponse object with a string result message.
         """
-        suite_args = {}
-        if autotest_tests:
-            suite_args['tests'] = [
-                test.strip() for test in autotest_tests
-            ]
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message=self.service
+            .run_cts_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.android_version,
+                request.pool,
+                request.specific_modules
+            ))
+        return response
 
-        return self.run_suite(
-            build_target,
-            model,
-            milestone,
-            build_version,
-            'gts', # suite
-            pool,
-            suite_args=suite_args)
+    def run_gts_suite(self, request, _context):
+        """Sets off GTS suite run.
 
-    def run_suite_faft(
-            self,
-            build_target,
-            build_version,
-            suite,
-            model=None,
-            pool=None,
-            ro_firmware=None,
-            rw_firmware=None,
-    ):
-        build_versions = {}
-        if rw_firmware:
-            build_versions['fwrw-version'] = rw_firmware
-        if ro_firmware:
-            build_versions['fwro-version'] = ro_firmware
+            Args:
+              request: RunGtsSuiteRequest object with parameters describing
+              arguments for suite run:
+                build_target: Ex. octopus
+                milestone: Ex. R80
+                build_version: A numeric version string of the form: '00000.00.0'
+                model: String identfier for the specific model to be run.
+                pool: String identifier for which pool of DUT's to run tests with.
+                specific_modules: Comma-separated string of specific module names to
+                run.
+              _context: grpc.server.Context
+            Returns:
+              RunSuiteResponse object with a string result message.
+            """
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message=self.service
+                .run_gts_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.pool,
+                request.specific_modules
+            ))
+        return response
 
-    def run_suite(self,
-                  build_target,
-                  model,
-                  milestone,
-                  build_version,
-                  suite,
-                  pool=None,
-                  suite_args={},
-                  test_args={},
-                  suite_timeout_mins=None,
-                  extra_builds={}):
-        """Starts suite run. Formats input arguments s.t. that they can be used
-        by an AFE suite run command.
+    def run_storage_qualification_suite(self, request, _context):
+        """Sets off hardware storage qualification suite run.
 
         Args:
+          request: RunStorageQualificationSuiteRequest object with parameters
+          describing arguments for suite run:
             build_target: Ex. octopus
-            milestone: Numeric string Ex. 80
+            milestone: Ex. R80
             build_version: A numeric version string of the form: '00000.00.0'
-            suite: String identifier for the suite to be run.
-            model: String identfier for the specific model to be run.
-            pool: String identifier for which pool of DUT's to run tests with.
-            suite_args: Dict containing key=val pairs to be used by suite control
-              file.
-            test_args: Dict containing key=val pairs to be used by test control
-              file.
+            model: String identifier for the specific model to be run.
+            avl_process_bug_id: Numeric string identifying the associated
+            buganizer issue.
+            avl_part_number: Numeric string identifying relevant part number.
+            variation: RunStorageQualificationSuiteRequest.Variation
+          _context: grpc.server.Context
         Returns:
-          String response message.
+          RunSuiteResponse object with a string result message.
         """
-
-        if not self._is_build_staged(build_version, build_target, model):
-            self._stage_build(model, build_target, build_version)
-
-        build = '{}-release/R{}-{}'.format(build_target, milestone, build_version)
-        builds = {'cros-version': build}
-
-        builds.update(extra_builds)
-
-        if not suite_timeout_mins:
-            suite_timeout_mins = self._default_suite_timeout_mins(suite)
-
-        ap_name, ap_pass = self.config_connector.get_test_wifi_ap_and_password()
-        test_args['ssid'] = ap_name
-        test_args['wifipass'] = ap_pass
-
-        suite_job_id, error = self.afe_connector.run_suite(
-            build_target,
-            build,
-            builds,
-            suite,
-            suite_timeout_mins,
-            pool,
-            model,
-            suite_args=suite_args,
-            test_args=test_args
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message = self.service.run_storage_qual_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.avl_process_bug_id,
+                request.avl_part_number,
+                request.variation,
+                request.pool
+            )
         )
+        return response
 
-        if not suite_job_id:
-            raise MoblabRpcError('Encountered error starting suite\n{}'.format(error))
-
-        return "Suite started (suite job ID: {})".format(suite_job_id)
-
-    def enroll_duts(self, ip_addresses):
-        self.afe_connector.enroll_duts(ip_addresses)
-
-    def unenroll_duts(self, ip_addresses):
-        self.afe_connector.unenroll_duts(ip_addresses)
-
-    def list_connected_duts_firmware(self):
-        duts = self.dut_connector.get_connected_dut_firmware()
-        return duts
-
-    def get_dut_details(self, dut):
-        return self.afe_connector.get_connected_devices(dut, get_current_jobs=True)
-
-    def update_duts_firmware(self, ip_addresses):
-        self.dut_connector.update_firmware(ip_addresses)
-
-    def _is_build_staged(self, build_version, build_target, model):
-        """
-            Applies the specified build artifacts to the bucket configured for this Moblab.
+    def run_memory_qualification_suite(self, request, _context):
+        """Sets off hardware memory qualification suite run.
 
         Args:
-            build_target (string): AKA board of the target DUT.
-            build_version (string): Build version to be applied to DUT for testing.
-            model (string): Model of the DUT.
+          request: RunMemoryQualificationSuiteRequest object with parameters
+          describing arguments for suite run:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identifier for the specific model to be run.
+            avl_process_bug_id: Numeric string identifying the associated
+            buganizer issue.
+            avl_part_number: Numeric string identifying relevant part number.
+          _context: grpc.server.Context
         Returns:
-            Boolean which is true iff build is already staged on Moblab.
+          RunSuiteResponse object with a string result message.
         """
-        return self.moblab_build_connector.check_build_stage_status(
-            build_target,
-            model,
-            build_version,
-            self.moblab_bucket_name
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message = self.service.run_memory_qual_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.avl_process_bug_id,
+                request.avl_part_number,
+                request.pool,
+            )
+        )
+        return response
+
+    def _get_connected_dut_from_dict(self, dut_dict):
+        return moblabrpc_pb2.ConnectedDutInfo(
+            name=dut_dict.get('platform', ''),
+            ip=dut_dict.get('hostname', ''),
+            mac_addr='',
+            model=self.service.extract_model_from_labels(
+                dut_dict.get('labels', [])),
+            build_target=self.service.extract_build_target_from_labels(
+                dut_dict.get('labels', [])),
+            pools=self.service.extract_pool_from_labels(
+                dut_dict.get('labels', [])),
+            status=dut_dict['status'],
+            is_enrolled=dut_dict.get('enrolled', False),
+            is_connected=dut_dict.get('isConnected', True),
+            labels=dut_dict.get('labels', []),
+            attributes=dut_dict.get('attributes', []),
+            error=dut_dict.get('error', '')
         )
 
-    def _stage_build(self, model, build_target, build_version):
-        """
-            Applies the specified build artifacts to the bucket configured for this Moblab.
+    def list_connected_duts(self, _request, _context):
+        response = moblabrpc_pb2.ListConnectedDutsResponse()
+        duts = self.service.list_duts()
+        for dut in duts:
+            dut_info = self._get_connected_dut_from_dict(dut)
+            response.duts.extend([dut_info])
+        return response
 
-        Args:
-            model (string): Model of the target DUT.
-            build_target (string): AKA board of the target DUT.
-            build_version (string): Build version to be applied to DUT for testing.
-        Returns:
-            Nothing.
-        """
-        self.moblab_build_connector.stage_build(build_target, model, build_version, self.moblab_bucket_name)
+    def get_dut_details(self, request, _context):
+        try:
+            dut = self.service.get_dut_details(request.dut)[0]
+        except IndexError:
+            error_msg = 'Unable to find DUT: {}'.format(request.dut)
+            logging.error(error_msg)
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            _context.set_details(error_msg)
+        else:
+            response = moblabrpc_pb2.GetDutDetailsResponse(
+                dut_detail=self._get_connected_dut_from_dict(dut)
+            )
+            if 'current_job' in dut:
+                response.dut_detail.current_job = dut['current_job'] if dut['current_job'] else 0
+            if 'current_special_task' in dut:
+                response.dut_detail.current_dut_task =\
+                    dut['current_special_task'] if dut['current_special_task'] else ''
+        return response
 
-        sleep_interval = 1
-        end_time = time.time() + MAX_BUILD_STAGING_SECONDS
-        while time.time() < end_time:
-            if self.moblab_build_connector.check_build_stage_status(build_target, model, build_version, self.moblab_bucket_name):
-                return
-            time.sleep(sleep_interval)
-            # every failure, increase wait interval by 1.5 times ( exponential backoff, of sorts )
-            sleep_interval *= 1.5
-        raise MoblabRpcError('Build stage did not finish within {} seconds.'.format(MAX_BUILD_STAGING_SECONDS))
+    def list_test_jobs(self, request, context):
+        pass
 
-    def list_usable_build_targets(self, model):
+    def list_build_targets(self, request, _context):
         """
             Returns build targets associated with the given model.
         Args:
-            mode(str): DUT model to return associated build_target(s) for.
+            request: ListBuildTargetsRequest object with model parameter.
+            _context: grpc.server.Context
         Returns:
-            List of build target strings.
+            ListBuildTargetsResponse
         """
+        build_targets = self.service.list_usable_build_targets(
+            request.model
+        )
+        response = moblabrpc_pb2.ListBuildTargetsResponse(
+            build_targets=build_targets)
+        return response
+
+    def list_milestones(self, request, _context):
+        milestones = self.service.list_usable_milestones(
+            request.build_target,
+            request.model
+        )
+        response = moblabrpc_pb2.ListMilestonesResponse(
+                milestones=[moblabrpc_pb2.BuildItem(
+                value=i.milestone,
+                is_staged=i.is_staged
+            ) for i in milestones.results],
+            is_incomplete=milestones.is_incomplete
+        )
+        return response
+
+    def list_build_versions(self, request, _context):
+        build_versions=self.service.list_usable_build_versions(
+            request.build_target,
+            request.milestone,
+            request.model
+        )
+
+        response = moblabrpc_pb2.ListBuildVersionsResponse(
+            build_versions=[
+                moblabrpc_pb2.BuildItem(
+                    value=i.build_version,
+                    is_staged=i.is_staged
+                ) for i in build_versions.results
+            ],
+            is_incomplete=build_versions.is_incomplete
+        )
+        return response
+
+    def list_pools(self, _request, _context):
         afe_hosts = self.afe_connector.get_connected_devices()
-        build_targets = set()
+        pools = set()
         for host in afe_hosts:
-            if self.extract_model_from_labels(host.get('labels', [])) == model:
-                build_targets.add(
-                    self.extract_build_target_from_labels(host.get('labels', []))
-                )
-        return list(build_targets)
+            pools = pools.union(
+                self.service.extract_pool_from_labels(host.get('labels', [])))
+        response = moblabrpc_pb2.ListPoolsResponse(pools=list(pools))
+        return response
 
-    def list_usable_milestones(self, build_target, model):
-        """
-            Returns milestones available for a given model/build_target, both staged and unstaged (if target bucket is in
-            US, otherwise will only return staged milestones).
+    def list_models(self, _request, _context):
+        afe_hosts = self.afe_connector.get_connected_devices()
+        models = set()
+        for host in afe_hosts:
+            models.add(self.service.extract_model_from_labels(host.get('labels', [])))
+        response = moblabrpc_pb2.ListModelsResponse(models=list(models))
+        return response
 
-            In this context, 'remote' means unstaged/from API call (i.e., remote milestones are those that are fetched
-            from the Moblab API rather than from existing build items staged in the partner bucket ).
+    def enroll_duts(self, request, _context):
+        self.service.enroll_duts(request.ips)
+        response = moblabrpc_pb2.EnrollDutsResponse()
+        return response
 
-            Args:
-                build_target(string): build_target (AKA board) to fetch milestones for.
-                model(string): model to fetch milestones for.
-            Returns:
-                A list of tuples where the first item is the milestone and the second is a boolean which is true iff at least
-                one build of the milestone is staged.
-        """
-        bucket_milestones = self.build_connector.get_milestones_available(build_target)
+    def unenroll_duts(self, request, _context):
+        self.service.unenroll_duts(request.ips)
+        response = moblabrpc_pb2.EnrollDutsResponse()
+        return response
 
-        remote_milestones = []
-        if not self._is_moblab_bucket_in_asia():
-            try:
-                remote_milestones = self.moblab_build_connector.list_available_milestones(
-                    build_target,
-                    model,
-                )
-            except moblab_build_connector.MoblabBuildConnectorException as e:
-                logging.exception('Encountered error trying to fetch remote milestones.')
-
-        milestone_results = [MilestonePair(milestone=milestone, is_staged=True)
-                                for milestone in bucket_milestones]
-        milestone_results.extend(
-            [
-                MilestonePair(milestone=milestone, is_staged=False) for milestone in
-                list(set(remote_milestones).difference(set(bucket_milestones)))
-            ]
-        )
-
-        milestone_results.sort(key=lambda x: int(x[0].strip('R')), reverse=True)
-        return BuildResults(results=milestone_results, is_incomplete=(len(remote_milestones) == MAX_BUILD_RESULTS_PAGE))
-
-    def list_usable_build_versions(self, build_target, milestone, model):
-        """
-            Returns build versions available for a given model/build_target/milestone, both staged and unstaged (if target bucket is in
-            US, otherwise will only return staged build versions).
-
-            In this context, 'remote' means unstaged/from API call (i.e., remote build versions are those that are fetched
-            from the Moblab API rather than from existing build items staged in the partner bucket ).
-
-            Args:
-                build_target(string): build_target (AKA board) to return build versions for.
-                model(string): model to return build versions for.
-                milestone(string): milestone to return build versions for.
-            Returns:
-                A list of tuples where the first item is the build_version and the second is a boolean which is true iff the build is staged.
-        """
-        bucket_build_versions = self.build_connector.get_builds_for_milestone(
-            build_target,
-            milestone
-        )
-
-        build_version_results = [
-            BuildVersionPair(build_version=build_version, is_staged=True) for build_version in bucket_build_versions
-        ]
-
-        remote_build_versions = []
-        if not self._is_moblab_bucket_in_asia():
-            try:
-                remote_build_versions = self.moblab_build_connector.list_builds_for_milestone(
-                    build_target,
-                    model,
-                    milestone
-                )
-            except moblab_build_connector.MoblabBuildConnectorException as e:
-                logging.exception('Encountered error trying to fetch remote build versions.')
-
-        build_version_results.extend(
-            [
-                BuildVersionPair(build_version=build_version, is_staged=False) for build_version in
-                list(set(remote_build_versions).difference(set(bucket_build_versions)))
-            ]
-        )
-
-        build_version_results.sort(key=lambda x: distutils.version.LooseVersion(x[0]), reverse=True)
-        return BuildResults(results=build_version_results, is_incomplete=(len(remote_build_versions) == MAX_BUILD_RESULTS_PAGE))
-
-    def get_num_jobs(self,
-                     id_filter=None,
-                     name_filter=None,
-                     created_time_lt=None,
-                     created_time_gt=None,
-                     sub=False,
-                     suite=False,
-                     not_yet_run=False,
-                     running=False,
-                     finished=False,
-                     parent_id_filter=None,
-                     dut_hostname_filter=None):
-        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because the
-        # Autotest backend that we currently invoke only accepts dut_filter on
-        # calls to get_num_host_queue_entries, not get_num_jobs. Even though,
-        # in both cases, the results are packaged and returned as jobs. This may
-        # change when Autotest RPC itself is refactored.
-        if dut_hostname_filter:
-            try:
-                dut_id = self.afe_connector.get_connected_devices(
-                    hostname=dut_hostname_filter)[0]['id']
-            except (IndexError, KeyError):
-                logging.error('Unable to find AFE id for dut: {}'.format(dut_hostname_filter))
-                return
-            return self.afe_connector.get_num_host_queue_entries(
-                host_id=dut_id
+    def list_connected_duts_firmware(self, _request, _context):
+        logging.info('Firmware list requested')
+        duts = self.service.list_connected_duts_firmware()
+        response = moblabrpc_pb2.ListConnectedDutsFirmwareResponse()
+        for dut in duts:
+            dut_firmware_info = moblabrpc_pb2.ConnectedDutFirmwareInfo(
+                ip=dut[0],
+                current_firmware=dut[1],
+                update_firmware=dut[2],
             )
+            response.duts.extend([dut_firmware_info])
+        return response
+
+    def update_duts_firmware(self, request, _context):
+        self.service.update_duts_firmware(request.ips)
+        response = moblabrpc_pb2.UpdateDutsFirmwareResponse()
+        return response
+
+    def get_num_jobs(self, request, _context):
+        num_jobs = self.service.get_num_jobs(
+            request.id_filter, request.name_filter, request.created_time_lt,
+            request.created_time_gt,
+            request.rel_filter == moblabrpc_pb2.Job.CHILD,
+            request.rel_filter == moblabrpc_pb2.Job.SUITE,
+            request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
+            request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            request.parent_id_filter,
+            request.dut_hostname_filter,
+        )
+        response = moblabrpc_pb2.GetNumJobsResponse(num_jobs=num_jobs)
+        return response
+
+    def _convert_timestamp_to_utc_secs(self, ts):
+        if not ts:
+            return None
+        try:
+            dt_ts = datetime.datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
+            to_utc_delta_seconds = calendar.timegm(
+                time.gmtime()) - calendar.timegm(time.localtime())
+            return int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds()) + \
+                   to_utc_delta_seconds
+        except (ValueError, TypeError) as e:
+            logging.error('Encountered an invalid string for conversion to' +
+                          ' timestamp: {}'.format(ts))
+            return None
+
+    def _extract_status_enum(self, status_str):
+        if status_str in AFE_TO_MOBLAB_STATUS_MAPPINGS:
+            return AFE_TO_MOBLAB_STATUS_MAPPINGS[status_str]
+        elif re.match('Aborted \(\s*\w+\s*\)', status_str):
+            # Ex. Aborted (Running)
+            return moblabrpc_pb2.Job.ABORTING
         else:
-            return self.afe_connector.get_num_jobs(
-                id_filter, name_filter, created_time_lt, created_time_gt, sub,
-                suite, not_yet_run, running, finished, parent_id_filter)
+            logging.error(
+                'Encountered unexpected status "{}"'.format(status_str))
+            return moblabrpc_pb2.Job.STATUS_NOT_SET
 
-    def get_jobs(self,
-                 query_start,
-                 query_limit,
-                 id_filter=None,
-                 name_filter=None,
-                 created_time_lt=None,
-                 created_time_gt=None,
-                 sub=False,
-                 suite=False,
-                 not_yet_run=False,
-                 running=False,
-                 finished=False,
-                 parent_id_filter=None,
-                 dut_hostname_filter=None):
-        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because the
-        # Autotest backend that we currently invoke only accepts dut_filter on
-        # calls to get_host_queue_entries, not get_jobs. Even though,
-        # in both cases, the results are packaged and returned as jobs. This may
-        # change when Autotest RPC itself is refactored.
-        if dut_hostname_filter:
-            try:
-                dut_id = self.afe_connector.get_connected_devices(
-                    hostname=dut_hostname_filter)[0]['id']
-            except (IndexError, KeyError):
-                logging.error('Unable to find AFE id for dut: {}'.format(dut_hostname_filter))
-                return
-            hqes = self.afe_connector.get_host_queue_entries(
-                host_id=dut_id,
-                query_start=query_start,
-                query_limit=query_limit,
-            )
-
-            jobs = []
-            # Extracting jobs information from HQE entries.
-            for hqe in hqes:
-                job = hqe['job']
-                job['status'] = hqe.get('status')
-                jobs.append(job)
-            return jobs
+    def _extract_status(self, job):
+        if job.get('status'):
+            return self._extract_status_enum(job.get('status'))
+        elif job.get('status_counts'):
+            # "if there is more than one status count, error out"
+            if len(job.get('status_counts').keys()) != 1 or \
+                job.get('status_counts')[list(job.get('status_counts').keys())[0]] != 1:
+                logging.error(
+                    'Encountered multiple status values for job {}'.format(job))
+                return moblabrpc_pb2.Job.STATUS_NOT_SET
+            return self._extract_status_enum(list(job.get('status_counts').keys())[0])
         else:
-            return self.afe_connector.get_jobs(
-                query_start, query_limit, id_filter, name_filter,
-                created_time_lt, created_time_gt, sub, suite, not_yet_run,
-                running, finished, parent_id_filter)
+            logging.error('Unable to find status for job {}'.format(job))
+            return moblabrpc_pb2.Job.STATUS_NOT_SET
 
-    def get_job_ids(self,
-                    query_start,
-                    query_limit,
-                    id_filter=None,
-                    name_filter=None,
-                    created_time_lt=None,
-                    created_time_gt=None,
-                    sub=False,
-                    suite=False,
-                    not_yet_run=False,
-                    running=False,
-                    finished=False,
-                    parent_id_filter=None,
-                    dut_hostname_filter=None):
+    def get_jobs(self, request, _context):
+        jobs = self.service.get_jobs(
+            request.query_start, request.query_limit, request.id_filter,
+            request.name_filter, request.created_time_lt,
+            request.created_time_gt,
+            request.rel_filter == moblabrpc_pb2.Job.CHILD,
+            request.rel_filter == moblabrpc_pb2.Job.SUITE,
+            request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
+            request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            request.parent_id_filter,
+            request.dut_hostname_filter,
+        )
+
+        response = moblabrpc_pb2.GetJobsResponse()
+        if jobs:
+            for job in jobs:
+                job_proto = moblabrpc_pb2.Job(
+                    job_id=job.get('id', -1),
+                    name=job.get('name', 'Name not found'),
+                    priority=job.get('priority', 0),
+                    created_time_sec_utc=self._convert_timestamp_to_utc_secs(
+                        job['created_on']),
+                    parent_job_id=job.get('parent_job', -1),
+                    status=self._extract_status(job))
+                response.jobs.extend([job_proto])
+        return response
+
+    def get_job_ids(self, request, _context):
         """Returns the job ID's that match the request filters.
 
         Args:
-            query_start: Int index for start of returned values.
-            query_limit: Int for max number of values to return.
-            id_filter: String filter for job id.
-            name_filter: String filter for job name.
-            created_time_lt: A unix timestamp in seconds granularity the sets
-                upper bound for jobs returned.
-            created_time_gt: A unix timestamp in seconds granularity the sets
-                lower bound for jobs returned.
-            sub: Boolean, true iff child jobs to be returned.
-            suite: Boolean, true iff parent jobs to be returned.
-            not_yet_run: Boolean, true iff queued jobs to be returned.
-            running: Boolean, true iff running jobs to be returned.
-            finished: Boolean, true iff only finished jobs to be returned.
-            parent_id_filter: String filter for parent job id.
-            dut_hostname_filter: String filter for DUT associated with job.
+          request: GetJobIdsRequest
+          _context:
 
         Returns:
-          List of job ID numbers.
+          GetJobIdsResponse object with a list of ID numerics.
         """
-        return [job['id'] for job in
-                self.get_jobs(query_start, query_limit, id_filter, name_filter,
-                              created_time_lt, created_time_gt, sub, suite,
-                              not_yet_run, running, finished, parent_id_filter,
-                              dut_hostname_filter)]
+        job_ids = self.service.get_job_ids(
+            request.query_start,
+            request.query_limit,
+            request.id_filter,
+            request.name_filter,
+            request.created_time_lt,
+            request.created_time_gt,
+            request.rel_filter == moblabrpc_pb2.Job.CHILD,
+            request.rel_filter == moblabrpc_pb2.Job.SUITE,
+            request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
+            request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
+            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            request.parent_id_filter,
+            request.dut_hostname_filter,
+        )
+        response = moblabrpc_pb2.GetJobIdsResponse(
+            job_ids = job_ids
+        )
+        return response
 
+    def abort_jobs(self, request, _context):
+        message = self.service.abort_jobs(
+            # converting proto RepeatedScalarFieldContainer type to python list
+            [job_id for job_id in request.job_ids]
+        )
+        response =  moblabrpc_pb2.AbortJobsResponse()
+        response.message = message
+        return response
 
-    def abort_jobs(self, job_ids):
-        result = self.afe_connector.abort_host_queue_entries(job_ids)
-        if result:
-            aborted_jobs = [str(item['Job']) for item in result]
-            if len(aborted_jobs) > 15:
-                return 'Aborted {} jobs, please refresh table to see results.'.format(
-                    len(aborted_jobs)
+    def _convert_timedelta_to_miliseconds(self, minutes=None, seconds=None):
+        if not minutes and not seconds:
+            return None
+        try:
+            miliseconds = 0
+            if minutes:
+                miliseconds += int(minutes) * 60 * 1000
+            if seconds:
+                miliseconds += int(seconds) * 1000
+            return miliseconds
+        except ValueError:
+            logging.error('Got invalid timedelta values {} {}'.format(
+                minutes, seconds))
+            return None
+
+    def get_job_details(self, request, _context):
+        try:
+            job = self.service.get_job_details(request.id)[0]
+        except IndexError:
+            error_msg = 'Unable to find job with ID: {}'.format(request.id)
+            logging.error(error_msg)
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            _context.set_details(error_msg)
+        else:
+            execution_history = []
+            job_history_dicts = self.service.get_job_history(request.id)
+            if job_history_dicts:
+                execution_history = [
+                    moblabrpc_pb2.Execution(
+                        name=item.get('name', ''),
+                        job_id=item.get('id', ''),
+                        status=self._extract_status(item),
+                        start_time_utc=self._convert_timestamp_to_utc_secs(
+                            item.get('start_time', '')),
+                        end_time_utc=self._convert_timestamp_to_utc_secs(
+                            item.get('end_time', '')),
+                        used_time=self._convert_timedelta_to_miliseconds(
+                            seconds=item.get('time_used', '')),
+                        dut=item.get('hostname', ''))
+                    for item in job_history_dicts
+
+                ]
+
+            associated_duts = []
+            for item in self.service.get_associated_duts(request.id):
+                try:
+                    dut = item['host']['hostname']
+                except (KeyError, TypeError):
+                    dut = 'hostless'
+
+                try:
+                    dut_status = item['host']['status']
+                except (KeyError, TypeError):
+                    dut_status = ''
+
+                job_id = int(item.get('id', ''))
+
+                status = self._extract_status(item)
+                associated_duts.append(moblabrpc_pb2.Execution(
+                        dut=dut,
+                        dut_status=dut_status,
+                        job_id=job_id,
+                        status=status,
+                    )
                 )
-            else:
-                return 'Aborted the following jobs: {}\nPlease refresh table to see results.'.format(
-                    ', '.join(aborted_jobs)
+
+            response = moblabrpc_pb2.GetJobDetailsResponse(
+                job_detail=moblabrpc_pb2.Job(
+                    job_id=job.get('id'),
+                    name=job.get('name', ''),
+                    priority=job.get('priority', 0),
+                    created_time_sec_utc=self._convert_timestamp_to_utc_secs(
+                        job.get('created_on', '')),
+                    parent_job_id=job.get('parent_job', None),
+                    status=self._extract_status(job),
+                    dependencies=job.get('dependencies', ''),
+                    server_control_file=job.get('control_file', ''),
+                    max_runtime=self._convert_timedelta_to_miliseconds(
+                        minutes=job.get('max_runtime_mins', '')),
+                    timeout=self._convert_timedelta_to_miliseconds(
+                        minutes=job.get('timeout_mins', '')),
+                    test_retries=job.get('test_retry', None),
+                    execution_history=execution_history,
+                    associated_duts=associated_duts
                 )
-        else:
-            return 'No jobs aborted (were selected jobs already aborted/finished)?'
+            )
+        return response
 
-    def get_job_details(self, job_id):
-        return self.afe_connector.get_jobs_by_ids([job_id])
-
-    def get_job_history(self, job_id):
-        return self.afe_connector.get_job_history(job_id)
-
-    def get_associated_duts(self, job_id):
-        return self.afe_connector.get_host_queue_entries(job_id=job_id)
-
-    def get_num_dut_tasks(self, ip, start_time_gt, end_time_lt):
+    def get_num_dut_tasks(self, request, _context):
         """
-            Given a DUT's IP, returns a number of tasks (e.g. repairs, reverifies)
-            associated with that DUT.
-        Args:
-            ip (string): DUT IP.
-            start_time_gt(int): Seconds timestamp of a filter to DUT tasks by
-                start time.
-            end_time_lt(int): Seconds timestamp of a filter to DUT tasks by
-                end time.
-        Returns:
-            Returns number of task associated with DUT which match query parameters.
-            If DUT itself is not found, returns -1.
+            Given a GetNumDutTasksRequest, returns a GetNumDutTasksResponse obj
+            which wraps an int representing the number of tasks that match filter
+            parameters of the request.
+        """
+        num_dut_tasks = self.service.get_num_dut_tasks(
+            request.ip,
+            request.start_time_gt,
+            request.end_time_lt,
+        )
+        if num_dut_tasks < 0:
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            return
+        return moblabrpc_pb2.GetNumDutTasksResponse(num_dut_tasks=num_dut_tasks)
+
+    def _extract_dut_task_status(self, dut_task_dict):
+        """
+            Given a dict representing a dut_task, will extract a status enum
+            based on the provided boolean flags.
         """
         try:
-            dut_id = self.afe_connector.get_connected_devices(hostname=ip)[0]['id']
-            return self.afe_connector.get_num_special_tasks(
-                host_id_list=[dut_id],
-                start_time_gt=start_time_gt,
-                end_time_lt=end_time_lt
-            )
-        except (IndexError, KeyError):
-            logging.error('Unable to find AFE id for dut: {}'.format(dut_id))
-            return -1
-
-    def get_dut_tasks(self, ip, query_start, query_limit, start_time_gt, end_time_lt):
-        """
-            Given a DUT's IP, returns a list of tasks (e.g. repairs, reverifies)
-            requested for that DUT. If DUT is not found, returns None.
-        Args:
-            query_start(int): Parameter specifying index on where to start when
-                returning paged results.
-            query_limit(int): Upper limit on number of results to return.
-            start_time_gt(int): Seconds timestamp of a filter to DUT tasks by
-                start time.
-            end_time_lt(int): Seconds timestamp of a filter to DUT tasks by
-                end time.
-        Returns:
-            A list of dicts, each dict specifying a task associated with the
-            queried DUT. If DUT is not found returns None.
-        """
-        try:
-            dut_id = self.afe_connector.get_connected_devices(hostname=ip)[0]['id']
-            return self.afe_connector.get_special_tasks(
-                host_id_list=[dut_id],
-                query_start=query_start,
-                query_limit=query_limit,
-                start_time_gt=start_time_gt,
-                end_time_lt=end_time_lt,
-            )
-        except (IndexError, KeyError):
-            logging.error('Unable to find AFE id for dut: {}'.format(dut_id))
-
-    def add_label_to_host(self, dut_hostname, label):
-        return self.afe_connector.add_label_to_host(dut_hostname, label)
-
-    def remove_label_from_host(self, dut_hostname, label):
-        return self.afe_connector.remove_label_to_host(dut_hostname, label)
-
-    def _apply_edit_to_duts(self, dut_hostnames, afe_edit_func, success_msg, *args):
-        """
-            A helper function which contains the repeated logic involved in
-            applying an edit to multiple DUTs. This logic is repeated for
-            adding and removing attributes and labels.
-        Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
-            afe_edit_func((*args) => (tuple(bool,string))): A reference to a
-            function of AFEConnector which takes in *args and returns a tuple
-            containing a bool indicating success and a results message string.
-            This function does the 'edit' to the DUT's. success_msg(int): A
-            format-able string to be returned in success cases; It should have
-            exactly as many format indexes ({}) as there are arguments in *args.
-            *args: Arguments which are meant to be passed into afe_edit_func.
-        Returns:
-            String message summarizing results.
-        """
-        failures = {}
-        for dut_hostname in dut_hostnames:
-            is_success, message = afe_edit_func(dut_hostname, *args)
-            if not is_success:
-                failures[dut_hostname] = message
-
-        response_message = success_msg.format(*args) + \
-                           " to {} DUTs\n".format(
-                               len(dut_hostnames) - len(failures.keys())
-                           )
-
-        if failures:
-            response_message += "Failures on the following DUTs:\n"
-            for dut_hostname, message in failures.items():
-                response_message += "{}: {}\n".format(dut_hostname, message)
-
-        return response_message
-
-    def add_attribute_to_duts(self, dut_hostnames, key, value):
-        """
-            Adds attribute key:value to the selected dut_hostnames. Returns a message
-            summarizing how many DUT's the attribute was successfully added to
-            as well for which DUT's the addition failed.
-        Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
-            key (string): Key of attribute to be added.
-            value (string): Value of attribute to be added.
-        Returns:
-            String message summarizing results.
-        """
-        return self._apply_edit_to_duts(
-            dut_hostnames,
-            # self.add_attribute_to_host,
-            self.afe_connector.add_attribute_to_host,
-            "Successfully added attribute {}:{}",
-            key,
-            value,
-        )
-
-    def remove_attribute_from_duts(self, dut_hostnames, key):
-        """
-            Removes attribute (referenced by key) from the selected dut_hostnames.
-            Returns a message summarizing how many DUT's the attribute was
-            successfully removed from as well for which DUT's the remove failed.
-        Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
-            key (string): Key of attribute to be remove.
-            value (string): Value of attribute to be remove.
-        Returns:
-            String message summarizing results.
-        """
-        return self._apply_edit_to_duts(
-            dut_hostnames,
-            self.afe_connector.remove_attribute_from_host,
-            "Successfully removed attribute {}",
-            key,
-        )
-
-    def add_label_to_duts(self, dut_hostnames, label):
-        """
-            Adds label to the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the label was successfully added to as well for which
-            DUT's the addition failed.
-        Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
-            label (string): Label to be added.
-        Returns:
-            String message summarizing results.
-        """
-        return self._apply_edit_to_duts(
-            dut_hostnames,
-            self.afe_connector.add_label_to_host,
-            "Successfully added label {}",
-            label,
-        )
-
-    def remove_label_from_duts(self, dut_hostnames, label):
-        """
-            Remove label from the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the label was successfully removed from as well as for
-            which DUT's the remove failed.
-        Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
-            label (string): Label to be removed.
-        Returns:
-            String message summarizing results.
-        """
-        return self._apply_edit_to_duts(
-            dut_hostnames,
-            self.afe_connector.remove_label_from_host,
-            "Successfully removed label {}",
-            label,
-        )
-
-    def add_pool_to_duts(self, dut_hostnames, pool):
-        """
-            Adds  pool to the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the  pool was successfully added to as well for which
-            DUT's the addition failed.
-        Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
-            pool (string): Pool to be added.
-        Returns:
-            String message summarizing results.
-        """
-        return self.add_label_to_duts(dut_hostnames, 'pool:' + pool)
-
-    def remove_pool_from_duts(self, dut_hostnames, pool):
-        """
-            Remove  pool from the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the  pool was successfully removed from as well as for
-            which DUT's the remove failed.
-        Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
-             pool (string): Pool to be removed.
-        Returns:
-            String message summarizing results.
-        """
-        return self.remove_label_from_duts(dut_hostnames, 'pool:' + pool)
-
-    def reverify_host(self, dut_hostname):
-        """Starts repair run on given DUT hostname.
-
-        Args:
-            dut_hostname(string): String hostname (ex. IP address)
-        """
-        dut_id = self._find_dut_id_given_ip(dut_hostname)
-        if dut_id:
-            self.afe_connector.reverify_host(dut_id)
-
-        return 'Successfully set off reverify on {}'.format(dut_hostname)
-
-    def repair_host(self, dut_hostname):
-        """Starts repair run on given DUT hostname.
-
-        Args:
-            dut_hostname(string): String hostname (ex. IP address)
-        """
-        dut_id = self._find_dut_id_given_ip(dut_hostname)
-        if dut_id:
-            self.afe_connector.repair_host(dut_id)
-
-        return 'Successfully set off repair on {}'.format(dut_hostname)
-
-    def get_cloud_configuration(self):
-        """
-            Gets cloud configuration info.
-        Returns:
-            A dict of cloud configuration info  ( specifically, 'gs_access_key_id',
-            'gs_secret_access_key', 'image_storage_server' )
-        """
-        return self.afe_connector.get_cloud_storage_info()
-
-    def get_dut_wifi_info(self):
-        """
-            Gets DUT wifi info.
-        Returns:
-            A dict with dut_wifi_name, dut_wifi_password
-        """
-        return self.afe_connector.get_dut_wifi_info()
-
-    def set_dut_wifi_info(self, dut_wifi_name, dut_wifi_password):
-        """
-            Attempts to set DUT wifi on Moblab.
-        Args:
-            dut_wifi_name (string): Wifi name
-            dut_wifi_password (string): Wifi password
-        Returns:
-            A result message string.
-        """
-        if self.afe_connector.set_configuration_info(
-            dut_wifi_name=dut_wifi_name,
-            dut_wifi_password=dut_wifi_password,
-        ):
-            return 'Successfully applied DUT Wifi info changes.'
-        else:
-            return 'Failed to apply DUT Wifi info changes.'
-
-    def set_cloud_configuration(self, is_cloud_enabled, boto_key_id, boto_key_secret, gcs_bucket_url, is_remote_agent_enabled):
-        """
-            Attempts to set configuration values to Moblab.
-        Args:
-            boto_key_id (string): boto ID string
-            boto_key_secret (string): boto secret string
-            gcs_bucket_url (string): GCS bucket URL
-        Returns:
-            A result message string.
-        """
-        if is_cloud_enabled:
-            is_valid, details = self.afe_connector.validate_cloud_storage_info(
-                boto_key_id,
-                boto_key_secret,
-                gcs_bucket_url
-            )
-
-            if is_valid:
-                if self.afe_connector.set_configuration_info(is_cloud_enabled, boto_key_id, boto_key_secret, gcs_bucket_url):
-                    message = 'Successfully applied cloud configuration values. '
-                    self._last_config_update = datetime.utcnow()
-
-                    if self.set_is_remote_agent_enabled(is_remote_agent_enabled):
-                        message += 'Remote agent has been {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
-                    else:
-                        message += 'But failed to set remote agent as {}.'.format('enabled' if is_remote_agent_enabled else 'disabled')
-                    return message
-                else:
-                    return 'Failed to apply cloud configuration changes.'
+            if dut_task_dict['is_aborted']:
+                return moblabrpc_pb2.DutTask.ABORTED
+            elif dut_task_dict['success']:
+                return moblabrpc_pb2.DutTask.SUCCEEDED
+            elif dut_task_dict['is_complete']:
+                return moblabrpc_pb2.DutTask.FAILED
+            elif dut_task_dict['is_active']:
+                return moblabrpc_pb2.DutTask.STARTED
             else:
-                return details
-        else:
-            if self.afe_connector.set_configuration_info(is_cloud_enabled):
-                return 'Successfully disabled cloud configuration.'
-            else:
-                return 'Failed to commit disable cloud change.'
+                return moblabrpc_pb2.DutTask.REQUESTED
+        except KeyError:
+            logging.error('Failed to determine dut task status for:\n{}'
+                          .format(dut_task_dict))
+            return moblabrpc_pb2.DutTask.STATUS_NOT_SET
 
-    def _get_public_ip_address(self):
-        """Gets the public IP address.
-
-        @return: public ip address as string.
+    def get_dut_tasks(self, request, _context):
         """
-        try:
-            return host_connector.HostServicesConnector.get_ip()
-        except host_connector.HostServicesException:
-            logging.exception("Failed to get ip address from host.")
-        return "No IP Address"
+            Given a GetDutTasksRequest, returns a GetDutTasksResponse obj which
+            wraps a list of DutTask objects that match the given filter
+            parameters.
+        """
+        dut_task_list = self.service.get_dut_tasks(
+            request.ip,
+            request.query_start,
+            request.query_limit,
+            request.start_time_gt,
+            request.end_time_lt
+        )
 
-    def get_network_info(self):
+        if dut_task_list is None:
+            _context.set_code(grpc.StatusCode.NOT_FOUND)
+            return
+
+        response = moblabrpc_pb2.GetDutTasksResponse()
+        for dut_task_dict in dut_task_list:
+            dut_task = moblabrpc_pb2.DutTask(
+                id=dut_task_dict.get('id', ''),
+                task=dut_task_dict.get('task', ''),
+                status=self._extract_dut_task_status(
+                    dut_task_dict),
+                created_time_utc=self._convert_timestamp_to_utc_secs(
+                    dut_task_dict.get('time_requested', '')),
+                started_time_utc=self._convert_timestamp_to_utc_secs(
+                    dut_task_dict.get('time_started', '')),
+                finished_time_utc=self._convert_timestamp_to_utc_secs(
+                    dut_task_dict.get('time_finished', '')),
+            )
+            response.tasks.extend([dut_task])
+        return response
+
+    def add_attribute_to_duts(self, request, _context):
+        """
+            Given a AddAttributeToDutsRequest, returns a
+            AddAttributeToDutsResponse obj which wraps a message indicating
+            which duts the attribute was successfully added on.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.add_attribute_to_duts(
+            request.dut_hostnames,
+            request.key,
+            request.value
+        )
+
+        response = moblabrpc_pb2.AddAttributeToDutsResponse()
+        response.message = response_msg
+        return response
+
+    def remove_attribute_from_duts(self, request, _context):
+        """
+            Given a RemoveAttributeFromDutsRequest, returns a
+            RemoveAttributeFromDutsResponse obj which wraps a message indicating
+            which duts the attribute was successfully removed from.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.remove_attribute_from_duts(
+            request.dut_hostnames,
+            request.key,
+        )
+
+        response = moblabrpc_pb2.RemoveAttributeFromDutsResponse()
+        response.message = response_msg
+        return response
+
+    def add_label_to_duts(self, request, _context):
+        """
+            Given a AddLabelToDutsRequest, returns a
+            AddLabelToDutsResponse obj which wraps a message indicating
+            which duts the label was successfully added on.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.add_label_to_duts(
+            request.dut_hostnames,
+            request.label,
+        )
+
+        response = moblabrpc_pb2.AddLabelToDutsResponse()
+        response.message = response_msg
+        return response
+
+    def remove_label_from_duts(self, request, _context):
+        """
+            Given a RemoveLabelFromDutsRequest, returns a
+            RemoveLabelFromDutsResponse obj which wraps a message indicating
+            which duts the label was successfully removed from.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.remove_label_from_duts(
+            request.dut_hostnames,
+            request.label,
+        )
+
+        response = moblabrpc_pb2.RemoveLabelFromDutsResponse()
+        response.message = response_msg
+        return response
+
+    def add_pool_to_duts(self, request, _context):
+        """
+            Given a AddPoolToDutsRequest, returns a
+            AddPoolDutsResponse obj which wraps a message indicating
+            which duts the pool was successfully added on.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.add_pool_to_duts(
+            request.dut_hostnames,
+            request.pool,
+        )
+
+        response = moblabrpc_pb2.AddPoolToDutsResponse()
+        response.message = response_msg
+        return response
+
+    def remove_pool_from_duts(self, request, _context):
+        """
+            Given a RemovePoolFromDutsRequest, returns a
+            RemovePoolFromDutsResponse obj which wraps a message indicating
+            which duts the pool was successfully removed from.
+
+            (A call to ListConnectedDuts will also reflect the change)
+        """
+        response_msg = self.service.remove_pool_from_duts(
+            request.dut_hostnames,
+            request.pool,
+        )
+
+        response = moblabrpc_pb2.RemovePoolFromDutsResponse()
+        response.message = response_msg
+        return response
+
+    def reverify_host(self, request, _context):
+        """
+            Sets of reverify job on specified DUT.
+        Args:
+            request: ReverifyHostRequest with parameter:
+                dut_hostname(string)
+            _context: grpc.server.Context
+        Returns:
+            ReverifyHostResponse
+        """
+        message = self.service.reverify_host(request.dut_hostname)
+        response =  moblabrpc_pb2.ReverifyHostResponse(
+            message=message
+        )
+        return response
+
+    def repair_host(self, request, _context):
+        """
+            Sets of repair job on specified DUT.
+        Args:
+            request: RepairHostRequest with parameter:
+                dut_hostname(string)
+            _context: grpc.server.Context
+        Returns:
+            RepairHostResponse
+        """
+        message = self.service.repair_host(request.dut_hostname)
+        response =  moblabrpc_pb2.RepairHostResponse(
+            message=message
+        )
+        return response
+
+    def get_network_info(self, request, _context):
         """
             Gets network info of Moblab.
-
-            TCP socket is used to test the connectivity. If there is no connectivity,
-            try to get the public IP with UDP socket.
-
+        Args:
+            request: GetNetworkInfoRequest object ( with no parameters )
+            _context: grpc.server.Context
         Returns:
-            A dict of network information ( specifically, a 'server_ip' and
-            'is_connected' which is true iff Moblab is connected to internet.
+            GetNetworkInfoResponse
         """
-        ip = self._get_public_ip_address()
-        if ip is not None:
-            logging.info('Established TCP connection with well known server.')
-            return {
-                'server_ip': ip,
-                'is_connected': True
-            }
-        return {
-            'server_ip': None,
-            'is_connected': False
-        }
+        network_info = moblab_info.get_network_info()
+        response = moblabrpc_pb2.GetNetworkInfoResponse(
+            moblab_hostname=network_info['server_ip'],
+            is_connected=network_info['is_connected']
+        )
+        return response
 
-    def get_is_update_available(self):
+    def get_dut_wifi_info(self, request, _context):
         """
-            Check to see if there are any containers that have updated images.
-
-            Scan the running containers, if the watchtower program has pulled down
-            a newer image then the container to image reference tag is broken.
-
-            Detect these image tag link breaks and assume that means we have an update.
-            Looking through update tools and forums, it seems this is the way
-            all update tools work.
-
+            Gets DUT wifi info configured for Moblab.
+        Args:
+            request: GetDutWifiInfoRequest object ( with no parameters )
+            _context: grpc.server.Context
         Returns:
-            True iff there is an update available.
+            GetDutWifiInfoResponse
         """
-        client = docker.from_env(timeout=300)
-        for container in client.containers.list():
-            if len(container.image.tags) == 0:
-                return True
-        return False
+        dut_wifi_info = self.service.get_dut_wifi_info()
+        response = moblabrpc_pb2.GetDutWifiInfoResponse(
+            dut_wifi_name=dut_wifi_info.get('wifi_dut_ap_name', ''),
+            dut_wifi_password=dut_wifi_info.get('wifi_dut_ap_pass', ''),
+        )
+        return response
 
-    def update_docker(self):
+    def set_dut_wifi_info(self, request, _context):
         """
-            Sets off an update of all docker containers, using watchtower
-
-        Returns: String result message.
+            Set DUT wifi info configured for Moblab.
+        Args:
+            request: SetDutWifiInfoRequest object with parameters:
+                dut_wifi_name,
+                dut_wifi_password
+            _context: grpc.server.Context
+        Returns:
+            GetDutWifiInfoResponse
         """
-        client = docker.from_env(timeout=600)
+        msg = self.service.set_dut_wifi_info(
+            request.dut_wifi_name,
+            request.dut_wifi_password,
+        )
+        response = moblabrpc_pb2.SetDutWifiInfoResponse(
+            message = msg
+        )
+        return response
 
-        try:
-            container = client.containers.get('update')
-            raise MoblabRpcError("Already updating please wait.")
-        except docker.errors.NotFound:
-            pass
+    def get_cloud_configuration(self, request, _context):
+        """
+            Get cloud configuration info of Moblab.
+        Args:
+            request: GetCloudConfigurationRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetCloudConfigurationResponse
+        """
+        cloud_configuration = self.service.get_cloud_configuration()
+        is_remote_agent_enabled = self.service.get_is_remote_agent_enabled()
+        response = moblabrpc_pb2.GetCloudConfigurationResponse(
+            is_cloud_enabled=cloud_configuration.get('is_cloud_enabled', 'False') == 'True',
+            boto_key_id=cloud_configuration.get('gs_access_key_id', ''),
+            boto_key_secret=cloud_configuration.get('gs_secret_access_key', ''),
+            gcs_bucket_url=cloud_configuration.get('image_storage_server', ''),
+            is_remote_console_enabled=is_remote_agent_enabled
+        )
+        return response
 
-        label = os.environ.get('WATCHTOWER_TAG', 'release')
-        container = client.containers.run(
-            MOBLAB_DOCKER_REGISTRY + 'watchtower:%s' % label,
-            volumes=['/var/run/docker.sock:/var/run/docker.sock'],
-            name='update',
-            detach=True,
-            command='--run-once'
+    def set_cloud_configuration(self, request, _context):
+        """
+            Set cloud configuration info of Moblab.
+        Args:
+            request: SetCloudConfigurationRequest object with parameters:
+                is_cloud_enabled,
+                boto_key_id,
+                boto_key_secret,
+                gcs_bucket_url,
+                is_remote_console_enabled
+            _context: grpc.server.Context
+        Returns:
+            GetCloudConfigurationResponse
+        """
+        msg = cloud_configuration = self.service.set_cloud_configuration(
+            request.is_cloud_enabled,
+            request.boto_key_id,
+            request.boto_key_secret,
+            request.gcs_bucket_url,
+            request.is_remote_console_enabled
+        )
+        response = moblabrpc_pb2.SetCloudConfigurationResponse(
+            message = msg
+        )
+        return response
+
+    def get_version_info(self, request, _context):
+        """
+            Get version info of Moblab.
+        Args:
+            request: GetVersionInfoRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetVersionInfoResponse
+        """
+        version_info = moblab_info.get_version_info()
+        response = moblabrpc_pb2.GetVersionInfoResponse(
+            chromeos_release_version=version_info['CHROMEOS_RELEASE_VERSION'],
+            chromeos_release_track=version_info['CHROMEOS_RELEASE_TRACK'],
+            chromeos_release_description=version_info['CHROMEOS_RELEASE_DESCRIPTION'],
+            moblab_id=version_info['MOBLAB_ID'],
+            moblab_serial_number=version_info['MOBLAB_SERIAL_NUMBER']
+        )
+        return response
+
+    def reboot_moblab(self, request, _context):
+        host_connector.HostServicesConnector.reboot()
+
+    def get_is_update_available(self, request, _context):
+        """
+            Get whether an update is available for user to pull.
+        Args:
+            request: GetIsUpdateAvailableRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetIsUpdateAvailableResponse ( with a boolean true iff an update is
+            available ).
+        """
+        is_update_available = self.service.get_is_update_available()
+        response = moblabrpc_pb2.GetIsUpdateAvailableResponse(
+            is_update_available=is_update_available
+        )
+        return response
+
+    def update_moblab(self, request, _context):
+        """
+            Set off an update of moblab.
+        Args:
+            request: UpdateMoblabRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            UpdateMoblabResponse ( with a string result message ).
+        """
+        message = self.service.update_docker()
+        response = moblabrpc_pb2.UpdateMoblabResponse(
+            message=message
+        )
+        return response
+
+    def get_remote_agent_configuration(self, request, _context):
+        """
+            Get remote agent configuration info of Moblab.
+        Args:
+            request: GetRemoteAgentConfigurationRequest object
+                (with no parameters)
+            _context: grpc.server.Context
+        Returns:
+            GetRemoteAgentConfigurationResponse
+        """
+        return moblabrpc_pb2.GetRemoteAgentConfigurationResponse(
+            is_enabled=self.service.get_is_remote_agent_enabled()
         )
 
-        try:
-            container.wait(timeout=600)
-        except requests.exceptions.ReadTimeout:
-            container.stop()
-        finally:
-            container.remove()
-        return 'Update finished.'
-
-    def get_is_remote_agent_enabled(self):
+    def set_remote_agent_configuration(self, request, _context):
         """
-            Check to see if the remote agent is enabled.
-
+            Set remote agent configuration info of Moblab.
+        Args:
+            request: SetRemoteAgentConfigurationRequest object with a parameter:
+                is_enabled
+            _context: grpc.server.Context
         Returns:
-            True iff remote agent is enabled.
+            SetRemoteAgentConfigurationResponse
         """
-        return self.config_connector.get_is_remote_agent_enabled()
+        is_succeeded = self.service.set_is_remote_agent_enabled(
+            is_enabled=request.is_enabled)
+        return moblabrpc_pb2.SetRemoteAgentConfigurationResponse(
+            is_succeeded=is_succeeded)
 
-    def set_is_remote_agent_enabled(self, is_enabled):
+    def pause_moblab(self, request, context):
+        """Pauses the moblab by user (PauseRequester = user)
         """
-             Attempts to set if the remote agent is enabled.
+        return moblabrpc_pb2.StateResponse()
+        
+    def resume_moblab(self, request, context):
+        """Resumes previously paused moblab by user (PauseRequester == user)
+        otherwise returns error
+        """
+        return moblabrpc_pb2.StateResponse()
 
-         Args:
-             is_enabled (bool): enable the remote agent or not
-         Returns:
-             True iff the set operation successfully.
-         """
-        return self.afe_connector.set_is_remote_agent_enabled(is_enabled)
+    def get_pause_state(self, request, context):
+        """Returns the state of pausing and the source of pausing
+        """
+        response = moblabrpc_pb2.StateResponse()
+        response.pause_requesters.extend([
+            moblabrpc_pb2.StateResponse.FREE_DISK_SPACE_CHECKER,
+            moblabrpc_pb2.StateResponse.USER,
+        ])
+        return response
