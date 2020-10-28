@@ -158,8 +158,9 @@ def run_gcloud_bucket_diagnosis(output_file, bucket_name):
         RunCommandError if the command fails to run.
     """
     try:
-        run_command(['gsutil perfdiag -o %s gs://%s' % (output_file, bucket_name)],
-                     log=True, shell=True)
+      run_command(
+          ['gsutil perfdiag -o %s -s 40M gs://%s' % (output_file, bucket_name)],
+          log=True, shell=True)
     except RunCommandError as err:
         LOGGER.exception('Failed to run performance diagnosis on given google storage bucket: %s'
                          % err)

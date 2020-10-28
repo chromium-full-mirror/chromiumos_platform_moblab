@@ -60,9 +60,9 @@ collectors:
             - network_stats
         frequency:
             # The unit of frequency is minutes/collection
-            DEFAULT: 4
-            WARNING: 8
-            ALERT: 15
+            DEFAULT: 720  # 12 hours
+            WARNING: 900  # 15 hours
+            ALERT: 1080  # 18 hours
 
     DUT_STATUS:
         attributes:
