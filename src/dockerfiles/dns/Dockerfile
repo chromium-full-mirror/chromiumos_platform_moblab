@@ -19,4 +19,7 @@ RUN chmod u+x /startup.sh
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
     --uid 246 --disabled-password --gecos "" moblab
 
+RUN mkdir -p /var/log
+RUN chown -R moblab:moblab /var/log
+
 CMD ["/startup.sh"]
