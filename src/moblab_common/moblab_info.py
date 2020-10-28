@@ -9,7 +9,7 @@ import uuid
 
 from moblab_common import lock_util
 from moblab_common import host_connector
-from moblab_common.constants import Constants as MoblabConstants
+from moblab_common.utils.constants import Constants as MoblabConstants
 
 _LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

@@ -1097,7 +1097,7 @@ export class MoblabGrpcService {
                       chromeos_release_version: string,
                       chromeos_release_track: string,
                       chromeos_release_description: string,
-                      moblab_id: string,
+                      moblab_install_id: string,
                       moblab_serial_number: string
                    ) => void,
                    errorHandlingCallback: (errorMsg: string) => void) {
@@ -1116,7 +1116,7 @@ export class MoblabGrpcService {
         response.getChromeosReleaseVersion(),
         response.getChromeosReleaseTrack(),
         response.getChromeosReleaseDescription(),
-        response.getMoblabId(),
+        response.getMoblabInstallId(),
         response.getMoblabSerialNumber()
       );
     });

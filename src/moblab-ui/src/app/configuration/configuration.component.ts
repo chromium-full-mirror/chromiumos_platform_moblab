@@ -65,7 +65,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   chromeosReleaseVersion: string;
   chromeosReleaseTrack: string;
   chromeosReleaseDescription: string;
-  moblabId: string;
+  moblabInstallId: string;
   moblabSerialNumber: string;
 
   moblabHostname: string;
@@ -163,10 +163,16 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         chromeos_release_version: string,
         chromeos_release_track: string,
         chromeos_release_description: string,
-        moblab_id: string,
+        moblab_install_id: string,
         moblab_serial_number: string
       ) => {
-        this.setVersionInfo(chromeos_release_version, chromeos_release_track, chromeos_release_description, moblab_id, moblab_serial_number);
+        this.refreshShownVersionInfo(
+          chromeos_release_version,
+          chromeos_release_track,
+          chromeos_release_description,
+          moblab_install_id,
+          moblab_serial_number
+        );
       },
       (errorMsg: string) => {
         console.log('Encountered failure getting vesrion info. ', errorMsg);
@@ -208,17 +214,19 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.isConnectedToInternet = is_connected;
   }
 
-  setVersionInfo(
+  refreshShownVersionInfo(
     chromeos_release_version: string,
     chromeos_release_track: string,
     chromeos_release_description: string,
-    moblab_id: string,
+    moblab_install_id: string,
     moblab_serial_number: string
   ) {
+    // local setter of variables that are shown in the config UI ( not to be confused with getter/setters that commit and
+    // fetch changes from actual backend. )
     this.chromeosReleaseVersion = chromeos_release_version;
     this.chromeosReleaseTrack = chromeos_release_track;
     this.chromeosReleaseDescription = chromeos_release_description;
-    this.moblabId = moblab_id;
+    this.moblabInstallId = moblab_install_id;
     this.moblabSerialNumber = moblab_serial_number;
   }
 

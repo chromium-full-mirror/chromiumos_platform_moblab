@@ -81,7 +81,7 @@ describe('ConfigurationComponent', () => {
 
     getVersionInfoSpy = spyOn<any>(component, 'getVersionInfo').and.callFake(
       function() {
-        component.setVersionInfo(
+        component.refreshShownVersionInfo(
           'R00-00000.00.0',
           'mock-release',
           'Mock description.',
