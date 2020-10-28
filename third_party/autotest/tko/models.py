@@ -334,6 +334,9 @@ class test(object):
         elif test._is_multimachine(job_dir):
             tko_utils.dprint('Multimachine job, no keyvals.')
             return {}
+        elif 'hostless' in job_dir:
+            tko_utils.dprint('Hostless job, no keyvals.')
+            return {}
         raise HostKeyvalError('Host keyval not found')
 
 
