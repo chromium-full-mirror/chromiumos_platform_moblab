@@ -22,7 +22,7 @@ sys.modules['google.cloud'] = MOCKED_DOCKER
 sys.modules['moblab_common'] = MagicMock()
 sys.modules['requests'] = MagicMock()
 
-from moblab_rpcservice import MoblabService, MoblabRpcError
+from moblab_service import MoblabService, MoblabRpcError
 
 
 class MoblabRPCServiceTest(unittest.TestCase):
@@ -69,7 +69,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
     build_targets = self.service.list_usable_build_targets('mock_model_1')
     self.assertEqual(build_targets, ['mock_build_target_1'])
 
-  @mock.patch("moblab_rpcservice.docker.from_env")
+  @mock.patch("moblab_service.docker.from_env")
   def test_get_is_update_available(self, mock_docker_from_env):
     mock_docker_client = MagicMock()
     # A single tagless container should cause update to show as available.
@@ -81,7 +81,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
     is_update_available = self.service.get_is_update_available()
     assert(is_update_available)
 
-  @mock.patch("moblab_rpcservice.docker.from_env")
+  @mock.patch("moblab_service.docker.from_env")
   def test_get_is_update_not_available(self, mock_docker_from_env):
     mock_docker_client = MagicMock()
     mock_docker_client.containers.list.return_value = \
@@ -91,7 +91,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
     is_update_available = self.service.get_is_update_available()
     assert(is_update_available == False)
 
-  @mock.patch("moblab_rpcservice.docker.from_env")
+  @mock.patch("moblab_service.docker.from_env")
   def test_update_docker(self, mock_docker_from_env):
     mock_docker_client = MagicMock()
     mock_container_run = MagicMock()
@@ -111,7 +111,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
     assert(result_msg == 'Update finished.')
 
-  @mock.patch("moblab_rpcservice.docker.from_env")
+  @mock.patch("moblab_service.docker.from_env")
   def test_update_docker_already_running(self, mock_docker_from_env):
     mock_docker_from_env.return_value = MagicMock()
 
@@ -223,8 +223,8 @@ class MoblabRPCServiceTest(unittest.TestCase):
         assert(message == params.expected_message_output)
 
   @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
-  @mock.patch("moblab_rpcservice.build_connector")
-  @mock.patch("moblab_rpcservice.moblab_build_connector")
+  @mock.patch("moblab_service.build_connector")
+  @mock.patch("moblab_service.moblab_build_connector")
   def test_set_cloud_configuration_updates_build_connectors(self, mock_moblab_build_connector, mock_build_connector, mock_afe_connector):
     # Mocking setup.
     self._mock_afe_connector_methods(mock_afe_connector, True, True, True)
