@@ -1,0 +1,51 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Usage: docker run -v `pwd`:/ctx/vol --net="host" --rm -it grpc_cli call [grpc service address] [ServiceName].[RpcMethod] '[json request]' --protofiles=vol/[your grpc service proto file]
+# Ex: docker run -v `pwd`:/ctx/vol --net="host" --rm -it grpc_cli call localhost:6002 MoblabConfigurationService.get_settings ' ' --protofiles=vol/protos/moblab_configuration_rpc.proto
+
+
+FROM debian:buster-slim as download
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+	ca-certificates \
+	curl \
+	dh-autoreconf \
+	g++ \
+	gcc-multilib \
+	git \
+	make \
+    cmake \
+	unzip \
+	libgflags-dev
+
+WORKDIR /
+
+# pull google well-known types protos
+RUN curl -L -o protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-x86_64.zip
+RUN unzip protobuf.zip
+
+# clone grpc cli source code
+RUN git clone https://github.com/grpc/grpc.git
+WORKDIR /grpc
+RUN git fetch
+RUN git reset --hard 118282682abe0e7c5dd1b167ad128815e7e00967
+RUN git submodule update --init
+
+# build grpc cli
+RUN mkdir -p cmake/build
+WORKDIR /grpc/cmake/build
+RUN cmake -DgRPC_BUILD_TESTS=ON ../..
+RUN make grpc_cli
+
+RUN cp /grpc/cmake/build/grpc_cli /usr/bin/grpc_cli
+
+# directory for volume with client's proto files
+RUN mkdir -p /ctx/vol
+WORKDIR /ctx
+
+# copy google well-known types proto files to run context
+RUN cp -r /include/google /ctx
+
+ENTRYPOINT ["grpc_cli"]
