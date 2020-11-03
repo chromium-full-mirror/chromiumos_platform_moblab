@@ -7,6 +7,9 @@ FROM alpine/git as source
 WORKDIR /
 
 RUN git clone https://chromium.googlesource.com/chromiumos/chromite
+WORKDIR /chromite
+RUN git fetch
+RUN git reset --hard 8196d0bfd0b3b8fbf7f7dbb8310ac43b80311f79
 
 ###############################################################################
 
