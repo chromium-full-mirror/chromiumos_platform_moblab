@@ -11,10 +11,6 @@ import re
 import time
 
 import moblab_service
-# pylint: disable=import-error
-from moblab_common.proto import moblabrpc_pb2
-# pylint: disable=import-error
-from moblab_common.proto import moblabrpc_pb2_grpc
 
 from moblab_common import afe_connector
 from moblab_common import config_connector
@@ -22,6 +18,12 @@ from moblab_common import devserver_connector
 from moblab_common import feedback_connector
 from moblab_common import host_connector
 from moblab_common import moblab_info
+
+# pylint: disable=import-error
+from moblab_common.proto import moblabrpc_pb2
+# pylint: disable=import-error
+from moblab_common.proto import moblabrpc_pb2_grpc
+from moblab_common.utils.constants import Constants as MoblabConstants
 
 AFE_TO_MOBLAB_STATUS_MAPPINGS =  {
     'Queued' : moblabrpc_pb2.Job.QUEUED,
@@ -894,11 +896,11 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
         version_info = moblab_info.get_version_info()
         response = moblabrpc_pb2.GetVersionInfoResponse(
-            chromeos_release_version=version_info['CHROMEOS_RELEASE_VERSION'],
-            chromeos_release_track=version_info['CHROMEOS_RELEASE_TRACK'],
-            chromeos_release_description=version_info['CHROMEOS_RELEASE_DESCRIPTION'],
-            moblab_id=version_info['MOBLAB_ID'],
-            moblab_serial_number=version_info['MOBLAB_SERIAL_NUMBER']
+            chromeos_release_version=version_info[MoblabConstants.BUILD_VERSION_NAME],
+            chromeos_release_track=version_info[MoblabConstants.CHANNEL_NAME],
+            chromeos_release_description=version_info[MoblabConstants.DESCRIPTION_NAME],
+            moblab_install_id=version_info[MoblabConstants.MOBLAB_INSTALL_ID_NAME],
+            moblab_serial_number=version_info[MoblabConstants.MOBLAB_HOST_ID_NAME]
         )
         return response
 
