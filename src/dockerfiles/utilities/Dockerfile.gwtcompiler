@@ -9,9 +9,9 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 	unzip wget ca-certificates python2 default-jdk apt-utils
 
 WORKDIR /
-RUN wget https://storage.googleapis.com/gwt-releases/gwt-2.8.2.zip
+RUN wget https://storage.googleapis.com/gwt-releases/gwt-2.9.0.zip
 
 # GWT compile
-RUN unzip gwt-2.8.2.zip
-RUN ln -s /gwt-2.8.2 /usr/local/lib/gwt
-RUN rm gwt-2.8.2.zip
+RUN unzip gwt-2.9.0.zip
+RUN ln -s /gwt-2.9.0 /usr/local/lib/gwt
+RUN rm gwt-2.9.0.zip
