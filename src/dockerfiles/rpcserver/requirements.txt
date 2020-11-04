@@ -21,14 +21,15 @@ google-resumable-media==1.1.0  # via google-cloud-storage
 googleapis-common-protos[grpc]==1.52.0  # via google-api-core, grpc-google-iam-v1
 greenlet==0.4.17          # via gevent
 grpc-google-iam-v1==0.12.3  # via google-cloud-pubsub
+grpcio-reflection==1.33.2  # via -r requirements.in
 grpcio-tools==1.33.2      # via -r requirements.in
-grpcio==1.33.2            # via -r requirements.in, google-api-core, googleapis-common-protos, grpc-google-iam-v1, grpcio-tools
+grpcio==1.33.2            # via -r requirements.in, google-api-core, googleapis-common-protos, grpc-google-iam-v1, grpcio-reflection, grpcio-tools
 idna==2.10                # via requests
 libcst==0.3.13            # via google-cloud-pubsub
 mypy-extensions==0.4.3    # via typing-inspect
 parallel-ssh==2.1.0.post1  # via -r requirements.in
 proto-plus==1.11.0        # via google-cloud-pubsub
-protobuf==3.13.0          # via google-api-core, googleapis-common-protos, grpcio-tools, proto-plus
+protobuf==3.13.0          # via google-api-core, googleapis-common-protos, grpcio-reflection, grpcio-tools, proto-plus
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
 pycparser==2.20           # via cffi

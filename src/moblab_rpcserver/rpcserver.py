@@ -13,8 +13,15 @@ import time
 from concurrent import futures
 
 import moblab_rpcservice
-# pylint: disable=import-error
+import moblab_configuration_rpcservice
+
+from moblab_common.proto import moblabrpc_pb2
 from moblab_common.proto import moblabrpc_pb2_grpc
+
+from moblab_common.proto import moblab_configuration_rpc_pb2
+from moblab_common.proto import moblab_configuration_rpc_pb2_grpc
+
+from grpc_reflection.v1alpha import reflection
 
 os.environ.setdefault('GOOGLE_APPLICATION_CREDENTIALS',
                       '%s/.service_account.json' % os.environ['HOME'])
@@ -53,22 +60,30 @@ def serve():
     setup_logging(logging_severity)
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
-
-    moblab_service = moblab_rpcservice.MoblabRpcService()
-
     try:
         moblabrpc_pb2_grpc.add_MoblabRpcServiceServicer_to_server(
-            moblab_service, server)
+            moblab_rpcservice.MoblabRpcService(),
+            server)
+
+        moblab_configuration_rpc_pb2_grpc.add_MoblabConfigurationServiceServicer_to_server(
+            moblab_configuration_rpcservice.ConfigurationRpcService(),
+            server)
+
+        SERVICE_NAMES = (
+            moblab_configuration_rpc_pb2.DESCRIPTOR.services_by_name['MoblabConfigurationService'].full_name,
+            moblabrpc_pb2.DESCRIPTOR.services_by_name['MoblabRpcService'].full_name,
+            reflection.SERVICE_NAME,
+        )
+        reflection.enable_server_reflection(SERVICE_NAMES, server)
 
         server.add_insecure_port('[::]:6002')
-        logging.info('Starting server')
+        logging.info('Starting server on [::]:6002')
         server.start()
         while True:
-            logging.info('Server sleepin')
+            logging.info('Server sleeping')
             time.sleep(60 * 60 * 24)
     except KeyboardInterrupt:
         server.stop(0)
-
 
 if __name__ == '__main__':
     serve()

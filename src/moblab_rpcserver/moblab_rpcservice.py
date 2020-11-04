@@ -23,6 +23,7 @@ from moblab_common import moblab_info
 from moblab_common.proto import moblabrpc_pb2
 # pylint: disable=import-error
 from moblab_common.proto import moblabrpc_pb2_grpc
+
 from moblab_common.utils.constants import Constants as MoblabConstants
 
 AFE_TO_MOBLAB_STATUS_MAPPINGS =  {

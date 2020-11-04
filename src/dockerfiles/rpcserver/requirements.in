@@ -11,3 +11,4 @@ google-cloud-pubsub
 docker
 parallel-ssh
 python-nmap
+grpcio-reflection
