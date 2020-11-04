@@ -13,7 +13,6 @@ RUN git reset --hard 8196d0bfd0b3b8fbf7f7dbb8310ac43b80311f79
 WORKDIR /devserver-src
 RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
 RUN ls /devserver-src/dev-util
-RUN sed -i 's#python2#python3#g' /devserver-src/dev-util/devserver.py
 ######################################################################
 
 FROM debian:buster-slim as run
