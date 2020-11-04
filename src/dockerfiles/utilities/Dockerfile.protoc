@@ -12,20 +12,21 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 	gcc-multilib \
 	git \
 	make \
-	unzip
+	unzip \
+	zlib1g-dev
 
 WORKDIR /
-RUN curl -L -o protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-x86_64.zip
+RUN curl -L -o protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.13.0-linux-x86_64.zip
 RUN unzip protobuf.zip
 
-RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.0.7/protoc-gen-grpc-web-1.0.7-linux-x86_64
+RUN curl -L -o /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/1.2.1/protoc-gen-grpc-web-1.2.1-linux-x86_64
 RUN chmod uog+x /usr/local/bin/protoc-gen-grpc-web
 
 # install grpc_python_plugin
 RUN git clone https://github.com/grpc/grpc.git
 WORKDIR /grpc
 RUN git fetch
-RUN git reset --hard 118282682abe0e7c5dd1b167ad128815e7e00967
+RUN git reset --hard ee5b762f33a42170144834f5ab7efda9d76c480b
 RUN git submodule update --init
 RUN make -j32 grpc_python_plugin
 
