@@ -92,7 +92,7 @@ class MoblabDUTConnector(object):
                                     timeout=timeout)
         client.join(output)
 
-        for ip, host_output in output.items():
+        for host_output in output:
             stdout = '{}'.format(''.join(host_output.stdout)) if host_output.stdout else ''
             stderr = '{}'.format(''.join(host_output.stderr)) if host_output.stderr else ''
 
@@ -102,7 +102,7 @@ class MoblabDUTConnector(object):
                 exception_msg = host_output.exception.args[0]
                 exception_args = host_output.exception.args[1:]
                 stderr += exception_msg % exception_args
-            command_results.append((ip, stdout, stderr, exit_code))
+            command_results.append((host_output.host, stdout, stderr, exit_code))
         logging.info('Running command %s on %s resulted in %s', command,
                      ip_addresses, command_results)
         return command_results
