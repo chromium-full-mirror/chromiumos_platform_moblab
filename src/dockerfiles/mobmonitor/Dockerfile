@@ -6,7 +6,7 @@ ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
 ###############################################################################
-FROM node:12 as build
+FROM node:15 as build
 
 # install chrome for protractor tests
 # RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
