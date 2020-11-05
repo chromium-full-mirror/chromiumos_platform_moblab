@@ -1,0 +1,4 @@
+FROM blacklabelops/logrotate:latest
+
+RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+    --disabled-password --gecos "" moblab

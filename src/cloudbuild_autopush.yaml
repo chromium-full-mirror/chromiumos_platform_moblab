@@ -51,15 +51,19 @@ steps:
     waitFor: ['-']
   - id: docker-compose
     name: "docker:19.03.8"
-    args: ["pull", "docker/compose:alpine-1.25.4"]
+    args: ["pull", "docker/compose:alpine-1.27.4"]
     waitFor: ['-']
   - id: node-buster
     name: "docker:19.03.8"
     args: ["pull", "node:12-buster"]
     waitFor: ['-']
-  - id: node
+  - id: node12
     name: "docker:19.03.8"
     args: ["pull", "node:12"]
+    waitFor: ['-']
+  - id: node15
+    name: "docker:19.03.8"
+    args: ["pull", "node:15"]
     waitFor: ['-']
   - id: alpine-edge
     name: "docker:19.03.8"
@@ -73,6 +77,11 @@ steps:
     name: "docker:19.03.8"
     args: ["pull", "python:2-buster"]
     waitFor: ['-']
+  - id: blacklabelops_logrotate
+    name: "docker:19.03.8"
+    args: ["pull", "blacklabelops/logrotate:latest"]
+    waitFor: ['-']
+
 
   - id: protoc
     name: "docker:19.03.8"
@@ -382,7 +391,7 @@ steps:
       ]
     waitFor:
       - "protoc"
-      - "node"
+      - "node12"
       - "nginx-alpine"
     env:
       - "DOCKER_BUILDKIT=1"
@@ -579,7 +588,7 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
     waitFor:
-      - "node"
+      - "node15"
       - "python-3.8-slim"
       - "moblab_common"
 
@@ -626,6 +635,22 @@ steps:
       - "autotest-base"
       - "moblab_common"
 
+  - id: logrotate
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.logrotate",
+        "-t",
+        "${_REGISTRY_URI}/logrotate:${_LABEL}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "blacklabelops_logrotate"
+
 images:
   [
     "${_REGISTRY_URI}/protoc:${_LABEL}",
@@ -654,6 +679,7 @@ images:
     "${_REGISTRY_URI}/gwtcompiler:${_LABEL}",
     "${_REGISTRY_URI}/moblab-dns:${_LABEL}",
     "${_REGISTRY_URI}/moblab_common:${_LABEL}",
+    "${_REGISTRY_URI}/logrotate:${_LABEL}",
   ]
 
 options:
