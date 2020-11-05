@@ -10,7 +10,7 @@ from autotest_lib.frontend.afe.json_rpc import proxy
 from autotest_lib.client.common_lib import global_config, utils
 
 GLOBAL_CONFIG = global_config.global_config
-DEFAULT_SERVER = 'autotest'
+DEFAULT_SERVER = 'autotest-afe'
 AFE_RPC_PATH = '/afe/server/noauth/rpc/'
 TKO_RPC_PATH = '/new_tko/server/noauth/rpc/'
 

@@ -31,11 +31,11 @@ else
     docker-compose pull remote_access
     docker-compose up -d remote_access
 
-    docker-compose pull db db-init dns autotest autotest-dbsetup moblab-ui
-    docker-compose up -d db db-init dns autotest autotest-dbsetup moblab-ui
+    docker-compose pull db db-init dns autotest-afe autotest-dbsetup moblab-ui
+    docker-compose up -d db db-init dns autotest-afe autotest-dbsetup moblab-ui
 
-    docker-compose pull devserver autotest-monitordb autotest-hostscheduler
-    docker-compose up -d devserver autotest-monitordb autotest-hostscheduler
+    docker-compose pull devserver autotest-monitor-db autotest-hostscheduler
+    docker-compose up -d devserver autotest-monitor-db autotest-hostscheduler
 
     docker-compose pull
     docker-compose up -d
