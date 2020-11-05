@@ -17,6 +17,7 @@ all:	autotest \
 		dns \
 		envoy \
 		local-dev \
+		logrotate \
 		mobmonitor \
 		offloader \
 		remote-access\
@@ -199,14 +200,21 @@ common: protoc
 		-f dockerfiles/moblab_common/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab_common:${LABEL}
 
+logrotate: export DOCKER_BUILDKIT=1
+logrotate:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/logrotate:${LABEL} \
+		-f dockerfiles/utilities/Dockerfile.logrotate dockerfiles/utilities
+	docker push ${REGISTRY_URI}/logrotate:${LABEL}
+
 .PHONY:	autotest \
-		compose \
 		common \
+		compose \
 		db devserver \
 		dhcp \
 		dns \
 		envoy \
 		local-dev \
+		logrotate \
 		mobmonitor \
 		offloader \
 		remote-access\

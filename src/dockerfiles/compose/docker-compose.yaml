@@ -390,24 +390,8 @@ services:
         ipv4_address: 192.168.100.51
 
   ##############################################################################
-  monitoring:
-    image: google/cadvisor:latest
-    restart: on-failure
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-
-    ports:
-      - 9997:8080
-
-    networks:
-      - moblab
-  ##############################################################################
   log-rotate:
-    image: blacklabelops/logrotate:latest
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/logrotate:${LOGROTATE:-release}
     restart: on-failure
     volumes:
       - /var/log/bootup:/bootup
