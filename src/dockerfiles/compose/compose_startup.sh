@@ -23,6 +23,17 @@ then
     docker-compose stop -t 30 db
     docker-compose down -t 30
     docker-compose rm -s -f
+
+elif [ "${1}" == "db" ]
+then
+
+    echo "Starting up db!"
+
+    docker-compose down
+
+    docker-compose pull db db-init db-setup
+    docker-compose up db db-init db-setup
+
 else
     # This is in case the device was not shutdown cleanly there might be
     # restarted containers (restarted by dockerd)
@@ -31,8 +42,8 @@ else
     docker-compose pull remote_access
     docker-compose up -d remote_access
 
-    docker-compose pull db db-init dns autotest-afe autotest-dbsetup moblab-ui
-    docker-compose up -d db db-init dns autotest-afe autotest-dbsetup moblab-ui
+    docker-compose pull db db-init db-setup dns autotest-afe autotest-dbsetup moblab-ui
+    docker-compose up -d db db-init db-setup dns autotest-afe autotest-dbsetup moblab-ui
 
     docker-compose pull devserver autotest-monitor-db autotest-hostscheduler
     docker-compose up -d devserver autotest-monitor-db autotest-hostscheduler

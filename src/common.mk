@@ -12,7 +12,9 @@ EXTRA_ARGS+= --build-arg SSH_PORT="${SSH_PORT}"
 all:	autotest \
 		compose \
 		common \
-		db devserver \
+		db \
+		devserver \
+		moblab-db-setup \
 		dhcp \
 		dns \
 		envoy \
@@ -23,7 +25,6 @@ all:	autotest \
 		remote-access\
 		remote-agent \
 		remote-scheduler \
-		remote_access \
 		rpcserver \
 		ssp \
 		ui \
@@ -200,28 +201,36 @@ common: protoc
 		-f dockerfiles/moblab_common/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab_common:${LABEL}
 
+moblab-db-setup: export DOCKER_BUILDKIT=1
+moblab-db-setup:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-db-setup:${LABEL} \
+		-f dockerfiles/moblab_common/Dockerfile.dbsetup .
+	docker push ${REGISTRY_URI}/moblab-db-setup:${LABEL}
+
 logrotate: export DOCKER_BUILDKIT=1
 logrotate:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/logrotate:${LABEL} \
 		-f dockerfiles/utilities/Dockerfile.logrotate dockerfiles/utilities
 	docker push ${REGISTRY_URI}/logrotate:${LABEL}
 
-.PHONY:	autotest \
+moblab:	autotest \
 		common \
 		compose \
-		db devserver \
-		dhcp \
-		dns \
-		envoy \
+		db \
+		devserver \
+		moblab-db-setup \
 		local-dev \
-		logrotate \
 		mobmonitor \
 		offloader \
-		remote-access\
+		remote-access \
 		remote-agent \
 		remote-scheduler \
-		remote_access \
 		rpcserver \
+		ui
+
+misc:	dhcp \
+		dns \
+		envoy \
+		logrotate \
 		ssp \
-		ui \
 		watchtower

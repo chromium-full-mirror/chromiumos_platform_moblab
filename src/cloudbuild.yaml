@@ -122,6 +122,26 @@ steps:
       - "buster-slim"
       - "python-3.8"
 
+  - id: moblab_db_setup
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${_LABEL}",
+        "-f",
+        "/workspace/src/dockerfiles/moblab_common/Dockerfile.dbsetup",
+        "-t",
+        "${_REGISTRY_URI}/moblab-db-setup:${_LABEL}",
+        "/workspace/src/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "python-3.8"
+
   - id: autotest-lucifer
     name: "docker:19.03.8"
     args:
