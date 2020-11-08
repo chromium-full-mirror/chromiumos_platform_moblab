@@ -4,7 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from moblab_common import constants
+from moblab_common.utils import constants
 
 class Constants(constants.Constants):
     """Class to maintain all reusable constant values within remote agent."""
