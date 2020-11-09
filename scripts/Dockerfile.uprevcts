@@ -1,0 +1,31 @@
+FROM openjdk:9
+
+ARG USER
+ARG USERID
+
+WORKDIR /
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN python2 get-pip.py
+RUN pip2 install jinja2
+
+
+RUN apt-get update && apt-get install -yq -o APT::Immediate-Configure=0 \
+    aapt \
+    vim \
+    python3
+
+RUN mkdir -p autotest moblab depot_tools
+
+RUN echo adduser --gecos "" --disabled-password --uid ${USERID} ${USER}
+RUN adduser --gecos "" --disabled-password --uid ${USERID} ${USER}
+
+RUN chown -R ${USER}:${USER} autotest moblab depot_tools
+
+USER $USER
+
+RUN git clone https://chromium.googlesource.com/chromiumos/third_party/autotest
+RUN git clone https://chromium.googlesource.com/chromiumos/platform/moblab
+RUN git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+ENV PATH=/depot_tools:/moblab/scripts:${PATH}
+
