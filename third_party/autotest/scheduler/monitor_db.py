@@ -345,60 +345,19 @@ class Dispatcher(object):
         of the tick time.
         """
 
-	self._log_tick_msg('New tick')
-	system_utils.DroneCache.refresh()
-
-
-	self._log_tick_msg('Starting _drone_manager.trigger_refresh')
-	_drone_manager.trigger_refresh()
-
-	self._schedule_running_host_queue_entries()
-
-	self._schedule_special_tasks()
-
-	self._schedule_new_jobs()
-
-	self._log_tick_msg('Starting _drone_manager.sync_refresh')
-	_drone_manager.sync_refresh()
-	if luciferlib.is_lucifer_enabled():
-	    self._send_to_lucifer()
-	# _run_cleanup must be called between drone_manager.sync_refresh,
-	# and drone_manager.execute_actions, as sync_refresh will clear the
-	# calls queued in drones. Therefore, any action that calls
-	# drone.queue_call to add calls to the drone._calls, should be after
-	# drone refresh is completed and before
-	# drone_manager.execute_actions at the end of the tick.
-
-	self._run_cleanup()
-
-	self._find_aborting()
-
-	self._find_aborted_special_tasks()
-
-	self._handle_agents()
-
-	self._log_tick_msg('Starting _host_scheduler.tick')
-	self._host_scheduler.tick()
-
-	self._log_tick_msg('Starting _drone_manager.execute_actions')
-	_drone_manager.execute_actions()
-
-	self._log_tick_msg('Starting django.db.reset_queries')
-	django.db.reset_queries()
+        self._log_tick_msg('New tick')
+        system_utils.DroneCache.refresh()
 
         self._log_tick_msg('Starting _drone_manager.trigger_refresh')
         _drone_manager.trigger_refresh()
 
         self._schedule_running_host_queue_entries()
-
         self._schedule_special_tasks()
-
         self._schedule_new_jobs()
 
         self._log_tick_msg('Starting _drone_manager.sync_refresh')
         _drone_manager.sync_refresh()
         if luciferlib.is_lucifer_enabled():
-
             self._send_to_lucifer()
         # _run_cleanup must be called between drone_manager.sync_refresh,
         # and drone_manager.execute_actions, as sync_refresh will clear the
