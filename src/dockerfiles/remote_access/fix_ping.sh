@@ -14,7 +14,7 @@ test_and_fix_ping() {
 
 while true
 do
-    test_and_fix_ping default_autotest-monitordb_1
-    test_and_fix_ping default_autotest_1
+    test_and_fix_ping autotest-monitor-db
+    test_and_fix_ping autotest-afe
     sleep 120
 done

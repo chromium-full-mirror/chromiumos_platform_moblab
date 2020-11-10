@@ -17,14 +17,14 @@ import logging
 import docker
 import requests
 
-MOBLAB_RPC_SERVER = "autotest:8888"
+MOBLAB_RPC_SERVER = "autotest-afe:8888"
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
 def enroll_dut(ip_address):
     client = docker.from_env()
-    afe_container = client.containers.get("default_autotest_1")
+    afe_container = client.containers.get("autotest-afe")
     cmd = "/usr/local/autotest/cli/atest host create %s" % ip_address
     _LOGGER.debug(cmd)
     (exit_code, output) = afe_container.exec_run(cmd)

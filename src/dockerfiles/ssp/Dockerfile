@@ -79,7 +79,7 @@ RUN chown moblab:moblab /tmp/autotest-tradefed-cache
 USER moblab
 
 ENV container=ssp_container
-ENV AUTOTEST_WEB=autotest:8888
+ENV AUTOTEST_WEB=autotest-afe:8888
 
 # Unlike lxc containers which you can start and will keep running on their own,
 # docker containers require a running process or they exist.

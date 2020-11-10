@@ -6,6 +6,7 @@ version: "3"
 services:
   ##############################################################################
   db:
+    container_name: db
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-db:${DB:-release}
     hostname: db
     restart: on-failure
@@ -43,6 +44,7 @@ services:
         hard: 16384
   ##############################################################################
   db-init:
+    container_name: db-init
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-db-init:${DB_INIT:-release}
     user: moblab
     depends_on:
@@ -51,7 +53,18 @@ services:
     networks:
       moblab:
   ##############################################################################
+  db-setup:
+    container_name: db-setup
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-db-setup:${DB_SETUP:-release}
+    user: moblab
+    depends_on:
+      - db
+
+    networks:
+      moblab:
+  ##############################################################################
   devserver:
+    container_name: devserver
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/devserver:${DEVSERVER:-release}
     hostname: devserver
     restart: on-failure
@@ -64,7 +77,7 @@ services:
       - static_cache:/static
 
     depends_on:
-      - autotest
+      - autotest-afe
       - dns
 
     dns:
@@ -80,7 +93,8 @@ services:
         soft: 10000
         hard: 16384
   ##############################################################################
-  autotest:
+  autotest-afe:
+    container_name: autotest-afe
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-afe:${AUTOTEST:-release}
     hostname: autotest
     restart: on-failure
@@ -101,7 +115,7 @@ services:
       - shadowconfig:/shadow_config
 
     environment:
-      - LABEL=${AUTOTEST}
+      - LABEL=${AUTOTEST_AFE}
 
     networks:
       - moblab
@@ -127,6 +141,7 @@ services:
       - "dockerhost:192.168.100.1"
 
   autotest-dbsetup:
+    container_name: autotest-dbsetup
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-dbsetup:${AT_DBSETUP:-release}
     user: moblab
     volumes:
@@ -140,7 +155,8 @@ services:
     depends_on:
       - db-init
 
-  autotest-monitordb:
+  autotest-monitor-db:
+    container_name: autotest-monitor-db
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-monitor_db:${AT_MONITORDB:-release}
     user: moblab
     restart: on-failure
@@ -160,7 +176,7 @@ services:
       - moblab
 
     depends_on:
-      - autotest
+      - autotest-afe
       - dns
 
     dns:
@@ -184,6 +200,7 @@ services:
       - "dockerhost:192.168.100.1"
 
   autotest-hostscheduler:
+    container_name: autotest-hostscheduler
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-host:${AT_HOSTSCHEDULER:-release}
     user: moblab
     restart: on-failure
@@ -197,9 +214,10 @@ services:
       - moblab
 
     depends_on:
-      - autotest
+      - autotest-afe
 
-  autotest-job_aborter:
+  autotest-job-aborter:
+    container_name: autotest-job-aborter
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-aborter:${AT_JOBABORTER:-release}
     user: moblab
     restart: on-failure
@@ -219,9 +237,10 @@ services:
       - moblab
 
     depends_on:
-      - autotest
+      - autotest-afe
   ##############################################################################
   envoy-proxy:
+    container_name: envoy-proxy
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/envoy-proxy:${ENVOYPROXY:-release}
     user: moblab
     restart: on-failure
@@ -238,6 +257,7 @@ services:
       - 6011:6011
   ##############################################################################
   moblab-ui:
+    container_name: moblab-ui
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-ui:${MOBLAB_UI:-release}
     hostname: moblab-ui
     restart: on-failure
@@ -260,6 +280,7 @@ services:
       - 80:6010
   ##############################################################################
   moblab-rpcserver:
+    container_name: moblab-rpcserver
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-rpcserver:${MOBLAB_RPCSERVER:-release}
     user: moblab
     hostname: moblab-rpcserver
@@ -281,7 +302,7 @@ services:
       - moblab
 
     depends_on:
-      - autotest
+      - autotest-afe
       - dns
 
     dns:
@@ -294,7 +315,8 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
       - WATCHTOWER_TAG=${WATCHTOWER}
   ##############################################################################
-  remote_agent:
+  remote-agent:
+    container_name: remote-agent
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-remote-agent:${REMOTE_AGENT:-release}
     user: moblab
     hostname: moblab-remote-agent
@@ -310,7 +332,7 @@ services:
       - moblab
 
     depends_on:
-      - autotest
+      - autotest-afe
       - dns
 
     dns:
@@ -324,6 +346,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
   ##############################################################################
   watchtower:
+    container_name: watchtower
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/watchtower:${WATCHTOWER:-release}
     restart: on-failure
     volumes:
@@ -346,6 +369,7 @@ services:
         hard: 16384
   ##############################################################################
   offloader:
+    container_name: offloader
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-offloader:${OFFLOADER:-release}
     restart: on-failure
 
@@ -360,7 +384,7 @@ services:
       - moblab
 
     depends_on:
-      - autotest
+      - autotest-afe
       - dns
 
     dns:
@@ -379,6 +403,7 @@ services:
 
   ##############################################################################
   dns:
+    container_name: dns
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-dns:${DNS:-release}
     restart: on-failure
 
@@ -391,6 +416,7 @@ services:
 
   ##############################################################################
   log-rotate:
+    container_name: log-rotate
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/logrotate:${LOGROTATE:-release}
     restart: on-failure
     volumes:
@@ -407,6 +433,7 @@ services:
       - moblab
   ##############################################################################
   remote_access:
+    container_name: remote_access
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/remote_access:${REMOTE_ACCESS:-release}
     restart: on-failure
     volumes:
@@ -423,7 +450,7 @@ services:
       - leases:/leases:ro
 
     depends_on:
-      - autotest
+      - autotest-afe
       - dns
 
     dns:
@@ -448,6 +475,7 @@ services:
       - "dockerhost:192.168.100.1"
 ##############################################################################
   remote-scheduler:
+    container_name: remote-scheduler
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-remote-scheduler:${REMOTE_SCHEDULER:-release}
     restart: always
     volumes:
@@ -456,7 +484,7 @@ services:
       - moblab_home:/home/moblab
 
     depends_on:
-      - autotest
+      - autotest-afe
       - dns
 
     dns:
@@ -466,8 +494,8 @@ services:
       - moblab
 
 ##############################################################################
-
   mobmonitor:
+    container_name: mobmonitor
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/mobmonitor:${MOBMONITOR:-release}
     user:  moblab
 
