@@ -28,18 +28,18 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
   @ViewChild(BasicTextFormComponent) modulesTextForm;
   @ViewChild(BasicSelectorComponent) ctsVersionSelectorForm;
 
-  selectedAndroidVersion: string;
+  suiteName: string;
 
   constructor(moblabGrpcService: MoblabGrpcService,
-              router: Router,
-              snackBar: MatSnackBar) {
+    router: Router,
+    snackBar: MatSnackBar) {
     super(moblabGrpcService, router, snackBar);
   }
 
   /** Sets initial form enable/disable states.
    * */
   ngAfterViewInit(): void {
-    setTimeout(function() {
+    setTimeout(function () {
       this.versionSelectForm.disable('Please select build.');
       this.modulesTextForm.disable('Please select build.');
     }.bind(this));
@@ -56,8 +56,12 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
 
   /** Method triggered on change of the cts version form.
    * */
-  ctsVersionChanged(selectedAndroidVersion: string) {
-    this.selectedAndroidVersion = selectedAndroidVersion;
+  ctsVersionChanged(suiteName: string) {
+    if (suiteName === 'cts_R') {
+      this.suiteName = 'cts';
+    } else {
+      this.suiteName = suiteName;
+    }
     this.runSuiteButton.enable();
   }
 
@@ -82,7 +86,7 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
         this.onRunSuiteFailed(err.message);
         this.runSuiteButton.enable();
       },
-      this.selectedAndroidVersion,
+      this.suiteName,
       this.selectedBuild,
       this.selectedMilestone,
       this.selectedBoard,
