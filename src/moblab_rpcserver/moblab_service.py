@@ -35,17 +35,31 @@ BuildResults = namedtuple('BuildResults', ['results', 'is_incomplete'])
 _DEFAULT_SUITE_TIMEOUT_MINS = 1440
 _SUITE_TIMEOUT_MAP = {
     'hardware_storagequal': 40320,
-    'hardware_storagequal_quick': 40320
+    'hardware_storagequal_quick': 40320,
+    'storage_qual_v2_xs': 480,  # 12 hours
+    'storage_qual_v2_s': 720,   # 2 days
+    'storage_qual_v2_m': 5760,  # 4 days
+    'storage_qual_v2_l': 14400  # 10 days
+    'storage_qual_v2_xl': 28800 # 20 days
 }
 
 _STORAGE_QUAL_VARIATIONS = {
     0: 'hardware_storagequal',
     1: 'hardware_storagequal_quick',
-    2: 'hardware_storagequal_external'
+    2: 'hardware_storagequal_external',
+    3: 'storage_qual_v2_quick',
+    4: 'storage_qual_v2_xs',
+    5: 'storage_qual_v2_s',
+    6: 'storage_qual_v2_m',
+    7: 'storage_qual_v2_l',
+    8: 'storage_qual_v2_xl'
 }
 
 HARDWARE_AVL_BUG_ID = 'bug_id'
 HARDWARE_AVL_PART_NO = 'part_id'
+
+STORAGE_QUAL_DISK_SIZE_GB = 'tast_disk_size_gb'
+STORAGE_QUAL_DUAL_NAMESPACE = 'tast_storage.slcQual'
 
 MAX_BUILD_RESULTS_PAGE = 1000
 
@@ -233,6 +247,8 @@ class MoblabService(object):
                                part_id,
                                variation,
                                pool=None,
+                               disk_size_gb=0,
+                               is_dual_namespace=False
     ):
         """Starts storage qual suite run. Formats arguments s.t. they can be
         ingested by AFE.
@@ -247,12 +263,16 @@ class MoblabService(object):
             part_id: Numeric string identifying relevant part number.
             variation: RunStorageQualificationSuiteRequest.Variation
             pool: String identifier for which pool of DUT's to run tests with.
+            disk_size_gb: Size of main storage disk (in whole GB).
+            is_dual_namespace: Dual-namespace test requested.
         Returns:
           String response message.
         """
         avl_args = {
             HARDWARE_AVL_BUG_ID: bug_id,
-            HARDWARE_AVL_PART_NO: part_id
+            HARDWARE_AVL_PART_NO: part_id,
+            STORAGE_QUAL_DISK_SIZE_GB: disk_size_gb,
+            STORAGE_QUAL_DUAL_NAMESPACE: is_dual_namespace
         }
 
         return self.run_suite(

@@ -278,7 +278,9 @@ export class MoblabGrpcService {
     pool: string,
     avl_process_bug_id: string,
     avl_part_number: string,
-    variation: number
+    variation: number,
+    disk_size_gb: number,
+    dual_namespace: boolean
   ) {
     const request = new RunStorageQualificationSuiteRequest();
     request.setBuildVersion(build);
@@ -289,6 +291,8 @@ export class MoblabGrpcService {
     request.setAvlProcessBugId(avl_process_bug_id);
     request.setAvlPartNumber(avl_part_number);
     request.setVariation(variation);
+    request.setDiskSizeGb(disk_size_gb);
+    request.setIsDualNamespace(dual_namespace);
 
     const call = this.moblabRpcService.run_storage_qualification_suite(
       request,

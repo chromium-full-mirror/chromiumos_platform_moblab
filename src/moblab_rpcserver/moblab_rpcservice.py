@@ -181,6 +181,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             buganizer issue.
             avl_part_number: Numeric string identifying relevant part number.
             variation: RunStorageQualificationSuiteRequest.Variation
+            disk_size_gb: Size of main storage disk (in whole GB).
+            is_dual_namespace: Dual-namespace test requested.
           _context: grpc.server.Context
         Returns:
           RunSuiteResponse object with a string result message.
@@ -194,7 +196,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 request.avl_process_bug_id,
                 request.avl_part_number,
                 request.variation,
-                request.pool
+                request.pool,
+                request.disk_size_gb,
+                request.is_dual_namespace
             )
         )
         return response
