@@ -10,7 +10,6 @@
 *.gz
 .DS_Store
 .vscode
-
 /.cache/
 /.coverage
 *node_modules
