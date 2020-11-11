@@ -95,7 +95,7 @@ services:
   ##############################################################################
   autotest-afe:
     container_name: autotest-afe
-    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-afe:${AUTOTEST:-release}
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-afe:${AUTOTEST_AFE:-release}
     hostname: autotest
     restart: on-failure
     user: moblab
