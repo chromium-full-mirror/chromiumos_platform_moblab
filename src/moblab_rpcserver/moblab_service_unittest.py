@@ -14,11 +14,19 @@ from unittest.mock import MagicMock, PropertyMock
 class MockNotFoundError(Exception):
   pass
 
+class MockClientError(Exception):
+  pass
 
 MOCKED_DOCKER = MagicMock()
 MOCKED_DOCKER.errors.NotFound = MockNotFoundError
+
+MOCKED_GOOGLE = MagicMock()
+MOCKED_GOOGLE.api_core.exceptions.ClientError = MockClientError
+
 sys.modules['docker'] = MOCKED_DOCKER
-sys.modules['google.cloud'] = MOCKED_DOCKER
+sys.modules['google'] = MOCKED_GOOGLE
+sys.modules['google.cloud'] = MagicMock()
+sys.modules['google.api_core'] = MagicMock()
 sys.modules['moblab_common'] = MagicMock()
 sys.modules['requests'] = MagicMock()
 
@@ -275,11 +283,14 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
     afe_set_is_remote_agent_enabled_mock.assert_called_once()
 
+  @mock.patch.object(MoblabService, 'moblab_build_connector', new_callable=PropertyMock)
   @mock.patch.object(MoblabService, 'config_connector', new_callable=PropertyMock)
   @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
-  def test_run_suite(self, mock_afe_connector, mock_config_connector):
+  def test_run_suite(self, mock_afe_connector, mock_config_connector, mock_moblab_build_connector):
     mock_config_connector.return_value.get_test_wifi_ap_and_password.return_value = ('mock_ssid', 'mock_wifi_pass')
     mock_afe_connector.return_value.run_suite.return_value = (1, None) # (job_id, error_msg)
+    mock_moblab_build_connector.return_value.check_build_stage_status.side_effect = [False, True]
+
     self.service.run_suite(
         'mock_build_target',
         'mock_model',
@@ -298,12 +309,15 @@ class MoblabRPCServiceTest(unittest.TestCase):
         suite_args={},
         test_args={'ssid': 'mock_ssid', 'wifipass': 'mock_wifi_pass'}
     )
+    mock_moblab_build_connector.return_value.stage_build.assert_called_once()
 
+  @mock.patch.object(MoblabService, 'moblab_build_connector', new_callable=PropertyMock)
   @mock.patch.object(MoblabService, 'config_connector', new_callable=PropertyMock)
   @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
-  def test_run_suite_afe_failure(self, mock_afe_connector, mock_config_connector):
+  def test_run_suite_afe_failure(self, mock_afe_connector, mock_config_connector, mock_moblab_build_connector):
     mock_config_connector.return_value.get_test_wifi_ap_and_password.return_value = ('mock_ssid', 'mock_wifi_pass')
     mock_afe_connector.return_value.run_suite.return_value = (None, 'Create suite job attempt failed, blah blah blah.') # (job_id, error_msg)
+    mock_moblab_build_connector.return_value.check_build_stage_status.return_value = True
 
     with self.assertRaises(MoblabRpcError) as context:
       self.service.run_suite(
@@ -313,6 +327,26 @@ class MoblabRPCServiceTest(unittest.TestCase):
           '00000.00.0',
           'mock_suite'
       )
+
+  @mock.patch.object(MoblabService, 'build_connector', new_callable=PropertyMock)
+  @mock.patch.object(MoblabService, 'moblab_build_connector', new_callable=PropertyMock)
+  @mock.patch.object(MoblabService, 'config_connector', new_callable=PropertyMock)
+  @mock.patch.object(MoblabService, 'afe_connector', new_callable=PropertyMock)
+  def test_run_suite_api_failure(self, mock_afe_connector, mock_config_connector, mock_moblab_build_connector, mock_build_connector):
+    mock_config_connector.return_value.get_test_wifi_ap_and_password.return_value = ('mock_ssid', 'mock_wifi_pass')
+    mock_afe_connector.return_value.run_suite.return_value = (1, None) # (job_id, error_msg)
+    mock_moblab_build_connector.return_value.check_build_stage_status.side_effect = MockClientError()
+    mock_build_connector.return_value.get_builds_for_milestone.return_value = ['00000.00.0']
+
+    self.service.run_suite(
+        'mock_build_target',
+        'mock_model',
+        '99',
+        '00000.00.0',
+        'mock_suite'
+    )
+
+    mock_build_connector.return_value.get_builds_for_milestone.assert_called_once()
 
 if __name__ == "__main__":
   unittest.main()
