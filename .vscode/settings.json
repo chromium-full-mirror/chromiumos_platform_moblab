@@ -14,11 +14,28 @@
         "**/*.pyc": {"when": "$(basename).py"},
     },
     "editor.rulers": [
-        80
+        79
     ],
     "cSpell.words": [
+        "Boto",
+        "HCEXECUTION",
+        "Popen",
+        "cherrypy",
+        "crbug",
+        "datefmt",
+        "etime",
+        "hcexpect",
+        "hcname",
+        "hcobj",
+        "hcstatus",
+        "hcstatuses",
+        "isclass",
         "moblabrpc",
-        "pb"
+        "myobj",
+        "pb",
+        "pylint",
+        "stime",
+        "testhc"
     ],
 
     "java.configuration.runtimes": [
@@ -27,7 +44,7 @@
           "path": "/usr/lib/jvm/java-11-openjdk-amd64",
           "default": true
         },
-      ]
+      ],
 
     "cSpell.enabledLanguageIds": [
         "asciidoc",
@@ -61,7 +78,15 @@
     "files.associations": {
         "Dockerfile*": "dockerfile",
         "docker-compose*": "yaml"
-    }
+    },
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length=79"
+    ]
+
 }
 
 
