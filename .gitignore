@@ -22,3 +22,4 @@
 .angulardoc.json
 *dist/
 *.code-workspace
+src/dockerfiles/compose/override.env
