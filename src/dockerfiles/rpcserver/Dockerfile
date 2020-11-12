@@ -16,7 +16,6 @@ FROM python:3.8-slim-buster
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-COPY --chown=moblab src/moblab_rpcserver/ /etc/moblab/moblab_rpcserver
 RUN apt-get update && apt-get install -yq \
     cmake \
     curl \
@@ -61,6 +60,8 @@ RUN apt-get clean
 # Need to be in docker group to use docker API
 RUN addgroup --gid 412 docker
 RUN usermod -aG docker moblab
+
+COPY --chown=moblab src/moblab_rpcserver/ /etc/moblab/moblab_rpcserver
 
 WORKDIR /moblab
 USER moblab
