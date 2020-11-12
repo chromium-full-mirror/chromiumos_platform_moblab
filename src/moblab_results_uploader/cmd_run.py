@@ -281,8 +281,8 @@ def _post_parse_args(arg_parser, args):
     """massage input arguments."""
     _LOGGER.debug('Input arguments: %s', args)
     if not args.gs_bucket:
-        config_connector.MoblabConfigConnector()
-        gs_bucket = config_connector.get_cloud_bucket()
+        gs_bucket=config_connector.MoblabConfigConnector(
+            afe_connector.AFEConnector()).get_cloud_bucket()
         if not gs_bucket:
             raise Exception("No GS bucket specified or configured.")
     else:
