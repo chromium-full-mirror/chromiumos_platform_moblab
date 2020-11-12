@@ -16,7 +16,8 @@ ENV SSH_PORT="${SSH_PORT}"
 
 WORKDIR /
 COPY docker-compose.yaml .
-COPY .env .
+COPY .env main.env
+COPY override.env* .
 COPY compose_startup.sh .
 RUN chmod u+x compose_startup.sh
 

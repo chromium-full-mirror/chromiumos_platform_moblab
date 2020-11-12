@@ -9,7 +9,11 @@ set -x
 
 echo "Enviroment variable LABEL is ${LABEL}"
 
-# The checked in code assumes autopush build, convert this to a beta/release
+
+echo "Merging main.env and override.env into .env"
+egrep -oh '^[^#]+' main.env override.env | egrep . | awk -F= '{a[$1]=$2}END{for(i in a) print i "=" a[i]}' > .env
+
+# The checked in code assumes  autopush build, convert this to a beta/release
 # build container on startup.  Autopush/custom builds can be overridden by the
 # user and those .env files should not be changed.
 if [ "${LABEL}" == "release" ] || [ "${LABEL}" == "beta" ]; then
