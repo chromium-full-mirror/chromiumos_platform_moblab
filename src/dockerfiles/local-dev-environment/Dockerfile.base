@@ -11,7 +11,7 @@ FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 FROM node:12-buster as base
 
-RUN npm install -g gts
+RUN npm install -g gts eslint
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
     https://packages.cloud.google.com/apt cloud-sdk main" | \
@@ -33,8 +33,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     python3-pip \
     software-properties-common \
     sudo \
-    vim \
-    vim-gtk
+    vim
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
