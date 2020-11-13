@@ -971,24 +971,3 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             is_enabled=request.is_enabled)
         return moblabrpc_pb2.SetRemoteAgentConfigurationResponse(
             is_succeeded=is_succeeded)
-
-    def pause_moblab(self, request, context):
-        """Pauses the moblab by user (PauseRequester = user)
-        """
-        return moblabrpc_pb2.StateResponse()
-        
-    def resume_moblab(self, request, context):
-        """Resumes previously paused moblab by user (PauseRequester == user)
-        otherwise returns error
-        """
-        return moblabrpc_pb2.StateResponse()
-
-    def get_pause_state(self, request, context):
-        """Returns the state of pausing and the source of pausing
-        """
-        response = moblabrpc_pb2.StateResponse()
-        response.pause_requesters.extend([
-            moblabrpc_pb2.StateResponse.FREE_DISK_SPACE_CHECKER,
-            moblabrpc_pb2.StateResponse.USER,
-        ])
-        return response

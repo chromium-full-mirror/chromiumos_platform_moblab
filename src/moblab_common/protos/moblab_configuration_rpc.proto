@@ -2,56 +2,52 @@ syntax = "proto3";
 
 package moblab;
 
-import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 
 // Service exposes Moblab static and runtime configuration
 service MoblabConfigurationService {
-  // Returns the list of requested values of Moblab settings
-  rpc get_settings(GetSettingsRequest) returns (GetSettingsResponse) {};
-  // Sets the value of Moblab setting
-  rpc set_setting(SetSettingRequest) returns (google.protobuf.Empty) {};
+  // request to pause host scheduling 
+  rpc pause_host_scheduler(PauseHostSchedulerRequest)
+    returns (PauseHostSchedulerResponse) {}
+  // request to unpause host scheduling
+  rpc resume_host_scheduler(ResumeHostSchedulerRequest)
+    returns (ResumeHostSchedulerResponse) {}
+  // returns the list of requestors currently requesting to pause
+  rpc get_host_scheduler_pause_status(google.protobuf.Empty)
+    returns (GetHostSchedulerPauseStatusResponse) {}
 }
 
 // NEXT_TAG = 2
-message GetSettingsRequest {
-  repeated MoblabSettingKey keys = 1;
+message PauseHostSchedulerRequest {
+  PauseRequestor pauseRequestor = 1;
 }
 
 // NEXT_TAG = 2
-message GetSettingsResponse {
-  // value of a specific type
-  repeated MoblabSetting moblabSettings = 1;
+message PauseHostSchedulerResponse {
+  repeated PauseRequestor pauseRequestors = 1;
 }
 
 // NEXT_TAG = 2
-message SetSettingRequest {
-  MoblabSetting setting = 1;
+message ResumeHostSchedulerRequest {
+  PauseRequestor pauseRequestor = 1;
 }
 
-// Message that represent one of Moblab's settings
-// NEXT_TAG = 3
-message MoblabSetting {
-  MoblabSettingKey key = 1;
-  // value of a specific type
-  Value value = 2;
+// NEXT_TAG = 2
+message ResumeHostSchedulerResponse {
+  repeated PauseRequestor pauseRequestors = 1;
 }
 
-// List of all Moblab settings keys
-enum MoblabSettingKey {
+// NEXT_TAG = 2
+message GetHostSchedulerPauseStatusResponse {
+  // the list of all host scheduling pause requestors
+  // if empty the host scheduling is running
+  repeated PauseRequestor pauseRequestors = 1;
+}
+
+// List of possible host scheduling pause requestors
+enum PauseRequestor {
   // Moblab is running out of free disk space
-  MOBLAB_SETTING_LOW_DISK_SPACE = 0;
+  PAUSE_REQUESTOR_LOW_DISK_SPACE = 0;
   // User requested pause of tests scheduling
-  MOBLAB_SETTING_PAUSED_BY_USER = 1;
-}
-
-// Structured value type to unify serialization
-// NEXT_TAG = 5
-message Value {
-  oneof oneof_value {
-    bool bool_value = 1;
-    double double_value = 2;
-    string string_value = 3;
-    google.protobuf.Any proto_value = 4;
-  }
+  PAUSE_REQUESTOR_PAUSED_BY_USER = 1;
 }

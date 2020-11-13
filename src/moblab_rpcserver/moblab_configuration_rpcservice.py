@@ -3,49 +3,40 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-import calendar
-import datetime
-import grpc
 import logging
-import re
-import time
-
-import moblab_service
 
 from moblab_common.proto.moblab_configuration_rpc_pb2 import (
-  GetSettingsRequest,
-  GetSettingsResponse,
-  SetSettingRequest,
-  MoblabSetting,
-  Value,
-  MOBLAB_SETTING_LOW_DISK_SPACE,
-  MOBLAB_SETTING_PAUSED_BY_USER,
+  PauseHostSchedulerResponse,
+  ResumeHostSchedulerResponse,
+  GetHostSchedulerPauseStatusResponse,
 )
-
-from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import MoblabConfigurationServiceServicer
-from google.protobuf.empty_pb2 import Empty
+from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
+    MoblabConfigurationServiceServicer
+)
+from moblab_common.proto.google.protobuf.empty_pb2 import Empty
+from host_scheduler_pause_service import HostSchedulerPauseService
 
 class ConfigurationRpcService(MoblabConfigurationServiceServicer):
 
     def __init__(self):
         super(ConfigurationRpcService, self).__init__()
+        self.pause_service = HostSchedulerPauseService()
 
-    def get_settings(self, request, context):
-        """Returns the list of requested values of Moblab settings
+    def pause_host_scheduler(self, request, context):
+        """Request pause of host scheduling
         """
-        return GetSettingsResponse(
-            moblabSettings = [
-                MoblabSetting(
-                    key = MOBLAB_SETTING_LOW_DISK_SPACE,
-                    value = Value(bool_value = False)
-                ),
-                MoblabSetting(
-                    key = MOBLAB_SETTING_PAUSED_BY_USER,
-                    value = Value(double_value = 123)
-                )]
-        )
+        requestors = self.pause_service.pause_moblab(request.pauseRequestor)
+        return PauseHostSchedulerResponse(pauseRequestors = requestors)
 
-    def set_setting(self, request, context):
-        """Sets the value of Moblab setting
+    def resume_host_scheduler(self, request, context):
+        """Request resume of host scheduling
         """
-        return Empty()
+        requestors = self.pause_service.unpause_moblab(request.pauseRequestor)
+        return ResumeHostSchedulerResponse(pauseRequestors = requestors)
+
+    def get_host_scheduler_pause_status(self, request, context):
+        """Request pause of host scheduling
+        """
+        logging.info('get_host_scheduler_pause_status is called!')
+        requestors = self.pause_service.get_pause_status()
+        return GetHostSchedulerPauseStatusResponse(pauseRequestors = requestors)
