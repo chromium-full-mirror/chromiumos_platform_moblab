@@ -12,9 +12,10 @@ def check_env_is_autopush():
     """Ensure that the .env file being checked in only contains =autopush
     """
     repo = Repo("/moblab_source/moblab")
-    commit = repo.commit("HEAD")
+    diffs = repo.index.diff("HEAD")
 
-    for filename in commit.stats.files:
+    for diff in diffs:
+        filename = diff.b_path
         error = ""
         if filename.endswith(".env"):
             with open(filename, "r") as f:
