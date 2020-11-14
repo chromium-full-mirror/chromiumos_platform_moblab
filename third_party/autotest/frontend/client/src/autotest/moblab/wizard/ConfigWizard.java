@@ -49,9 +49,6 @@ public class ConfigWizard extends Composite {
   // The view mode controller.
   private ConfigViewMode viewMode;
 
-  // The edit mode controller.
-  private ConfigEditMode editMode;
-
   // Constructor.
   public ConfigWizard() {
     cards = new WizardCard[] {};
@@ -74,7 +71,6 @@ public class ConfigWizard extends Composite {
     setStyleName("config-wizard");
 
     viewMode = new ConfigViewMode(this);
-    editMode = new ConfigEditMode(this);
 
     // Default to view mode.
     setMode(Mode.View);
@@ -86,15 +82,6 @@ public class ConfigWizard extends Composite {
   protected Widget createWizardHeader() {
     FlowPanel headerPanel = new FlowPanel();
     headerPanel.setStyleName("wizard-header");
-    Button btnStartConfig = new Button("Configure");
-    headerPanel.add(btnStartConfig);
-    btnStartConfig.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        onStartEdit();
-      }
-    });
-
     Button btnReboot = new Button("Reboot");
     headerPanel.add(btnReboot);
     btnReboot.addClickHandler(new ClickHandler() {
@@ -197,9 +184,6 @@ public class ConfigWizard extends Composite {
     } else {
       this.cards = new WizardCard[] {};
     }
-    for (WizardCard card : cards) {
-      card.setDataStatusListener(editMode);
-    }
     updateModeUI();
   }
 
@@ -236,16 +220,7 @@ public class ConfigWizard extends Composite {
   }
 
   private void updateModeUI() {
-    switch (this.mode) {
-      case Edit:
-        contentContainer.setWidget(editMode.display());
-        viewMode.hide();
-        break;
-      case View:
-        contentContainer.setWidget(viewMode.display());
-        editMode.hide();
-        break;
-    }
+    contentContainer.setWidget(viewMode.display());
   }
 
   public enum Mode {
