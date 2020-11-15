@@ -92,7 +92,9 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
       this.selectedPool,
       this.bugIdInput.getInput(),
       this.partNumberInput.getInput(),
-      this.variationSelection
+      this.variationSelection,
+      0,    // Disk size in GB.
+      false // Test dual namespace devices.
     );
   }
 }
