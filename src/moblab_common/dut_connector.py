@@ -152,22 +152,44 @@ class MoblabDUTConnector(object):
         return results
 
     def get_connected_dut_firmware(self):
-        command_results = self.run_command_on_connected_duts(
-            ('timeout 10 crossystem fwid; echo ""; '
-             'mosys platform model;'
-             'chromeos-firmwareupdate --manifest'))
+        """Get current and firmware update on each DUT.
 
-        def get_rw_firmware(command_output, model):
-            json_data = json.loads(''.join(command_output))
-            return json_data[model]['host']['versions']['rw']
+           Gets the currently installed firmware on the DUT.
+           Looks at the install manifest to the firmware ID that would
+           be installed with a firmware update command.
+
+           The installed firmware and the update firmware may be the same.
+        Returns:
+            list: list of tuples each tuple contains:
+                 string: host, the ip address if the DUT
+                 string: current firmware, version of installed firmware
+                 string: update firmware, version of firmware to be applied.
+        """
+        command_results = self.run_command_on_connected_duts(
+            ('fwid=`timeout 10 crossystem fwid`;'
+             'model=`timeout 10 mosys platform model`;'
+             'fw_update=`timeout 20 chromeos-firmwareupdate --manifest`;'
+             'printf "{\\\"fwid\\\": \\\"%s\\\",\\\"model\\\": \\\"%s\\\",'
+             '\\\"fw_update\\\":%s}" $fwid $model \"$fw_update\"'),
+             timeout=50
+            )
 
         results = []
         for (host, stdout, stderr, exit_code) in command_results:
             if exit_code:
                 results.append((host, stderr, stderr))
             else:
+                try:
+                    parsed_results = json.loads(stdout)
+                except json.JSONDecodeError as e:
+                    logging.exception("Failed to decode fw details %s", stdout)
+                    results.append((host, e.msg, stderr))
+                    continue
+                model = parsed_results["model"]
+                current_firmware = parsed_results["fwid"]
+                firmware_update = parsed_results["fw_update"][model]['host']['versions']['rw']
                 results.append(
-                    (host, stdout[0], get_rw_firmware(stdout[2:], stdout[1])))
+                    (host, current_firmware, firmware_update))
         return results
 
     def update_firmware(self, ip_addresses):
