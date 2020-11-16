@@ -23,3 +23,5 @@
 *dist/
 *.code-workspace
 src/dockerfiles/compose/override.env
+src/dockerfiles/compose/docker-compose.override.yml
+src/local_registry.mk
