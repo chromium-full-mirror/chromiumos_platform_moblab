@@ -39,8 +39,8 @@ _SUITE_TIMEOUT_MAP = {
     'storage_qual_v2_xs': 480,  # 12 hours
     'storage_qual_v2_s': 720,   # 2 days
     'storage_qual_v2_m': 5760,  # 4 days
-    'storage_qual_v2_l': 14400  # 10 days
-    'storage_qual_v2_xl': 28800 # 20 days
+    'storage_qual_v2_l': 14400,  # 10 days
+    'storage_qual_v2_xl': 28800  # 20 days
 }
 
 _STORAGE_QUAL_VARIATIONS = {
