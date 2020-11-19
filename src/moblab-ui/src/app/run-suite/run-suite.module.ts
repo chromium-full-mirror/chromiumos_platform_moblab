@@ -15,6 +15,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 
 import {BasicAutocompleteSelectorComponent} from './common/basic-autocomplete-selector/basic-autocomplete-selector.component';
+import {BasicCheckboxFormComponent} from './common/basic-checkbox/basic-checkbox.component';
 import {BasicInputFormComponent} from './common/basic-input-form/basic-input.component';
 import {BasicSelectorComponent} from './common/basic-selector/basic-selector.component';
 import {BasicTextFormComponent} from './common/basic-text-form/basic-text-form.component';
@@ -28,11 +29,13 @@ import {RunAnySuiteComponent} from './run-any-suite/run-any-suite.component';
 import {RunSuiteButtonComponent} from './common/run-suite-button/run-suite-button.component';
 import {RunSuiteComponent} from './run-suite.component';
 import {StorageQualComponent} from './custom-run-suite/storage-qual/storage-qual.component';
+import {StorageQualV2Component} from './custom-run-suite/storage-qual-v2/storage-qual-v2.component';
 import {WidgetsModule} from './../widgets/widgets.module';
 
 @NgModule({
   declarations: [
     BasicAutocompleteSelectorComponent,
+    BasicCheckboxFormComponent,
     BasicInputFormComponent,
     BasicSelectorComponent,
     BasicTextFormComponent,
@@ -46,6 +49,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
     RunSuiteButtonComponent,
     RunSuiteComponent,
     StorageQualComponent,
+    StorageQualV2Component,
   ],
   exports: [
     BvtComponent,
@@ -55,6 +59,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
     RunAnySuiteComponent,
     RunSuiteComponent,
     StorageQualComponent,
+    StorageQualV2Component,
   ],
   imports: [
     BrowserModule,

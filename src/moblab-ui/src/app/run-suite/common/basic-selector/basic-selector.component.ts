@@ -65,4 +65,11 @@ export class BasicSelectorComponent extends BaseForm implements OnChanges, OnIni
   getSelectedValue(): string {
     return !this.isShown ? null : this.selected;
   }
+
+  selectOption(optionIndex) {
+    if (optionIndex >= 0 && optionIndex < this.options.length) {
+      this.selected = this.options[optionIndex];
+      this.select.emit({value: this.selected});
+    }
+  }
 }
