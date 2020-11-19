@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package moblab;
+
+import "google/protobuf/any.proto";
+
+// Message that represent one of Moblab's settings
+// NEXT_TAG = 3
+message MoblabSetting {
+  MoblabSettingKey key = 1;
+  // value of a specific type
+  Value value = 2;
+}
+
+// List of all Moblab settings keys
+enum MoblabSettingKey {
+  // Moblab is running out of free disk space
+  MOBLAB_SETTING_LOW_DISK_SPACE = 0;
+  // User requested pause of tests scheduling
+  MOBLAB_SETTING_PAUSED_BY_USER = 1;
+}
+
+// Structured value type to unify serialization
+// NEXT_TAG = 5
+message Value {
+  oneof oneof_value {
+    bool bool_value = 1;
+    double double_value = 2;
+    string string_value = 3;
+    google.protobuf.Any proto_value = 4;
+  }
+}

@@ -12,3 +12,6 @@ docker
 parallel-ssh
 python-nmap
 grpcio-reflection
+sqlalchemy
+alembic
+pymysql
