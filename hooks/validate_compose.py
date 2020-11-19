@@ -3,15 +3,20 @@
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+"""In the current git commit ensure env files are set to autopush."""
 
 import sys
 from git import Repo
 
 
 def check_env_is_autopush():
-    """Ensure that the .env file being checked in only contains =autopush
-    """
+    """Ensure that the .env file being checked in only contains =autopush."""
     repo = Repo("/moblab_source/moblab")
+    commit = repo.commit("HEAD")
+    if len(commit.parents) > 1:
+        print("Not a regular commit")
+        sys.exit(1)
+
     diffs = repo.index.diff("HEAD")
 
     for diff in diffs:
@@ -30,9 +35,9 @@ def check_env_is_autopush():
                             continue
                         if value != "autopush":
                             error += (
-                                "Error: do not commit an env file that does not"
-                                " have autopush set for all containers: %s \n"
-                                % line
+                                "Error: do not commit an env file that does "
+                                "not have autopush set for all containers: %s "
+                                "\n" % line
                             )
         if error:
             print(error)
@@ -40,7 +45,12 @@ def check_env_is_autopush():
     sys.exit(0)
 
 
-def main(argv):
+def main(unused_argv):
+    """Check env files do not have debugging settings.
+
+    Args:
+        unused_argv (list): currently unused.
+    """
     check_env_is_autopush()
 
 

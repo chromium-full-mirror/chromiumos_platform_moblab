@@ -15,3 +15,6 @@ git config --local remote.origin.review https://chromium-review.googlesource.com
 f=`git rev-parse --git-dir`/hooks/commit-msg ; mkdir -p $(dirname $f)
 curl -Lo $f https://gerrit-review.googlesource.com/tools/hooks/commit-msg
 chmod +x $f
+
+# Set up all the git hooks
+hooks4git --init
