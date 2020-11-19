@@ -95,7 +95,7 @@ export class MoblabGrpcService {
   constructor() {
     let url = new URL(window.location.href);
     let service_url = new String(url.protocol);
-    service_url = service_url.concat("//", url.hostname, ":", "6001");
+    service_url = service_url.concat("//", url.hostname, ":", url.port, "/rpc");
     console.log(service_url);
 
     this.moblabRpcService = new MoblabRpcServiceClient(
@@ -552,8 +552,8 @@ export class MoblabGrpcService {
   }
 
   abortJobs(callback: (resultMsg: string) => void,
-                errorHandlingCallback: (errorMsg: string) => void,
-                jobIds: number[]) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    jobIds: number[]) {
     const request = new AbortJobsRequest();
     request.setJobIdsList(jobIds);
 
@@ -694,7 +694,7 @@ export class MoblabGrpcService {
   listPools(
     callback: (x: string[]) => void,
     errorHandlingCallback: (err_msg: string) => void
-    ) {
+  ) {
     const request = new ListPoolsRequest();
 
     const call = this.moblabRpcService.list_pools(
@@ -710,8 +710,8 @@ export class MoblabGrpcService {
   }
 
   enrollDuts(ips: string[],
-             callback: () => void,
-             errorCallback: (msg: string) => void) {
+    callback: () => void,
+    errorCallback: (msg: string) => void) {
     const request = new EnrollDutsRequest();
     request.setIpsList(ips);
     const call = this.moblabRpcService.enroll_duts(
@@ -727,8 +727,8 @@ export class MoblabGrpcService {
   }
 
   unenrollDuts(ips: string[],
-               callback: () => void,
-               errorCallback: (msg: string) => void) {
+    callback: () => void,
+    errorCallback: (msg: string) => void) {
     const request = new EnrollDutsRequest();
     request.setIpsList(ips);
     const call = this.moblabRpcService.unenroll_duts(
@@ -940,7 +940,7 @@ export class MoblabGrpcService {
   }
 
   addPoolToDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-                 dut_ips: string[], pool: string) {
+    dut_ips: string[], pool: string) {
     /** Sends request to add pool label to given DUTs.
      *  @param callback: function invoked in success scenarios.
      *  @param error_callback: function invoked in failure scenarios.
@@ -963,7 +963,7 @@ export class MoblabGrpcService {
   }
 
   removePoolFromDuts(callback: (message: string) => void, errorHandlingCallback: (errorMsg: string) => void,
-                      dut_ips: string[], pool: string) {
+    dut_ips: string[], pool: string) {
     /** Sends request to remove pool label to given DUTs.
      *  @param callback: function invoked in success scenarios.
      *  @param error_callback: function invoked in failure scenarios.
@@ -986,7 +986,7 @@ export class MoblabGrpcService {
   }
 
   get_network_info(callback: (moblab_hostname: string, is_connected: boolean) => void,
-            errorHandlingCallback: (errorMsg: string) => void) {
+    errorHandlingCallback: (errorMsg: string) => void) {
     const request = new GetNetworkInfoRequest();
     const call = this.moblabRpcService.get_network_info(
       request,
@@ -1001,13 +1001,13 @@ export class MoblabGrpcService {
   }
 
   get_cloud_configuration(callback: (
-                            boto_key_id: string,
-                            boto_key_secret: string,
-                            gcs_bucket_url: string,
-                            is_cloud_enabled: boolean,
-                            is_remote_console_enabled: boolean
-                          ) => void,
-                          errorHandlingCallback: (errorMsg: string) => void) {
+    boto_key_id: string,
+    boto_key_secret: string,
+    gcs_bucket_url: string,
+    is_cloud_enabled: boolean,
+    is_remote_console_enabled: boolean
+  ) => void,
+    errorHandlingCallback: (errorMsg: string) => void) {
     const request = new GetCloudConfigurationRequest();
 
     const call = this.moblabRpcService.get_cloud_configuration(
@@ -1029,12 +1029,12 @@ export class MoblabGrpcService {
   }
 
   set_cloud_configuration(callback: (message: string) => void,
-                          errorHandlingCallback: (errorMsg: string) => void,
-                          boto_key_id: string,
-                          boto_key_secret: string,
-                          gcs_bucket_url: string,
-                          is_cloud_enabled: boolean,
-                          is_remote_console_enabled: boolean) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    boto_key_id: string,
+    boto_key_secret: string,
+    gcs_bucket_url: string,
+    is_cloud_enabled: boolean,
+    is_remote_console_enabled: boolean) {
     const request = new SetCloudConfigurationRequest();
     request.setBotoKeyId(boto_key_id);
     request.setBotoKeySecret(boto_key_secret);
@@ -1057,7 +1057,7 @@ export class MoblabGrpcService {
   }
 
   get_dut_wifi_info(callback: (dut_wifi_name: string, dut_wifi_password: string) => void,
-                          errorHandlingCallback: (errorMsg: string) => void) {
+    errorHandlingCallback: (errorMsg: string) => void) {
     const request = new GetDutWifiInfoRequest();
 
     const call = this.moblabRpcService.get_dut_wifi_info(
@@ -1076,9 +1076,9 @@ export class MoblabGrpcService {
   }
 
   set_dut_wifi_info(callback: (message: string) => void,
-                          errorHandlingCallback: (errorMsg: string) => void,
-                          dut_wifi_name: string,
-                          dut_wifi_password: string) {
+    errorHandlingCallback: (errorMsg: string) => void,
+    dut_wifi_name: string,
+    dut_wifi_password: string) {
     const request = new SetDutWifiInfoRequest();
     request.setDutWifiName(dut_wifi_name);
     request.setDutWifiPassword(dut_wifi_password);
@@ -1098,13 +1098,13 @@ export class MoblabGrpcService {
   }
 
   get_version_info(callback: (
-                      chromeos_release_version: string,
-                      chromeos_release_track: string,
-                      chromeos_release_description: string,
-                      moblab_install_id: string,
-                      moblab_serial_number: string
-                   ) => void,
-                   errorHandlingCallback: (errorMsg: string) => void) {
+    chromeos_release_version: string,
+    chromeos_release_track: string,
+    chromeos_release_description: string,
+    moblab_install_id: string,
+    moblab_serial_number: string
+  ) => void,
+    errorHandlingCallback: (errorMsg: string) => void) {
     const request = new GetVersionInfoRequest();
 
     const call = this.moblabRpcService.get_version_info(
@@ -1131,7 +1131,7 @@ export class MoblabGrpcService {
       new RebootMoblabRequest(),
       {},
       (err: grpcWeb.Error, response: RebootMoblabResponse) => {
-          error_callback(err.message);
+        error_callback(err.message);
       }
     );
   }
@@ -1223,7 +1223,7 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error,
-       response: SetRemoteAgentConfigurationResponse) => {
+        response: SetRemoteAgentConfigurationResponse) => {
         errorHandlingCallback(err.message);
       }
     );
