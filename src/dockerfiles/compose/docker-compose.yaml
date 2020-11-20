@@ -244,6 +244,8 @@ services:
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/envoy-proxy:${ENVOYPROXY:-release}
     user: moblab
     restart: on-failure
+    environment:
+      ENVOY_UID: 0
 
     hostname: envoy-proxy
     volumes:
@@ -307,6 +309,9 @@ services:
 
     dns:
       - 192.168.100.51
+
+    ports:
+      - "6002:6002"
 
     extra_hosts:
       - "dockerhost:192.168.100.1"
