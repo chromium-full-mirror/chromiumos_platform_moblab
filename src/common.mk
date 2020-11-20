@@ -18,7 +18,6 @@ all:	autotest \
 		dhcp \
 		dns \
 		envoy \
-		local-dev \
 		logrotate \
 		mobmonitor \
 		offloader \
@@ -152,12 +151,6 @@ watchtower:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/watchtower:${LABEL} \
 		-f dockerfiles/watchtower/Dockerfile dockerfiles/watchtower
 	docker push ${REGISTRY_URI}/watchtower:${LABEL}
-
-local-dev: export DOCKER_BUILDKIT=1
-local-dev: protoc
-	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-dev-environment:${LABEL} \
-		-f dockerfiles/local-dev-environment/Dockerfile.base dockerfiles/local-dev-environment
-	docker push ${REGISTRY_URI}/moblab-dev-environment:${LABEL}
 
 remote-agent: export DOCKER_BUILDKIT=1
 remote-agent: common
