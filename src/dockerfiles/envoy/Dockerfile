@@ -2,7 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-FROM envoyproxy/envoy:v1.14.1
+# Crashing on Moblab
+#FROM envoyproxy/envoy:v1.16.0
+
+FROM envoyproxy/envoy:v1.15.2
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
 
