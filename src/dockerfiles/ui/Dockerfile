@@ -69,6 +69,10 @@ COPY --chown=moblab --from=build /app/dist /etc/nginx/html/
 COPY --chown=moblab moblab-ui/nginx.conf /etc/nginx
 RUN rm -f /etc/nginx/conf.d/*
 RUN rm -f /docker-entrypoint.d/*
+RUN rm -f /var/log/nginx/*
+RUN chmod uog+rw /var/log/nginx
+RUN chown -R moblab:moblab /var/log/nginx
+
 
 EXPOSE 6010
 

@@ -255,7 +255,7 @@ services:
       - moblab
 
     ports:
-      - 6001:6001
+      - 80:6001
       - 6011:6011
   ##############################################################################
   moblab-ui:
@@ -269,17 +269,17 @@ services:
 
     volumes:
       - results:/etc/nginx/html/results:ro
+      - logs:/var/log/nginx
+
     depends_on:
       - dns
+      - envoy-proxy
 
     dns:
       - 192.168.100.51
 
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
-
-    ports:
-      - 80:6010
   ##############################################################################
   moblab-rpcserver:
     container_name: moblab-rpcserver
