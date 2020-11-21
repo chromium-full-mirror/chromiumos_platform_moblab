@@ -27,7 +27,7 @@ steps:
     waitFor: ['-']
   - id: mariadb
     name: "docker:19.03.8"
-    args: ["pull", "mariadb:10.2"]
+    args: ["pull", "mariadb:10.5"]
     waitFor: ['-']
   - id: python-3.8-slim
     name: "docker:19.03.8"
@@ -39,7 +39,7 @@ steps:
     waitFor: ['-']
   - id: envoyproxy
     name: "docker:19.03.8"
-    args: ["pull", "envoyproxy/envoy:v1.14.1"]
+    args: ["pull", "envoyproxy/envoy:v1.15.2"]
     waitFor: ['-']
   - id: openssh-server
     name: "docker:19.03.8"
