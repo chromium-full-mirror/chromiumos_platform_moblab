@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
@@ -11,7 +12,7 @@ FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 
-FROM python:3.8-buster as python3
+FROM ${BASE_REGISTRY_URI}/python:3.8-buster as python3
 
 WORKDIR /src/tools/
 COPY src/tools/create-moblab-id.py .
@@ -22,10 +23,10 @@ COPY src/moblab_common/ .
 # copy protoc binaries
 COPY --from=protoc /protoc/* /usr/local/bin/
 
-# dir for all proto files 
+# dir for all proto files
 RUN mkdir -p ./proto/moblab_common/proto/
 
-# copy protoc from across all projects 
+# copy protoc from across all projects
 COPY src/*/*.proto proto/moblab_common/proto/
 RUN cp -r ./protos/* proto/moblab_common/proto/
 COPY --from=protoc /protoc/include/ proto/moblab_common/proto/
@@ -58,7 +59,7 @@ RUN cp /src/moblab_common/dist/* .
 
 ######################################################################
 
-FROM python:2-buster as python2
+FROM ${BASE_REGISTRY_URI}/python:2-buster as python2
 
 WORKDIR /src/tools/
 COPY src/tools/create-moblab-id.py .
@@ -92,7 +93,7 @@ RUN cp /src/moblab_common/dist/* .
 
 ######################################################################
 
-FROM debian:buster-slim
+FROM ${BASE_REGISTRY_URI}/debian:buster-slim
 
 WORKDIR /wheel
 

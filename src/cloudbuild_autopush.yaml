@@ -1,4 +1,5 @@
 substitutions:
+  _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
   _REGISTRY_URI: gcr.io/chromeos-partner-moblab
   _LABEL: autopush
   _WATCHTOWER_CMD: "--interval 1"
@@ -7,79 +8,79 @@ substitutions:
 steps:
   - id: buster-slim
     name: "docker:19.03.8"
-    args: ["pull", "debian:buster-slim"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/debian:buster-slim"]
     waitFor: ['-']
   - id: alpine-git
     name: "docker:19.03.8"
-    args: ["pull", "alpine/git"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/alpine/git"]
     waitFor: ['-']
   - id: dockerfile-copy
     name: "docker:19.03.8"
-    args: ["pull", "docker/dockerfile-copy:v0.1.9"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/docker/dockerfile-copy:v0.1.9"]
     waitFor: ['-']
   - id: buster
     name: "docker:19.03.8"
-    args: ["pull", "debian:buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/debian:buster"]
     waitFor: ['-']
   - id: python-2.7-slim
     name: "docker:19.03.8"
-    args: ["pull", "python:2.7-slim-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/python:2.7-slim-buster"]
     waitFor: ['-']
   - id: mariadb
     name: "docker:19.03.8"
-    args: ["pull", "mariadb:10.5"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/mariadb:10.5"]
     waitFor: ['-']
   - id: python-3.8-slim
     name: "docker:19.03.8"
-    args: ["pull", "python:3.8-slim-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/python:3.8-slim-buster"]
     waitFor: ['-']
   - id: python-3.8
     name: "docker:19.03.8"
-    args: ["pull", "python:3.8-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/python:3.8-buster"]
     waitFor: ['-']
   - id: envoyproxy
     name: "docker:19.03.8"
-    args: ["pull", "envoyproxy/envoy:v1.15.2"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/envoyproxy/envoy:v1.15.2"]
     waitFor: ['-']
   - id: openssh-server
     name: "docker:19.03.8"
-    args: ["pull", "linuxserver/openssh-server"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/linuxserver/openssh-server"]
     waitFor: ['-']
   - id: watchtower
     name: "docker:19.03.8"
-    args: ["pull", "v2tec/watchtower:latest"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/v2tec/watchtower:latest"]
     waitFor: ['-']
   - id: docker-compose
     name: "docker:19.03.8"
-    args: ["pull", "docker/compose:alpine-1.27.4"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/docker/compose:alpine-1.27.4"]
     waitFor: ['-']
   - id: node-buster
     name: "docker:19.03.8"
-    args: ["pull", "node:12-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:12-buster"]
     waitFor: ['-']
   - id: node12
     name: "docker:19.03.8"
-    args: ["pull", "node:12"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:12"]
     waitFor: ['-']
   - id: node15
     name: "docker:19.03.8"
-    args: ["pull", "node:15"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:15"]
     waitFor: ['-']
   - id: alpine-edge
     name: "docker:19.03.8"
-    args: ["pull", "alpine:edge"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/alpine:edge"]
     waitFor: ['-']
   - id: nginx-alpine
     name: "docker:19.03.8"
-    args: ["pull", "nginx:alpine"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/nginx:alpine"]
     waitFor: ['-']
   - id: python-2
     name: "docker:19.03.8"
-    args: ["pull", "python:2-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/python:2-buster"]
     waitFor: ['-']
   - id: blacklabelops_logrotate
     name: "docker:19.03.8"
-    args: ["pull", "blacklabelops/logrotate:latest"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/blacklabelops/logrotate:latest"]
     waitFor: ['-']
 
 

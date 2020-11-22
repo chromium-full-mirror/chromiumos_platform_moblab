@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
@@ -15,7 +16,7 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 ######################################################################
 
-FROM alpine/git as source
+FROM ${BASE_REGISTRY_URI}/alpine/git as source
 
 WORKDIR /
 
@@ -26,7 +27,7 @@ RUN git reset --hard 8196d0bfd0b3b8fbf7f7dbb8310ac43b80311f79
 
 ######################################################################
 
-FROM debian:buster-slim as protobuild
+FROM ${BASE_REGISTRY_URI}/debian:buster-slim as protobuild
 
 COPY --from=protoc /protoc/* /usr/local/bin/
 
@@ -39,7 +40,7 @@ RUN protoc --proto_path /moblab/third_party/autotest/tko \
 ######################################################################
 
 
-FROM python:2.7-slim-buster
+FROM ${BASE_REGISTRY_URI}/python:2.7-slim-buster
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
     --uid 246 --disabled-password --gecos "" moblab

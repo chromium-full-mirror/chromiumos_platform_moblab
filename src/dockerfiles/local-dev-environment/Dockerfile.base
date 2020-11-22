@@ -3,17 +3,18 @@
 # found in the LICENSE file.
 
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG LABEL=release
 
 FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
-FROM bufbuild/buf as buf
+FROM ${BASE_REGISTRY_URI}/bufbuild/buf as buf
 
-FROM hadolint/hadolint:latest-debian as hadolint
+FROM ${BASE_REGISTRY_URI}/hadolint/hadolint:latest-debian as hadolint
 
 ######################################################################
 
-FROM node:12-buster as base
+FROM ${BASE_REGISTRY_URI}/node:12-buster as base
 
 RUN npm install -g gts eslint
 
@@ -68,6 +69,9 @@ COPY --from=buf /usr/local/bin/buf /usr/local/bin
 
 # Install Dockerfile linter https://github.com/hadolint/hadolint
 COPY --from=buf /usr/local/bin/buf /usr/local/bin
+
+# Dockerfile linter/formatter
+COPY --from=hadolint /bin/hadolint /usr/local/bin
 
 COPY get_source.sh /usr/local/bin
 COPY entry.sh /usr/local/bin
