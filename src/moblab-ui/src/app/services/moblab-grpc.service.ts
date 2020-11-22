@@ -1005,7 +1005,8 @@ export class MoblabGrpcService {
     boto_key_secret: string,
     gcs_bucket_url: string,
     is_cloud_enabled: boolean,
-    is_remote_console_enabled: boolean
+    is_remote_console_enabled: boolean,
+    is_remote_command_enabled: boolean
   ) => void,
     errorHandlingCallback: (errorMsg: string) => void) {
     const request = new GetCloudConfigurationRequest();
@@ -1023,7 +1024,8 @@ export class MoblabGrpcService {
         response.getBotoKeySecret(),
         response.getGcsBucketUrl(),
         response.getIsCloudEnabled(),
-        response.getIsRemoteConsoleEnabled()
+        response.getIsRemoteConsoleEnabled(),
+        response.getIsRemoteCommandEnabled()
       );
     });
   }
@@ -1034,13 +1036,15 @@ export class MoblabGrpcService {
     boto_key_secret: string,
     gcs_bucket_url: string,
     is_cloud_enabled: boolean,
-    is_remote_console_enabled: boolean) {
+    is_remote_console_enabled: boolean,
+    is_remote_command_enabled: boolean) {
     const request = new SetCloudConfigurationRequest();
     request.setBotoKeyId(boto_key_id);
     request.setBotoKeySecret(boto_key_secret);
     request.setGcsBucketUrl(gcs_bucket_url);
     request.setIsCloudEnabled(is_cloud_enabled);
-    request.setIsRemoteConsoleEnabled(is_remote_console_enabled);
+    request.setIsRemoteConsoleEnabled(is_remote_console_enabled)
+    request.setIsRemoteCommandEnabled(is_remote_command_enabled);
 
     const call = this.moblabRpcService.set_cloud_configuration(
       request,

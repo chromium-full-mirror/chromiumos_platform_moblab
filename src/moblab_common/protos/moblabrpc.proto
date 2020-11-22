@@ -593,13 +593,14 @@ message GetNetworkInfoResponse {
 // NEXT_TAG = 1;
 message GetCloudConfigurationRequest {}
 
-// NEXT_TAG = 6;
+// NEXT_TAG = 7;
 message GetCloudConfigurationResponse {
   string boto_key_id = 1;
   string boto_key_secret = 2;
   string gcs_bucket_url = 3;
   bool is_cloud_enabled = 4;
   bool is_remote_console_enabled = 5;
+  bool is_remote_command_enabled = 6;
 }
 
 // NEXT_TAG = 1;
@@ -622,13 +623,14 @@ message SetDutWifiInfoResponse {
   string message = 1;
 }
 
-// NEXT_TAG = 6;
+// NEXT_TAG = 7;
 message SetCloudConfigurationRequest {
   string boto_key_id = 1;
   string boto_key_secret = 2;
   string gcs_bucket_url = 3;
   bool is_cloud_enabled = 4;
   bool is_remote_console_enabled = 5;
+  bool is_remote_command_enabled = 6;
 }
 
 // NEXT_TAG = 2;

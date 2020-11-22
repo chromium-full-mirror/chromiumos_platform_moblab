@@ -7,7 +7,6 @@
 import http.client
 import json
 import sys
-import subprocess
 import multiprocessing
 
 from datetime import datetime
@@ -78,13 +77,12 @@ class AFEConnector(object):
         Args:
             response (string): json formatted data.
             key (string): they key of the data to retrieve.
-            expected_code (int, optional): Defaults to http.client.OK. [description]
+            expected_code (int, optional): Defaults to http.client.OK.
 
         Returns:
             dict: {} if the AFE server returned an error else a map k,v
             of the response.
         """
-
         if not response or response.status_code != expected_code:
             if response:
                 # TODO(haddowk): Figure out how to return a useful error
@@ -99,7 +97,6 @@ class AFEConnector(object):
         Returns:
             dict: { <section name> : { <config_name> : <config_value> } }
         """
-
         response = self.send_rpc_command("get_config_values")
         raw_result = self.decode_response(response, "result")
         result = {}
@@ -118,9 +115,8 @@ class AFEConnector(object):
         return result
 
     def get_connected_devices(self, hostname=None, get_current_jobs=False):
-        """
-            Get the list of hosts (DUT's) configured in AFE ( which match
-            the specified hostname, if provided).
+        """Get the list of hosts (DUT's) configured in AFE ( which match
+           the specified hostname, if provided).
 
             hostname (string): ip for which to return information.
             get_current_jobs (bool): return info about curently executing
@@ -159,12 +155,12 @@ class AFEConnector(object):
         Args:
             id_filter: Filter for only jobs that contain id string, this is a
                 contains match rather than an exact match.
-            name_filter: Filter for only jobs that contain name string, this is a
-                contains match rather than an exact match.
-            created_time_lt: Upper bound created time filter. Second granularity
-                timestamp.
-            created_time_gt: Lower bound created time filter. Second granularity
-                timestamp.
+            name_filter: Filter for only jobs that contain name string, this
+                is a contains match rather than an exact match.
+            created_time_lt: Upper bound created time filter. Second
+                granularity timestamp.
+            created_time_gt: Lower bound created time filter. Second
+                granularity timestamp.
             sub: true iff only child jobs are not to be filtered.
             suite: true iff only parent jobs are not to be filtered.
             not_yet_run: true iff only not-yet-run jobs are not to be filtered.
@@ -228,17 +224,16 @@ class AFEConnector(object):
         finished=False,
         parent_id_filter=None,
     ):
-        """
-            Get attributes of the jobs specified.
+        """Get attributes of the jobs specified.
         Args:
             id_filter: Filter for only jobs that contain id string, this is a
                 contains match rather than an exact match.
-            name_filter: Filter for only jobs that contain name string, this is a
-                contains match rather than an exact match.
-            created_time_lt: Upper bound created time filter. Second granularity
-                timestamp.
-            created_time_gt: Lower bound created time filter. Second granularity
-                timestamp.
+            name_filter: Filter for only jobs that contain name string, this
+                is a contains match rather than an exact match.
+            created_time_lt: Upper bound created time filter. Second
+                granularity timestamp.
+            created_time_gt: Lower bound created time filter. Second
+                granularity timestamp.
             sub: true iff only child jobs are not to be filtered.
             suite: true iff only parent jobs are not to be filtered.
             not_yet_run: true iff only not-yet-run jobs are not to be filtered.
@@ -539,15 +534,15 @@ class AFEConnector(object):
             return (False, self.decode_response(response, "error")["message"])
 
     def add_label_to_host(self, dut_hostname, label):
-        """
-            Adds label to the specified DUT.
+        """Add label to the specified DUT.
+
         Args:
             dut_hostname(string): hostname (IP) of targeted DUT.
             label (string): Label to be added.
         Returns:
-            A tuple with first value indicating whether action succeeded and the
-            second value a message summarizing the result (+ reason for failure,
-            if action failed).
+            A tuple with first value indicating whether action succeeded and
+            the second value a message summarizing the result (+ reason for
+            failure, if action failed).
         """
         response = self.send_rpc_command(
             "add_moblab_label",
@@ -562,9 +557,9 @@ class AFEConnector(object):
             dut_hostname(string): hostname (IP) of targeted DUT.
             label (string): Label to be removed.
         Returns:
-            A tuple with first value indicating whether action succeeded and the
-            second value a message summarizing the result (+ reason for failure,
-            if action failed).
+            A tuple with first value indicating whether action succeeded and
+            the second value a message summarizing the result (+ reason for
+            failure, if action failed).
         """
         response = self.send_rpc_command(
             "remove_moblab_label",
@@ -580,9 +575,9 @@ class AFEConnector(object):
             key (string): Key of attribute to be added.
             value (string): Value of attribute to be added.
         Returns:
-            A tuple with first value indicating whether action succeeded and the
-            second value a message summarizing the result (+ reason for failure,
-            if action failed).
+            A tuple with first value indicating whether action succeeded and
+            the second value a message summarizing the result (+ reason for
+            failure, if action failed).
         """
         response = self.send_rpc_command(
             "set_host_attrib",
@@ -597,9 +592,9 @@ class AFEConnector(object):
             dut_hostname(string): hostname (IP) of targeted DUT.
             key (string): Key of attribute to be removed.
         Returns:
-            A tuple with first value indicating whether action succeeded and the
-            second value a message summarizing the result (+ reason for failure,
-            if action failed).
+            A tuple with first value indicating whether action succeeded and
+            the second value a message summarizing the result (+ reason for
+            failure, if action failed).
         """
         response = self.send_rpc_command(
             "delete_host_attrib",
@@ -620,8 +615,8 @@ class AFEConnector(object):
         return self.decode_response(response, "result")
 
     def repair_host(self, host_id):
-        """
-            Sets off repair job on DUT of given ID.
+        """Set off repair job on DUT of given ID.
+
         Args:
             host_id(int): ID of DUT in AFE backend.
         """
@@ -629,11 +624,11 @@ class AFEConnector(object):
         return self.decode_response(response, "result")
 
     def get_cloud_storage_info(self):
-        """
-            Gets cloud configuration info from AFE.
+        """Get cloud configuration info from AFE.
         Returns:
-            A dict of cloud configuration info  ( specifically, 'gs_access_key_id',
-            'gs_secret_access_key', 'image_storage_server' )
+            A dict of cloud configuration info  ( specifically,
+            'gs_access_key_id', 'gs_secret_access_key',
+            'image_storage_server' )
         """
         response = self.send_rpc_command("get_cloud_storage_info", {})
         return self.decode_response(response, "result")
@@ -662,8 +657,8 @@ class AFEConnector(object):
             config and validate cloud config. Will assume that submissions
             are only for either DUT WIFI *or* cloud configurations.
         Args:
-            is_cloud_enabled (boolean): True iff user has checked 'integrate with
-                cloud' on UI
+            is_cloud_enabled (boolean): True iff user has checked 'integrate
+                with cloud' on UI
             gs_access_key_id (string): boto ID string
             gs_secret_access_key (string): boto secret string
             image_storage_server (string): GCS bucket URL
@@ -686,9 +681,9 @@ class AFEConnector(object):
                 "gs_secret_access_key": gs_secret_access_key,
                 "image_storage_server": image_storage_server,
                 "results_storage_server": "",
-                # AFE backend services configuration of other values in addition
-                # to cloud configs, but Moblab only needs to change these values,
-                # so this value is always False.
+                # AFE backend services configuration of other values in
+                # addition to cloud configs, but Moblab only needs to change
+                # these values, so this value is always False.
                 "use_existing_boto_file": False,
             }
 
@@ -706,8 +701,8 @@ class AFEConnector(object):
         """
             Applies given configuration values to AFE.
         Args:
-            is_cloud_enabled (boolean): True iff user has checked 'integrate with
-                cloud' on UI
+            is_cloud_enabled (boolean): True iff user has checked 'integrate
+                with cloud' on UI
             gs_access_key_id (string): boto ID string
             gs_secret_access_key (string): boto secret string
             image_storage_server (string): GCS bucket URL
@@ -738,8 +733,7 @@ class AFEConnector(object):
     def validate_cloud_storage_info(
         self, gs_access_key_id, gs_secret_access_key, image_storage_server
     ):
-        """
-            Calls through to AFE to check validity of boto and bucket
+        """Call through to AFE to check validity of boto and bucket
             configuration, returns true iff configurations are valid, and if
             false returns a reason that configuration is not valid.
         Args:
@@ -762,8 +756,8 @@ class AFEConnector(object):
         return result["status_ok"], result.get("status_details", "")
 
     def set_is_remote_agent_enabled(self, is_enabled=False):
-        """
-            Applies given remote agent configuration values to AFE.
+        """Apply given remote agent configuration values to AFE.
+
         Args:
             is_enabled (bool): enable the remote agent or not
         Returns:
@@ -772,6 +766,26 @@ class AFEConnector(object):
         """
         response = self.send_rpc_command(
             "set_remote_agent_config", {"enabled": is_enabled}
+        )
+
+        response = self.decode_response(response, "result")
+        return (
+            True
+            if "status_ok" in response and response["status_ok"]
+            else False
+        )
+
+    def set_is_remote_command_enabled(self, is_enabled=False):
+        """Apply given remote command configuration values to AFE.
+
+        Args:
+            is_enabled (bool): enable the remote command or not
+        Returns:
+            A boolean, true IFF application of remote command configurations
+            succeeded.
+        """
+        response = self.send_rpc_command(
+            "set_remote_command_config", {"enabled": is_enabled}
         )
 
         response = self.decode_response(response, "result")

@@ -31,6 +31,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   errors = false;
   isCloudEnabled = false;
   isRemoteConsoleEnabled = false;
+  isRemoteCommandEnabled = false;
 
   botoKeyIDForm = new FormControl('', {
     validators: [Validators.required],
@@ -52,6 +53,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
   lastFetchedIsCloudEnabled = false;
   lastFetchedIsRemoteConsoleEnabled = false;
+  lastFetchedIsRemoteCommandEnabled = false;
   lastFetchedBotoKeyID = '';
   lastFetchedBotoKeySecret = '';
   lastFetchedBucketURL = '';
@@ -76,7 +78,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private dialog: MatDialog,
     private moblabRpcService: MoblabGrpcService,
     private snackBar: MatSnackBar,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.bucketURLForm.valueChanges.subscribe(value => {
@@ -111,14 +113,16 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         boto_key_secret: string,
         gcs_bucket_url: string,
         is_cloud_enabled: boolean,
-        is_remote_console_enabled: boolean
+        is_remote_console_enabled: boolean,
+        is_remote_command_enabled: boolean
       ) => {
         this.updateCloudConfigurationForms(
           boto_key_id,
           boto_key_secret,
           gcs_bucket_url,
           is_cloud_enabled,
-          is_remote_console_enabled
+          is_remote_console_enabled,
+          is_remote_command_enabled
         )
       },
       (errorMsg: string) => {
@@ -154,7 +158,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         this.setOffPopup(errorMsg);
       },
       this.dutWifiNameForm.value,
-      this.dutWifiPasswordForm.value,);
+      this.dutWifiPasswordForm.value);
   }
 
   getVersionInfo() {
@@ -175,7 +179,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         );
       },
       (errorMsg: string) => {
-        console.log('Encountered failure getting vesrion info. ', errorMsg);
+        console.log('Encountered failure getting version info. ', errorMsg);
       });
   }
 
@@ -188,7 +192,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.lastFetchedBotoKeySecret != this.botoKeySecretForm.value ||
       this.lastFetchedBucketURL != this.bucketURLForm.value ||
       this.lastFetchedIsCloudEnabled != this.isCloudEnabled ||
-      this.lastFetchedIsRemoteConsoleEnabled != this.isRemoteConsoleEnabled
+      this.lastFetchedIsRemoteConsoleEnabled != this.isRemoteConsoleEnabled ||
+      this.lastFetchedIsRemoteCommandEnabled != this.isRemoteCommandEnabled
   }
 
   isDutWifiInfoValidForSubmit() {
@@ -271,13 +276,15 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
     if (!this.isCloudEnabled) {
       this.isRemoteConsoleEnabled = false;
-      // clears boto and GCS bucket configurations, leaves cloud and remote console enable settings unchanged.
+      this.isRemoteCommandEnabled = false;
+      // clears boto and GCS bucket configurations, leaves cloud and remote console / remote commands enable settings unchanged.
       this.updateCloudConfigurationForms(
         '', // boto_key_id
         '', // boto_key_secret
         '', // gcs_bucket_url
         this.isCloudEnabled,
-        this.isRemoteConsoleEnabled
+        this.isRemoteConsoleEnabled,
+        this.isRemoteCommandEnabled
       );
     }
     this.toggleCloudConfigDisabledMessage();
@@ -288,6 +295,13 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * Invoked on change of remote console enabled checkbox.
      */
     this.isRemoteConsoleEnabled = !this.isRemoteConsoleEnabled;
+  }
+
+  isRemoteCommandEnabledCheckboxChange() {
+    /**
+     * Invoked on change of remote command enabled checkbox.
+     */
+    this.isRemoteCommandEnabled = !this.isRemoteCommandEnabled;
   }
 
   ngAfterContentInit(): void {
@@ -312,7 +326,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.botoKeySecretForm.value,
       this.bucketURLForm.value,
       this.isCloudEnabled,
-      this.isRemoteConsoleEnabled);
+      this.isRemoteConsoleEnabled,
+      this.isRemoteCommandEnabled);
   }
 
   cloudCheckboxHoverStart() {
@@ -361,7 +376,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     boto_key_secret: string,
     gcs_bucket_url: string,
     is_cloud_enabled: boolean,
-    is_remote_console_enabled: boolean
+    is_remote_console_enabled: boolean,
+    is_remote_command_enabled: boolean
   ) {
     /**
      * Updates the form values of the cloud configurations. Meant to be called
@@ -377,11 +393,13 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
     this.isCloudEnabled = is_cloud_enabled;
     this.isRemoteConsoleEnabled = is_remote_console_enabled;
+    this.isRemoteCommandEnabled = is_remote_command_enabled;
 
     this.toggleCloudConfigDisabledMessage();
 
     this.lastFetchedIsCloudEnabled = this.isCloudEnabled;
     this.lastFetchedIsRemoteConsoleEnabled = this.isRemoteConsoleEnabled;
+    this.lastFetchedIsRemoteCommandEnabled = this.isRemoteCommandEnabled;
 
     this.configurationLoading = false;
   }

@@ -37,7 +37,6 @@ class MoblabConfigConnector(object):
         Returns:
             [type]: [description]
         """
-
         if not self.config or force_reload:
             self.load_config()
         if not self.config or section not in self.config:
@@ -50,7 +49,6 @@ class MoblabConfigConnector(object):
         Returns:
             string: The configured cloud storage bucket or None
         """
-
         # The bucket setting has gs:// and ends in /, so remove them
         image_server = self.get(
             "CROS", "image_storage_server", force_reload=force_reload
@@ -62,7 +60,12 @@ class MoblabConfigConnector(object):
 
     def is_remote_task_scheduler_enabled(self):
         """Return task scheduler is enabled otherwise false."""
-        is_enable = self.get("REMOTE_TASK_SCHEDULER", "enabled", default=False)
+        is_enable = self.get(
+            "REMOTE_TASK_SCHEDULER",
+            "enabled",
+            default=False,
+            force_reload=True,
+        )
         return True if is_enable == "True" else False
 
     def get_remote_task_scheduler_tick_delay(self):
@@ -70,12 +73,21 @@ class MoblabConfigConnector(object):
         return int(self.get("REMOTE_TASK_SCHEDULER", "tick_interval", 30))
 
     def is_remote_task_debug_enabled(self):
+        """Return True if remote task debug is enabled in config."""
         is_enable = self.get(
             "REMOTE_TASK_SCHEDULER", "debug_enabled", default=False
         )
         return True if is_enable == "True" else False
 
     def get_test_wifi_ap_and_password(self):
+        """Get the AP name and password configured for use in tests.
+
+        Returns:
+            (string, string): Tuple of strings containing the values stored
+            in the configuration for wifi access point and password to use
+            in testing.  The AP string may be None if no configuration is
+            saved.
+        """
         ap_name = self.get("MOBLAB", "wifi_dut_ap_name", default=None)
         ap_pass = self.get("MOBLAB", "wifi_dut_ap_pass", default="")
         return (ap_name, ap_pass)

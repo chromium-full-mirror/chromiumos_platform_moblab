@@ -1121,3 +1121,16 @@ def set_remote_agent_config(enabled=False):
 
     logging.info('Set remote agent config successfully: %s', remote_agent_info)
     return _create_operation_status_response(True, None)
+
+@rpc_utils.moblab_only
+def set_remote_command_config(enabled=False):
+    """RPC handler to get the remote agent information."""
+    remote_command_info = {"REMOTE_TASK_SCHEDULER": [("enabled", enabled)]}
+
+    _update_partial_config(remote_command_info)
+    _CONFIG.parse_config_file()
+
+    logging.error(
+        "Set remote command config successfully: %s", remote_command_info
+    )
+    return _create_operation_status_response(True, None)

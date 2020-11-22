@@ -9,8 +9,8 @@ import google.api_core
 import os
 import re
 import requests
-import socket
 import time
+import logging
 
 from collections import namedtuple
 from datetime import datetime
@@ -21,10 +21,6 @@ from moblab_common import dut_connector
 from moblab_common import host_connector
 from moblab_common import moblab_build_connector
 
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    import logging
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
@@ -92,14 +88,13 @@ class MoblabService(object):
         self.config_connector = config_connector.MoblabConfigConnector(
             self.afe_connector
         )
-        _last_config_update = datetime.utcnow()
         self.setup_devserver_connector()
         self.dut_connector = dut_connector.MoblabDUTConnector()
 
     def _find_dut_id_given_ip(self, dut_hostname):
-        """
-        Given an ip address, will return the id given to the DUT by AFE;
-        else will raise an error.
+        """Given an ip address, will return the id given to the DUT by AFE.
+        Raises:
+             MoblabRpcError: if unable to find the DUT.
         """
         try:
             return self.afe_connector.get_connected_devices(
@@ -123,7 +118,7 @@ class MoblabService(object):
             self._build_connector = build_connector.MoblabBuildConnector(
                 self.moblab_bucket_name
             )
-        except build_connector.MoblabBuildConnectorException as e:
+        except build_connector.MoblabBuildConnectorException:
             logging.exception("Failed to initialize MoblabBuildConnector.")
             if raise_error:
                 raise
@@ -141,7 +136,7 @@ class MoblabService(object):
             self._moblab_build_connector = (
                 moblab_build_connector.MoblabBuildConnector()
             )
-        except build_connector.MoblabBuildConnectorException as e:
+        except build_connector.MoblabBuildConnectorException:
             logging.exception("Failed to initialize MoblabBuildConnector.")
             if raise_error:
                 raise
@@ -152,8 +147,8 @@ class MoblabService(object):
         Returns a build_connector.MoblabBuildConnector instance ( distinct from
         moblab_build_connector.MoblabBuildConnector ),
 
-        TODO(wangmichael) change naming so that difference between two connectors is more
-        clear.
+        TODO(wangmichael) change naming so that difference between two
+        connectors is more clear.
         """
         if (
             not hasattr(self, "_build_connector")
@@ -170,8 +165,8 @@ class MoblabService(object):
     @property
     def moblab_build_connector(self):
         """
-        Returns a moblab.build_connector.MoblabBuildConnector instance ( distinct from
-        build_connector.MoblabBuildConnector ),
+        Returns a moblab.build_connector.MoblabBuildConnector instance
+        ( distinct from build_connector.MoblabBuildConnector ),
         """
         if (
             not hasattr(self, "_moblab_build_connector")
@@ -190,7 +185,10 @@ class MoblabService(object):
     def _is_moblab_bucket_in_asia(self):
         if not self.moblab_bucket_name:
             raise MoblabRpcError(
-                "Attempted to check bucket location while bucket has not been configured."
+                (
+                    "Attempted to check bucket location while bucket has not"
+                    " been configured."
+                )
             )
 
         bucket = storage.Client().bucket(self.moblab_bucket_name)
@@ -216,9 +214,9 @@ class MoblabService(object):
     def extract_pool_from_labels(self, labels):
         return self.extract_from_labels(self.pool_re, labels)
 
-    def extract_from_labels(self, rexp, labels):
+    def extract_from_labels(self, regexp, labels):
         result = [
-            m.group(1) for m in [rexp.match(label) for label in labels] if m
+            m.group(1) for m in [regexp.match(label) for label in labels] if m
         ]
         return list(set(result))
 
@@ -322,7 +320,7 @@ class MoblabService(object):
 
         Args:
             build_target: Ex. octopus
-            model: String identfier for the specific model to be run.
+            model: String identifer for the specific model to be run.
             milestone: String,  Ex. R80
             build_version: A numeric version string of the form: '00000.00.0'
             bug_id: Numeric string identifying the associated buganizer issue.
@@ -398,10 +396,10 @@ class MoblabService(object):
             build_target: Ex. octopus
             milestone: Ex. R80
             build_version: A numeric version string of the form: '00000.00.0'
-            model: String identfier for the specific model to be run.
+            model: String identifer for the specific model to be run.
             pool: String identifier for which pool of DUT's to run tests with.
-            specific_modules: Comma-separated string of specific module names to
-            run.
+            specific_modules: Comma-separated string of specific module names
+            to run.
         Returns:
           String response message.
         """
@@ -456,10 +454,10 @@ class MoblabService(object):
             milestone: Numeric string Ex. 80
             build_version: A numeric version string of the form: '00000.00.0'
             suite: String identifier for the suite to be run.
-            model: String identfier for the specific model to be run.
+            model: String identifer for the specific model to be run.
             pool: String identifier for which pool of DUT's to run tests with.
-            suite_args: Dict containing key=val pairs to be used by suite control
-              file.
+            suite_args: Dict containing key=val pairs to be used by suite
+              control file.
             test_args: Dict containing key=val pairs to be used by test control
               file.
         Returns:
@@ -527,11 +525,13 @@ class MoblabService(object):
 
     def _is_build_staged(self, build_version, build_target, milestone, model):
         """
-            Checks if targeted build is staged. Defaults to checking staging status via Moblab API,
-            falls back to checking the configured GCS bucket directly.
+            Checks if targeted build is staged. Defaults to checking staging
+            status via Moblab API, falls back to checking the configured GCS
+            bucket directly.
         Args:
             build_target (string): AKA board of the target DUT.
-            build_version (string): Build version to be applied to DUT for testing.
+            build_version (string): Build version to be applied to DUT for
+                testing.
             milestone (string): Milestone the build version belongs to.
             model (string): Model of the DUT.
         Returns:
@@ -541,11 +541,12 @@ class MoblabService(object):
             return self.moblab_build_connector.check_build_stage_status(
                 build_target, model, build_version, self.moblab_bucket_name
             )
-        except google.api_core.exceptions.ClientError as e:
+        except google.api_core.exceptions.ClientError:
             logging.exception(
-                "Encountered API error while checking build stage status for {}/{} on model {}".format(
-                    build_target, build_version, model
-                )
+                (
+                    "Encountered API error while checking build stage status "
+                    "for {}/{} on model {}"
+                ).format(build_target, build_version, model)
             )
             return (
                 build_version
@@ -556,12 +557,14 @@ class MoblabService(object):
 
     def _stage_build(self, model, build_target, build_version):
         """
-            Applies the specified build artifacts to the bucket configured for this Moblab.
+            Applies the specified build artifacts to the bucket configured
+            for this Moblab.
 
         Args:
             model (string): Model of the target DUT.
             build_target (string): AKA board of the target DUT.
-            build_version (string): Build version to be applied to DUT for testing.
+            build_version (string): Build version to be applied to DUT for
+                testing.
         Returns:
             Nothing.
         """
@@ -577,7 +580,8 @@ class MoblabService(object):
             ):
                 return
             time.sleep(sleep_interval)
-            # every failure, increase wait interval by 1.5 times ( exponential backoff, of sorts )
+            # every failure, increase wait interval by 1.5 times
+            # ( exponential backoff, of sorts )
             sleep_interval *= 1.5
         raise MoblabRpcError(
             "Build stage did not finish within {} seconds.".format(
@@ -606,18 +610,22 @@ class MoblabService(object):
 
     def list_usable_milestones(self, build_target, model):
         """
-        Returns milestones available for a given model/build_target, both staged and unstaged (if target bucket is in
-        US, otherwise will only return staged milestones).
+        Returns milestones available for a given model/build_target, both
+        staged and unstaged (if target bucket is in US, otherwise will only
+        return staged milestones).
 
-        In this context, 'remote' means unstaged/from API call (i.e., remote milestones are those that are fetched
-        from the Moblab API rather than from existing build items staged in the partner bucket ).
+        In this context, 'remote' means unstaged/from API call (i.e., remote
+        milestones are those that are fetched from the Moblab API rather than
+        from existing build items staged in the partner bucket ).
 
         Args:
-            build_target(string): build_target (AKA board) to fetch milestones for.
+            build_target(string): build_target (AKA board) to fetch milestones
+              for.
             model(string): model to fetch milestones for.
         Returns:
-            A list of tuples where the first item is the milestone and the second is a boolean which is true iff at least
-            one build of the milestone is staged.
+            A list of tuples where the first item is the milestone and the
+            second is a boolean which is true iff at least one build of the
+            milestone is staged.
         """
         bucket_milestones = self.build_connector.get_milestones_available(
             build_target
@@ -632,7 +640,7 @@ class MoblabService(object):
                         model,
                     )
                 )
-            except moblab_build_connector.MoblabBuildConnectorException as e:
+            except moblab_build_connector.MoblabBuildConnectorException:
                 logging.exception(
                     "Encountered error trying to fetch remote milestones."
                 )
@@ -660,18 +668,22 @@ class MoblabService(object):
 
     def list_usable_build_versions(self, build_target, milestone, model):
         """
-        Returns build versions available for a given model/build_target/milestone, both staged and unstaged (if target bucket is in
-        US, otherwise will only return staged build versions).
+        Returns build versions available for a given
+        model/build_target/milestone, both staged and unstaged (if target
+        bucket is in US, otherwise will only return staged build versions).
 
-        In this context, 'remote' means unstaged/from API call (i.e., remote build versions are those that are fetched
-        from the Moblab API rather than from existing build items staged in the partner bucket ).
+        In this context, 'remote' means unstaged/from API call (i.e., remote
+        build versions are those that are fetched from the Moblab API rather
+        than from existing build items staged in the partner bucket ).
 
         Args:
-            build_target(string): build_target (AKA board) to return build versions for.
+            build_target(string): build_target (AKA board) to return build
+                versions for.
             model(string): model to return build versions for.
             milestone(string): milestone to return build versions for.
         Returns:
-            A list of tuples where the first item is the build_version and the second is a boolean which is true iff the build is staged.
+            A list of tuples where the first item is the build_version and the
+            second is a boolean which is true iff the build is staged.
         """
         bucket_build_versions = self.build_connector.get_builds_for_milestone(
             build_target, milestone
@@ -690,7 +702,7 @@ class MoblabService(object):
                         build_target, model, milestone
                     )
                 )
-            except moblab_build_connector.MoblabBuildConnectorException as e:
+            except moblab_build_connector.MoblabBuildConnectorException:
                 logging.exception(
                     "Encountered error trying to fetch remote build versions."
                 )
@@ -730,11 +742,11 @@ class MoblabService(object):
         parent_id_filter=None,
         dut_hostname_filter=None,
     ):
-        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because the
-        # Autotest backend that we currently invoke only accepts dut_filter on
-        # calls to get_num_host_queue_entries, not get_num_jobs. Even though,
-        # in both cases, the results are packaged and returned as jobs. This may
-        # change when Autotest RPC itself is refactored.
+        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because
+        # the Autotest backend that we currently invoke only accepts dut_filter
+        # on calls to get_num_host_queue_entries, not get_num_jobs. Even
+        # though, in both cases, the results are packaged and returned as jobs.
+        # This may change when Autotest RPC itself is refactored.
         if dut_hostname_filter:
             try:
                 dut_id = self.afe_connector.get_connected_devices(
@@ -780,11 +792,11 @@ class MoblabService(object):
         parent_id_filter=None,
         dut_hostname_filter=None,
     ):
-        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because the
-        # Autotest backend that we currently invoke only accepts dut_filter on
-        # calls to get_host_queue_entries, not get_jobs. Even though,
-        # in both cases, the results are packaged and returned as jobs. This may
-        # change when Autotest RPC itself is refactored.
+        # TO_DO(wangmichael): bifurcating on dut_filter is necessary because
+        # the Autotest backend that we currently invoke only accepts dut_filter
+        # on calls to get_host_queue_entries, not get_jobs. Even though,
+        # in both cases, the results are packaged and returned as jobs. This
+        # may change when Autotest RPC itself is refactored.
         if dut_hostname_filter:
             try:
                 dut_id = self.afe_connector.get_connected_devices(
@@ -888,15 +900,19 @@ class MoblabService(object):
         if result:
             aborted_jobs = [str(item["Job"]) for item in result]
             if len(aborted_jobs) > 15:
-                return "Aborted {} jobs, please refresh table to see results.".format(
-                    len(aborted_jobs)
-                )
+                return (
+                    "Aborted {} jobs, please refresh table" " to see results."
+                ).format(len(aborted_jobs))
             else:
-                return "Aborted the following jobs: {}\nPlease refresh table to see results.".format(
-                    ", ".join(aborted_jobs)
-                )
+                return (
+                    "Aborted the following jobs: {}\nPlease refresh "
+                    "table to see results."
+                ).format(", ".join(aborted_jobs))
         else:
-            return "No jobs aborted (were selected jobs already aborted/finished)?"
+            return (
+                "No jobs aborted (were selected jobs already "
+                "aborted/finished)?"
+            )
 
     def get_job_details(self, job_id):
         return self.afe_connector.get_jobs_by_ids([job_id])
@@ -909,8 +925,8 @@ class MoblabService(object):
 
     def get_num_dut_tasks(self, ip, start_time_gt, end_time_lt):
         """
-            Given a DUT's IP, returns a number of tasks (e.g. repairs, reverifies)
-            associated with that DUT.
+            Given a DUT's IP, returns a number of tasks (e.g. repairs,
+            reverifies) associated with that DUT.
         Args:
             ip (string): DUT IP.
             start_time_gt(int): Seconds timestamp of a filter to DUT tasks by
@@ -918,8 +934,8 @@ class MoblabService(object):
             end_time_lt(int): Seconds timestamp of a filter to DUT tasks by
                 end time.
         Returns:
-            Returns number of task associated with DUT which match query parameters.
-            If DUT itself is not found, returns -1.
+            Returns number of task associated with DUT which match query
+            parameters.  If DUT itself is not found, returns -1.
         """
         try:
             dut_id = self.afe_connector.get_connected_devices(hostname=ip)[0][
@@ -938,8 +954,9 @@ class MoblabService(object):
         self, ip, query_start, query_limit, start_time_gt, end_time_lt
     ):
         """
-            Given a DUT's IP, returns a list of tasks (e.g. repairs, reverifies)
-            requested for that DUT. If DUT is not found, returns None.
+            Given a DUT's IP, returns a list of tasks (e.g. repairs,
+            reverifies) requested for that DUT. If DUT is not found, returns
+            None.
         Args:
             query_start(int): Parameter specifying index on where to start when
                 returning paged results.
@@ -980,14 +997,15 @@ class MoblabService(object):
             applying an edit to multiple DUTs. This logic is repeated for
             adding and removing attributes and labels.
         Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
+            dut_hostnames(string[]): A list of strings representing the
+                hostnames of the DUT's to be targeted.
             afe_edit_func((*args) => (tuple(bool,string))): A reference to a
-            function of AFEConnector which takes in *args and returns a tuple
-            containing a bool indicating success and a results message string.
-            This function does the 'edit' to the DUT's. success_msg(int): A
-            format-able string to be returned in success cases; It should have
-            exactly as many format indexes ({}) as there are arguments in *args.
+                function of AFEConnector which takes in *args and returns a
+                tuple containing a bool indicating success and a results
+                message string. This function does the 'edit' to the DUT's.
+            success_msg(int): A format-able string to be returned in success
+                cases; It should have exactly as many format indexes ({}) as
+                there are arguments in *args.
             *args: Arguments which are meant to be passed into afe_edit_func.
         Returns:
             String message summarizing results.
@@ -1011,11 +1029,12 @@ class MoblabService(object):
 
     def add_attribute_to_duts(self, dut_hostnames, key, value):
         """
-            Adds attribute key:value to the selected dut_hostnames. Returns a message
-            summarizing how many DUT's the attribute was successfully added to
-            as well for which DUT's the addition failed.
+            Adds attribute key:value to the selected dut_hostnames. Returns a
+            message summarizing how many DUT's the attribute was successfully
+            added to as well for which DUT's the addition failed.
         Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
+            dut_hostnames(string[]): A list of strings representing the
+              hostnames
             of the DUT's to be targeted.
             key (string): Key of attribute to be added.
             value (string): Value of attribute to be added.
@@ -1033,12 +1052,13 @@ class MoblabService(object):
 
     def remove_attribute_from_duts(self, dut_hostnames, key):
         """
-            Removes attribute (referenced by key) from the selected dut_hostnames.
-            Returns a message summarizing how many DUT's the attribute was
-            successfully removed from as well for which DUT's the remove failed.
+            Removes attribute (referenced by key) from the selected
+            dut_hostnames. Returns a message summarizing how many DUT's the
+            attribute was successfully removed from as well for which DUT's the
+            remove failed.
         Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
+            dut_hostnames(string[]): A list of strings representing the
+                hostnames of the DUT's to be targeted.
             key (string): Key of attribute to be remove.
             value (string): Value of attribute to be remove.
         Returns:
@@ -1053,12 +1073,12 @@ class MoblabService(object):
 
     def add_label_to_duts(self, dut_hostnames, label):
         """
-            Adds label to the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the label was successfully added to as well for which
-            DUT's the addition failed.
+            Adds label to the selected dut_hostnames. Returns a message
+            summarizing how many DUT's the label was successfully added to as
+            well for which DUT's the addition failed.
         Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
+            dut_hostnames(string[]): A list of strings representing the
+                hostnames of the DUT's to be targeted.
             label (string): Label to be added.
         Returns:
             String message summarizing results.
@@ -1072,12 +1092,12 @@ class MoblabService(object):
 
     def remove_label_from_duts(self, dut_hostnames, label):
         """
-            Remove label from the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the label was successfully removed from as well as for
-            which DUT's the remove failed.
+            Remove label from the selected dut_hostnames. Returns a message
+            summarizing how many DUT's the label was successfully removed from
+            as well as for which DUT's the remove failed.
         Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
+            dut_hostnames(string[]): A list of strings representing the
+                hostnames of the DUT's to be targeted.
             label (string): Label to be removed.
         Returns:
             String message summarizing results.
@@ -1091,12 +1111,12 @@ class MoblabService(object):
 
     def add_pool_to_duts(self, dut_hostnames, pool):
         """
-            Adds  pool to the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the  pool was successfully added to as well for which
-            DUT's the addition failed.
+            Adds  pool to the selected dut_hostnames. Returns a message
+            summarizing how many DUT's the  pool was successfully added to as
+            well for which DUT's the addition failed.
         Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
+            dut_hostnames(string[]): A list of strings representing the
+                hostnames of the DUT's to be targeted.
             pool (string): Pool to be added.
         Returns:
             String message summarizing results.
@@ -1105,12 +1125,12 @@ class MoblabService(object):
 
     def remove_pool_from_duts(self, dut_hostnames, pool):
         """
-            Remove  pool from the selected dut_hostnames. Returns a message summarizing
-            how many DUT's the  pool was successfully removed from as well as for
-            which DUT's the remove failed.
+            Remove  pool from the selected dut_hostnames. Returns a message
+            summarizing how many DUT's the  pool was successfully removed from
+            as well as for which DUT's the remove failed.
         Args:
-            dut_hostnames(string[]): A list of strings representing the hostnames
-            of the DUT's to be targeted.
+            dut_hostnames(string[]): A list of strings representing the
+                hostnames of the DUT's to be targeted.
              pool (string): Pool to be removed.
         Returns:
             String message summarizing results.
@@ -1145,14 +1165,13 @@ class MoblabService(object):
         """
             Gets cloud configuration info.
         Returns:
-            A dict of cloud configuration info  ( specifically, 'gs_access_key_id',
-            'gs_secret_access_key', 'image_storage_server' )
+            A dict of cloud configuration info specifically,
+            'gs_access_key_id', 'gs_secret_access_key', 'image_storage_server'
         """
         return self.afe_connector.get_cloud_storage_info()
 
     def get_dut_wifi_info(self):
-        """
-            Gets DUT wifi info.
+        """Gets DUT wifi info.
         Returns:
             A dict with dut_wifi_name, dut_wifi_password
         """
@@ -1182,6 +1201,7 @@ class MoblabService(object):
         boto_key_secret,
         gcs_bucket_url,
         is_remote_agent_enabled,
+        is_remote_command_enabled,
     ):
         """
             Attempts to set configuration values to Moblab.
@@ -1222,6 +1242,23 @@ class MoblabService(object):
                             "But failed to set remote agent as {}.".format(
                                 "enabled"
                                 if is_remote_agent_enabled
+                                else "disabled"
+                            )
+                        )
+
+                    if self.set_is_remote_command_enabled(
+                        is_remote_command_enabled
+                    ):
+                        message += "Remote command has been {}.".format(
+                            "enabled"
+                            if is_remote_command_enabled
+                            else "disabled"
+                        )
+                    else:
+                        message += (
+                            "But failed to set remote command as {}.".format(
+                                "enabled"
+                                if is_remote_command_enabled
                                 else "disabled"
                             )
                         )
@@ -1334,3 +1371,23 @@ class MoblabService(object):
             True iff the set operation successfully.
         """
         return self.afe_connector.set_is_remote_agent_enabled(is_enabled)
+
+    def get_is_remote_command_enabled(self):
+        """
+            Check to see if the remote agent is enabled.
+
+        Returns:
+            True iff remote agent is enabled.
+        """
+        return self.config_connector.is_remote_task_scheduler_enabled()
+
+    def set_is_remote_command_enabled(self, is_enabled):
+        """
+            Attempts to set if the remote command is enabled.
+
+        Args:
+            is_enabled (bool): enable the remote command or not
+        Returns:
+            True iff the set operation successfully.
+        """
+        return self.afe_connector.set_is_remote_command_enabled(is_enabled)

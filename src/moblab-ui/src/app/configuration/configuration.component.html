@@ -115,7 +115,18 @@
               </div>
             </div>
           </mat-list-item>
-
+          <mat-list-item>
+            <div id="command-checkbox-wrapper" class="form-text">
+              <mat-checkbox id ="command-checkbox"
+                [disabled]="!this.isCloudEnabled"
+                (change)="isRemoteCommandEnabledCheckboxChange()"
+                [checked]="this.isRemoteCommandEnabled"
+                [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="below"
+              ></mat-checkbox>
+              <span id="command-checkbox-description" class="checkbox-label"
+                    [class.disabled]="!this.isCloudEnabled"> Enable remote commands </span>
+            </div>
+          </mat-list-item>
         </mat-list>
       </mat-card-content>
     </mat-card>

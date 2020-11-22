@@ -10,6 +10,7 @@ import logging
 import re
 import time
 
+# pylint: disable=import-error
 import moblab_service
 
 from moblab_common import afe_connector
@@ -25,6 +26,7 @@ from moblab_common.proto import moblabrpc_pb2
 # pylint: disable=import-error
 from moblab_common.proto import moblabrpc_pb2_grpc
 
+# pylint: disable=import-error
 from moblab_common.utils.constants import Constants as MoblabConstants
 
 AFE_TO_MOBLAB_STATUS_MAPPINGS = {
@@ -84,9 +86,10 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.screenshot,
         )
         response = moblabrpc_pb2.SendMoblabScreenshotResponse(
-            message="Feedback uploaded to bucket {} under {}. URL to screenshot: {}".format(
-                self.moblab_bucket_name, path, url
-            )
+            message=(
+                "Feedback uploaded to bucket {} under {}. "
+                "URL to screenshot: {}"
+            ).format(self.moblab_bucket_name, path, url)
         )
         return response
 
@@ -95,8 +98,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         for run of any suite but with no custom arguments.
 
         Args:
-          request: RunSuiteRequest object with parameters describing suite to be
-          run and arguments for suite run.
+          request: RunSuiteRequest object with parameters describing suite to
+          be run and arguments for suite run.
           _context: grpc.server.Context
         Returns:
           RunSuiteResponse object with a string result message.
@@ -116,7 +119,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """Sets off CTS suite run.
 
         Args:
-          request: RunCtsSuiteRequest object with parameters describing suite to be
+          request: RunCtsSuiteRequest object with parameters describing suite
+            to be
           run and arguments for suite run:
             build_target: Ex. octopus
             milestone: Ex. R80
@@ -125,8 +129,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
              run ( Ex. cts_X )
             model: String identfier for the specific model to be run.
             pool: String identifier for which pool of DUT's to run tests with.
-            specific_modules: Comma-separated string of specific module names to
-            run.
+            specific_modules: Comma-separated string of specific module names
+            to run.
           _context: grpc.server.Context
         Returns:
           RunSuiteResponse object with a string result message.
@@ -155,8 +159,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             build_version: A numeric version string of the form: '00000.00.0'
             model: String identfier for the specific model to be run.
             pool: String identifier for which pool of DUT's to run tests with.
-            specific_modules: Comma-separated string of specific module names to
-            run.
+            specific_modules: Comma-separated string of specific module names
+            to run.
           _context: grpc.server.Context
         Returns:
           RunSuiteResponse object with a string result message.
@@ -419,8 +423,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 int((dt_ts - datetime.datetime(1970, 1, 1)).total_seconds())
                 + to_utc_delta_seconds
             )
-        except (ValueError, TypeError) as e:
-            logging.error(
+        except (ValueError, TypeError):
+            logging.exception(
                 "Encountered an invalid string for conversion to"
                 + " timestamp: {}".format(ts)
             )
@@ -429,7 +433,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def _extract_status_enum(self, status_str):
         if status_str in AFE_TO_MOBLAB_STATUS_MAPPINGS:
             return AFE_TO_MOBLAB_STATUS_MAPPINGS[status_str]
-        elif re.match("Aborted \(\s*\w+\s*\)", status_str):
+        elif re.match(r"Aborted \(\s*\w+\s*\)", status_str):
             # Ex. Aborted (Running)
             return moblabrpc_pb2.Job.ABORTING
         else:
@@ -896,6 +900,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
         cloud_configuration = self.service.get_cloud_configuration()
         is_remote_agent_enabled = self.service.get_is_remote_agent_enabled()
+        is_remote_command_enabled = (
+            self.service.get_is_remote_command_enabled()
+        )
         response = moblabrpc_pb2.GetCloudConfigurationResponse(
             is_cloud_enabled=cloud_configuration.get(
                 "is_cloud_enabled", "False"
@@ -907,6 +914,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             ),
             gcs_bucket_url=cloud_configuration.get("image_storage_server", ""),
             is_remote_console_enabled=is_remote_agent_enabled,
+            is_remote_command_enabled=is_remote_command_enabled,
         )
         return response
 
@@ -924,12 +932,13 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
             GetCloudConfigurationResponse
         """
-        msg = cloud_configuration = self.service.set_cloud_configuration(
+        msg = self.service.set_cloud_configuration(
             request.is_cloud_enabled,
             request.boto_key_id,
             request.boto_key_secret,
             request.gcs_bucket_url,
             request.is_remote_console_enabled,
+            request.is_remote_command_enabled,
         )
         response = moblabrpc_pb2.SetCloudConfigurationResponse(message=msg)
         return response
@@ -1011,8 +1020,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
             Set remote agent configuration info of Moblab.
         Args:
-            request: SetRemoteAgentConfigurationRequest object with a parameter:
-                is_enabled
+            request: SetRemoteAgentConfigurationRequest object with a
+                parameter: is_enabled
             _context: grpc.server.Context
         Returns:
             SetRemoteAgentConfigurationResponse
