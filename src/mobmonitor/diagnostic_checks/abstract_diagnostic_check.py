@@ -3,6 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+
 class AbstractDiagnosticCheck:
     """
     Defines the interface for a diagnostic check
@@ -12,13 +13,13 @@ class AbstractDiagnosticCheck:
 
     # High level category for this check (network, disk etc)
     # Diagnostics are grouped by category in the UI
-    category = 'abstract category'
+    category = "abstract category"
 
     # Name for this diagnostic
-    name = 'abstract name'
+    name = "abstract name"
 
     # A short description of what the diagnostic does
-    description = 'abstract description'
+    description = "abstract description"
 
     def run(self):
         """

@@ -7,8 +7,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 class Shard(declarative_base()):
-    __tablename__ = 'afe_shards'
-    name_field = 'hostname'
+    __tablename__ = "afe_shards"
+    name_field = "hostname"
 
     id = Column(Integer, primary_key=True)
     hostname = Column(String(length=255), unique=True)

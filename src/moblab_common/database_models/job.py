@@ -2,8 +2,15 @@
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-from sqlalchemy import Boolean, Column, Integer, String, DateTime, \
-    SmallInteger, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Integer,
+    String,
+    DateTime,
+    SmallInteger,
+    Text,
+)
 from sqlalchemy.ext.declarative import declarative_base
 
 from database_models.common.constants import Constants
@@ -41,23 +48,28 @@ class Job(declarative_base()):
     require_ssp: Require server-side packaging unless require_ssp is set to
                  False. (optional, default: None)
     """
-    __tablename__ = 'afe_jobs'
+
+    __tablename__ = "afe_jobs"
 
     # TODO: Investigate, if jobkeyval_set is really needed.
     # dynamic_suite will write them into an attached file for the drone, but
     # it doesn't seem like they are actually used. If they aren't used, remove
     # jobkeyval_set here.
-    SERIALIZATION_LINKS_TO_FOLLOW = {'dependency_labels', 'hostqueueentry_set',
-                                     'jobkeyval_set', 'shard'}
+    SERIALIZATION_LINKS_TO_FOLLOW = {
+        "dependency_labels",
+        "hostqueueentry_set",
+        "jobkeyval_set",
+        "shard",
+    }
 
-    EXCLUDE_KNOWN_JOBS_CLAUSE = '''
+    EXCLUDE_KNOWN_JOBS_CLAUSE = """
         AND NOT (afe_host_queue_entries.aborted = 0
                  AND afe_jobs.id IN (%(known_ids)s))
-    '''
+    """
 
     EXCLUDE_OLD_JOBS_CLAUSE = 'AND (afe_jobs.created_on > "%(cutoff)s")'
 
-    SQL_SHARD_JOBS = '''
+    SQL_SHARD_JOBS = """
         SELECT DISTINCT(afe_jobs.id) FROM afe_jobs
         INNER JOIN afe_host_queue_entries
           ON (afe_jobs.id = afe_host_queue_entries.job_id)
@@ -71,7 +83,7 @@ class Job(declarative_base()):
                AND afe_host_queue_entries.active != 1
                %(exclude_known_jobs)s
                %(exclude_old_jobs)s)
-    '''
+    """
 
     # Jobs can be created with assigned hosts and have no dependency
     # labels nor meta_host.
@@ -81,7 +93,7 @@ class Job(declarative_base()):
     #     - one of the host's labels matches the shard's label.
     # Non-aborted known jobs, completed jobs, active jobs, jobs
     # without hqe are exluded as we do with SQL_SHARD_JOBS.
-    SQL_SHARD_JOBS_WITH_HOSTS = '''
+    SQL_SHARD_JOBS_WITH_HOSTS = """
         SELECT DISTINCT(afe_jobs.id) FROM afe_jobs
         INNER JOIN afe_host_queue_entries
           ON (afe_jobs.id = afe_host_queue_entries.job_id)
@@ -94,7 +106,7 @@ class Job(declarative_base()):
                AND afe_host_queue_entries.host_id IS NOT NULL
                %(exclude_known_jobs)s
                %(exclude_old_jobs)s)
-    '''
+    """
 
     # Even if we had filters about complete, active and aborted
     # bits in the above two SQLs, there is a chance that
@@ -103,14 +115,14 @@ class Job(declarative_base()):
     # This happens when a job has two (or more) hqes and at least
     # one hqe has different bits than others.
     # We use a second sql to ensure we exclude all un-desired jobs.
-    SQL_JOBS_TO_EXCLUDE = '''
+    SQL_JOBS_TO_EXCLUDE = """
         SELECT afe_jobs.id FROM afe_jobs
         INNER JOIN afe_host_queue_entries
           ON (afe_jobs.id = afe_host_queue_entries.job_id)
         WHERE (afe_jobs.id in (%(candidates)s)
                AND (afe_host_queue_entries.complete=1
                     OR afe_host_queue_entries.active=1))
-    '''
+    """
 
     RebootBefore = Constants.REBOOT_BEFORE
     RebootAfter = Constants.REBOOT_AFTER

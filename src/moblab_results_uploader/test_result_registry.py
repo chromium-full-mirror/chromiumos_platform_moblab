@@ -13,8 +13,9 @@ import autotest_result
 REGISTRY = []
 
 
-class TestResultRegisteryEntry(collections.namedtuple(
-        'TestResultRegisteryEntry', ['root_dir', 'classes'])):
+class TestResultRegisteryEntry(
+    collections.namedtuple("TestResultRegisteryEntry", ["root_dir", "classes"])
+):
     """TestResultRegisteryEntry is used to register test results.
 
     Args:
@@ -31,7 +32,7 @@ REGISTRY.append(
         root_dir=autotest_result.ROOT_DIR,
         classes=[
             autotest_result.AutotestTestJob,
-            autotest_result.AutotestHostTask
-        ]
+            autotest_result.AutotestHostTask,
+        ],
     )
 )

@@ -23,8 +23,11 @@ from moblab_common.proto import moblab_configuration_rpc_pb2_grpc
 
 from grpc_reflection.v1alpha import reflection
 
-os.environ.setdefault('GOOGLE_APPLICATION_CREDENTIALS',
-                      '%s/.service_account.json' % os.environ['HOME'])
+os.environ.setdefault(
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "%s/.service_account.json" % os.environ["HOME"],
+)
+
 
 def setup_logging(level):
     """Enable the correct level of logging.
@@ -34,11 +37,12 @@ def setup_logging(level):
     """
     logging.getLogger().handlers = []
     logging.getLogger().setLevel(level)
-    fh = logging.FileHandler('/var/log/moblab/moblab_rpc.log')
+    fh = logging.FileHandler("/var/log/moblab/moblab_rpc.log")
     fh.setLevel(level)
     # create formatter and add it to the handlers
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     fh.setFormatter(formatter)
     logging.getLogger().addHandler(fh)
 
@@ -48,7 +52,8 @@ def parse_arguments(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument(
-        '-v', '--verbose', action='store_true', help='Turn on debug logging.')
+        "-v", "--verbose", action="store_true", help="Turn on debug logging."
+    )
     return parser.parse_args(argv)
 
 
@@ -62,28 +67,33 @@ def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
     try:
         moblabrpc_pb2_grpc.add_MoblabRpcServiceServicer_to_server(
-            moblab_rpcservice.MoblabRpcService(),
-            server)
+            moblab_rpcservice.MoblabRpcService(), server
+        )
 
         moblab_configuration_rpc_pb2_grpc.add_MoblabConfigurationServiceServicer_to_server(
-            moblab_configuration_rpcservice.ConfigurationRpcService(),
-            server)
+            moblab_configuration_rpcservice.ConfigurationRpcService(), server
+        )
 
         SERVICE_NAMES = (
-            moblab_configuration_rpc_pb2.DESCRIPTOR.services_by_name['MoblabConfigurationService'].full_name,
-            moblabrpc_pb2.DESCRIPTOR.services_by_name['MoblabRpcService'].full_name,
+            moblab_configuration_rpc_pb2.DESCRIPTOR.services_by_name[
+                "MoblabConfigurationService"
+            ].full_name,
+            moblabrpc_pb2.DESCRIPTOR.services_by_name[
+                "MoblabRpcService"
+            ].full_name,
             reflection.SERVICE_NAME,
         )
         reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-        server.add_insecure_port('[::]:6002')
-        logging.info('Starting server on [::]:6002')
+        server.add_insecure_port("[::]:6002")
+        logging.info("Starting server on [::]:6002")
         server.start()
         while True:
-            logging.info('Server sleeping')
+            logging.info("Server sleeping")
             time.sleep(60 * 60 * 24)
     except KeyboardInterrupt:
         server.stop(0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     serve()

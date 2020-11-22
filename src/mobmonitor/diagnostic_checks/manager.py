@@ -4,11 +4,13 @@
 # found in the LICENSE file.
 
 import logging
+
 LOGGER = logging.getLogger(__name__)
 
 from diagnostic_checks.cloud_storage_speedtest import CloudStorageSpeedTest
 from diagnostic_checks.disk_info import DiskInfo
 from diagnostic_checks.diagnostic_error import DiagnosticError
+
 
 class DiagnosticCheckManager:
     """
@@ -72,15 +74,16 @@ class DiagnosticCheckManager:
         """
         check_list = []
         for category in self.diagnostic_checks:
-            category_entry = {'category': category}
+            category_entry = {"category": category}
             category_checks = []
             for name in self.diagnostic_checks[category]:
-                description = self.diagnostic_checks[category][name].description
-                category_checks.append({
-                    'name': name,
-                    'description': description
-                })
-            category_entry['checks'] = category_checks
+                description = self.diagnostic_checks[category][
+                    name
+                ].description
+                category_checks.append(
+                    {"name": name, "description": description}
+                )
+            category_entry["checks"] = category_checks
             check_list.append(category_entry)
         return check_list
 
@@ -97,13 +100,13 @@ class DiagnosticCheckManager:
             DiagnosticError if the check is not found, or encounters an error
         """
         try:
-            LOGGER.info('running diagnostic %s %s' % (category, name))
+            LOGGER.info("running diagnostic %s %s" % (category, name))
             check = self.diagnostic_checks[category][name]
             if check is None:
-                raise DiagnosticError('Check not found')
+                raise DiagnosticError("Check not found")
             return check.run()
         except KeyError:
-            raise DiagnosticError('Check not found')
+            raise DiagnosticError("Check not found")
         except DiagnosticError as e:
-            LOGGER.error('failed to run diagnostic check: %s', str(e))
+            LOGGER.error("failed to run diagnostic check: %s", str(e))
             raise e

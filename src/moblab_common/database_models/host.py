@@ -24,11 +24,16 @@ class Host(declarative_base()):
     Local:
         locked_by: user that locked the host, or null if the host is unlocked
     """
-    __tablename__ = 'afe_hosts'
 
-    SERIALIZATION_LINKS_TO_FOLLOW = {'aclgroup_set', 'hostattribute_set',
-                                     'labels', 'shard'}
-    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {'invalid'}
+    __tablename__ = "afe_hosts"
+
+    SERIALIZATION_LINKS_TO_FOLLOW = {
+        "aclgroup_set",
+        "hostattribute_set",
+        "labels",
+        "shard",
+    }
+    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {"invalid"}
 
     id = Column(Integer, primary_key=True)
     hostname = Column(String(length=255), unique=True)

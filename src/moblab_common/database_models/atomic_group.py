@@ -21,7 +21,8 @@ class AtomicGroup(declarative_base()):
     Optional:
       description: Arbitrary text description of this group's purpose.
     """
-    __tablename__ = 'afe_atomic_groups'
+
+    __tablename__ = "afe_atomic_groups"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(length=255), unique=True)

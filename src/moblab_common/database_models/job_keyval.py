@@ -8,10 +8,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class JobKeyval(declarative_base()):
     """Keyvals associated with jobs"""
-    __tablename__ = 'afe_job_keyvals'
 
-    SERIALIZATION_LINKS_TO_KEEP = {'job'}
-    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {'value'}
+    __tablename__ = "afe_job_keyvals"
+
+    SERIALIZATION_LINKS_TO_KEEP = {"job"}
+    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {"value"}
 
     id = Column(Integer, primary_key=True)
     job_id = Column(Integer, nullable=False)

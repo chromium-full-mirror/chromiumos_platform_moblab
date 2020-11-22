@@ -14,6 +14,7 @@ import remote_request
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
+
 class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
     """Encapsulates all the information required to run a suite on moblab."""
 
@@ -34,32 +35,32 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
     ):
         """Class constructor.
 
-            Construct the suite request either from the params or from
-            a proto that contains all the params.
+        Construct the suite request either from the params or from
+        a proto that contains all the params.
 
-            unique_id (string, optional): Defaults to None. The unique
-                identifier for this request, if None a new identifier will be
-                generated.
-            board (string, optional): Defaults to None. The board to run the
-                suite with.
-            build (string, optional): Defaults to None. The build number to
-                run e.g. R75-12055.0.0
-            priority (int, optional): Defaults to None. The priority of the
-                request, lower number is higher priority.
-            suite (string, optional): Defaults to None. The name of the
-                suite to run e.g. cts_P
-            min_duts (int, optional): Minimun number of active DUT's attached
-                with the correct board/model before the suite will run.
-            suite_args (string, optional): Defaults to None.  key=value pairs
-                delimited by newlines.
-            model (string, optional): Defaults to None. The model to run the
-                suite on.
-            test_args (string, optional): Defaults to None. key=value pairs
-                delimited by newlines.
-            expires_at_sec_utc (string, optional): Defaults to None. If set
-                a time in UTC at which this command will be ignored.
-            proto (object, optional): Defaults to None.Allows construction of
-                this object from the values in a the proto equivalent.
+        unique_id (string, optional): Defaults to None. The unique
+            identifier for this request, if None a new identifier will be
+            generated.
+        board (string, optional): Defaults to None. The board to run the
+            suite with.
+        build (string, optional): Defaults to None. The build number to
+            run e.g. R75-12055.0.0
+        priority (int, optional): Defaults to None. The priority of the
+            request, lower number is higher priority.
+        suite (string, optional): Defaults to None. The name of the
+            suite to run e.g. cts_P
+        min_duts (int, optional): Minimun number of active DUT's attached
+            with the correct board/model before the suite will run.
+        suite_args (string, optional): Defaults to None.  key=value pairs
+            delimited by newlines.
+        model (string, optional): Defaults to None. The model to run the
+            suite on.
+        test_args (string, optional): Defaults to None. key=value pairs
+            delimited by newlines.
+        expires_at_sec_utc (string, optional): Defaults to None. If set
+            a time in UTC at which this command will be ignored.
+        proto (object, optional): Defaults to None.Allows construction of
+            this object from the values in a the proto equivalent.
         """
 
         if proto:
@@ -98,18 +99,14 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
             str: Formatted string representing this object.
         """
 
-        return (
-            "unique_id=%s, build=%s, board=%s, suite=%s, model=%s, priority=%s,"
-            " min_duts=%s"
-            % (
-                self.unique_id,
-                self.build,
-                self.board,
-                self.suite,
-                self.model,
-                self.priority,
-                self.min_duts,
-            )
+        return "unique_id=%s, build=%s, board=%s, suite=%s, model=%s, priority=%s," " min_duts=%s" % (
+            self.unique_id,
+            self.build,
+            self.board,
+            self.suite,
+            self.model,
+            self.priority,
+            self.min_duts,
         )
 
     def copy_to_proto(self, proto):
@@ -174,21 +171,25 @@ class MoblabSuiteRunRequestWrapper(remote_request.MoblabRemoteRequest):
         """
         _LOGGER.info("Running suite %s", self)
         # if the request has expired then don't run the suite
-        if self.expires_at_sec_utc and int(time.time()) > self.expires_at_sec_utc:
+        if (
+            self.expires_at_sec_utc
+            and int(time.time()) > self.expires_at_sec_utc
+        ):
             return
 
         # TODO Change run_suite_request proto to have a milestone,
         # build version and build_target depricate build and board.
-        milestone = self.build.split('-')[0]
+        milestone = self.build.split("-")[0]
         # TODO fix this upstream so the requests do not have an R on the
         # milestone.
-        milestone = milestone.strip('R')
-        build_version = self.build.split('-')[1]
+        milestone = milestone.strip("R")
+        build_version = self.build.split("-")[1]
         # TODO plumb through suite_args and test_args.
         reponse = moblabrpc_connector.MoblabRpcConnector.run_suite(
             build_target=self.board,
             model=self.model,
             milestone=milestone,
             build_version=build_version,
-            suite=self.suite)
+            suite=self.suite,
+        )
         return json.loads(reponse.message)["error"]

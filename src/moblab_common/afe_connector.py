@@ -22,6 +22,7 @@ MOBLAB_RPC_SERVER = "autotest-afe:8888"
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
+
 def enroll_dut(ip_address):
     client = docker.from_env()
     afe_container = client.containers.get("autotest-afe")
@@ -51,7 +52,9 @@ class AFEConnector(object):
             params = {}
 
         rpc_url = "http://%s/afe/server/rpc/" % MOBLAB_RPC_SERVER
-        data = self.json_encoder.encode({"id": 0, "method": method, "params": [params]})
+        data = self.json_encoder.encode(
+            {"id": 0, "method": method, "params": [params]}
+        )
 
         _LOGGER.debug("%s %s", rpc_url, data)
         try:
@@ -108,7 +111,9 @@ class AFEConnector(object):
             try:
                 result[k] = dict(v)
             except ValueError:
-                _LOGGER.error("Error getting config values key: %s value: %s", k, v)
+                _LOGGER.error(
+                    "Error getting config values key: %s value: %s", k, v
+                )
 
         return result
 
@@ -178,11 +183,15 @@ class AFEConnector(object):
             params["name__icontains"] = name_filter
         if created_time_lt:
             params["created_on__lte"] = str(
-                datetime.fromtimestamp(created_time_lt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(created_time_lt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
         if created_time_gt:
             params["created_on__gte"] = str(
-                datetime.fromtimestamp(created_time_gt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(created_time_gt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
 
         if sub:
@@ -243,7 +252,7 @@ class AFEConnector(object):
         params = {
             "query_start": query_start,
             "query_limit": query_limit,
-            'sort_by': ['-created_on']
+            "sort_by": ["-created_on"],
         }
 
         if id_filter:
@@ -252,11 +261,15 @@ class AFEConnector(object):
             params["name__icontains"] = name_filter
         if created_time_lt:
             params["created_on__lte"] = str(
-                datetime.fromtimestamp(created_time_lt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(created_time_lt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
         if created_time_gt:
             params["created_on__gte"] = str(
-                datetime.fromtimestamp(created_time_gt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(created_time_gt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
 
         if sub:
@@ -312,11 +325,15 @@ class AFEConnector(object):
 
         if start_time_gt:
             params["start_time"] = str(
-                datetime.fromtimestamp(start_time_gt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(start_time_gt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
         if end_time_lt:
             params["end_time"] = str(
-                datetime.fromtimestamp(end_time_lt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(end_time_lt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
         response = self.send_rpc_command("get_num_special_tasks", params)
         return self.decode_response(response, "result")
@@ -363,11 +380,15 @@ class AFEConnector(object):
 
         if start_time_gt:
             params["start_time"] = str(
-                datetime.fromtimestamp(start_time_gt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(start_time_gt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
         if end_time_lt:
             params["end_time"] = str(
-                datetime.fromtimestamp(end_time_lt).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(end_time_lt).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             )
 
         if sort_by_most_recent:
@@ -504,13 +525,13 @@ class AFEConnector(object):
 
     def _package_edit_action_results(self, response):
         """
-            Add/remove attribute label actions are currently implemented by
-            calling an AFE endpoint that will return (True, <message>)
-            on success cases, but not the same format on failure cases. This
-            logic packages failure cases in the same format.
+        Add/remove attribute label actions are currently implemented by
+        calling an AFE endpoint that will return (True, <message>)
+        on success cases, but not the same format on failure cases. This
+        logic packages failure cases in the same format.
 
-            TO-DO: This logic should disappear when the underlying AFE calls
-            are no longer relied upon.
+        TO-DO: This logic should disappear when the underlying AFE calls
+        are no longer relied upon.
         """
         if self.decode_response(response, "result"):
             return self.decode_response(response, "result")
@@ -529,7 +550,8 @@ class AFEConnector(object):
             if action failed).
         """
         response = self.send_rpc_command(
-            "add_moblab_label", {"ipaddress": dut_hostname, "label_name": label}
+            "add_moblab_label",
+            {"ipaddress": dut_hostname, "label_name": label},
         )
         return self._package_edit_action_results(response)
 
@@ -545,7 +567,8 @@ class AFEConnector(object):
             if action failed).
         """
         response = self.send_rpc_command(
-            "remove_moblab_label", {"ipaddress": dut_hostname, "label_name": label}
+            "remove_moblab_label",
+            {"ipaddress": dut_hostname, "label_name": label},
         )
         return self._package_edit_action_results(response)
 
@@ -579,7 +602,11 @@ class AFEConnector(object):
             if action failed).
         """
         response = self.send_rpc_command(
-            "delete_host_attrib", {"ipaddress": dut_hostname, "attribute": key,}
+            "delete_host_attrib",
+            {
+                "ipaddress": dut_hostname,
+                "attribute": key,
+            },
         )
         return self._package_edit_action_results(response)
 
@@ -589,8 +616,8 @@ class AFEConnector(object):
         Args:
             host_id(int): ID of DUT in AFE backend.
         """
-        response = self.send_rpc_command('reverify_hosts', {'id': host_id})
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("reverify_hosts", {"id": host_id})
+        return self.decode_response(response, "result")
 
     def repair_host(self, host_id):
         """
@@ -598,8 +625,8 @@ class AFEConnector(object):
         Args:
             host_id(int): ID of DUT in AFE backend.
         """
-        response = self.send_rpc_command('repair_hosts', {'id': host_id})
-        return self.decode_response(response, 'result')
+        response = self.send_rpc_command("repair_hosts", {"id": host_id})
+        return self.decode_response(response, "result")
 
     def get_cloud_storage_info(self):
         """
@@ -608,9 +635,7 @@ class AFEConnector(object):
             A dict of cloud configuration info  ( specifically, 'gs_access_key_id',
             'gs_secret_access_key', 'image_storage_server' )
         """
-        response = self.send_rpc_command(
-            "get_cloud_storage_info", {}
-        )
+        response = self.send_rpc_command("get_cloud_storage_info", {})
         return self.decode_response(response, "result")
 
     def get_dut_wifi_info(self):
@@ -620,19 +645,17 @@ class AFEConnector(object):
             A dict of DUT wifi info  ( specifically, 'dut_wifi_name,
             'dut_wifi_password' )
         """
-        response = self.send_rpc_command(
-            "get_dut_wifi_info", {}
-        )
+        response = self.send_rpc_command("get_dut_wifi_info", {})
         return self.decode_response(response, "result")
 
     def _format_configuration_dict(
         self,
         is_cloud_enabled=True,
-        gs_access_key_id='',
-        gs_secret_access_key='',
-        image_storage_server='',
+        gs_access_key_id="",
+        gs_secret_access_key="",
+        image_storage_server="",
         dut_wifi_name=None,
-        dut_wifi_password=''
+        dut_wifi_password="",
     ):
         """
             Helper method for returning params shared between calls to set
@@ -654,7 +677,7 @@ class AFEConnector(object):
         if dut_wifi_name:
             configuration_dict["wifi_info"] = {
                 "wifi_dut_ap_name": dut_wifi_name,
-                "wifi_dut_ap_pass": dut_wifi_password
+                "wifi_dut_ap_pass": dut_wifi_password,
             }
         else:
             configuration_dict["cloud_storage_info"] = {
@@ -666,20 +689,19 @@ class AFEConnector(object):
                 # AFE backend services configuration of other values in addition
                 # to cloud configs, but Moblab only needs to change these values,
                 # so this value is always False.
-                "use_existing_boto_file": False
+                "use_existing_boto_file": False,
             }
 
         return configuration_dict
 
-
     def set_configuration_info(
         self,
         is_cloud_enabled=True,
-        gs_access_key_id='',
-        gs_secret_access_key='',
-        image_storage_server='',
+        gs_access_key_id="",
+        gs_secret_access_key="",
+        image_storage_server="",
         dut_wifi_name=None,
-        dut_wifi_password=''
+        dut_wifi_password="",
     ):
         """
             Applies given configuration values to AFE.
@@ -696,28 +718,25 @@ class AFEConnector(object):
             succeeded.
         """
         response = self.send_rpc_command(
-            'submit_wizard_config_info',
+            "submit_wizard_config_info",
             self._format_configuration_dict(
                 is_cloud_enabled,
                 gs_access_key_id,
                 gs_secret_access_key,
                 image_storage_server,
                 dut_wifi_name,
-                dut_wifi_password
-            )
+                dut_wifi_password,
+            ),
         )
 
         response = self.decode_response(response, "result")
-        if 'status_ok' in response and response['status_ok']:
+        if "status_ok" in response and response["status_ok"]:
             return True
         else:
             return False
 
     def validate_cloud_storage_info(
-        self,
-        gs_access_key_id,
-        gs_secret_access_key,
-        image_storage_server
+        self, gs_access_key_id, gs_secret_access_key, image_storage_server
     ):
         """
             Calls through to AFE to check validity of boto and bucket
@@ -731,16 +750,16 @@ class AFEConnector(object):
             A tuple (boolean, string).
         """
         response = self.send_rpc_command(
-            'validate_cloud_storage_info',
+            "validate_cloud_storage_info",
             self._format_configuration_dict(
                 gs_access_key_id=gs_access_key_id,
                 gs_secret_access_key=gs_secret_access_key,
-                image_storage_server=image_storage_server
-            )
+                image_storage_server=image_storage_server,
+            ),
         )
 
         result = self.decode_response(response, "result")
-        return result['status_ok'], result.get('status_details', '')
+        return result["status_ok"], result.get("status_details", "")
 
     def set_is_remote_agent_enabled(self, is_enabled=False):
         """
@@ -752,10 +771,12 @@ class AFEConnector(object):
             succeeded.
         """
         response = self.send_rpc_command(
-            'set_remote_agent_config',
-            {'enabled': is_enabled}
+            "set_remote_agent_config", {"enabled": is_enabled}
         )
 
         response = self.decode_response(response, "result")
-        return True if 'status_ok' in response and response['status_ok'] \
+        return (
+            True
+            if "status_ok" in response and response["status_ok"]
             else False
+        )

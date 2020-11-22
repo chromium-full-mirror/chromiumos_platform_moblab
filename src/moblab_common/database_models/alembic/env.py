@@ -24,9 +24,11 @@ fileConfig(config.config_file_name)
 
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.pardir))
 
 from database_models.moblab_settings import Base
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

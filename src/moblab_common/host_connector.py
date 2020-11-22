@@ -33,13 +33,16 @@ class HostServicesConnector(object):
             cls.channel = grpc.insecure_channel(DEFAULT_SERVER)
             if cls.channel:
                 cls.stub = hostservices_pb2_grpc.MoblabHostServiceStub(
-                    cls.channel)
+                    cls.channel
+                )
                 if not cls.stub:
                     raise HostServicesException(
-                "Unable to connect to server %s" % DEFAULT_SERVER)
+                        "Unable to connect to server %s" % DEFAULT_SERVER
+                    )
             else:
                 raise HostServicesException(
-            "No server found %s" % DEFAULT_SERVER)
+                    "No server found %s" % DEFAULT_SERVER
+                )
 
     @classmethod
     def disconnect(cls):
@@ -57,8 +60,8 @@ class HostServicesConnector(object):
             return response.identifier
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error getting the host identifier')
-            raise HostServicesException('Error getting the host identifier')
+            logging.exception("Error getting the host identifier")
+            raise HostServicesException("Error getting the host identifier")
 
     @classmethod
     def is_service_running(cls, service_name):
@@ -69,8 +72,10 @@ class HostServicesConnector(object):
             return response.is_running
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error getting service %s status', service_name)
-            raise HostServicesException('Error getting service %s status' % service_name)
+            logging.exception("Error getting service %s status", service_name)
+            raise HostServicesException(
+                "Error getting service %s status" % service_name
+            )
 
     @classmethod
     def get_disk_info(cls):
@@ -81,8 +86,8 @@ class HostServicesConnector(object):
             return response.disk_info
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error getting disk info')
-            raise HostServicesException('Error getting disk info')
+            logging.exception("Error getting disk info")
+            raise HostServicesException("Error getting disk info")
 
     @classmethod
     def get_ip(cls):
@@ -93,8 +98,8 @@ class HostServicesConnector(object):
             return response.ip_address
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error getting host ip')
-            raise HostServicesException('Error getting host ip')
+            logging.exception("Error getting host ip")
+            raise HostServicesException("Error getting host ip")
 
     @classmethod
     def check_for_system_update(cls):
@@ -104,8 +109,8 @@ class HostServicesConnector(object):
             response = cls.stub.check_for_system_update(request)
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error checking for system updates')
-            raise HostServicesException('Error checking for system updates')
+            logging.exception("Error checking for system updates")
+            raise HostServicesException("Error checking for system updates")
 
     @classmethod
     def get_system_update_status(cls):
@@ -116,8 +121,8 @@ class HostServicesConnector(object):
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error getting update status')
-            raise HostServicesException('Error getting update status')
+            logging.exception("Error getting update status")
+            raise HostServicesException("Error getting update status")
 
     @classmethod
     def install_system_update(cls):
@@ -128,8 +133,8 @@ class HostServicesConnector(object):
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error installing update')
-            raise HostServicesException('Error installing update')
+            logging.exception("Error installing update")
+            raise HostServicesException("Error installing update")
 
     @classmethod
     def reboot(cls):
@@ -140,8 +145,8 @@ class HostServicesConnector(object):
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error rebooting')
-            raise HostServicesException('Error rebooting')
+            logging.exception("Error rebooting")
+            raise HostServicesException("Error rebooting")
 
     @classmethod
     def factory_reset(cls):

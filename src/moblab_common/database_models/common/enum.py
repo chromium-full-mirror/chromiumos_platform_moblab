@@ -31,9 +31,9 @@ class Enum(object):
     """
 
     def __init__(self, *names, **kwargs):
-        self.string_values = kwargs.get('string_values')
-        start_value = kwargs.get('start_value', 0)
-        step = kwargs.get('step', 1)
+        self.string_values = kwargs.get("string_values")
+        start_value = kwargs.get("start_value", 0)
+        step = kwargs.get("step", 1)
         self.names = names
         self.values = []
         for i, name in enumerate(names):
@@ -46,10 +46,10 @@ class Enum(object):
 
     @staticmethod
     def get_attr_name(string):
-        return string.upper().replace(' ', '_')
+        return string.upper().replace(" ", "_")
 
     def choices(self):
-        'Return choice list suitable for Django model choices.'
+        "Return choice list suitable for Django model choices."
         return zip(self.values, self.names)
 
     def get_value(self, name):
@@ -63,8 +63,8 @@ class Enum(object):
         return getattr(self, self.get_attr_name(name))
 
     def get_string(self, value):
-        ' Given a value, get the string name for it.'
+        " Given a value, get the string name for it."
         if value not in self.values:
-            raise ValueError('Value %s not in this enum' % value)
+            raise ValueError("Value %s not in this enum" % value)
         index = self.values.index(value)
         return self.names[index]

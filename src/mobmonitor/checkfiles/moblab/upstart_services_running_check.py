@@ -23,8 +23,8 @@ def UpstartExists(service):
     """
     _, ext = os.path.splitext(service)
     if not ext:
-        service = os.extsep.join([service, 'conf'])
-    return os.path.exists(os.path.join('/etc/init', service))
+        service = os.extsep.join([service, "conf"])
+    return os.path.exists(os.path.join("/etc/init", service))
 
 
 def UpstartRunning(service):
@@ -44,7 +44,7 @@ def UpstartRunning(service):
 
 
 def MoblabBooting():
-    """ Test if moblab is still booting, and some services haven't come up yet.
+    """Test if moblab is still booting, and some services haven't come up yet.
     Checks that moblab-bootup-status-init is running. This is killed when
     essential services have attempted to start.
 
@@ -52,7 +52,7 @@ def MoblabBooting():
       True if the moblab is still booting
     """
 
-    return UpstartRunning('moblab-bootup-status-init')
+    return UpstartRunning("moblab-bootup-status-init")
 
 
 def ServiceRunning(service):
@@ -62,7 +62,7 @@ def ServiceRunning(service):
       True if |service| is running.
       False otherwise.
     """
-    cmd = ['ps', 'aux']
+    cmd = ["ps", "aux"]
     output = cli.run_command(cmd, error_code_ok=True).strip()
 
     for line in output.splitlines():
@@ -85,28 +85,33 @@ class UpstartServiceRunning(object):
           -(i+1) if SERVICE with index i is not running.
           i+1 if SERVICE with index i is not running, but moblab is still booting.
         """
-        LOGGER.info('Checking services: %s', self.SERVICES)
+        LOGGER.info("Checking services: %s", self.SERVICES)
         booting = MoblabBooting()
         for i, x in enumerate(self.SERVICES):
             if not UpstartRunning(x):
-                return i+1 if booting else -(i+1)
+                return i + 1 if booting else -(i + 1)
 
         return 0
 
     def Diagnose(self, errcode):
         if errcode and self.SERVICES:
-            index = -1*errcode - 1 if errcode < 0 else errcode - 1
+            index = -1 * errcode - 1 if errcode < 0 else errcode - 1
             service = self.SERVICES[index]
 
             if errcode > 0:
-                return ('Essential moblab service "%s" has not started yet.'
-                        ' Moblab is still booting.' % service, [])
+                return (
+                    'Essential moblab service "%s" has not started yet.'
+                    " Moblab is still booting." % service,
+                    [],
+                )
 
-            return ('Essential moblab service "%s" is not running.'
-                    ' Please launch the service.' % service,
-                    [moblab_actions.LaunchUpstartService(service)])
+            return (
+                'Essential moblab service "%s" is not running.'
+                " Please launch the service." % service,
+                [moblab_actions.LaunchUpstartService(service)],
+            )
 
-        return ('Unknown error reached with error code: %s' % errcode, [])
+        return ("Unknown error reached with error code: %s" % errcode, [])
 
 
 # class DHCPRunning(UpstartServiceRunning):

@@ -22,8 +22,8 @@ from google.cloud import storage as gs
 
 from retry.api import retry_call
 
-ENV_GOOGLE_APP_CREDENTIALS = 'GOOGLE_APPLICATION_CREDENTIALS'
-_LOGGER = logging.getLogger('moblab_uploader')
+ENV_GOOGLE_APP_CREDENTIALS = "GOOGLE_APPLICATION_CREDENTIALS"
+_LOGGER = logging.getLogger("moblab_uploader")
 
 
 class GsAccessError(Exception):
@@ -44,9 +44,9 @@ def _get_gs_bucket(gs_bucket, credentials_file):
         GsAccessError when we can't access the bucket or don't have enough
         permission.
     """
-    _LOGGER.info('Verify the access to Google Storage.')
+    _LOGGER.info("Verify the access to Google Storage.")
     if not credentials_file:
-        raise GsAccessError('No credential file specified.')
+        raise GsAccessError("No credential file specified.")
     os.environ[ENV_GOOGLE_APP_CREDENTIALS] = credentials_file
     client = gs.Client()
     try:
@@ -55,11 +55,12 @@ def _get_gs_bucket(gs_bucket, credentials_file):
         raise GsAccessError(str(err))
 
     # Test the write permission.
-    if bucket.test_iam_permissions(['storage.objects.create']):
+    if bucket.test_iam_permissions(["storage.objects.create"]):
         return bucket
 
     raise GsAccessError(
-        "You don't have write permission to the bucket:{}".format(gs_bucket))
+        "You don't have write permission to the bucket:{}".format(gs_bucket)
+    )
 
 
 class GsApiWrapper(object):
@@ -75,7 +76,8 @@ class GsApiWrapper(object):
         self._bucket_name = gs_bucket
         self._credentials_file = credentials_file
         self._gs_bucket = _get_gs_bucket(
-            self._bucket_name, self._credentials_file)
+            self._bucket_name, self._credentials_file
+        )
         self._client = gs.Client()
 
     def upload_from_filename(self, *, local_name, remote_name):
@@ -88,7 +90,8 @@ class GsApiWrapper(object):
             _LOGGER.debug("Not attempting upload - symlink %s", local_name)
             return
         blob = self._gs_bucket.blob(
-            remote_name, chunk_size=(1024 * 1024 * 100))
+            remote_name, chunk_size=(1024 * 1024 * 100)
+        )
 
         # dice = random.uniform(0, 1) * 100
         # if dice > 99.8:
@@ -99,11 +102,18 @@ class GsApiWrapper(object):
         #     else:
         #         _LOGGER.debug("You win!!! Long sleep %s", local_name)
         #         asyncio.sleep(60*60)
-        retry_call(blob.upload_from_filename,
-                   fargs=[str(local_name)], fkwargs={"client": self._client},
-                   exceptions=(requests.exceptions.ConnectionError,
-                               urllib3.exceptions.ProtocolError),
-                   tries=20, delay=1, backoff=1.25)
+        retry_call(
+            blob.upload_from_filename,
+            fargs=[str(local_name)],
+            fkwargs={"client": self._client},
+            exceptions=(
+                requests.exceptions.ConnectionError,
+                urllib3.exceptions.ProtocolError,
+            ),
+            tries=20,
+            delay=1,
+            backoff=1.25,
+        )
 
     @property
     def bucket_name(self):

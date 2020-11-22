@@ -14,14 +14,16 @@ import google.api_core.path_template
 
 from google.api_core.exceptions import GoogleAPICallError
 from google.auth import exceptions as auth_exceptions
-from google.chromeos.moblab_v1beta1.services.build_service.client import \
-    BuildServiceClient
+from google.chromeos.moblab_v1beta1.services.build_service.client import (
+    BuildServiceClient,
+)
 from google.chromeos.moblab_v1beta1.types import build_service
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 
 class MoblabBuildConnectorException(Exception):
     """Generic exception for this module."""
+
     pass
 
 
@@ -35,7 +37,7 @@ class MoblabBuildConnector(object):
     def model_path(cls, build_target, model):
         """Return a fully-qualified model string."""
         return google.api_core.path_template.expand(
-            'buildTargets/{build_target}/models/{model}',
+            "buildTargets/{build_target}/models/{model}",
             build_target=build_target,
             model=model,
         )
@@ -44,7 +46,7 @@ class MoblabBuildConnector(object):
     def build_artifact_path(cls, build_target, model, build, artifact):
         """Return a fully-qualified build_artifact string."""
         return google.api_core.path_template.expand(
-            'buildTargets/{build_target}/models/{model}/builds/{build}/artifacts/{artifact}',
+            "buildTargets/{build_target}/models/{model}/builds/{build}/artifacts/{artifact}",
             build_target=build_target,
             model=model,
             build=build,
@@ -52,32 +54,39 @@ class MoblabBuildConnector(object):
         )
 
     def _parse_milestone(self, milestone):
-        if re.match('\Amilestones\/(\d+)$', milestone):
-            return milestone.split('/')[1]
+        if re.match("\Amilestones\/(\d+)$", milestone):
+            return milestone.split("/")[1]
         else:
             raise MoblabBuildConnectorException(
-                'Encountered unexpected format while reading milestones: {}'.format(milestone))
+                "Encountered unexpected format while reading milestones: {}".format(
+                    milestone
+                )
+            )
 
     def __init__(self, build_service_client=None):
         """Instantiates the build connector and sets up the build service
         client. The service account is set in the global environment.
         """
         try:
-            self.build_service_client = build_service_client if \
-                build_service_client is not None else BuildServiceClient()
+            self.build_service_client = (
+                build_service_client
+                if build_service_client is not None
+                else BuildServiceClient()
+            )
         except auth_exceptions.DefaultCredentialsError as e:
-            raise MoblabBuildConnectorException('No credentials loaded') from e
+            raise MoblabBuildConnectorException("No credentials loaded") from e
 
     def _list_builds(self, request):
         try:
             return self.build_service_client.list_builds(request).builds
         except GoogleAPICallError as e:
             raise MoblabBuildConnectorException(
-                'Encountered API error when attempting to list builds.'
+                "Encountered API error when attempting to list builds."
             ) from e
 
-    def list_available_milestones(self, build_target, model, page_size=50,
-        page_token=None):
+    def list_available_milestones(
+        self, build_target, model, page_size=50, page_token=None
+    ):
         """Lists the available milestones for the given build target and model.
 
         Args:
@@ -99,13 +108,16 @@ class MoblabBuildConnector(object):
             page_size=page_size,
             page_token=page_token,
             read_mask=milestone_field,
-            group_by=milestone_field
+            group_by=milestone_field,
         )
         build_results = self._list_builds(request)
-        return [self._parse_milestone(build.milestone) for build in build_results]
+        return [
+            self._parse_milestone(build.milestone) for build in build_results
+        ]
 
-    def list_builds_for_milestone(self, build_target, model, milestone,
-        page_size=50, page_token=None):
+    def list_builds_for_milestone(
+        self, build_target, model, milestone, page_size=50, page_token=None
+    ):
         """Lists the builds for the given build target, model and milestone.
 
         Args:
@@ -128,12 +140,14 @@ class MoblabBuildConnector(object):
             parent=self.model_path(build_target, model),
             page_size=page_size,
             page_token=page_token,
-            filter=milestone_filter
+            filter=milestone_filter,
         )
         build_results = self._list_builds(request)
         return [build.build_version for build in build_results]
 
-    def check_build_stage_status(self, build_target, model, build, bucket_name):
+    def check_build_stage_status(
+        self, build_target, model, build, bucket_name
+    ):
         """Checks the stage status for a given build artifact in a partner
         Google Cloud Storage bucket.
 
@@ -149,10 +163,13 @@ class MoblabBuildConnector(object):
                 equaling the # of objects in the destination build directory )
         """
         request = build_service.CheckBuildStageStatusRequest(
-            name=self.build_artifact_path(build_target, model, build,
-                                          bucket_name)
+            name=self.build_artifact_path(
+                build_target, model, build, bucket_name
+            )
         )
-        return self.build_service_client.check_build_stage_status(request).is_build_staged
+        return self.build_service_client.check_build_stage_status(
+            request
+        ).is_build_staged
 
     def stage_build(self, build_target, model, build, bucket_name):
         # TODO(zhihuixie): Long running operation cannot returned correctly in
@@ -177,7 +194,8 @@ class MoblabBuildConnector(object):
                 message for staging a build artifact.
         """
         request = build_service.StageBuildRequest(
-            name=self.build_artifact_path(build_target, model, build,
-                                          bucket_name)
+            name=self.build_artifact_path(
+                build_target, model, build, bucket_name
+            )
         )
         return self.build_service_client.stage_build(request)

@@ -5,23 +5,21 @@
 """Common lib for moblab checkfiles."""
 
 
-
-
 #
 # Boto file constants.
 #
-BOTO_PATH = '/home/moblab/.boto'
-SERVICE_ACCOUNT_PATH = '/home/moblab/.service_account.json'
+BOTO_PATH = "/home/moblab/.boto"
+SERVICE_ACCOUNT_PATH = "/home/moblab/.service_account.json"
 #
 # disk_check constants.
 #
 # 100GB
 DISK_SIZE_BYTES = 100 * 1024 * 1024 * 1024
 
-MOBLAB_LABEL = 'MOBLAB-STORAGE'
+MOBLAB_LABEL = "MOBLAB-STORAGE"
 
-STATEFUL_MOUNTPOINT = '/'
-MOBLAB_MOUNTPOINT = '/mnt/moblab'
-MOBLAB_FILESYSTEM = 'ext4'
+STATEFUL_MOUNTPOINT = "/"
+MOBLAB_MOUNTPOINT = "/mnt/moblab"
+MOBLAB_FILESYSTEM = "ext4"
 
 DISK_FREE_THRESHOLD_PERCENT = 0.3

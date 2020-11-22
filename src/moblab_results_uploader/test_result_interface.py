@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 
-
 import abc
 import pathlib
 
@@ -15,7 +14,8 @@ class TestResultError(Exception):
 
 class TestResult(abc.ABC):
     """The interface class for all TestResult classes."""
-    GLOB_PATTERN = '*'
+
+    GLOB_PATTERN = "*"
 
     def __init__(self, *, description, root_dir, relative_path):
         """Constructor of the class.
@@ -27,13 +27,13 @@ class TestResult(abc.ABC):
                 of the test result.
             relative_path: A pathlib.Path object or a string of the test result
                 path relative to the `root_dir`. Cannot start with './'.
-            """
+        """
         self._description = description
         self._relative_path = pathlib.Path(relative_path)
         self._abs_path = pathlib.Path(root_dir) / relative_path
 
     def __str__(self):
-        return '<{}: {}>'.format(self._description, self.name)
+        return "<{}: {}>".format(self._description, self.name)
 
     @property
     def name(self):
@@ -51,7 +51,7 @@ class TestResult(abc.ABC):
         Returns:
             The string of test result ID.
         """
-        raise NotImplementedError('TestResult.id')
+        raise NotImplementedError("TestResult.id")
 
     @property
     @abc.abstractmethod
@@ -62,7 +62,7 @@ class TestResult(abc.ABC):
             The datetime.datetime object of finished time, or None if the test
             is not finished yet.
         """
-        raise NotImplementedError('TestResult.finished_time')
+        raise NotImplementedError("TestResult.finished_time")
 
     @property
     @abc.abstractmethod
@@ -73,13 +73,13 @@ class TestResult(abc.ABC):
             True when the test finished successfully, or False when finished
             with problems, or None when not finished yet.
         """
-        raise NotImplementedError('TestResult.succeeded')
+        raise NotImplementedError("TestResult.succeeded")
 
     @property
     @abc.abstractmethod
     def suite_name(self):
         """Return the suite name of the test."""
-        raise NotImplementedError('TestResult.suite_name')
+        raise NotImplementedError("TestResult.suite_name")
 
     @property
     def pubsub_when_uploaded(self):

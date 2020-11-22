@@ -17,8 +17,9 @@ class StaticLabel(declarative_base()):
       only_if_needed: Deprecated. This is always False.
       atomic_group: Deprecated. This is always NULL.
     """
-    __tablename__ = 'afe_static_labels'
-    name_field = 'name'
+
+    __tablename__ = "afe_static_labels"
+    name_field = "name"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(length=255), unique=True)

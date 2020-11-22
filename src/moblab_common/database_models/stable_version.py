@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 class StableVersion(declarative_base()):
-    __tablename__ = 'afe_stable_versions'
+    __tablename__ = "afe_stable_versions"
 
     id = Column(Integer, primary_key=True)
     board = Column(String(length=255), nullable=False)

@@ -21,7 +21,10 @@ from services.collect.collect_service import CollectService
 from services.upload.message_handler import MessageHandler
 from moblab_common import afe_connector
 from moblab_common import config_connector
-from moblab_common.utils.cli import run_gcloud_bucket_diagnosis, RunCommandError
+from moblab_common.utils.cli import (
+    run_gcloud_bucket_diagnosis,
+    RunCommandError,
+)
 
 logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
@@ -35,6 +38,7 @@ class NoneCloudBucketException(Exception):
 
 class Frequency(Enum):
     """Enum class that defines the levels of collection frequencies."""
+
     DEFAULT = 1
     WARNING = 2
     ALERT = 3
@@ -59,7 +63,8 @@ class Scheduler(Constants):
     def __init__(self):
         self.afe_connector = afe_connector.AFEConnector()
         self.config_connector = config_connector.MoblabConfigConnector(
-            self.afe_connector)
+            self.afe_connector
+        )
         self.config = self._get_scheduler_config()
         self.collect_service = CollectService()
         self.upload_service = MessageHandler()
@@ -95,9 +100,11 @@ class Scheduler(Constants):
         elif msg_type == self.DUT:
             collect_func = self.collect_service.collect_attr_for_duts
         else:
-            _LOGGER.exception("Wrong message type, %s. "
-                              "Message type should be 'moblab' or 'dut'.",
-                              msg_type)
+            _LOGGER.exception(
+                "Wrong message type, %s. "
+                "Message type should be 'moblab' or 'dut'.",
+                msg_type,
+            )
             return
 
         while RUNNING:
@@ -111,7 +118,7 @@ class Scheduler(Constants):
             try:
                 device_attrs = collect_func(attr_type)
             except Exception:
-                _LOGGER.exception('Failed to collect Moblab or DUT data.')
+                _LOGGER.exception("Failed to collect Moblab or DUT data.")
                 return
 
             if not isinstance(device_attrs, list):
@@ -120,19 +127,21 @@ class Scheduler(Constants):
             if device_attrs and len(device_attrs) > 0 and device_attrs[0]:
                 self.upload_service.upload_messages(device_attrs, attr_type)
             else:
-                _LOGGER.info('No device info is collected or uploaded.')
+                _LOGGER.info("No device info is collected or uploaded.")
 
             current_freq_level = self.freq_level.name
-            collection_interval_in_minute \
-                = self._get_attr_type_freq_with_random_factor(attr_type)
+            collection_interval_in_minute = (
+                self._get_attr_type_freq_with_random_factor(attr_type)
+            )
             minutes_passed = 0
 
             while minutes_passed < collection_interval_in_minute:
                 time.sleep(SECONDS_IN_MIN)
                 if current_freq_level != self.freq_level.name:
                     current_freq_level = self.freq_level.name
-                    collection_interval_in_minute \
-                        = self._get_attr_type_freq_with_random_factor(attr_type)
+                    collection_interval_in_minute = (
+                        self._get_attr_type_freq_with_random_factor(attr_type)
+                    )
                 minutes_passed += 1
 
     def _get_attr_type_freq_with_random_factor(self, attr_type):
@@ -151,9 +160,12 @@ class Scheduler(Constants):
         Returns:
             A collection frequency with a random factor.
         """
-        current_freq = self.config['collectors'][attr_type]['frequency'][self.freq_level.name]
-        return current_freq + random.randint(0, min(int(current_freq / 10),
-                                                    SECONDS_IN_MIN))
+        current_freq = self.config["collectors"][attr_type]["frequency"][
+            self.freq_level.name
+        ]
+        return current_freq + random.randint(
+            0, min(int(current_freq / 10), SECONDS_IN_MIN)
+        )
 
     # TODO(chromium:1116710):Rewrite unit test for this function because the way of getting
     # cloud bucket name is changed.
@@ -180,43 +192,58 @@ class Scheduler(Constants):
         Returns:
             A Frequency enum.
         """
-        cloud_storage_info = \
+        cloud_storage_info = (
             self.collect_service.afe_connector.get_cloud_storage_info()
+        )
         try:
-            bucket_name = cloud_storage_info['image_storage_server'][5:-1]
+            bucket_name = cloud_storage_info["image_storage_server"][5:-1]
         except KeyError:
-            _LOGGER.warning('Failed to get network stats because cloud bucket '
-                            'is not fetched. Return DEFAULT frequency level.')
+            _LOGGER.warning(
+                "Failed to get network stats because cloud bucket "
+                "is not fetched. Return DEFAULT frequency level."
+            )
             return Frequency.DEFAULT
 
         if not bucket_name:
-            _LOGGER.warning('Cloud bucket name is none. Return DEFAULT '
-                            'frequency level.')
+            _LOGGER.warning(
+                "Cloud bucket name is none. Return DEFAULT " "frequency level."
+            )
             return Frequency.DEFAULT
 
         try:
-            output_file = '/moblab/network.json'
+            output_file = "/moblab/network.json"
             run_gcloud_bucket_diagnosis(output_file, bucket_name)
 
             with open(output_file) as output:
                 network_json = json.load(output)
             server_errors = network_json["request_errors"]
             broken_connections = network_json["connection_breaks"]
-            upload_bits_per_second = int(network_json["write_throughput"]["bytes_per_second"] * 8)
+            upload_bits_per_second = int(
+                network_json["write_throughput"]["bytes_per_second"] * 8
+            )
 
         except (RunCommandError, KeyError) as err:
-            _LOGGER.warning('Failed to get network status from network '
-                            'diagonosis and return DEFAULT frequency level: '
-                            '%s', err)
+            _LOGGER.warning(
+                "Failed to get network status from network "
+                "diagonosis and return DEFAULT frequency level: "
+                "%s",
+                err,
+            )
             return Frequency.DEFAULT
 
         # TODO(chromium:1113365): Abstract the config access into its own class.
-        high_threshold \
-            = self.config['network_thresholds']['upload_bits_per_second']['high']
-        median_threshold \
-            = self.config['network_thresholds']['upload_bits_per_second']['medium']
+        high_threshold = self.config["network_thresholds"][
+            "upload_bits_per_second"
+        ]["high"]
+        median_threshold = self.config["network_thresholds"][
+            "upload_bits_per_second"
+        ]["medium"]
 
-        if server_errors > 0 or broken_connections > 0 or upload_bits_per_second < median_threshold:
+        if (
+            server_errors > 0
+            or broken_connections > 0
+            or upload_bits_per_second < median_threshold
+        ):
             return Frequency.ALERT
         if upload_bits_per_second < high_threshold:
             return Frequency.WARNING
@@ -233,8 +260,8 @@ class Scheduler(Constants):
         memory_stats = psutil.virtual_memory()
         memory_usage = memory_stats.percent / 100.0
 
-        high_threshold = self.config['memory_usage_thresholds']['high']
-        median_threshold = self.config['memory_usage_thresholds']['medium']
+        high_threshold = self.config["memory_usage_thresholds"]["high"]
+        median_threshold = self.config["memory_usage_thresholds"]["medium"]
 
         if memory_usage >= high_threshold:
             return Frequency.ALERT
@@ -244,38 +271,49 @@ class Scheduler(Constants):
 
     def schedule(self):
         """
-            Schedules the collection and upload of moblab and duts data
-            according to the their respective message types and frequencies.
+        Schedules the collection and upload of moblab and duts data
+        according to the their respective message types and frequencies.
         """
         job_list = []
         with ThreadPoolExecutor(max_workers=15) as executor:
             # Submits jobs to collect and update Moblab data.
             for attr_type in self.moblab_attr_types:
                 job_list.append(
-                    executor.submit(self.collect_and_upload,
-                                    self.MOBLAB,
-                                    attr_type))
+                    executor.submit(
+                        self.collect_and_upload, self.MOBLAB, attr_type
+                    )
+                )
 
             # Submits jobs to collect and update DUT data.
             for attr_type in self.dut_attr_types:
                 job_list.append(
-                    executor.submit(self.collect_and_upload, self.DUT,
-                                    attr_type))
+                    executor.submit(
+                        self.collect_and_upload, self.DUT, attr_type
+                    )
+                )
 
             # Submits jobs to update data collection frequencies based on memory
             # stats and network stats.
             # Memory Stats: check every 10 mins.
             # Network Stats: check every 12 hours.
             job_list.append(
-                executor.submit(self.update_freq_level,
-                                self._get_freq_based_on_memory_stats, 10))
+                executor.submit(
+                    self.update_freq_level,
+                    self._get_freq_based_on_memory_stats,
+                    10,
+                )
+            )
             job_list.append(
-                executor.submit(self.update_freq_level,
-                                self._get_freq_based_on_network_stats, 720))
+                executor.submit(
+                    self.update_freq_level,
+                    self._get_freq_based_on_network_stats,
+                    720,
+                )
+            )
 
             # Execute all the submitted jobs.
             for job in as_completed(job_list):
                 try:
                     job.result()
                 except Exception:
-                    _LOGGER.exception('Failed to start the scheduler.')
+                    _LOGGER.exception("Failed to start the scheduler.")

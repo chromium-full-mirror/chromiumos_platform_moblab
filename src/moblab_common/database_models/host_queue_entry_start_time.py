@@ -9,9 +9,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class HostQueueEntryStartTimes(declarative_base()):
     """An auxiliary table to HostQueueEntry to index by start time."""
-    __tablename__ = 'afe_host_queue_entry_start_times'
+
+    __tablename__ = "afe_host_queue_entry_start_times"
 
     id = Column(Integer, primary_key=True)
-    insert_time = Column(DateTime, nullable=False,
-                         default=datetime.datetime.now().timestamp())
+    insert_time = Column(
+        DateTime, nullable=False, default=datetime.datetime.now().timestamp()
+    )
     highest_hqe_id = Column(Integer, nullable=False)

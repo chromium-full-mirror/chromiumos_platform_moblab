@@ -5,8 +5,6 @@
 """This module defines some common utils for processing the test results."""
 
 
-
-
 class ProcessStep(object):
     """A base class for define a processing step.
 

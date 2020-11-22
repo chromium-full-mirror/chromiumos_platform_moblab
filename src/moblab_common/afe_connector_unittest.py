@@ -14,8 +14,8 @@ from datetime import datetime
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock
 
-sys.modules['docker'] = MagicMock()
-sys.modules['requests'] = MagicMock()
+sys.modules["docker"] = MagicMock()
+sys.modules["requests"] = MagicMock()
 
 import afe_connector
 
@@ -37,7 +37,9 @@ class AFEConnectorTest(unittest.TestCase):
     @mock.patch("afe_connector.requests.post")
     @mock.patch("chromite.lib.cros_logging.error")
     def test_send_rpc_command_fail(self, mock_logging, mock_post):
-        test_exception = afe_connector.requests.exceptions.RequestException("Testing")
+        test_exception = afe_connector.requests.exceptions.RequestException(
+            "Testing"
+        )
         mock_post.side_effect = test_exception
         self.afe_conn.send_rpc_command("fake_method", "fake_params")
         mock_post.assert_called_once_with(
@@ -51,7 +53,9 @@ class AFEConnectorTest(unittest.TestCase):
         response.text = '{"error": null, "result": [1], "id": 0}'
         response.status_code = http.client.OK
 
-        self.assertEqual([1], self.afe_conn.decode_response(response, "result"))
+        self.assertEqual(
+            [1], self.afe_conn.decode_response(response, "result")
+        )
 
     def test_decode_response_bad_code(self):
         response = mock.Mock()
@@ -69,7 +73,9 @@ class AFEConnectorTest(unittest.TestCase):
 
     @mock.patch("afe_connector.AFEConnector.send_rpc_command")
     @mock.patch("afe_connector.AFEConnector.decode_response")
-    def test_get_config_values(self, mock_decode_response, mock_send_rpc_command):
+    def test_get_config_values(
+        self, mock_decode_response, mock_send_rpc_command
+    ):
         mock_decode_response.return_value = {
             "HOSTS": [["default_protection", "NO_PROTECTION"]],
             "AUTOTEST_WEB": [
@@ -95,7 +101,9 @@ class AFEConnectorTest(unittest.TestCase):
 
     @mock.patch("afe_connector.AFEConnector.send_rpc_command")
     @mock.patch("afe_connector.AFEConnector.decode_response")
-    def test_get_connected_devices(self, mock_decode_response, mock_send_rpc_command):
+    def test_get_connected_devices(
+        self, mock_decode_response, mock_send_rpc_command
+    ):
         mock_decode_response.return_value = "Testing"
 
         result = self.afe_conn.get_connected_devices()
@@ -233,9 +241,9 @@ class AFEConnectorTest(unittest.TestCase):
 
     @mock.patch("afe_connector.AFEConnector.send_rpc_command")
     def test_set_configuration_info_cloud(self, mock_send_rpc_command):
-        MOCK_BOTO_ACCESS_ID = 'GOOGRKMVD3VCFI51JHWM'
-        MOCK_BOTO_ACCESS_KEY = 'QlZThtrb9hNfWL2R6MHbUfU7tjHUwAZPy8nyQ3c86'
-        MOCK_BUCKET_NAME = 'not-a-real-moblab-bucket'
+        MOCK_BOTO_ACCESS_ID = "GOOGRKMVD3VCFI51JHWM"
+        MOCK_BOTO_ACCESS_KEY = "QlZThtrb9hNfWL2R6MHbUfU7tjHUwAZPy8nyQ3c86"
+        MOCK_BUCKET_NAME = "not-a-real-moblab-bucket"
 
         self.afe_conn.set_configuration_info(
             gs_access_key_id=MOCK_BOTO_ACCESS_ID,
@@ -246,21 +254,21 @@ class AFEConnectorTest(unittest.TestCase):
         mock_send_rpc_command.assert_called_once_with(
             "submit_wizard_config_info",
             {
-                'cloud_storage_info' : {
-                    'gs_access_key_id' : MOCK_BOTO_ACCESS_ID,
-                    'gs_secret_access_key' : MOCK_BOTO_ACCESS_KEY,
-                    'image_storage_server' : MOCK_BUCKET_NAME,
-                    'results_storage_server' : '',
-                    'use_existing_boto_file' : False,
-                    'is_cloud_enabled': True
+                "cloud_storage_info": {
+                    "gs_access_key_id": MOCK_BOTO_ACCESS_ID,
+                    "gs_secret_access_key": MOCK_BOTO_ACCESS_KEY,
+                    "image_storage_server": MOCK_BUCKET_NAME,
+                    "results_storage_server": "",
+                    "use_existing_boto_file": False,
+                    "is_cloud_enabled": True,
                 }
-            }
+            },
         )
 
     @mock.patch("afe_connector.AFEConnector.send_rpc_command")
     def test_set_configuration_info_dut_wifi(self, mock_send_rpc_command):
-        MOCK_DUT_WIFI_NAME = 'Fake Wifi'
-        MOCK_DUT_WIFI_PASSWORD = 'perhaps934999linux'
+        MOCK_DUT_WIFI_NAME = "Fake Wifi"
+        MOCK_DUT_WIFI_PASSWORD = "perhaps934999linux"
 
         self.afe_conn.set_configuration_info(
             dut_wifi_name=MOCK_DUT_WIFI_NAME,
@@ -270,23 +278,20 @@ class AFEConnectorTest(unittest.TestCase):
         mock_send_rpc_command.assert_called_once_with(
             "submit_wizard_config_info",
             {
-                'wifi_info' : {
-                    'wifi_dut_ap_name' : MOCK_DUT_WIFI_NAME,
-                    'wifi_dut_ap_pass' : MOCK_DUT_WIFI_PASSWORD,
+                "wifi_info": {
+                    "wifi_dut_ap_name": MOCK_DUT_WIFI_NAME,
+                    "wifi_dut_ap_pass": MOCK_DUT_WIFI_PASSWORD,
                 }
-            }
+            },
         )
 
     @mock.patch("afe_connector.AFEConnector.send_rpc_command")
     def test_set_is_remote_agent_enabled(self, mock_send_rpc_command):
         MOCK_IS_ENABLED = True
-        self.afe_conn.set_is_remote_agent_enabled(
-            is_enabled=MOCK_IS_ENABLED
-        )
+        self.afe_conn.set_is_remote_agent_enabled(is_enabled=MOCK_IS_ENABLED)
 
         mock_send_rpc_command.assert_called_once_with(
-            'set_remote_agent_config',
-            {'enabled': MOCK_IS_ENABLED}
+            "set_remote_agent_config", {"enabled": MOCK_IS_ENABLED}
         )
 
 

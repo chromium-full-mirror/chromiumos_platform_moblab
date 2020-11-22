@@ -21,9 +21,9 @@ import processing_step
 import result_file_filter
 import test_result_registry
 
-SUB_COMMAND_NAME = 'try_filter'
+SUB_COMMAND_NAME = "try_filter"
 
-_LOGGER = logging.getLogger('moblab_uploader')
+_LOGGER = logging.getLogger("moblab_uploader")
 _RC_NO_MATCHED_CLASS = 1
 _PRINT_FILE_LIST_LIMIT = 100
 
@@ -43,7 +43,7 @@ def _directory_type(path):
 
     if path.is_dir():
         return path
-    raise argparse.ArgumentTypeError('Invalid directory name: {}'.format(path))
+    raise argparse.ArgumentTypeError("Invalid directory name: {}".format(path))
 
 
 def _get_file_size(result_file):
@@ -67,8 +67,10 @@ def _create_test_result_obj(abs_path, registry=None):
             continue
         for cls in registry_entry.classes:
             if abs_path.match(str(root_dir / cls.GLOB_PATTERN)):
-                return cls(root_dir=root_dir,
-                           relative_path=abs_path.relative_to(root_dir))
+                return cls(
+                    root_dir=root_dir,
+                    relative_path=abs_path.relative_to(root_dir),
+                )
 
 
 class _Counter(processing_step.ProcessStep):
@@ -109,8 +111,9 @@ class _FileNamePrinter(processing_step.ProcessStep):
         super().__init__(next_step=next_step)
         self._limit = limit
         self._count = 0
-        _LOGGER.info('The filtered files will be listed, but up to %s files.',
-                     limit)
+        _LOGGER.info(
+            "The filtered files will be listed, but up to %s files.", limit
+        )
 
     async def print(self, result_file):
         if self._limit:
@@ -128,15 +131,21 @@ def add_arguments(parent_parser):
     """
     parser = parent_parser.add_parser(
         SUB_COMMAND_NAME,
-        help='Try the file filter locally with a real test result directory '
-        'and see the filtering result.')
-    parser.add_argument(
-        '-d', '--dir', type=_directory_type, required=True,
-        help='The directory to test the file filter.'
+        help="Try the file filter locally with a real test result directory "
+        "and see the filtering result.",
     )
     parser.add_argument(
-        '-l', '--list-result-files', action='store_true',
-        help='Print out all the files after applying the filter.'
+        "-d",
+        "--dir",
+        type=_directory_type,
+        required=True,
+        help="The directory to test the file filter.",
+    )
+    parser.add_argument(
+        "-l",
+        "--list-result-files",
+        action="store_true",
+        help="Print out all the files after applying the filter.",
     )
 
     parser.set_defaults(func=try_file_filter)
@@ -145,11 +154,14 @@ def add_arguments(parent_parser):
 def try_file_filter(args):
     test_result = _create_test_result_obj(args.dir)
     if not test_result:
-        _LOGGER.error('No registered class matches the directory: %s', args.dir)
+        _LOGGER.error(
+            "No registered class matches the directory: %s", args.dir
+        )
         return _RC_NO_MATCHED_CLASS
 
     files_generator = result_file_filter.ResultFileFilter(
-        filter_config=args.uploading_filter_config, force=True)
+        filter_config=args.uploading_filter_config, force=True
+    )
     file_counter = _Counter()
     file_size_counter = _Counter(method=_get_file_size)
 
@@ -172,7 +184,8 @@ def try_file_filter(args):
 
         if args.list_result_files:
             file_size_counter.next_step = _FileNamePrinter(
-                limit=_PRINT_FILE_LIST_LIMIT).print
+                limit=_PRINT_FILE_LIST_LIMIT
+            ).print
 
         loop.run_until_complete(files_generator.filter_files(test_result))
     finally:
@@ -181,10 +194,14 @@ def try_file_filter(args):
     filtered_file_count = file_counter.sum
     filtered_file_size = file_size_counter.sum
 
-    print('Filtering result: {} files: {} bytes => {} files: {} bytes. {:.0%} '
-          'space saved!'.format(
-              total_file_count, total_file_size,
-              filtered_file_count, filtered_file_size,
-              1 - float(filtered_file_size) / total_file_size
-          ))
+    print(
+        "Filtering result: {} files: {} bytes => {} files: {} bytes. {:.0%} "
+        "space saved!".format(
+            total_file_count,
+            total_file_size,
+            filtered_file_count,
+            filtered_file_size,
+            1 - float(filtered_file_size) / total_file_size,
+        )
+    )
     return 0

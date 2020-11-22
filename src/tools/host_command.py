@@ -7,6 +7,7 @@ import os
 
 from moblab_common import host_connector
 
+
 def reboot():
     host_connector.HostServicesConnector().reboot()
 

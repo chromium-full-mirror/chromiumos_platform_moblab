@@ -12,8 +12,9 @@ class Drone(declarative_base()):
 
     hostname: the drone's hostname
     """
-    __tablename__ = 'afe_drones'
-    name_field = 'hostname'
+
+    __tablename__ = "afe_drones"
+    name_field = "hostname"
 
     id = Column(Integer, primary_key=True)
     hostname = Column(String(length=255), unique=True)

@@ -8,11 +8,12 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class HostQueueEntry(declarative_base()):
     """Represents a host queue entry."""
-    __tablename__ = 'afe_host_queue_entries'
 
-    SERIALIZATION_LINKS_TO_FOLLOW = {'meta_host'}
-    SERIALIZATION_LINKS_TO_KEEP = {'host'}
-    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {'aborted'}
+    __tablename__ = "afe_host_queue_entries"
+
+    SERIALIZATION_LINKS_TO_FOLLOW = {"meta_host"}
+    SERIALIZATION_LINKS_TO_KEEP = {"host"}
+    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {"aborted"}
 
     id = Column(Integer, primary_key=True)
     job_id = Column(Integer, nullable=False)

@@ -8,8 +8,9 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 metadata = Base.metadata
 
+
 class MoblabSettings(Base):
-    __tablename__ = 'moblab_settings'
+    __tablename__ = "moblab_settings"
 
     id = Column(Integer, primary_key=True)
     key = Column(String(length=255), nullable=False, unique=True)

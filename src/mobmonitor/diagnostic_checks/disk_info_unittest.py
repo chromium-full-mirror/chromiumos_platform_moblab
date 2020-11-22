@@ -11,12 +11,12 @@ import unittest
 
 from unittest.mock import MagicMock
 
-sys.path.append('..')
-sys.modules['moblab_common'] = MagicMock()
+sys.path.append("..")
+sys.modules["moblab_common"] = MagicMock()
 import disk_info
 
-class TestDiskInfo(unittest.TestCase):
 
+class TestDiskInfo(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -24,5 +24,6 @@ class TestDiskInfo(unittest.TestCase):
         disk_info_test = disk_info.DiskInfo()
         result = disk_info_test.run()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -21,9 +21,11 @@ def test_uploading_blob(gs_bucket, credentials_file):
     """Test uploading a file."""
     gs = gs_api_wrapper.GsApiWrapper(gs_bucket, credentials_file)
     with tempfile.NamedTemporaryFile() as f:
-        f.write(b'Some test data.\n')
+        f.write(b"Some test data.\n")
         f.seek(0)
-        gs.upload_from_filename(local_name=pathlib.Path(f.name), remote_name=f.name)
+        gs.upload_from_filename(
+            local_name=pathlib.Path(f.name), remote_name=f.name
+        )
 
 
 class GsApiWrapperTest(unittest.TestCase):
@@ -32,4 +34,4 @@ class GsApiWrapperTest(unittest.TestCase):
     @pytest.mark.network
     def test_credential(self):
         with self.assertRaises(gs_api_wrapper.GsAccessError):
-            gs_api_wrapper.GsApiWrapper('FAKE_BUCKET', None)
+            gs_api_wrapper.GsApiWrapper("FAKE_BUCKET", None)

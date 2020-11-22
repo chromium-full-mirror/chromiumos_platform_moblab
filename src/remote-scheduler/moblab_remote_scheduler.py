@@ -155,8 +155,9 @@ class MoblabTestScheduler(object):
 
         def has_been_executed(executed, request):
             if request.unique_id in executed:
-                _LOGGER.debug("Rejecting request %s as executed",
-                              request.unique_id)
+                _LOGGER.debug(
+                    "Rejecting request %s as executed", request.unique_id
+                )
                 return False
             return True
 
@@ -165,7 +166,8 @@ class MoblabTestScheduler(object):
 
         # Filter out all commands that can or should not run on this moblab.
         self.requests.filter_requests(
-            functools.partial(has_been_executed, executed))
+            functools.partial(has_been_executed, executed)
+        )
         self.requests.filter_requests(
             functools.partial(can_be_executed, attached_boards)
         )
@@ -186,7 +188,10 @@ class MoblabTestScheduler(object):
             help="Run the scheduler one time and then exit.",
         )
         parser.add_argument(
-            "-v", "--verbose", action="store_true", help="Turn on debug _LOGGER."
+            "-v",
+            "--verbose",
+            action="store_true",
+            help="Turn on debug _LOGGER.",
         )
         return parser.parse_args(argv)
 
@@ -200,7 +205,9 @@ class MoblabTestScheduler(object):
             bool: False if the scheduler is not enabled on this device.
         """
         is_enabled = self.config_connector.is_remote_task_scheduler_enabled()
-        delay_mins = self.config_connector.get_remote_task_scheduler_tick_delay()
+        delay_mins = (
+            self.config_connector.get_remote_task_scheduler_tick_delay()
+        )
         debug_enabled = self.config_connector.is_remote_task_debug_enabled()
 
         options = self.parse_arguments(argv)
@@ -210,8 +217,12 @@ class MoblabTestScheduler(object):
             logging_severity = logging.DEBUG
         _setup_logging(logging_severity)
 
-        _LOGGER.info("enabled %s delay %d debug %s",
-                     is_enabled, delay_mins, debug_enabled)
+        _LOGGER.info(
+            "enabled %s delay %d debug %s",
+            is_enabled,
+            delay_mins,
+            debug_enabled,
+        )
 
         if not is_enabled:
             _LOGGER.info("The scheduler is not enabled")
@@ -225,8 +236,9 @@ class MoblabTestScheduler(object):
                 if self.obtain_lock(request):
                     _LOGGER.info("Executing request. %s", request.unique_id)
                     # TODO - return an enum SUCCESS/FAIL/RETRY.
-                    result = request.execute(self.devserver_connector,
-                                             self.afe_connector)
+                    result = request.execute(
+                        self.devserver_connector, self.afe_connector
+                    )
             else:
                 _LOGGER.debug("No requests to run.")
             if options.single_run:
@@ -245,8 +257,11 @@ def _setup_logging(level):
     fh = logging.FileHandler("/var/log/moblab/moblab_remote_schedule.log")
     fh.setLevel(level)
     # create formatter and add it to the handlers
-    fh.setFormatter(logging.Formatter(
-        '%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s'))
+    fh.setFormatter(
+        logging.Formatter(
+            "%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s"
+        )
+    )
     _LOGGER.addHandler(fh)
     _LOGGER.setLevel(level)
 

@@ -14,7 +14,9 @@ SCHEDULE_FILENAME = "scheduled_suites.data"
 SCHEDULE_DIR = "scheduled_builds"
 
 
-def get_executed_commands(storage_client, bucket_name, schedule_dir=SCHEDULE_DIR):
+def get_executed_commands(
+    storage_client, bucket_name, schedule_dir=SCHEDULE_DIR
+):
     """Generate a list of the request Id's that have been executed.
 
     The request may still be being executed, in this status executed
@@ -30,7 +32,9 @@ def get_executed_commands(storage_client, bucket_name, schedule_dir=SCHEDULE_DIR
         list : List of strings each one being the name of a
     """
     executed = []
-    blob_itr = storage_client.bucket(bucket_name).list_blobs(prefix=schedule_dir)
+    blob_itr = storage_client.bucket(bucket_name).list_blobs(
+        prefix=schedule_dir
+    )
     try:
         executed = [blob.name[len(schedule_dir) + 1 :] for blob in blob_itr]
     except cloud_exceptions.NotFound as e:
@@ -54,5 +58,7 @@ def get_executed_contents(
         schedule_dir (string, optional): Defaults to SCHEDULE_DIR. Path to
             search for the marker files for executed commands.
     """
-    blob = storage_client.bucket(bucket_name).blob("%s/%s" % (schedule_dir, unique_id))
+    blob = storage_client.bucket(bucket_name).blob(
+        "%s/%s" % (schedule_dir, unique_id)
+    )
     return blob.download_as_string()

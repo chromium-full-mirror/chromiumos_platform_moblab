@@ -14,7 +14,9 @@ class MoblabConfigConnector(unittest.TestCase):
 
     def setUp(self):
         self.mock_afe_connector = mock.MagicMock()
-        self.connector = config_connector.MoblabConfigConnector(self.mock_afe_connector)
+        self.connector = config_connector.MoblabConfigConnector(
+            self.mock_afe_connector
+        )
 
     @mock.patch("config_connector.MoblabConfigConnector.load_config")
     def test_get_no_config(self, mock_load_config):
@@ -55,9 +57,13 @@ class MoblabConfigConnector(unittest.TestCase):
         self.assertEqual("testingresult", value)
 
         # Check to ensure the caching is working
-        value = self.connector.get("testingsection", "testingkey", force_reload=True)
+        value = self.connector.get(
+            "testingsection", "testingkey", force_reload=True
+        )
         self.assertEqual("testingresult", value)
-        self.assertEqual(2, self.mock_afe_connector.get_config_values.call_count)
+        self.assertEqual(
+            2, self.mock_afe_connector.get_config_values.call_count
+        )
 
 
 if __name__ == "__main__":

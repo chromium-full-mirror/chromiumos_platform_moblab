@@ -17,7 +17,10 @@ from moblab_common import config_connector
 from moblab_common import dut_connector
 from moblab_common import host_connector
 from moblab_common.moblab_info import get_version_info
-from moblab_common.utils.cli import run_gcloud_bucket_diagnosis, RunCommandError
+from moblab_common.utils.cli import (
+    run_gcloud_bucket_diagnosis,
+    RunCommandError,
+)
 
 # pylint: disable=no-member
 # pylint: disable=no-self-use
@@ -25,6 +28,7 @@ from moblab_common.utils.cli import run_gcloud_bucket_diagnosis, RunCommandError
 
 _LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 class CollectService(Constants):
     """Class that collects data about moblab and its connected, enrolled duts.
@@ -46,7 +50,9 @@ class CollectService(Constants):
 
     def __init__(self):
         self.afe_connector = afe_connector.AFEConnector()
-        self.config_connector = config_connector.MoblabConfigConnector(self.afe_connector)
+        self.config_connector = config_connector.MoblabConfigConnector(
+            self.afe_connector
+        )
         self.host_connector = host_connector.HostServicesConnector()
         self.dut_connector = dut_connector.MoblabDUTConnector()
         self.moblab_version_info = None
@@ -65,26 +71,36 @@ class CollectService(Constants):
         """
         cloud_storage_info = self.afe_connector.get_cloud_storage_info()
         try:
-            bucket = cloud_storage_info['image_storage_server'][5:-1]
+            bucket = cloud_storage_info["image_storage_server"][5:-1]
         except KeyError:
-            _LOGGER.exception('Failed to get moblab key attributes because'
-                              ' could bucket is not fetched.')
+            _LOGGER.exception(
+                "Failed to get moblab key attributes because"
+                " could bucket is not fetched."
+            )
             return False
 
         if bucket:
             self.bucket_name = bucket
         else:
-            _LOGGER.exception('Failed to get moblab key attributes because'
-                              ' cloud bucket name is wrong.')
+            _LOGGER.exception(
+                "Failed to get moblab key attributes because"
+                " cloud bucket name is wrong."
+            )
             return False
 
         try:
             self.moblab_version_info = get_version_info()
-            self.moblab_host_id = self.moblab_version_info[self.MOBLAB_HOST_ID_NAME].rstrip()
-            self.moblab_install_id = self.moblab_version_info[self.MOBLAB_INSTALL_ID_NAME].rstrip()
+            self.moblab_host_id = self.moblab_version_info[
+                self.MOBLAB_HOST_ID_NAME
+            ].rstrip()
+            self.moblab_install_id = self.moblab_version_info[
+                self.MOBLAB_INSTALL_ID_NAME
+            ].rstrip()
             return True
         except KeyError as err:
-            _LOGGER.exception("Failed to get moblab key attributes for missing key: %s", err)
+            _LOGGER.exception(
+                "Failed to get moblab key attributes for missing key: %s", err
+            )
         return False
 
     def _initiate_moblab_message(self):
@@ -92,12 +108,25 @@ class CollectService(Constants):
 
         Returns: A MoblabHost protobuf message instance.
         """
-        if None in (self.moblab_host_id, self.moblab_install_id, self.bucket_name):
-            err_msg_1 = ' moblab_host_id' if self.moblab_host_id is None else ''
-            err_msg_2 = ' moblab_install_id' if self.moblab_install_id is None else ''
-            err_msg_3 = ' bucket_name' if self.bucket_name is None else ''
-            _LOGGER.exception("Failed to initiate moblab message because"
-                              "%s%s%s is/are none.", err_msg_1, err_msg_2, err_msg_3)
+        if None in (
+            self.moblab_host_id,
+            self.moblab_install_id,
+            self.bucket_name,
+        ):
+            err_msg_1 = (
+                " moblab_host_id" if self.moblab_host_id is None else ""
+            )
+            err_msg_2 = (
+                " moblab_install_id" if self.moblab_install_id is None else ""
+            )
+            err_msg_3 = " bucket_name" if self.bucket_name is None else ""
+            _LOGGER.exception(
+                "Failed to initiate moblab message because"
+                "%s%s%s is/are none.",
+                err_msg_1,
+                err_msg_2,
+                err_msg_3,
+            )
             return None
 
         moblab = remoteagentrpc_pb2.MoblabHost()
@@ -118,13 +147,24 @@ class CollectService(Constants):
             return None
 
         try:
-            moblab.milestone = int(self.moblab_version_info[self.MILESTONE_NAME].rstrip())
-            moblab.build_version = self.moblab_version_info[self.BUILD_VERSION_NAME].rstrip()
+            moblab.milestone = int(
+                self.moblab_version_info[self.MILESTONE_NAME].rstrip()
+            )
+            moblab.build_version = self.moblab_version_info[
+                self.BUILD_VERSION_NAME
+            ].rstrip()
             moblab.ip_address = self.host_connector.get_ip()
-            moblab.channel = self.moblab_version_info[self.CHANNEL_NAME].rstrip()
-            moblab.description = self.moblab_version_info[self.DESCRIPTION_NAME].rstrip()
+            moblab.channel = self.moblab_version_info[
+                self.CHANNEL_NAME
+            ].rstrip()
+            moblab.description = self.moblab_version_info[
+                self.DESCRIPTION_NAME
+            ].rstrip()
         except KeyError as err:
-            _LOGGER.exception("Failed to get moblab version attributes for missing key: %s", err)
+            _LOGGER.exception(
+                "Failed to get moblab version attributes for missing key: %s",
+                err,
+            )
         return moblab
 
     def _calculate_disk_in_bytes(self, disk_space_list):
@@ -144,18 +184,20 @@ class CollectService(Constants):
         result = 0
         try:
             for disk_space in disk_space_list:
-                if disk_space[-1] == 'T':
+                if disk_space[-1] == "T":
                     result += float(disk_space[:-1]) * (2 ** 40)
-                elif disk_space[-1] == 'G':
+                elif disk_space[-1] == "G":
                     result += float(disk_space[:-1]) * (2 ** 30)
-                elif disk_space[-1] == 'M':
+                elif disk_space[-1] == "M":
                     result += float(disk_space[:-1]) * (2 ** 20)
-                elif disk_space[-1] == 'K':
+                elif disk_space[-1] == "K":
                     result += float(disk_space[:-1]) * (2 ** 10)
                 else:
                     result += float(disk_space)
         except ValueError as err:
-            _LOGGER.exception("Disk space calculation failed for the error: %s", err)
+            _LOGGER.exception(
+                "Disk space calculation failed for the error: %s", err
+            )
             raise
         return int(result)
 
@@ -168,19 +210,25 @@ class CollectService(Constants):
         """
         try:
             disk_info_str = self.host_connector.get_disk_info()
-            disk_space_info = disk_info_str.split('lsblk')[0].split()
+            disk_space_info = disk_info_str.split("lsblk")[0].split()
             used_disk_list = []
             available_disk_list = []
             for i in range(2, int(len(disk_space_info)), 6):
                 used_disk_list.append(disk_space_info[i + 2])
                 available_disk_list.append(disk_space_info[i + 3])
 
-            used_disk_size_bytes = self._calculate_disk_in_bytes(used_disk_list)
-            free_disk_size_bytes = self._calculate_disk_in_bytes(available_disk_list)
+            used_disk_size_bytes = self._calculate_disk_in_bytes(
+                used_disk_list
+            )
+            free_disk_size_bytes = self._calculate_disk_in_bytes(
+                available_disk_list
+            )
 
             disk_stats = remoteagentrpc_pb2.DiskStats()
             disk_stats.free_disk_size_bytes = free_disk_size_bytes
-            disk_stats.total_disk_size_bytes = used_disk_size_bytes + free_disk_size_bytes
+            disk_stats.total_disk_size_bytes = (
+                used_disk_size_bytes + free_disk_size_bytes
+            )
             return disk_stats
 
         except AttributeError as err:
@@ -205,8 +253,12 @@ class CollectService(Constants):
         if moblab is None:
             return None
 
-        moblab.disk_stats.free_disk_size_bytes = disk_stats.free_disk_size_bytes
-        moblab.disk_stats.total_disk_size_bytes = disk_stats.total_disk_size_bytes
+        moblab.disk_stats.free_disk_size_bytes = (
+            disk_stats.free_disk_size_bytes
+        )
+        moblab.disk_stats.total_disk_size_bytes = (
+            disk_stats.total_disk_size_bytes
+        )
         return moblab
 
     def create_moblab_network_message(self):
@@ -221,21 +273,27 @@ class CollectService(Constants):
             return None
 
         try:
-            output_file = '/moblab/output.json'
+            output_file = "/moblab/output.json"
             run_gcloud_bucket_diagnosis(output_file, self.bucket_name)
 
             with open(output_file) as output:
                 network_json = json.load(output)
-            moblab.network_stats.upload_bits_per_second \
-                = int(network_json["write_throughput"]["bytes_per_second"] * 8)
-            moblab.network_stats.download_bits_per_second \
-                = int(network_json["read_throughput"]["bytes_per_second"] * 8)
+            moblab.network_stats.upload_bits_per_second = int(
+                network_json["write_throughput"]["bytes_per_second"] * 8
+            )
+            moblab.network_stats.download_bits_per_second = int(
+                network_json["read_throughput"]["bytes_per_second"] * 8
+            )
             moblab.network_stats.server_errors = network_json["request_errors"]
-            moblab.network_stats.broken_connections = network_json["connection_breaks"]
+            moblab.network_stats.broken_connections = network_json[
+                "connection_breaks"
+            ]
             return moblab
 
         except (RunCommandError, KeyError) as err:
-            _LOGGER.exception('Failed to get network status from network diagonosis: %s', err)
+            _LOGGER.exception(
+                "Failed to get network status from network diagonosis: %s", err
+            )
             return None
 
     def _initiate_dut_message(self, dut_id):
@@ -243,12 +301,24 @@ class CollectService(Constants):
 
         Returns: A MoblabDut protobuf message instance.
         """
-        if None in (self.moblab_host_id, self.moblab_install_id, self.bucket_name):
-            err_msg_1 = ' moblab_host_id' if self.moblab_host_id is None else ''
-            err_msg_2 = ' moblab_install_id' if self.moblab_install_id is None else ''
-            err_msg_3 = ' bucket_name' if self.bucket_name is None else ''
-            _LOGGER.exception("Failed to initiate dut message because"
-                              "%s%s%s is/are none.", err_msg_1, err_msg_2, err_msg_3)
+        if None in (
+            self.moblab_host_id,
+            self.moblab_install_id,
+            self.bucket_name,
+        ):
+            err_msg_1 = (
+                " moblab_host_id" if self.moblab_host_id is None else ""
+            )
+            err_msg_2 = (
+                " moblab_install_id" if self.moblab_install_id is None else ""
+            )
+            err_msg_3 = " bucket_name" if self.bucket_name is None else ""
+            _LOGGER.exception(
+                "Failed to initiate dut message because" "%s%s%s is/are none.",
+                err_msg_1,
+                err_msg_2,
+                err_msg_3,
+            )
             return None
 
         moblab_dut = remoteagentrpc_pb2.MoblabDut()
@@ -274,7 +344,7 @@ class CollectService(Constants):
             Attribute value.
         """
         for label in labels:
-            label_parts = label.split(':')
+            label_parts = label.split(":")
             if attr == label_parts[0]:
                 if len(label_parts) > 1:
                     return label_parts[1]
@@ -295,17 +365,21 @@ class CollectService(Constants):
         if moblab_dut is None:
             return None
 
-        if len(dut_info_dict['labels']) > 0:
-            build_target = self._get_attribute_from_labels('board', dut_info_dict['labels'])
-            model = self._get_attribute_from_labels('model', dut_info_dict['labels'])
+        if len(dut_info_dict["labels"]) > 0:
+            build_target = self._get_attribute_from_labels(
+                "board", dut_info_dict["labels"]
+            )
+            model = self._get_attribute_from_labels(
+                "model", dut_info_dict["labels"]
+            )
             if build_target:
                 moblab_dut.build_target = build_target
             if model:
                 moblab_dut.model = model
-            moblab_dut.label.extend(dut_info_dict['labels'])
-        moblab_dut.is_locked = dut_info_dict['locked']
+            moblab_dut.label.extend(dut_info_dict["labels"])
+        moblab_dut.is_locked = dut_info_dict["locked"]
         if moblab_dut.is_locked:
-            moblab_dut.lock_reason = dut_info_dict['lock_reason']
+            moblab_dut.lock_reason = dut_info_dict["lock_reason"]
 
         return moblab_dut
 
@@ -325,8 +399,11 @@ class CollectService(Constants):
             return None
 
         try:
-            moblab_dut.status = remoteagentrpc_pb2.DutStatus.Value('DUT_STATUS_{}'.format(
-                dut_info_dict['status'].upper().replace(' ', '_')))
+            moblab_dut.status = remoteagentrpc_pb2.DutStatus.Value(
+                "DUT_STATUS_{}".format(
+                    dut_info_dict["status"].upper().replace(" ", "_")
+                )
+            )
         except ValueError as err:
             _LOGGER.exception("Unrecorded dut status: %s", err)
             return None
@@ -349,15 +426,21 @@ class CollectService(Constants):
         if not self.collect_moblab_key_attributes():
             return None
 
-        message_attributes = {'MOBLAB_BASIC': self.create_moblab_basic_message,
-                              'DISK': self.create_moblab_disk_message,
-                              'NETWORK': self.create_moblab_network_message}
+        message_attributes = {
+            "MOBLAB_BASIC": self.create_moblab_basic_message,
+            "DISK": self.create_moblab_disk_message,
+            "NETWORK": self.create_moblab_network_message,
+        }
         if attribute_type in message_attributes:
             moblab = message_attributes[attribute_type]()
             if moblab:
-                moblab.last_update_time = round(time.time() * 1000) # in millisecond
+                moblab.last_update_time = round(
+                    time.time() * 1000
+                )  # in millisecond
         else:
-            _LOGGER.exception('Moblab does not have attribute type: %s', attribute_type)
+            _LOGGER.exception(
+                "Moblab does not have attribute type: %s", attribute_type
+            )
 
         return moblab
 
@@ -384,16 +467,26 @@ class CollectService(Constants):
         moblab_dut_ids = self.dut_connector.get_connected_dut_serialno()
         connected_devices = self.afe_connector.get_connected_devices()
 
-        if not connected_devices or len(connected_devices) == 0 \
-            or not moblab_dut_ids or len(moblab_dut_ids) == 0:
-            _LOGGER.exception('Dut serial numbers or connected devices list is empty/none.')
+        if (
+            not connected_devices
+            or len(connected_devices) == 0
+            or not moblab_dut_ids
+            or len(moblab_dut_ids) == 0
+        ):
+            _LOGGER.exception(
+                "Dut serial numbers or connected devices list is empty/none."
+            )
             return duts
 
-        message_attributes = {'DUT_BASIC': self.create_dut_basic_message,
-                              'DUT_STATUS': self.create_dut_status_message}
+        message_attributes = {
+            "DUT_BASIC": self.create_dut_basic_message,
+            "DUT_STATUS": self.create_dut_status_message,
+        }
 
         if attribute_type not in message_attributes:
-            _LOGGER.exception('Dut does not have attribute type: %s', attribute_type)
+            _LOGGER.exception(
+                "Dut does not have attribute type: %s", attribute_type
+            )
             return duts
 
         create_msg_func = message_attributes[attribute_type]
@@ -408,13 +501,15 @@ class CollectService(Constants):
             return duts
 
         for dut_info_dict in connected_devices:
-            dut_ip = dut_info_dict['hostname']
+            dut_ip = dut_info_dict["hostname"]
             if dut_ip in moblab_duts_ids_map:
                 dut_id = moblab_duts_ids_map[dut_ip]
                 dut = create_msg_func(dut_info_dict, dut_id)
                 if dut:
                     dut.ip_address = dut_ip
-                    dut.last_update_time = round(time.time() * 1000) # in millisecond
+                    dut.last_update_time = round(
+                        time.time() * 1000
+                    )  # in millisecond
                     duts.append(dut)
 
         return duts

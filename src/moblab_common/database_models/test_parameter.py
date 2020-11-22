@@ -10,7 +10,8 @@ class TestParameter(declarative_base()):
     """
     A declared parameter of a test
     """
-    __tablename__ = 'afe_test_parameters'
+
+    __tablename__ = "afe_test_parameters"
 
     id = Column(Integer, primary_key=True)
     test_id = Column(Integer, nullable=False)

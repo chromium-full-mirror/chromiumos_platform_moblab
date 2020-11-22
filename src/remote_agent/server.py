@@ -19,7 +19,6 @@ from services.scheduler.scheduler import Scheduler
 
 
 class RemoteLoggingAgent(remoteagentrpc_pb2_grpc.RemoteLoggingAgentServicer):
-
     def __init__(self):
         super(RemoteLoggingAgent, self).__init__()
 
@@ -32,12 +31,13 @@ def setup_logging(level):
     """
     logging.getLogger().handlers = []
     logging.getLogger().setLevel(level)
-    file_handler = logging.FileHandler('/var/log/moblab/remote_agent.log')
+    file_handler = logging.FileHandler("/var/log/moblab/remote_agent.log")
     file_handler.setLevel(level)
 
     # create formatter and add it to the handlers
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     file_handler.setFormatter(formatter)
     logging.getLogger().addHandler(file_handler)
 
@@ -47,7 +47,8 @@ def parse_arguments(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument(
-        '-v', '--verbose', action='store_true', help='Turn on debug logging.')
+        "-v", "--verbose", action="store_true", help="Turn on debug logging."
+    )
     return parser.parse_args(argv)
 
 
@@ -64,15 +65,16 @@ def serve():
     remoteLoggingAgent = RemoteLoggingAgent()
 
     remoteagentrpc_pb2_grpc.add_RemoteLoggingAgentServicer_to_server(
-        remoteLoggingAgent, server)
+        remoteLoggingAgent, server
+    )
 
-    server.add_insecure_port('[::]:6050')
-    logging.info('Starting server')
+    server.add_insecure_port("[::]:6050")
+    logging.info("Starting server")
     server.start()
 
     scheduler = Scheduler()
     scheduler.schedule()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     serve()

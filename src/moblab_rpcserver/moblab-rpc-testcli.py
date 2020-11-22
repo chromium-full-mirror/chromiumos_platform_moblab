@@ -22,12 +22,14 @@ def get_jobs(stub):
     request = moblabrpc_pb2.GetNumJobsRequest()
     print((stub.get_jobs(request)))
 
+
 def list_connected_duts_firmware(stub):
     request = moblabrpc_pb2.ListConnectedDutsFirmwareRequest()
     print((stub.list_connected_duts_firmware(request)))
 
-if __name__ == '__main__':
-    channel = grpc.insecure_channel('localhost:6002')
+
+if __name__ == "__main__":
+    channel = grpc.insecure_channel("localhost:6002")
     stub = moblabrpc_pb2_grpc.MoblabRpcServiceStub(channel)
     get_jobs(stub)
     list_connected_duts(stub)

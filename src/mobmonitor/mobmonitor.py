@@ -25,237 +25,264 @@ from moblab_common.monitoring import collect_logs
 from moblab_common.utils.cli import CopyFile
 
 
-STATICDIR = '/etc/moblab/mobmonitor/static/'
+STATICDIR = "/etc/moblab/mobmonitor/static/"
 
-LOGDIR = '/var/log/moblab/'
-LOGFILE = 'mobmonitor.log'
+LOGDIR = "/var/log/moblab/"
+LOGFILE = "mobmonitor.log"
 LOGFILE_SIZE_BYTES = 1024 * 1024
 LOGFILE_COUNT = 10
 
 
 class MobMonitorRoot(object):
-  """The central object supporting the Mob* Monitor web interface."""
+    """The central object supporting the Mob* Monitor web interface."""
 
-  def __init__(self, checkfile_manager, diagnostic_manager,
-      staticdir=STATICDIR):
-    if not os.path.exists(staticdir):
-      raise IOError('Static directory does not exist: %s' % staticdir)
+    def __init__(
+        self, checkfile_manager, diagnostic_manager, staticdir=STATICDIR
+    ):
+        if not os.path.exists(staticdir):
+            raise IOError("Static directory does not exist: %s" % staticdir)
 
-    self.staticdir = staticdir
-    self.checkfile_manager = checkfile_manager
-    self.diagnostic_manager = diagnostic_manager
+        self.staticdir = staticdir
+        self.checkfile_manager = checkfile_manager
+        self.diagnostic_manager = diagnostic_manager
 
-  @cherrypy.expose
-  def index(self):
-    """Presents a welcome message."""
-    raise cherrypy.HTTPRedirect('/static/index.html')
+    @cherrypy.expose
+    def index(self):
+        """Presents a welcome message."""
+        raise cherrypy.HTTPRedirect("/static/index.html")
 
+    @cherrypy.expose
+    def GetServiceList(self):
+        """Return a list of the monitored services.
 
-  @cherrypy.expose
-  def GetServiceList(self):
-    """Return a list of the monitored services.
+        Returns:
+          A list of the monitored services.
+        """
+        return json.dumps(self.checkfile_manager.GetServiceList())
 
-    Returns:
-      A list of the monitored services.
-    """
-    return json.dumps(self.checkfile_manager.GetServiceList())
+    @cherrypy.expose
+    def GetStatus(self, service=None):
+        """Return the health status of the specified service.
 
-  @cherrypy.expose
-  def GetStatus(self, service=None):
-    """Return the health status of the specified service.
+        Args:
+          service: The service whose health status is being queried. If service
+            is None, return the health status of all monitored services.
 
-    Args:
-      service: The service whose health status is being queried. If service
-        is None, return the health status of all monitored services.
+        Returns:
+          A list of dictionaries. Each dictionary contains the keys:
+            service: The name of the service.
+            health: A boolean describing the overall service health.
+            healthchecks: A list of unhealthy or quasi-healthy health checks.
+        """
+        service_statuses = self.checkfile_manager.GetStatus(service)
+        if not isinstance(service_statuses, list):
+            service_statuses = [service_statuses]
 
-    Returns:
-      A list of dictionaries. Each dictionary contains the keys:
-        service: The name of the service.
-        health: A boolean describing the overall service health.
-        healthchecks: A list of unhealthy or quasi-healthy health checks.
-    """
-    service_statuses = self.checkfile_manager.GetStatus(service)
-    if not isinstance(service_statuses, list):
-      service_statuses = [service_statuses]
+        result = [
+            cf_manager.MapServiceStatusToDict(status)
+            for status in service_statuses
+        ]
+        return json.dumps(result)
 
-    result = [
-        cf_manager.MapServiceStatusToDict(status) for status in service_statuses]
-    return json.dumps(result)
+    @cherrypy.expose
+    def ActionInfo(self, service, healthcheck, action):
+        """Return usage and argument information for |action|.
 
-  @cherrypy.expose
-  def ActionInfo(self, service, healthcheck, action):
-    """Return usage and argument information for |action|.
+        Args:
+          service: A string. The name of a service being monitored.
+          healthcheck: A string. The name of the healthcheck the action belongs to.
+          action: A string. The name of an action specified by some healthcheck's
+            Diagnose method.
 
-    Args:
-      service: A string. The name of a service being monitored.
-      healthcheck: A string. The name of the healthcheck the action belongs to.
-      action: A string. The name of an action specified by some healthcheck's
-        Diagnose method.
+        Returns:
+          TBD
+        """
+        result = self.checkfile_manager.ActionInfo(
+            service, healthcheck, action
+        )
+        return json.dumps(cf_manager.MapActionInfoToDict(result))
 
-    Returns:
-      TBD
-    """
-    result = self.checkfile_manager.ActionInfo(service, healthcheck, action)
-    return json.dumps(cf_manager.MapActionInfoToDict(result))
+    @cherrypy.expose
+    def RepairService(self, service, healthcheck, action, params):
+        """Execute the repair action on the specified service.
 
-  @cherrypy.expose
-  def RepairService(self, service, healthcheck, action, params):
-    """Execute the repair action on the specified service.
+        Args:
+          service: The service that the specified action will be applied to.
+          healthcheck: The particular healthcheck we are repairing.
+          action: The action to be applied.
+          args: A list of the positional arguments for the given repair action.
+          kwargs: A dictionary of keyword arguments for the given repair action.
+        """
+        # The mobmonitor's RPC library encodes arguments as strings when
+        # making a remote call to the monitor. The checkfile manager expects
+        # lists and dicts for the arugments, so we convert them here.
+        params = json.loads(params.replace("'", '"'))
 
-    Args:
-      service: The service that the specified action will be applied to.
-      healthcheck: The particular healthcheck we are repairing.
-      action: The action to be applied.
-      args: A list of the positional arguments for the given repair action.
-      kwargs: A dictionary of keyword arguments for the given repair action.
-    """
-    # The mobmonitor's RPC library encodes arguments as strings when
-    # making a remote call to the monitor. The checkfile manager expects
-    # lists and dicts for the arugments, so we convert them here.
-    params = json.loads(params.replace('\'', '"'))
+        status = self.checkfile_manager.RepairService(
+            service, healthcheck, action, params
+        )
+        return json.dumps(cf_manager.MapServiceStatusToDict(status))
 
-    status = self.checkfile_manager.RepairService(service, healthcheck, action,
-                                                  params)
-    return json.dumps(cf_manager.MapServiceStatusToDict(status))
+    @cherrypy.expose
+    def CollectLogs(self):
+        tarfile = collect_logs.collect_logs()
+        return serve_file(
+            tarfile,
+            "application/x-download",
+            "attachment",
+            os.path.basename(tarfile),
+        )
 
-  @cherrypy.expose
-  def CollectLogs(self):
-    tarfile = collect_logs.collect_logs()
-    return serve_file(tarfile, 'application/x-download',
-                      'attachment', os.path.basename(tarfile))
+    @cherrypy.expose
+    def UploadLogs(self):
+        afe = afe_connector.AFEConnector()
+        conf = config_connector.MoblabConfigConnector(afe)
+        conf.load_config()
+        conn = feedback_connector.MoblabFeedbackConnector(
+            conf.get_cloud_bucket()
+        )
+        tarfile_path = collect_logs.collect_logs()
+        feedback_dir_path, url = conn.upload_feedback(
+            # upload tar as a *.tgz without exposing any of the Moblab dir structure
+            files=[
+                CopyFile(src=tarfile_path, name=tarfile_path.split("/")[-1])
+            ]
+        )
+        return (
+            "Your logs have been uploaded to your Google Cloud bucket "
+            '<a href="https://console.developers.google.com/storage/%s/%s">Link to Logs</a>'
+            % (conf.get_cloud_bucket(), feedback_dir_path)
+        )
 
-  @cherrypy.expose
-  def UploadLogs(self):
-    afe = afe_connector.AFEConnector()
-    conf = config_connector.MoblabConfigConnector(afe)
-    conf.load_config()
-    conn = feedback_connector.MoblabFeedbackConnector(conf.get_cloud_bucket())
-    tarfile_path = collect_logs.collect_logs()
-    feedback_dir_path, url = conn.upload_feedback(
-        # upload tar as a *.tgz without exposing any of the Moblab dir structure
-        files=[CopyFile(src=tarfile_path, name=tarfile_path.split('/')[-1])]
-    )
-    return ("Your logs have been uploaded to your Google Cloud bucket "
-            "<a href=\"https://console.developers.google.com/storage/%s/%s\">Link to Logs</a>" % (conf.get_cloud_bucket(), feedback_dir_path))
+    @cherrypy.expose
+    def ListDiagnosticChecks(self):
+        """List available diagnostics.
 
-
-
-  @cherrypy.expose
-  def ListDiagnosticChecks(self):
-    """List available diagnostics.
-
-    Returns:
-      A list of available diagnostics in the format
-      [
-        {
-          category: a category or subsystem of checks
-          checks: [
+        Returns:
+          A list of available diagnostics in the format
+          [
             {
-              name: name of this diagnostic
-              description: a short description
+              category: a category or subsystem of checks
+              checks: [
+                {
+                  name: name of this diagnostic
+                  description: a short description
+                }
+              ]
             }
           ]
-        }
-      ]
-    """
-    return json.dumps(self.diagnostic_manager.list_diagnostic_checks())
+        """
+        return json.dumps(self.diagnostic_manager.list_diagnostic_checks())
 
-  @cherrypy.expose
-  def RunDiagnosticCheck(self, category, name):
-    """Runs the specified diagnostic check and returns the results
+    @cherrypy.expose
+    def RunDiagnosticCheck(self, category, name):
+        """Runs the specified diagnostic check and returns the results
 
-    Args:
-      category: The category the check is under
-      name: The name of the diagnostic check
-    Returns:
-      results of the diagnostic check in the format
-      {
-        result: a freeform text field containing diagnostic resutls
-      }
-    """
-    return json.dumps({
-      'result': self.diagnostic_manager.run_diagnostic_check(category, name)
-    })
+        Args:
+          category: The category the check is under
+          name: The name of the diagnostic check
+        Returns:
+          results of the diagnostic check in the format
+          {
+            result: a freeform text field containing diagnostic resutls
+          }
+        """
+        return json.dumps(
+            {
+                "result": self.diagnostic_manager.run_diagnostic_check(
+                    category, name
+                )
+            }
+        )
 
 
 def SetupLogging(logdir):
-  logging.basicConfig(
-      level=logging.DEBUG,
-      format='%(asctime)s:%(name)s:%(levelname)-8s %(message)s',
-      datefmt='%Y-%m-%d %H:%M',
-      filename=os.path.join(logdir, LOGFILE),
-      filemode='w'
-  )
-  rotate = logging.handlers.RotatingFileHandler(
-      os.path.join(logdir, LOGFILE), maxBytes=LOGFILE_SIZE_BYTES,
-      backupCount=LOGFILE_COUNT)
-  logging.getLogger().addHandler(rotate)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s:%(name)s:%(levelname)-8s %(message)s",
+        datefmt="%Y-%m-%d %H:%M",
+        filename=os.path.join(logdir, LOGFILE),
+        filemode="w",
+    )
+    rotate = logging.handlers.RotatingFileHandler(
+        os.path.join(logdir, LOGFILE),
+        maxBytes=LOGFILE_SIZE_BYTES,
+        backupCount=LOGFILE_COUNT,
+    )
+    logging.getLogger().addHandler(rotate)
 
 
 def ParseArguments(argv):
-  """Creates the argument parser."""
-  parser = argparse.ArgumentParser(description=__doc__)
+    """Creates the argument parser."""
+    parser = argparse.ArgumentParser(description=__doc__)
 
-  parser.add_argument('-d', '--checkdir',
-                      default='/etc/moblab/mobmonitor/checkfiles/',
-                      help='The Mob* Monitor checkfile directory.')
-  parser.add_argument('-p', '--port', type=int, default=9991,
-                      help='The Mob* Monitor port.')
-  parser.add_argument('-s', '--staticdir', default=STATICDIR,
-                      help='Mob* Monitor web ui static content directory')
-  parser.add_argument('--logdir', dest='logdir', default=LOGDIR,
-                      help='Mob* Monitor log file directory.')
+    parser.add_argument(
+        "-d",
+        "--checkdir",
+        default="/etc/moblab/mobmonitor/checkfiles/",
+        help="The Mob* Monitor checkfile directory.",
+    )
+    parser.add_argument(
+        "-p", "--port", type=int, default=9991, help="The Mob* Monitor port."
+    )
+    parser.add_argument(
+        "-s",
+        "--staticdir",
+        default=STATICDIR,
+        help="Mob* Monitor web ui static content directory",
+    )
+    parser.add_argument(
+        "--logdir",
+        dest="logdir",
+        default=LOGDIR,
+        help="Mob* Monitor log file directory.",
+    )
 
-  return parser.parse_args(argv)
+    return parser.parse_args(argv)
+
 
 def _validate_port(check_port):
     port = int(check_port)
     if port <= 0 or port >= 65536:
-        raise ValueError('%d is not a valid port' % port)
+        raise ValueError("%d is not a valid port" % port)
     return port
 
 
 def main(argv):
-  options = ParseArguments(argv)
+    options = ParseArguments(argv)
 
-  # Configure logger.
-  SetupLogging(options.logdir)
+    # Configure logger.
+    SetupLogging(options.logdir)
 
-  # Configure global cherrypy parameters.
-  cherrypy.config.update(
-      {'server.socket_host': '0.0.0.0',
-       'server.socket_port': _validate_port(options.port)
-      })
+    # Configure global cherrypy parameters.
+    cherrypy.config.update(
+        {
+            "server.socket_host": "0.0.0.0",
+            "server.socket_port": _validate_port(options.port),
+        }
+    )
 
-  mobmon_appconfig = {
-      '/':
-          {'tools.staticdir.root': options.staticdir
-          },
-      '/static':
-          {'tools.staticdir.on': True,
-           'tools.staticdir.dir': ''
-          },
-      '/static/css':
-          {'tools.staticdir.dir': 'css'
-          },
-      '/static/js':
-          {'tools.staticdir.dir': 'js'
-          }
-  }
+    mobmon_appconfig = {
+        "/": {"tools.staticdir.root": options.staticdir},
+        "/static": {"tools.staticdir.on": True, "tools.staticdir.dir": ""},
+        "/static/css": {"tools.staticdir.dir": "css"},
+        "/static/js": {"tools.staticdir.dir": "js"},
+    }
 
-  # Setup the mobmonitor
-  checkfile_manager = cf_manager.CheckFileManager(checkdir=options.checkdir)
-  diagnostic_manager = dc_manager.DiagnosticCheckManager()
-  diagnostic_manager.init_checks()
-  mobmonitor = MobMonitorRoot(checkfile_manager, diagnostic_manager,
-      staticdir=options.staticdir)
+    # Setup the mobmonitor
+    checkfile_manager = cf_manager.CheckFileManager(checkdir=options.checkdir)
+    diagnostic_manager = dc_manager.DiagnosticCheckManager()
+    diagnostic_manager.init_checks()
+    mobmonitor = MobMonitorRoot(
+        checkfile_manager, diagnostic_manager, staticdir=options.staticdir
+    )
 
-  # Start the checkfile collection and execution background task.
-  checkfile_manager.StartCollectionExecution()
+    # Start the checkfile collection and execution background task.
+    checkfile_manager.StartCollectionExecution()
 
-  # Start the Mob* Monitor.
-  cherrypy.quickstart(mobmonitor, config=mobmon_appconfig)
+    # Start the Mob* Monitor.
+    cherrypy.quickstart(mobmonitor, config=mobmon_appconfig)
 
 
-if __name__ == '__main__':
-  main(sys.argv[1:])
+if __name__ == "__main__":
+    main(sys.argv[1:])

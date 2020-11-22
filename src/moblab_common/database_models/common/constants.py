@@ -4,7 +4,8 @@
 # found in the LICENSE file.
 from database_models.common import enum
 
+
 class Constants:
     # Common enums for Job attributes
-    REBOOT_BEFORE = enum.Enum('Never', 'If dirty', 'Always')
-    REBOOT_AFTER = enum.Enum('Never', 'If all tests passed', 'Always')
+    REBOOT_BEFORE = enum.Enum("Never", "If dirty", "Always")
+    REBOOT_AFTER = enum.Enum("Never", "If all tests passed", "Always")

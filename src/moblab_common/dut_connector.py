@@ -17,16 +17,18 @@ from pssh.clients.native import ParallelSSHClient
 
 
 # Location where dhcp leases are stored.
-_DHCPD_LEASES = '/leases/dnsmasq.leases'
+_DHCPD_LEASES = "/leases/dnsmasq.leases"
 
 
 class MoblabDUTConnectorException(Exception):
     """Generic exception for this module."""
+
     pass
 
 
 class DUTInfo(object):
     """Class to encapsulate the information for a single DUT."""
+
     mac_address = None
     ip_addresses = None
 
@@ -51,9 +53,8 @@ class MoblabDUTConnector(object):
             else:
                 logging.info("Rejecting %s %s", host, active_hosts)
 
-
     def _get_dhcp_dut_leases(self):
-        """ Extract information about connected duts from the dhcp server.
+        """Extract information about connected duts from the dhcp server.
 
         @return: A dict of ipaddress to mac address for each device connected.
         """
@@ -65,7 +66,7 @@ class MoblabDUTConnector(object):
         # 1584225109 60:38:e0:e3:10:bd 192.168.231.113 * 01:60:38:e0:e3:10:bd
         leases = {}
         for lease in lease_lines:
-            items = lease.strip().split(' ')
+            items = lease.strip().split(" ")
             leases[items[2]] = items[1]
         return leases
 
@@ -75,26 +76,37 @@ class MoblabDUTConnector(object):
 
     def run_command_on_connected_duts(self, command, timeout=300):
         self.find_duts()
-        return self.run_command_on_ips(command, self.connected_ip_addresses,
-                                       timeout)
+        return self.run_command_on_ips(
+            command, self.connected_ip_addresses, timeout
+        )
 
     def run_command_on_ips(self, command, ip_addresses, timeout=10):
         client = ParallelSSHClient(
             ip_addresses,
             pool_size=20,
-            user='root',
+            user="root",
             num_retries=1,
             timeout=timeout,
-            pkey='/home/moblab/.ssh/testing_rsa')
+            pkey="/home/moblab/.ssh/testing_rsa",
+        )
         command_results = []
 
-        output = client.run_command(command, stop_on_errors=False,
-                                    timeout=timeout)
+        output = client.run_command(
+            command, stop_on_errors=False, timeout=timeout
+        )
         client.join(output)
 
         for host_output in output:
-            stdout = '{}'.format(''.join(host_output.stdout)) if host_output.stdout else ''
-            stderr = '{}'.format(''.join(host_output.stderr)) if host_output.stderr else ''
+            stdout = (
+                "{}".format("".join(host_output.stdout))
+                if host_output.stdout
+                else ""
+            )
+            stderr = (
+                "{}".format("".join(host_output.stderr))
+                if host_output.stderr
+                else ""
+            )
 
             exit_code = host_output.exit_code
 
@@ -102,15 +114,25 @@ class MoblabDUTConnector(object):
                 exception_msg = host_output.exception.args[0]
                 exception_args = host_output.exception.args[1:]
                 stderr += exception_msg % exception_args
-            command_results.append((host_output.host, stdout, stderr, exit_code))
-        logging.info('Running command %s on %s resulted in %s', command,
-                     ip_addresses, command_results)
+            command_results.append(
+                (host_output.host, stdout, stderr, exit_code)
+            )
+        logging.info(
+            "Running command %s on %s resulted in %s",
+            command,
+            ip_addresses,
+            command_results,
+        )
         return command_results
 
     def get_all_connected_mac(self):
         leases = self._get_dhcp_dut_leases()
         active_hosts = self._get_active_network_devices()
-        return [(host, output) for (host, output) in leases.items() if host in active_hosts]
+        return [
+            (host, output)
+            for (host, output) in leases.items()
+            if host in active_hosts
+        ]
 
     def _get_active_network_devices(self):
         """Use the tool nmap to find devices currently alive on the network.
@@ -130,13 +152,14 @@ class MoblabDUTConnector(object):
             list: A list of IP addresses with port 22 open and active.
         """
         nm = nmap.PortScanner()
-        nm.scan('192.168.231.0/24', '22', '-T 5 --open -Pn')
+        nm.scan("192.168.231.0/24", "22", "-T 5 --open -Pn")
         hosts = nm.all_hosts()
         return hosts
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
-            'timeout 2 cat /etc/lsb-release', timeout=100)
+            "timeout 2 cat /etc/lsb-release", timeout=100
+        )
 
         def is_dut_connected(output):
             if output:
@@ -144,7 +167,7 @@ class MoblabDUTConnector(object):
             return False
 
         def extract_model(output):
-            return output[0] if output else 'Unknown'
+            return output[0] if output else "Unknown"
 
         results = []
         for (host, stdout, stderr, exit_code) in command_results:
@@ -166,13 +189,15 @@ class MoblabDUTConnector(object):
                  string: update firmware, version of firmware to be applied.
         """
         command_results = self.run_command_on_connected_duts(
-            ('fwid=`timeout 10 crossystem fwid`;'
-             'model=`timeout 10 mosys platform model`;'
-             'fw_update=`timeout 20 chromeos-firmwareupdate --manifest`;'
-             'printf "{\\\"fwid\\\": \\\"%s\\\",\\\"model\\\": \\\"%s\\\",'
-             '\\\"fw_update\\\":%s}" $fwid $model \"$fw_update\"'),
-             timeout=50
-            )
+            (
+                "fwid=`timeout 10 crossystem fwid`;"
+                "model=`timeout 10 mosys platform model`;"
+                "fw_update=`timeout 20 chromeos-firmwareupdate --manifest`;"
+                'printf "{\\"fwid\\": \\"%s\\",\\"model\\": \\"%s\\",'
+                '\\"fw_update\\":%s}" $fwid $model "$fw_update"'
+            ),
+            timeout=50,
+        )
 
         results = []
         for (host, stdout, stderr, exit_code) in command_results:
@@ -187,17 +212,22 @@ class MoblabDUTConnector(object):
                     continue
                 model = parsed_results["model"]
                 current_firmware = parsed_results["fwid"]
-                firmware_update = parsed_results["fw_update"][model]['host']['versions']['rw']
-                results.append(
-                    (host, current_firmware, firmware_update))
+                firmware_update = parsed_results["fw_update"][model]["host"][
+                    "versions"
+                ]["rw"]
+                results.append((host, current_firmware, firmware_update))
         return results
 
     def update_firmware(self, ip_addresses):
         command_results = self.run_command_on_ips(
-            ('/usr/sbin/chromeos-firmwareupdate --mode autoupdate '
-             '--force --verbose'),
-            ip_addresses, timeout=300)
-        self.run_command_on_ips('reboot', ip_addresses)
+            (
+                "/usr/sbin/chromeos-firmwareupdate --mode autoupdate "
+                "--force --verbose"
+            ),
+            ip_addresses,
+            timeout=300,
+        )
+        self.run_command_on_ips("reboot", ip_addresses)
         return command_results
 
     def get_connected_dut_serialno(self):
@@ -208,12 +238,19 @@ class MoblabDUTConnector(object):
             is the parsed serial number.
         """
         command_results = self.run_command_on_connected_duts(
-            'timeout 20 vpd -g serial_number', timeout=20)
+            "timeout 20 vpd -g serial_number", timeout=20
+        )
         results = []
         for (host, stdout, stderr, exit_code) in command_results:
             if exit_code:
-                results.append((host, 'Failed to parse s/n for {}'.format(host)))
-                logging.error('Attempted to discover serial no of {} exited with error: {}'.format(stderr))
+                results.append(
+                    (host, "Failed to parse s/n for {}".format(host))
+                )
+                logging.error(
+                    "Attempted to discover serial no of {} exited with error: {}".format(
+                        stderr
+                    )
+                )
             else:
                 results.append((host, stdout))
         return results

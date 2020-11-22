@@ -8,10 +8,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class HostAttribute(declarative_base()):
     """Arbitrary keyvals associated with hosts."""
-    __tablename__ = 'afe_host_attributes'
 
-    SERIALIZATION_LINKS_TO_KEEP = {'host'}
-    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {'value'}
+    __tablename__ = "afe_host_attributes"
+
+    SERIALIZATION_LINKS_TO_KEEP = {"host"}
+    SERIALIZATION_LOCAL_LINKS_TO_UPDATE = {"value"}
 
     id = Column(Integer, primary_key=True)
     host_id = Column(Integer, nullable=False)

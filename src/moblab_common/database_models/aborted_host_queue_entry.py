@@ -10,7 +10,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class AbortedHostQueueEntry(declarative_base()):
     """Represents an aborted host queue entry."""
-    __tablename__ = 'afe_aborted_host_queue_entries'
+
+    __tablename__ = "afe_aborted_host_queue_entries"
 
     queue_entry_id = Column(Integer, primary_key=True)
     aborted_by_id = Column(Integer, default=None)

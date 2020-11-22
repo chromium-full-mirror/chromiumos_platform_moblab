@@ -14,9 +14,12 @@ import run_suite_request
 
 import logging
 
+
 class UnknownRequestType(Exception):
     """Custom Exception Type for Unknown Request Type."""
+
     pass
+
 
 class MoblabRemoteRequests(object):
     """Class the wraps around a list of remote requests."""
@@ -57,7 +60,9 @@ class MoblabRemoteRequests(object):
 
         for suite_request in requests.suite_requests:
             self.requests.append(
-                run_suite_request.MoblabSuiteRunRequestWrapper(proto=suite_request)
+                run_suite_request.MoblabSuiteRunRequestWrapper(
+                    proto=suite_request
+                )
             )
         return True
 
@@ -69,7 +74,9 @@ class MoblabRemoteRequests(object):
         """
         requests = moblab_request_pb2.MoblabRequests()
         for request in self.requests:
-            if isinstance(request, run_suite_request.MoblabSuiteRunRequestWrapper):
+            if isinstance(
+                request, run_suite_request.MoblabSuiteRunRequestWrapper
+            ):
                 proto = requests.suite_requests.add()
             else:
                 raise UnknownRequestType(request)
@@ -86,7 +93,9 @@ class MoblabRemoteRequests(object):
             filter_func (function): function that takes request as a param, and
                 returns True or False.
         """
-        self.requests = [request for request in self.requests if filter_func(request)]
+        self.requests = [
+            request for request in self.requests if filter_func(request)
+        ]
 
     def sort_requests(self):
         """Sort requests based on priority.

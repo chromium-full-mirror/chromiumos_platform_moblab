@@ -4,20 +4,22 @@
 
 import configparser
 
+
 class Config:
     """
     Provide an interface to read and get config values from
     moblab
     """
 
-    GLOBAL_CONFIG = '/usr/local/autotest/global_config.ini'
-    MOBLAB_CONFIG = '/usr/local/autotest/moblab_config.ini'
-    SHADOW_CONFIG = '/usr/local/autotest/shadow_config.ini'
+    GLOBAL_CONFIG = "/usr/local/autotest/global_config.ini"
+    MOBLAB_CONFIG = "/usr/local/autotest/moblab_config.ini"
+    SHADOW_CONFIG = "/usr/local/autotest/shadow_config.ini"
 
     def __init__(self):
         self.config = configparser.ConfigParser()
         self.config.read(
-            [self.GLOBAL_CONFIG, self.MOBLAB_CONFIG, self.SHADOW_CONFIG])
+            [self.GLOBAL_CONFIG, self.MOBLAB_CONFIG, self.SHADOW_CONFIG]
+        )
 
     def get(self, key):
         """
@@ -36,5 +38,3 @@ class Config:
                 if key == option:
                     return value
         return None
-
-

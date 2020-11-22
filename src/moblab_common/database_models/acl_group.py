@@ -14,9 +14,10 @@ class AclGroup(declarative_base()):
     Optional:
     description: arbitrary description of group
     """
-    __tablename__ = 'afe_acl_groups'
 
-    name_field = 'name'
+    __tablename__ = "afe_acl_groups"
+
+    name_field = "name"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(length=255), default=None)

@@ -10,7 +10,8 @@ import sys
 
 DEV_SERVER = "devserver:8080"
 
-_LOGGER = logging.getLogger('__name__')
+_LOGGER = logging.getLogger("__name__")
+
 
 class DevserverConnector(object):
     """Connector the the moblab devserver."""
@@ -75,7 +76,9 @@ class DevserverConnector(object):
         params = "archive_url=%s&artifacts=%s" % (archive_url, artifacts)
         return self.send_devserver_command(command, params)
 
-    def stage_build(self, board, build, build_type="release", archive_url=None):
+    def stage_build(
+        self, board, build, build_type="release", archive_url=None
+    ):
         """Stage a build to the local moblab cache.
 
         By default the source of the build is the moblab's configured bucket,

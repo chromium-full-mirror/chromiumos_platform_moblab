@@ -24,8 +24,8 @@ import result_file_filter
 import result_uploader
 import test_result_registry as test_result_registry_module
 
-SUB_COMMAND_NAME = 'run'
-_LOGGER = logging.getLogger('moblab_uploader')
+SUB_COMMAND_NAME = "run"
+_LOGGER = logging.getLogger("moblab_uploader")
 
 _DEFAULT_UPLOAD_TIMEOUT = datetime.timedelta(days=3)
 _DEFAULT_MIN_AGE_TO_UPLOAD = datetime.timedelta(days=0)
@@ -45,13 +45,15 @@ async def _enumerate_test_results(test_result_registry):
         for cls in registry_entry.classes:
             root_dir = registry_entry.root_dir
             for d in root_dir.glob(cls.GLOB_PATTERN):
-                test_result = cls.create(root_dir=root_dir,
-                                         relative_path=d.relative_to(root_dir))
-                if (test_result):
+                test_result = cls.create(
+                    root_dir=root_dir, relative_path=d.relative_to(root_dir)
+                )
+                if test_result:
                     # Give other coroutine chance to run.
-                    await asyncio.sleep(.01)
-                    yield _TEST_RESULT_CACHE.setdefault(test_result.abs_path,
-                                                        test_result)
+                    await asyncio.sleep(0.01)
+                    yield _TEST_RESULT_CACHE.setdefault(
+                        test_result.abs_path, test_result
+                    )
 
 
 async def _prune_test_result(dry_run, test_result):
@@ -61,19 +63,19 @@ async def _prune_test_result(dry_run, test_result):
     # Leaving the marker file to as late as possible in the process ensures
     # that cleanup will resume in the event of a process crash.
     try:
-        _LOGGER.debug('Removing test result %s', test_result)
+        _LOGGER.debug("Removing test result %s", test_result)
         if dry_run:
-            _LOGGER.debug('DRYRUN: Removed: %s', test_result)
+            _LOGGER.debug("DRYRUN: Removed: %s", test_result)
 
         def log_error(func, path, _):
             "Log prune failures, catching them preventing them being raised."
             # Even the chmod failed to fix the issue, just log and leave
             # the problem behind, nothing we can do.
-            _LOGGER.error('PRUNE: Failed to remove file %s', path)
+            _LOGGER.error("PRUNE: Failed to remove file %s", path)
 
         def remove_readonly(func, path, _):
             "Clear the readonly bit and re-attempt the removal"
-            _LOGGER.error('PRUNE: Fixing read only %s', path)
+            _LOGGER.error("PRUNE: Fixing read only %s", path)
             try:
                 os.chmod(path, stat.S_IWRITE | stat.S_IREAD | stat.S_IEXEC)
             # If the process is not the owner of the file then just give up
@@ -98,12 +100,14 @@ async def _prune_test_result(dry_run, test_result):
         # the subdirs, it will also delete any sibling directores - there are
         # none in this example.
         for topdir in topdirs:
-            shutil.rmtree(os.path.join(test_result.abs_path, topdir),
-                        onerror=remove_readonly)
+            shutil.rmtree(
+                os.path.join(test_result.abs_path, topdir),
+                onerror=remove_readonly,
+            )
         # This will remove 1-moblab and all its subdirs
-        shutil.rmtree(test_result.abs_path,  onerror=remove_readonly)
+        shutil.rmtree(test_result.abs_path, onerror=remove_readonly)
         del _TEST_RESULT_CACHE[test_result.abs_path]
-        _LOGGER.debug('Removed: %s', test_result)
+        _LOGGER.debug("Removed: %s", test_result)
     except Exception as e:
         _LOGGER.exception(e)
 
@@ -112,16 +116,18 @@ async def _async_prune(args, registry):
     """Scan and prune all EXPIRED test results."""
     status_checker = result_dir_status.ResultStatusChecker(
         min_age_to_upload=args.min_age_to_upload,
-        min_age_to_prune=args.min_age_to_prune
+        min_age_to_prune=args.min_age_to_prune,
     )
     status_filter = result_dir_status.StatusFilter(
-        result_dir_status.Status.EXPIRED)
+        result_dir_status.Status.EXPIRED
+    )
 
     # Steps needed to prune a result directory:
     # check status -> for each EXPIRED directories -> prune it.
     status_checker.next_step = status_filter.filter
-    status_filter.next_step = functools.partial(_prune_test_result,
-                                                args.dry_run)
+    status_filter.next_step = functools.partial(
+        _prune_test_result, args.dry_run
+    )
 
     while True:
         async for test_result in _enumerate_test_results(registry):
@@ -146,14 +152,17 @@ async def _resume_aborted_uploading(args, registry, status_checker, uploader):
     # state, and an uploading context which doesn't change directory status
     # before uploading.
     uploader.uploading_context = result_uploader.UploadingContext(
-        gs_bucket=args.gs_api.bucket_name, dry_run=args.dry_run,
-        resume_aborted=True)
+        gs_bucket=args.gs_api.bucket_name,
+        dry_run=args.dry_run,
+        resume_aborted=True,
+    )
     status_filter = result_dir_status.StatusFilter(
-        result_dir_status.Status.UPLOADING)
+        result_dir_status.Status.UPLOADING
+    )
     status_checker.next_step = status_filter.filter
     status_filter.next_step = uploader.try_upload_dir
 
-    _LOGGER.info('First scan for aborted uploading jobs.')
+    _LOGGER.info("First scan for aborted uploading jobs.")
     async for test_result in _enumerate_test_results(registry):
         await status_checker.get_last_status(test_result)
 
@@ -162,18 +171,20 @@ async def _async_upload(args, registry):
     """Scan and upload all 'READY' test results."""
     status_checker = result_dir_status.ResultStatusChecker(
         min_age_to_upload=args.min_age_to_upload,
-        min_age_to_prune=args.min_age_to_prune
+        min_age_to_prune=args.min_age_to_prune,
     )
     uploader = result_uploader.Uploader(
-        timeout=datetime.timedelta(minutes=60),
-        gs_api=args.gs_api)
+        timeout=datetime.timedelta(minutes=60), gs_api=args.gs_api
+    )
     file_filter = result_file_filter.ResultFileFilter(
-        filter_config=args.uploading_filter_config)
+        filter_config=args.uploading_filter_config
+    )
     uploader.next_step = file_filter.filter_files
     file_filter.next_step = uploader.uploading_queue.put
 
-    consumer = asyncio.ensure_future(uploader.upload_files(args.jobs,
-                                                           args.dry_run))
+    consumer = asyncio.ensure_future(
+        uploader.upload_files(args.jobs, args.dry_run)
+    )
 
     # Finish unfinished jobs of last run.
     await _resume_aborted_uploading(args, registry, status_checker, uploader)
@@ -183,14 +194,17 @@ async def _async_upload(args, registry):
     # READY state, and a new uploading context which changes directory state to
     # UPLOADING before uploading.
     status_filter = result_dir_status.StatusFilter(
-        result_dir_status.Status.READY)
+        result_dir_status.Status.READY
+    )
     status_checker.next_step = status_filter.filter
     status_filter.next_step = uploader.try_upload_dir
 
     uploader.uploading_context = result_uploader.UploadingContext(
-        gs_bucket=args.gs_api.bucket_name, dry_run=args.dry_run,
-        resume_aborted=False)
-    _LOGGER.info('Main uploading scan loop started.')
+        gs_bucket=args.gs_api.bucket_name,
+        dry_run=args.dry_run,
+        resume_aborted=False,
+    )
+    _LOGGER.info("Main uploading scan loop started.")
     while True:
         async for test_result in _enumerate_test_results(registry):
             await status_checker.check(test_result)
@@ -205,7 +219,7 @@ async def _async_upload(args, registry):
 def _accessible_file_type(file_path):
     """Check if input is an accessible file."""
     if not file_path:
-        raise argparse.ArgumentTypeError('No value specified.')
+        raise argparse.ArgumentTypeError("No value specified.")
 
     try:
         with open(file_path):
@@ -223,81 +237,98 @@ def add_arguments(parent_parser):
     """
     parser = parent_parser.add_parser(
         SUB_COMMAND_NAME,
-        help='Scan, upload and prune the test result directories.')
-    parser.add_argument(
-        '--once', action='store_true', help='Just run once and exit.')
-    parser.add_argument(
-        '-n', '--dry-run', action='store_true',
-        help='Dry run mode: just print out directories processed. Only valid '
-        'when specified with option --once.'
+        help="Scan, upload and prune the test result directories.",
     )
     parser.add_argument(
-        '-j', '--jobs', type=int, default=1,
-        help='Allow N jobs run simultaneously to work.'
+        "--once", action="store_true", help="Just run once and exit."
     )
     parser.add_argument(
-        '--gs-bucket',
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="Dry run mode: just print out directories processed. Only valid "
+        "when specified with option --once.",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=1,
+        help="Allow N jobs run simultaneously to work.",
+    )
+    parser.add_argument(
+        "--gs-bucket",
         default=config_connector.MoblabConfigConnector(
-            afe_connector.AFEConnector()).get_cloud_bucket(),
+            afe_connector.AFEConnector()
+        ).get_cloud_bucket(),
         help='The Google Storage Bucket to upload (without "gs://" prefix). '
-        'Default is reading from Autotest config file, i.e. %(default)s'
+        "Default is reading from Autotest config file, i.e. %(default)s",
     )
 
     parser.add_argument(
-        '--credentials-file',
-        default=os.environ.get(gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS, ''),
+        "--credentials-file",
+        default=os.environ.get(gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS, ""),
         type=_accessible_file_type,
-        help='Google cloud application credentials file. Default is the value '
+        help="Google cloud application credentials file. Default is the value "
         'of environment variable {}, i.e. "%(default)s".'.format(
-            gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS)
+            gs_api_wrapper.ENV_GOOGLE_APP_CREDENTIALS
+        ),
     )
 
     parser.add_argument(
-        '--timeout-days', type=lambda x: datetime.timedelta(days=float(x)),
-        default=_DEFAULT_UPLOAD_TIMEOUT, dest='upload_timeout',
-        help='The timeout time in days (can be a float number) to give up the '
-        'uploading (default: %(default)s).'
+        "--timeout-days",
+        type=lambda x: datetime.timedelta(days=float(x)),
+        default=_DEFAULT_UPLOAD_TIMEOUT,
+        dest="upload_timeout",
+        help="The timeout time in days (can be a float number) to give up the "
+        "uploading (default: %(default)s).",
     )
     parser.add_argument(
-        '--min-age-to-upload', type=lambda x: datetime.timedelta(days=float(x)),
+        "--min-age-to-upload",
+        type=lambda x: datetime.timedelta(days=float(x)),
         default=_DEFAULT_MIN_AGE_TO_UPLOAD,
-        help='Minimum job age in days (can be a float number) before a result '
-        'can be uploaded, but not removed from local storage '
-        '(default: %(default)s).'
+        help="Minimum job age in days (can be a float number) before a result "
+        "can be uploaded, but not removed from local storage "
+        "(default: %(default)s).",
     )
     parser.add_argument(
-        '--min-age-to-prune', type=lambda x: datetime.timedelta(days=float(x)),
+        "--min-age-to-prune",
+        type=lambda x: datetime.timedelta(days=float(x)),
         default=_DEFAULT_MIN_AGE_TO_PRUNE,
-        help='Minimum job age in days (can be a float number) before a result '
-        'can be removed from local storage (default: %(default)s).'
+        help="Minimum job age in days (can be a float number) before a result "
+        "can be removed from local storage (default: %(default)s).",
     )
 
     parser.set_defaults(
-        func=run,
-        post_parse_args=functools.partial(_post_parse_args, parser))
+        func=run, post_parse_args=functools.partial(_post_parse_args, parser)
+    )
 
 
 def _post_parse_args(arg_parser, args):
     """massage input arguments."""
-    _LOGGER.debug('Input arguments: %s', args)
+    _LOGGER.debug("Input arguments: %s", args)
     if not args.gs_bucket:
-        gs_bucket=config_connector.MoblabConfigConnector(
-            afe_connector.AFEConnector()).get_cloud_bucket()
+        gs_bucket = config_connector.MoblabConfigConnector(
+            afe_connector.AFEConnector()
+        ).get_cloud_bucket()
         if not gs_bucket:
             raise Exception("No GS bucket specified or configured.")
     else:
         gs_bucket = args.gs_bucket
 
     try:
-        args.gs_api = gs_api_wrapper.GsApiWrapper(args.gs_bucket,
-                                                  args.credentials_file)
+        args.gs_api = gs_api_wrapper.GsApiWrapper(
+            args.gs_bucket, args.credentials_file
+        )
     except gs_api_wrapper.GsAccessError as err:
         arg_parser.error(str(err))
 
-    delattr(args, 'credentials_file')
-    delattr(args, 'gs_bucket')
+    delattr(args, "credentials_file")
+    delattr(args, "gs_bucket")
 
-    if args.dry_run:  # It makes no sense to dry run a daemon, so just run once.
+    if (
+        args.dry_run
+    ):  # It makes no sense to dry run a daemon, so just run once.
         args.once = True
 
 
@@ -309,18 +340,21 @@ def run(args, test_result_registry=None):
         test_result_registry: A list of TestResultRegisteryEntry which has
             needed test result directory information.
     """
-    _LOGGER.info('Starting to scan, upload and prune test results.')
+    _LOGGER.info("Starting to scan, upload and prune test results.")
     _LOGGER.setLevel(logging.DEBUG)
 
     registry = test_result_registry or test_result_registry_module.REGISTRY
     loop = asyncio.get_event_loop()
 
     try:
-        loop.run_until_complete(asyncio.gather(_async_upload(args, registry),
-                                               _async_prune(args, registry)))
+        loop.run_until_complete(
+            asyncio.gather(
+                _async_upload(args, registry), _async_prune(args, registry)
+            )
+        )
     except KeyboardInterrupt:
-        _LOGGER.info('Program is terminated by user.')
+        _LOGGER.info("Program is terminated by user.")
         pass
     finally:
-        _LOGGER.info('Shutting down. Bye!')
+        _LOGGER.info("Shutting down. Bye!")
         loop.close()

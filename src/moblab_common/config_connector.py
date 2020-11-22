@@ -53,7 +53,8 @@ class MoblabConfigConnector(object):
 
         # The bucket setting has gs:// and ends in /, so remove them
         image_server = self.get(
-            "CROS", "image_storage_server", force_reload=force_reload)
+            "CROS", "image_storage_server", force_reload=force_reload
+        )
         if image_server and len(image_server) > 5:
             return image_server[5:-1]
         else:
@@ -62,16 +63,17 @@ class MoblabConfigConnector(object):
     def is_remote_task_scheduler_enabled(self):
         """Return task scheduler is enabled otherwise false."""
         is_enable = self.get("REMOTE_TASK_SCHEDULER", "enabled", default=False)
-        return True if is_enable == 'True' else False
+        return True if is_enable == "True" else False
 
     def get_remote_task_scheduler_tick_delay(self):
         """Return the number of mins task scheduler waits between attempts."""
         return int(self.get("REMOTE_TASK_SCHEDULER", "tick_interval", 30))
 
     def is_remote_task_debug_enabled(self):
-        is_enable = self.get("REMOTE_TASK_SCHEDULER", "debug_enabled",
-                             default=False)
-        return True if is_enable == 'True' else False
+        is_enable = self.get(
+            "REMOTE_TASK_SCHEDULER", "debug_enabled", default=False
+        )
+        return True if is_enable == "True" else False
 
     def get_test_wifi_ap_and_password(self):
         ap_name = self.get("MOBLAB", "wifi_dut_ap_name", default=None)
@@ -80,6 +82,7 @@ class MoblabConfigConnector(object):
 
     def get_is_remote_agent_enabled(self):
         """Return if the remote agent is enabled otherwise false."""
-        is_enable = self.get("REMOTE_AGENT", "enabled", default=False,
-                             force_reload=True)
-        return True if is_enable == 'True' else False
+        is_enable = self.get(
+            "REMOTE_AGENT", "enabled", default=False, force_reload=True
+        )
+        return True if is_enable == "True" else False

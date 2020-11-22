@@ -15,8 +15,9 @@ class Profiler(declarative_base()):
     Optional:
     description: arbirary text description
     """
-    __tablename__ = 'afe_profilers'
-    name_field = 'name'
+
+    __tablename__ = "afe_profilers"
+    name_field = "name"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(length=255), unique=True, nullable=False)

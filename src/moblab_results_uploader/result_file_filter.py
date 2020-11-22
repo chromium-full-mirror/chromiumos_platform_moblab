@@ -42,16 +42,18 @@ import yaml
 
 import processing_step
 
-_LOGGER = logging.getLogger('moblab_uploader')
+_LOGGER = logging.getLogger("moblab_uploader")
 
 
-class ResultFile(collections.namedtuple('ResultFile', ['test_result',
-                                                       'relative_path'])):
+class ResultFile(
+    collections.namedtuple("ResultFile", ["test_result", "relative_path"])
+):
     """A class to represent a file in a test result directory.
     It has two fields:
         test_result: is a TestResult object which this file belongs to.
         relative_path: the path relative to the test result directory.
     """
+
     @property
     def abs_path(self):
         return self.test_result.abs_path / self.relative_path
@@ -64,9 +66,9 @@ class FilterConfigError(Exception):
     """Error raised when parse filter configurations."""
 
 
-_KEY_SUITE_NAME_REGEX = 'suite_name_regex'
-_KEY_INCLUDE = 'include'
-_KEY_EXCLUDE = 'exclude'
+_KEY_SUITE_NAME_REGEX = "suite_name_regex"
+_KEY_INCLUDE = "include"
+_KEY_EXCLUDE = "exclude"
 
 
 def _get_filter_by_suite(filters, suite_name):
@@ -88,8 +90,9 @@ async def _list_all_files(test_result, next_step):
         relative_root = pathlib.Path(root).relative_to(test_result.abs_path)
         for f in files:
             await next_step(
-                ResultFile(test_result=test_result,
-                           relative_path=relative_root / f)
+                ResultFile(
+                    test_result=test_result, relative_path=relative_root / f
+                )
             )
 
 
@@ -100,19 +103,23 @@ def filters_sanity_check(filters):
         extra_key -= {_KEY_SUITE_NAME_REGEX, _KEY_INCLUDE, _KEY_EXCLUDE}
         if extra_key:
             raise FilterConfigError(
-                'Found extra key for filter {}: {}'.format(filter, extra_key))
+                "Found extra key for filter {}: {}".format(filter, extra_key)
+            )
 
         # _KEY_SUITE_NAME_REGEX is required.
         if _KEY_SUITE_NAME_REGEX not in filter:
             raise FilterConfigError(
-                'Required key {} is missing from {}.'.format(
-                    _KEY_SUITE_NAME_REGEX, filter))
+                "Required key {} is missing from {}.".format(
+                    _KEY_SUITE_NAME_REGEX, filter
+                )
+            )
         # The value of _KEY_INCLUDE and _KEY_EXCLUDE is a list.
         for key in [_KEY_INCLUDE, _KEY_EXCLUDE]:
             value = filter.get(key, [])
             if type(value) is not list:
                 raise FilterConfigError(
-                    "The '{}' value of {} is not a list.".format(key, filter))
+                    "The '{}' value of {} is not a list.".format(key, filter)
+                )
 
 
 class ResultFileFilter(processing_step.ProcessStep):
@@ -137,7 +144,7 @@ class ResultFileFilter(processing_step.ProcessStep):
 
     async def _filter(self, result_file):
         """Check the file path with predefined filter patterns."""
-        for pattern in self._applicable_filter.get(_KEY_INCLUDE, ['*']):
+        for pattern in self._applicable_filter.get(_KEY_INCLUDE, ["*"]):
             if fnmatch.fnmatch(str(result_file.relative_path), pattern):
                 break
         else:
@@ -158,18 +165,25 @@ class ResultFileFilter(processing_step.ProcessStep):
         if test_result.succeeded and test_result.skip_uploading_when_succeeded:
             return
 
-        self._applicable_filter = _get_filter_by_suite(self._filters_config,
-                                                       test_result.suite_name)
+        self._applicable_filter = _get_filter_by_suite(
+            self._filters_config, test_result.suite_name
+        )
 
         if not self._applicable_filter:
-            _LOGGER.info('No filter found for %s (%s). List all files then.',
-                         test_result, test_result.suite_name)
+            _LOGGER.info(
+                "No filter found for %s (%s). List all files then.",
+                test_result,
+                test_result.suite_name,
+            )
             await _list_all_files(test_result, next_step=self._next_step)
             return
 
         if self._force or test_result.succeeded:
-            _LOGGER.info('Apply below filter to %s.\n%s', test_result,
-                         self._applicable_filter)
+            _LOGGER.info(
+                "Apply below filter to %s.\n%s",
+                test_result,
+                self._applicable_filter,
+            )
             await _list_all_files(test_result, next_step=self._filter)
         else:
             await _list_all_files(test_result, next_step=self._next_step)

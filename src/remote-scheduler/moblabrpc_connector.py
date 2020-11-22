@@ -32,14 +32,13 @@ class MoblabRpcConnector(object):
         if not cls.channel or not cls.stub:
             cls.channel = grpc.insecure_channel(DEFAULT_SERVER)
             if cls.channel:
-                cls.stub = moblabrpc_pb2_grpc.MoblabRpcServiceStub(
-                    cls.channel)
+                cls.stub = moblabrpc_pb2_grpc.MoblabRpcServiceStub(cls.channel)
                 if not cls.stub:
                     raise MoblabRpcException(
-                "Unable to connect to server %s" % DEFAULT_SERVER)
+                        "Unable to connect to server %s" % DEFAULT_SERVER
+                    )
             else:
-                raise MoblabRpcException(
-            "No server found %s" % DEFAULT_SERVER)
+                raise MoblabRpcException("No server found %s" % DEFAULT_SERVER)
 
     @classmethod
     def disconnect(cls):
@@ -48,8 +47,9 @@ class MoblabRpcConnector(object):
         cls.stub = None
 
     @classmethod
-    def run_suite(cls, build_target, model, milestone, build_version, suite,
-                  pool=None):
+    def run_suite(
+        cls, build_target, model, milestone, build_version, suite, pool=None
+    ):
         # Call the host service to get a non volatile identifier.
         cls.connect()
         try:
@@ -65,5 +65,5 @@ class MoblabRpcConnector(object):
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            logging.exception('Error calling run_suite')
-            raise MoblabRpcException('Error calling run_suite')
+            logging.exception("Error calling run_suite")
+            raise MoblabRpcException("Error calling run_suite")

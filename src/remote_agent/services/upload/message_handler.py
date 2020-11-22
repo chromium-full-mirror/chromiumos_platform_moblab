@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 
 # TODO(chromium:1113472): Enable the switch between dev and prod pubsub topics
 # based on the .env parameter.
-_PUBSUB_REMOTE_AGENT_TOPIC = 'moblab-remote-console-notification'
+_PUBSUB_REMOTE_AGENT_TOPIC = "moblab-remote-console-notification"
 
 
 class MessageHandler(Constants):
@@ -31,7 +31,9 @@ class MessageHandler(Constants):
             max_bytes=max_bytes,
             max_latency=max_latency,
         )
-        self.pubsub_client = pubsub_client.PubSubBasedClient(batch_settings=batch_settings)
+        self.pubsub_client = pubsub_client.PubSubBasedClient(
+            batch_settings=batch_settings
+        )
 
     def _create_pubsub_attr(self, proto_msg, attr_type):
         """Creates a map of attributes to be used in a pubsub message.
@@ -48,21 +50,29 @@ class MessageHandler(Constants):
             instance of MoblabHost or MoblabDut or 2) if attrbute type is 'DUT_STATUS'
             but the given dut status is unrecognizable.
         """
-        message_type = 'MoblabHost'
+        message_type = "MoblabHost"
         if isinstance(proto_msg, MoblabDut):
-            message_type = 'MoblabDut'
+            message_type = "MoblabDut"
         elif not isinstance(proto_msg, MoblabHost):
-            _LOGGER.error("Failed to create pubsub attributes map because of "
-                          "unknown proto message type: %s", type(proto_msg))
+            _LOGGER.error(
+                "Failed to create pubsub attributes map because of "
+                "unknown proto message type: %s",
+                type(proto_msg),
+            )
             return None
 
         attr_map = MessageToDict(proto_msg, preserving_proto_field_name=True)
 
         if attr_type == self.DUT_STATUS:
             try:
-                attr_map[self.STATUS] = self._reformat_dut_status(attr_map[self.STATUS])
+                attr_map[self.STATUS] = self._reformat_dut_status(
+                    attr_map[self.STATUS]
+                )
             except IndexError:
-                _LOGGER.exception('DutStatus does not have enum value: %s.', attr_map[self.STATUS])
+                _LOGGER.exception(
+                    "DutStatus does not have enum value: %s.",
+                    attr_map[self.STATUS],
+                )
                 return None
 
         # All attributes published to pubsub must be sent as strings.
@@ -73,7 +83,7 @@ class MessageHandler(Constants):
                     attr_map[key] = self._map_to_str(val)
                 else:
                     attr_map[key] = str(val)
-        attr_map['moblab_remote_console_message_type'] = message_type
+        attr_map["moblab_remote_console_message_type"] = message_type
         return attr_map
 
     def _reformat_dut_status(self, dut_status):
@@ -91,15 +101,17 @@ class MessageHandler(Constants):
         Raises:
             IndexError if the given dut status has wrong format.
         """
-        status_splitted = dut_status.lower().split('_')
+        status_splitted = dut_status.lower().split("_")
         try:
             result = status_splitted[2]
             for index in range(3, len(status_splitted)):
-                result += ('_' + status_splitted[index])
+                result += "_" + status_splitted[index]
             return result
         except IndexError:
-            _LOGGER.exception('Failed to parse dut status, %s, because it has wrong format.',
-                              dut_status)
+            _LOGGER.exception(
+                "Failed to parse dut status, %s, because it has wrong format.",
+                dut_status,
+            )
             raise
 
     def _map_to_str(self, subattr_map):
@@ -113,9 +125,9 @@ class MessageHandler(Constants):
         Returns:
             A semicolon-separated string representing some subattributes of a proto message.
         """
-        result = ''
+        result = ""
         for key, val in subattr_map.items():
-            result += (key + ': ' + str(val) + '; ')
+            result += key + ": " + str(val) + "; "
         if len(result) > 2:
             result = result[:-2]
         return result
@@ -145,5 +157,5 @@ class MessageHandler(Constants):
         return self.pubsub_client.send_messages_with_attributes(
             _PUBSUB_REMOTE_AGENT_TOPIC,
             pubsub_msg_attr_maps,
-            b'remote agent logs'
+            b"remote agent logs",
         )

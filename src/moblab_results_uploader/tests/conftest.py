@@ -22,26 +22,29 @@ from autotest_result import tko_pb2
 
 
 def pytest_addoption(parser):
-    parser.addoption('--network', action='store_true', default=False,
-                     help='Run tests that depend on good network connectivity')
     parser.addoption(
-        '--gs-bucket', help='The GS bucket name for testing.'
+        "--network",
+        action="store_true",
+        default=False,
+        help="Run tests that depend on good network connectivity",
     )
+    parser.addoption("--gs-bucket", help="The GS bucket name for testing.")
     parser.addoption(
-        '--credentials-file', help='The valid credentials file to access GS.'
+        "--credentials-file", help="The valid credentials file to access GS."
     )
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption('--network'):
+    if config.getoption("--network"):
         # run network tests
         return
 
     skip_network_tests = pytest.mark.skip(
-        reason='Skipping network test (re-run w/--network)')
+        reason="Skipping network test (re-run w/--network)"
+    )
 
     for item in items:
-        if 'network' in item.keywords:
+        if "network" in item.keywords:
             item.add_marker(skip_network_tests)
 
 
@@ -52,20 +55,20 @@ def next_step():
 
 @pytest.fixture
 def gs_bucket(request):
-    return request.config.getoption('--gs-bucket')
+    return request.config.getoption("--gs-bucket")
 
 
 @pytest.fixture
 def credentials_file(request):
-    return request.config.getoption('--credentials-file')
+    return request.config.getoption("--credentials-file")
 
 
 @pytest.fixture
 def job_serialize_CTS():
     j = tko_pb2.Job()
-    j.suite = 'cts_P'
-    j.dir = j.user = j.label = j.tag = j.machine = j.machine_owner = ''
-    j.machine_group = j.aborted_by = ''
+    j.suite = "cts_P"
+    j.dir = j.user = j.label = j.tag = j.machine = j.machine_owner = ""
+    j.machine_group = j.aborted_by = ""
     j.started_time = j.finished_time = j.aborted_on = j.queued_time = 0
-    j.afe_job_id = '1'
+    j.afe_job_id = "1"
     return j.SerializeToString()

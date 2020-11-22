@@ -49,8 +49,11 @@ class PubSubClient(object):
     """A generic pubsub client."""
 
     def __init__(self, batch_settings=()):
-        self.publisher = pubsub_v1.PublisherClient() if len(batch_settings) == 0 \
+        self.publisher = (
+            pubsub_v1.PublisherClient()
+            if len(batch_settings) == 0
             else pubsub_v1.PublisherClient(batch_settings)
+        )
 
     def publish_notifications(self, topic, messages=None):
         """Publishes a test result notification to a given pubsub topic.
@@ -65,7 +68,9 @@ class PubSubClient(object):
         Raises:
             PubSubException if failed to publish the notification.
         """
-        topic_path = self.publisher.topic_path("chromeos-partner-moblab", topic)
+        topic_path = self.publisher.topic_path(
+            "chromeos-partner-moblab", topic
+        )
         message_ids = []
         for message in messages:
             resp = self.publisher.publish(
@@ -76,13 +81,12 @@ class PubSubClient(object):
             try:
                 message_ids.append(resp.result())
             except Exception:
-                _LOGGER.exception('Failed to publish notification: %s', resp)
+                _LOGGER.exception("Failed to publish notification: %s", resp)
         return message_ids
 
 
 class PubSubBasedClient(object):
-    """A Cloud PubSub based implementation of the CloudConsoleClient interface.
-    """
+    """A Cloud PubSub based implementation of the CloudConsoleClient interface."""
 
     def __init__(self, batch_settings=()):
         """Constructor.
@@ -111,7 +115,9 @@ class PubSubBasedClient(object):
             message["attributes"] = msg_attributes
         return message
 
-    def _create_test_job_offloaded_message(self, gcs_uri, serial_number, moblab_id):
+    def _create_test_job_offloaded_message(
+        self, gcs_uri, serial_number, moblab_id
+    ):
         """Construct a test result notification.
 
         TODO(ntang): switch LEGACY to new message format.
@@ -130,7 +136,9 @@ class PubSubBasedClient(object):
 
         return self._create_message(data, msg_attributes)
 
-    def send_test_job_offloaded_message(self, gcs_uri, serial_number, moblab_id):
+    def send_test_job_offloaded_message(
+        self, gcs_uri, serial_number, moblab_id
+    ):
         """Notify the cloud console a test job is offloaded.
 
         Args:
@@ -144,9 +152,13 @@ class PubSubBasedClient(object):
         message = self._create_test_job_offloaded_message(
             gcs_uri, serial_number, moblab_id
         )
-        return self.pubsub_client.publish_notifications(_PUBSUB_TOPIC, [message])
+        return self.pubsub_client.publish_notifications(
+            _PUBSUB_TOPIC, [message]
+        )
 
-    def send_messages_with_attributes(self, pubsub_topic, msg_attributes_list, data):
+    def send_messages_with_attributes(
+        self, pubsub_topic, msg_attributes_list, data
+    ):
         """Publishes a list of pubsub messages containing the 'attributes' field
            to the cloud console.
 
@@ -164,5 +176,7 @@ class PubSubBasedClient(object):
         Raises:
             KeyError if data is none or empty.
         """
-        messages = [self._create_message(data, attr) for attr in msg_attributes_list]
+        messages = [
+            self._create_message(data, attr) for attr in msg_attributes_list
+        ]
         return self.pubsub_client.publish_notifications(pubsub_topic, messages)

@@ -24,10 +24,12 @@ class SpecialTask(declarative_base()):
     queue_entry: Host queue entry waiting on this task (or None, if task was not
                  started in preparation of a job)
     """
-    __tablename__ = 'afe_special_tasks'
 
-    Task = enum.Enum('Verify', 'Cleanup', 'Repair', 'Reset', 'Provision',
-                     string_values=True)
+    __tablename__ = "afe_special_tasks"
+
+    Task = enum.Enum(
+        "Verify", "Cleanup", "Repair", "Reset", "Provision", string_values=True
+    )
 
     id = Column(Integer, primary_key=True)
     host_id = Column(Integer, nullable=False)

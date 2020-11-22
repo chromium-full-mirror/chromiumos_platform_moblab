@@ -5,17 +5,18 @@
 """DUT health checks for moblab."""
 
 
-
 import netifaces
 import re
 
 from checkfiles.moblab import common
 from moblab_common.utils import cli
 
+
 class DUT_CHECK_CODES:
     OK = 0
     NO_SUBNET = -1
     NO_DUTS = -2
+
 
 # def list_connected_dut_ips():
 #     """List duts by ip currently connected to test subnet

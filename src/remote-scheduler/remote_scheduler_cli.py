@@ -21,7 +21,8 @@ import scheduler_common
 import build_connector
 
 os.environ.setdefault(
-    "GOOGLE_APPLICATION_CREDENTIALS", "%s/.service_account.json" % os.environ["HOME"]
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "%s/.service_account.json" % os.environ["HOME"],
 )
 
 
@@ -81,9 +82,14 @@ class MoblabRemoteSchedulerCLI(object):
             is_executed, is_expired = self.get_request_status(request)
             status = "pending"
             if is_executed:
-                status = "executed\t\t\t%s" % scheduler_common.get_executed_contents(
-                    self.storage_client, self.moblab_bucket_name, request.unique_id
-                ).split("\n")
+                status = (
+                    "executed\t\t\t%s"
+                    % scheduler_common.get_executed_contents(
+                        self.storage_client,
+                        self.moblab_bucket_name,
+                        request.unique_id,
+                    ).split("\n")
+                )
             elif is_expired:
                 status = "expired"
             print(
@@ -115,10 +121,13 @@ class MoblabRemoteSchedulerCLI(object):
 
     def interactive_queue_runsuite(self):
         boards = [
-            board.split("-")[0] for board in self.build_connector.get_boards_available()
+            board.split("-")[0]
+            for board in self.build_connector.get_boards_available()
         ]
         boards = list(set(boards))
-        selected_boards = self.get_input_from_list(boards, "Pick a board number ")
+        selected_boards = self.get_input_from_list(
+            boards, "Pick a board number "
+        )
 
         new_commands = []
         milestone = None
@@ -215,7 +224,12 @@ class MoblabRemoteSchedulerCLI(object):
                     "sand",
                     "snappy",
                 ],
-                "sarien": ["arcada", "arcada_signed", "sarien", "sarien_signed"],
+                "sarien": [
+                    "arcada",
+                    "arcada_signed",
+                    "sarien",
+                    "sarien_signed",
+                ],
                 "scarlet": ["dru", "druwl", "dumo", "overkill"],
                 "scarlet-arcnext": ["dru", "druwl", "dumo"],
                 "soraka": ["soraka"],
@@ -246,7 +260,9 @@ class MoblabRemoteSchedulerCLI(object):
                         board, milestone
                     )
                     builds.sort()
-                    build = self.get_input_from_list(builds, "Pick a build number ")[0]
+                    build = self.get_input_from_list(
+                        builds, "Pick a build number "
+                    )[0]
 
                 suites = ["cts_N", "cts_P", "gts", "dummy_server"]
                 if not selected_suites:
@@ -306,7 +322,9 @@ class MoblabRemoteSchedulerCLI(object):
             self.executed = scheduler_common.get_executed_commands(
                 self.storage_client, self.moblab_bucket_name
             )
-        current_sec_utc = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds()
+        current_sec_utc = (
+            datetime.utcnow() - datetime(1970, 1, 1)
+        ).total_seconds()
         is_executed = request.unique_id in self.executed
         is_expired = request.expires_at_sec_utc < current_sec_utc
         return (is_executed, is_expired)

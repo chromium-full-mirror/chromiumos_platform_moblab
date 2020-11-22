@@ -16,7 +16,7 @@ import pwd
 from moblab_common import moblab_info
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     moblab_info.get_or_create_id()
     uid = pwd.getpwnam(moblab_info.MOBLAB_USER).pw_uid
     gid = grp.getgrnam(moblab_info.MOBLAB_GROUP).gr_gid

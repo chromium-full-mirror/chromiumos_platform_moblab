@@ -5,7 +5,6 @@
 """Network monitoring health checks for moblab."""
 
 
-
 import netifaces
 
 from moblab_common.utils import cli

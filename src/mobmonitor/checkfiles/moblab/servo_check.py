@@ -5,11 +5,10 @@
 """Servo health checks for moblab."""
 
 
-
 from moblab_common.utils import cli
 
-SERVO_VID = b'18d1'
-SERVO_PID = [b'5002', b'501b']
+SERVO_VID = b"18d1"
+SERVO_PID = [b"5002", b"501b"]
 
 
 # class ServoExists(object):

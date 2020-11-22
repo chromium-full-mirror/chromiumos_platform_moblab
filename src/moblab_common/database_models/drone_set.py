@@ -16,8 +16,9 @@ class DroneSet(declarative_base()):
     name: the drone set's name
     drones: the drones that are part of the set
     """
-    __tablename__ = 'afe_drone_sets'
-    name_field = 'name'
+
+    __tablename__ = "afe_drone_sets"
+    name_field = "name"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(length=255), unique=True)

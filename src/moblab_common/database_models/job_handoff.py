@@ -8,7 +8,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class JobHandoff(declarative_base()):
     """Jobs that have been handed off to lucifer."""
-    __tablename__ = 'afe_job_handoffs'
+
+    __tablename__ = "afe_job_handoffs"
 
     job_id = Column(Integer, primary_key=True)
     created = Column(DateTime, nullable=False)

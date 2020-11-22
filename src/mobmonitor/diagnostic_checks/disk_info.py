@@ -9,7 +9,7 @@ from .abstract_diagnostic_check import AbstractDiagnosticCheck
 from moblab_common import host_connector
 
 
-sys.path.append('..')
+sys.path.append("..")
 
 
 class DiskInfo(AbstractDiagnosticCheck):
@@ -18,12 +18,14 @@ class DiskInfo(AbstractDiagnosticCheck):
     mount points.
     """
 
-    category = 'System'
+    category = "System"
 
-    name = 'Disk Info'
+    name = "Disk Info"
 
-    description = ('Get information on current disk usage, '
-                   'mounted filesystems and their mount points')
+    description = (
+        "Get information on current disk usage, "
+        "mounted filesystems and their mount points"
+    )
 
     def run(self):
         return host_connector.HostServicesConnector().get_disk_info()

@@ -6,7 +6,6 @@
 """Unittests for systeminfo."""
 
 
-
 import collections
 import io
 import mock
@@ -18,13 +17,14 @@ from unittest.mock import MagicMock
 
 # necessary in order to get systeminfo.py to import cli correctly
 import sys
-sys.modules['moblab_common.utils'] = MagicMock()
-sys.path.append('../') # we can run the test from mobmonitor/system/
-sys.path.append('.') # or from mobmonitor/
+
+sys.modules["moblab_common.utils"] = MagicMock()
+sys.path.append("../")  # we can run the test from mobmonitor/system/
+sys.path.append(".")  # or from mobmonitor/
 import systeminfo
 
 # Strings that are used to mock particular system files for testing.
-MOCK_PROC_MEMINFO = '''
+MOCK_PROC_MEMINFO = """
 MemTotal:       65897588 kB
 MemFree:        24802380 kB
 Buffers:         1867288 kB
@@ -68,9 +68,9 @@ Hugepagesize:       2048 kB
 DirectMap4k:     1619840 kB
 DirectMap2M:    46536704 kB
 DirectMap1G:    18874368 kB
-'''
+"""
 
-MOCK_PROC_MOUNTS = '''
+MOCK_PROC_MOUNTS = """
 rootfs / rootfs rw 0 0
 sysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
 proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
@@ -104,9 +104,9 @@ cros /sys/fs/cgroup/cros cgroup rw,relatime,cpuset 0 0
 gvfsd-fuse /run/user/307266/gvfs fuse.gvfsd-fuse rw,nosuid,nodev,relatime,user_id=307266,group_id=5000 0 0
 objfsd /google/obj fuse.objfsd rw,nosuid,nodev,relatime,user_id=903,group_id=65534,default_permissions,allow_other 0 0
 x20fsd /google/data fuse.x20fsd rw,nosuid,nodev,relatime,user_id=904,group_id=65534,allow_other 0 0
-'''
+"""
 
-MOCK_PROC_FILESYSTEMS = '''
+MOCK_PROC_FILESYSTEMS = """
 nodev sysfs
 nodev rootfs
 nodev ramfs
@@ -149,9 +149,9 @@ nodev autofs
       qnx4
       ufs
       btrfs
-'''
+"""
 
-MOCK_PROC_STAT = '''
+MOCK_PROC_STAT = """
 cpu  36790888 1263256 11740848 7297360559 3637601 444 116964 0 0 0
 intr 3386552889 27 3 0 0 0 0 0 0 1 0 0 0 4 0 0 0 33 26 0 0 0 0 0 3508578 0 0 0
 ctxt 9855640605
@@ -160,361 +160,433 @@ processes 3593799
 procs_running 2
 procs_blocked 0
 softirq 652938841 3508230 208834832 49297758 52442647 16919039 0 47196001 147658748 3188900 123892686
-'''
+"""
 
 
 class SystemInfoStorageTest(unittest.TestCase):
-  """Unittests for SystemInfoStorage."""
+    """Unittests for SystemInfoStorage."""
 
-  def _CreateSystemInfoStorage(self, update_sec):
-    """Setup a SystemInfoStorage object."""
-    return systeminfo.SystemInfoStorage(update_sec=update_sec)
+    def _CreateSystemInfoStorage(self, update_sec):
+        """Setup a SystemInfoStorage object."""
+        return systeminfo.SystemInfoStorage(update_sec=update_sec)
 
-  def testUpdate(self):
-    """Test SystemInfoStorage Update."""
-    si = self._CreateSystemInfoStorage(1)
-    si.Update('test', 'testvalue')
-    self.assertEqual(si.resources.get('test'), 'testvalue')
+    def testUpdate(self):
+        """Test SystemInfoStorage Update."""
+        si = self._CreateSystemInfoStorage(1)
+        si.Update("test", "testvalue")
+        self.assertEqual(si.resources.get("test"), "testvalue")
 
-  def testNeedToUpdateNoData(self):
-    """Test NeedToUpdate with no data."""
-    si = self._CreateSystemInfoStorage(1)
-    self.assertEqual(si.NeedToUpdate('test'), True)
+    def testNeedToUpdateNoData(self):
+        """Test NeedToUpdate with no data."""
+        si = self._CreateSystemInfoStorage(1)
+        self.assertEqual(si.NeedToUpdate("test"), True)
 
-  def testNeedToUpdateNoUpdateTime(self):
-    """Test NeedToUpdate with data that has no update time recorded."""
-    si = self._CreateSystemInfoStorage(1)
-    dataname, data = ('testname', 'testvalue')
-    si.resources[dataname] = data
-    self.assertEqual(si.NeedToUpdate(dataname), True)
+    def testNeedToUpdateNoUpdateTime(self):
+        """Test NeedToUpdate with data that has no update time recorded."""
+        si = self._CreateSystemInfoStorage(1)
+        dataname, data = ("testname", "testvalue")
+        si.resources[dataname] = data
+        self.assertEqual(si.NeedToUpdate(dataname), True)
 
-  @mock.patch('systeminfo.time')
-  def testNeedToUpdateStaleData(self, MockTime):
-    """Test NeedToUpdate with data that is out of date."""
-    si = self._CreateSystemInfoStorage(1)
+    @mock.patch("systeminfo.time")
+    def testNeedToUpdateStaleData(self, MockTime):
+        """Test NeedToUpdate with data that is out of date."""
+        si = self._CreateSystemInfoStorage(1)
 
-    dataname, data = ('testname', 'testvalue')
-    curtime = time.time()
+        dataname, data = ("testname", "testvalue")
+        curtime = time.time()
 
-    si.resources[dataname] = data
-    si.update_times[dataname] = curtime
+        si.resources[dataname] = data
+        si.update_times[dataname] = curtime
 
-    MockTime.time.return_value = curtime + 2
+        MockTime.time.return_value = curtime + 2
 
-    self.assertEqual(si.NeedToUpdate(dataname), True)
+        self.assertEqual(si.NeedToUpdate(dataname), True)
 
-  @mock.patch('systeminfo.time')
-  def testNeedToUpdateFreshData(self, MockTime):
-    """Test NeedToUpdate with data that is not out of date."""
-    si = self._CreateSystemInfoStorage(1)
+    @mock.patch("systeminfo.time")
+    def testNeedToUpdateFreshData(self, MockTime):
+        """Test NeedToUpdate with data that is not out of date."""
+        si = self._CreateSystemInfoStorage(1)
 
-    dataname, data = ('testname', 'testvalue')
-    curtime = time.time()
+        dataname, data = ("testname", "testvalue")
+        curtime = time.time()
 
-    si.resources[dataname] = data
-    si.update_times[dataname] = curtime
+        si.resources[dataname] = data
+        si.update_times[dataname] = curtime
 
-    MockTime.time.return_value = curtime + 0.5
+        MockTime.time.return_value = curtime + 0.5
 
-    self.assertEqual(si.NeedToUpdate(dataname), False)
+        self.assertEqual(si.NeedToUpdate(dataname), False)
 
 
 class MemoryTest(unittest.TestCase):
-  """Unittests for Memory."""
+    """Unittests for Memory."""
 
-  def _CreateMemory(self, update_sec):
-    """Setup a Memory object."""
-    return systeminfo.Memory(update_sec=update_sec)
+    def _CreateMemory(self, update_sec):
+        """Setup a Memory object."""
+        return systeminfo.Memory(update_sec=update_sec)
 
-  def testMemoryExisting(self):
-    """Test memory information collection when a record exists."""
-    mem = self._CreateMemory(1)
+    def testMemoryExisting(self):
+        """Test memory information collection when a record exists."""
+        mem = self._CreateMemory(1)
 
-    dataname, data = (systeminfo.RESOURCENAME_MEMORY, 'testvalue')
-    mem.Update(dataname, data)
+        dataname, data = (systeminfo.RESOURCENAME_MEMORY, "testvalue")
+        mem.Update(dataname, data)
 
-    self.assertEqual(mem.MemoryUsage(), 'testvalue')
+        self.assertEqual(mem.MemoryUsage(), "testvalue")
 
-  def testMemory(self):
-    """Test memory info when there is no record, or record is stale."""
-    mem = self._CreateMemory(1)
+    def testMemory(self):
+        """Test memory info when there is no record, or record is stale."""
+        mem = self._CreateMemory(1)
 
-    mock_file = io.StringIO(MOCK_PROC_MEMINFO)
-    with mock.patch('__builtin__.open', return_value=mock_file, create=True):
-      mem.MemoryUsage()
+        mock_file = io.StringIO(MOCK_PROC_MEMINFO)
+        with mock.patch(
+            "__builtin__.open", return_value=mock_file, create=True
+        ):
+            mem.MemoryUsage()
 
-    # The correct values that mem.MemoryUsage() should produce based on the
-    # mocked /proc/meminfo file.
-    mock_memtotal = 67479130112
-    mock_available = 57475702784
-    mock_percent_used = 14.824475821482267
+        # The correct values that mem.MemoryUsage() should produce based on the
+        # mocked /proc/meminfo file.
+        mock_memtotal = 67479130112
+        mock_available = 57475702784
+        mock_percent_used = 14.824475821482267
 
-    mock_memory = systeminfo.RESOURCE_MEMORY(mock_memtotal, mock_available,
-                                             mock_percent_used)
+        mock_memory = systeminfo.RESOURCE_MEMORY(
+            mock_memtotal, mock_available, mock_percent_used
+        )
 
-    self.assertEqual(mem.resources.get(systeminfo.RESOURCENAME_MEMORY),
-                      mock_memory)
+        self.assertEqual(
+            mem.resources.get(systeminfo.RESOURCENAME_MEMORY), mock_memory
+        )
 
 
 class DiskTest(unittest.TestCase):
-  """Unittests for Disk."""
+    """Unittests for Disk."""
 
-  def _CreateDisk(self, update_sec):
-    """Setup a Disk object."""
-    return systeminfo.Disk(update_sec=update_sec)
+    def _CreateDisk(self, update_sec):
+        """Setup a Disk object."""
+        return systeminfo.Disk(update_sec=update_sec)
 
-  def testDiskPartitionsExisting(self):
-    """Test disk partition information collection when a record exists."""
-    disk = self._CreateDisk(1)
+    def testDiskPartitionsExisting(self):
+        """Test disk partition information collection when a record exists."""
+        disk = self._CreateDisk(1)
 
-    dataname, data = (systeminfo.RESOURCENAME_DISKPARTITIONS, 'testvalue')
-    disk.Update(dataname, data)
+        dataname, data = (systeminfo.RESOURCENAME_DISKPARTITIONS, "testvalue")
+        disk.Update(dataname, data)
 
-    self.assertEqual(disk.DiskPartitions(), 'testvalue')
+        self.assertEqual(disk.DiskPartitions(), "testvalue")
 
-  def testDiskPartitions(self):
-    """Test disk partition info when there is no record, or record is stale."""
-    disk = self._CreateDisk(1)
+    def testDiskPartitions(self):
+        """Test disk partition info when there is no record, or record is stale."""
+        disk = self._CreateDisk(1)
 
-    mock_mounts_file = io.StringIO(MOCK_PROC_MOUNTS)
-    mock_filesystems_file = io.StringIO(MOCK_PROC_FILESYSTEMS)
+        mock_mounts_file = io.StringIO(MOCK_PROC_MOUNTS)
+        mock_filesystems_file = io.StringIO(MOCK_PROC_FILESYSTEMS)
 
-    def _file_returner(fname, _mode):
-      if systeminfo.SYSTEMFILE_PROC_MOUNTS == fname:
-        return mock_mounts_file
-      elif systeminfo.SYSTEMFILE_PROC_FILESYSTEMS == fname:
-        return mock_filesystems_file
+        def _file_returner(fname, _mode):
+            if systeminfo.SYSTEMFILE_PROC_MOUNTS == fname:
+                return mock_mounts_file
+            elif systeminfo.SYSTEMFILE_PROC_FILESYSTEMS == fname:
+                return mock_filesystems_file
 
-    with mock.patch('__builtin__.open', side_effect=_file_returner,
-                    create=True):
-      disk.DiskPartitions()
+        with mock.patch(
+            "__builtin__.open", side_effect=_file_returner, create=True
+        ):
+            disk.DiskPartitions()
 
-    # The expected return value.
-    mock_disk_partitions = [
-        systeminfo.RESOURCE_DISKPARTITION(
-            '/dev/mapper/dhcp--100--106--128--134--vg-root', '/', 'ext4'),
-        systeminfo.RESOURCE_DISKPARTITION('/dev/sdb1', '/work', 'ext4'),
-        systeminfo.RESOURCE_DISKPARTITION('/dev/sda1', '/boot', 'ext2'),
-        systeminfo.RESOURCE_DISKPARTITION(
-            '/dev/sdb1', '/usr/local/autotest', 'ext4'),
-        systeminfo.RESOURCE_DISKPARTITION(
-            '/dev/mapper/dhcp--100--106--128--134--vg-usr+local+google',
-            '/usr/local/google', 'ext4'),
-        systeminfo.RESOURCE_DISKPARTITION(
-            '/dev/mapper/dhcp--100--106--128--134--vg-root',
-            '/home/build', 'ext4'),
-        systeminfo.RESOURCE_DISKPARTITION(
-            '/dev/mapper/dhcp--100--106--128--134--vg-root',
-            '/auto/buildstatic', 'ext4')]
+        # The expected return value.
+        mock_disk_partitions = [
+            systeminfo.RESOURCE_DISKPARTITION(
+                "/dev/mapper/dhcp--100--106--128--134--vg-root", "/", "ext4"
+            ),
+            systeminfo.RESOURCE_DISKPARTITION("/dev/sdb1", "/work", "ext4"),
+            systeminfo.RESOURCE_DISKPARTITION("/dev/sda1", "/boot", "ext2"),
+            systeminfo.RESOURCE_DISKPARTITION(
+                "/dev/sdb1", "/usr/local/autotest", "ext4"
+            ),
+            systeminfo.RESOURCE_DISKPARTITION(
+                "/dev/mapper/dhcp--100--106--128--134--vg-usr+local+google",
+                "/usr/local/google",
+                "ext4",
+            ),
+            systeminfo.RESOURCE_DISKPARTITION(
+                "/dev/mapper/dhcp--100--106--128--134--vg-root",
+                "/home/build",
+                "ext4",
+            ),
+            systeminfo.RESOURCE_DISKPARTITION(
+                "/dev/mapper/dhcp--100--106--128--134--vg-root",
+                "/auto/buildstatic",
+                "ext4",
+            ),
+        ]
 
-    self.assertEqual(
-        disk.resources.get(systeminfo.RESOURCENAME_DISKPARTITIONS),
-        mock_disk_partitions)
+        self.assertEqual(
+            disk.resources.get(systeminfo.RESOURCENAME_DISKPARTITIONS),
+            mock_disk_partitions,
+        )
 
-  def testDiskUsageExisting(self):
-    """Test disk usage information collection when a record exists."""
-    disk = self._CreateDisk(1)
+    def testDiskUsageExisting(self):
+        """Test disk usage information collection when a record exists."""
+        disk = self._CreateDisk(1)
 
-    partition = 'fakepartition'
-    dataname = '%s:%s' % (systeminfo.RESOURCENAME_DISKUSAGE, partition)
-    data = 'testvalue'
+        partition = "fakepartition"
+        dataname = "%s:%s" % (systeminfo.RESOURCENAME_DISKUSAGE, partition)
+        data = "testvalue"
 
-    disk.Update(dataname, data)
+        disk.Update(dataname, data)
 
-    self.assertEqual(disk.DiskUsage(partition), 'testvalue')
+        self.assertEqual(disk.DiskUsage(partition), "testvalue")
 
-  @mock.patch('systeminfo.os')
-  def testDiskUsage(self, MockOs):
-    """Test disk usage info when there is no record or record is stale."""
-    disk = self._CreateDisk(1)
+    @mock.patch("systeminfo.os")
+    def testDiskUsage(self, MockOs):
+        """Test disk usage info when there is no record or record is stale."""
+        disk = self._CreateDisk(1)
 
-    partition = 'fakepartition'
+        partition = "fakepartition"
 
-    # Mock value for test. These values came from statvfs'ing root.
-    mock_statvfs_return = collections.namedtuple(
-        'mock_disk', ['f_bsize', 'f_frsize', 'f_blocks', 'f_bfree', 'f_bavail',
-                      'f_files', 'f_ffree', 'f_favail', 'f_flag', 'f_namemax'])
-    mock_value = mock_statvfs_return(4096, 4096, 9578876, 5332865, 4840526,
-                                     2441216, 2079830, 2079830, 4096, 255)
+        # Mock value for test. These values came from statvfs'ing root.
+        mock_statvfs_return = collections.namedtuple(
+            "mock_disk",
+            [
+                "f_bsize",
+                "f_frsize",
+                "f_blocks",
+                "f_bfree",
+                "f_bavail",
+                "f_files",
+                "f_ffree",
+                "f_favail",
+                "f_flag",
+                "f_namemax",
+            ],
+        )
+        mock_value = mock_statvfs_return(
+            4096,
+            4096,
+            9578876,
+            5332865,
+            4840526,
+            2441216,
+            2079830,
+            2079830,
+            4096,
+            255,
+        )
 
-    MockOs.statvfs.return_value = mock_value
+        MockOs.statvfs.return_value = mock_value
 
-    # Expected results of the test.
-    mock_total = 39235076096
-    mock_free = 21843415040
-    mock_used = 17391661056
-    mock_percent_used = 44.326818720693325
-    mock_diskusage = systeminfo.RESOURCE_DISKUSAGE(mock_total, mock_used,
-                                                   mock_free,
-                                                   mock_percent_used)
+        # Expected results of the test.
+        mock_total = 39235076096
+        mock_free = 21843415040
+        mock_used = 17391661056
+        mock_percent_used = 44.326818720693325
+        mock_diskusage = systeminfo.RESOURCE_DISKUSAGE(
+            mock_total, mock_used, mock_free, mock_percent_used
+        )
 
-    self.assertEqual(disk.DiskUsage(partition), mock_diskusage)
+        self.assertEqual(disk.DiskUsage(partition), mock_diskusage)
 
-  def testBlockDevicesExisting(self):
-    """Test block device information collection when a record exists."""
-    disk = self._CreateDisk(1)
+    def testBlockDevicesExisting(self):
+        """Test block device information collection when a record exists."""
+        disk = self._CreateDisk(1)
 
-    device = '/dev/sda1'
-    dataname = '%s:%s' % (systeminfo.RESOURCENAME_BLOCKDEVICE, device)
-    data = 'testvalue'
+        device = "/dev/sda1"
+        dataname = "%s:%s" % (systeminfo.RESOURCENAME_BLOCKDEVICE, device)
+        data = "testvalue"
 
-    disk.Update(dataname, data)
+        disk.Update(dataname, data)
 
-    self.assertEqual(disk.BlockDevices(device), data)
+        self.assertEqual(disk.BlockDevices(device), data)
 
-  @mock.patch('systeminfo.list_block_devices')
-  @mock.patch('systeminfo.cli')
-  def testBlockDevice(self, mock_cli, mock_list_block_devices):
-    """Test block device info when there is no record or a record is stale."""
-    disk = self._CreateDisk(1)
+    @mock.patch("systeminfo.list_block_devices")
+    @mock.patch("systeminfo.cli")
+    def testBlockDevice(self, mock_cli, mock_list_block_devices):
+        """Test block device info when there is no record or a record is stale."""
+        disk = self._CreateDisk(1)
 
-    mock_device = '/dev/sda1'
-    mock_size = 12345678987654321
-    mock_ids = ['ata-ST1000DM003-1ER162_Z4Y3WQDB-part1']
-    mock_labels = ['BOOT-PARTITION']
+        mock_device = "/dev/sda1"
+        mock_size = 12345678987654321
+        mock_ids = ["ata-ST1000DM003-1ER162_Z4Y3WQDB-part1"]
+        mock_labels = ["BOOT-PARTITION"]
 
-    keys = ['NAME', 'RM', 'TYPE', 'SIZE']
-    BlockDevice = collections.namedtuple('BlockDevice', keys)
-    mock_lsblk = BlockDevice('sda1', 'RM', 'TYPE', mock_size)
-    systeminfo.list_block_devices.return_value = [mock_lsblk]
+        keys = ["NAME", "RM", "TYPE", "SIZE"]
+        BlockDevice = collections.namedtuple("BlockDevice", keys)
+        mock_lsblk = BlockDevice("sda1", "RM", "TYPE", mock_size)
+        systeminfo.list_block_devices.return_value = [mock_lsblk]
 
-    systeminfo.cli.resolve_symlink.return_value = '/dev/sda1'
+        systeminfo.cli.resolve_symlink.return_value = "/dev/sda1"
 
-    def side_effect(*args, **kwargs):
-      cmd = args[0]
-      if systeminfo.SYSTEMFILE_DEV_DISKBY['ids'] in cmd:
-        return '\n'.join(mock_ids)
-      if systeminfo.SYSTEMFILE_DEV_DISKBY['labels'] in cmd:
-        return '\n'.join(mock_labels)
-    systeminfo.cli.run_command.side_effect = side_effect
+        def side_effect(*args, **kwargs):
+            cmd = args[0]
+            if systeminfo.SYSTEMFILE_DEV_DISKBY["ids"] in cmd:
+                return "\n".join(mock_ids)
+            if systeminfo.SYSTEMFILE_DEV_DISKBY["labels"] in cmd:
+                return "\n".join(mock_labels)
 
-    mock_blockdevice = [systeminfo.RESOURCE_BLOCKDEVICE(mock_device,
-                                                        mock_size,
-                                                        mock_ids,
-                                                        mock_labels)]
+        systeminfo.cli.run_command.side_effect = side_effect
 
-    self.assertEqual(disk.BlockDevices(mock_device), mock_blockdevice)
+        mock_blockdevice = [
+            systeminfo.RESOURCE_BLOCKDEVICE(
+                mock_device, mock_size, mock_ids, mock_labels
+            )
+        ]
+
+        self.assertEqual(disk.BlockDevices(mock_device), mock_blockdevice)
 
 
 class Cpu(unittest.TestCase):
-  """Unittests for Cpu."""
+    """Unittests for Cpu."""
 
-  def _CreateCpu(self, update_sec):
-    """Setup a Cpu object."""
-    return systeminfo.Cpu(update_sec=update_sec)
+    def _CreateCpu(self, update_sec):
+        """Setup a Cpu object."""
+        return systeminfo.Cpu(update_sec=update_sec)
 
-  def testCpuTimeExisting(self):
-    """Test cpu timing information collection when a record exists."""
-    cpu = self._CreateCpu(1)
+    def testCpuTimeExisting(self):
+        """Test cpu timing information collection when a record exists."""
+        cpu = self._CreateCpu(1)
 
-    dataname, data = (systeminfo.RESOURCENAME_CPUTIMES, 'testvalue')
-    cpu.Update(dataname, data)
+        dataname, data = (systeminfo.RESOURCENAME_CPUTIMES, "testvalue")
+        cpu.Update(dataname, data)
 
-    self.assertEqual(cpu.CpuTime(), 'testvalue')
+        self.assertEqual(cpu.CpuTime(), "testvalue")
 
-  def testCpuTime(self):
-    """Test cpu timing info when there is no record or record is stale."""
-    cpu = self._CreateCpu(1)
+    def testCpuTime(self):
+        """Test cpu timing info when there is no record or record is stale."""
+        cpu = self._CreateCpu(1)
 
-    mock_file = io.StringIO(MOCK_PROC_STAT)
-    with mock.patch('__builtin__.open', return_value=mock_file, create=True):
-      cpu.CpuTime()
+        mock_file = io.StringIO(MOCK_PROC_STAT)
+        with mock.patch(
+            "__builtin__.open", return_value=mock_file, create=True
+        ):
+            cpu.CpuTime()
 
-    # The expected return value.
-    mock_cpu_name = 'cpu'
-    mock_cpu_total = 7350910560
-    mock_cpu_idle = 7300998160
-    mock_cpu_nonidle = 49912400
+        # The expected return value.
+        mock_cpu_name = "cpu"
+        mock_cpu_total = 7350910560
+        mock_cpu_idle = 7300998160
+        mock_cpu_nonidle = 49912400
 
-    mock_cputimes = [systeminfo.RESOURCE_CPUTIME(mock_cpu_name, mock_cpu_total,
-                                                 mock_cpu_idle,
-                                                 mock_cpu_nonidle)]
+        mock_cputimes = [
+            systeminfo.RESOURCE_CPUTIME(
+                mock_cpu_name, mock_cpu_total, mock_cpu_idle, mock_cpu_nonidle
+            )
+        ]
 
-    self.assertEqual(cpu.resources.get(systeminfo.RESOURCENAME_CPUTIMES),
-                      mock_cputimes)
+        self.assertEqual(
+            cpu.resources.get(systeminfo.RESOURCENAME_CPUTIMES), mock_cputimes
+        )
 
-  def testCpuLoadExisting(self):
-    """Test cpu load information collection when a record exists."""
-    cpu = self._CreateCpu(1)
+    def testCpuLoadExisting(self):
+        """Test cpu load information collection when a record exists."""
+        cpu = self._CreateCpu(1)
 
-    dataname, data = (systeminfo.RESOURCENAME_CPULOADS, 'testvalue')
-    cpu.Update(dataname, data)
+        dataname, data = (systeminfo.RESOURCENAME_CPULOADS, "testvalue")
+        cpu.Update(dataname, data)
 
-    self.assertEqual(cpu.CpuLoad(), 'testvalue')
+        self.assertEqual(cpu.CpuLoad(), "testvalue")
 
-  def testCpuLoad(self):
-    """Test cpu load collection info when we have previous timing data."""
-    cpu = self._CreateCpu(1)
+    def testCpuLoad(self):
+        """Test cpu load collection info when we have previous timing data."""
+        cpu = self._CreateCpu(1)
 
-    # Create a cpu timing record.
-    mock_cpu_prev_name = 'cpu'
-    mock_cpu_prev_total = 7340409560
-    mock_cpu_prev_idle = 7300497160
-    mock_cpu_prev_nonidle = 39912400
+        # Create a cpu timing record.
+        mock_cpu_prev_name = "cpu"
+        mock_cpu_prev_total = 7340409560
+        mock_cpu_prev_idle = 7300497160
+        mock_cpu_prev_nonidle = 39912400
 
-    mock_cputimes_prev = [systeminfo.RESOURCE_CPUTIME(mock_cpu_prev_name,
-                                                      mock_cpu_prev_total,
-                                                      mock_cpu_prev_idle,
-                                                      mock_cpu_prev_nonidle)]
+        mock_cputimes_prev = [
+            systeminfo.RESOURCE_CPUTIME(
+                mock_cpu_prev_name,
+                mock_cpu_prev_total,
+                mock_cpu_prev_idle,
+                mock_cpu_prev_nonidle,
+            )
+        ]
 
-    cpu.Update(systeminfo.RESOURCENAME_CPUPREVTIMES, mock_cputimes_prev)
+        cpu.Update(systeminfo.RESOURCENAME_CPUPREVTIMES, mock_cputimes_prev)
 
-    # Mock and execute.
-    mock_file = io.StringIO(MOCK_PROC_STAT)
-    with mock.patch('__builtin__.open', return_value=mock_file, create=True):
-      cpu.CpuLoad()
+        # Mock and execute.
+        mock_file = io.StringIO(MOCK_PROC_STAT)
+        with mock.patch(
+            "__builtin__.open", return_value=mock_file, create=True
+        ):
+            cpu.CpuLoad()
 
-    # The expected return value.
-    mock_cpu_name = 'cpu'
-    mock_cpu_load = 0.9522902580706599
+        # The expected return value.
+        mock_cpu_name = "cpu"
+        mock_cpu_load = 0.9522902580706599
 
-    mock_cpuloads = [systeminfo.RESOURCE_CPULOAD(mock_cpu_name, mock_cpu_load)]
+        mock_cpuloads = [
+            systeminfo.RESOURCE_CPULOAD(mock_cpu_name, mock_cpu_load)
+        ]
 
-    self.assertEqual(cpu.resources.get(systeminfo.RESOURCENAME_CPULOADS),
-                      mock_cpuloads)
+        self.assertEqual(
+            cpu.resources.get(systeminfo.RESOURCENAME_CPULOADS), mock_cpuloads
+        )
 
 
 class InfoClassCacheTest(unittest.TestCase):
-  """Unittests for checking that information class caching."""
+    """Unittests for checking that information class caching."""
 
-  def testGetCpu(self):
-    """Test caching explicitly for Cpu information objects."""
-    cpus1 = [systeminfo.GetCpu(), systeminfo.GetCpu(),
-             systeminfo.GetCpu(systeminfo.UPDATE_CPU_SEC),
-             systeminfo.GetCpu(update_sec=systeminfo.UPDATE_CPU_SEC)]
+    def testGetCpu(self):
+        """Test caching explicitly for Cpu information objects."""
+        cpus1 = [
+            systeminfo.GetCpu(),
+            systeminfo.GetCpu(),
+            systeminfo.GetCpu(systeminfo.UPDATE_CPU_SEC),
+            systeminfo.GetCpu(update_sec=systeminfo.UPDATE_CPU_SEC),
+        ]
 
-    cpus2 = [systeminfo.GetCpu(10), systeminfo.GetCpu(10),
-             systeminfo.GetCpu(update_sec=10)]
+        cpus2 = [
+            systeminfo.GetCpu(10),
+            systeminfo.GetCpu(10),
+            systeminfo.GetCpu(update_sec=10),
+        ]
 
-    self.assertTrue(all(id(x) == id(cpus1[0]) for x in cpus1))
-    self.assertTrue(all(id(x) == id(cpus2[0]) for x in cpus2))
-    self.assertNotEqual(id(cpus1[0]), id(cpus2[0]))
+        self.assertTrue(all(id(x) == id(cpus1[0]) for x in cpus1))
+        self.assertTrue(all(id(x) == id(cpus2[0]) for x in cpus2))
+        self.assertNotEqual(id(cpus1[0]), id(cpus2[0]))
 
-  def testGetMemory(self):
-    """Test caching explicitly for Memory information objects."""
-    mems1 = [systeminfo.GetMemory(), systeminfo.GetMemory(),
-             systeminfo.GetMemory(systeminfo.UPDATE_MEMORY_SEC),
-             systeminfo.GetMemory(update_sec=systeminfo.UPDATE_MEMORY_SEC)]
+    def testGetMemory(self):
+        """Test caching explicitly for Memory information objects."""
+        mems1 = [
+            systeminfo.GetMemory(),
+            systeminfo.GetMemory(),
+            systeminfo.GetMemory(systeminfo.UPDATE_MEMORY_SEC),
+            systeminfo.GetMemory(update_sec=systeminfo.UPDATE_MEMORY_SEC),
+        ]
 
-    mems2 = [systeminfo.GetMemory(10), systeminfo.GetMemory(10),
-             systeminfo.GetMemory(update_sec=10)]
+        mems2 = [
+            systeminfo.GetMemory(10),
+            systeminfo.GetMemory(10),
+            systeminfo.GetMemory(update_sec=10),
+        ]
 
-    self.assertTrue(all(id(x) == id(mems1[0]) for x in mems1))
-    self.assertTrue(all(id(x) == id(mems2[0]) for x in mems2))
-    self.assertNotEqual(id(mems1[0]), id(mems2[0]))
+        self.assertTrue(all(id(x) == id(mems1[0]) for x in mems1))
+        self.assertTrue(all(id(x) == id(mems2[0]) for x in mems2))
+        self.assertNotEqual(id(mems1[0]), id(mems2[0]))
 
-  def testGetDisk(self):
-    """Test caching explicitly for Disk information objects."""
-    disks1 = [systeminfo.GetDisk(), systeminfo.GetDisk(),
-              systeminfo.GetDisk(systeminfo.UPDATE_MEMORY_SEC),
-              systeminfo.GetDisk(update_sec=systeminfo.UPDATE_MEMORY_SEC)]
+    def testGetDisk(self):
+        """Test caching explicitly for Disk information objects."""
+        disks1 = [
+            systeminfo.GetDisk(),
+            systeminfo.GetDisk(),
+            systeminfo.GetDisk(systeminfo.UPDATE_MEMORY_SEC),
+            systeminfo.GetDisk(update_sec=systeminfo.UPDATE_MEMORY_SEC),
+        ]
 
-    disks2 = [systeminfo.GetDisk(10), systeminfo.GetDisk(10),
-              systeminfo.GetDisk(update_sec=10)]
+        disks2 = [
+            systeminfo.GetDisk(10),
+            systeminfo.GetDisk(10),
+            systeminfo.GetDisk(update_sec=10),
+        ]
 
-    self.assertTrue(all(id(x) == id(disks1[0]) for x in disks1))
-    self.assertTrue(all(id(x) == id(disks2[0]) for x in disks2))
-    self.assertNotEqual(id(disks1[0]), id(disks2[0]))
+        self.assertTrue(all(id(x) == id(disks1[0]) for x in disks1))
+        self.assertTrue(all(id(x) == id(disks2[0]) for x in disks2))
+        self.assertNotEqual(id(disks1[0]), id(disks2[0]))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

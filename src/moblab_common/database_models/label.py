@@ -19,7 +19,8 @@ class Label(declarative_base()):
               in the job_dependencies).
       atomic_group: The atomic group associated with this label.
     """
-    __tablename__ = 'afe_labels'
+
+    __tablename__ = "afe_labels"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(length=255), unique=True)

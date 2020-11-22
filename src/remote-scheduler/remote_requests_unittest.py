@@ -59,14 +59,18 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         self.test_requests.load_requests_from_gcs(test_blob)
 
         test_blob.download_as_string.assert_called_once()
-        mock_error_log.assert_called_once_with("No request list found in test path")
+        mock_error_log.assert_called_once_with(
+            "No request list found in test path"
+        )
 
     @mock.patch("moblab_request_pb2.MoblabRequests")
     def test_load_requests_from_gcs(self, mock_requests_constructor):
         test_blob = mock.Mock()
         mock_requests = mock.Mock()
         mock_requests_constructor.return_value = mock_requests
-        mock_requests.suite_requests = [moblab_request_pb2.MoblabSuiteRunRequest()]
+        mock_requests.suite_requests = [
+            moblab_request_pb2.MoblabSuiteRunRequest()
+        ]
         test_blob.download_as_string.return_value = "Test string"
 
         self.test_requests.load_requests_from_gcs(test_blob)
@@ -76,7 +80,9 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         self.assertEqual(1, len(self.test_requests.requests))
 
     @mock.patch("moblab_request_pb2.MoblabRequests")
-    def test_save_requests_to_gcs_unknown_type(self, mock_requests_constructor):
+    def test_save_requests_to_gcs_unknown_type(
+        self, mock_requests_constructor
+    ):
         test_blob = mock.Mock()
         mock_requests = mock.Mock()
         mock_requests_constructor.return_value = mock_requests
@@ -89,14 +95,18 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         test_blob = mock.Mock()
         mock_requests = mock.Mock()
         mock_requests_constructor.return_value = mock_requests
-        mock_run_suite_request = mock.Mock(run_suite_request.MoblabSuiteRunRequest)
+        mock_run_suite_request = mock.Mock(
+            run_suite_request.MoblabSuiteRunRequest
+        )
         self.test_requests.add_request(mock_run_suite_request)
         mock_proto = mock.Mock()
         mock_requests.suite_requests.add.return_value = mock_proto
 
         self.test_requests.save_requests_to_gcs(test_blob)
 
-        mock_run_suite_request.copy_to_proto.assert_called_once_with(mock_proto)
+        mock_run_suite_request.copy_to_proto.assert_called_once_with(
+            mock_proto
+        )
         mock_requests.suite_requests.add.assert_called_once()
         mock_requests.SerializeToString.assert_called_once()
 
@@ -118,8 +128,12 @@ class MoblabRemoteRequestsTest(unittest.TestCase):
         self.assertListEqual([2], ids)
 
     def test_sort_requests(self):
-        self.test_requests.add_request(TestRemoteRequest(unique_id=2, priority=2))
-        self.test_requests.add_request(TestRemoteRequest(unique_id=1, priority=1))
+        self.test_requests.add_request(
+            TestRemoteRequest(unique_id=2, priority=2)
+        )
+        self.test_requests.add_request(
+            TestRemoteRequest(unique_id=1, priority=1)
+        )
 
         ids = [request.unique_id for request in self.test_requests.requests]
         self.assertListEqual([2, 1], ids)

@@ -8,7 +8,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class IneligibleHostQueue(declarative_base()):
     """Represents an ineligible host queue."""
-    __tablename__ = 'afe_ineligible_host_queues'
+
+    __tablename__ = "afe_ineligible_host_queues"
 
     id = Column(Integer, primary_key=True)
     job_id = Column(Integer, default=None)

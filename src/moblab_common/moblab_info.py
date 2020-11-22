@@ -23,10 +23,12 @@ _ID_FILE_LOCK_PATH = "%s.lock" % MOBLAB_ID_FILENAME
 # from autotest code base.
 
 # File where information about the current device is stored.
-_ETC_LSB_RELEASE = '/etc/lsb-release'
+_ETC_LSB_RELEASE = "/etc/lsb-release"
+
 
 class MoblabInfoError(Exception):
     pass
+
 
 def get_or_create_id():
     """Gets the moblab random id and write it to id file if necessary.
@@ -41,7 +43,9 @@ def get_or_create_id():
         with open(MOBLAB_ID_FILENAME) as id_file:
             random_id = id_file.read()
     except IOError:
-        with lock_util.file_lock(_ID_FILE_LOCK_PATH, exclusive=True, timeout_seconds=1):
+        with lock_util.file_lock(
+            _ID_FILE_LOCK_PATH, exclusive=True, timeout_seconds=1
+        ):
             # Check again to see if another process just created it.
             try:
                 with open(MOBLAB_ID_FILENAME) as id_file:
@@ -62,14 +66,13 @@ NO_SERIAL_NUMBER = "NoSerialNumber"
 
 
 def get_serial_number():
-    """Gets a unique identifier for the moblab.
-
-    """
+    """Gets a unique identifier for the moblab."""
     try:
         return host_connector.HostServicesConnector.get_host_identifier()
     except host_connector.HostServicesException:
         _LOGGER.exception("Failed to get serial number from host.")
     return NO_SERIAL_NUMBER
+
 
 def _get_public_ip_address():
     """
@@ -83,6 +86,7 @@ def _get_public_ip_address():
     except host_connector.HostServicesException:
         _LOGGER.exception("Failed to get ip address from host.")
         raise
+
 
 def get_network_info():
     """
@@ -98,16 +102,10 @@ def get_network_info():
     try:
         ip = _get_public_ip_address()
     except host_connector.HostServicesException:
-        return {
-            'server_ip': None,
-            'is_connected': False
-        }
+        return {"server_ip": None, "is_connected": False}
     else:
-        _LOGGER.info('Established TCP connection with well known server.')
-        return {
-            'server_ip': ip,
-            'is_connected': True
-        }
+        _LOGGER.info("Established TCP connection with well known server.")
+        return {"server_ip": ip, "is_connected": True}
 
 
 def get_version_info():
@@ -119,15 +117,17 @@ def get_version_info():
     """
     lines = open(_ETC_LSB_RELEASE).readlines()
     version_info = {
-        x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}
-    version_info[MoblabConstants.MOBLAB_INSTALL_ID_NAME] = get_or_create_id();
-    version_info[MoblabConstants.MOBLAB_HOST_ID_NAME] = get_serial_number();
+        x.split("=")[0]: x.split("=")[1] for x in lines if "=" in x
+    }
+    version_info[MoblabConstants.MOBLAB_INSTALL_ID_NAME] = get_or_create_id()
+    version_info[MoblabConstants.MOBLAB_HOST_ID_NAME] = get_serial_number()
 
     try:
-        version_info[MoblabConstants.BUILD_VERSION_NAME] = \
-            version_info[MoblabConstants.BUILDER_PATH].split('/')[1].strip()
+        version_info[MoblabConstants.BUILD_VERSION_NAME] = (
+            version_info[MoblabConstants.BUILDER_PATH].split("/")[1].strip()
+        )
     except (KeyError, IndexError):
-        msg = 'Unable to parse ChromeOS release version.'
+        msg = "Unable to parse ChromeOS release version."
         _LOGGER.exception(msg)
         raise MoblabInfoError(msg)
 

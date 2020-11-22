@@ -11,8 +11,8 @@ import mock
 import cloud_storage_speedtest
 import diagnostic_error
 
-class TestCloudStorageSpeedTest(unittest.TestCase):
 
+class TestCloudStorageSpeedTest(unittest.TestCase):
     def testProcessResults(self):
         # test 10mbps down 5mbps up
         data = """{
@@ -23,11 +23,12 @@ class TestCloudStorageSpeedTest(unittest.TestCase):
                 "bytes_per_second": 625000
             }
         }"""
-        expect = 'download 10.0000 mbps\nupload 5.0000 mbps'
+        expect = "download 10.0000 mbps\nupload 5.0000 mbps"
 
         speed_test = cloud_storage_speedtest.CloudStorageSpeedTest()
         result = speed_test._process_results(data)
         self.assertEqual(expect, result)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

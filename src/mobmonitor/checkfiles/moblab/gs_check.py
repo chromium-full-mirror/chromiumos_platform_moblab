@@ -5,7 +5,6 @@
 """Google Storage health checks for devserver."""
 
 
-
 import netifaces
 import os
 
@@ -14,23 +13,23 @@ from util import config
 
 
 GSUTIL_TIMEOUT_SEC = 5
-GSUTIL_USER = 'moblab'
-GSUTIL_INTERNAL_BUCKETS = ['gs://chromeos-image-archive']
-MOBLAB_SUBNET_ADDR = '192.168.231.1'
+GSUTIL_USER = "moblab"
+GSUTIL_INTERNAL_BUCKETS = ["gs://chromeos-image-archive"]
+MOBLAB_SUBNET_ADDR = "192.168.231.1"
 
 
 def GetIp():
-  for iface in netifaces.interfaces():
-    if 'eth' not in iface:
-      continue
-    addrs = netifaces.ifaddresses(iface).get(netifaces.AF_INET)
-    if not addrs:
-      continue
-    for addr in addrs:
-      if MOBLAB_SUBNET_ADDR != addr.get('addr'):
-        return addr['addr']
+    for iface in netifaces.interfaces():
+        if "eth" not in iface:
+            continue
+        addrs = netifaces.ifaddresses(iface).get(netifaces.AF_INET)
+        if not addrs:
+            continue
+        for addr in addrs:
+            if MOBLAB_SUBNET_ADDR != addr.get("addr"):
+                return addr["addr"]
 
-  return 'localhost'
+    return "localhost"
 
 
 # class GsBucket(object):
