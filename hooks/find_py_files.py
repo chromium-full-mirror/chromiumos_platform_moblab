@@ -17,16 +17,19 @@ def find_python_files():
     repo = Repo("/moblab_source/moblab")
     commit = repo.commit("HEAD")
     if len(commit.parents) > 1:
-        print("Not a regular commit")
-        sys.exit(1)
+        sys.exit(0)
 
     diffs = repo.index.diff("HEAD")
 
     filenames = []
     for diff in diffs:
-        filename = diff.b_path
-        if filename.endswith(".py"):
-            filenames.append("%s/%s" % (BASE_DIR, filename))
+        filename = "%s/%s" % (BASE_DIR, diff.b_path)
+        if (
+            filename.endswith(".py")
+            and "third_party/" not in filename
+            and os.path.exists(filename)
+        ):
+            filenames.append(filename)
     print(" ".join(filenames))
 
 

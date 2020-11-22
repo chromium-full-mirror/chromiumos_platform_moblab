@@ -15,7 +15,7 @@ def check_env_is_autopush():
     commit = repo.commit("HEAD")
     if len(commit.parents) > 1:
         print("Not a regular commit")
-        sys.exit(1)
+        sys.exit(0)
 
     diffs = repo.index.diff("HEAD")
 
