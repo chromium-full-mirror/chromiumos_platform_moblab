@@ -5,7 +5,9 @@
 # Crashing on Moblab
 #FROM envoyproxy/envoy:v1.16.0
 
-FROM envoyproxy/envoy:v1.15.2
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+
+FROM ${BASE_REGISTRY_URI}/envoyproxy/envoy:v1.15.2
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
 

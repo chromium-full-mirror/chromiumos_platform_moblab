@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-FROM alpine/git as source
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+
+FROM ${BASE_REGISTRY_URI}/alpine/git as source
 
 WORKDIR /
 RUN git clone https://chromium.googlesource.com/chromiumos/chromite
@@ -15,7 +17,7 @@ RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
 RUN ls /devserver-src/dev-util
 ######################################################################
 
-FROM debian:buster-slim as run
+FROM ${BASE_REGISTRY_URI}/debian:buster-slim as run
 
 COPY --from=source /devserver-src /devserver-src
 COPY --from=source /chromite /chromite

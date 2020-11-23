@@ -2,11 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
 ###############################################################################
-FROM node:15 as build
+FROM ${BASE_REGISTRY_URI}/node:15 as build
 
 # install chrome for protractor tests
 # RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -41,7 +42,7 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 #########################################################################################3
 
-FROM python:3.8-slim-buster
+FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
 WORKDIR /
 

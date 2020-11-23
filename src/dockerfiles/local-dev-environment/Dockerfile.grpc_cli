@@ -5,8 +5,9 @@
 # Usage: docker run -v `pwd`:/ctx/vol --net="host" --rm -it grpc_cli call [grpc service address] [ServiceName].[RpcMethod] '[json request]' --protofiles=vol/[your grpc service proto file]
 # Ex: docker run -v `pwd`:/ctx/vol --net="host" --rm -it grpc_cli call localhost:6002 MoblabConfigurationService.get_settings ' ' --protofiles=vol/protos/moblab_configuration_rpc.proto
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 
-FROM debian:buster-slim as download
+FROM ${BASE_REGISTRY_URI}/debian:buster-slim as download
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	ca-certificates \
