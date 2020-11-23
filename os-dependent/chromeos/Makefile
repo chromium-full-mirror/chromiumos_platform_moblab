@@ -2,19 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-PROTO = "hostservices.proto"
+PROTO = "hostservice.proto"
 WORKDIR="/tmp"
-PROTO_OUT_DIR = ${WORKDIR}/host_services
+PROTO_OUT_DIR = ${WORKDIR}/host_service
 
 all:
 	mkdir -p ${PROTO_OUT_DIR}
-	rm -f ${WORKDIR}/host_services/*pb2*
+	rm -f ${WORKDIR}/host_service/*pb2*
 	python -m grpc_tools.protoc \
-		-I="." \
+		-I="../common" \
 		--python_out=":${PROTO_OUT_DIR}" \
 		--grpc_python_out=":${PROTO_OUT_DIR}" \
 	        ${PROTO}
 
 install:
-	install -t ${DESTDIR}etc/moblab/host_services -D ${PROTO_OUT_DIR}/*
-	install -D *.py ${DESTDIR}etc/moblab/host_services
+	install -t ${DESTDIR}etc/moblab/host_server -D ${PROTO_OUT_DIR}/*
+	install -D host_server_chromeos.py ${DESTDIR}etc/moblab/host_server
+	install -D ../common/host*.py ${DESTDIR}etc/moblab/host_server

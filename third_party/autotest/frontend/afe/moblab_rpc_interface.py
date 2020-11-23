@@ -460,10 +460,17 @@ def get_version_info():
 
     @return: A serialized JSON RPC object.
     """
-    lines = open(_ETC_LSB_RELEASE).readlines()
-    version_response = {
-        x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}
-    version_response['MOBLAB_ID'] = utils.get_moblab_id();
+    # lines = open(_ETC_LSB_RELEASE).readlines()
+    # version_response = {
+    #     x.split('=')[0]: x.split('=')[1] for x in lines if '=' in x}'
+    try:
+        version_info=host_connector.HostServicesConnector.get_system_version()
+    except host_connector.HostServicesException:
+        raise error.RPCException("Failed to get verson informantion.")
+    version_response = {}
+    version_response['CHROMEOS_RELEASE_CHROME_MILESTONE'] = version_info.version
+    version_response['CHROMEOS_RELEASE_DESCRIPTION'] = version_info.description
+    version_response['MOBLAB_ID'] = utils.get_moblab_id()
     version_response['MOBLAB_SERIAL_NUMBER'] = (
         moblab_info.get_serial_number())
     _check_for_system_update()
