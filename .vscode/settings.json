@@ -18,11 +18,16 @@
     ],
     "cSpell.words": [
         "Boto",
+        "DUT's",
         "HCEXECUTION",
         "Popen",
+        "buganizer",
         "cherrypy",
+        "chromeos",
         "crbug",
+        "cros",
         "datefmt",
+        "duts",
         "etime",
         "hcexpect",
         "hcname",
@@ -35,7 +40,10 @@
         "pb",
         "pylint",
         "stime",
-        "testhc"
+        "tast",
+        "testhc",
+        "unstaged",
+        "wifi"
     ],
 
     "java.configuration.runtimes": [
@@ -85,7 +93,8 @@
     "python.formatting.provider": "black",
     "python.formatting.blackArgs": [
         "--line-length=79"
-    ]
+    ],
+    "editor.formatOnSave": true
 
 }
 
