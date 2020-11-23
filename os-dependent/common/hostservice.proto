@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package moblab;
+
+import "google/protobuf/empty.proto";
+
+service MoblabHostService {
+  rpc get_host_identifier(google.protobuf.Empty) returns (HostIdentifierResponse) {}
+  rpc is_service_running(ServiceRunningRequest) returns (ServiceRunningResponse) {}
+  rpc get_disk_info(google.protobuf.Empty) returns (DiskInfoResponse) {}
+  rpc get_ip(google.protobuf.Empty) returns (IpResponse) {}
+  rpc check_for_system_update(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc get_system_update_status(google.protobuf.Empty) returns (SystemUpdateStatusResponse) {}
+  rpc install_system_update(google.protobuf.Empty) returns (SystemUpdateInstallResponse) {}
+  rpc reboot(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc factory_reset(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc get_system_version(google.protobuf.Empty) returns (SystemVersionResponse) {}
+  rpc get_api_version(google.protobuf.Empty) returns (GetApiVersionResponse) {}
+}
+
+// NEXT_TAG = 2
+message HostIdentifierResponse {
+  string identifier = 1;
+}
+
+// NEXT_TAG = 2
+message ServiceRunningRequest {
+  string service = 1;
+}
+
+// NEXT_TAG = 2
+message ServiceRunningResponse {
+  bool is_running = 1;
+}
+
+// NEXT_TAG = 2
+message DiskInfoResponse {
+  string disk_info = 1;
+}
+
+// NEXT_TAG = 2
+message IpResponse {
+  string ip_address = 1;
+}
+
+// NEXT_TAG = 6
+message SystemUpdateStatusResponse {
+  string progress = 1;
+  string current_op = 2;
+  string new_size = 3;
+  string new_version = 4;
+  string last_checked_time = 5;
+}
+
+// NEXT_TAG = 2
+message SystemUpdateInstallResponse {
+  string error = 1;
+}
+
+// NEXT_TAG = 2
+message SystemVersionResponse{
+  string version = 1;
+  string track = 2;
+  string description = 3;
+}
+
+// NEXT_TAG = 2
+message GetApiVersionResponse {
+  int32 version = 1;
+}

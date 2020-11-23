@@ -1,0 +1,66 @@
+#!/bin/sh
+set -e
+
+### BEGIN INIT INFO
+# Provides:           moblab-networking
+# Required-Start:     docker
+# Required-Stop:      docker
+# Default-Start:      2 3 4 5
+# Default-Stop:       0 1 6
+# Short-Description:  Create lightweight, portable, self-sufficient containers.
+# Description: Enable bridge networking and DHCP server on extra NIC port so you
+# can attach a DUT and enable it in moblab.
+### END INIT INFO
+
+
+. /lib/lsb/init-functions
+
+# Some things that run always
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+    start)
+        echo "Starting script moblab "
+        
+        ##################################################################
+        # Edit this for your particular machine setup
+        # sudo ip addr will show all the interfaces on your machine
+        # Pick the correct values for EXT_IFACE and INT_IFACE
+        ##################################################################
+        EXT_IFACE=enp8s0   # Interface that is connected to the internet
+        INT_IFACE=enp10s0  # Interface that is connected to DUT
+        ##################################################################
+        # Do not edit below this line.
+        
+        DHCPD_IFACE=qemubr0
+        SERVER_ADDRESS=192.168.231.1
+        SERVER_NETMASK=255.255.255.0
+        INTERFACE_WAN='WAN'
+        INTERFACE_LAN='LAN'
+        
+        brctl addbr ${DHCPD_IFACE}
+        brctl setfd ${DHCPD_IFACE} 0
+        ifconfig ${DHCPD_IFACE} ${SERVER_ADDRESS} netmask ${SERVER_NETMASK} up
+        
+        docker run --rm --name dhcp -v leases:/var/lib/misc -d --cap-add=NET_ADMIN --network host gcr.io/chromeos-partner-moblab/moblab-dhcp:release --interface ${DHCPD_IFACE}
+        
+        brctl addif ${DHCPD_IFACE} ${INT_IFACE}
+        iptables -w -t nat -A POSTROUTING -o ${EXT_IFACE} -j MASQUERADE
+        iptables -w -A FORWARD -i ${EXT_IFACE} -o ${DHCPD_IFACE} -m state --state RELATED,ESTABLISHED -j ACCEPT
+        iptables -w -A FORWARD -i ${DHCPD_IFACE} -o ${EXT_IFACE} -j ACCEPT
+        
+        ifconfig ${INT_IFACE} up
+        iptables -w -P FORWARD ACCEPT
+    ;;
+    stop)
+        echo "Stopping script moblab-networking"
+        docker stop dhcp
+    ;;
+    *)
+        echo "Usage: /etc/init.d/moblab {start|stop}"
+        exit 1
+    ;;
+esac
+
+exit 0
+
