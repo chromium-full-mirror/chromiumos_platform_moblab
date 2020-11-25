@@ -58,7 +58,7 @@ HARDWARE_AVL_BUG_ID = "bug_id"
 HARDWARE_AVL_PART_NO = "part_id"
 
 STORAGE_QUAL_DISK_SIZE_GB = "tast_disk_size_gb"
-STORAGE_QUAL_DUAL_NAMESPACE = "tast_storage.slcQual"
+STORAGE_QUAL_DUAL_NAMESPACE = "tast_storage_slc_qual"
 
 MAX_BUILD_RESULTS_PAGE = 1000
 
