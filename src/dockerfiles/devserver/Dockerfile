@@ -73,6 +73,7 @@ RUN install -m 0755 host/start_devserver "/usr/bin"
 RUN mkdir /usr/lib/devserver
 RUN install -m 0755 devserver.py strip_package.py /usr/lib/devserver
 RUN install -m 0644  \
+        autoupdate.py \
         builder.py \
         cherrypy_ext.py \
         health_checker.py \
