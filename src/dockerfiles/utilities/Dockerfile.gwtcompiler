@@ -3,7 +3,10 @@
 # found in the LICENSE file.
 
 # NOTE - do not make this one -slim - java will not install.
-FROM debian:buster as build
+
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+
+FROM ${BASE_REGISTRY_URI}/debian:buster as build
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	unzip wget ca-certificates python2 default-jdk apt-utils

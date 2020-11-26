@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-FROM alpine/git as source
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+
+FROM ${BASE_REGISTRY_URI}/alpine/git as source
 
 WORKDIR /
 
@@ -13,7 +15,7 @@ RUN git reset --hard 8196d0bfd0b3b8fbf7f7dbb8310ac43b80311f79
 
 ###############################################################################
 
-FROM debian:buster-slim as run
+FROM ${BASE_REGISTRY_URI}/debian:buster-slim as run
 
 WORKDIR /
 

@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-FROM debian:buster-slim as download
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+
+FROM ${BASE_REGISTRY_URI}/debian:buster-slim as download
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
 	ca-certificates \
@@ -31,7 +33,7 @@ RUN git submodule update --init
 RUN make -j32 grpc_python_plugin
 
 ##############################################################################
-FROM debian:buster-slim
+FROM ${BASE_REGISTRY_URI}/debian:buster-slim
 
 RUN mkdir -p /protoc
 COPY --from=download bin/protoc /protoc

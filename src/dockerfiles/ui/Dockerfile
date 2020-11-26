@@ -1,6 +1,8 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 ######################################################################
@@ -9,7 +11,7 @@ FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 
-FROM node:12 as build
+FROM ${BASE_REGISTRY_URI}/node:12 as build
 
 # install chrome for protractor tests
 # RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -53,7 +55,7 @@ RUN ng build --output-path=dist --output-hashing=all --configuration=production
 ######################################################################
 
 # base image
-FROM nginx:alpine
+FROM ${BASE_REGISTRY_URI}/nginx:alpine
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
      --disabled-password --gecos "" moblab

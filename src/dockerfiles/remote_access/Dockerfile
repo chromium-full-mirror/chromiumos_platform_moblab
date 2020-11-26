@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
@@ -11,7 +12,7 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 ###########################################################
 
-FROM docker:latest as docker
+FROM ${BASE_REGISTRY_URI}/docker:latest as docker
 
 ###########################################################
 
@@ -19,7 +20,7 @@ FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL} as autotest
 
 ###########################################################
 
-FROM linuxserver/openssh-server:latest
+FROM ${BASE_REGISTRY_URI}/linuxserver/openssh-server:latest
 
 COPY src/dockerfiles/remote_access/testing_rsa.pub /
 COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker

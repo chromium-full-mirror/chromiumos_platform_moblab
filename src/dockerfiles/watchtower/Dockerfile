@@ -3,5 +3,6 @@
 # found in the LICENSE file.
 
 # TODO - fix the version we are using.
-FROM containrrr/watchtower:latest
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+FROM ${BASE_REGISTRY_URI}/containrrr/watchtower:latest
 

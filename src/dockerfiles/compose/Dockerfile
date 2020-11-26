@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-FROM docker/compose:alpine-1.27.4
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+
+FROM ${BASE_REGISTRY_URI}/docker/compose:alpine-1.27.4
 
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release

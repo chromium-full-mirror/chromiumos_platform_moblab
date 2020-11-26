@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
@@ -15,7 +16,7 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 ######################################################################
 
-FROM python:3.8-buster as proto_build
+FROM ${BASE_REGISTRY_URI}/python:3.8-buster as proto_build
 
 WORKDIR /
 COPY --from=protoc /protoc/* /usr/local/bin/
@@ -26,7 +27,7 @@ RUN protoc --proto_path /usr/local/autotest/tko \
 
 ####################################################################
 
-FROM python:3.8-slim-buster
+FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
 WORKDIR /
 
