@@ -20,35 +20,6 @@ COPY src/tools/create-moblab-id.py .
 WORKDIR /src/moblab_common
 COPY src/moblab_common/ .
 
-# copy protoc binaries
-COPY --from=protoc /protoc/* /usr/local/bin/
-
-# dir for all proto files
-RUN mkdir -p ./proto/moblab_common/proto/
-
-# copy protoc from across all projects
-COPY src/*/*.proto proto/moblab_common/proto/
-RUN cp -r ./protos/* proto/moblab_common/proto/
-COPY --from=protoc /protoc/include/ proto/moblab_common/proto/
-RUN touch ./proto/__init__.py
-
-RUN protoc \
-    -I=/src/moblab_common/proto/ \
-    -I=/usr/local/bin \
-    --experimental_allow_proto3_optional \
-    --python_out=:/src/moblab_common/proto/ \
-    --grpc_python_out=:/src/moblab_common/proto/ \
-    --plugin=protoc-gen-grpc_python=/usr/local/bin/grpc_python_plugin \
-    /src/moblab_common/proto/moblab_common/proto/*.proto \
-    /usr/local/bin/google/protobuf/empty.proto \
-    /usr/local/bin/google/protobuf/any.proto
-
-RUN cp -r proto/moblab_common/proto/* ./proto/
-RUN touch ./proto/google/__init__.py
-RUN touch ./proto/google/protobuf/__init__.py
-
-#RUN rm -rf /src/moblab_common/proto/moblab_common
-
 COPY src/dockerfiles/moblab_common/setup.py /
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade setuptools wheel

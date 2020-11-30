@@ -17,6 +17,7 @@ setuptools.setup(
         "docker",
         "parallel-ssh",
         "python-nmap",
+        "protobuf",
     ],
     scripts=[
         "/src/tools/create-moblab-id.py",
