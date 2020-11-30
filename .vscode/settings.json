@@ -1,9 +1,8 @@
 {
     "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
     "[typescript]": {
-      "editor.formatOnSave": true
+        "editor.formatOnSave": true
     },
-
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -11,7 +10,9 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/node_modules": true,
-        "**/*.pyc": {"when": "$(basename).py"},
+        "**/*.pyc": {
+            "when": "$(basename).py"
+        }
     },
     "editor.rulers": [
         79
@@ -45,15 +46,13 @@
         "unstaged",
         "wifi"
     ],
-
     "java.configuration.runtimes": [
         {
-          "name": "JavaSE-11",
-          "path": "/usr/lib/jvm/java-11-openjdk-amd64",
-          "default": true
-        },
-      ],
-
+            "name": "JavaSE-11",
+            "path": "/usr/lib/jvm/java-11-openjdk-amd64",
+            "default": true
+        }
+    ],
     "cSpell.enabledLanguageIds": [
         "asciidoc",
         "c",
@@ -89,13 +88,19 @@
     },
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
-
     "python.formatting.provider": "black",
     "python.formatting.blackArgs": [
         "--line-length=79"
     ],
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/core": true
+    },
 
+    "cSpell.diagnosticLevel": "Hint"
 }
 
 
