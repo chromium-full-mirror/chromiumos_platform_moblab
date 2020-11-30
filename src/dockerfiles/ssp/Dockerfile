@@ -25,19 +25,19 @@ RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
 COPY --from=source --chown=moblab /chromite /chromite
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-        bzip2 \
-        ca-certificates \
-        curl \
-        gnupg \
-        lsb-release \
-        python \
-        rsync \
-        ssh \
-        sudo \
-        unzip \
-        wget \
-        iputils-ping \
-        psmisc
+    bzip2 \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    python \
+    rsync \
+    ssh \
+    sudo \
+    unzip \
+    wget \
+    iputils-ping \
+    psmisc
 
 # Install the google cloud sdk
 RUN echo \
@@ -59,7 +59,7 @@ RUN python2.7 -m pip install --upgrade --no-cache-dir -r requirements.txt \
 # TODO - see if we can figure out two versions of the SSP and just load the
 # java one for CTS.
 RUN  wget https://download.java.net/java/GA/jdk9/9.0.4/binaries/\
-openjdk-9.0.4_linux-x64_bin.tar.gz
+    openjdk-9.0.4_linux-x64_bin.tar.gz
 RUN  tar xvf openjdk-9.0.4_linux-x64_bin.tar.gz
 RUN  update-alternatives --install /usr/bin/java java \
     /jdk-9.0.4/bin/java 200000
@@ -67,7 +67,7 @@ RUN  update-alternatives --config java
 # Java 9 has a issue where the ca certificates are not correct,
 # get them from v 13
 RUN  wget https://download.java.net/java/GA/jdk13.0.1/\
-cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz
+    cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz
 RUN  tar xvf openjdk-13.0.1_linux-x64_bin.tar.gz
 RUN  cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/
 RUN  rm -rf jdk-13.0.1
@@ -78,9 +78,16 @@ RUN chown moblab:moblab /usr/local/tast
 RUN mkdir -p /tmp/autotest-tradefed-cache
 RUN chown moblab:moblab /tmp/autotest-tradefed-cache
 
+# Used by autotest to detect it is running on a moblab
+RUN echo "moblab" > /etc/lsb-release
+
 USER moblab
 
-ENV container=ssp_container
+
+# The upstream autotest code that run in the container uses this to determine
+# it is running in a container.  Even though we are running docker not lxc
+# the check is for the string lxc
+ENV container=lxc
 ENV AUTOTEST_WEB=autotest-afe:8888
 
 # Unlike lxc containers which you can start and will keep running on their own,
