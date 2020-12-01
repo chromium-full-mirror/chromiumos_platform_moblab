@@ -25,4 +25,3 @@
 src/dockerfiles/compose/override.env
 src/dockerfiles/compose/docker-compose.override.yml
 src/local_registry.mk
-src/moblab_common/proto/*

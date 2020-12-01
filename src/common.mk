@@ -118,7 +118,6 @@ devserver:
 
 ui: export DOCKER_BUILDKIT=1
 ui: protoc
-	./moblab-ui/protogen_ui.sh
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-ui:${LABEL} \
 		-f dockerfiles/ui/Dockerfile .
 	docker push ${REGISTRY_URI}/moblab-ui:${LABEL}
@@ -191,7 +190,6 @@ dns:
 
 common: export DOCKER_BUILDKIT=1
 common: protoc
-	./moblab_common/protos/protogen.sh
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab_common:${LABEL} \
 		-f dockerfiles/moblab_common/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab_common:${LABEL}
