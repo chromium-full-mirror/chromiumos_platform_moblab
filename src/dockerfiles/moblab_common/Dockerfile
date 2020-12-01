@@ -71,6 +71,7 @@ COPY src/moblab_common/ .
 COPY --from=protoc /protoc/* /usr/local/bin/
 RUN mkdir -p ./proto/moblab_common/proto/
 COPY src/*/*.proto ./proto/moblab_common/proto/
+COPY os-dependent/common/*.proto proto/moblab_common/proto/
 RUN touch ./proto/__init__.py
 
 RUN protoc -I=/src/moblab_common/proto/ \
