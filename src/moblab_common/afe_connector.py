@@ -55,18 +55,13 @@ class AFEConnector(object):
             {"id": 0, "method": method, "params": [params]}
         )
 
-        _LOGGER.debug("%s %s", rpc_url, data)
+        _LOGGER.debug("URL: %s Data: %s", rpc_url, data)
         try:
-            _LOGGER.debug("URL %s", rpc_url)
-            _LOGGER.debug("Data %s ", data)
             response = requests.post(rpc_url, data=data)
             error = self.decode_response(response, "error")
             if error:
-                _LOGGER.error("AFE RPC called %s", rpc_url)
-                _LOGGER.error("failed with error %s", error)
-            _LOGGER.debug("****************************************")
-            _LOGGER.debug("%s %s", response.text, response.content)
-            _LOGGER.debug("****************************************")
+                _LOGGER.error("AFE %s failed with error %s", method, error)
+            _LOGGER.debug("Response: %s", response.text)
             return response
         except requests.exceptions.RequestException as e:
             _LOGGER.error(e)
@@ -794,3 +789,31 @@ class AFEConnector(object):
             if "status_ok" in response and response["status_ok"]
             else False
         )
+
+    def modify_hosts_lock_state(
+        self, new_locked_state, hosts_names, lock_reason
+    ):
+        """Lock/unlock given DUTs by host name
+
+        Args:
+            new_locked_state (bool): lock or unlock DUTs
+            hosts_names ([str]): list of host names (DUTs' IPs)
+            lock_reason: user facing text message
+        Returns:
+            A boolean. True if command was executed without errors.
+        """
+        params = {
+            "host_filter_data": {"hostname__in": hosts_names},
+            "update_data": {
+                "locked": new_locked_state,
+                "lock_reason": lock_reason,
+            },
+        }
+        response = self.send_rpc_command("modify_hosts", params)
+        logging.debug(
+            "modify_hosts call to modified lock state"
+            "request: %s ,response: %s",
+            params,
+            response,
+        )
+        return not self.decode_response(response, "error")
