@@ -28,6 +28,7 @@ RUN mkdir -p ./proto/moblab_common/proto/
 
 # copy protoc from across all projects
 COPY src/*/*.proto proto/moblab_common/proto/
+COPY os-dependent/common/*.proto proto/moblab_common/proto/
 RUN cp -r ./protos/* proto/moblab_common/proto/
 COPY --from=protoc /protoc/include/ proto/moblab_common/proto/
 RUN touch ./proto/__init__.py
