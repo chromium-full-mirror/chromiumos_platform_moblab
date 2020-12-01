@@ -8,7 +8,6 @@ import grpc
 import logging
 import os
 import sys
-import time
 
 from concurrent import futures
 
@@ -16,10 +15,13 @@ import moblab_rpcservice
 import moblab_configuration_rpcservice
 
 from moblab_common.proto import moblabrpc_pb2
-from moblab_common.proto import moblabrpc_pb2_grpc
-
+from moblab_common.proto.moblabrpc_pb2_grpc import (
+    add_MoblabRpcServiceServicer_to_server,
+)
 from moblab_common.proto import moblab_configuration_rpc_pb2
-from moblab_common.proto import moblab_configuration_rpc_pb2_grpc
+from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
+    add_MoblabConfigurationServiceServicer_to_server,
+)
 
 from grpc_reflection.v1alpha import reflection
 
@@ -66,11 +68,11 @@ def serve():
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
     try:
-        moblabrpc_pb2_grpc.add_MoblabRpcServiceServicer_to_server(
+        add_MoblabRpcServiceServicer_to_server(
             moblab_rpcservice.MoblabRpcService(), server
         )
 
-        moblab_configuration_rpc_pb2_grpc.add_MoblabConfigurationServiceServicer_to_server(
+        add_MoblabConfigurationServiceServicer_to_server(
             moblab_configuration_rpcservice.ConfigurationRpcService(), server
         )
 
@@ -85,13 +87,13 @@ def serve():
         )
         reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-        server.add_insecure_port("[::]:6002")
-        logging.info("Starting server on [::]:6002")
+        serving_port = 6002
+        server.add_insecure_port("[::]:%s" % serving_port)
+
         server.start()
-        while True:
-            logging.info("Server sleeping")
-            time.sleep(60 * 60 * 24)
-    except KeyboardInterrupt:
+        logging.info("Starting server port %s" % serving_port)
+        server.wait_for_termination()
+    finally:
         server.stop(0)
 
 

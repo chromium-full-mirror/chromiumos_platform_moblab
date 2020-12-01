@@ -1,6 +1,4 @@
-import logging
 from google.protobuf.json_format import MessageToJson, Parse
-
 
 from moblab_common.afe_connector import AFEConnector
 from settings_store import SettingsStore
@@ -17,39 +15,88 @@ UNLOCK_HOST = False
 PAUSED_DUT_LOCKING_REASON = "Locked by system. Do not change manually"
 
 
+class PauseServiceException(Exception):
+    pass
+
+
 class HostSchedulerPauseService:
+    """Service that manages pausing of host scheduling.
+    Effectively allows to pause/resume all running test suites execution.
+    """
+
     def __init__(self):
         self._settings_store = SettingsStore()
         self._afe_connector = AFEConnector()
 
     def pause_moblab(self, requestor):
+        """Commands to pause the host scheduling.
+
+        Arg:
+            requestor (PauseRequestor): indicate who is requesting to pause
+
+        Returns:
+            The list of PauseRequestor who is currently requesting to pause.
+        """
         duts = self._afe_connector.get_connected_devices()
-        # ToDo: actually lock duts
-        # self._afe_connector.modify_hosts_lock_state(duts, LOCK_HOST, duts, PAUSED_DUT_LOCKING_REASON)
+        hostnames = [dut["hostname"] for dut in duts]
+
+        if not self._afe_connector.modify_hosts_lock_state(
+            LOCK_HOST, hostnames, PAUSED_DUT_LOCKING_REASON
+        ):
+            raise PauseServiceException("Failed to pause host scheduler")
 
         self._set_pause_setting(is_paused=True, requestor=requestor)
         return self.get_pause_status()
 
     def unpause_moblab(self, requestor):
+        """Commands to resume the host scheduling.
+
+        Arg:
+            requestor (PauseRequestor): indicates who is withdrawing
+            pause request.
+
+        Returns:
+            The list of PauseRequestor who is currently requesting to pause.
+        """
         duts = self._afe_connector.get_connected_devices()
-        # ToDo: actually unlock duts
-        # self._afe_connector.modify_hosts_lock_state(duts, UNLOCK_HOST, duts, '')
+        hostnames = [dut["hostname"] for dut in duts]
+
+        if not self._afe_connector.modify_hosts_lock_state(
+            UNLOCK_HOST, hostnames, ""
+        ):
+            raise PauseServiceException("Failed to unpause host scheduler")
 
         self._set_pause_setting(is_paused=False, requestor=requestor)
         return self.get_pause_status()
 
-    def ensure_duts_pause_state(self):
+    def ensure_duts_pause_state(self) -> None:
+        """Enforces consistent state of host scheduling pause across all DUTs.
+        Should be called when new DUT is enrolled.
+
+        Returns None.
+        """
         is_pause = self.get_pause_status()
 
         duts = self._afe_connector.get_connected_devices()
 
-        # ToDo: actually lock duts
-        # if not is_pause:
-        #   self._afe_connector.modify_hosts_lock_state(duts, LOCK_HOST, duts, PAUSED_DUT_LOCKING_REASON)
-        # esle
-        #   self._afe_connector.modify_hosts_lock_state(duts, UNLOCK_HOST, duts, '')
+        if not is_pause:
+            if not self._afe_connector.modify_hosts_lock_state(
+                LOCK_HOST, duts, PAUSED_DUT_LOCKING_REASON
+            ):
+                raise PauseServiceException("Failed to pause host scheduler")
+
+        else:
+            if not self._afe_connector.modify_hosts_lock_state(
+                UNLOCK_HOST, duts, ""
+            ):
+                raise PauseServiceException("Failed to unpause host scheduler")
 
     def get_pause_status(self):
+        """Get a list of requestors who is currently requesting to pause.
+
+        Returns:
+            The list of PauseRequestor.
+        """
         keys = [
             MoblabSettingKey.Name(
                 MoblabSettingKey.MOBLAB_SETTING_LOW_DISK_SPACE
