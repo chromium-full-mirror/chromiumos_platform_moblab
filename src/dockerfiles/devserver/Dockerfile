@@ -10,7 +10,7 @@ WORKDIR /
 RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 WORKDIR /chromite
 RUN git fetch
-RUN git reset --hard 8196d0bfd0b3b8fbf7f7dbb8310ac43b80311f79
+RUN git reset --hard aa250cf881dec006e0137dd40f079d2ce7092067
 
 WORKDIR /devserver-src
 RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
@@ -24,17 +24,17 @@ COPY --from=source /chromite /chromite
 
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-    bzip2 \
-    ca-certificates \
-    curl \
-    gcc-multilib \
-    openssh-server \
-    python-dev procps \
-    python3 \
-    python3-dev \
-    python3-distutils \
-    sudo \
-    unzip
+        bzip2 \
+        ca-certificates \
+        curl \
+        gcc-multilib \
+        openssh-server \
+        python-dev procps \
+        python3 \
+        python3-dev \
+        python3-distutils \
+        sudo \
+        unzip
 
 RUN mkdir /run/sshd
 RUN mkdir -p /config/.ssh/
@@ -92,8 +92,8 @@ EXPOSE 8080
 
 ## Add moblab user
 RUN addgroup --gid 246 moblab && \
-    adduser --gecos "" --ingroup moblab \
-       --disabled-password --uid 246 moblab
+        adduser --gecos "" --ingroup moblab \
+        --disabled-password --uid 246 moblab
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN mkdir -p /static/cache
