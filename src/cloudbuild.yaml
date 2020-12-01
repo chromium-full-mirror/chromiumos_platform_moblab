@@ -100,20 +100,6 @@ steps:
     waitFor:
       - "buster-slim"
 
-  - id: protogen
-    name: "docker:19.03.8"
-    entrypoint: "bash"
-    args: ["/workspace/src/moblab_common/protos/protogen.sh"]
-    waitFor:
-      - "protoc"
-
-  - id: protogen-ui
-    name: "docker:19.03.8"
-    entrypoint: "bash"
-    args: ["/workspace/src/moblab-ui/protos/protogen_ui.sh"]
-    waitFor:
-      - "protoc"
-
   - id: moblab_common
     name: "docker:19.03.8"
     args:
@@ -132,7 +118,7 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
     waitFor:
-      - "protogen"
+      - "protoc"
       - "python-2"
       - "buster-slim"
       - "python-3.8"
@@ -425,7 +411,7 @@ steps:
         "/workspace/src/",
       ]
     waitFor:
-      - "protogen-ui"
+      - "protoc"
       - "node12"
       - "nginx-alpine"
     env:
