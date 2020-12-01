@@ -11,6 +11,8 @@ import grpc
 from moblab_common.proto import hostservice_pb2
 from moblab_common.proto import hostservice_pb2_grpc
 
+from google.protobuf import empty_pb2
+
 DEFAULT_SERVER = "dockerhost:7002"
 
 channel = None
@@ -81,8 +83,7 @@ class HostServicesConnector(object):
         # Call the host service to get a non volatile identifier.
         cls.connect()
         try:
-            request = hostservice_pb2.HostIdentifierRequest()
-            response = cls.stub.get_host_identifier(request)
+            response = cls.stub.get_host_identifier(empty_pb2.Empty())
             return response.identifier
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
@@ -104,8 +105,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.DiskInfoRequest()
-            response = cls.stub.get_disk_info(request)
+            response = cls.stub.get_disk_info(empty_pb2.Empty())
             return response.disk_info
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
@@ -124,8 +124,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.IpRequest()
-            response = cls.stub.get_ip(request)
+            response = cls.stub.get_ip(empty_pb2.Empty())
             return response.ip_address
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
@@ -143,8 +142,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.SystemUpdateCheckRequest()
-            cls.stub.check_for_system_update(request)
+            cls.stub.check_for_system_update(empty_pb2.Empty())
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error checking for system updates")
@@ -170,8 +168,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.SystemUpdateStatusRequest()
-            response = cls.stub.get_system_update_status(request)
+            response = cls.stub.get_system_update_status(empty_pb2.Empty())
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
@@ -193,8 +190,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.SystemUpdateInstallRequest()
-            response = cls.stub.install_system_update(request)
+            response = cls.stub.install_system_update(empty_pb2.Empty())
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
@@ -212,8 +208,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.RebootRequest()
-            cls.stub.reboot(request)
+            cls.stub.reboot(empty_pb2.Empty())
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error rebooting")
@@ -230,8 +225,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.FactoryResetRequest()
-            cls.stub.factory_reset(request)
+            cls.stub.factory_reset(empty_pb2.Empty())
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error factory reset")
@@ -252,8 +246,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            request = hostservice_pb2.SystemVersionRequest()
-            response = cls.stub.get_system_version(request)
+            response = cls.stub.get_system_version(empty_pb2.Empty())
             return response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
