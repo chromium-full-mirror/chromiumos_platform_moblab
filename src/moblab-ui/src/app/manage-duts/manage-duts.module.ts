@@ -21,6 +21,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
+import {MatDialogModule} from '@angular/material/dialog';
 
 import {EditAttributesComponent} from './edit-attributes/edit-attributes.component';
 import {EnrollmentComponent} from './enrollment/enrollment.component';
@@ -29,6 +30,8 @@ import {ManageDutsComponent} from './manage-duts.component';
 import {ServicesModule} from '../services/services.module';
 import {ViewDutsComponent} from './view-duts/view-duts.component';
 import {WidgetsModule} from '../widgets/widgets.module';
+import {FirmwareUpdateConfirmDialog, FirmwareUpdateResultDialog} from './firmware/firmware.component';
+
 
 import {PipesModule} from 'app/pipes/pipes.module';
 
@@ -60,14 +63,17 @@ import {PipesModule} from 'app/pipes/pipes.module';
     RouterModule,
     ServicesModule,
     WidgetsModule,
+    MatDialogModule,
   ],
   declarations: [
     EditAttributesComponent,
     EnrollmentComponent,
     FirmwareComponent,
     ManageDutsComponent,
-    ViewDutsComponent
+    ViewDutsComponent,
+    FirmwareUpdateConfirmDialog,
+    FirmwareUpdateResultDialog,
   ],
   exports: [ManageDutsComponent]
 })
-export class ManageDutsModule {}
+export class ManageDutsModule { }

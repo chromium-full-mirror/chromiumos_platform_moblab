@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>Update Firmware Result</h2>
+<mat-dialog-content class="mat-typography">
+</mat-dialog-content>
+<mat-card *ngFor="let item of data">{{item}}
+  {{item.ip}}<br>
+  <pre>{{item.command_output}}</pre>
+</mat-card>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

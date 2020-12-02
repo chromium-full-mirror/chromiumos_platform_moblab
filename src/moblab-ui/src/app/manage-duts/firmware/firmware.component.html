@@ -3,19 +3,22 @@
     Update Firmware
   </button>
 </mat-card>
-
+<div id="loading-overlay" *ngIf="loading">
+  <div class="loading-spinner-wrapper">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>
 <mat-card>
   <table mat-table [dataSource]="firmware_duts">
     <ng-container matColumnDef="select">
       <th width="10%" mat-header-cell *matHeaderCellDef>
-        <mat-checkbox> </mat-checkbox>
+        <app-table-header-selector class="select-cb"
+         (update)="selectionChanged($event)">
+        </app-table-header-selector>
       </th>
       <td mat-cell *matCellDef="let row">
-        <mat-checkbox
-        (click)="$event.stopPropagation()"
-        (change)="$event ? selection.toggle(row) : null"
-        [checked]="selection.isSelected(row)"
-        > </mat-checkbox>
+        <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+          [checked]="selection.isSelected(row)"> </mat-checkbox>
       </td>
     </ng-container>
 
@@ -38,10 +41,7 @@
       </td>
     </ng-container>
 
-    <tr
-      mat-header-row
-      *matHeaderRowDef="firmwareDisplayedColumns; sticky: true"
-    ></tr>
+    <tr mat-header-row *matHeaderRowDef="firmwareDisplayedColumns; sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: firmwareDisplayedColumns"></tr>
   </table>
 </mat-card>

@@ -394,8 +394,14 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def update_duts_firmware(self, request, _context):
-        self.service.update_duts_firmware(request.ips)
+        results = self.service.update_duts_firmware(request.ips)
         response = moblabrpc_pb2.UpdateDutsFirmwareResponse()
+        for result in results:
+            command_output = moblabrpc_pb2.FirmwareUpdateCommandOutput(
+                ip=result[0], command_output=result[1]
+            )
+            response.outputs.extend([command_output])
+
         return response
 
     def get_num_jobs(self, request, _context):

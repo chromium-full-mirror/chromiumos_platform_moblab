@@ -7,13 +7,11 @@
 import json
 import logging
 import os
-import re
-import subprocess
-
+import ssh2
 
 import cachetools
 import nmap
-from pssh.clients.native import ParallelSSHClient
+from pssh.clients.native.parallel import ParallelSSHClient
 
 
 # Location where dhcp leases are stored.
@@ -86,6 +84,7 @@ class MoblabDUTConnector(object):
             pool_size=20,
             user="root",
             num_retries=1,
+            keepalive_seconds=timeout,
             timeout=timeout,
             pkey="/home/moblab/.ssh/testing_rsa",
         )
@@ -94,35 +93,37 @@ class MoblabDUTConnector(object):
         output = client.run_command(
             command, stop_on_errors=False, timeout=timeout
         )
-        client.join(output)
+        try:
+            client.join(output)
+            for host_output in output:
+                stdout = (
+                    "{}".format("\n".join(host_output.stdout))
+                    if host_output.stdout
+                    else ""
+                )
+                stderr = (
+                    "{}".format("\n".join(host_output.stderr))
+                    if host_output.stderr
+                    else ""
+                )
 
-        for host_output in output:
-            stdout = (
-                "{}".format("".join(host_output.stdout))
-                if host_output.stdout
-                else ""
-            )
-            stderr = (
-                "{}".format("".join(host_output.stderr))
-                if host_output.stderr
-                else ""
-            )
+                exit_code = host_output.exit_code
 
-            exit_code = host_output.exit_code
-
-            if host_output.exception:
-                exception_msg = host_output.exception.args[0]
-                exception_args = host_output.exception.args[1:]
-                stderr += exception_msg % exception_args
-            command_results.append(
-                (host_output.host, stdout, stderr, exit_code)
+                if host_output.exception:
+                    exception_msg = host_output.exception.args[0]
+                    exception_args = host_output.exception.args[1:]
+                    stderr += exception_msg % exception_args
+                command_results.append(
+                    (host_output.host, stdout, stderr, exit_code)
+                )
+            logging.info(
+                "Running command %s on %s resulted in %s",
+                command,
+                ip_addresses,
+                command_results,
             )
-        logging.info(
-            "Running command %s on %s resulted in %s",
-            command,
-            ip_addresses,
-            command_results,
-        )
+        except ssh2.exceptions.SocketRecvError:
+            logging.exception("Command failed to run %s", command)
         return command_results
 
     def get_all_connected_mac(self):
@@ -220,12 +221,9 @@ class MoblabDUTConnector(object):
 
     def update_firmware(self, ip_addresses):
         command_results = self.run_command_on_ips(
-            (
-                "/usr/sbin/chromeos-firmwareupdate --mode autoupdate "
-                "--force --verbose"
-            ),
+            ("/usr/sbin/chromeos-firmwareupdate --mode autoupdate --force"),
             ip_addresses,
-            timeout=300,
+            timeout=120,
         )
         self.run_command_on_ips("reboot", ip_addresses)
         return command_results

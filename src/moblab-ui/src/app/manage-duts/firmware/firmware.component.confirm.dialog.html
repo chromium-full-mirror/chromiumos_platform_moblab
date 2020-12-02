@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Update Firmware</h2>
+<mat-dialog-content class="mat-typography">
+  <p>
+    This will run a forced firmware update on the DUT's selected.
+  </p>
+  <p>
+    Updating firmware can take 3-5 minutes, the DUT should reboot after
+    the update is applied.
+  </p>
+  <p>
+    This is a beta feature, please file bugs if you experience issues.
+  </p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Update</button>
+</mat-dialog-actions>

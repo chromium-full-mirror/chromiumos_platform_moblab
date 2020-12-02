@@ -284,7 +284,15 @@ message UpdateDutsFirmwareRequest {
   repeated string ips = 1;
 }
 
+// NEXT_TAG = 3
+message FirmwareUpdateCommandOutput {
+  string ip = 1;
+  string command_output = 2;
+}
+
+// NEXT_TAG = 2
 message UpdateDutsFirmwareResponse {
+  repeated FirmwareUpdateCommandOutput outputs = 1;
 }
 
 // NEXT_TAG = 9

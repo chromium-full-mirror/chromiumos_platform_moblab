@@ -522,7 +522,7 @@ class MoblabService(object):
         )
 
     def update_duts_firmware(self, ip_addresses):
-        self.dut_connector.update_firmware(ip_addresses)
+        return self.dut_connector.update_firmware(ip_addresses)
 
     def _is_build_staged(self, build_version, build_target, milestone, model):
         """

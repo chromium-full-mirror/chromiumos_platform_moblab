@@ -86,6 +86,7 @@ import {
   UpdateDutsFirmwareResponse,
   UpdateMoblabRequest,
   UpdateMoblabResponse,
+  FirmwareUpdateCommandOutput,
 } from "./moblabrpc_pb";
 
 @Injectable({providedIn: "root"})
@@ -759,7 +760,7 @@ export class MoblabGrpcService {
     });
   }
 
-  updateFirmwareOnDuts(ips: string[], callback: () => void) {
+  updateFirmwareOnDuts(ips: string[], callback: (x: FirmwareUpdateCommandOutput[]) => void) {
     const request = new UpdateDutsFirmwareRequest();
     request.setIpsList(ips);
     const call = this.moblabRpcService.update_duts_firmware(
@@ -770,7 +771,7 @@ export class MoblabGrpcService {
       }
     );
     call.on("data", (response: UpdateDutsFirmwareResponse) => {
-      callback();
+      callback(response.getOutputsList());
     });
   }
 
