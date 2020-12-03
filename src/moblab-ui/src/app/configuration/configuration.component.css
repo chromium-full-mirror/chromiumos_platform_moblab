@@ -155,3 +155,7 @@ mat-list-item {
   margin-top: 25px;
   margin-bottom: 20px;
 }
+
+#test-runner-config {
+  padding: 2px
+}

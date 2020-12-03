@@ -3,8 +3,6 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-import logging
-
 from moblab_common.proto.moblab_configuration_rpc_pb2 import (
     PauseHostSchedulerResponse,
     ResumeHostSchedulerResponse,
@@ -34,6 +32,5 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
 
     def get_host_scheduler_pause_status(self, request, context):
         """Request pause of host scheduling"""
-        logging.info("get_host_scheduler_pause_status is called!")
         requestors = self.pause_service.get_pause_status()
         return GetHostSchedulerPauseStatusResponse(pauseRequestors=requestors)

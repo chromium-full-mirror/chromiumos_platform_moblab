@@ -44,27 +44,27 @@ describe('ConfigurationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          CommonModule,
-          FormsModule,
-          HttpClientModule,
-          MatCardModule,
-          MatDialogModule,
-          MatFormFieldModule,
-          MatIconModule,
-          MatInputModule,
-          MatListModule,
-          MatPaginatorModule,
-          MatProgressSpinnerModule,
-          MatProgressSpinnerModule,
-          MatSnackBarModule,
-          ReactiveFormsModule,
-        ],
-        declarations: [
-          ConfigurationComponent,
-          RebootButtonComponent
-        ]})
+      imports: [
+        BrowserAnimationsModule,
+        CommonModule,
+        FormsModule,
+        HttpClientModule,
+        MatCardModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatListModule,
+        MatPaginatorModule,
+        MatProgressSpinnerModule,
+        MatSnackBarModule,
+        ReactiveFormsModule,
+      ],
+      declarations: [
+        ConfigurationComponent,
+        RebootButtonComponent
+      ]
+    })
       .compileComponents();
   }));
   beforeEach(() => {
@@ -72,7 +72,7 @@ describe('ConfigurationComponent', () => {
     component = fixture.componentInstance;
 
     getNetworkInfoSpy = spyOn<any>(component, 'getNetworkInfo').and.callFake(
-      function() {
+      function () {
         component.setNetworkInfo(
           '000.000.000.000',
           true
@@ -80,7 +80,7 @@ describe('ConfigurationComponent', () => {
       });
 
     getVersionInfoSpy = spyOn<any>(component, 'getVersionInfo').and.callFake(
-      function() {
+      function () {
         component.refreshShownVersionInfo(
           'R00-00000.00.0',
           'mock-release',
@@ -268,7 +268,7 @@ describe('ConfigurationComponent', () => {
       fixture = TestBed.createComponent(ConfigurationComponent);
       component = fixture.componentInstance;
       getCloudConfigurationSpy = spyOn<any>(component, 'getCloudConfiguration').and.callFake(
-        function() {
+        function () {
           component.updateCloudConfigurationForms(
             'fake-boto-key',
             'fake-secret-key',
@@ -278,7 +278,7 @@ describe('ConfigurationComponent', () => {
           )
         });
       getDutWifiInfoSpy = spyOn<any>(component, 'getDutWifiInfo').and.callFake(
-        function() {
+        function () {
           // @ts-ignore
           component.setDutWifiInfo(
             'fake-wifi-name',

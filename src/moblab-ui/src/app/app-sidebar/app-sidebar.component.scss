@@ -18,6 +18,12 @@ mat-toolbar {
   min-height: 70px;
 }
 
+.mat-toolbar-warn {
+  min-height: 34px;
+  height: 34px;
+  background-color: rgb(255, 102, 0);
+}
+
 .moblab-logo-icon {
   transform: scale(2.3);
   vertical-align: middle;

@@ -2,6 +2,17 @@ import {Injectable} from "@angular/core";
 import * as grpcWeb from "grpc-web";
 
 import {MoblabRpcServiceClient} from "./moblabrpc_grpc_web_pb";
+import {MoblabConfigurationServiceClient} from "./moblab_configuration_rpc_grpc_web_pb";
+import {Empty} from "./google/protobuf/empty_pb";
+import {
+  PauseHostSchedulerRequest,
+  PauseHostSchedulerResponse,
+  ResumeHostSchedulerRequest,
+  ResumeHostSchedulerResponse,
+  PauseRequestor,
+  GetHostSchedulerPauseStatusResponse
+} from "./moblab_configuration_rpc_pb"
+
 import {
   AbortJobsRequest,
   AbortJobsResponse,
@@ -88,10 +99,12 @@ import {
   UpdateMoblabResponse,
   FirmwareUpdateCommandOutput,
 } from "./moblabrpc_pb";
+import {MoblabSettingsConstains} from '../constants'
 
 @Injectable({providedIn: "root"})
 export class MoblabGrpcService {
   moblabRpcService = null;
+  configurationRpcClient = null;
 
   constructor() {
     let url = new URL(window.location.href);
@@ -100,9 +113,10 @@ export class MoblabGrpcService {
     console.log(service_url);
 
     this.moblabRpcService = new MoblabRpcServiceClient(
-      service_url.toString(),
-      null,
-      null
+      service_url.toString()
+    );
+    this.configurationRpcClient = new MoblabConfigurationServiceClient(
+      service_url.toString()
     );
   }
 
@@ -712,7 +726,8 @@ export class MoblabGrpcService {
 
   enrollDuts(ips: string[],
     callback: () => void,
-    errorCallback: (msg: string) => void) {
+    errorCallback: (msg: string) => void
+  ) {
     const request = new EnrollDutsRequest();
     request.setIpsList(ips);
     const call = this.moblabRpcService.enroll_duts(
@@ -1044,7 +1059,7 @@ export class MoblabGrpcService {
     request.setBotoKeySecret(boto_key_secret);
     request.setGcsBucketUrl(gcs_bucket_url);
     request.setIsCloudEnabled(is_cloud_enabled);
-    request.setIsRemoteConsoleEnabled(is_remote_console_enabled)
+    request.setIsRemoteConsoleEnabled(is_remote_console_enabled);
     request.setIsRemoteCommandEnabled(is_remote_command_enabled);
 
     const call = this.moblabRpcService.set_cloud_configuration(
@@ -1238,5 +1253,106 @@ export class MoblabGrpcService {
         response.getIsSucceeded()
       )
     });
+  }
+
+  /**
+   *  Returns whether system is on pause and why.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  */
+  get_pause_state(
+    callback: (pause_requesters: string[]) => void,
+    errorHandlingCallback: (errorMsg: string) => void
+  ) {
+    const call = this.configurationRpcClient.get_host_scheduler_pause_status(
+      new Empty(),
+      {},
+      (err: grpcWeb.Error,
+        response: GetHostSchedulerPauseStatusResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+
+    call.on('data', (response: GetHostSchedulerPauseStatusResponse) => {
+      callback(
+        response
+          .getPauserequestorsList()
+          .map(this.map_requestors)
+      )
+    });
+  }
+
+  /**
+   *  Request to pause host scheduling.
+   *  Returns the status of host scheduling.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  */
+  pause_host_scheduling(
+    callback: (pause_requesters: string[]) => void,
+    errorHandlingCallback: (errorMsg: string) => void
+  ) {
+    const request = new PauseHostSchedulerRequest();
+    request.setPauserequestor(PauseRequestor.PAUSE_REQUESTOR_PAUSED_BY_USER);
+
+    const call = this.configurationRpcClient.pause_host_scheduler(
+      request,
+      {},
+      (err: grpcWeb.Error,
+        response: PauseHostSchedulerResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+
+    call.on('data', (response: PauseHostSchedulerResponse) => {
+      callback(
+        response
+          .getPauserequestorsList()
+          .concat(PauseRequestor.PAUSE_REQUESTOR_LOW_DISK_SPACE)
+          .map(this.map_requestors)
+      )
+    });
+  }
+
+  /**
+   *  Request to unpause host scheduling.
+   *  Returns whether system is on pause and why.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  */
+  resume_host_scheduler(
+    callback: (pause_requesters: string[]) => void,
+    errorHandlingCallback: (errorMsg: string) => void
+  ) {
+    const request = new ResumeHostSchedulerRequest();
+    request.setPauserequestor(PauseRequestor.PAUSE_REQUESTOR_PAUSED_BY_USER);
+
+    const call = this.configurationRpcClient.resume_host_scheduler(
+      request,
+      {},
+      (err: grpcWeb.Error,
+        response: ResumeHostSchedulerResponse) => {
+        errorHandlingCallback(err.message);
+      }
+    );
+
+    call.on('data', (response: ResumeHostSchedulerResponse) => {
+      callback(
+        response
+          .getPauserequestorsList()
+          .map(this.map_requestors)
+      )
+    });
+  }
+
+  private map_requestors(requestor: PauseRequestor) {
+    switch (requestor) {
+      case PauseRequestor.PAUSE_REQUESTOR_LOW_DISK_SPACE:
+        return MoblabSettingsConstains.LOW_DISK_SPACE_STRING;
+      case PauseRequestor.PAUSE_REQUESTOR_PAUSED_BY_USER:
+        return MoblabSettingsConstains.USER_REQUEST_STRING;
+      default:
+        throw new Error("Unkown pause requestor");
+    }
   }
 }

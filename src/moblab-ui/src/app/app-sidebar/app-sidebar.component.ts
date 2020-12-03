@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {GlobalInfoService} from 'app/services/services.module';
+import {MoblabSettingsService} from 'app/services/moblab-settings.service';
 import {Feature} from 'app/services/services.module';
+import {MoblabSettingsConstains} from '../constants'
 
 @Component({
   selector: 'app-sidebar',
@@ -20,12 +22,16 @@ export class AppSidebarComponent implements OnInit {
 
   navTabs = [];
   navTestRunMenuOptions = [];
+  pauseRequestors = [];
 
-  constructor(private globalInfo: GlobalInfoService) {
-    this.globalInfo = globalInfo;
+  constructor(
+    private globalInfo: GlobalInfoService,
+    private settingsService: MoblabSettingsService,
+  ) {
     this.addSidebarEntry(
       Feature.DUT_MANAGEMENT, this.navTabs, {
-        route: '/manage_dut', label: 'Manage DUT\'s', icon: 'laptop_chromebook'});
+      route: '/manage_dut', label: 'Manage DUT\'s', icon: 'laptop_chromebook'
+    });
     this.addSidebarEntry(
       Feature.DUT_DETAIL, this.navTabs,
       {route: '/dut_detail', label: 'DUT Detail'});
@@ -34,16 +40,16 @@ export class AppSidebarComponent implements OnInit {
       {route: '/run_tests', label: 'Run Suite', icon: 'play_arrow'});
     this.addSidebarEntry(
       Feature.VIEW_JOBS, this.navTabs,
-        {route: '/view_jobs', label: 'View Jobs', icon: 'visibility'});
+      {route: '/view_jobs', label: 'View Jobs', icon: 'visibility'});
     this.addSidebarEntry(
       Feature.JOB_DETAIL, this.navTabs,
       {route: '/job_detail', label: 'Job Detail'});
     this.addSidebarEntry(
-        Feature.SYSTEM_CONFIGURATION, this.navTabs,
-        {route: '/config', label: 'Configuration', icon: 'settings'});
+      Feature.SYSTEM_CONFIGURATION, this.navTabs,
+      {route: '/config', label: 'Configuration', icon: 'settings'});
     this.addSidebarEntry(
-        Feature.MOBMONITOR, this.navTabs,
-        {route: '/mobmonitor', label: 'Mobmonitor', icon: 'security'});
+      Feature.MOBMONITOR, this.navTabs,
+      {route: '/mobmonitor', label: 'Mobmonitor', icon: 'security'});
     this.addSidebarEntry(Feature.ADVANCED_SETTINGS, this.navTabs, {
       route: '/advanced',
       label: 'Advanced Settings',
@@ -55,8 +61,8 @@ export class AppSidebarComponent implements OnInit {
       icon: 'bug_report'
     });
     this.addSidebarEntry(
-        Feature.DOCUMENTATION, this.navTabs,
-        {route: '/documentation', label: 'Documentation', icon: 'help'});
+      Feature.DOCUMENTATION, this.navTabs,
+      {route: '/documentation', label: 'Documentation', icon: 'help'});
   }
 
   getErrors() {
@@ -92,9 +98,17 @@ export class AppSidebarComponent implements OnInit {
     return `http://${hostname}:${port}/static/index.html`;
   }
 
-  ngOnInit() {}
+  ngOnInit(): void {
+    this.settingsService.pauseRequestors.subscribe(requestors => {
+      this.pauseRequestors = requestors;
+    });
+  }
 
-  onSend(event) {
-    console.log(event);
+  getPausedDueToUser(): string[] {
+    return this.pauseRequestors.filter(p => p === MoblabSettingsConstains.USER_REQUEST_STRING);
+  }
+
+  getPausedDueToLowDisk(): string[] {
+    return this.pauseRequestors.filter(p => p === MoblabSettingsConstains.LOW_DISK_SPACE_STRING);
   }
 }

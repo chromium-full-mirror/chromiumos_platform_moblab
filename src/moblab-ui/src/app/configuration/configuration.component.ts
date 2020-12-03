@@ -5,12 +5,12 @@ import {
   OnInit,
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Validators} from '@angular/forms';
 
 import {leadingTrailingWhitespaceValidator} from '../utils/validators';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
+import {MoblabSettingsService, USER_REQUEST_STRING} from '../services/moblab-settings.service';
 
 const URL = 'https://google.com/api/';
 
@@ -32,6 +32,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   isCloudEnabled = false;
   isRemoteConsoleEnabled = false;
   isRemoteCommandEnabled = false;
+  isHostSchedulerPauseRequested: boolean = false;
 
   botoKeyIDForm = new FormControl('', {
     validators: [Validators.required],
@@ -75,16 +76,18 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
   constructor(
     private changeDetector: ChangeDetectorRef,
-    private dialog: MatDialog,
     private moblabRpcService: MoblabGrpcService,
     private snackBar: MatSnackBar,
+    private settingsService: MoblabSettingsService,
   ) { }
 
   ngOnInit(): void {
     this.bucketURLForm.valueChanges.subscribe(value => {
       this.formatBucketLink();
     });
-
+    this.settingsService.pauseRequestors.subscribe(requestors => {
+      this.isHostSchedulerPauseRequested = requestors && requestors.includes(USER_REQUEST_STRING);
+    });
     this.getNetworkInfo();
     this.getCloudConfiguration();
     this.getVersionInfo();
@@ -371,6 +374,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     });
   }
 
+  // ToDo: consolidate dialogs into sharable directory
+  setOffError(dialogue: string) {
+    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
+      verticalPosition: 'top',
+      panelClass: ["snack-error"],
+    });
+  }
+
   updateCloudConfigurationForms(
     boto_key_id: string,
     boto_key_secret: string,
@@ -402,5 +413,28 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.lastFetchedIsRemoteCommandEnabled = this.isRemoteCommandEnabled;
 
     this.configurationLoading = false;
+  }
+
+  pauseClick() {
+    this.moblabRpcService.pause_host_scheduling(
+      (pauseRequesters: string[]) => {
+        this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+      },
+      (msg: string) => {
+        console.log('pause_host_scheduling call failed');
+        this.setOffError('Failed to pause host scheduling: ' + msg);
+      }
+    )
+  }
+  resumeClick() {
+    this.moblabRpcService.resume_host_scheduler(
+      (pauseRequesters: string[]) => {
+        this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+      },
+      (msg: string) => {
+        console.log('resume_host_scheduler call failed');
+        this.setOffError('Failed to resume host scheduling: ' + msg);
+      }
+    )
   }
 }

@@ -26,12 +26,13 @@ class SettingsStore:
     def get_settings(self, keys):
         """Returns the list of active"""
         if keys:
+            session = self.db.get_session()
             results = (
-                self.db.get_session()
-                .query(MoblabSettings)
+                session.query(MoblabSettings)
                 .filter(MoblabSettings.key.in_(keys))
                 .all()
             )
+            session.close()
             if results:
                 return [r.value or r.default_value for r in results]
         return None
@@ -54,3 +55,4 @@ class SettingsStore:
             )
             setting.value = value
         session.commit()
+        session.close()

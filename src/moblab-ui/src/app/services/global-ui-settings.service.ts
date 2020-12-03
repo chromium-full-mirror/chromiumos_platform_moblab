@@ -25,8 +25,7 @@ export enum Feature {
   TOOLBAR_PAGE_INFORMATION,
   JOB_DETAIL,
   DUT_DETAIL
-}
-;
+};
 
 @Injectable()
 export class GlobalInfoService {
@@ -39,8 +38,6 @@ export class GlobalInfoService {
     Feature.DUT_DETAIL,
     Feature.SYSTEM_CONFIGURATION
   ];
-
-  constructor() {};
 
   getUIState() {
     return UIState.NEEDS_SETUP;
