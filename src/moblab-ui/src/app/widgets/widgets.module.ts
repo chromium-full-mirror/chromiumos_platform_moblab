@@ -11,6 +11,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatListModule} from '@angular/material/list';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTableModule} from '@angular/material/table';
 import {NgModule} from '@angular/core';
@@ -23,6 +24,7 @@ import {UpdateButtonComponent} from './update-button/update-button.component';
 
 import {FeedbackComponent, SubmissionResultDialog} from './feedback/feedback.component';
 import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedback/feedback.module';
+import {ButtonWithProgressComponent} from './button-with-progress/button-with-progress.component';
 
 
 @NgModule({
@@ -35,6 +37,7 @@ import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedbac
     SubmissionResultDialog,
     TableHeaderSelectorComponent,
     UpdateButtonComponent,
+    ButtonWithProgressComponent,
   ],
   exports: [
     FeedbackComponent,
@@ -43,6 +46,7 @@ import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedbac
     RebootButtonComponent,
     TableHeaderSelectorComponent,
     UpdateButtonComponent,
+    ButtonWithProgressComponent,
   ],
   imports: [
     BrowserAnimationsModule,
@@ -59,10 +63,11 @@ import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedbac
     MatIconModule,
     MatListModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
     ReactiveFormsModule,
     ScreenshotFeedbackModule,
   ]
 })
-export class WidgetsModule {}
+export class WidgetsModule { }
