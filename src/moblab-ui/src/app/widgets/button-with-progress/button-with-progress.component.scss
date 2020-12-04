@@ -1,0 +1,13 @@
+.container {
+    display: grid;
+    grid-template-areas: "content";
+}
+
+.button {
+    grid-area: content;
+}
+
+.spinner {
+    grid-area: content;
+    z-index: 10;
+}

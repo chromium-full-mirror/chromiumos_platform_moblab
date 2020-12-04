@@ -1,0 +1,10 @@
+<div class="container">
+    <div class="button">
+        <button mat-raised-button color="primary" [disabled]="isLoading" (click)="onButtonClick()">
+            {{caption}}
+        </button>
+    </div>
+    <div *ngIf="isLoading" class="spinner" fxLayout="row" fxLayoutAlign="center center">
+        <mat-spinner diameter="35" color="primary"></mat-spinner>
+    </div>
+</div>
