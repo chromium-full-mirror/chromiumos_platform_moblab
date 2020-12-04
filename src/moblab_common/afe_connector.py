@@ -27,7 +27,7 @@ def enroll_dut(ip_address):
     afe_container = client.containers.get("autotest-afe")
     cmd = "/usr/local/autotest/cli/atest host create %s" % ip_address
     _LOGGER.debug(cmd)
-    (exit_code, output) = afe_container.exec_run(cmd)
+    (_, output) = afe_container.exec_run(cmd)
     _LOGGER.debug(output)
 
 
@@ -505,7 +505,7 @@ class AFEConnector(object):
             _LOGGER.error(params)
             if hostname in ip_addresses:
                 response = self.send_rpc_command("delete_host", params)
-            _LOGGER.error(response)
+                _LOGGER.error(response)
 
     def abort_host_queue_entries(self, job_ids):
         response = self.send_rpc_command(
@@ -811,7 +811,7 @@ class AFEConnector(object):
         }
         response = self.send_rpc_command("modify_hosts", params)
         logging.debug(
-            "modify_hosts call to modified lock state"
+            "modify_hosts call to modified lock state "
             "request: %s ,response: %s",
             params,
             response,
