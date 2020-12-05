@@ -11,7 +11,6 @@ from moblab_common.proto.moblab_configuration_rpc_pb2 import (
 from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
     MoblabConfigurationServiceServicer,
 )
-from moblab_common.proto.google.protobuf.empty_pb2 import Empty
 from host_scheduler_pause_service import HostSchedulerPauseService
 
 
