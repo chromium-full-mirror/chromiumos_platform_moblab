@@ -69,27 +69,32 @@ class HostSchedulerPauseService:
         self._set_pause_setting(is_paused=False, requestor=requestor)
         return self.get_pause_status()
 
-    def ensure_duts_pause_state(self) -> None:
+    def ensure_duts_pause_state(self, hostnames: [str] = None) -> None:
         """Enforces consistent state of host scheduling pause across all DUTs.
         Should be called when new DUT is enrolled.
+
+        Arg:
+            hostnames ([str]): optional list of host names
 
         Returns None.
         """
         is_pause = self.get_pause_status()
 
-        duts = self._afe_connector.get_connected_devices()
+        if not hostnames:
+            duts = self._afe_connector.get_connected_devices()
+            hostnames = [dut["hostname"] for dut in duts]
 
         if not is_pause:
             if not self._afe_connector.modify_hosts_lock_state(
-                LOCK_HOST, duts, PAUSED_DUT_LOCKING_REASON
+                UNLOCK_HOST, hostnames, ""
             ):
-                raise PauseServiceException("Failed to pause host scheduler")
+                raise PauseServiceException("Failed to unpause host scheduler")
 
         else:
             if not self._afe_connector.modify_hosts_lock_state(
-                UNLOCK_HOST, duts, ""
+                LOCK_HOST, hostnames, PAUSED_DUT_LOCKING_REASON
             ):
-                raise PauseServiceException("Failed to unpause host scheduler")
+                raise PauseServiceException("Failed to pause host scheduler")
 
     def get_pause_status(self):
         """Get a list of requestors who is currently requesting to pause.

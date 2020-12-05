@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -10,7 +11,10 @@ import {Validators} from '@angular/forms';
 
 import {leadingTrailingWhitespaceValidator} from '../utils/validators';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
-import {MoblabSettingsService, USER_REQUEST_STRING} from '../services/moblab-settings.service';
+import {MoblabConfigurationGrpcService} from '../services/moblab-configuration-grpc.service';
+import {MoblabSettingsService} from '../services/moblab-settings.service';
+import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component'
+import {MoblabSettingsConstains} from '../constants'
 
 const URL = 'https://google.com/api/';
 
@@ -28,6 +32,8 @@ function gsURLValidator(control) {
   styleUrls: ['./configuration.component.css']
 })
 export class ConfigurationComponent implements OnInit, AfterContentInit {
+  @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
+  @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
   errors = false;
   isCloudEnabled = false;
   isRemoteConsoleEnabled = false;
@@ -79,6 +85,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private moblabRpcService: MoblabGrpcService,
     private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
+    private moblabConfigurationRpcService: MoblabConfigurationGrpcService,
   ) { }
 
   ngOnInit(): void {
@@ -86,7 +93,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.formatBucketLink();
     });
     this.settingsService.pauseRequestors.subscribe(requestors => {
-      this.isHostSchedulerPauseRequested = requestors && requestors.includes(USER_REQUEST_STRING);
+      this.isHostSchedulerPauseRequested =
+        requestors && requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
     });
     this.getNetworkInfo();
     this.getCloudConfiguration();
@@ -415,26 +423,36 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.configurationLoading = false;
   }
 
-  pauseClick() {
-    this.moblabRpcService.pause_host_scheduling(
-      (pauseRequesters: string[]) => {
-        this.settingsService.updateHostSchedulingStatus(pauseRequesters);
-      },
-      (msg: string) => {
-        console.log('pause_host_scheduling call failed');
-        this.setOffError('Failed to pause host scheduling: ' + msg);
-      }
-    )
+  public async pauseClick() {
+    this.pauseButton.setIsLoadingStatus(true);
+
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    try {
+      const pauseRequesters = await this.moblabConfigurationRpcService.pause_host_scheduling();
+      this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+    }
+    catch (error) {
+      console.log('pause_host_scheduling call failed with:' + error);
+      this.setOffError('Failed to pause host scheduling: ' + error);
+    }
+    finally {
+      this.pauseButton.setIsLoadingStatus(false);
+    }
   }
-  resumeClick() {
-    this.moblabRpcService.resume_host_scheduler(
-      (pauseRequesters: string[]) => {
-        this.settingsService.updateHostSchedulingStatus(pauseRequesters);
-      },
-      (msg: string) => {
-        console.log('resume_host_scheduler call failed');
-        this.setOffError('Failed to resume host scheduling: ' + msg);
-      }
-    )
+
+  public async resumeClick() {
+    this.resumeButton.setIsLoadingStatus(true);
+    try {
+      const pauseRequesters = await this.moblabConfigurationRpcService.resume_host_scheduler()
+      this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+    }
+    catch (error) {
+      console.log('resume_host_scheduler call failed with:' + error);
+      this.setOffError('Failed to resume host scheduling: ' + error);
+    }
+    finally {
+      this.resumeButton.setIsLoadingStatus(false);
+    }
   }
 }

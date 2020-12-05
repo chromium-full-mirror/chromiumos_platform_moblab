@@ -140,14 +140,12 @@
     <div id="test-runner-config" fxLayout="row" fxLayoutAlign="space-between center">
       <span>Job Scheduler status:</span>
       <span><b>{{isHostSchedulerPauseRequested ? 'Paused' : "Active"}}</b></span>
-      <button *ngIf="!isHostSchedulerPauseRequested" class="pause-button" mat-raised-button color="primary"
-        (click)="pauseClick()">
-        Pause
-      </button>
-      <button *ngIf="isHostSchedulerPauseRequested" class="resume-button" mat-raised-button color="primary"
-        (click)="resumeClick()">
-        Resume
-      </button>
+      <app-button-with-progress #pauseButton *ngIf="!isHostSchedulerPauseRequested" caption="Pause"
+        (buttonClick)="pauseClick()">
+      </app-button-with-progress>
+      <app-button-with-progress #resumeButton *ngIf="isHostSchedulerPauseRequested" caption="Resume"
+        (buttonClick)="resumeClick()">
+      </app-button-with-progress>
     </div>
   </mat-card-content>
 </mat-card>

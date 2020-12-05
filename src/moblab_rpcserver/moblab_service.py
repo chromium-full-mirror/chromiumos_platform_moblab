@@ -25,6 +25,7 @@ from moblab_common import moblab_build_connector
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
+from host_scheduler_pause_service import HostSchedulerPauseService
 
 MilestonePair = namedtuple("MilestonePair", ["milestone", "is_staged"])
 BuildVersionPair = namedtuple(
@@ -91,6 +92,7 @@ class MoblabService(object):
         )
         self.setup_devserver_connector()
         self.dut_connector = dut_connector.MoblabDUTConnector()
+        self.pause_service = HostSchedulerPauseService()
 
     def _find_dut_id_given_ip(self, dut_hostname):
         """Given an ip address, will return the id given to the DUT by AFE.
@@ -508,6 +510,7 @@ class MoblabService(object):
 
     def enroll_duts(self, ip_addresses):
         self.afe_connector.enroll_duts(ip_addresses)
+        self.pause_service.ensure_duts_pause_state(list(ip_addresses))
 
     def unenroll_duts(self, ip_addresses):
         self.afe_connector.unenroll_duts(ip_addresses)
