@@ -74,7 +74,7 @@ class JobAborter(DockerContainerRunning):
 
 
 class Scheduler(DockerContainerRunning):
-    SERVICES = {"autotest-monitordb": "Scheduler"}
+    SERVICES = {"autotest-monitor-db": "Scheduler"}
 
 
 class AFEServer(DockerContainerRunning):
