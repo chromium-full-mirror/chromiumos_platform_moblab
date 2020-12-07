@@ -40,3 +40,5 @@ COPY --from=download bin/protoc /protoc
 COPY --from=download /include /protoc/include
 COPY --from=download /usr/local/bin/protoc-gen-grpc-web /protoc
 COPY --from=download /grpc/bins/opt/grpc_python_plugin /protoc
+
+RUN cp -r /protoc/* /usr/local/bin/

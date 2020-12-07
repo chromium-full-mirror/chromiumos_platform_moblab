@@ -36,15 +36,6 @@ RUN ngcc
 # install and cache app dependencies
 # add app
 COPY ./moblab-ui /app
-COPY ./moblab_common/protos/moblabrpc.proto /app
-COPY --from=protoc /protoc/include/ /app
-
-COPY --from=protoc /protoc/* /usr/local/bin/
-RUN protoc -I=/app --js_out=import_style=commonjs:/app/src/app/services \
-    --grpc-web_out=import_style=commonjs+dts,mode=grpcwebtext:/app/src/app/services \
-    /app/moblabrpc.proto \
-    /app/google/protobuf/empty.proto \
-    /app/google/protobuf/any.proto
 
 # run tests
 #RUN ng test --watch=false
