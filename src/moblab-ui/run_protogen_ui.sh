@@ -13,6 +13,6 @@ echo "cd $moblab_dir"
 cd $moblab_dir
 
 docker run --rm \
-    -v `pwd`:/protoc/volume \
+    -v `pwd`:/workspace \
     gcr.io/chromeos-partner-moblab/protoc:autopush \
-    bash /protoc/volume/src/moblab-ui/protogen_ui.sh
+    bash /workspace/src/moblab-ui/protogen_ui.sh

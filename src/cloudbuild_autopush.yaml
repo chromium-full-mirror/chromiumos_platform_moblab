@@ -103,14 +103,14 @@ steps:
   - id: protogen
     name: "${_REGISTRY_URI}/protoc:${_LABEL}"
     entrypoint: "bash"
-    args: ["/workspace/src/moblab_common/protos/run_protogen.sh"]
+    args: ["/workspace/src/moblab_common/protos/protogen.sh"]
     waitFor:
       - "protoc"
 
   - id: protogen-ui
     name: "${_REGISTRY_URI}/protoc:${_LABEL}"
     entrypoint: "bash"
-    args: ["/workspace/src/moblab-ui/run_protogen_ui.sh"]
+    args: ["/workspace/src/moblab-ui/protogen_ui.sh"]
     waitFor:
       - "protoc"
 

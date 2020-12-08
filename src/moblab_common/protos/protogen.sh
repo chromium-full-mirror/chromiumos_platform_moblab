@@ -8,7 +8,7 @@ set +x
 
 echo "Running protogen inside protoc container"
 
-cd /protoc/volume/src
+cd /workspace/src
 
 mkdir -p moblab_common/proto
 
@@ -20,13 +20,13 @@ cp ../os-dependent/common/*.proto protos_temp/moblab_common/proto/
 
 
 protoc \
-    -I=/protoc/volume/src/protos_temp/ \
+    -I=/workspace/src/protos_temp/ \
     -I=/protoc/include/ \
     --experimental_allow_proto3_optional \
-    --python_out=:/protoc/volume/src/ \
-    --grpc_python_out=:/protoc/volume/src/ \
+    --python_out=:/workspace/src/ \
+    --grpc_python_out=:/workspace/src/ \
     --plugin=protoc-gen-grpc_python=/protoc/grpc_python_plugin \
-    /protoc/volume/src/protos_temp/moblab_common/proto/*.proto
+    /workspace/src/protos_temp/moblab_common/proto/*.proto
 
 rm -dr protos_temp
 
