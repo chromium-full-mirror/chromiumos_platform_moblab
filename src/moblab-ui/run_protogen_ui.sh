@@ -12,7 +12,22 @@ moblab_dir="$(dirname "$(dirname "$(dirname "$(readlink -f "$0")")")")"
 echo "cd $moblab_dir"
 cd $moblab_dir
 
+if [ -z "${SOURCE_ROOT}" ]
+then
+    SOURCE_ROOT=$(pwd)
+fi
+
+if [ -z "${REGISTRY}" ]
+then
+    REGISTRY=gcr.io/chromeos-partner-moblab
+fi
+
+if [ -z "${LABEL}" ]
+then
+    LABEL=autopush
+fi
+
 docker run --rm \
-    -v `pwd`:/workspace \
-    gcr.io/chromeos-partner-moblab/protoc:autopush \
-    bash /workspace/src/moblab-ui/protogen_ui.sh
+-v ${SOURCE_ROOT}:/workspace \
+${REGISTRY}/protoc:${LABEL} \
+bash /workspace/src/moblab-ui/protogen_ui.sh
