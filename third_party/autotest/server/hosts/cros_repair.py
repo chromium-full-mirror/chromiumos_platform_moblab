@@ -37,7 +37,12 @@ from chromite.lib import timeout_util
 
 MIN_BATTERY_LEVEL = 50.0
 
-DEFAULT_SERVO_RESET_TRIGGER = ('ssh', 'stop_start_ui')
+DEFAULT_SERVO_RESET_TRIGGER = (
+        'ping',
+        'ssh',
+        'stop_start_ui',
+        'power',
+)
 
 
 # _DEV_MODE_ALLOW_POOLS - The set of pools that are allowed to be
@@ -85,11 +90,30 @@ _DEV_MODE_ALWAYS_ALLOWED = global_config.global_config.get_config_value(
 # the 'cros' verifier; it's listed as an provision trigger as a
 # simplification.  The ultimate fix is to split the 'cros' verifier
 # into smaller individual verifiers.
-_CROS_PROVISION_TRIGGERS = ('power', 'rwfw', 'python', 'cros',
-                            'dev_default_boot',)
+_CROS_PROVISION_TRIGGERS = (
+        'power',
+        'rwfw',
+        'fwstatus',
+        'python',
+        'cros',
+        'dev_default_boot',
+)
 _CROS_POWERWASH_TRIGGERS = ('tpm', 'good_provision', 'ext4',)
-_CROS_USB_TRIGGERS = ('ssh', 'writable', 'stop_start_ui',)
-_JETSTREAM_USB_TRIGGERS = ('ssh', 'writable',)
+_CROS_USB_TRIGGERS = (
+        'ping',
+        'ssh',
+        'writable',
+        'stop_start_ui',
+)
+_JETSTREAM_USB_TRIGGERS = (
+        'ping',
+        'ssh',
+        'writable',
+)
+_CROS_FIRMWARE_TRIGGERS = (
+        'ping',
+        'ssh',
+)
 _CROS_USB_DEPENDENCIES = ('usb_drive', )
 
 
@@ -127,7 +151,22 @@ class ACPowerVerifier(hosts.Verifier):
     def _validate_battery(self, host, info):
         try:
             charging_state = info['Battery']['state']
-            if charging_state == self.BATTERY_DISCHARGING:
+            battery_level = float(info['Battery']['percentage'])
+
+            # Collect info to determine which battery level is better to call
+            # as MIN_BATTERY_LEVEL for DUTs in the lab.
+            if battery_level < cros_constants.MIN_BATTERY_LEVEL:
+                level_by_10 = int(math.floor(battery_level / 10.0)) * 10
+                metrics_data = {
+                        'host': host.hostname,
+                        'level': level_by_10,
+                        'mode': charging_state
+                }
+                metrics.Counter('chromeos/autotest/battery/state2').increment(
+                        fields=metrics_data)
+
+            if (charging_state == self.BATTERY_DISCHARGING
+                        and battery_level < self.BATTERY_DISCHARGE_MIN):
                 logging.debug('Try to fix discharging state of the battery. '
                               'Possible that a test left wrong state.')
                 # Here is the chance that battery is discharging because
@@ -140,12 +179,19 @@ class ACPowerVerifier(hosts.Verifier):
                 charging_state = info['Battery']['state']
                 fixed = charging_state != self.BATTERY_DISCHARGING
 
-            battery_level = float(info['Battery']['percentage'])
-            if (battery_level < MIN_BATTERY_LEVEL and
-                charging_state == self.BATTERY_DISCHARGING):
-                raise hosts.AutoservVerifyError('Battery is in discharging'
-                        ' state and current level is less than %s%%' %
-                        MIN_BATTERY_LEVEL)
+            if (battery_level < cros_constants.MIN_BATTERY_LEVEL
+                        and charging_state == self.BATTERY_DISCHARGING):
+                # TODO(@xianuowang) remove metrics here once we have device
+                # health profile to collect history of DUT's metrics.
+                metrics_data = {'host': host.hostname,
+                                'board': host.host_info_store.get().board}
+                metrics.Counter(
+                    'chromeos/autotest/repair/verifier/power').increment(
+                        fields=metrics_data)
+                raise hosts.AutoservVerifyError(
+                        'Battery is in discharging state and current level'
+                        ' is less than %s%%' %
+                        cros_constants.MIN_BATTERY_LEVEL)
         except (KeyError, ValueError):
             logging.warning('Cannot determine battery state -'
                             ' skipping check.')
@@ -404,23 +450,76 @@ class HWIDVerifier(hosts.Verifier):
     @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         # pylint: disable=missing-docstring
-        try:
-            info = host.host_info_store.get()
+        info = host.host_info_store.get()
+        if not info.board or not info.model:
+            # if board or model missed in host_info file then it is empty
+            # skip verifier
+            return
+        info_hwid = info.attributes.get('HWID')
+        info_serial_number = info.attributes.get('serial_number')
 
-            hwid = host.run('crossystem hwid', ignore_status=True).stdout
-            if hwid:
-                info.attributes['HWID'] = hwid
+        if not info_hwid or not info_serial_number:
+            logging.info('Missing HWID or/and SerialNumber.'
+                         ' Probably device was not deployed properly.'
+                         ' Marking DUT for need re-deployment.')
+            host.set_device_repair_state(
+                    cros_constants.DEVICE_STATE_NEEDS_DEPLOY)
+            return
 
-            serial_number = host.run('vpd -g serial_number',
-                                     ignore_status=True).stdout
-            if serial_number:
-                info.attributes['serial_number'] = serial_number
+        host_hwid = host.run('crossystem hwid', ignore_status=True).stdout
+        host_serial_number = self._get_serial_number(host, info_serial_number)
+        if not host_hwid or not host_serial_number:
+            raise hosts.AutoservVerifyError(
+                    'Failed to get HWID & Serial Number for host %s' %
+                    host.hostname)
 
-            if info != host.host_info_store.get():
-                host.host_info_store.commit(info)
-        except Exception as e:
-            logging.exception('Failed to get HWID & Serial Number for host '
-                              '%s: %s', host.hostname, str(e))
+        if host_hwid != info_hwid:
+            # We not fail verifier as it not critical for majority tests.
+            metrics.Counter('chromeos/autotest/repair/hwid_change').increment(
+                    fields={
+                            'host': host.hostname,
+                            'board': info.board or ''
+                    })
+            logging.info(
+                    'HWID changed to: %s required manual work'
+                    ' to fix it.', host_hwid)
+
+        if host_serial_number and host_serial_number != info_serial_number:
+            logging.info(
+                    'The SerialNumber mismatch detected %s != %s.'
+                    ' Probably attempt to replace DUT without deployment.'
+                    ' Marking DUT for need re-deployment.', info_serial_number,
+                    host_serial_number)
+            host.set_device_repair_state(
+                    cros_constants.DEVICE_STATE_NEEDS_DEPLOY)
+
+    def _get_serial_number(self, host, serial_number):
+        """Read serial_number from VPD.
+
+        If VPD does not have any value for serial_number then it will
+        try to restore from host_info.
+
+        @param host             CrosHost
+        @param serial_number    Serial-number from host-info
+        """
+        req = host.run('vpd -g serial_number', ignore_status=True)
+        # serial_number not found in the VPD info
+        if not req.stdout and req.exit_status == 3 and serial_number:
+            logging.debug('Cannot find serial_number from VPD.')
+            # check if vpd working fine without error
+            l1 = host.run('vpd -l', ignore_status=True)
+            l2 = host.run('vpd -l |grep "\"serial_number\"="',
+                          ignore_status=True)
+            if l1.exit_status == 0 and l2.exit_status == 1:
+                logging.info('Start restoring serial_number:%s for VPD.',
+                             serial_number)
+                # update serial_number for VPD
+                cmd = 'vpd -s serial_number=%s'
+                host.run(cmd % serial_number, ignore_status=True)
+                host.run('dump_vpd_log --force', ignore_status=True)
+                # reading from VPD to see what we updated
+                req = host.run('vpd -g serial_number', ignore_status=True)
+        return req.stdout
 
     @property
     def description(self):
@@ -885,17 +984,36 @@ class ServoInstallRepair(hosts.RepairAction):
     from servo-attached USB storage.
     """
 
+    # Timeout value for this repair action is specially configured as we need
+    # stage image to usb drive, install chromeos image.
+    @timeout_util.TimeoutDecorator(60 * 60)
     def repair(self, host):
         # pylint: disable=missing-docstring
-        repair_utils.require_servo(host)
+        repair_utils.require_servo(host, ignore_state=True)
         image_name = host.get_cros_repair_image_name()
-        update_url = None
-        if host._servo_host.validate_image_usbkey() != image_name:
-            logging.info('Downloading %s to usbkey.', image_name)
-            _, update_url = host.stage_image_for_servo()
+        image_name_on_usb = host._servo_host.validate_image_usbkey()
+        if image_name_on_usb == image_name:
+            logging.info(
+                    'Required image %s is already on usbkey,'
+                    ' skipping download.', image_name)
+            need_update_image = False
         else:
-            logging.info('Required image %s is already on usbkey,'
-                         ' skipping download.', image_name)
+            logging.info('Required image is not on usbkey.')
+            need_update_image = True
+
+        # Verify if we want to force re-image the USB.
+        if not need_update_image and host.health_profile:
+            repair_failed_count = host.health_profile.get_repair_fail_count()
+            # try to re-image USB when previous attempt failed
+            if repair_failed_count == 1:
+                logging.info('Required re-download image to usbkey as'
+                             ' a previous repair failed.')
+                need_update_image = True
+
+        update_url = None
+        if need_update_image:
+            logging.info('Staging image: %s on caching server.', image_name)
+            _, update_url = host.stage_image_for_servo()
         afe_utils.clean_provision_labels(host)
         host.servo_install(update_url)
         afe_utils.add_provision_labels(host, host.VERSION_PREFIX, image_name)
@@ -947,7 +1065,8 @@ def _cros_verify_base_dag():
     FirmwareStatusVerifier = cros_firmware.FirmwareStatusVerifier
     FirmwareVersionVerifier = cros_firmware.FirmwareVersionVerifier
     verify_dag = (
-            (repair_utils.SshVerifier, 'ssh', ()),
+            (repair_utils.PingVerifier, 'ping', ()),
+            (repair_utils.SshVerifier, 'ssh', ('ping', )),
             (ServoUSBDriveVerifier, 'usb_drive', ()),
             (DevDefaultBootVerifier, 'dev_default_boot', ('ssh', )),
             (DevModeVerifier, 'devmode', ('ssh', )),
@@ -981,29 +1100,42 @@ def _cros_basic_repair_actions(
     and servo cr50 reboot repair.
     """
     repair_actions = (
-        # RPM cycling must precede Servo reset:  if the DUT has a dead
-        # battery, we need to reattach AC power before we reset via servo.
-        (repair_utils.RPMCycleRepair, 'rpm', (), ('ssh', 'power',)),
-        (ServoResetRepair, 'servoreset', (), servo_reset_trigger),
-        (ServoCr50RebootRepair, 'cr50_reset', (), servo_reset_trigger),
-        (ServoSysRqRepair, 'sysrq', (), ('ssh',)),
-        (LabelCleanupRepair, 'label_cleanup', (), ('cros_version_label',)),
+            # RPM cycling must precede Servo reset:  if the DUT has a dead
+            # battery, we need to reattach AC power before we reset via servo.
+            (repair_utils.RPMCycleRepair, 'rpm', (), (
+                    'ping',
+                    'ssh',
+                    'power',
+            )),
+            (ServoResetRepair, 'servoreset', (), servo_reset_trigger),
+            (ServoCr50RebootRepair, 'cr50_reset', (), servo_reset_trigger),
+            (ServoSysRqRepair, 'sysrq', (), (
+                    'ping',
+                    'ssh',
+            )),
+            (LabelCleanupRepair, 'label_cleanup', ('ssh', ),
+             ('cros_version_label', )),
 
-        # N.B. FirmwareRepair can't fix a 'good_provision' failure directly,
-        # because it doesn't remove the flag file that triggers the
-        # failure.  We include it as a repair trigger because it's
-        # possible the the last update failed because of the firmware,
-        # and we want the repair steps below to be able to trust the
-        # firmware.
-        (cros_firmware.FaftFirmwareRepair,
-         'faft_firmware_repair', (), ('ssh', 'fwstatus', 'good_provision',)),
-
-        (DevDefaultBootRepair,
-         'set_default_boot', ('ssh',), ('dev_default_boot',)),
-
-        (CrosRebootRepair, 'reboot', ('ssh',), ('devmode', 'writable',)),
-        (EnrollmentCleanupRepair, 'cleanup_enrollment', ('ssh',),
-         ('enrollment_state',)),
+            # N.B. FaftFirmwareRepair can't fix a 'good_provision' failure
+            # directly, because it doesn't remove the flag file that triggers
+            # the failure.  We include it as a repair trigger because it's
+            # possible the the last update failed because of the firmware,
+            # and we want the repair steps below to be able to trust the
+            # firmware.
+            (cros_firmware.FaftFirmwareRepair, 'faft_firmware_repair', (), (
+                    'ping',
+                    'ssh',
+                    'fwstatus',
+                    'good_provision',
+            )),
+            (DevDefaultBootRepair, 'set_default_boot', ('ssh', ),
+             ('dev_default_boot', )),
+            (CrosRebootRepair, 'reboot', ('ssh', ), (
+                    'devmode',
+                    'writable',
+            )),
+            (EnrollmentCleanupRepair, 'cleanup_enrollment', ('ssh', ),
+             ('enrollment_state', )),
     )
     return repair_actions
 
@@ -1097,22 +1229,23 @@ def _jetstream_repair_actions():
     jetstream_tpm_triggers = ('jetstream_tpm', 'jetstream_attestation')
     jetstream_service_triggers = (jetstream_tpm_triggers +
                                   ('jetstream_services',))
-    repair_actions = (
-        _cros_basic_repair_actions(servo_reset_trigger=('ssh',)) +
-        (
+    base_actions = _cros_basic_repair_actions(servo_reset_trigger=(
+            'ping',
+            'ssh',
+    ))
+    custom_actions = (
             (JetstreamTpmRepair, 'jetstream_tpm_repair',
              _JETSTREAM_USB_TRIGGERS + _CROS_POWERWASH_TRIGGERS,
              provision_triggers + jetstream_tpm_triggers),
-
             (JetstreamServiceRepair, 'jetstream_service_repair',
-             _JETSTREAM_USB_TRIGGERS + _CROS_POWERWASH_TRIGGERS + (
-                 'jetstream_tpm', 'jetstream_attestation'),
+             _JETSTREAM_USB_TRIGGERS + _CROS_POWERWASH_TRIGGERS +
+             ('jetstream_tpm', 'jetstream_attestation'),
              provision_triggers + jetstream_service_triggers),
-        ) +
-        _cros_extended_repair_actions(
+    )
+    extend_actions = _cros_extended_repair_actions(
             provision_triggers=provision_triggers + jetstream_service_triggers,
-            usb_triggers=_JETSTREAM_USB_TRIGGERS))
-    return repair_actions
+            usb_triggers=_JETSTREAM_USB_TRIGGERS)
+    return base_actions + custom_actions + extend_actions
 
 
 def _jetstream_verify_dag():

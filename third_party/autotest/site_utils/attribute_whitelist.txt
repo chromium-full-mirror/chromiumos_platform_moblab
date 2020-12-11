@@ -49,6 +49,8 @@ suite:bvt-tast-android-pfq
 suite:bvt-tast-chrome-pfq
 suite:bvt-tast-cq
 suite:bvt-tast-informational
+suite:camera-libcamera
+suite:camera-postsubmit
 suite:camerabox_facing-back
 suite:camerabox_facing-front
 suite:cell_emulator
@@ -58,10 +60,7 @@ suite:cellular_endtoend
 suite:cellular_mbim_compliance
 suite:cellular_modem_repair
 suite:cellular_ota
-suite:cellular_ota_att
-suite:cellular_ota_sprint
-suite:cellular_ota_tmobile
-suite:cellular_ota_verizon
+suite:cellular_ota_flaky
 suite:cellular_pseudomodem
 suite:cellular_qual
 suite:chameleon_audio_perbuild
@@ -81,6 +80,7 @@ suite:crosbolt_perf_nightly
 suite:crosbolt_perf_perbuild
 suite:crosbolt_perf_weekly
 suite:cts_P
+suite:cts
 suite:cups_weekly
 suite:dev_drone_image_test
 suite:dummy
@@ -114,6 +114,7 @@ suite:faft_ec_fw_qual
 suite:faft_ec_tot
 suite:faft_ec_wp
 suite:faft_experimental
+suite:faft_flashrom
 suite:faft_lab
 suite:faft_lv1
 suite:faft_lv2
@@ -137,6 +138,7 @@ suite:gts
 suite:hotrod
 suite:hotrod-remora
 suite:hwqual
+suite:infra_qual
 suite:jailed_build
 suite:kernel_daily_benchmarks
 suite:kernel_daily_regression
@@ -216,6 +218,7 @@ suite:vmtest-informational2
 suite:vmtest-informational3
 suite:vmtest-informational4
 suite:wifi_atten_perf
+suite:wifi_atten_roam_perf
 suite:wifi_endtoend
 suite:wifi_flaky
 suite:wifi_func_tast
@@ -233,5 +236,3 @@ suite:wificell-cq
 suite:wifichaos
 suite:wilco_bve
 suite:wilco_bve_dock
-suite:youtube_mse_eme
-suite:youtube_page

@@ -662,9 +662,11 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         update_url = self._autotest_devserver.get_update_url(build)
         statefuldev_url = update_url.replace('update', 'static')
         statefuldev_url += '/stateful.tgz'
-        cmd = ['curl', '--silent', '--max-time', '300',
-               statefuldev_url, '|', 'tar', '--ignore-command-error',
-               '--overwrite','--directory', '/mnt/stateful_partition', '-xz']
+        cmd = [
+                'curl', '--silent', '--show-error', '--max-time', '600',
+                statefuldev_url, '|', 'tar', '--ignore-command-error',
+                '--overwrite', '--directory', '/mnt/stateful_partition', '-xz'
+        ]
         try:
             self._run(cmd)
         except error.AutoservRunError as e:
@@ -757,11 +759,6 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         # Use the same lab devserver to also handle the update.
         url = self._autotest_devserver.get_update_url(build)
 
-        # Delta payloads get staged into the 'au_nton' directory of the
-        # build itself. So we need to append this at the end of the update
-        # URL to get the delta payload.
-        if not full_payload:
-            url += '/au_nton'
         logging.info('Update URL: %s', url)
         return url
 
@@ -813,7 +810,11 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         return payload_url
 
 
-    def update_device(self, payload_uri, clobber_stateful=False, tag='source'):
+    def update_device(self,
+                      payload_uri,
+                      clobber_stateful=False,
+                      tag='source',
+                      ignore_appid=False):
         """
         Updates the device.
 
@@ -825,6 +826,10 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
                                  of the device should be force updated. By
                                  default, set to False
         @param tag: An identifier string added to each log filename.
+        @param ignore_appid: True to tell Nebraska to ignore the App ID field
+                             when parsing the update request. This allows
+                             the target update to use a different board's
+                             image, which is needed for kernelnext updates.
 
         @raise error.TestFail if anything goes wrong with the update.
 
@@ -837,13 +842,18 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         with remote_access.ChromiumOSDeviceHandler(
             self._host.hostname, base_dir=cros_preserved_path) as device:
             updater = auto_updater.ChromiumOSUpdater(
-                device, build_name, build_name,
-                yes=True,
-                payload_filename=payload_filename,
-                clobber_stateful=clobber_stateful,
-                do_stateful_update=True,
-                staging_server=self._autotest_devserver.url(),
-                transfer_class=auto_updater_transfer.LabEndToEndPayloadTransfer)
+                    device,
+                    build_name,
+                    build_name,
+                    yes=True,
+                    payload_filename=payload_filename,
+                    clobber_stateful=clobber_stateful,
+                    clear_tpm_owner=clobber_stateful,
+                    do_stateful_update=True,
+                    staging_server=self._autotest_devserver.url(),
+                    transfer_class=auto_updater_transfer.
+                    LabEndToEndPayloadTransfer,
+                    ignore_appid=ignore_appid)
 
             try:
                 updater.RunUpdate()

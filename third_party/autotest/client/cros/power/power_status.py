@@ -30,7 +30,9 @@ BatteryDataReportType = autotest_enum.AutotestEnum('CHARGE', 'ENERGY')
 
 # For devices whose full capacity is significantly lower than design full
 # capacity, scale down their design full capacity.
-BATTERY_DESIGN_FULL_SCALE = {'jinlon': 0.95}  # b/161307060
+BATTERY_DESIGN_FULL_SCALE = {'jinlon': 0.95, # b/161307060
+                             'berknip': 0.94, # b/172625511
+                             }
 # battery data reported at 1e6 scale
 BATTERY_DATA_SCALE = 1e6
 # number of times to retry reading the battery in the case of bad data
@@ -1602,6 +1604,22 @@ class SystemPower(PowerMeasurement):
         return float(keyvals['Battery']['energy rate'])
 
 
+class BatteryStateOfCharge(PowerMeasurement):
+    """Class for logging battery state of charge."""
+
+    def __init__(self):
+        """Constructor."""
+        super(BatteryStateOfCharge, self).__init__('battery_soc')
+
+    def refresh(self):
+        """refresh method.
+
+        See superclass PowerMeasurement for details.
+        """
+        keyvals = parse_power_supply_info()
+        return float(keyvals['Battery']['percentage'])
+
+
 class CheckpointLogger(object):
     """Class to log checkpoint data.
 
@@ -2104,6 +2122,8 @@ class PowerLogger(MeasurementLogger):
 
         measurements = []
         status = get_status()
+        if status.battery:
+            measurements.append(BatteryStateOfCharge())
         if status.battery_discharging():
             measurements.append(SystemPower(status.battery_path))
         if power_utils.has_powercap_support():

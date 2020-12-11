@@ -109,8 +109,108 @@ class ServodConnectionError(socket.error):
 
     def __str__(self):
         """String representation of the exception"""
-        return '%s: [Errno %d] %s: %r' % (
-            self.when, self.errno, self.strerror, self.filename)
+        return '%s -- [Errno %d] %s: %r' % (self.when, self.errno,
+                                            self.strerror, self.filename)
+
+
+# TODO: once in python 3, inherit from AbstractContextManager
+class _WrapServoErrors(object):
+    """
+    Wrap an operation, replacing BadStatusLine and socket.error with
+    servo-specific versions, and extracting exception info from xmlrplib.Fault.
+
+    @param servo_name: The servo object, used to add the servo name to errors.
+                       See the ServodConnectionError docstring.
+    @param description:  String to use when describing what was being done
+    @raise ServodBadStatusLine: if exception is a httplib.BadStatusLine
+    @raise ServodSocketError: if exception is a socket.error
+    @raise ControlUnavailableError: if Fault matches NO_CONTROL_RE
+    @raise UnresponsiveConsoleError: if Fault matches NO_CONSOLE_OUTPUT_RE
+    @raise ResponsiveConsoleError: if Fault matches CONSOLE_MISMATCH_RE
+    """
+
+    def __init__(self, servo, description):
+        self.servo_name = str(servo)
+        self.description = description
+
+    @staticmethod
+    def _get_xmlrpclib_exception(xmlexc):
+        """Get meaningful exception string from xmlrpc.
+
+        Args:
+            xmlexc: xmlrpclib.Fault object
+
+        xmlrpclib.Fault.faultString has the following format:
+
+        <type 'exception type'>:'actual error message'
+
+        Parse and return the real exception from the servod side instead of the
+        less meaningful one like,
+           <Fault 1: "<type 'exceptions.AttributeError'>:'tca6416' object has no
+           attribute 'hw_driver'">
+
+        Returns:
+            string of underlying exception raised in servod.
+        """
+        return re.sub('^.*>:', '', xmlexc.faultString)
+
+    @staticmethod
+    def _log_exception(exc_type, exc_val, exc_tb):
+        """Log exception information"""
+        if exc_val is not None:
+            logging.debug(
+                    'Wrapped exception:', exc_info=(exc_type, exc_val, exc_tb))
+
+    def __enter__(self):
+        """Enter the context"""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context, handling the exception if there was one"""
+        try:
+            if isinstance(exc_val, six.moves.http_client.BadStatusLine):
+                self._log_exception(exc_type, exc_val, exc_tb)
+                if exc_val.line in ('', "''"):
+                    err = ServodEmptyResponse(self.description, exc_val.line)
+                else:
+                    err = ServodBadResponse(self.description, exc_val.line)
+                six.reraise(err.__class__, err, exc_tb)
+
+            if isinstance(exc_val, seven.SOCKET_ERRORS):
+                self._log_exception(exc_type, exc_val, exc_tb)
+                err = ServodConnectionError(self.description, exc_val.args[0],
+                                            exc_val.args[1], self.servo_name)
+                six.reraise(err.__class__, err, exc_tb)
+
+            if isinstance(exc_val, six.moves.xmlrpc_client.Fault):
+                err_str = self._get_xmlrpclib_exception(exc_val)
+                err_msg = '%s :: %s' % (self.description, err_str)
+                unknown_ctrl = re.search(NO_CONTROL_RE, err_str)
+                if not unknown_ctrl:
+                    # Log the full text for errors, except unavailable controls.
+                    self._log_exception(exc_type, exc_val, exc_tb)
+                    logging.debug(err_msg)
+                if unknown_ctrl:
+                    # The error message for unavailable controls is huge, since
+                    # it reports all known controls.  Don't log the full text.
+                    unknown_ctrl_name = unknown_ctrl.group('name')
+                    logging.debug('%s :: No control named %r',
+                                  self.description, unknown_ctrl_name)
+                    err = ControlUnavailableError(
+                            'No control named %r' % unknown_ctrl_name)
+                elif re.search(NO_CONSOLE_OUTPUT_RE, err_str):
+                    err = UnresponsiveConsoleError(
+                            'Console not printing output. %s.' %
+                            self.description)
+                elif re.search(CONSOLE_MISMATCH_RE, err_str):
+                    err = ResponsiveConsoleError(
+                            'Control failed but console alive. %s.' %
+                            self.description)
+                else:
+                    err = error.TestFail(err_msg)
+                six.reraise(err.__class__, err, exc_tb)
+        finally:
+            del exc_tb
 
 
 def _extract_image_from_tarball(tarball, dest_dir, image_candidates, timeout):
@@ -445,6 +545,9 @@ class Servo(object):
     # extract firmware on the lab host machines (b/149419503).
     EXTRACT_TIMEOUT_SECS = 180
 
+    # The VBUS voltage threshold used to detect if VBUS is supplied
+    VBUS_THRESHOLD = 3000.0
+
     def __init__(self, servo_host, servo_serial=None):
         """Sets up the servo communication infrastructure.
 
@@ -548,6 +651,23 @@ class Servo(object):
         else:
             logging.warning('Servod command \'usb_mux_oe1\' is not available. '
                             'Any USB drive related servo routines will fail.')
+        # Create a record of SBU voltages if this is running support servo (v4,
+        # v4p1).
+        # TODO(coconutruben): eventually, replace this with a metric to track
+        # SBU voltages wrt servo-hw/dut-hw
+        if self.has_control('servo_v4_sbu1_mv'):
+            # Attempt to take a reading of sbu1 and sbu2 multiple times to
+            # account for situations where the two lines exchange hi/lo roles
+            # frequently.
+            for i in range(10):
+                try:
+                    sbu1 = int(self.get('servo_v4_sbu1_mv'))
+                    sbu2 = int(self.get('servo_v4_sbu2_mv'))
+                    logging.info('attempt %d sbu1 %d sbu2 %d', i, sbu1, sbu2)
+                except error.TestFail as e:
+                    # This is a nice to have but if reading this fails, it
+                    # shouldn't interfere with the test.
+                    logging.exception(e)
         self._uart.start_capture()
         if cold_reset:
             if not self._power_state.supported:
@@ -1551,6 +1671,23 @@ class Servo(object):
         else:
             logging.debug('Not a servo v4, unable to set role to %s.', role)
 
+    def get_servo_v4_role(self):
+        """Get the power role of servo v4, either 'src' or 'snk'.
+
+        It returns None if not a servo v4.
+        """
+        if not self._servo_type.startswith('servo_v4'):
+            logging.debug('Not a servo v4, unable to get role')
+            return None
+
+        if not self.has_control('servo_v4_role'):
+            logging.debug(
+                    'Servo does not has servo_v4_role control, unable'
+                    ' to get the role.')
+            return None
+
+        return self.get('servo_v4_role')
+
     def set_servo_v4_pd_comm(self, en):
         """Set the PD communication of servo v4, either 'on' or 'off'.
 
@@ -1748,3 +1885,16 @@ class Servo(object):
         self.set_nocheck('ec_uart_flush', 'off')
         self.set_nocheck('ec_uart_cmd', 'reboot')
         self.set_nocheck('ec_uart_flush', 'on')
+
+    def get_vbus_voltage(self):
+        """Get the voltage of VBUS'.
+
+        @returns The voltage of VBUS, if vbus_voltage is supported.
+                 None               , if vbus_voltage is not supported.
+        """
+        if not self.has_control('vbus_voltage'):
+            logging.debug('Servo does not have vbus_voltage control,'
+                          'unable to get vbus voltage')
+            return None
+
+        return self.get('vbus_voltage')

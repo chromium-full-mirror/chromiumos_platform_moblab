@@ -133,10 +133,11 @@ class ServoHost(base_servohost.BaseServoHost):
 
     # Mapping servo board with their vid-pid
     SERVO_VID_PID = {
-        'servo_v4':'18d1:501b',
-        'ccd_cr50':'18d1:5014',
-        'servo_micro':'18d1:501a',
-        'servo_v3':['18d1:5004', '0403:6014'],
+            'servo_v4': '18d1:501b',
+            'ccd_cr50': '18d1:5014',
+            'servo_micro': '18d1:501a',
+            'servo_v3': ['18d1:5004', '0403:6014'],
+            'c2d2': '1d81:5041',
     }
 
     # States of verifiers
@@ -153,6 +154,9 @@ class ServoHost(base_servohost.BaseServoHost):
         self.servo_board = None
         self.servo_model = None
         self.servo_serial = None
+        self.servo_setup = None
+        self.additional_servod_args = None
+        self._dut_health_profile = None
         # The flag that indicate if a servo is connected to a smart usbhub.
         # TODO(xianuowang@) remove this flag once all usbhubs in the lab
         # get replaced.
@@ -194,6 +198,8 @@ class ServoHost(base_servohost.BaseServoHost):
         self.servo_board = servo_board
         self.servo_model = servo_model
         self.servo_serial = servo_serial
+        self.servo_setup = servo_setup
+        self.additional_servod_args = additional_servod_args
 
         # The location of the log files on the servo host for this instance.
         self.remote_log_dir = '%s_%s' % (self.SERVOD_LOG_PREFIX,
@@ -318,6 +324,9 @@ class ServoHost(base_servohost.BaseServoHost):
             self._servo_state = servo_constants.SERVO_STATE_WORKING
             self.record('INFO', None, None,
                         'ServoHost verify set servo_state as WORKING')
+            if self.is_servo_topology_supported():
+                self._topology = servo_topology.ServoTopology(self)
+                self._topology.generate()
         except Exception as e:
             if not self.is_localhost():
                 self._servo_state = self.determine_servo_state()
@@ -538,6 +547,9 @@ class ServoHost(base_servohost.BaseServoHost):
             # reboot request created by this servo because it passed repair.
             if self.is_labstation():
                 self.withdraw_reboot_request()
+            if self.is_servo_topology_supported():
+                self._topology = servo_topology.ServoTopology(self)
+                self._topology.generate()
         except Exception as e:
             if not self.is_localhost():
                 self._servo_state = self.determine_servo_state()
@@ -692,79 +704,14 @@ class ServoHost(base_servohost.BaseServoHost):
         logging.error('Unexpected error occurred from usbhub control, please'
                       ' file a bug and inform chrome-fleet-software@ team!')
 
-    def _is_usbc_pigtail_connection_timeout(self):
-        """Check if servo has issue with USBC pigtail connection timeout.
+    def get_main_servo_usb_path(self):
+        """Helper function to collect current usb-path to main servo.
 
-        The usb_console has to be clean for good servo. If console generate
-        messages like (below) then issue is present:
-        [475635.427072 PD TMOUT RX 1/1]
-        RXERR1 Preamble
-        [475635.476044 PD TMOUT RX 1/1]
-        RXERR1 Preamble
-        """
-        if not self.servo_serial:
-            return False
-        logging.debug('Starting check if USBC pigtail connection timeout.')
-        try:
-            cmd = 'usb_console -d 18d1:501b -s %s' % self.servo_serial
-            resp = self.run(cmd, timeout=self.DEFAULT_TERMINAL_TIMEOUT)
-            result_lines = resp.stdout.splitlines()
-            for line in result_lines:
-                if re.match(self.USBC_PIGTAIL_TIMEOUT_RE, line):
-                    return True
-        except Exception as e:
-            logging.debug('(Non-critical) %s.', e)
-        return False
+        The usb-path is path to the folder where usb-device was enumerated.
+        If fail then will return an empty string ('').
 
-    def _reset_usbc_pigtail_connection(self):
-        """Reset USBC pigtail connection on servo board.
-
-        To reset need to run 'cc off' and then 'cc srcdts' in usb_console.
-        """
-        if not self.servo_serial:
-            return False
-        logging.debug('Starting reset USBC pigtail connection.')
-        def _run_command(cc_command):
-            """Run configuration chanel commands.
-
-            @returns: True if pas successful and False if fail.
-            """
-            try:
-                cmd = (r"echo 'cc %s' | usb_console -d 18d1:501b -s %s"
-                       % (cc_command, self.servo_serial))
-                resp = self.run(cmd, timeout=self.DEFAULT_TERMINAL_TIMEOUT)
-                return True
-            except Exception as e:
-                logging.info('(Non-critical) %s.', e)
-            return False
-
-        logging.info('Turn off configuration channel. And wait 5 seconds.')
-        if _run_command('off'):
-            # wait till command will be effected
-            time.sleep(5)
-            logging.info('Turn on configuration channel. '
-                          'And wait 15 seconds.')
-            if _run_command('srcdts'):
-                # wait till command will be effected
-                time.sleep(15)
-
-    def reset_usbc_pigtail_connection_on_need(self):
-        """Reset USBC pitgtail issue if it present."""
-        if not self.is_labstation():
-            logging.info('USBC pigtail reset applicable only for labstations')
-            return
-
-        if self._is_usbc_pigtail_connection_timeout():
-            logging.info('USBC pigtail issue detected on servo.')
-            self._reset_usbc_pigtail_connection()
-            fields = self._get_host_metrics_data()
-            fields['success'] = not self._is_usbc_pigtail_connection_timeout()
-            metrics.Counter(
-                'chromeos/autotest/repair/servo_usbc/reset'
-                ).increment(fields=fields)
-
-    def _get_servo_usb_devnum(self):
-        """Helper function to collect current usb devnum of servo.
+        @returns: string, usb-path to the main servo device.
+            e.g.: '/sys/bus/usb/devices/1-6.1.3.1'
         """
         # TODO remove try-except when fix crbug.com/1087964
         try:
@@ -776,15 +723,19 @@ class ServoHost(base_servohost.BaseServoHost):
             logging.debug('Attempt to get servo usb-path failed due to '
                           'timeout; %s', e)
             return ''
-
         if resp.exit_status != 0:
             self._process_servodtool_error(resp)
             return ''
         usb_path = resp.stdout.strip()
         logging.info('Usb path of servo %s is %s', self.servo_serial, usb_path)
+        return usb_path
 
-        resp = self.run('cat %s/devnum' % usb_path,
-                        ignore_status=True)
+    def _get_servo_usb_devnum(self):
+        """Helper function to collect current usb devnum of servo."""
+        usb_path = self.get_main_servo_usb_path()
+        if not usb_path:
+            return ''
+        resp = self.run('cat %s/devnum' % usb_path, ignore_status=True)
         if resp.exit_status != 0:
             self._process_servodtool_error(resp)
             return ''
@@ -1374,15 +1325,19 @@ class ServoHost(base_servohost.BaseServoHost):
         The state detecting based on first fail verifier or collecting of
         them.
         """
-        ssh = self.get_verify_state('servo_ssh')
-        disk_space = self.get_verify_state('disk_space')
-        start_servod = self.get_verify_state('servod_job')
-        create_servo = self.get_verify_state('servod_connection')
-        init_servo = self.get_verify_state('servod_control')
-        pwr_button = self.get_verify_state('pwr_button')
-        lid_open = self.get_verify_state('lid_open')
-        ec_board = self.get_verify_state('ec_board')
-        ccd_testlab = self.get_verify_state('ccd_testlab')
+        ssh = self.get_verifier_state('servo_ssh')
+        disk_space = self.get_verifier_state('disk_space')
+        start_servod = self.get_verifier_state('servod_job')
+        create_servo = self.get_verifier_state('servod_connection')
+        init_servo = self.get_verifier_state('servod_control')
+        servo_topology = self.get_verifier_state('servo_topology')
+        dut_connected = self.get_verifier_state('dut_connected')
+        hub_connected = self.get_verifier_state('hub_connected')
+        pwr_button = self.get_verifier_state('pwr_button')
+        lid_open = self.get_verifier_state('lid_open')
+        ec_board = self.get_verifier_state('ec_board')
+        cr50_console = self.get_verifier_state('cr50_console')
+        ccd_testlab = self.get_verifier_state('ccd_testlab')
 
         if not ssh:
             return servo_constants.SERVO_STATE_NO_SSH
@@ -1400,7 +1355,20 @@ class ServoHost(base_servohost.BaseServoHost):
             elif self._is_servo_board_present_on_servo_v3() == False:
                 return servo_constants.SERVO_STATE_NOT_CONNECTED
 
-        if start_servod == self.VERIFY_FAILED:
+        if servo_topology == hosts.VERIFY_FAILED:
+            return servo_constants.SERVO_STATE_TOPOLOGY_ISSUE
+
+        if (dut_connected == hosts.VERIFY_FAILED
+                    or hub_connected == hosts.VERIFY_FAILED):
+            return servo_constants.SERVO_STATE_DUT_NOT_CONNECTED
+        # TODO(otabek@): detect special cases detected by pwr_button
+        if dut_connected == hosts.VERIFY_SUCCESS:
+            if pwr_button == hosts.VERIFY_FAILED:
+                metrics.Counter(
+                        'chromeos/autotest/repair/servo_unexpected/pwr_button2'
+                ).increment(fields=self._get_host_metrics_data())
+
+        if start_servod == hosts.VERIFY_FAILED:
             return servo_constants.SERVO_STATE_SERVOD_ISSUE
 
         if create_servo == self.VERIFY_FAILED:
@@ -1445,6 +1413,45 @@ class ServoHost(base_servohost.BaseServoHost):
             ).increment(fields=self._get_host_metrics_data())
         logging.info('We do not have special state for this failure yet :)')
         return servo_constants.SERVO_STATE_BROKEN
+
+    def is_servo_topology_supported(self):
+        """Check if servo_topology is supported."""
+        if not self.is_up_fast():
+            logging.info('Servo-Host is not reachable.')
+            return False
+        if not self.is_labstation():
+            logging.info('Servo-topology supported only for labstation.')
+            return False
+        if not self.servo_serial:
+            logging.info('Servo-topology required a servo serial.')
+            return False
+        return True
+
+    def get_topology(self):
+        """Get servo topology."""
+        return self._topology
+
+    def is_dual_setup(self):
+        """Check is servo will run in dual setup.
+
+        Dual setup used only for servo_v4 when used ccd_cr50 and servo_micro
+        at the same time.
+        """
+        return self.servo_setup == servo_constants.SERVO_SETUP_VALUE_DUAL_V4
+
+    def set_dut_health_profile(self, dut_health_profile):
+        """
+        @param dut_health_profile: A DeviceHealthProfile object.
+        """
+        logging.debug('setting dut_health_profile field to (%s)',
+                      dut_health_profile)
+        self._dut_health_profile = dut_health_profile
+
+    def get_dut_health_profile(self):
+        """
+        @return A DeviceHealthProfile object.
+        """
+        return self._dut_health_profile
 
 
 def make_servo_hostname(dut_hostname):
@@ -1540,8 +1547,12 @@ def _tweak_args_for_ssp_moblab(servo_args):
                 'SSP', 'host_container_ip', type=str, default=None)
 
 
-def create_servo_host(dut, servo_args, try_lab_servo=False,
-                      try_servo_repair=False, dut_host_info=None):
+def create_servo_host(dut,
+                      servo_args,
+                      try_lab_servo=False,
+                      try_servo_repair=False,
+                      dut_host_info=None,
+                      dut_health_profile=None):
     """Create a ServoHost object for a given DUT, if appropriate.
 
     This function attempts to create and verify or repair a `ServoHost`
@@ -1593,6 +1604,7 @@ def create_servo_host(dut, servo_args, try_lab_servo=False,
                           `repair()` instead of `verify()`.
     @param dut_host_info: A HostInfo object of the DUT that connected
                           to this servo.
+    @param dut_health_profile: DUT repair info with history.
 
     @returns: A ServoHost object or None. See comments above.
 
@@ -1637,6 +1649,10 @@ def create_servo_host(dut, servo_args, try_lab_servo=False,
         return None, servo_constants.SERVO_STATE_NO_SSH
 
     newhost = ServoHost(**servo_args)
+    if not newhost.is_up_fast(count=3):
+        # We do not have any option to recover servo_host.
+        # If servo_host is not pingable then we can stop here.
+        return None, servo_constants.SERVO_STATE_NO_SSH
 
     # Reset or reboot servo device only during AdminRepair tasks.
     if try_servo_repair:
@@ -1657,6 +1673,18 @@ def create_servo_host(dut, servo_args, try_lab_servo=False,
         newhost.set_dut_hostname(dut.hostname)
     if dut_host_info:
         newhost.set_dut_host_info(dut_host_info)
+    if dut_health_profile and (try_lab_servo or try_servo_repair):
+        try:
+            if newhost.is_localhost():
+                logging.info('Servohost is a localhost, skip device'
+                             ' health profile setup...')
+            else:
+                dut_health_profile.init_profile(newhost)
+                newhost.set_dut_health_profile(dut_health_profile)
+        except Exception as e:
+            logging.info(
+                    '[Non-critical] Unexpected error while trying to'
+                    ' load device health profile; %s', e)
 
     if try_lab_servo or try_servo_repair:
         try:

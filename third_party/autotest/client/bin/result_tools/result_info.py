@@ -14,9 +14,12 @@ import contextlib
 import json
 import os
 
-import common
-from autotest_lib.client.bin.result_tools import result_info_lib
-from autotest_lib.client.bin.result_tools import utils_lib
+try:
+    from autotest_lib.client.bin.result_tools import result_info_lib
+    from autotest_lib.client.bin.result_tools import utils_lib
+except ImportError:
+    import result_info_lib
+    import utils_lib
 
 
 class ResultInfoError(Exception):

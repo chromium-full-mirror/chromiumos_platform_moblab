@@ -96,6 +96,7 @@ def main():
                 opts.hostname,
                 host_info_path=opts.host_info_file,
                 try_lab_servo=need_servod,
+                try_servo_repair=need_servod,
                 servo_uart_logs_dir=servo_uart_logs_dir)
     except Exception as err:
         logging.error("fail to create host: %s", err)
@@ -110,8 +111,6 @@ def main():
             except Exception as err:
                 logging.error("fail to init servo host: %s", err)
                 return RETURN_CODES.OTHER_FAILURES
-        if hasattr(host, 'setup_device_health_profile'):
-            host.setup_device_health_profile()
         for action in opts.actions:
             if opts.dry_run:
                 logging.info('DRY RUN: Would have run actions %s', action)
