@@ -542,7 +542,7 @@ class MoblabService(object):
             return self.moblab_build_connector.check_build_stage_status(
                 build_target, model, build_version, self.moblab_bucket_name
             )
-        except google.api_core.exceptions.ClientError:
+        except google.api_core.exceptions.GoogleAPIError:
             logging.exception(
                 (
                     "Encountered API error while checking build stage status "
