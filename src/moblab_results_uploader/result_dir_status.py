@@ -127,7 +127,7 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if previous_status == Status.NOT_READY:
             if test_result.is_logged:
                 _LOGGER.debug(
-                    "%s Not running and in the age rage to upload.",
+                    "%s Not running and in the age range to upload.",
                     test_result,
                 )
             return Status.READY

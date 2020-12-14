@@ -90,20 +90,27 @@ def _query_job_finished_time(id_):
         else:
             # The value of 'finished_on' for failed/aborted HQE is NULL. So use
             # the job creating time instead.
+            # TODO: figure out why do we get here when job is still running
             _LOGGER.debug(
-                "Determined that all HQEs (%s) are completed."
-                "No finished_on time, using job created_on time",
+                "Determined that all HQEs (%s) are completed.\n"
+                "No finished_on time, using job created_on time.\n"
+                "Job summary: %s\n"
+                "HQEs detailes: %s\n",
                 id_,
+                result,
+                hqes,
             )
-            create_on_str = result.get("created_on")
-            if create_on_str:
-                created_time = datetime.datetime.strptime(
-                    create_on_str, _TIMESTAMP_FORMAT
-                )
-                return created_time.replace(tzinfo=datetime.timezone.utc)
-            else:
-                _LOGGER.debug("No job finish time job id %s", id_)
-                return None
+            return None
+
+            # create_on_str = result.get("created_on")
+            # if create_on_str:
+            #    created_time = datetime.datetime.strptime(
+            #        create_on_str, _TIMESTAMP_FORMAT
+            #    )
+            #    return created_time.replace(tzinfo=datetime.timezone.utc)
+            # else:
+            #    _LOGGER.debug("No job finish time job id %s", id_)
+            #    return None
 
     return func
 
