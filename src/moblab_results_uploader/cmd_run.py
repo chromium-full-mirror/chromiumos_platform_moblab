@@ -174,7 +174,9 @@ async def _async_upload(args, registry):
         min_age_to_prune=args.min_age_to_prune,
     )
     uploader = result_uploader.Uploader(
-        timeout=datetime.timedelta(minutes=60), gs_api=args.gs_api
+        timeout=datetime.timedelta(minutes=60),
+        gs_api=args.gs_api,
+        notify_uploaded=result_file_filter.mark_files_uploaded,
     )
     file_filter = result_file_filter.ResultFileFilter(
         filter_config=args.uploading_filter_config

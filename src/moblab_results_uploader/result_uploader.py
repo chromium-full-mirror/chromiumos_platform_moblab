@@ -34,7 +34,9 @@ class Uploader(processing_step.ProcessStep):
 
     # We use this queue to allow parallel files uploading.
 
-    def __init__(self, *, timeout, gs_api, next_step=None):
+    def __init__(
+        self, *, timeout, gs_api, next_step=None, notify_uploaded=None
+    ):
         """Constructor.
 
         Args:
@@ -44,6 +46,8 @@ class Uploader(processing_step.ProcessStep):
                 cloud storage API.
             next_step: A coroutine will be awaited as the next step in the
                 whole pipeline.
+            notify_uploaded: Callback to notify that a batch of files has been
+                successfully uploaded.
         """
         super().__init__(next_step=next_step)
         self._gs_api = gs_api
@@ -53,6 +57,7 @@ class Uploader(processing_step.ProcessStep):
         )
         self._uploading_context = None
         self.uploading_queue = asyncio.Queue(maxsize=0)
+        self._notify_uploaded = notify_uploaded
 
     def uploading_context(self, ctx):
         self._uploading_context = ctx
@@ -70,7 +75,7 @@ class Uploader(processing_step.ProcessStep):
                             test_result,
                             ctx.gs_path,
                         )
-                except Exception as e:
+                except Exception:
                     ctx.gs_path = None
                     _LOGGER.exception("Try upload dir failed")
         except _TestResultExpiredError as err:
@@ -105,6 +110,7 @@ class Uploader(processing_step.ProcessStep):
         loop = asyncio.get_event_loop()
         executor = futures.ThreadPoolExecutor(max_workers=jobs)
         awaitables = []
+        result_filenames = []
         while True:
             f = await self.uploading_queue.get()
             if dry_run:
@@ -113,6 +119,7 @@ class Uploader(processing_step.ProcessStep):
                 awaitables.append(
                     loop.run_in_executor(executor, self._upload_file, f)
                 )
+                result_filenames.append(f)
                 if self._uploading_context._test_result.is_logged:
                     _LOGGER.debug(
                         "Uploading %s, awaitables %d", f, len(awaitables)
@@ -140,6 +147,7 @@ class Uploader(processing_step.ProcessStep):
                         if result:
                             # One file returned error mark the upload as bad
                             self._uploading_context.error = True
+                            result_filenames.clear()
                             # The only way to end the queue join is to empty
                             # the queue.
                             _LOGGER.debug(
@@ -158,11 +166,17 @@ class Uploader(processing_step.ProcessStep):
                                     # have only one loop removing items from
                                     # the queue.
                                     _LOGGER.error(
-                                        "Error trying to remove item from empty queue."
+                                        "Error trying to remove "
+                                        "item from empty queue."
                                     )
                                     pass
                         self.uploading_queue.task_done()
+
                     awaitables = []
+                    if self._notify_uploaded:
+                        self._notify_uploaded(result_filenames)
+                    result_filenames.clear()
+
                 except Exception as e:
                     _LOGGER.debug(
                         "%s Exception thrown %s",

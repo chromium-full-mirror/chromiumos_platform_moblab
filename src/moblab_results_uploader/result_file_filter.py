@@ -39,10 +39,12 @@ import pathlib
 import re
 
 import yaml
+from os import path
 
 import processing_step
 
 _LOGGER = logging.getLogger("moblab_uploader")
+UPLOADING_PROGRESS_FILENAME = "uploading_progress.txt"
 
 
 class ResultFile(
@@ -91,7 +93,8 @@ async def _list_all_files(test_result, next_step):
         for f in files:
             await next_step(
                 ResultFile(
-                    test_result=test_result, relative_path=relative_root / f
+                    test_result=test_result,
+                    relative_path=relative_root / f,
                 )
             )
 
@@ -169,13 +172,20 @@ class ResultFileFilter(processing_step.ProcessStep):
             self._filters_config, test_result.suite_name
         )
 
+        already_uploaded_files = self._load_uploaded_files(test_result)
+
         if not self._applicable_filter:
             _LOGGER.info(
                 "No filter found for %s (%s). List all files then.",
                 test_result,
                 test_result.suite_name,
             )
-            await _list_all_files(test_result, next_step=self._next_step)
+            await _list_all_files(
+                test_result,
+                next_step=self._get_filter_uploaded_func(
+                    already_uploaded_files, self._next_step
+                ),
+            )
             return
 
         if self._force or test_result.succeeded:
@@ -184,6 +194,101 @@ class ResultFileFilter(processing_step.ProcessStep):
                 test_result,
                 self._applicable_filter,
             )
-            await _list_all_files(test_result, next_step=self._filter)
+            await _list_all_files(
+                test_result,
+                next_step=self._get_filter_uploaded_func(
+                    already_uploaded_files, self._filter
+                ),
+            )
         else:
-            await _list_all_files(test_result, next_step=self._next_step)
+            await _list_all_files(
+                test_result,
+                next_step=self._get_filter_uploaded_func(
+                    already_uploaded_files, self._next_step
+                ),
+            )
+
+    def _get_filter_uploaded_func(
+        self, already_uploaded_files, next_step_override
+    ):
+        """Creatres a funtion to filter already uploaded files.
+
+        Args:
+            already_uploaded_files: list of relative files paths.
+            next_step_override: next function to call is case of
+
+        Returns a results specific function to filter already uploaded files.
+        """
+
+        async def _filter_func(result_file):
+            """Filter function of uploaded results.
+            Captures already_uploaded_files and next_step_override.
+            """
+            if str(result_file.relative_path) not in already_uploaded_files:
+                await next_step_override(result_file)
+            else:
+                _LOGGER.info(
+                    "Skipping (%s), file has been already uploaded"
+                    % result_file.relative_path
+                )
+
+        return _filter_func
+
+    def _load_uploaded_files(self, test_result):
+        """Fetches the list of already uploaded files for given test_result.
+        Creates the file if it does not exist.
+
+        Args:
+            test_result: ResultAndStatus object representing the result.
+
+        Return:
+            The list of strings representing relative
+            paths of already uploaded files.
+        """
+        file_path = test_result.abs_path / UPLOADING_PROGRESS_FILENAME
+
+        _LOGGER.debug("Loading list of uploaded files %s", file_path)
+
+        if not path.exists(file_path):
+            self._create_fresh_uploading_progress_file(test_result)
+
+        return set(line.strip() for line in open(file_path, "r"))
+
+    def _create_fresh_uploading_progress_file(self, test_result):
+        """Clears out the list of already uploaded files"""
+        file_path = test_result.abs_path / UPLOADING_PROGRESS_FILENAME
+
+        _LOGGER.debug("Creating file %s", file_path)
+        with open(file_path, "w") as f:
+            f.write("%s\n" % UPLOADING_PROGRESS_FILENAME)
+
+
+def mark_files_uploaded(result_files):
+    """Function that saves the progress of results upload
+
+    Appends the result_files to uploading_progress.txt.
+
+    Args:
+        result_files: list of ResultFile objects of uploaded files
+    """
+    # Short circuit if nothing to mark
+    if not result_files:
+        return
+
+    # Make sure all the files are for the same result
+    result_dir = result_files[0].test_result.abs_path
+    if any(rf.test_result.abs_path != result_dir for rf in result_files):
+        _LOGGER.warning("Multiple results in one upload batch %s", result_dir)
+        return
+
+    file_path = result_dir / UPLOADING_PROGRESS_FILENAME
+    if not path.exists(file_path):
+        _LOGGER.warning(
+            "%s file is not found in %s",
+            UPLOADING_PROGRESS_FILENAME,
+            result_dir,
+        )
+
+    with open(file_path, "a") as f:
+        for uf in result_files:
+            f.write("%s\n" % uf.relative_path)
