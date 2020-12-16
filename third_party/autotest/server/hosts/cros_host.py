@@ -235,9 +235,12 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         if 'btpeer_host_list' in args_dict:
             result = []
             for btpeer in args_dict['btpeer_host_list'].split(','):
+                # IPv6 addresses including a port number should be enclosed in
+                # square brackets.
+                delimiter = ']:' if re.search(r':.*:', btpeer) else ':'
                 result.append({key: value for key,value in
                     zip(('btpeer_host','btpeer_port'),
-                    btpeer.split(':'))})
+                    btpeer.strip('[]').split(delimiter))})
             return result
         else:
             return {key: args_dict[key]
@@ -334,15 +337,47 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         self.env['LIBC_FATAL_STDERR_'] = '1'
         self._ssh_verbosity_flag = ssh_verbosity_flag
         self._ssh_options = ssh_options
-        _servo_host, servo_state = servo_host.create_servo_host(
-            dut=self,
-            servo_args=servo_args,
-            try_lab_servo=try_lab_servo,
-            try_servo_repair=try_servo_repair,
-            dut_host_info=self.host_info_store.get())
-        self.set_servo_host(_servo_host, servo_state)
         self.health_profile = None
         self._default_power_method = None
+        dut_health_profile = device_health_profile.DeviceHealthProfile(
+                hostname=self.hostname,
+                host_info=self.host_info_store.get(),
+                result_dir=self.get_result_dir())
+
+        # TODO(otabek@): remove when b/171414073 closed
+        pingable_before_servo = self.is_up_fast(count=3)
+        if pingable_before_servo:
+            logging.info('DUT is pingable before init Servo.')
+        _servo_host, servo_state = servo_host.create_servo_host(
+                dut=self,
+                servo_args=servo_args,
+                try_lab_servo=try_lab_servo,
+                try_servo_repair=try_servo_repair,
+                dut_host_info=self.host_info_store.get(),
+                dut_health_profile=dut_health_profile)
+        if dut_health_profile.is_loaded():
+            logging.info('Device health profile loaded.')
+            # The device profile is located in the servo_host which make it
+            # dependency. If profile is not loaded yet then we do not have it
+            # TODO(otabek@) persist device provide out of servo-host.
+            self.health_profile = dut_health_profile
+        self.set_servo_host(_servo_host, servo_state)
+
+        # TODO(otabek@): remove when b/171414073 closed
+        # Introduced to collect cases when servo made DUT not sshable
+        pingable_after_servo = self.is_up_fast(count=3)
+        if pingable_after_servo:
+            logging.info('DUT is pingable after init Servo.')
+        elif pingable_before_servo:
+            logging.info('DUT was pingable before init Servo but not now')
+            if servo_args and self._servo_host and self._servo_host.hostname:
+                # collect stats only for tests.
+                dut_ping_servo_init_data = {
+                        'host': self.hostname,
+                        'servo_host': self._servo_host.hostname,
+                }
+                metrics.Counter('chromeos/autotest/dut_ping_servo_init2'
+                                ).increment(fields=dut_ping_servo_init_data)
 
         self.chameleon = None
 
@@ -1139,7 +1174,6 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             host_info.labels.remove(servo_constants.SMART_USBHUB_LABEL)
         self.host_info_store.commit(host_info)
 
-
     def repair(self):
         """Attempt to get the DUT to pass `self.verify()`.
 
@@ -1155,9 +1189,13 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         try:
             self._repair_strategy.repair(self)
         except hosts.AutoservVerifyDependencyError as e:
+            # TODO(otabek): remove when finish b/174191325
+            self._stat_if_pingable_but_not_sshable()
             # We don't want flag a DUT as failed if only non-critical
             # verifier(s) failed during the repair.
             if e.is_critical():
+                profile_state = profile_constants.DUT_STATE_REPAIR_FAILED
+                self._reboot_labstation_if_needed()
                 self.try_set_device_needs_manual_repair()
                 raise
 
@@ -2396,6 +2434,27 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
                                  os.path.basename(device)).stdout.strip())
         return removable == 1
 
+    def is_boot_from_external_device(self):
+        """Check if DUT is boot from external storage.
+
+        @return: True if DUT is boot from external storage.
+        """
+        boot_device = self.run('rootdev -s -d', ignore_status=True,
+                               timeout=60).stdout.strip()
+        if not boot_device:
+            logging.debug('Boot storage not detected on the host.')
+            return False
+        main_storage_cmd = ('. /usr/sbin/write_gpt.sh;'
+                            ' . /usr/share/misc/chromeos-common.sh;'
+                            ' load_base_vars; get_fixed_dst_drive')
+        main_storage = self.run(main_storage_cmd,
+                                ignore_status=True,
+                                timeout=60).stdout.strip()
+        if not main_storage or boot_device != main_storage:
+            logging.debug('Device booted from external storage storage.')
+            return True
+        logging.debug('Device booted from main storage.')
+        return False
 
     def read_from_meminfo(self, key):
         """Return the memory info from /proc/meminfo
@@ -2590,6 +2649,28 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             cros_constants.DEVICE_STATE_NEEDS_REPLACEMENT,
             resultdir=resultdir)
 
+    def _dut_fail_ssh_verifier(self):
+        """Check if DUT failed SSH verifier.
+
+        @returns: bool, True - verifier marked as fail.
+                        False - result not reachable, verifier did not fail.
+        """
+        if not self._repair_strategy:
+            return False
+        dut_ssh_verifier = self._repair_strategy.verifier_is_good('ssh')
+        return dut_ssh_verifier == hosts.VERIFY_FAILED
+
+    def _stat_if_pingable_but_not_sshable(self):
+        """Check if DUT pingable but failed SSH verifier."""
+        if not self._repair_strategy:
+            return
+        dut_ssh = self._repair_strategy.verifier_is_good('ssh')
+        dut_ping = self._repair_strategy.verifier_is_good('ping')
+        if (dut_ping == hosts.VERIFY_FAILED
+                    and dut_ssh == hosts.VERIFY_FAILED):
+            metrics.Counter('chromeos/autotest/dut_pingable_no_ssh').increment(
+                    fields={'host': self.hostname})
+
     def try_set_device_needs_manual_repair(self):
         """Check if device require manual attention to be fixed.
 
@@ -2600,24 +2681,68 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         # state can be set by any cros repair actions
         if self.get_device_repair_state():
             return
+        if not self._dut_fail_ssh_verifier():
+            # DUT is sshable and we still have many options to repair it.
+            return
+        needs_manual_repair = False
+        dhp = self.health_profile
+        if dhp and dhp.get_repair_fail_count() > 49:
+            # 42 = 6 times during 7 days. (every 4 hour repair)
+            # round up to 50 in case somebody will run some attempt on it.
+            logging.info(
+                    'DUT is not sshable and fail %s times.'
+                    ' Limit to try repair is 50 times',
+                    dhp.get_repair_fail_count())
+            needs_manual_repair = True
 
-        # set need manual attention if servo has hardware issue
-        servo_state_required_manual_fix = [
-            servo_constants.SERVO_STATE_NOT_CONNECTED,
-            servo_constants.SERVO_STATE_NEED_REPLACEMENT,
-            servo_constants.SERVO_STATE_LID_OPEN_FAILED,
-            servo_constants.SERVO_STATE_BAD_RIBBON_CABLE,
-            servo_constants.SERVO_STATE_EC_BROKEN,
-        ]
-        if self.get_servo_state() in servo_state_required_manual_fix:
-            data = {'host': self.hostname,
-                    'state': cros_constants.DEVICE_STATE_NEEDS_MANUAL_REPAIR}
-            metrics.Counter(
-                'chromeos/autotest/repair/special_dut_state'
-                ).increment(fields=data)
-            # TODO (otabek) unblock when be sure that we do not have flakiness
-            # self.set_device_repair_state(
-            #   cros_constants.DEVICE_STATE_NEEDS_MANUAL_REPAIR)
+        if not needs_manual_repair:
+            # We cannot ssh to the DUT and we have hardware or set-up issues
+            # with servo then we need request manual repair for the DUT.
+            servo_state_required_manual_fix = [
+                    servo_constants.SERVO_STATE_DUT_NOT_CONNECTED,
+                    servo_constants.SERVO_STATE_NEED_REPLACEMENT,
+            ]
+            if self.get_servo_state() in servo_state_required_manual_fix:
+                logging.info(
+                        'DUT required manual repair because it is not sshable'
+                        ' and possible have setup issue with Servo. Please'
+                        ' verify all connections and present of devices.')
+                needs_manual_repair = True
+
+        if needs_manual_repair:
+            self.set_device_repair_state(
+                    cros_constants.DEVICE_STATE_NEEDS_MANUAL_REPAIR)
+
+    def _reboot_labstation_if_needed(self):
+        """Place request to reboot the labstation if DUT is not sshable.
+
+        @returns: None
+        """
+        message_prefix = "Don't need to request servo-host reboot "
+        if not self._dut_fail_ssh_verifier():
+            return
+        if not self._servo_host:
+            logging.debug(message_prefix + 'as it not initialized')
+            return
+        if not self._servo_host.is_up_fast():
+            logging.debug(message_prefix + 'as servo-host is not sshable')
+            return
+        if not self._servo_host.is_labstation():
+            logging.debug('Servo_v3 is not requested to reboot for the DUT')
+            return
+        usb_path = self._servo_host.get_main_servo_usb_path()
+        if usb_path:
+            connected_port = os.path.basename(os.path.normpath(usb_path))
+            # Directly connected servo to the labstation looks like '1-5.3'
+            # and when connected by hub - '1-5.2.3' or '1-5.2.1.3'. Where:
+            # - '1-5' - port on labstation
+            # - '2' or '2.1'   - port on the hub or smart-hub
+            # - '3'   - port on servo hub
+            if len(connected_port.split('.')) > 2:
+                logging.debug(message_prefix + 'as servo connected by hub')
+                return
+        self._servo_host.request_reboot()
+        logging.info('Requested labstation reboot because DUT is not sshable')
 
     def is_file_system_writable(self, testdirs=None):
         """Check is the file systems are writable.
@@ -2665,20 +2790,93 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
                 return False
         return True
 
-    def setup_device_health_profile(self):
-        """Setup device health profile for repair/provision task to consume.
+    def blocking_sync(self, freeze_for_reset=False):
+        """Sync root device and internal device, via script.
+
+        The actual calls end up logged by the run() call, since they're printed
+        to stdout/stderr in the script.
+
+        @param freeze_for_reset: if True, prepare for reset by blocking writes
+                                 (only if enable_fs_sync_fsfreeze=True)
         """
-        if not self._servo_host:
-            logging.info('Servohost is not instantiated, skip device'
-                         ' health profile setup...')
+
+        if freeze_for_reset and self.USE_FSFREEZE:
+            logging.info('Blocking sync and freeze')
+        elif freeze_for_reset:
+            logging.info('Blocking sync for reset')
+        else:
+            logging.info('Blocking sync')
+
+        # client/bin is installed on the DUT as /usr/local/autotest/bin
+        sync_cmd = '/usr/local/autotest/bin/fs_sync.py'
+        if freeze_for_reset and self.USE_FSFREEZE:
+            sync_cmd += ' --freeze'
+        return self.run(sync_cmd)
+
+    def set_health_profile_dut_state(self, state):
+        if not self.health_profile:
+            logging.debug('Device health profile is not initialized, skip'
+                          ' set dut state.')
             return
-        # Also skip setup health profile if it's a task runs locally.
-        if self._servo_host.is_localhost():
-            logging.info('Servohost is a localhost, skip device'
-                         ' health profile setup...')
-            return
+        reset_counters = state in profile_constants.STATES_NEED_RESET_COUNTER
+        self.health_profile.update_dut_state(state, reset_counters)
+
+    def require_snk_mode_in_recovery(self):
+        """Check whether we need to switch servo_v4 role to snk when
+        booting into recovery mode. (See crbug.com/1129165)
+        """
+        has_battery = True
+        # Determine if the host has battery based on host_info first.
+        power_info = self.host_info_store.get().get_label_value('power')
+        if power_info:
+            has_battery = power_info == 'battery'
+        elif self.is_up_fast():
+            # when running local tests host_info is not available, so we
+            # need to determine whether the host has battery by checking
+            # from host side.
+            logging.debug('Label `power` is not found in host_info, checking'
+                          ' if the host has battery from host side.')
+            has_battery = self.has_battery()
+
+        if not has_battery:
+            logging.info(
+                    '%s does not has battery, snk mode is not needed'
+                    ' for recovery.', self.hostname)
+            return False
+
+        if not self.servo.supports_built_in_pd_control():
+            logging.info('Power delivery is not supported on this servo, snk'
+                         ' mode is not needed for recovery.')
+            return False
         try:
-            self.health_profile = device_health_profile.DeviceHealthProfile(
-                self, self._servo_host)
+            battery_percent = self.servo.get('battery_charge_percent')
+            if battery_percent < cros_constants.MIN_BATTERY_LEVEL:
+                logging.info(
+                        'Current battery level %s%% below %s%% threshold, we'
+                        ' will attempt to boot host in recovery mode without'
+                        ' changing servo to snk mode. Please note the host may'
+                        ' not able to see usb drive in recovery mode later due'
+                        ' to servo not in snk mode.', battery_percent,
+                        cros_constants.MIN_BATTERY_LEVEL)
+                return False
         except Exception as e:
-            logging.warning('Failed to setup device health profile; %s', e)
+            logging.info(
+                    'Unexpected error occurred when getting'
+                    ' battery_charge_percent from servo; %s', str(e))
+            return False
+        return True
+
+    def _set_servo_topology(self):
+        """Set servo-topology info to the host-info."""
+        logging.debug('Try to save servo topology to host-info.')
+        if not self._servo_host:
+            logging.info('Servo host is not initilized.')
+            return
+        if not self._servo_host.is_servo_topology_supported():
+            logging.info('Servo-topology is not supported.')
+            return
+        servo_topology = self._servo_host.get_topology()
+        if not servo_topology or servo_topology.is_empty():
+            logging.info('Servo topology is empty')
+            return
+        servo_topology.save(self.host_info_store)
