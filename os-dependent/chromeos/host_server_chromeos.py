@@ -10,6 +10,7 @@ import subprocess
 import sys
 import time
 import netifaces
+import os
 
 # pylint: disable=import-error
 from google.protobuf import empty_pb2
@@ -279,6 +280,41 @@ class HostServerChromeOS(host_server_base.HostServerBase):
             ]
 
         return response
+
+    def get_disk_usage_stats(self, request, context):
+        """Get information about available disk space.
+
+        Returns:
+            GetDiskUsageStatsResponse:
+                free_MB: amount of available disk space in MB.
+        """
+
+        disk_stats = [
+            s.split()
+            for s in os.popen("df -BM | grep stateful_partition")
+            .read()
+            .splitlines()
+        ]
+        # Ex. output:
+        # Filesystem   1M-blocks    Used Available Use% Mounted on
+        # /dev/mmcblk0   790388M 168009M   582163M  23% /
+        # ...
+        if len(disk_stats) != 1:
+            raise DiskSpaceException(
+                "%s stateful partitions found, expected one" % len(disk_stats)
+            )
+        disk_stats = disk_stats[0]
+
+        response = hostservice_pb2.GetDiskUsageStatsResponse()
+        response.available_MB = int(disk_stats[3].rtrim("M"))
+        response.total.MB = int(disk_stats[1].rtrim("M"))
+        return response
+
+
+class DiskSpaceException(Exception):
+    """Exception thrown by get_disk_space endpoint"""
+
+    pass
 
 
 if __name__ == "__main__":

@@ -207,3 +207,10 @@ class HostServerBase(hostservice_pb2_grpc.MoblabHostServiceServicer):
                 time.sleep(60 * 60 * 24)
         except KeyboardInterrupt:
             server.stop(0)
+
+    def get_disk_usage_stats(self, request, context):
+        """Get information about available disk space.
+
+        Raises: NotImplementedError
+        """
+        raise NotImplementedError
