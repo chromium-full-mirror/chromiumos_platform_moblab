@@ -44,7 +44,7 @@ from os import path
 import processing_step
 
 _LOGGER = logging.getLogger("moblab_uploader")
-UPLOADING_PROGRESS_FILENAME = "uploading_progress.txt"
+UPLOADING_PROGRESS_FILENAME = ".uploader_progress"
 
 
 class ResultFile(
@@ -266,7 +266,7 @@ class ResultFileFilter(processing_step.ProcessStep):
 def mark_files_uploaded(result_files):
     """Function that saves the progress of results upload
 
-    Appends the result_files to uploading_progress.txt.
+    Appends the result_files to .uploader_progress file.
 
     Args:
         result_files: list of ResultFile objects of uploaded files
