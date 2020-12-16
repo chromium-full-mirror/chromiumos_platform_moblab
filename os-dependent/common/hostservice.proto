@@ -16,6 +16,7 @@ service MoblabHostService {
   rpc factory_reset(google.protobuf.Empty) returns (google.protobuf.Empty) {}
   rpc get_system_version(google.protobuf.Empty) returns (SystemVersionResponse) {}
   rpc get_api_version(google.protobuf.Empty) returns (GetApiVersionResponse) {}
+  rpc get_disk_usage_stats(google.protobuf.Empty) returns (GetDiskUsageStatsResponse) {}
 }
 
 // NEXT_TAG = 2
@@ -67,4 +68,10 @@ message SystemVersionResponse{
 // NEXT_TAG = 2
 message GetApiVersionResponse {
   int32 version = 1;
+}
+
+// NEXT_TAG = 3
+message GetDiskUsageStatsResponse {
+  int32 available_MB = 1;
+  int32 total_MB = 2;
 }
