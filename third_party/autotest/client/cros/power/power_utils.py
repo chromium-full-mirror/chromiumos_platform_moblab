@@ -862,8 +862,8 @@ class USBPower(object):
         self._alist_file = \
             '/etc/laptop-mode/conf.d/board-specific/usb-autosuspend.conf'
         # TODO b:169251326 terms below are set outside of this codebase
-        # and should be updated when possible. ("WHITELIST" -> "ALLOWLIST")
-        self._alist_vname = '$AUTOSUSPEND_USBID_WHITELIST'
+        # and should be updated when possible. ("ALLOWLIST" -> "ALLOWLIST")
+        self._alist_vname = '$AUTOSUSPEND_USBID_ALLOWLIST'
         self._allowlisted = None
         self.devices = []
 

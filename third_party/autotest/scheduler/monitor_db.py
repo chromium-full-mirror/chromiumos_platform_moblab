@@ -764,7 +764,7 @@ class Dispatcher(object):
                 # host will have a special task scheduled on the next cycle
                 continue
             if host.shard_id is not None and not server_utils.is_shard():
-                # I am master and host is owned by a shard, ignore it.
+                # I am client and host is owned by a shard, ignore it.
                 continue
             if print_message:
                 logging.error(print_message, host.hostname)
@@ -998,12 +998,12 @@ class Dispatcher(object):
             # it and sync back the right status.
             if entry.job.shard_id is not None and not server_utils.is_shard():
                 # Due to crbug.com/894162, we abort jobs that 1hr beyond
-                # timeout on master.
+                # timeout on client.
                 create_on = time.mktime(entry.job.created_on.timetuple())
                 wait_threshold = entry.job.timeout_mins * 60 + 3600
                 abort_anyway = wait_threshold < time.time() - create_on
                 if abort_anyway:
-                    logging.info('Aborting %s on master due to '
+                    logging.info('Aborting %s on client due to '
                                  'the job 1 hour beyond timeout.', entry)
                 else:
                     logging.info('Waiting for shard %s to abort hqe %s',

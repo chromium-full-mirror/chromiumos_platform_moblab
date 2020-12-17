@@ -51,7 +51,7 @@ def _parse_config_file(config_file):
     @returns A dictionary mapping each unique autotest name to a dictionary
         of presentation config information.
 
-    @raises PerfUploadingError if config data or master name for the test
+    @raises PerfUploadingError if config data or client name for the test
         is missing from the config file.
 
     """
@@ -95,14 +95,14 @@ def _gather_presentation_info(config_data, test_name):
                 'No config data is specified for test %s in %s.' %
                 (test_name, _PRESENTATION_CONFIG_FILE))
     try:
-        master_name = presentation_dict['master_name']
+        client_name = presentation_dict['client_name']
     except KeyError:
         raise PerfUploadingError(
-                'No master name is specified for test %s in %s.' %
+                'No client name is specified for test %s in %s.' %
                 (test_name, _PRESENTATION_CONFIG_FILE))
     if 'dashboard_test_name' in presentation_dict:
         test_name = presentation_dict['dashboard_test_name']
-    return {'master_name': master_name, 'test_name': test_name}
+    return {'client_name': client_name, 'test_name': test_name}
 
 
 def _format_for_upload(board_name, cros_version, chrome_version,
@@ -114,7 +114,7 @@ def _format_for_upload(board_name, cros_version, chrome_version,
     specially-formatted JSON string.  In particular, the JSON object must be a
     dictionary with key "data", and value being a list of dictionaries where
     each dictionary contains all the information associated with a single
-    measured perf value: master name, bot name, test name, perf value, error
+    measured perf value: client name, bot name, test name, perf value, error
     value, units, and build version numbers.
 
     @param board_name: The string name of the image board name.
@@ -144,7 +144,7 @@ def _format_for_upload(board_name, cros_version, chrome_version,
         }
 
     dash_entry = {
-        'master': presentation_info['master_name'],
+        'client': presentation_info['client_name'],
         'bot': 'cros-' + board_name,  # Prefix to clarify it's ChromeOS.
         'point_id': _get_id_from_version(chrome_version, cros_version),
         'versions': {

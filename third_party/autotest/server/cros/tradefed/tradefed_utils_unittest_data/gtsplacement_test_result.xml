@@ -4,7 +4,7 @@
   <Summary pass="80" failed="4" modules_done="4" modules_total="4" />
   <Module name="GtsPlacementTestCases" abi="arm64-v8a" runtime="3646" done="true" pass="20" total_tests="26">
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsPrivappPermissionsTest">
-      <Test result="pass" name="testCoreGmsAppsPermissionsWhitelisted" />
+      <Test result="pass" name="testCoreGmsAppsPermissionsAllowlisted" />
     </TestCase>
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsTest">
       <Test result="ASSUMPTION_FAILURE" name="testVrCorePreloaded">
@@ -264,7 +264,7 @@
   </Module>
   <Module name="GtsPlacementTestCases" abi="armeabi-v7a" runtime="4023" done="true" pass="20" total_tests="26">
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsPrivappPermissionsTest">
-      <Test result="pass" name="testCoreGmsAppsPermissionsWhitelisted" />
+      <Test result="pass" name="testCoreGmsAppsPermissionsAllowlisted" />
     </TestCase>
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsTest">
       <Test result="ASSUMPTION_FAILURE" name="testVrCorePreloaded">
@@ -524,7 +524,7 @@
   </Module>
   <Module name="GtsPlacementTestCases" abi="x86" runtime="4095" done="true" pass="20" total_tests="26">
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsPrivappPermissionsTest">
-      <Test result="pass" name="testCoreGmsAppsPermissionsWhitelisted" />
+      <Test result="pass" name="testCoreGmsAppsPermissionsAllowlisted" />
     </TestCase>
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsTest">
       <Test result="ASSUMPTION_FAILURE" name="testVrCorePreloaded">
@@ -784,7 +784,7 @@
   </Module>
   <Module name="GtsPlacementTestCases" abi="x86_64" runtime="3669" done="true" pass="20" total_tests="26">
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsPrivappPermissionsTest">
-      <Test result="pass" name="testCoreGmsAppsPermissionsWhitelisted" />
+      <Test result="pass" name="testCoreGmsAppsPermissionsAllowlisted" />
     </TestCase>
     <TestCase name="com.google.android.placement.gts.CoreGmsAppsTest">
       <Test result="ASSUMPTION_FAILURE" name="testVrCorePreloaded">

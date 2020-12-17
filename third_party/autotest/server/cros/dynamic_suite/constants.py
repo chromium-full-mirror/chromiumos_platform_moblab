@@ -52,7 +52,7 @@ PAYLOAD_FINISHED_TIME = 'payload_finished_time'
 # maintain backwards compatibility.
 REIMAGE_TYPE_OS = 'os'
 REIMAGE_TYPE_FIRMWARE = 'firmware'
-LATEST_BUILD_URL = 'gs://chromeos-image-archive/master-paladin/LATEST-master'
+LATEST_BUILD_URL = 'gs://chromeos-image-archive/client-paladin/LATEST-client'
 
 JOB_OFFLOAD_FAILURES_KEY = 'offload_failures_only'
 
@@ -66,13 +66,13 @@ KEYVAL_CIDB_BUILD_ID = 'cidb_build_id'
 KEYVAL_CIDB_BUILD_STAGE_ID = 'cidb_build_stage_id'
 KEYVAL_BRANCH = 'branch'
 KEYVAL_BUILDER_NAME = 'build_config'
-KEYVAL_MASTER_BUILDER_NAME = 'master_build_config'
+KEYVAL_CLIENT_BUILDER_NAME = 'client_build_config'
 SUITE_NAME = 'suite'
 INHERITED_KEYVALS = (
     KEYVAL_CIDB_BUILD_ID,
     KEYVAL_CIDB_BUILD_STAGE_ID,
     KEYVAL_BRANCH,
     KEYVAL_BUILDER_NAME,
-    KEYVAL_MASTER_BUILDER_NAME,
+    KEYVAL_CLIENT_BUILDER_NAME,
     SUITE_NAME,
 )

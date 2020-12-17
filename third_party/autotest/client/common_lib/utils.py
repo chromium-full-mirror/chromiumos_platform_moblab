@@ -127,7 +127,7 @@ def _join_with_nickname(base_string, nickname):
 
 
 # TODO: Cleanup and possibly eliminate |unjoinable|, which is only used in our
-# master-ssh connection process, while fixing underlying
+# client-ssh connection process, while fixing underlying
 # semantics problem in BgJob. See crbug.com/279312
 class BgJob(object):
     def __init__(self, command, stdout_tee=None, stderr_tee=None, verbose=True,
@@ -178,7 +178,7 @@ class BgJob(object):
         @param unjoinable: Optional bool, default False.
                            This should be True for BgJobs running in background
                            and will never be joined with join_bg_jobs(), such
-                           as the master-ssh connection. Instead, it is
+                           as the client-ssh connection. Instead, it is
                            caller's responsibility to terminate the subprocess
                            correctly, e.g. by calling nuke_subprocess().
                            This will lead that, calling join_bg_jobs(),
@@ -3104,7 +3104,7 @@ def get_mount_info(process='self', mount_point=None):
         for line in f.readlines():
             # These lines are formatted according to the proc(5) manpage.
             # Sample line:
-            # 36 35 98:0 /mnt1 /mnt2 rw,noatime master:1 - ext3 /dev/root \
+            # 36 35 98:0 /mnt1 /mnt2 rw,noatime client:1 - ext3 /dev/root \
             #     rw,errors=continue
             # Fields (descriptions omitted for fields we don't care about)
             # 3: the root of the mount.

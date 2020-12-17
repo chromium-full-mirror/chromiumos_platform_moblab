@@ -1447,32 +1447,32 @@ def save_vm_state(checkpoint):
         logging.info('Done saving VM state "%s"', checkpoint)
 
 
-def check_raw_dmesg(dmesg, message_level, whitelist):
+def check_raw_dmesg(dmesg, message_level, allowlist):
     """Checks dmesg for unexpected warnings.
 
     This function parses dmesg for message with message_level <= message_level
-    which do not appear in the whitelist.
+    which do not appear in the allowlist.
 
     Arguments:
       dmesg - string containing raw dmesg buffer
       message_level - minimum message priority to check
-      whitelist - messages to ignore
+      allowlist - messages to ignore
 
     Returns:
       List of unexpected warnings
     """
-    whitelist_re = re.compile(r'(%s)' % '|'.join(whitelist))
+    allowlist_re = re.compile(r'(%s)' % '|'.join(allowlist))
     unexpected = []
     for line in dmesg.splitlines():
         if int(line[1]) <= message_level:
             stripped_line = line.split('] ', 1)[1]
-            if whitelist_re.search(stripped_line):
+            if allowlist_re.search(stripped_line):
                 continue
             unexpected.append(stripped_line)
     return unexpected
 
 
-def verify_mesg_set(mesg, regex, whitelist):
+def verify_mesg_set(mesg, regex, allowlist):
     """Verifies that the exact set of messages are present in a text.
 
     This function finds all strings in the text matching a certain regex, and
@@ -1482,7 +1482,7 @@ def verify_mesg_set(mesg, regex, whitelist):
     Arguments:
       mesg - the mutiline text to be scanned
       regex - regular expression to match
-      whitelist - messages to find in the output, a list of strings
+      allowlist - messages to find in the output, a list of strings
           (potentially regexes) to look for in the filtered output. All these
           strings must be there, and no other strings should be present in the
           filtered output.
@@ -1500,7 +1500,7 @@ def verify_mesg_set(mesg, regex, whitelist):
             continue
         present_strings.append(line.split('] ', 1)[1])
 
-    for string in whitelist:
+    for string in allowlist:
         for present_string in list(present_strings):
             if re.search(r'^%s$' % string, present_string):
                 present_strings.remove(present_string)

@@ -12,7 +12,7 @@ class gtest_parser(object):
     """This class knows how to understand GTest test output.
 
     The code was borrowed with minor changes from chrome utility gtest_command.
-        http://src.chromium.org/viewvc/chrome/trunk/tools/build/scripts/master/
+        http://src.chromium.org/viewvc/chrome/trunk/tools/build/scripts/client/
         log_parser/gtest_command.py?view=markup
     """
 
@@ -62,8 +62,8 @@ class gtest_parser(object):
         self._suppression_end = re.compile('^}\s*$')
 
         # TODO b:169251326 terms below are set outside of this codebase
-        # and should be updated when possible. ("master" -> "main")
-        self._main_name_re = re.compile('\[Running for master: "([^"]*)"')
+        # and should be updated when possible. ("client" -> "main")
+        self._main_name_re = re.compile('\[Running for client: "([^"]*)"')
         self.main_name = ''
 
         self._error_logging_start_re = re.compile('=' * 70)

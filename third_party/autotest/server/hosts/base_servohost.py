@@ -460,7 +460,7 @@ class BaseServoHost(ssh_host.SSHHost):
         """
         command = ('scp -rq %s -o BatchMode=yes -o StrictHostKeyChecking=no '
                    '-o UserKnownHostsFile=/dev/null -P %d %s "%s"')
-        return command % (self._master_ssh.ssh_option,
+        return command % (self._client_ssh.ssh_option,
                           self.port, sources, dest)
 
 

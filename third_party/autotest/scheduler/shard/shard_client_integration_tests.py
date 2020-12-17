@@ -25,7 +25,7 @@ class ShardClientIntegrationTest(rdb_testing_utils.AbstractBaseRDBTester,
     def setup_global_config(self):
         """Mock out global_config for shard client creation."""
         global_config.global_config.override_config_value(
-                'SHARD', 'is_slave_shard', 'True')
+                'SHARD', 'is_agent_shard', 'True')
         global_config.global_config.override_config_value(
                 'SHARD', 'shard_hostname', 'host1')
 
@@ -134,17 +134,17 @@ class ShardClientIntegrationTest(rdb_testing_utils.AbstractBaseRDBTester,
         user = self.db_helper.create_user(name='test_user')
         serialized_user = user.serialize()
 
-        # Master sends a user with the same login but different id
+        # Client sends a user with the same login but different id
         serialized_user['id'] = '3'
         models.User.deserialize(serialized_user)
         models.User.objects.get(id=3, login='test_user')
 
-        # Master sends a user with the same id, different login
+        # Client sends a user with the same id, different login
         serialized_user['login'] = 'fake_user'
         models.User.deserialize(serialized_user)
         models.User.objects.get(id=3, login='fake_user')
 
-        # Master sends a new user
+        # Client sends a new user
         user = self.db_helper.create_user(name='new_user')
         serialized_user = user.serialize()
         models.User.objects.all().delete()

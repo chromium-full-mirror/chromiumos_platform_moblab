@@ -186,7 +186,7 @@ class EventHandler(object):
 
     def _release_job_if_sharded(self):
         if self._job.shard_id is not None:
-            # If shard_id is None, the job will be synced back to the master
+            # If shard_id is None, the job will be synced back to the client
             self._job.shard_id = None
             self._job.save(update_fields=['shard_id'])
 

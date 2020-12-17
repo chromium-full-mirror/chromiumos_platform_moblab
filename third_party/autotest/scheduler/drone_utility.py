@@ -584,7 +584,7 @@ def parse_input():
 def _parse_args(args):
     parser = argparse.ArgumentParser(description='Local drone process manager.')
     parser.add_argument('--call_time',
-                        help='Time this process was invoked from the master',
+                        help='Time this process was invoked from the client',
                         default=None, type=float)
     return parser.parse_args(args)
 

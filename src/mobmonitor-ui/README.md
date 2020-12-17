@@ -8,21 +8,25 @@ You will need nodejs locally to build and run the app. node v6.11.5 is already i
 chroot via the cros sdk. If you don't have node, the easiest way to get it is nvm.
 
 Install [nvm](https://github.com/creationix/nvm#install-script)
+
 ```
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 ```
 
 Install node
+
 ```
 nvm i v6.11.5
 ```
 
 Install angular cli
+
 ```
 npm i -g @angular/cli@1.7.3
 ```
 
 Install local node modules
+
 ```
 npm i
 ```
@@ -56,4 +60,4 @@ binary.
 
 ## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/client/README.md).

@@ -58,7 +58,7 @@ def enable_hotword(autotest_ext):
     try:
         autotest_ext.ExecuteJavaScript('''
             window.__assistant_hotword_ready = 0;
-            chrome.autotestPrivate.setWhitelistedPref(
+            chrome.autotestPrivate.setAllowlistedPref(
               'settings.voice_interaction.hotword.enabled', true,
               function(response) {
                 if (chrome.runtime.lastError) {
