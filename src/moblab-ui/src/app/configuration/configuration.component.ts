@@ -385,4 +385,34 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
     this.configurationLoading = false;
   }
+
+  public async pauseClick() {
+    this.pauseButton.setIsLoadingStatus(true);
+    try {
+      const pauseRequesters = await this.moblabConfigurationRpcService.pause_host_scheduling();
+      this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+    }
+    catch (error) {
+      console.log('pause_host_scheduling call failed with:' + error);
+      this.setOffError('Failed to pause host scheduling: ' + error);
+    }
+    finally {
+      this.pauseButton.setIsLoadingStatus(false);
+    }
+  }
+
+  public async resumeClick() {
+    this.resumeButton.setIsLoadingStatus(true);
+    try {
+      const pauseRequesters = await this.moblabConfigurationRpcService.resume_host_scheduler()
+      this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+    }
+    catch (error) {
+      console.log('resume_host_scheduler call failed with:' + error);
+      this.setOffError('Failed to resume host scheduling: ' + error);
+    }
+    finally {
+      this.resumeButton.setIsLoadingStatus(false);
+    }
+  }
 }
