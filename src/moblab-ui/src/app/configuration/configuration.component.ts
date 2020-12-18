@@ -253,4 +253,75 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       verticalPosition: 'top'
     });
   }
+
+  // ToDo: consolidate dialogs into sharable directory
+  setOffError(dialogue: string) {
+    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
+      verticalPosition: 'top',
+      panelClass: ["snack-error"],
+    });
+  }
+
+  updateCloudConfigurationForms(
+    boto_key_id: string,
+    boto_key_secret: string,
+    gcs_bucket_url: string,
+    is_cloud_enabled: boolean,
+    is_remote_console_enabled: boolean,
+    is_remote_command_enabled: boolean
+  ) {
+    /**
+     * Updates the form values of the cloud configurations. Meant to be called
+     * with values returned from RPC call to get cloud info.
+     */
+    this.botoKeyIDForm.setValue(boto_key_id);
+    this.botoKeySecretForm.setValue(boto_key_secret);
+    this.bucketURLForm.setValue(gcs_bucket_url);
+
+    this.lastFetchedBotoKeyID = boto_key_id;
+    this.lastFetchedBotoKeySecret = boto_key_secret;
+    this.lastFetchedBucketURL = gcs_bucket_url;
+
+    this.isCloudEnabled = is_cloud_enabled;
+    this.isRemoteConsoleEnabled = is_remote_console_enabled;
+    this.isRemoteCommandEnabled = is_remote_command_enabled;
+
+    this.toggleCloudConfigDisabledMessage();
+
+    this.lastFetchedIsCloudEnabled = this.isCloudEnabled;
+    this.lastFetchedIsRemoteConsoleEnabled = this.isRemoteConsoleEnabled;
+    this.lastFetchedIsRemoteCommandEnabled = this.isRemoteCommandEnabled;
+
+    this.configurationLoading = false;
+  }
+
+  public async pauseClick() {
+    this.pauseButton.setIsLoadingStatus(true);
+    try {
+      const pauseRequesters = await this.moblabConfigurationRpcService.pause_host_scheduling();
+      this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+    }
+    catch (error) {
+      console.log('pause_host_scheduling call failed with:' + error);
+      this.setOffError('Failed to pause host scheduling: ' + error);
+    }
+    finally {
+      this.pauseButton.setIsLoadingStatus(false);
+    }
+  }
+
+  public async resumeClick() {
+    this.resumeButton.setIsLoadingStatus(true);
+    try {
+      const pauseRequesters = await this.moblabConfigurationRpcService.resume_host_scheduler()
+      this.settingsService.updateHostSchedulingStatus(pauseRequesters);
+    }
+    catch (error) {
+      console.log('resume_host_scheduler call failed with:' + error);
+      this.setOffError('Failed to resume host scheduling: ' + error);
+    }
+    finally {
+      this.resumeButton.setIsLoadingStatus(false);
+    }
+  }
 }
