@@ -425,9 +425,6 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
   public async pauseClick() {
     this.pauseButton.setIsLoadingStatus(true);
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
     try {
       const pauseRequesters = await this.moblabConfigurationRpcService.pause_host_scheduling();
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
