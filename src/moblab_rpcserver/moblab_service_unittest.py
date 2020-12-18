@@ -29,6 +29,7 @@ sys.modules["docker"] = MOCKED_DOCKER
 sys.modules["google"] = MOCKED_GOOGLE
 sys.modules["google.cloud"] = MagicMock()
 sys.modules["google.api_core"] = MagicMock()
+sys.modules["host_scheduler_pause_service"] = MagicMock()
 sys.modules["moblab_common"] = MagicMock()
 sys.modules["requests"] = MagicMock()
 
@@ -196,6 +197,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 "boto_key_secret",
                 "gcs_bucket_url",
                 "is_remote_agent_enabled",
+                "is_remote_command_enabled",
                 # The follow are bools to set whether mock afe_connector succeeds or fails for the
                 # validate_cloud_storage_info, set_configuration_info, and set_is_remote_agent_enabled.
                 "succeed_validate",
@@ -217,10 +219,13 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 boto_key_secret="fake-boto-secret",
                 gcs_bucket_url="gs://bucket/",
                 is_remote_agent_enabled=True,
+                is_remote_command_enabled=False,
                 succeed_validate=True,
                 succeed_cloud_configuration_set=True,
                 succeed_remote_agent_config_commit=True,
-                expected_message_output="Successfully applied cloud configuration values. Remote agent has been enabled.",
+                expected_message_output="Successfully applied cloud configuration values. " +
+                                        "Remote agent has been enabled. " +
+                                        "Remote command has been disabled.",
             ),
             # test set only cloud disabled.
             SetCloudConfigurationTestParams(
@@ -229,6 +234,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 boto_key_secret=None,
                 gcs_bucket_url=None,
                 is_remote_agent_enabled=None,
+                is_remote_command_enabled=False,
                 succeed_validate=True,
                 succeed_cloud_configuration_set=True,
                 succeed_remote_agent_config_commit=True,
@@ -241,6 +247,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 boto_key_secret="fake-boto-secret",
                 gcs_bucket_url="gs://bucket/",
                 is_remote_agent_enabled=True,
+                is_remote_command_enabled=False,
                 succeed_validate=False,
                 succeed_cloud_configuration_set=True,
                 succeed_remote_agent_config_commit=True,
@@ -253,10 +260,13 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 boto_key_secret="fake-boto-secret",
                 gcs_bucket_url="gs://bucket/",
                 is_remote_agent_enabled=True,
+                is_remote_command_enabled=False,
                 succeed_validate=True,
                 succeed_cloud_configuration_set=True,
                 succeed_remote_agent_config_commit=False,
-                expected_message_output="Successfully applied cloud configuration values. But failed to set remote agent as enabled.",
+                expected_message_output="Successfully applied cloud configuration values. " +
+                                        "But failed to set remote agent as enabled. " +
+                                        "Remote command has been disabled.",
             ),
         ]
 
@@ -275,8 +285,8 @@ class MoblabRPCServiceTest(unittest.TestCase):
                     params.boto_key_secret,
                     params.gcs_bucket_url,
                     params.is_remote_agent_enabled,
+                    params.is_remote_command_enabled
                 )
-                print(message)
                 assert message == params.expected_message_output
 
     @mock.patch.object(
@@ -311,6 +321,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
             "mock-boto-key-secret",
             "gs:/mock-gcs-url",
             True,
+            True
         )
 
         self.service.moblab_build_connector

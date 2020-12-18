@@ -1236,14 +1236,14 @@ class MoblabService(object):
                     if self.set_is_remote_agent_enabled(
                         is_remote_agent_enabled
                     ):
-                        message += "Remote agent has been {}.".format(
+                        message += "Remote agent has been {}. ".format(
                             "enabled"
                             if is_remote_agent_enabled
                             else "disabled"
                         )
                     else:
                         message += (
-                            "But failed to set remote agent as {}.".format(
+                            "But failed to set remote agent as {}. ".format(
                                 "enabled"
                                 if is_remote_agent_enabled
                                 else "disabled"
