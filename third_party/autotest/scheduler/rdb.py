@@ -20,7 +20,7 @@ from autotest_lib.scheduler import rdb_utils
 from autotest_lib.server import utils
 
 _rdb_timer_name = 'chromeos/autotest/scheduler/rdb/durations/%s'
-_is_master = not utils.is_shard()
+_is_client = not utils.is_shard()
 
 # Qeury managers: Provide a layer of abstraction over the database by
 # encapsulating common query patterns used by the rdb.
@@ -445,13 +445,13 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
                 raise rdb_utils.RDBException('Got multiple hosts for a single '
                         'request. Hosts: %s, request %s.' % (hosts, request))
             # Job-shard is 1:1 mapping. Because a job can only belongs
-            # to one shard, or belongs to master, we disallow frontend job
+            # to one shard, or belongs to client, we disallow frontend job
             # that spans hosts on and off shards or across multiple shards,
             # which would otherwise break the 1:1 mapping.
-            # As such, on master, if a request asks for multiple hosts and
+            # As such, on client, if a request asks for multiple hosts and
             # if any host is found on shard, we assume other requested hosts
             # would also be on the same shard.  We can safely drop this request.
-            ignore_request = _is_master and any(
+            ignore_request = _is_client and any(
                     [host.shard_id for host in hosts])
             if (not ignore_request and
                     (self.valid_host_assignment(request, hosts[0]) and

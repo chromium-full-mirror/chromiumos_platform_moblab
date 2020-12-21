@@ -84,14 +84,14 @@ class BuffetConfig(object):
                  enable_xmpp=False,
                  enable_ping=True,
                  disable_pairing_security=False,
-                 device_whitelist=None,
+                 device_allowlist=None,
                  options=None):
         self.enable_xmpp = enable_xmpp
         self.log_verbosity = log_verbosity
         self.test_definitions_dir = test_definitions_dir
         self.enable_ping = enable_ping
         self.disable_pairing_security = disable_pairing_security
-        self.device_whitelist = device_whitelist
+        self.device_allowlist = device_allowlist
         self.options = TEST_CONFIG.copy()
         if options:
             self.options.update(options)
@@ -132,8 +132,8 @@ class BuffetConfig(object):
         if self.test_definitions_dir:
             flags['BUFFET_TEST_DEFINITIONS_PATH'] = self.test_definitions_dir
 
-        if self.device_whitelist:
-            flags['BUFFET_DEVICE_WHITELIST'] = ','.join(self.device_whitelist)
+        if self.device_allowlist:
+            flags['BUFFET_DEVICE_ALLOWLIST'] = ','.join(self.device_allowlist)
 
         run('start buffet %s' % format_options(flags, ' '))
 

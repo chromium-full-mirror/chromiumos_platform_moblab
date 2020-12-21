@@ -50,37 +50,37 @@ class I2CController(object):
     I2C_NACK_ON_DATA = 3
     I2C_TIME_OUT = 4
 
-    def send_and_check_status(self, slave_addr, int_array):
-        '''Sends data to I2C slave device and checks the bus status.
+    def send_and_check_status(self, agent_addr, int_array):
+        '''Sends data to I2C agent device and checks the bus status.
 
-        @param slave_addr: The address of slave in 7bits format.
+        @param agent_addr: The address of agent in 7bits format.
         @param int_array: The data to send in integer array.
         @param status_check: Whether to check I2C bus status.
 
         @return An integer indicates I2C bus status.
         '''
-        self.send(slave_addr, int_array)
+        self.send(agent_addr, int_array)
         return self.read_bus_status()
 
     def read_bus_status(self):
         '''Returns the I2C bus status.'''
         raise NotImplementedError
 
-    def send(self, slave_addr, int_array):
-        '''Sends data to I2C slave device.
+    def send(self, agent_addr, int_array):
+        '''Sends data to I2C agent device.
 
         Caller should call read_bus_status() explicitly to confirm whether the
         data sent successfully.
 
-        @param slave_addr: The address of slave in 7bits format.
+        @param agent_addr: The address of agent in 7bits format.
         @param int_array: The data to send in integer array.
         '''
         raise NotImplementedError
 
-    def read(self, slave_addr, bytes_to_read):
-        '''Reads data from I2C slave device.
+    def read(self, agent_addr, bytes_to_read):
+        '''Reads data from I2C agent device.
 
-        @param slave_addr: The address of slave in 7bits format.
+        @param agent_addr: The address of agent in 7bits format.
         @param bytes_to_read: The number of bytes to read from device.
         @return An array of data.
         '''
@@ -135,11 +135,11 @@ class _I2CControllerSC18IM700(I2CController):
         return ret
 
     @staticmethod
-    def _convert_to_8bits_addr(slave_addr_7bits, lsb):
-        '''Converts slave_addr from 7 bits to 8 bits with given LSB.'''
-        assert (slave_addr_7bits >> 7) == 0, "Address must not exceed 7 bits."
+    def _convert_to_8bits_addr(agent_addr_7bits, lsb):
+        '''Converts agent_addr from 7 bits to 8 bits with given LSB.'''
+        assert (agent_addr_7bits >> 7) == 0, "Address must not exceed 7 bits."
         assert (lsb & ~0x01) == 0, "lsb must not exceed one bit."
-        return (slave_addr_7bits << 1) | lsb
+        return (agent_addr_7bits << 1) | lsb
 
     def read_bus_status(self):
         cmd = [ord('R'), 0x0A, ord('P')]
@@ -150,16 +150,16 @@ class _I2CControllerSC18IM700(I2CController):
             return self.I2C_STATUS[ord(ret[0])]
         raise IOError("I2C_STATUS_READ_FAILED")
 
-    def send(self, slave_addr, int_array):
+    def send(self, agent_addr, int_array):
         cmd = ([ord('S'),
-                self._convert_to_8bits_addr(slave_addr, WRITE_BIT),
+                self._convert_to_8bits_addr(agent_addr, WRITE_BIT),
                 len(int_array)] +
                int_array + [ord('P')])
         self._write(cmd)
 
-    def read(self, slave_addr, bytes_to_read):
+    def read(self, agent_addr, bytes_to_read):
         cmd = ([ord('S'),
-                self._convert_to_8bits_addr(slave_addr, READ_BIT),
+                self._convert_to_8bits_addr(agent_addr, READ_BIT),
                 bytes_to_read,
                 ord('P')])
         self._write(cmd)

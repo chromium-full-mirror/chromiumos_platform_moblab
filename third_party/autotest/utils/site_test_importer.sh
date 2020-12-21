@@ -15,5 +15,5 @@ pushd $(dirname "$0") > /dev/null
 ./test_importer.py -p /usr/local/autotest/client/profilers
 
 # Add selected tests
-./test_importer.py -w site_whitelist_tests
+./test_importer.py -w site_allowlist_tests
 popd > /dev/null

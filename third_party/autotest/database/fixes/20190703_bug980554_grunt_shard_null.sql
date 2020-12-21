@@ -1,4 +1,4 @@
-# Run against the master database cros-bighd-0001.mtv
+# Run against the client database cros-bighd-0001.mtv
 
 UPDATE afe_hosts
 SET leased = 0

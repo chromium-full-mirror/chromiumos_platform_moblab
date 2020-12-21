@@ -32,8 +32,8 @@ RUN export LD_LIBRARY_PATH=/usr/local/lib
 
 
 WORKDIR /
-RUN wget https://chromium.googlesource.com/chromiumos/platform/standalone-hdctools/+archive/master.tar.gz
-RUN tar xvf master.tar.gz
+RUN wget https://chromium.googlesource.com/chromiumos/platform/standalone-hdctools/+archive/main.tar.gz
+RUN tar xvf main.tar.gz
 
 COPY servod/start_servod.sh ./
 

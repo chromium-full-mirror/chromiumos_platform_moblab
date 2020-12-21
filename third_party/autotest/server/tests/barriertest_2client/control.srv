@@ -22,19 +22,19 @@ def run(pair):
 import logging, platform, socket, traceback
 try:
     client_hostnames = %r
-    master_hostname = client_hostnames[0]
+    client_hostname = client_hostnames[0]
     client_hostname = client_hostnames[1]
 
     logging.info('Testing hostname only barrier')
     barrier = job.barrier(platform.node(), 'barriertest_2client', 120)
     logging.info('rendezvous-ing')
-    barrier.rendezvous(master_hostname, client_hostname)
+    barrier.rendezvous(client_hostname, client_hostname)
     logging.info('done.')
 
     logging.info('Testing local identifier barrier')
     barrier = job.barrier(platform.node() + '#id0', 'barriertest_2client', 120)
     logging.info('rendezvous-ing')
-    barrier.rendezvous(master_hostname + '#id0',
+    barrier.rendezvous(client_hostname + '#id0',
                        client_hostname + '#id0')
     logging.info('done.')
 
@@ -42,7 +42,7 @@ try:
     barrier = job.barrier(socket.gethostbyname(platform.node()),
                           'barriertest_2client', 120)
     logging.info('rendezvous-ing')
-    barrier.rendezvous(socket.gethostbyname(master_hostname),
+    barrier.rendezvous(socket.gethostbyname(client_hostname),
                        socket.gethostbyname(client_hostname))
     logging.info('done.')
 
@@ -50,7 +50,7 @@ try:
     barrier = job.barrier(socket.gethostbyname(platform.node()) + '#42',
                           'barriertest_2client', 120)
     logging.info('rendezvous-ing')
-    barrier.rendezvous(socket.gethostbyname(master_hostname) + '#42',
+    barrier.rendezvous(socket.gethostbyname(client_hostname) + '#42',
                        socket.gethostbyname(client_hostname) + '#42')
     logging.info('done.')
 except:

@@ -15,11 +15,11 @@ AUTO_TEST_LOCATION=/autotest/server/site_tests
 
 #Start a new branch
 cd "${AUTO_TEST_LOCATION}/cheets_CTS_${CTS_LETTER}"
-git checkout master
+git checkout main
 git pull
 git rebase
 git checkout -b "uprev_${CTS_VERSION}_${CTS_LETTER}"
-git branch --set-upstream-to=origin/master "uprev_${CTS_VERSION}_${CTS_LETTER}"
+git branch --set-upstream-to=origin/main "uprev_${CTS_VERSION}_${CTS_LETTER}"
 git pull
 git rebase
 
@@ -61,4 +61,4 @@ BUG=b:${BUG_NUMBER}
 TEST=None
 EOF
 
-git push origin HEAD:refs/for/master
+git push origin HEAD:refs/for/main

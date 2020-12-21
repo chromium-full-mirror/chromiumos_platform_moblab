@@ -106,7 +106,7 @@ class WiFiClient(site_linux_system.LinuxSystem):
 
     # List of interface names we won't consider for use as "the" WiFi interface
     # on Android or CastOS hosts.
-    WIFI_IF_BLACKLIST = ['p2p0', 'wfd0']
+    WIFI_IF_DENYLIST = ['p2p0', 'wfd0']
 
     UNKNOWN_BOARD_TYPE = 'unknown'
 
@@ -339,7 +339,7 @@ class WiFiClient(site_linux_system.LinuxSystem):
             # Look up the WiFi device (and its MAC) on the client.
             devs = self.iw_runner.list_interfaces(desired_if_type='managed')
             devs = [dev for dev in devs
-                    if dev.if_name not in self.WIFI_IF_BLACKLIST]
+                    if dev.if_name not in self.WIFI_IF_DENYLIST]
             if not devs:
                 raise error.TestFail('No wlan devices found on %s.' %
                                      self.host.hostname)
@@ -730,15 +730,15 @@ class WiFiClient(site_linux_system.LinuxSystem):
         return result.stdout, result.stderr
 
 
-    def clear_supplicant_blacklist(self):
-        """Clear's the AP blacklist on the DUT.
+    def clear_supplicant_denylist(self):
+        """Clear's the AP denylist on the DUT.
 
         @return stdout and stderror returns passed from wpa_cli command.
 
         """
-        result = self._wpa_cli_proxy.run_wpa_cli_cmd('blacklist clear',
+        result = self._wpa_cli_proxy.run_wpa_cli_cmd('denylist clear',
                                                      check_result=False);
-        logging.info('wpa_cli blacklist clear: out:%r err:%r', result.stdout,
+        logging.info('wpa_cli denylist clear: out:%r err:%r', result.stdout,
                      result.stderr)
         return result.stdout, result.stderr
 

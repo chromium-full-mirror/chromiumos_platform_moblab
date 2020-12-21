@@ -19,11 +19,11 @@ AUTO_TEST_LOCATION="/autotest/server/site_tests"
 
 #Start a new branch
 cd "${AUTO_TEST_LOCATION}/${GTS_DIRNAME}"
-git checkout master
+git checkout main
 git pull
 git rebase
 git checkout -b "uprev_${GTS_DIRNAME}_${GTS_VERSION}"
-git branch --set-upstream-to=origin/master "uprev_${GTS_DIRNAME}_${GTS_VERSION}"
+git branch --set-upstream-to=origin/main "uprev_${GTS_DIRNAME}_${GTS_VERSION}"
 git pull
 git rebase
 
@@ -59,4 +59,4 @@ BUG=b:${BUG_NUMBER}
 TEST=None
 EOF
 
-git push origin HEAD:refs/for/master
+git push origin HEAD:refs/for/main

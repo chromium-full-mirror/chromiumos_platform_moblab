@@ -7,8 +7,8 @@
 # Constants used by other constants.
 USER_DATA_DIR = '/home/chronos'
 # TODO b:169251326 terms below are set outside of this codebase
-# and should be updated when possible. ("whitelist" -> "allowlist")
-ALLOWLIST_DIR = '/var/lib/whitelist'
+# and should be updated when possible. ("allowlist" -> "allowlist")
+ALLOWLIST_DIR = '/var/lib/allowlist'
 LOG_DIR = '/var/log'
 
 # Rest of constants.

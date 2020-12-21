@@ -173,7 +173,7 @@ class chromedriver_server(object):
         chromedriver_args = [exe_path]
         if port:
             # Allow remote connections if a port was specified
-            chromedriver_args.append('--whitelisted-ips')
+            chromedriver_args.append('--allowlisted-ips')
         else:
             port = utils.get_unused_port()
         chromedriver_args.append('--port=%d' % port)

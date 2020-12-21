@@ -429,35 +429,35 @@ def _log_or_execute(content, func, *args, **kwargs):
         func(*args)
 
 
-def _create_whitelist_set(whitelist_path):
+def _create_allowlist_set(allowlist_path):
     """
-    Create a set with contents from a whitelist file for membership testing.
+    Create a set with contents from a allowlist file for membership testing.
 
-    @param whitelist_path: full path to the whitelist file.
+    @param allowlist_path: full path to the allowlist file.
 
     @return set with files listed one/line - newlines included.
     """
-    f = open(whitelist_path, 'r')
-    whitelist_set = set([line.strip() for line in f])
+    f = open(allowlist_path, 'r')
+    allowlist_set = set([line.strip() for line in f])
     f.close()
-    return whitelist_set
+    return allowlist_set
 
 
-def update_from_whitelist(whitelist_set, add_experimental, add_noncompliant,
+def update_from_allowlist(allowlist_set, add_experimental, add_noncompliant,
                           autotest_dir):
     """
-    Scans through all tests in the whitelist and add them to the database.
+    Scans through all tests in the allowlist and add them to the database.
 
     This function invoked when -w supplied.
 
-    @param whitelist_set: set of tests in full-path form from a whitelist.
+    @param allowlist_set: set of tests in full-path form from a allowlist.
     @param add_experimental: add tests with experimental attribute set.
     @param add_noncompliant: attempt adding test with invalid control files.
     @param autotest_dir: prepended to path strings (/usr/local/autotest).
     """
     tests = {}
     profilers = {}
-    for file_path in whitelist_set:
+    for file_path in allowlist_set:
         if file_path.find('client/profilers') == -1:
             try:
                 found_test = control_data.parse_control(file_path,
@@ -524,7 +524,7 @@ def main(argv):
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='store_true', default=False,
                       help='Run in verbose mode')
-    parser.add_option('-w', '--whitelist-file', dest='whitelist_file',
+    parser.add_option('-w', '--allowlist-file', dest='allowlist_file',
                       help='Filename for list of test names that must match')
     parser.add_option('-z', '--autotest-dir', dest='autotest_dir',
                       default=os.path.join(os.path.dirname(__file__), '..'),
@@ -574,18 +574,18 @@ def main(argv):
             return 1
         db_clean_all(options.autotest_dir)
 
-    whitelist_set = None
-    if options.whitelist_file:
+    allowlist_set = None
+    if options.allowlist_file:
         if options.add_all:
-            logging.error("Cannot pass both --add-all and --whitelist-file")
+            logging.error("Cannot pass both --add-all and --allowlist-file")
             return 1
-        whitelist_path = os.path.abspath(options.whitelist_file)
-        if not os.path.isfile(whitelist_path):
-            logging.error("--whitelist-file (%s) not found", whitelist_path)
+        allowlist_path = os.path.abspath(options.allowlist_file)
+        if not os.path.isfile(allowlist_path):
+            logging.error("--allowlist-file (%s) not found", allowlist_path)
             return 1
-        logging.info("Using whitelist file %s", whitelist_path)
-        whitelist_set =  _create_whitelist_set(whitelist_path)
-        update_from_whitelist(whitelist_set,
+        logging.info("Using allowlist file %s", allowlist_path)
+        allowlist_set =  _create_allowlist_set(allowlist_path)
+        update_from_allowlist(allowlist_set,
                               add_experimental=options.add_experimental,
                               add_noncompliant=options.add_noncompliant,
                               autotest_dir=options.autotest_dir)

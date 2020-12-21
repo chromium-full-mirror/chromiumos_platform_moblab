@@ -667,7 +667,7 @@ class HostQueueEntry(DBObject):
             self.set_finished_on_now()
             self._log_trace()
         if self.job.shard_id is not None:
-            # If shard_id is None, the job will be synced back to the master
+            # If shard_id is None, the job will be synced back to the client
             self.job.update_field('shard_id', None)
         if not self.execution_subdir:
             return

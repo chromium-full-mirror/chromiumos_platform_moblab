@@ -692,9 +692,7 @@ class LinuxSystem(object):
         """
         if self._bridge_interface is None:
             self._create_bridge_interface()
-        # TODO b:169251326 terms below are set outside of this codebase
-        # and should be updated when possible. ("master" -> "main")
-        self.host.run('%s link set dev %s master %s' %
+        self.host.run('%s link set dev %s main %s' %
                       (self.cmd_ip, interface, self._bridge_interface))
 
 

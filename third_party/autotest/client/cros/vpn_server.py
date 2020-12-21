@@ -224,9 +224,9 @@ class OpenVPNServer(VPNServer):
     USERNAME = 'username'
     SERVER_IP_ADDRESS = '10.11.12.1'
     # TODO b:169251326 terms below are set outside of this codebase
-    # and should be updated when possible. ("blacklist" -> "blocklist")
+    # and should be updated when possible. ("denylist" -> "blocklist")
     CONFIGURATION = {
-        'etc/ssl/blacklist' : '',
+        'etc/ssl/denylist' : '',
         CA_CERTIFICATE_FILE : site_eap_certs.ca_cert_1,
         SERVER_CERTIFICATE_FILE : site_eap_certs.server_cert_1,
         SERVER_KEY_FILE : site_eap_certs.server_private_key_1,
