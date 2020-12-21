@@ -1,5 +1,5 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   Component,
   ViewChild
 } from '@angular/core';
@@ -22,7 +22,7 @@ import {BasicSelectorComponent} from '../../common/basic-selector/basic-selector
   templateUrl: './cts-run.component.html',
   styleUrls: ['./cts-run.component.scss'],
 })
-export class CtsRunComponent extends BaseSuite implements AfterViewInit {
+export class CtsRunComponent extends BaseSuite implements AfterContentInit {
   @ViewChild('versionSelector') versionSelectForm;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
   @ViewChild(BasicTextFormComponent) modulesTextForm;
@@ -38,7 +38,7 @@ export class CtsRunComponent extends BaseSuite implements AfterViewInit {
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterViewInit(): void {
+  ngAfterContentInit(): void {
     setTimeout(function () {
       this.versionSelectForm.disable('Please select build.');
       this.modulesTextForm.disable('Please select build.');

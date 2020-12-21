@@ -1,5 +1,5 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   ChangeDetectorRef,
   Component,
   ViewChild
@@ -20,7 +20,7 @@ import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-b
   templateUrl: './gts-run.component.html',
   styleUrls: ['./gts-run.component.css'],
 })
-export class GtsRunComponent extends BaseSuite implements AfterViewInit {
+export class GtsRunComponent extends BaseSuite implements AfterContentInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
   @ViewChild(BasicTextFormComponent) modulesTextForm;
 
@@ -33,7 +33,7 @@ export class GtsRunComponent extends BaseSuite implements AfterViewInit {
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterViewInit(): void {
+  ngAfterContentInit(): void {
     this.modulesTextForm.disable('Please select build.');
     this.changeDetector.detectChanges();
   }

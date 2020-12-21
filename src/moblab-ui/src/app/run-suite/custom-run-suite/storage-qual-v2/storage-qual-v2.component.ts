@@ -1,5 +1,5 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   ChangeDetectorRef,
   Component,
   ViewChild
@@ -17,7 +17,7 @@ import {RunStorageQualificationSuiteRequest} from '../../../services/moblabrpc_p
   templateUrl: './storage-qual-v2.component.html',
   styleUrls: ['./storage-qual-v2.component.scss']
 })
-export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
+export class StorageQualV2Component extends BaseSuite implements AfterContentInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild('diskSizeInput') diskSizeInput;
@@ -44,7 +44,7 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterViewInit(): void {
+  ngAfterContentInit(): void {
     this.disableTestParamControls();
     this.bugIdInput.disable('Please select disk size.');
     this.partNumberInput.disable('Please select disk size.');

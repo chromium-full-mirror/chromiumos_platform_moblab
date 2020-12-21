@@ -1,9 +1,8 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {AfterContentInit, ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 
 import {BaseSuite} from '../../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
-import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-form.component';
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
@@ -15,7 +14,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
   templateUrl: './memory-qual.component.html',
   styleUrls: ['./memory-qual.component.scss']
 })
-export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
+export class MemoryQualComponent extends BaseSuite implements AfterContentInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
@@ -29,7 +28,7 @@ export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterViewInit(): void {
+  ngAfterContentInit(): void {
     this.bugIdInput.disable('Please select build.');
     this.partNumberInput.disable('Please select build.');
     this.changeDetector.detectChanges();
