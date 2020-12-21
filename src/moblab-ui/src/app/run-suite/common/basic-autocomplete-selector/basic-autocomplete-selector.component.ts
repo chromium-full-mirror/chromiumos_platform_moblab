@@ -51,27 +51,27 @@ export class BasicAutocompleteSelectorComponent extends BaseForm implements OnCh
 
   private getFilteredOptions(value: string): string[] {
     var filterResults = this.options;
-    if (value) {
-      value = value.toLowerCase();
-      filterResults = this.options.filter(option => option.toLowerCase().includes(value));
-    }
+    // if (value) {
+    //   value = value.toLowerCase();
+    //   filterResults = this.options.filter(option => option.toLowerCase().includes(value));
+    // }
 
-    if (this.options.length && filterResults.length === 0) {
-      this.setError("Input does not match with any options.");
-    } else if (filterResults.length !== 0) {
-      this.clearError();
-    }
+    // if (this.options.length && filterResults.length === 0) {
+    //   this.setError("Input does not match with any options.");
+    // } else if (filterResults.length !== 0) {
+    //   this.clearError();
+    // }
 
     return filterResults;
   }
 
   // If only one option is available, it is automatically selected.
   autoSelectedSingleOption() {
-      if (this.autoselect && this.options.length === 1) {
-        this.selectFormControl.setValue(this.options[0]);
-        this.lock();
-        this.select.emit({value: this.selectFormControl.value});
-      }
+    if (this.autoselect && this.options.length === 1) {
+      this.selectFormControl.setValue(this.options[0]);
+      this.lock();
+      this.select.emit({value: this.selectFormControl.value});
+    }
   }
 
   _keyUp(event: any) {
