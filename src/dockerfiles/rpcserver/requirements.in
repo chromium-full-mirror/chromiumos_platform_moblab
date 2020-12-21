@@ -16,3 +16,4 @@ sqlalchemy
 alembic
 pymysql
 gsutil   # required to copy the service account using the boto key.
+coverage

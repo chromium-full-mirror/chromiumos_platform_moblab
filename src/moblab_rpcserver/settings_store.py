@@ -39,20 +39,25 @@ class SettingsStore:
 
     def set_setting(self, key, value):
         session = self.db.get_session()
-        setting = session.query(MoblabSettings).filter_by(key=key).first()
-        if not setting:
-            logging.info('Insert setting "%s" = "%s"', key, value)
-            session.add(
-                MoblabSettings(
-                    key=key,
-                    value=value,
-                    default_value=value,
+        try:
+            setting = session.query(MoblabSettings).filter_by(key=key).first()
+            if not setting:
+                logging.info('Insert setting "%s" = "%s"', key, value)
+                session.add(
+                    MoblabSettings(
+                        key=key,
+                        value=value,
+                        default_value=value,
+                    )
                 )
-            )
-        else:
-            logging.info(
-                'Updating setting "%s" "%s" -> "%s"', key, setting.value, value
-            )
-            setting.value = value
-        session.commit()
-        session.close()
+            else:
+                logging.info(
+                    'Updating setting "%s" "%s" -> "%s"',
+                    key,
+                    setting.value,
+                    value,
+                )
+                setting.value = value
+            session.commit()
+        finally:
+            session.close()

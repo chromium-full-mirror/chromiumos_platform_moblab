@@ -233,7 +233,8 @@ misc:	dhcp \
 # Build & run, but don't push
 rpcserver-test: export DOCKER_BUILDKIT=1
 rpcserver-test: rpcserver
-	docker run -w /etc/moblab/moblab_rpcserver -it ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
-		python -m unittest discover -p *_unittest.py
+	install -d -m 0777 moblab_rpcserver/coverage
+	docker run -w /etc/moblab/moblab_rpcserver -v "${PWD}/moblab_rpcserver/coverage":/etc/moblab/moblab_rpcserver/coverage --rm ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
+		bash -c 'coverage run -m unittest discover -p "*_unittest.py" && coverage html -d coverage --omit "*_unittest.py"'
 
 test:	rpcserver-test
