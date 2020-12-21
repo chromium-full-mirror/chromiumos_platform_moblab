@@ -21,7 +21,7 @@ set -e
 case "$1" in
     start)
         echo "Starting script moblab "
-        
+
         ##################################################################
         # Edit this for your particular machine setup
         # sudo ip addr will show all the interfaces on your machine
@@ -31,24 +31,24 @@ case "$1" in
         INT_IFACE=enp10s0  # Interface that is connected to DUT
         ##################################################################
         # Do not edit below this line.
-        
+
         DHCPD_IFACE=qemubr0
         SERVER_ADDRESS=192.168.231.1
         SERVER_NETMASK=255.255.255.0
         INTERFACE_WAN='WAN'
         INTERFACE_LAN='LAN'
-        
+
         brctl addbr ${DHCPD_IFACE}
         brctl setfd ${DHCPD_IFACE} 0
         ifconfig ${DHCPD_IFACE} ${SERVER_ADDRESS} netmask ${SERVER_NETMASK} up
-        
-        docker run --rm --name dhcp -v leases:/var/lib/misc -d --cap-add=NET_ADMIN --network host gcr.io/chromeos-partner-moblab/moblab-dhcp:release --interface ${DHCPD_IFACE}
-        
+
+        docker run --rm --name dhcp -v leases:/var/lib/misc -d --cap-add=NET_ADMIN --network host gcr.io/chromeos-partner-moblab/moblab-dhcp:release --interface ${DHCPD_IFACE} --bind-interfaces
+
         brctl addif ${DHCPD_IFACE} ${INT_IFACE}
         iptables -w -t nat -A POSTROUTING -o ${EXT_IFACE} -j MASQUERADE
         iptables -w -A FORWARD -i ${EXT_IFACE} -o ${DHCPD_IFACE} -m state --state RELATED,ESTABLISHED -j ACCEPT
         iptables -w -A FORWARD -i ${DHCPD_IFACE} -o ${EXT_IFACE} -j ACCEPT
-        
+
         ifconfig ${INT_IFACE} up
         iptables -w -P FORWARD ACCEPT
     ;;
