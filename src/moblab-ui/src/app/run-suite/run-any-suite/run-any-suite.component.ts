@@ -1,5 +1,5 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   ChangeDetectorRef,
   Component,
   ViewChild
@@ -20,9 +20,26 @@ import {RunSuiteButtonComponent} from '../common/run-suite-button/run-suite-butt
   selector: 'app-run-any-suite',
   templateUrl: './run-any-suite.component.html',
 })
-export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
+export class RunAnySuiteComponent extends BaseSuite implements AfterContentInit {
   @ViewChild('suiteInput') suiteInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
+
+  MANUAL_SUITE_ENTRY_DESC = ">> Enter suite name";
+  public suiteList: string[] = [
+    this.MANUAL_SUITE_ENTRY_DESC,
+    "au_fsi",
+    "bvt-cq",
+    "bvt-inline",
+    "bvt-tast-cq",
+    "usb-camera",
+    "wifi_matfunc",
+    "wifi_perf",
+    "labqual",
+  ];
+
+  public hideCustomInput = true;
+
+  public suiteName = "";
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -34,7 +51,7 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterViewInit(): void {
+  ngAfterContentInit(): void {
     this.suiteInput.disable('Please select build.');
     this.changeDetector.detectChanges();
   }
@@ -45,6 +62,22 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
     if (this.suiteInput.getInput()) {
       this.runSuiteButton.enable();
     } else {
+      this.runSuiteButton.disable();
+    }
+  }
+
+  /** Method triggered on change of suite input form.
+  * */
+  suiteDropdownChanged(suiteName: string) {
+    if (suiteName != this.MANUAL_SUITE_ENTRY_DESC) {
+      this.hideCustomInput = true;
+      this.suiteName = suiteName;
+      this.suiteInput.disable('Please select build.');
+      this.runSuiteButton.enable();
+    } else {
+      this.hideCustomInput = false;
+      this.suiteInput.enable();
+      this.suiteName = null;
       this.runSuiteButton.disable();
     }
   }
@@ -68,6 +101,10 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
   onRunSuiteClick() {
     super.onRunSuiteClick('Starting suite run.');
 
+    if (!this.suiteName) {
+      this.suiteName = this.suiteInput.getInput();
+    }
+
     this.moblabGrpcService.runSuite(
       (response) => {
         this.onSuiteStarted();
@@ -76,7 +113,7 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
         this.setOffPopup(err.message);
         this.runSuiteButton.enable();
       },
-      this.suiteInput.getInput(),
+      this.suiteName,
       this.selectedBuild,
       this.selectedMilestone,
       this.selectedBoard,

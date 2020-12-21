@@ -1,14 +1,16 @@
 <mat-card style="padding-top:35px;">
-  <app-build-select-forms
-    (allRequiredFieldsSet)="onBuildSet($event)"
-    (allRequiredFieldsSet)="suiteChanged()"
-    (buildVersionUnselected)="onBuildVersionUnselected()"
-    (formLoading)="onFormLoading($event.message)"
+  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)" (allRequiredFieldsSet)="suiteChanged()"
+    (buildVersionUnselected)="onBuildVersionUnselected()" (formLoading)="onFormLoading($event.message)"
     (formLoaded)="onFormLoaded()">
   </app-build-select-forms>
-  <app-basic-input
-    #suiteInput [name]="'Custom Suite Name'"
-    (update)="suiteChanged()">
+  <app-basic-selector #variationInput [title]="'Select suite:'" [options]="suiteList" [placeholder]="['Select a suite']"
+    [isShown]="true" (select)="suiteDropdownChanged($event.value)">
+  </app-basic-selector>
+  <div [hidden]="!hideCustomInput">
+    <br>
+  </div>
+  <app-basic-input [hidden]="hideCustomInput" #suiteInput [name]="'Custom Suite Name'" (update)="suiteChanged()">
   </app-basic-input>
+
   <app-run-suite-button (click)="onRunSuiteClick()"></app-run-suite-button>
 </mat-card>
