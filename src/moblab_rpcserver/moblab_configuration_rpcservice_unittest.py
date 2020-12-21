@@ -3,21 +3,20 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-import settings_repo
+import settings_store
 
 from moblab_common.proto.moblab_configuration_rpc_pb2 import (
-    GetSettingsRequest,
-    GetSettingsResponse,
-    SetSettingRequest,
-    MoblabSetting,
-    Value,
-    MOBLAB_SETTING_LOW_DISK_SPACE,
+    PauseHostSchedulerRequest,
+    ResumeHostSchedulerResponse,
+    PauseHostSchedulerResponse,
+    PauseRequestor,
 )
 
-from settings_repo import MoblabDb
+from moblab_common.database_models.moblab_settings import MoblabSettings
 
 from moblab_configuration_rpcservice import ConfigurationRpcService
-from moblab_common.proto.google.protobuf.empty_pb2 import Empty
+from google.protobuf.empty_pb2 import Empty
+
 
 import unittest
 from unittest import mock
@@ -27,41 +26,24 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
     """Testing the ConfigurationRpcService code."""
 
     def setUp(self):
-        self.rpcService = ConfigurationRpcService()
+        self.configurationRpcService = ConfigurationRpcService()
 
-    @mock.patch.object(settings_repo.SettingsRepo, "set_setting")
-    def test_set_setting(self, mock_set_setting):
-        result = self.rpcService.set_setting(
-            request=SetSettingRequest(
-                setting=MoblabSetting(
-                    key=MOBLAB_SETTING_LOW_DISK_SPACE,
-                    value=Value(bool_value=False),
-                )
-            ),
-            context={},
-        )
-        self.assertEqual(result, Empty())
-
-    @mock.patch.object(settings_repo.SettingsRepo, "get_settings")
-    def test_get_settings(self, mock_get_settings):
+    @mock.patch.object(settings_store.SettingsStore, "set_setting")
+    @mock.patch.object(settings_store.SettingsStore, "get_settings")
+    def test_pause(self, mock_get_settings, mock_set_setting):
         mock_get_settings.return_value = [
-            '{ "key": "MOBLAB_SETTING_LOW_DISK_SPACE", "value": { "doubleValue": 123.0 } }'
+            '{ "key": "MOBLAB_SETTING_LOW_DISK_SPACE", "value": { "boolValue": true } }'
         ]
-        result = self.rpcService.get_settings(
-            request=GetSettingsRequest(keys=[MOBLAB_SETTING_LOW_DISK_SPACE]),
+        response = self.configurationRpcService.pause_host_scheduler(
+            request=PauseHostSchedulerRequest(
+                pauseRequestor=PauseRequestor.PAUSE_REQUESTOR_LOW_DISK_SPACE
+            ),
             context={},
         )
-        self.assertEqual(
-            result,
-            GetSettingsResponse(
-                moblabSettings=[
-                    MoblabSetting(
-                        key=MOBLAB_SETTING_LOW_DISK_SPACE,
-                        value=Value(double_value=123.0),
-                    )
-                ]
-            ),
+        expectedResponse = PauseHostSchedulerResponse(
+            pauseRequestors=[PauseRequestor.PAUSE_REQUESTOR_LOW_DISK_SPACE],
         )
+        self.assertEqual(response, expectedResponse)
 
 
 if __name__ == "__main__":

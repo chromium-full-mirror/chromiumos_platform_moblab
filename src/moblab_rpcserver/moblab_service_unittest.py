@@ -23,13 +23,12 @@ MOCKED_DOCKER = MagicMock()
 MOCKED_DOCKER.errors.NotFound = MockNotFoundError
 
 MOCKED_GOOGLE = MagicMock()
-MOCKED_GOOGLE.api_core.exceptions.ClientError = MockClientError
+MOCKED_GOOGLE.api_core.exceptions.GoogleAPIError = MockClientError
 
 sys.modules["docker"] = MOCKED_DOCKER
 sys.modules["google"] = MOCKED_GOOGLE
 sys.modules["google.cloud"] = MagicMock()
 sys.modules["google.api_core"] = MagicMock()
-sys.modules["host_scheduler_pause_service"] = MagicMock()
 sys.modules["moblab_common"] = MagicMock()
 sys.modules["requests"] = MagicMock()
 
@@ -130,7 +129,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
         mock_docker_from_env.return_value = mock_docker_client
 
         is_update_available = self.service.get_is_update_available()
-        assert is_update_available == False
+        assert not is_update_available
 
     @mock.patch("moblab_service.docker.from_env")
     def test_update_docker(self, mock_docker_from_env):
@@ -156,8 +155,8 @@ class MoblabRPCServiceTest(unittest.TestCase):
     def test_update_docker_already_running(self, mock_docker_from_env):
         mock_docker_from_env.return_value = MagicMock()
 
-        with self.assertRaises(MoblabRpcError) as context:
-            result_msg = self.service.update_docker()
+        with self.assertRaises(MoblabRpcError):
+            _ = self.service.update_docker()
 
     def _mock_afe_connector_methods(
         self,
@@ -198,19 +197,23 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 "gcs_bucket_url",
                 "is_remote_agent_enabled",
                 "is_remote_command_enabled",
-                # The follow are bools to set whether mock afe_connector succeeds or fails for the
-                # validate_cloud_storage_info, set_configuration_info, and set_is_remote_agent_enabled.
+                # The follow are bools to set whether mock afe_connector
+                # succeeds or fails for the
+                # validate_cloud_storage_info, set_configuration_info,
+                # and set_is_remote_agent_enabled.
                 "succeed_validate",
                 "succeed_cloud_configuration_set",
                 "succeed_remote_agent_config_commit",
-                # Expected message to be returned by MoblabService.set_cloud_configuration
+                # Expected message to be returned by
+                # MoblabService.set_cloud_configuration
                 "expected_message_output",
             ],
         )
 
-        # below is a list of different permutations of potential inputs to set_cloud_configuration + different behaviors for
-        # the mocked afe_connector. Each item includes the expected message output of the set_cloud_configuration that will
-        # be assert'ed against.
+        # below is a list of different permutations of potential inputs to
+        # set_cloud_configuration + different behaviors for
+        # the mocked afe_connector. Each item includes the expected message
+        # output of the set_cloud_configuration that will be assert'ed against.
         parameterized_set_cloud_configuration_tests = [
             # test completely successful set cloud config.
             SetCloudConfigurationTestParams(
@@ -223,9 +226,10 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 succeed_validate=True,
                 succeed_cloud_configuration_set=True,
                 succeed_remote_agent_config_commit=True,
-                expected_message_output="Successfully applied cloud configuration values. " +
-                                        "Remote agent has been enabled. " +
-                                        "Remote command has been disabled.",
+                expected_message_output="Successfully applied "
+                + "cloud configuration values. "
+                + "Remote agent has been enabled. "
+                + "Remote command has been disabled.",
             ),
             # test set only cloud disabled.
             SetCloudConfigurationTestParams(
@@ -238,7 +242,8 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 succeed_validate=True,
                 succeed_cloud_configuration_set=True,
                 succeed_remote_agent_config_commit=True,
-                expected_message_output="Successfully disabled cloud configuration.",
+                expected_message_output="Successfully disabled "
+                + "cloud configuration.",
             ),
             # test validation failed.
             SetCloudConfigurationTestParams(
@@ -253,7 +258,8 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 succeed_remote_agent_config_commit=True,
                 expected_message_output="Cloud validation failed.",
             ),
-            # test cloud configuration successfully committed but remote agent toggle set failed
+            # test cloud configuration successfully committed but remote
+            # agent toggle set failed
             SetCloudConfigurationTestParams(
                 is_cloud_enabled=True,
                 boto_key_id="fake-boto-id",
@@ -264,9 +270,10 @@ class MoblabRPCServiceTest(unittest.TestCase):
                 succeed_validate=True,
                 succeed_cloud_configuration_set=True,
                 succeed_remote_agent_config_commit=False,
-                expected_message_output="Successfully applied cloud configuration values. " +
-                                        "But failed to set remote agent as enabled. " +
-                                        "Remote command has been disabled.",
+                expected_message_output="Successfully applied cloud "
+                + "configuration values. "
+                + "But failed to set remote agent as enabled. "
+                + "Remote command has been disabled.",
             ),
         ]
 
@@ -285,7 +292,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
                     params.boto_key_secret,
                     params.gcs_bucket_url,
                     params.is_remote_agent_enabled,
-                    params.is_remote_command_enabled
+                    params.is_remote_command_enabled,
                 )
                 assert message == params.expected_message_output
 
@@ -315,20 +322,21 @@ class MoblabRPCServiceTest(unittest.TestCase):
             MockMoblabBuildConnector.call_count
         )
 
-        message = self.service.set_cloud_configuration(
+        _ = self.service.set_cloud_configuration(
             True,
             "mock-boto-key-id",
             "mock-boto-key-secret",
             "gs:/mock-gcs-url",
             True,
-            True
+            True,
         )
-
         self.service.moblab_build_connector
         self.service.build_connector
 
-        # Verifies that, after an invokation of set_cloud_configuration, references to the two build connectors results in
-        # a reinitialization of each. This ensures that changes in target bucket or service_account creds gets ingested.
+        # Verifies that, after an invokation of set_cloud_configuration,
+        # references to the two build connectors results in
+        # a reinitialization of each. This ensures that changes in target
+        # bucket or service_account creds gets ingested.
         assert (
             MockMoblabBuildConnector.call_count
             == pre_moblab_build_connector_call_count + 1
@@ -434,7 +442,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
             True
         )
 
-        with self.assertRaises(MoblabRpcError) as context:
+        with self.assertRaises(MoblabRpcError):
             self.service.run_suite(
                 "mock_build_target",
                 "mock_model",

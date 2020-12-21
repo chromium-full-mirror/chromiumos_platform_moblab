@@ -229,3 +229,11 @@ misc:	dhcp \
 		logrotate \
 		ssp \
 		watchtower
+
+# Build & run, but don't push
+rpcserver-test: export DOCKER_BUILDKIT=1
+rpcserver-test: rpcserver
+	docker run -w /etc/moblab/moblab_rpcserver -it ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
+		python -m unittest discover -p *_unittest.py
+
+test:	rpcserver-test
