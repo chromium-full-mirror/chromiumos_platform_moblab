@@ -18,7 +18,7 @@ import six
 
 _CLIENT_SSH_COMMAND_TEMPLATE = (
     '/usr/bin/ssh -a -x -N '
-    '-o ControlClient=yes '  # Create multiplex socket.
+    '-o ControlMaster=yes '  # Create multiplex socket.
     '-o ControlPath=%(socket)s '
     '-o StrictHostKeyChecking=no '
     '-o UserKnownHostsFile=/dev/null '
