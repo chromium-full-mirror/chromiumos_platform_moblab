@@ -8,6 +8,7 @@ import grpc
 import logging
 import os
 import sys
+import asyncio
 
 from concurrent import futures
 
@@ -22,6 +23,8 @@ from moblab_common.proto import moblab_configuration_rpc_pb2
 from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
     add_MoblabConfigurationServiceServicer_to_server,
 )
+
+from disk_space_monitor_service import DiskSpaceMonitorService
 
 from grpc_reflection.v1alpha import reflection
 
@@ -59,7 +62,7 @@ def parse_arguments(argv):
     return parser.parse_args(argv)
 
 
-def serve():
+async def serve():
     options = parse_arguments(sys.argv[1:])
     logging_severity = logging.INFO
     if options.verbose:
@@ -90,12 +93,22 @@ def serve():
         serving_port = 6002
         server.add_insecure_port("[::]:%s" % serving_port)
 
-        server.start()
-        logging.info("Starting server port %s" % serving_port)
-        server.wait_for_termination()
+        def run_grpc_server():
+            server.start()
+            logging.info("Starting server port %s" % serving_port)
+            server.wait_for_termination()
+
+        loop = asyncio.get_event_loop()
+        executor = futures.ThreadPoolExecutor()
+
+        await asyncio.gather(
+            loop.run_in_executor(executor, run_grpc_server),
+            DiskSpaceMonitorService().run(),
+        )
+
     finally:
         server.stop(0)
 
 
 if __name__ == "__main__":
-    serve()
+    asyncio.run(serve())

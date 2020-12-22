@@ -800,8 +800,20 @@ class AFEConnector(object):
             hosts_names ([str]): list of host names (DUTs' IPs)
             lock_reason: user facing text message
         Returns:
-            A boolean. True if command was executed without errors.
+            A string. Errors message returned by AFE or None.
         """
+
+        connected_duts = self.get_connected_devices()
+
+        _LOGGER.info("Connected DUTs: %s", connected_duts)
+
+        hosts_names = [
+            dut["hostname"]
+            for dut in connected_duts
+            if dut["hostname"] in hosts_names
+            and dut["locked"] != new_locked_state
+        ]
+
         params = {
             "host_filter_data": {"hostname__in": hosts_names},
             "update_data": {
@@ -816,4 +828,4 @@ class AFEConnector(object):
             params,
             response,
         )
-        return not self.decode_response(response, "error")
+        return self.decode_response(response, "error")
