@@ -1,7 +1,12 @@
 import {Component, OnInit} from '@angular/core';
-import {ElementRef, Pipe, PipeTransform, ViewChild, ViewEncapsulation} from '@angular/core';
+import {
+  ElementRef,
+  Pipe,
+  PipeTransform,
+  ViewChild,
+  ViewEncapsulation,
+} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
-
 
 @Pipe({name: 'safe'})
 export class MobmonitorPipe implements PipeTransform {
@@ -14,10 +19,10 @@ export class MobmonitorPipe implements PipeTransform {
 @Component({
   selector: 'app-mob-mobmonitor',
   templateUrl: './mobmonitor.component.html',
-  styleUrls: ['./mobmonitor.component.scss']
+  styleUrls: ['./mobmonitor.component.scss'],
 })
 export class MobmonitorComponent {
   title = 'app';
 
-  video = 'http://localhost:9991'
+  video = 'http://localhost:9991';
 }

@@ -1,15 +1,8 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
 import {BaseForm} from '../base-form/base-form.component';
 import {numericValidator} from '../../../utils/validators';
-
 
 /**
  * Component meant to be used for input form items in run suite components.
@@ -17,7 +10,7 @@ import {numericValidator} from '../../../utils/validators';
 @Component({
   selector: 'app-basic-input',
   templateUrl: './basic-input.component.html',
-  styleUrls: ['./basic-input.component.css']
+  styleUrls: ['./basic-input.component.css'],
 })
 export class BasicInputFormComponent extends BaseForm implements OnInit {
   @Input() name: string;
@@ -37,7 +30,7 @@ export class BasicInputFormComponent extends BaseForm implements OnInit {
   }
 
   setNumericValidation() {
-    this.input.setValidators([numericValidator])
+    this.input.setValidators([numericValidator]);
   }
 
   getInput() {

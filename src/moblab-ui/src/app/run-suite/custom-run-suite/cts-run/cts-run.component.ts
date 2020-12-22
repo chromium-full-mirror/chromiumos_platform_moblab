@@ -1,8 +1,4 @@
-import {
-  AfterContentInit,
-  Component,
-  ViewChild
-} from '@angular/core';
+import {AfterContentInit, Component, ViewChild} from '@angular/core';
 
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -13,7 +9,6 @@ import {BuildSettings} from '../../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
 import {BasicSelectorComponent} from '../../common/basic-selector/basic-selector.component';
-
 
 /** Component owns logic for CTS suite run form.
  * */
@@ -30,19 +25,21 @@ export class CtsRunComponent extends BaseSuite implements AfterContentInit {
 
   suiteName: string;
 
-  constructor(moblabGrpcService: MoblabGrpcService,
+  constructor(
+    moblabGrpcService: MoblabGrpcService,
     router: Router,
-    snackBar: MatSnackBar) {
+    snackBar: MatSnackBar
+  ) {
     super(moblabGrpcService, router, snackBar);
   }
 
   /** Sets initial form enable/disable states.
    * */
   ngAfterContentInit(): void {
-    setTimeout(function () {
+    setTimeout(() => {
       this.versionSelectForm.disable('Please select build.');
       this.modulesTextForm.disable('Please select build.');
-    }.bind(this));
+    });
   }
 
   /** Method is triggered when build version form no longer has a valid
@@ -79,7 +76,7 @@ export class CtsRunComponent extends BaseSuite implements AfterContentInit {
     super.onRunSuiteClick('Starting CTS suite run.');
 
     this.moblabGrpcService.runCtsSuite(
-      (response) => {
+      response => {
         this.onSuiteStarted();
       },
       (err, response) => {
@@ -92,7 +89,7 @@ export class CtsRunComponent extends BaseSuite implements AfterContentInit {
       this.selectedBoard,
       this.selectedModel,
       this.selectedPool,
-      this.modulesTextForm.getCsvList(),
+      this.modulesTextForm.getCsvList()
     );
   }
 }

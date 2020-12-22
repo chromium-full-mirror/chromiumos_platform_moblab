@@ -21,7 +21,6 @@ import {PipesModule} from 'app/pipes/pipes.module';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
 import {WidgetsModule} from 'app/widgets/widgets.module';
 
-
 function createMockDuts(): ConnectedDutInfo[] {
   const mockDuts = [];
   for (let i = 0; i < 10; i++) {
@@ -45,25 +44,25 @@ describe('EditAttributesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          FormsModule,
-          MatCardModule,
-          MatCheckboxModule,
-          MatFormFieldModule,
-          MatIconModule,
-          MatInputModule,
-          MatProgressSpinnerModule,
-          MatSnackBarModule,
-          MatTableModule,
-          MatTooltipModule,
-          PipesModule,
-          ReactiveFormsModule,
-          RouterModule,
-          WidgetsModule,
-        ],
-        declarations: [EditAttributesComponent, ViewDutsComponent]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatProgressSpinnerModule,
+        MatSnackBarModule,
+        MatTableModule,
+        MatTooltipModule,
+        PipesModule,
+        ReactiveFormsModule,
+        RouterModule,
+        WidgetsModule,
+      ],
+      declarations: [EditAttributesComponent, ViewDutsComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -71,39 +70,44 @@ describe('EditAttributesComponent', () => {
     component = fixture.componentInstance;
 
     // @ts-ignore
-    addAttributeToDutsSpy = spyOn<any>(component.moblabGrpcService,
-      'addAttributeToDuts');
+    addAttributeToDutsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'addAttributeToDuts'
+    );
     // @ts-ignore
-    removeAttributeFromDutsSpy = spyOn<any>(component.moblabGrpcService,
-      'removeAttributeFromDuts');
+    removeAttributeFromDutsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'removeAttributeFromDuts'
+    );
     // @ts-ignore
-    addLabelToDutsSpy = spyOn<any>(component.moblabGrpcService,
-      'addLabelToDuts');
+    addLabelToDutsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'addLabelToDuts'
+    );
     // @ts-ignore
-    removeLabelFromDutsSpy = spyOn<any>(component.moblabGrpcService,
-      'removeLabelFromDuts');
+    removeLabelFromDutsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'removeLabelFromDuts'
+    );
     // @ts-ignore
-    addPoolToDutsSpy = spyOn<any>(component.moblabGrpcService,
-      'addPoolToDuts');
+    addPoolToDutsSpy = spyOn<any>(component.moblabGrpcService, 'addPoolToDuts');
     // @ts-ignore
-    removePoolFromDutsSpy = spyOn<any>(component.moblabGrpcService,
-      'removePoolFromDuts');
+    removePoolFromDutsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'removePoolFromDuts'
+    );
     fixture.detectChanges();
   });
 
   function inputEditValue(formId: string, val: string) {
-    const editInput = fixture.debugElement.nativeElement.querySelector(
-      formId
-    );
+    const editInput = fixture.debugElement.nativeElement.querySelector(formId);
     editInput.value = val;
     editInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
   }
 
   function dispatchButtonClick(buttonId: string) {
-    const button = fixture.debugElement.nativeElement.querySelector(
-      buttonId
-    );
+    const button = fixture.debugElement.nativeElement.querySelector(buttonId);
     button.dispatchEvent(new Event('click'));
     fixture.detectChanges();
   }
@@ -119,10 +123,12 @@ describe('EditAttributesComponent', () => {
     expect(addLabelToDutsSpy).toHaveBeenCalledTimes(0);
   });
 
-  describe('Submission tests', function () {
+  describe('Submission tests', () => {
     beforeEach(() => {
-      dutsTableSpy = spyOn<any>(component.dutsTableRef, 'getSelectedDutHostnames')
-        .and.callFake(createMockDuts);
+      dutsTableSpy = spyOn<any>(
+        component.dutsTableRef,
+        'getSelectedDutHostnames'
+      ).and.callFake(createMockDuts);
     });
 
     it('expect that add label submission gets passed through.', () => {

@@ -5,20 +5,19 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectionModel} from '@angular/cdk/collections';
 
-import {TableHeaderSelectorComponent} from
-  '../../widgets/table-header-selector/table-header-selector.component';
+import {TableHeaderSelectorComponent} from '../../widgets/table-header-selector/table-header-selector.component';
 
 const NOT_CONNECTED_MESSAGE = 'DUT not reachable by SSH';
-
 
 @Component({
   selector: 'app-view-duts',
   templateUrl: './view-duts.component.html',
-  styleUrls: ['./view-duts.component.css']
+  styleUrls: ['./view-duts.component.css'],
 })
 export class ViewDutsComponent implements OnInit {
   @Input() hideUnenrolledDuts = false;
-  @ViewChild(TableHeaderSelectorComponent) headerSelectorRef: TableHeaderSelectorComponent;
+  @ViewChild(TableHeaderSelectorComponent)
+  headerSelectorRef: TableHeaderSelectorComponent;
 
   duts = new MatTableDataSource<ConnectedDutInfo>();
   displayedColumns: string[] = [
@@ -33,7 +32,6 @@ export class ViewDutsComponent implements OnInit {
   loading = false;
 
   selectOptions: string[] = ['All Enrolled', 'All Unenrolled'];
-
 
   filterLabels = true;
 

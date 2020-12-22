@@ -30,11 +30,12 @@ import {ManageDutsComponent} from './manage-duts.component';
 import {ServicesModule} from '../services/services.module';
 import {ViewDutsComponent} from './view-duts/view-duts.component';
 import {WidgetsModule} from '../widgets/widgets.module';
-import {FirmwareUpdateConfirmDialog, FirmwareUpdateResultDialog} from './firmware/firmware.component';
-
+import {
+  FirmwareUpdateConfirmDialog,
+  FirmwareUpdateResultDialog,
+} from './firmware/firmware.component';
 
 import {PipesModule} from 'app/pipes/pipes.module';
-
 
 @NgModule({
   imports: [
@@ -74,6 +75,6 @@ import {PipesModule} from 'app/pipes/pipes.module';
     FirmwareUpdateConfirmDialog,
     FirmwareUpdateResultDialog,
   ],
-  exports: [ManageDutsComponent]
+  exports: [ManageDutsComponent],
 })
-export class ManageDutsModule { }
+export class ManageDutsModule {}

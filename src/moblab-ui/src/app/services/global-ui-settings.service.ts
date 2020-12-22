@@ -4,7 +4,7 @@ enum UIState {
   NEEDS_SETUP = 1,
   SETUP_COMPLETE,
   NO_DUTS_CONFIGURED,
-};
+}
 
 export enum Feature {
   VIEW_JOBS = 1,
@@ -24,8 +24,8 @@ export enum Feature {
   FEEDBACK_REPORTS,
   TOOLBAR_PAGE_INFORMATION,
   JOB_DETAIL,
-  DUT_DETAIL
-};
+  DUT_DETAIL,
+}
 
 @Injectable()
 export class GlobalInfoService {
@@ -36,13 +36,13 @@ export class GlobalInfoService {
     Feature.VIEW_JOBS,
     Feature.JOB_DETAIL,
     Feature.DUT_DETAIL,
-    Feature.SYSTEM_CONFIGURATION
+    Feature.SYSTEM_CONFIGURATION,
   ];
 
   getUIState() {
     return UIState.NEEDS_SETUP;
-  };
+  }
   isFeatureEnabled(f: Feature) {
     return this.enabledFeatures.indexOf(f) > -1;
-  };
+  }
 }

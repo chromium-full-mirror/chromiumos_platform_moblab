@@ -17,7 +17,6 @@ export class FeedbackService {
   private isDraggingToolbarSource = new Subject<boolean>();
   public isDraggingToolbar$: Observable<boolean> = this.isDraggingToolbarSource.asObservable();
 
-
   public initScreenshotCanvas() {
     const that = this;
     const body = document.body;
@@ -27,7 +26,7 @@ export class FeedbackService {
       height: document.documentElement.clientHeight,
       x: document.documentElement.scrollLeft,
       y: document.documentElement.scrollTop,
-      allowTaint : true
+      allowTaint: true,
     }).then(bodyCanvas => {
       this.screenshotCanvasSource.next(bodyCanvas);
     });
@@ -47,7 +46,7 @@ export class FeedbackService {
 
   public getImgEle(canvas): HTMLElement {
     const img = canvas.toDataURL('image/png'),
-          imageEle = document.createElement('img');
+      imageEle = document.createElement('img');
     imageEle.setAttribute('src', img);
     Object.assign(imageEle.style, {
       position: 'absolute',
@@ -57,18 +56,22 @@ export class FeedbackService {
       margin: '0 auto',
       maxHeight: '100%',
       maxWidth: '100%',
-      transform: 'translateY(-50%)'
+      transform: 'translateY(-50%)',
     });
     return imageEle;
   }
 
   public hideBackDrop() {
-    const dialogBackDrop = document.getElementsByClassName('dialogBackDrop')[0] as HTMLElement;
+    const dialogBackDrop = document.getElementsByClassName(
+      'dialogBackDrop'
+    )[0] as HTMLElement;
     dialogBackDrop.style.backgroundColor = 'initial';
   }
 
   public showBackDrop() {
-    const dialogBackDrop = document.getElementsByClassName('dialogBackDrop')[0] as HTMLElement;
+    const dialogBackDrop = document.getElementsByClassName(
+      'dialogBackDrop'
+    )[0] as HTMLElement;
     if (!dialogBackDrop.getAttribute('data-html2canvas-ignore')) {
       dialogBackDrop.setAttribute('data-html2canvas-ignore', 'true');
     }

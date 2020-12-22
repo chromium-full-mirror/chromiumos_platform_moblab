@@ -5,7 +5,6 @@ import {MatCardModule} from '@angular/material/card';
 import {LoadingOverlayComponent} from './loading-overlay.component';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 
-
 describe('LoadingOverlayComponent', () => {
   let component: LoadingOverlayComponent;
   let fixture: ComponentFixture<LoadingOverlayComponent>;
@@ -20,15 +19,9 @@ describe('LoadingOverlayComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        declarations: [
-          LoadingOverlayComponent
-        ],
-        imports: [
-          MatCardModule,
-          MatProgressBarModule
-        ]
-      })
-      .compileComponents();
+      declarations: [LoadingOverlayComponent],
+      imports: [MatCardModule, MatProgressBarModule],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

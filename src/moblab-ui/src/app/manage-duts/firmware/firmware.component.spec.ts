@@ -1,9 +1,9 @@
 /* tslint:disable:no-unused-variable */
-import { DebugElement } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
+import {DebugElement} from '@angular/core';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 
-import { FirmwareComponent } from './firmware.component';
+import {FirmwareComponent} from './firmware.component';
 
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -15,9 +15,9 @@ describe('FirmwareComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [MatCardModule, MatCheckboxModule, MatTableModule],
-        declarations: [FirmwareComponent]})
-        .compileComponents();
+      imports: [MatCardModule, MatCheckboxModule, MatTableModule],
+      declarations: [FirmwareComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

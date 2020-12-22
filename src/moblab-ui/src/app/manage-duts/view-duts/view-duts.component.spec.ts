@@ -9,11 +9,14 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatTableModule} from '@angular/material/table';
 import {RouterModule} from '@angular/router';
 
-import {ConnectedDutInfo, Job, ListConnectedDutsResponse} from '../../services/moblabrpc_pb';
+import {
+  ConnectedDutInfo,
+  Job,
+  ListConnectedDutsResponse,
+} from '../../services/moblabrpc_pb';
 import {PipesModule} from 'app/pipes/pipes.module';
 import {ViewDutsComponent} from './view-duts.component';
 import {WidgetsModule} from 'app/widgets/widgets.module';
-
 
 function createMockDuts(): ConnectedDutInfo[] {
   const mockDuts = [];
@@ -37,19 +40,19 @@ describe('ViewDutsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          MatCardModule,
-          MatCheckboxModule,
-          MatIconModule,
-          MatTableModule,
-          PipesModule,
-          RouterModule,
-          RouterModule.forRoot([]),
-          WidgetsModule,
-        ],
-        declarations: [ViewDutsComponent]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatIconModule,
+        MatTableModule,
+        PipesModule,
+        RouterModule,
+        RouterModule.forRoot([]),
+        WidgetsModule,
+      ],
+      declarations: [ViewDutsComponent],
+    }).compileComponents();
   }));
 
   function applyClickTo(button_identifier: string) {
@@ -66,12 +69,12 @@ describe('ViewDutsComponent', () => {
     fixture.detectChanges();
 
     // @ts-ignore
-    getDutsSpy = spyOn<any>(component.moblabGrpcService, 'listConnectedDuts')
-      .and.callFake(
-        function() {
-          component.assignDuts(
-            createMockDuts());
-        });
+    getDutsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'listConnectedDuts'
+    ).and.callFake(() => {
+      component.assignDuts(createMockDuts());
+    });
   });
   beforeEach(() => {
     component.ngOnInit();
@@ -83,9 +86,9 @@ describe('ViewDutsComponent', () => {
   });
 
   it('load-in case.', () => {
-    const viewDutsTableRows =
-      fixture.debugElement.nativeElement.querySelectorAll(
-        '#view-duts-table .mat-row');
+    const viewDutsTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+      '#view-duts-table .mat-row'
+    );
 
     expect(viewDutsTableRows.length).toBe(createMockDuts().length);
     expect(getDutsSpy).toHaveBeenCalledTimes(1);
@@ -94,24 +97,23 @@ describe('ViewDutsComponent', () => {
   it('refresh button works.', () => {
     applyClickTo('#duts-refresh-button');
 
-    const viewDutsTableRows =
-      fixture.debugElement.nativeElement.querySelectorAll(
-        '#view-duts-table .mat-row');
+    const viewDutsTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+      '#view-duts-table .mat-row'
+    );
 
     expect(viewDutsTableRows.length).toBe(createMockDuts().length);
     expect(getDutsSpy).toHaveBeenCalledTimes(2);
   });
 
   it('unenrolled DUTs can be hidden.', () => {
-
     component.setHideUnenrolledDuts(true);
     fixture.detectChanges();
 
-    const viewDutsTableRows =
-      fixture.debugElement.nativeElement.querySelectorAll(
-        '#view-duts-table .mat-row');
+    const viewDutsTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+      '#view-duts-table .mat-row'
+    );
     let hiddenDutsCount = 0;
-    viewDutsTableRows.forEach((row) => {
+    viewDutsTableRows.forEach(row => {
       if (row.hidden) {
         hiddenDutsCount += 1;
       }
@@ -125,7 +127,9 @@ describe('ViewDutsComponent', () => {
 
     // Toggling checkbox widget.
     component.headerSelectorRef.checkboxChange();
-    expect(component.getSelectedDutHostnames().length).toBe(createMockDuts().length);
+    expect(component.getSelectedDutHostnames().length).toBe(
+      createMockDuts().length
+    );
 
     component.headerSelectorRef.checkboxChange();
     expect(component.getSelectedDutHostnames().length).toBe(0);

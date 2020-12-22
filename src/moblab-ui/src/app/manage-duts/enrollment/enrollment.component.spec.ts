@@ -15,27 +15,26 @@ import {WidgetsModule} from 'app/widgets/widgets.module';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
-
 describe('EnrollmentComponent', () => {
   let component: EnrollmentComponent;
   let fixture: ComponentFixture<EnrollmentComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          MatCardModule,
-          MatCheckboxModule,
-          MatIconModule,
-          MatSnackBarModule,
-          MatTableModule,
-          PipesModule,
-          RouterModule,
-          RouterModule.forRoot([]),
-          WidgetsModule,
-        ],
-        declarations: [EnrollmentComponent, ViewDutsComponent]})
-        .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatIconModule,
+        MatSnackBarModule,
+        MatTableModule,
+        PipesModule,
+        RouterModule,
+        RouterModule.forRoot([]),
+        WidgetsModule,
+      ],
+      declarations: [EnrollmentComponent, ViewDutsComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

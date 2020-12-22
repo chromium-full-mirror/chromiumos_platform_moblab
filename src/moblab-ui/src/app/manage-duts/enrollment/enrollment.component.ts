@@ -6,13 +6,11 @@ import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
 
-
 @Component({
   selector: 'app-enrollment',
   templateUrl: './enrollment.component.html',
-  styleUrls: ['./enrollment.component.scss']
+  styleUrls: ['./enrollment.component.scss'],
 })
-
 export class EnrollmentComponent implements OnInit {
   @ViewChild(ViewDutsComponent) dutsTableRef: ViewDutsComponent;
   duts = new MatTableDataSource<ConnectedDutInfo>();
@@ -22,8 +20,7 @@ export class EnrollmentComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   enrollSelected() {
     this.dutsTableRef.startLoadingSpinner();
@@ -31,30 +28,34 @@ export class EnrollmentComponent implements OnInit {
     this.moblabGrpcService.enrollDuts(
       hostnames,
       () => {
-      this.dutsTableRef.getConnectedDuts();
-      },
-      (msg: string) => {
-        this.reportError(msg);
-        this.dutsTableRef.stopLoadingSpinner();
-      });
-  }
-
-  unenrollSelected() {
-    this.dutsTableRef.startLoadingSpinner();
-    const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
-      this.moblabGrpcService.unenrollDuts(hostnames, () => {
         this.dutsTableRef.getConnectedDuts();
       },
       (msg: string) => {
         this.reportError(msg);
         this.dutsTableRef.stopLoadingSpinner();
-      });
+      }
+    );
+  }
+
+  unenrollSelected() {
+    this.dutsTableRef.startLoadingSpinner();
+    const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
+    this.moblabGrpcService.unenrollDuts(
+      hostnames,
+      () => {
+        this.dutsTableRef.getConnectedDuts();
+      },
+      (msg: string) => {
+        this.reportError(msg);
+        this.dutsTableRef.stopLoadingSpinner();
+      }
+    );
   }
 
   reportError(dialogue) {
     const snackBarRef = this.snackBar.open(dialogue, '', {
       duration: 5000,
-      verticalPosition: 'top'
+      verticalPosition: 'top',
     });
   }
 }

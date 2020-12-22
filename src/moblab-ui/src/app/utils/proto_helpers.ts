@@ -1,10 +1,10 @@
 import {
   DutTask,
   Job,
-  RunStorageQualificationSuiteRequest
+  RunStorageQualificationSuiteRequest,
 } from '../services/moblabrpc_pb';
 
-function createInvertedObj (obj) {
+function createInvertedObj(obj) {
   const inverted_mappings = {};
   for (const key of Object.keys(obj)) {
     inverted_mappings[obj[key]] = key;

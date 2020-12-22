@@ -9,26 +9,23 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {BasicSelectorComponent} from './basic-selector.component';
 
-
 @Component({
   selector: 'basic-selector-test-wrapper',
-  template:
-    `
+  template: `
     <app-basic-selector
-        #modelSelector
-        [title]="'Select option:'"
-        [placeholder]="['Pick from available options']"
-        [options]="['MockOption1']"
-        [isShown]="true"
-        (select)="selectChanged($event.value)">
+      #modelSelector
+      [title]="'Select option:'"
+      [placeholder]="['Pick from available options']"
+      [options]="['MockOption1']"
+      [isShown]="true"
+      (select)="selectChanged($event.value)"
+    >
     </app-basic-selector>
   `,
 })
 class BasicSelectorTestWrapperComponent {
-  selectChanged(event) {
-  }
+  selectChanged(event) {}
 }
-
 
 describe('BasicSelectorComponent', () => {
   let component: BasicSelectorComponent;
@@ -36,19 +33,16 @@ describe('BasicSelectorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          FormsModule,
-          MatCardModule,
-          MatInputModule,
-          MatSelectModule,
-          MatTooltipModule,
-          ReactiveFormsModule,
-        ],
-        declarations: [
-          BasicSelectorComponent,
-          BasicSelectorTestWrapperComponent,
-        ]})
-      .compileComponents();
+      imports: [
+        FormsModule,
+        MatCardModule,
+        MatInputModule,
+        MatSelectModule,
+        MatTooltipModule,
+        ReactiveFormsModule,
+      ],
+      declarations: [BasicSelectorComponent, BasicSelectorTestWrapperComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -72,11 +66,10 @@ describe('BasicSelectorComponent', () => {
     // new MatOptionSelectionChange(new MatOption(1,1,1,1))
     // select.dispatchEvent(new Event('input'));
     // wrapperFixture.debugElement.query(By.css('mat-select')).triggerEventHandler('selectionChange', { value: { id: 1 } });
-    spyOn(component.select, "emit").and.callThrough();
+    spyOn(component.select, 'emit').and.callThrough();
 
     select.dispatchEvent(new Event('selectionChange'));
     wrapperFixture.detectChanges();
     expect(component.select.emit).toHaveBeenCalledTimes(1);
-
   });
 });

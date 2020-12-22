@@ -1,4 +1,10 @@
-import {Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import {Job} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectionModel} from '@angular/cdk/collections';
@@ -7,9 +13,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 @Component({
   selector: 'app-job-action',
   templateUrl: './job-action.component.html',
-  styleUrls: ['./job-action.component.css']
+  styleUrls: ['./job-action.component.css'],
 })
-
 export class JobActionComponent {
   @Output() actionSubmitted = new EventEmitter();
 
@@ -18,14 +23,20 @@ export class JobActionComponent {
   jobSelections = new SelectionModel<number>(true, []);
   numSelectedJobs = 0;
 
-  constructor(private moblabGrpcService: MoblabGrpcService, private snackBar: MatSnackBar,) {}
+  constructor(
+    private moblabGrpcService: MoblabGrpcService,
+    private snackBar: MatSnackBar
+  ) {}
 
   toggleJobSelection(element) {
     this.jobSelections.toggle(element.getJobId());
   }
 
   isSelected(element) {
-    return this.jobSelections.hasValue() && this.jobSelections.isSelected(element.getJobId());
+    return (
+      this.jobSelections.hasValue() &&
+      this.jobSelections.isSelected(element.getJobId())
+    );
   }
 
   selectJob(element) {
@@ -33,9 +44,9 @@ export class JobActionComponent {
   }
 
   selectJobs(jobs: number[]) {
-    jobs.forEach((job_id) => {
+    jobs.forEach(job_id => {
       this.jobSelections.select(job_id);
-    })
+    });
   }
 
   clearSelectedJobs() {
@@ -51,10 +62,10 @@ export class JobActionComponent {
 
     if (this.selectedAction) {
       this.moblabGrpcService.abortJobs(
-        (resultMsg) => {
+        resultMsg => {
           this.setOffPopup(resultMsg);
         },
-        (errorMsg) => {
+        errorMsg => {
           this.setOffPopup(errorMsg);
         },
         jobIds

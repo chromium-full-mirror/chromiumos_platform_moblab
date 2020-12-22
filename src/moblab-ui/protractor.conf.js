@@ -2,17 +2,17 @@
 // https://github.com/angular/protractor/blob/client/lib/config.ts
 
 /*global jasmine */
-var SpecReporter = require("jasmine-spec-reporter");
+const SpecReporter = require('jasmine-spec-reporter');
 
 exports.config = {
   allScriptsTimeout: 11000,
-  specs: ["./e2e/**/*.e2e-spec.ts"],
+  specs: ['./e2e/**/*.e2e-spec.ts'],
   capabilities: {
-    browserName: "chrome",
+    browserName: 'chrome',
   },
   directConnect: true,
-  baseUrl: "http://localhost:4200/",
-  framework: "jasmine",
+  baseUrl: 'http://localhost:4200/',
+  framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,
     defaultTimeoutInterval: 30000,
@@ -20,8 +20,8 @@ exports.config = {
   },
   useAllAngular2AppRoots: true,
   beforeLaunch: function () {
-    require("ts-node").register({
-      project: "e2e",
+    require('ts-node').register({
+      project: 'e2e',
     });
   },
   onPrepare: function () {

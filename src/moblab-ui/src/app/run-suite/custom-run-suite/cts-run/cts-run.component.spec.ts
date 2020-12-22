@@ -1,9 +1,5 @@
 /* tslint:disable:no-unused-variable */
-import {
-  async,
-  ComponentFixture,
-  TestBed
-} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {BasicAutocompleteSelectorComponent} from '../../common/basic-autocomplete-selector/basic-autocomplete-selector.component';
 import {BasicInputFormComponent} from '../../common/basic-input-form/basic-input.component';
@@ -28,29 +24,29 @@ describe('CTSRunComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          FormsModule,
-          MatAutocompleteModule,
-          MatCardModule,
-          MatInputModule,
-          MatSelectModule,
-          MatSnackBarModule,
-          MatTooltipModule,
-          ReactiveFormsModule,
-          RouterModule,
-          RouterModule.forRoot([]),
-        ],
-        declarations: [
-          BasicAutocompleteSelectorComponent,
-          BasicInputFormComponent,
-          BasicSelectorComponent,
-          BasicTextFormComponent,
-          BuildSelectFormsComponent,
-          CtsRunComponent,
-          RunSuiteButtonComponent,
-        ]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        MatAutocompleteModule,
+        MatCardModule,
+        MatInputModule,
+        MatSelectModule,
+        MatSnackBarModule,
+        MatTooltipModule,
+        ReactiveFormsModule,
+        RouterModule,
+        RouterModule.forRoot([]),
+      ],
+      declarations: [
+        BasicAutocompleteSelectorComponent,
+        BasicInputFormComponent,
+        BasicSelectorComponent,
+        BasicTextFormComponent,
+        BuildSelectFormsComponent,
+        CtsRunComponent,
+        RunSuiteButtonComponent,
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

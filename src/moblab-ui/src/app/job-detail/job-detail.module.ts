@@ -1,11 +1,8 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {
-  FormsModule,
-  ReactiveFormsModule
-} from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatTableModule} from '@angular/material/table';
 import {MatCardModule} from '@angular/material/card';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatExpansionModule} from '@angular/material/expansion';
@@ -32,9 +29,9 @@ import {WidgetsModule} from '../widgets/widgets.module';
     MatTableModule,
     ReactiveFormsModule,
     ViewJobsModule,
-    WidgetsModule
+    WidgetsModule,
   ],
   declarations: [JobDetailComponent],
-  exports: [JobDetailComponent]
+  exports: [JobDetailComponent],
 })
 export class JobDetailModule {}

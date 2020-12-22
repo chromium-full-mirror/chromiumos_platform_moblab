@@ -5,19 +5,15 @@ import {MatIconModule} from '@angular/material/icon';
 
 import {FeedbackComponent} from './feedback.component';
 
-
 describe('FeedbackComponent', () => {
   let component: FeedbackComponent;
   let fixture: ComponentFixture<FeedbackComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          MatDialogModule,
-          MatIconModule,
-        ],
-        declarations: [FeedbackComponent]})
-      .compileComponents();
+      imports: [MatDialogModule, MatIconModule],
+      declarations: [FeedbackComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

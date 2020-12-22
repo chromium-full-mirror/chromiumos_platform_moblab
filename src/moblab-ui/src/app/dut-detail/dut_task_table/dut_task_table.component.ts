@@ -35,9 +35,7 @@ export class DutTaskTableComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
-    this.paginator.page.subscribe(
-      () => this.getNextPageDutTasks()
-    );
+    this.paginator.page.subscribe(() => this.getNextPageDutTasks());
   }
 
   setDutIp(dutIp: string) {
@@ -50,26 +48,29 @@ export class DutTaskTableComponent implements AfterViewInit {
   }
 
   getNextPageDutTasks() {
-    this.moblabGrpcService.getDutTasks((dutTasks: DutTask[]) => {
+    this.moblabGrpcService.getDutTasks(
+      (dutTasks: DutTask[]) => {
         this.setDutTasks(dutTasks);
       },
-      (errorMsg) => {
+      errorMsg => {
         this.setOffPopup(errorMsg);
       },
       this.dutIp,
-      (this.paginator.pageIndex * this.paginator.pageSize) ?
-      this.paginator.pageIndex * this.paginator.pageSize : 0,
-      this.paginator.pageSize ?
-        this.paginator.pageSize : this.DEFAULT_PAGE_SIZE)
+      this.paginator.pageIndex * this.paginator.pageSize
+        ? this.paginator.pageIndex * this.paginator.pageSize
+        : 0,
+      this.paginator.pageSize ? this.paginator.pageSize : this.DEFAULT_PAGE_SIZE
+    );
 
-    this.moblabGrpcService.getNumDutTasks((numDutTasks: number) => {
+    this.moblabGrpcService.getNumDutTasks(
+      (numDutTasks: number) => {
         this.numDutTasks = numDutTasks;
       },
-      (errorMsg) => {
+      errorMsg => {
         this.setOffPopup(errorMsg);
       },
-      this.dutIp,
-    )
+      this.dutIp
+    );
   }
 
   getStatusFromNum(statusNum) {
@@ -79,7 +80,7 @@ export class DutTaskTableComponent implements AfterViewInit {
   setOffPopup(message) {
     const snackBarRef = this.snackBar.open(message, '', {
       duration: 5000,
-      verticalPosition: 'top'
+      verticalPosition: 'top',
     });
   }
 }

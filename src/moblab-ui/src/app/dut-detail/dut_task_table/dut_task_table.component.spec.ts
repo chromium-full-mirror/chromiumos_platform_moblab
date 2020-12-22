@@ -25,9 +25,9 @@ function createMockDutTasks() {
     const mockDutTask = new DutTask();
     mockDutTask.setId(i);
     mockDutTask.setTask('Mock Task');
-    mockDutTask.setStatus(Math.floor(Math.random() * 5))
-    mockDutTask.setCreatedTimeUtc(Math.floor(Date.now() / 1000))
-    mockDutTasks.push(mockDutTask)
+    mockDutTask.setStatus(Math.floor(Math.random() * 5));
+    mockDutTask.setCreatedTimeUtc(Math.floor(Date.now() / 1000));
+    mockDutTasks.push(mockDutTask);
   }
   return mockDutTasks;
 }
@@ -41,24 +41,24 @@ describe('DutTaskTableComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          CommonModule,
-          FormsModule,
-          MatButtonModule,
-          MatCardModule,
-          MatDividerModule,
-          MatExpansionModule,
-          MatFormFieldModule,
-          MatIconModule,
-          MatInputModule,
-          MatPaginatorModule,
-          MatTableModule,
-          ReactiveFormsModule,
-          ViewJobsModule,
-          WidgetsModule,
-        ],
-        declarations: [DutTaskTableComponent]})
-      .compileComponents();
+      imports: [
+        CommonModule,
+        FormsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatDividerModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatPaginatorModule,
+        MatTableModule,
+        ReactiveFormsModule,
+        ViewJobsModule,
+        WidgetsModule,
+      ],
+      declarations: [DutTaskTableComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -71,18 +71,20 @@ describe('DutTaskTableComponent', () => {
     fixture = TestBed.createComponent(DutTaskTableComponent);
     component = fixture.componentInstance;
     // @ts-ignore
-    getDutTasksSpy = spyOn<any>(component.moblabGrpcService, 'getDutTasks')
-      .and.callFake(
-        function() {
-          component.setDutTasks(
-            createMockDutTasks())
-        });
+    getDutTasksSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'getDutTasks'
+    ).and.callFake(() => {
+      component.setDutTasks(createMockDutTasks());
+    });
 
     // @ts-ignore
-    getNumDutTasksSpy = spyOn<any>(component.moblabGrpcService, 'getNumDutTasks')
-      .and.callFake(function() {
-        component.numDutTasks = createMockDutTasks().length;
-      });
+    getNumDutTasksSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'getNumDutTasks'
+    ).and.callFake(() => {
+      component.numDutTasks = createMockDutTasks().length;
+    });
     fixture.detectChanges();
   });
 

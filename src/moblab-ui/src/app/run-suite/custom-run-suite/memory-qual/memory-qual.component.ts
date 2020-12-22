@@ -1,4 +1,9 @@
-import {AfterContentInit, ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectorRef,
+  Component,
+  ViewChild,
+} from '@angular/core';
 
 import {BaseSuite} from '../../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
@@ -6,23 +11,24 @@ import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-b
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
-
 /** Component owns logic for hardware memory qualification suite run form.
  * */
 @Component({
   selector: 'app-memory-qual',
   templateUrl: './memory-qual.component.html',
-  styleUrls: ['./memory-qual.component.scss']
+  styleUrls: ['./memory-qual.component.scss'],
 })
 export class MemoryQualComponent extends BaseSuite implements AfterContentInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
-  constructor(private changeDetector: ChangeDetectorRef,
+  constructor(
+    private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    snackBar: MatSnackBar) {
+    snackBar: MatSnackBar
+  ) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -66,7 +72,7 @@ export class MemoryQualComponent extends BaseSuite implements AfterContentInit {
     super.onRunSuiteClick('Starting memory qualification suite run.');
 
     this.moblabGrpcService.runMemoryQualificationSuite(
-      (response) => {
+      response => {
         this.onSuiteStarted();
       },
       (err, response) => {

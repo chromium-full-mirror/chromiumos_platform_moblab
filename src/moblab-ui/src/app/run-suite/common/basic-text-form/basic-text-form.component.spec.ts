@@ -9,30 +9,27 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {BasicTextFormComponent} from './basic-text-form.component';
 
-
 describe('BasicTextFormComponent', () => {
   let component: BasicTextFormComponent;
   let fixture: ComponentFixture<BasicTextFormComponent>;
 
   const MOCK_MODULE_1 = 'MockModule1';
   const MOCK_MODULE_2 = 'MockModule2';
-  const MODULES_LIST_STR = MOCK_MODULE_1 + ','  + MOCK_MODULE_2;
+  const MODULES_LIST_STR = MOCK_MODULE_1 + ',' + MOCK_MODULE_2;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          FormsModule,
-          MatFormFieldModule,
-          MatIconModule,
-          MatInputModule,
-          MatTooltipModule,
-          ReactiveFormsModule,
-        ],
-        declarations: [
-          BasicTextFormComponent,
-        ]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatTooltipModule,
+        ReactiveFormsModule,
+      ],
+      declarations: [BasicTextFormComponent],
+    }).compileComponents();
   }));
 
   function setInput(inputValue) {
@@ -62,18 +59,17 @@ describe('BasicTextFormComponent', () => {
   it('should parse input str into CSV list', () => {
     setInput(MODULES_LIST_STR);
     expect(component.getCsvList().toString()).toBe(
-      [MOCK_MODULE_1, MOCK_MODULE_2].toString());
+      [MOCK_MODULE_1, MOCK_MODULE_2].toString()
+    );
   });
 
   it('should parse no-comma input str into 1-item list', () => {
     setInput(MOCK_MODULE_1);
-    expect(component.getCsvList().toString()).toBe(
-      [MOCK_MODULE_1].toString());
+    expect(component.getCsvList().toString()).toBe([MOCK_MODULE_1].toString());
   });
 
   it('should parse empty input str into 0-item list', () => {
     setInput('');
-    expect(component.getCsvList().toString()).toBe(
-      [].toString());
+    expect(component.getCsvList().toString()).toBe([].toString());
   });
 });

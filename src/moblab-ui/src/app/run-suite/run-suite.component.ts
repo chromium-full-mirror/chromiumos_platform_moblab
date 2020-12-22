@@ -1,7 +1,10 @@
 import {Component, ViewChild} from '@angular/core';
 
 import {SuiteChangeType} from './common/base_suite/base-suite.component';
-import {LoadingOverlayComponent, LoadingOverlayStyle} from '../widgets/loading-overlay/loading-overlay.component';
+import {
+  LoadingOverlayComponent,
+  LoadingOverlayStyle,
+} from '../widgets/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-run-suite',

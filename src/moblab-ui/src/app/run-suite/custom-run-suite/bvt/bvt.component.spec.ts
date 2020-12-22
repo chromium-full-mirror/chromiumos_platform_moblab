@@ -10,8 +10,9 @@ describe('BvtComponent', () => {
   let fixture: ComponentFixture<BvtComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({declarations: [BvtComponent]})
-        .compileComponents();
+    TestBed.configureTestingModule({
+      declarations: [BvtComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

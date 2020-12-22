@@ -12,7 +12,6 @@ import {BaseForm} from '../base-form/base-form.component';
 import {EventEmitter} from '@angular/core';
 import {MatSelect, MatSelectChange} from '@angular/material/select';
 
-
 /**
  * Selector to be used in run suite forms. Contains logic that should be
  * commonly used across suite forms (e.g., autoselect).
@@ -22,7 +21,9 @@ import {MatSelect, MatSelectChange} from '@angular/material/select';
   templateUrl: './basic-selector.component.html',
   styleUrls: ['./basic-selector.component.scss'],
 })
-export class BasicSelectorComponent extends BaseForm implements OnChanges, OnInit {
+export class BasicSelectorComponent
+  extends BaseForm
+  implements OnChanges, OnInit {
   @ViewChild(MatSelect) selector;
 
   @Input() autoselect = true;

@@ -38,25 +38,25 @@ describe('DutDetailComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          CommonModule,
-          FormsModule,
-          MatButtonModule,
-          MatCardModule,
-          MatDividerModule,
-          MatExpansionModule,
-          MatFormFieldModule,
-          MatIconModule,
-          MatInputModule,
-          MatPaginatorModule,
-          MatTableModule,
-          ReactiveFormsModule,
-          RouterTestingModule,
-          ViewJobsModule,
-          WidgetsModule,
-        ],
-        declarations: [DutDetailComponent, DutTaskTableComponent]})
-      .compileComponents();
+      imports: [
+        CommonModule,
+        FormsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatDividerModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatPaginatorModule,
+        MatTableModule,
+        ReactiveFormsModule,
+        RouterTestingModule,
+        ViewJobsModule,
+        WidgetsModule,
+      ],
+      declarations: [DutDetailComponent, DutTaskTableComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -67,19 +67,22 @@ describe('DutDetailComponent', () => {
 
   beforeEach(() => {
     // @ts-ignore
-    repairDutSpy = spyOn<any>(component.moblabGrpcService, 'repairDut')
+    repairDutSpy = spyOn<any>(component.moblabGrpcService, 'repairDut');
     // @ts-ignore
-    reverifyDutSpy = spyOn<any>(component.moblabGrpcService, 'reverifyDut')
+    reverifyDutSpy = spyOn<any>(component.moblabGrpcService, 'reverifyDut');
     // @ts-ignore
-    getDutDetailsSpy = spyOn<any>(component.moblabGrpcService, 'getDutTasks')
-      .and.callFake(
-        function(
-          callback: (x: ConnectedDutInfo) => void,
-          errorHandlingCallback: (errorMsg: string) => void,
-          dut: string) {
-          component.setDutDetails(
-            createMockDutDetailInfo(dut))
-        });
+    getDutDetailsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'getDutTasks'
+    ).and.callFake(
+      (
+        callback: (x: ConnectedDutInfo) => void,
+        errorHandlingCallback: (errorMsg: string) => void,
+        dut: string
+      ) => {
+        component.setDutDetails(createMockDutDetailInfo(dut));
+      }
+    );
     fixture.detectChanges();
   });
 
@@ -101,57 +104,53 @@ describe('DutDetailComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('verify that repair/reverify task buttons disabled prior to DUT load.',
-    () => {
-      const repairButton = fixture.debugElement.nativeElement.querySelector(
-        '#repair-button'
-      );
-      const reverifyButton = fixture.debugElement.nativeElement.querySelector(
-        '#reverify-button'
-      );
-      expect(repairButton.disabled).toBeTruthy();
-      expect(reverifyButton.disabled).toBeTruthy();
+  it('verify that repair/reverify task buttons disabled prior to DUT load.', () => {
+    const repairButton = fixture.debugElement.nativeElement.querySelector(
+      '#repair-button'
+    );
+    const reverifyButton = fixture.debugElement.nativeElement.querySelector(
+      '#reverify-button'
+    );
+    expect(repairButton.disabled).toBeTruthy();
+    expect(reverifyButton.disabled).toBeTruthy();
   });
 
-  it('load and refresh of DUT detail information works.',
-    () => {
-      expect(getDutDetailsSpy).not.toHaveBeenCalled();
-      inputDutQuery('000.000.000.000');
-      expect(getDutDetailsSpy).toHaveBeenCalled();
+  it('load and refresh of DUT detail information works.', () => {
+    expect(getDutDetailsSpy).not.toHaveBeenCalled();
+    inputDutQuery('000.000.000.000');
+    expect(getDutDetailsSpy).toHaveBeenCalled();
 
-      getDutDetailsSpy.calls.reset();
-      expect(getDutDetailsSpy).not.toHaveBeenCalled();
+    getDutDetailsSpy.calls.reset();
+    expect(getDutDetailsSpy).not.toHaveBeenCalled();
 
-      fixture.debugElement.nativeElement.querySelector(
-        '#dut-refresh-button'
-      ).dispatchEvent(new Event('click'));
+    fixture.debugElement.nativeElement
+      .querySelector('#dut-refresh-button')
+      .dispatchEvent(new Event('click'));
 
-      expect(getDutDetailsSpy).toHaveBeenCalled();
+    expect(getDutDetailsSpy).toHaveBeenCalled();
 
-      // Repair and reverify buttons should be clickable after DUT load.
-      const repairButton = fixture.debugElement.nativeElement.querySelector(
-        '#repair-button'
-      );
-      const reverifyButton = fixture.debugElement.nativeElement.querySelector(
-        '#reverify-button'
-      );
-      expect(repairButton.disabled).toBeFalsy();
-      expect(reverifyButton.disabled).toBeFalsy();
-    });
+    // Repair and reverify buttons should be clickable after DUT load.
+    const repairButton = fixture.debugElement.nativeElement.querySelector(
+      '#repair-button'
+    );
+    const reverifyButton = fixture.debugElement.nativeElement.querySelector(
+      '#reverify-button'
+    );
+    expect(repairButton.disabled).toBeFalsy();
+    expect(reverifyButton.disabled).toBeFalsy();
+  });
 
-  it('repair and reverify submissions fire.',
-    () => {
+  it('repair and reverify submissions fire.', () => {
+    inputDutQuery('000.000.000.000');
 
-      inputDutQuery('000.000.000.000');
+    fixture.debugElement.nativeElement
+      .querySelector('#reverify-button')
+      .dispatchEvent(new Event('click'));
+    expect(reverifyDutSpy).toHaveBeenCalled();
 
-      fixture.debugElement.nativeElement.querySelector(
-        '#reverify-button'
-      ).dispatchEvent(new Event('click'));
-      expect(reverifyDutSpy).toHaveBeenCalled();
-
-      fixture.debugElement.nativeElement.querySelector(
-        '#repair-button'
-      ).dispatchEvent(new Event('click'));
-      expect(repairDutSpy).toHaveBeenCalled();
-    });
+    fixture.debugElement.nativeElement
+      .querySelector('#repair-button')
+      .dispatchEvent(new Event('click'));
+    expect(repairDutSpy).toHaveBeenCalled();
+  });
 });

@@ -22,10 +22,12 @@ import {RebootButtonComponent} from './reboot-button/reboot-button.component';
 import {TableHeaderSelectorComponent} from './table-header-selector/table-header-selector.component';
 import {UpdateButtonComponent} from './update-button/update-button.component';
 
-import {FeedbackComponent, SubmissionResultDialog} from './feedback/feedback.component';
+import {
+  FeedbackComponent,
+  SubmissionResultDialog,
+} from './feedback/feedback.component';
 import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedback/feedback.module';
 import {ButtonWithProgressComponent} from './button-with-progress/button-with-progress.component';
-
 
 @NgModule({
   declarations: [
@@ -68,6 +70,6 @@ import {ButtonWithProgressComponent} from './button-with-progress/button-with-pr
     MatTableModule,
     ReactiveFormsModule,
     ScreenshotFeedbackModule,
-  ]
+  ],
 })
-export class WidgetsModule { }
+export class WidgetsModule {}

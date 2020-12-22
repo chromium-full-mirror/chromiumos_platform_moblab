@@ -5,16 +5,15 @@ import {
   MatDialog,
   MAT_DIALOG_DATA,
   MatDialogModule,
-  MatDialogRef
+  MatDialogRef,
 } from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.component';
 import {UpdateButtonComponent} from './update-button.component';
 
-
 describe('UpdateButtonComponent', () => {
-  const mock_dialog_ref = { afterClosed : () => {}, close: () => {} }
+  const mock_dialog_ref = {afterClosed: () => {}, close: () => {}};
   const dialogRefSpyObj = jasmine.createSpyObj(mock_dialog_ref);
 
   let buttonComponent: UpdateButtonComponent;
@@ -25,43 +24,36 @@ describe('UpdateButtonComponent', () => {
   let updateMoblabSpy: jasmine.Spy;
 
   beforeEach(async(() => {
-    TestBed
-      .configureTestingModule({
-        declarations: [
-          ConfirmationDialog,
-          UpdateButtonComponent,
-        ],
-        imports: [
-          BrowserAnimationsModule,
-          MatButtonModule,
-          MatDialogModule,
-          MatSnackBarModule
-        ],
-        providers: [
-          { provide: MAT_DIALOG_DATA, useValue: {} },
-          { provide: MatDialogRef, useValue: mock_dialog_ref }
-        ],
-      })
-      .compileComponents();
+    TestBed.configureTestingModule({
+      declarations: [ConfirmationDialog, UpdateButtonComponent],
+      imports: [
+        BrowserAnimationsModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatSnackBarModule,
+      ],
+      providers: [
+        {provide: MAT_DIALOG_DATA, useValue: {}},
+        {provide: MatDialogRef, useValue: mock_dialog_ref},
+      ],
+    }).compileComponents();
   }));
 
   function dispatchButtonClick(fixture, buttonId: string) {
-    const button = fixture.debugElement.nativeElement.querySelector(
-      buttonId
-    );
+    const button = fixture.debugElement.nativeElement.querySelector(buttonId);
     button.dispatchEvent(new Event('click'));
     fixture.detectChanges();
   }
 
-  describe('button tests', function () {
+  describe('button tests', () => {
     beforeEach(() => {
       buttonFixture = TestBed.createComponent(UpdateButtonComponent);
       buttonComponent = buttonFixture.componentInstance;
       buttonFixture.detectChanges();
 
-      dialogSpy = spyOn(TestBed.get(MatDialog), 'open')
-        .and.returnValue(dialogRefSpyObj);
-
+      dialogSpy = spyOn(TestBed.get(MatDialog), 'open').and.returnValue(
+        dialogRefSpyObj
+      );
 
       isUpdateAvailableSpy = spyOn<any>(
         // @ts-ignore
@@ -90,7 +82,7 @@ describe('UpdateButtonComponent', () => {
     });
 
     it('update command should call-through to moblabGRPC', () => {
-      buttonComponent.updateMoblab()
+      buttonComponent.updateMoblab();
       expect(updateMoblabSpy).toHaveBeenCalled();
     });
   });

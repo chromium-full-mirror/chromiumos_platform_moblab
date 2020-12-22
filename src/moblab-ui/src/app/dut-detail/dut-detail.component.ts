@@ -1,5 +1,11 @@
 import {ActivatedRoute} from '@angular/router';
-import {AfterContentInit, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
@@ -8,7 +14,6 @@ import {DutTaskTableComponent} from './dut_task_table/dut_task_table.component';
 import {KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
-
 
 @Component({
   selector: 'app-dut-detail',
@@ -22,10 +27,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   @ViewChild('associated_jobs_table') associatedJobsTableRef: ViewJobsComponent;
 
   serverControlFile = '';
-  dutQuery = new FormControl(
-    '',
-    [Validators.minLength(1)]
-  );
+  dutQuery = new FormControl('', [Validators.minLength(1)]);
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -48,16 +50,17 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   }
 
   setDutDetails(dutInfo: ConnectedDutInfo) {
-    this.dutInfoTableRef.loadRows(
+    this.dutInfoTableRef.loadRows([
+      ['DUT', dutInfo.getIp()],
+      ['Name', dutInfo.getName()],
+      ['Status', dutInfo.getStatus()],
+      ['Labels', dutInfo.getLabelsList().toString()],
       [
-        ['DUT', dutInfo.getIp()],
-        ['Name', dutInfo.getName()],
-        ['Status', dutInfo.getStatus()],
-        ['Labels', dutInfo.getLabelsList().toString()],
-        ['Current Job', dutInfo.getCurrentJob() ? dutInfo.getCurrentJob().toString() : ''],
-        ['Current DUT Task', dutInfo.getCurrentDutTask()],
-      ]
-    )
+        'Current Job',
+        dutInfo.getCurrentJob() ? dutInfo.getCurrentJob().toString() : '',
+      ],
+      ['Current DUT Task', dutInfo.getCurrentDutTask()],
+    ]);
     this.dutTaskTableRef.setDutIp(this.dutQuery.value);
     this.associatedJobsTableRef.refreshJobs(undefined, this.dutQuery.value);
   }
@@ -71,30 +74,36 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       (dutInfo: ConnectedDutInfo) => {
         this.setDutDetails(dutInfo);
       },
-      (errorMsg) => {
-        this.setOffPopup(errorMsg)
+      errorMsg => {
+        this.setOffPopup(errorMsg);
       },
       this.dutQuery.value
     );
   }
 
   repairDut() {
-    this.moblabGrpcService.repairDut((message: string) => {
-        this.setOffPopup('Set off repair task on DUT, please refresh page for status.')
+    this.moblabGrpcService.repairDut(
+      (message: string) => {
+        this.setOffPopup(
+          'Set off repair task on DUT, please refresh page for status.'
+        );
       },
-      (errorMsg) => {
-        this.setOffPopup(errorMsg)
+      errorMsg => {
+        this.setOffPopup(errorMsg);
       },
       this.dutQuery.value
     );
   }
 
   reverifyDut() {
-    this.moblabGrpcService.reverifyDut((message: string) => {
-        this.setOffPopup('Set off reverify task on DUT, please refresh page for status.')
+    this.moblabGrpcService.reverifyDut(
+      (message: string) => {
+        this.setOffPopup(
+          'Set off reverify task on DUT, please refresh page for status.'
+        );
       },
-      (errorMsg) => {
-        this.setOffPopup(errorMsg)
+      errorMsg => {
+        this.setOffPopup(errorMsg);
       },
       this.dutQuery.value
     );
@@ -103,7 +112,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   setOffPopup(dialogue) {
     const snackBarRef = this.snackBar.open(dialogue, '', {
       duration: 5000,
-      verticalPosition: 'top'
+      verticalPosition: 'top',
     });
   }
 

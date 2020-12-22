@@ -1,9 +1,9 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {DebugElement} from '@angular/core';
 
-import { AdvancedSettingsComponent } from './advanced-settings.component';
+import {AdvancedSettingsComponent} from './advanced-settings.component';
 
 describe('AdvancedSettingsComponent', () => {
   let component: AdvancedSettingsComponent;
@@ -11,9 +11,8 @@ describe('AdvancedSettingsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AdvancedSettingsComponent ]
-    })
-    .compileComponents();
+      declarations: [AdvancedSettingsComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

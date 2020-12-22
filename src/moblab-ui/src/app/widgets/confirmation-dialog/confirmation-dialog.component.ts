@@ -13,7 +13,8 @@ export class ConfirmationDialog {
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmationDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: any) {
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
     this.message = data.message;
     this.title = data.title;
   }

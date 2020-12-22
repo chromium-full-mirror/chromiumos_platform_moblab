@@ -13,8 +13,8 @@ import {leadingTrailingWhitespaceValidator} from '../utils/validators';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {MoblabConfigurationGrpcService} from '../services/moblab-configuration-grpc.service';
 import {MoblabSettingsService} from '../services/moblab-settings.service';
-import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component'
-import {MoblabSettingsConstains} from '../constants'
+import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
+import {MoblabSettingsConstains} from '../constants';
 
 const URL = 'https://google.com/api/';
 
@@ -22,14 +22,14 @@ function gsURLValidator(control) {
   if (!control.value) {
     return null;
   }
-  const forbidden = !(new RegExp('^gs:\\/\\/.*\\/$').test(control.value));
-  return forbidden ? {'notAGSUrl': {value: control.value}} : null;
+  const forbidden = !new RegExp('^gs:\\/\\/.*\\/$').test(control.value);
+  return forbidden ? {notAGSUrl: {value: control.value}} : null;
 }
 
 @Component({
   selector: 'app-configuration',
   templateUrl: './configuration.component.html',
-  styleUrls: ['./configuration.component.css']
+  styleUrls: ['./configuration.component.css'],
 })
 export class ConfigurationComponent implements OnInit, AfterContentInit {
   @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
@@ -38,7 +38,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   isCloudEnabled = false;
   isRemoteConsoleEnabled = false;
   isRemoteCommandEnabled = false;
-  isHostSchedulerPauseRequested: boolean = false;
+  isHostSchedulerPauseRequested = false;
 
   botoKeyIDForm = new FormControl('', {
     validators: [Validators.required],
@@ -53,7 +53,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   });
 
   bucketLink = '';
-  cloudConfigDisabledMessage = "";
+  cloudConfigDisabledMessage = '';
 
   showUncheckWarning = false;
   configurationLoading = false;
@@ -66,7 +66,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   lastFetchedBucketURL = '';
 
   dutWifiInfoLoading = false;
-  dutWifiNameForm = new FormControl('', {validators: [leadingTrailingWhitespaceValidator]});
+  dutWifiNameForm = new FormControl('', {
+    validators: [leadingTrailingWhitespaceValidator],
+  });
   dutWifiPasswordForm = new FormControl('');
   lastFetchedDutWifiName = '';
   lastFetchedDutWifiPassword = '';
@@ -85,8 +87,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private moblabRpcService: MoblabGrpcService,
     private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
-    private moblabConfigurationRpcService: MoblabConfigurationGrpcService,
-  ) { }
+    private moblabConfigurationRpcService: MoblabConfigurationGrpcService
+  ) {}
 
   ngOnInit(): void {
     this.bucketURLForm.valueChanges.subscribe(value => {
@@ -94,7 +96,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     });
     this.settingsService.pauseRequestors.subscribe(requestors => {
       this.isHostSchedulerPauseRequested =
-        requestors && requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
+        requestors &&
+        requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
     });
     this.getNetworkInfo();
     this.getCloudConfiguration();
@@ -109,7 +112,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       },
       (errorMsg: string) => {
         console.log('Encountered failure getting network info. ', errorMsg);
-      });
+      }
+    );
   }
 
   getCloudConfiguration() {
@@ -134,27 +138,26 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
           is_cloud_enabled,
           is_remote_console_enabled,
           is_remote_command_enabled
-        )
+        );
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
         this.setOffPopup('Failed to get cloud configuration: ' + errorMsg);
-      });
+      }
+    );
   }
 
   getDutWifiInfo() {
     this.dutWifiInfoLoading = true;
     this.moblabRpcService.get_dut_wifi_info(
-      (
-        dut_wifi_name: string,
-        dut_wifi_password: string,
-      ) => {
+      (dut_wifi_name: string, dut_wifi_password: string) => {
         this.setDutWifiInfo(dut_wifi_name, dut_wifi_password);
       },
       (errorMsg: string) => {
         this.dutWifiInfoLoading = false;
         this.setOffPopup('Failed to get DUT wifi info: ' + errorMsg);
-      });
+      }
+    );
   }
 
   onDutWifiInfoSubmit(formValue) {
@@ -169,7 +172,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         this.setOffPopup(errorMsg);
       },
       this.dutWifiNameForm.value,
-      this.dutWifiPasswordForm.value);
+      this.dutWifiPasswordForm.value
+    );
   }
 
   getVersionInfo() {
@@ -191,7 +195,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       },
       (errorMsg: string) => {
         console.log('Encountered failure getting version info. ', errorMsg);
-      });
+      }
+    );
   }
 
   isCloudConfigurationChanged() {
@@ -199,20 +204,24 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * Returns true IFF there is a change in any of the cloud configuration
      * values.
      */
-    return this.lastFetchedBotoKeyID != this.botoKeyIDForm.value ||
+    return (
+      this.lastFetchedBotoKeyID != this.botoKeyIDForm.value ||
       this.lastFetchedBotoKeySecret != this.botoKeySecretForm.value ||
       this.lastFetchedBucketURL != this.bucketURLForm.value ||
       this.lastFetchedIsCloudEnabled != this.isCloudEnabled ||
       this.lastFetchedIsRemoteConsoleEnabled != this.isRemoteConsoleEnabled ||
       this.lastFetchedIsRemoteCommandEnabled != this.isRemoteCommandEnabled
+    );
   }
 
   isDutWifiInfoValidForSubmit() {
-    return this.dutWifiNameForm.value.length && !this.dutWifiNameForm.errors && !this.dutWifiPasswordForm.errors &&
-      (
-        this.lastFetchedDutWifiName != this.dutWifiNameForm.value ||
-        this.lastFetchedDutWifiPassword != this.dutWifiPasswordForm.value
-      );
+    return (
+      this.dutWifiNameForm.value.length &&
+      !this.dutWifiNameForm.errors &&
+      !this.dutWifiPasswordForm.errors &&
+      (this.lastFetchedDutWifiName != this.dutWifiNameForm.value ||
+        this.lastFetchedDutWifiPassword != this.dutWifiPasswordForm.value)
+    );
   }
 
   private setDutWifiInfo(dut_wifi_name: string, dut_wifi_password: string) {
@@ -247,10 +256,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   }
 
   disableCloudConfigSubmissionButton() {
-    return !this.isCloudConfigurationChanged() ||
+    return (
+      !this.isCloudConfigurationChanged() ||
       this.botoKeySecretForm.errors ||
       this.botoKeyIDForm.errors ||
-      this.bucketURLForm.errors;
+      this.bucketURLForm.errors
+    );
   }
 
   enableLink() {
@@ -259,7 +270,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
 
   private formatBucketLink() {
     if (this.enableLink()) {
-      this.bucketLink = 'https://console.cloud.google.com/storage/browser/' +
+      this.bucketLink =
+        'https://console.cloud.google.com/storage/browser/' +
         this.bucketURLForm.value.split('//')[1];
     } else {
       this.bucketLink = '';
@@ -272,10 +284,11 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * integration needs to be enabled before any change is made.
      */
     if (this.isCloudEnabled) {
-      this.cloudConfigDisabledMessage = "";
+      this.cloudConfigDisabledMessage = '';
     } else {
-      this.cloudConfigDisabledMessage = "Cloud settings are not enabled, please check 'enable' above if you would " +
-        " like to opt-in to cloud interaction for your Moblab.";
+      this.cloudConfigDisabledMessage =
+        "Cloud settings are not enabled, please check 'enable' above if you would " +
+        ' like to opt-in to cloud interaction for your Moblab.';
     }
   }
 
@@ -338,7 +351,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.bucketURLForm.value,
       this.isCloudEnabled,
       this.isRemoteConsoleEnabled,
-      this.isRemoteCommandEnabled);
+      this.isRemoteCommandEnabled
+    );
   }
 
   cloudCheckboxHoverStart() {
@@ -349,9 +363,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * the cloud checkbox in enabled during mouseover and there is at least one
      * non-empty cloud configuration ).
      */
-    if (this.isCloudEnabled && (this.botoKeyIDForm.value || this.botoKeySecretForm.value || this.bucketURLForm.value)) {
+    if (
+      this.isCloudEnabled &&
+      (this.botoKeyIDForm.value ||
+        this.botoKeySecretForm.value ||
+        this.bucketURLForm.value)
+    ) {
       this.showUncheckWarning = true;
-      const clearError = {'clearWarning': true}
+      const clearError = {clearWarning: true};
 
       this.botoKeyIDForm.setErrors(clearError);
       this.botoKeySecretForm.setErrors(clearError);
@@ -364,7 +383,11 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * Invoked on mouseoff of the enable cloud checkbox. Will clear the error
      * set by cloudCheckboxHoverStart
      */
-    if (this.botoKeyIDForm.value || this.botoKeySecretForm.value || this.bucketURLForm.value) {
+    if (
+      this.botoKeyIDForm.value ||
+      this.botoKeySecretForm.value ||
+      this.bucketURLForm.value
+    ) {
       this.botoKeyIDForm.setErrors(null);
       this.botoKeySecretForm.setErrors(null);
       this.bucketURLForm.setErrors(null);
@@ -378,7 +401,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   setOffPopup(dialogue: string) {
     const snackBarRef = this.snackBar.open(dialogue, '', {
       duration: 5000,
-      verticalPosition: 'top'
+      verticalPosition: 'top',
     });
   }
 
@@ -386,7 +409,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   setOffError(dialogue: string) {
     const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
       verticalPosition: 'top',
-      panelClass: ["snack-error"],
+      panelClass: ['snack-error'],
     });
   }
 
@@ -428,12 +451,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     try {
       const pauseRequesters = await this.moblabConfigurationRpcService.pause_host_scheduling();
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
-    }
-    catch (error) {
+    } catch (error) {
       console.log('pause_host_scheduling call failed with:' + error);
       this.setOffError('Failed to pause host scheduling: ' + error);
-    }
-    finally {
+    } finally {
       this.pauseButton.setIsLoadingStatus(false);
     }
   }
@@ -441,14 +462,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   public async resumeClick() {
     this.resumeButton.setIsLoadingStatus(true);
     try {
-      const pauseRequesters = await this.moblabConfigurationRpcService.resume_host_scheduler()
+      const pauseRequesters = await this.moblabConfigurationRpcService.resume_host_scheduler();
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
-    }
-    catch (error) {
+    } catch (error) {
       console.log('resume_host_scheduler call failed with:' + error);
       this.setOffError('Failed to resume host scheduling: ' + error);
-    }
-    finally {
+    } finally {
       this.resumeButton.setIsLoadingStatus(false);
     }
   }

@@ -1,9 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 const DISABLED_NAME = 'This form is disabled.';
 
@@ -17,8 +12,7 @@ export abstract class BaseForm {
   private disabled = false;
   private disabledReasonMessage = DISABLED_NAME;
 
-  constructor() {
-  }
+  constructor() {}
 
   enable() {
     this.disabled = false;

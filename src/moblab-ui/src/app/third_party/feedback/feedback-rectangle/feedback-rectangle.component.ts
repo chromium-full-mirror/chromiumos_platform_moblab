@@ -1,13 +1,18 @@
-import {Component, EventEmitter, HostListener, Input, Output} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+} from '@angular/core';
 import {Rectangle} from '../entity/rectangle';
 import {FeedbackService} from '../feedback.service';
 
 @Component({
   selector: 'feedback-rectangle',
   templateUrl: './feedback-rectangle.component.html',
-  styleUrls: ['./feedback-rectangle.component.css']
+  styleUrls: ['./feedback-rectangle.component.css'],
 })
-
 export class FeedbackRectangleComponent {
   @Input()
   public rectangle: Rectangle;
@@ -15,10 +20,9 @@ export class FeedbackRectangleComponent {
   public noHover: boolean;
   @Output()
   public close = new EventEmitter<boolean>();
-  public showCloseTag: boolean = false;
+  public showCloseTag = false;
 
-  constructor(public feedbackService: FeedbackService) {
-  }
+  constructor(public feedbackService: FeedbackService) {}
 
   @HostListener('mouseenter')
   public onMouseEnter(): void {
@@ -33,6 +37,4 @@ export class FeedbackRectangleComponent {
   public onClose(): void {
     this.close.emit();
   }
-
-
 }

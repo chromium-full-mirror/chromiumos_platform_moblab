@@ -1,7 +1,4 @@
-import {
-  EventEmitter,
-  Output
-} from '@angular/core';
+import {EventEmitter, Output} from '@angular/core';
 
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -19,7 +16,7 @@ export interface BuildSettings {
   pool: string;
 }
 
-export enum SuiteChangeType{
+export enum SuiteChangeType {
   RunSuiteStart = 1,
   RunSuiteFailed,
   FormLoadingStart,
@@ -41,10 +38,11 @@ export abstract class BaseSuite {
   selectedModel: string;
   selectedPool: string;
 
-  constructor(public moblabGrpcService: MoblabGrpcService,
-              public router: Router,
-              public snackBar: MatSnackBar) {
-  }
+  constructor(
+    public moblabGrpcService: MoblabGrpcService,
+    public router: Router,
+    public snackBar: MatSnackBar
+  ) {}
 
   onBuildSet(event: BuildSettings) {
     this.selectedModel = event.model;
@@ -62,16 +60,14 @@ export abstract class BaseSuite {
   abstract onBuildSetCustom(event: BuildSettings);
 
   onFormLoading(event) {
-    this.suiteFormChange.emit(
-      {
-        changeType: SuiteChangeType.FormLoadingStart,
-        message: event
-      });
+    this.suiteFormChange.emit({
+      changeType: SuiteChangeType.FormLoadingStart,
+      message: event,
+    });
   }
 
   onFormLoaded() {
-    this.suiteFormChange.emit(
-      {changeType: SuiteChangeType.FormLoadingFinish});
+    this.suiteFormChange.emit({changeType: SuiteChangeType.FormLoadingFinish});
   }
 
   onRunSuiteClick(message: string = null) {
@@ -79,16 +75,14 @@ export abstract class BaseSuite {
       this.setOffPopup(message);
     }
 
-    this.suiteFormChange.emit(
-      {changeType: SuiteChangeType.RunSuiteStart});
+    this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteStart});
   }
 
   onRunSuiteFailed(message: string = null) {
     if (message) {
       this.setOffError(message);
     }
-    this.suiteFormChange.emit(
-      {changeType: SuiteChangeType.RunSuiteFailed});
+    this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteFailed});
   }
 
   onSuiteStarted() {
@@ -98,24 +92,21 @@ export abstract class BaseSuite {
   redirectToViewJobs() {
     const params = {};
     params[JOB_START_TIME_FROM_FILTER] = normalizeTimestamp(
-      new Date().setTime(
-        new Date().getTime()
-        - 1000 /* 1 second */
-      )
+      new Date().setTime(new Date().getTime() - 1000 /* 1 second */)
     );
-    this.router.navigate(['/view_jobs'], { queryParams: params });
+    this.router.navigate(['/view_jobs'], {queryParams: params});
   }
 
   // sets off a persistent, error-themed popup.
   setOffError(dialogue: string) {
     const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
       verticalPosition: 'top',
-      panelClass: ["snack-error"],
+      panelClass: ['snack-error'],
     });
   }
 
   // sets off a neutral-themed popup that fades after 'duration' miliseconds
-  setOffPopup(dialogue: string, duration: number = 5000) {
+  setOffPopup(dialogue: string, duration = 5000) {
     const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
       duration: duration,
       verticalPosition: 'top',

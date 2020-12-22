@@ -2,7 +2,7 @@ import {
   AfterContentInit,
   ChangeDetectorRef,
   Component,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 
 import {BaseSuite} from '../../common/base_suite/base-suite.component';
@@ -15,9 +15,11 @@ import {RunStorageQualificationSuiteRequest} from '../../../services/moblabrpc_p
 @Component({
   selector: 'app-storage-qual-v2',
   templateUrl: './storage-qual-v2.component.html',
-  styleUrls: ['./storage-qual-v2.component.scss']
+  styleUrls: ['./storage-qual-v2.component.scss'],
 })
-export class StorageQualV2Component extends BaseSuite implements AfterContentInit {
+export class StorageQualV2Component
+  extends BaseSuite
+  implements AfterContentInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild('diskSizeInput') diskSizeInput;
@@ -31,14 +33,16 @@ export class StorageQualV2Component extends BaseSuite implements AfterContentIni
     'Short test (10 testing blocks)',
     'Medium test (20 testing blocks)',
     'Long test (30 testing blocks)',
-    'Extra long test (40 testing blocks)'
-  ]
+    'Extra long test (40 testing blocks)',
+  ];
   suiteIndex = 0; // Index of currently seleted suite.
 
-  constructor(private changeDetector: ChangeDetectorRef,
+  constructor(
+    private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    snackBar: MatSnackBar) {
+    snackBar: MatSnackBar
+  ) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -60,15 +64,15 @@ export class StorageQualV2Component extends BaseSuite implements AfterContentIni
   diskInputChanged() {
     if (this.diskSizeInput.getInput()) {
       if (this.diskSizeInput.getInput() < 35) {
-        this.suiteSelector.selectOption(1)
+        this.suiteSelector.selectOption(1);
       } else if (this.diskSizeInput.getInput() < 70) {
-        this.suiteSelector.selectOption(2)
+        this.suiteSelector.selectOption(2);
       } else if (this.diskSizeInput.getInput() < 140) {
-        this.suiteSelector.selectOption(3)
+        this.suiteSelector.selectOption(3);
       } else if (this.diskSizeInput.getInput() < 280) {
-        this.suiteSelector.selectOption(4)
+        this.suiteSelector.selectOption(4);
       } else {
-        this.suiteSelector.selectOption(5)
+        this.suiteSelector.selectOption(5);
       }
       this.bugIdInput.enable();
       this.partNumberInput.enable();
@@ -112,7 +116,7 @@ export class StorageQualV2Component extends BaseSuite implements AfterContentIni
     super.onRunSuiteClick('Starting storage qualification suite run.');
 
     this.moblabGrpcService.runStorageQualificationSuite(
-      (response) => {
+      response => {
         this.onSuiteStarted();
       },
       (err, response) => {
@@ -126,7 +130,8 @@ export class StorageQualV2Component extends BaseSuite implements AfterContentIni
       this.selectedPool,
       this.bugIdInput.getInput(),
       this.partNumberInput.getInput(),
-      this.suiteIndex + Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2),
+      this.suiteIndex +
+        Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2),
       this.diskSizeInput.getInput(),
       this.dualNamespace.getChecked()
     );

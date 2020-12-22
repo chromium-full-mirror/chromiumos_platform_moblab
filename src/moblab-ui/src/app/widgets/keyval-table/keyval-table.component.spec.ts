@@ -5,20 +5,15 @@ import {MatTableModule} from '@angular/material/table';
 
 import {KeyValTableComponent} from './keyval-table.component';
 
-
 describe('KeyValTableComponent', () => {
   let component: KeyValTableComponent;
   let fixture: ComponentFixture<KeyValTableComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          FormsModule,
-          MatSelectModule,
-          MatTableModule,
-        ],
-        declarations: [KeyValTableComponent]})
-      .compileComponents();
+      imports: [FormsModule, MatSelectModule, MatTableModule],
+      declarations: [KeyValTableComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -34,12 +29,10 @@ describe('KeyValTableComponent', () => {
   it('row loading and empty check work.', () => {
     expect(component.isEmpty()).toBe(true);
 
-    component.loadRows(
-      [
-        ['key1', 'val1'],
-        ['key2', 'val2']
-      ]
-    )
+    component.loadRows([
+      ['key1', 'val1'],
+      ['key2', 'val2'],
+    ]);
 
     expect(component.isEmpty()).toBe(false);
   });

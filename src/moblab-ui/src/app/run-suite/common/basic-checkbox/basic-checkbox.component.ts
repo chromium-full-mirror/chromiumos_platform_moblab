@@ -1,14 +1,7 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
 import {BaseForm} from '../base-form/base-form.component';
-
 
 /**
  * Component meant to be used for checkbox form items in run suite components.
@@ -16,7 +9,7 @@ import {BaseForm} from '../base-form/base-form.component';
 @Component({
   selector: 'app-basic-checkbox',
   templateUrl: './basic-checkbox.component.html',
-  styleUrls: ['./basic-checkbox.component.css']
+  styleUrls: ['./basic-checkbox.component.css'],
 })
 export class BasicCheckboxFormComponent extends BaseForm implements OnInit {
   @Input() name: string;

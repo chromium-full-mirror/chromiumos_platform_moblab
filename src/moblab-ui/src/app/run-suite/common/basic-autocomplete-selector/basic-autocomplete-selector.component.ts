@@ -13,7 +13,6 @@ import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 
-
 /**
  * Autocomplete selector to be used in run suite forms.
  */
@@ -22,7 +21,9 @@ import {map, startWith} from 'rxjs/operators';
   templateUrl: './basic-autocomplete-selector.component.html',
   styleUrls: ['./basic-autocomplete-selector.component.scss'],
 })
-export class BasicAutocompleteSelectorComponent extends BaseForm implements OnChanges {
+export class BasicAutocompleteSelectorComponent
+  extends BaseForm
+  implements OnChanges {
   // i.e., if only one option is available, select it.
   @Input() autoselect = true;
   @Input() options: string[];
@@ -42,15 +43,14 @@ export class BasicAutocompleteSelectorComponent extends BaseForm implements OnCh
   // Sets up the subscription to the input form control which generates the
   // filtered options dropdown.
   private setFilterOptions() {
-    this.filteredOptions = this.selectFormControl.valueChanges
-      .pipe(
-        startWith(''),
-        map(value => this.getFilteredOptions(value))
-      );
+    this.filteredOptions = this.selectFormControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this.getFilteredOptions(value))
+    );
   }
 
   private getFilteredOptions(value: string): string[] {
-    var filterResults = this.options;
+    const filterResults = this.options;
     // if (value) {
     //   value = value.toLowerCase();
     //   filterResults = this.options.filter(option => option.toLowerCase().includes(value));
@@ -90,7 +90,10 @@ export class BasicAutocompleteSelectorComponent extends BaseForm implements OnCh
   }
 
   onBlur() {
-    if (this.isExactMatchToOption() && this.selectFormControl.value !== this.selectValueOnUnlock) {
+    if (
+      this.isExactMatchToOption() &&
+      this.selectFormControl.value !== this.selectValueOnUnlock
+    ) {
       this.select.emit({value: this.selectFormControl.value});
       this.lock();
     } else if (this.selectFormControl.value !== this.selectValueOnUnlock) {

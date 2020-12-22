@@ -1,11 +1,11 @@
-import {BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {By} from '@angular/platform-browser';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {FormsModule } from '@angular/forms';
-import {MatButtonModule } from '@angular/material/button';
-import {MatCardModule } from '@angular/material/card';
-import {MatFormFieldModule } from '@angular/material/form-field';
-import {MatSelect, MatSelectModule } from '@angular/material/select';
+import {FormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelect, MatSelectModule} from '@angular/material/select';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 import {Job} from '../../services/moblabrpc_pb';
@@ -26,19 +26,17 @@ describe('JobActionComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          FormsModule,
-          MatButtonModule,
-          MatCardModule,
-          MatFormFieldModule,
-          MatSelectModule,
-          MatSnackBarModule,
-        ],
-        declarations: [
-          JobActionComponent,
-        ]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatSnackBarModule,
+      ],
+      declarations: [JobActionComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -50,8 +48,9 @@ describe('JobActionComponent', () => {
   });
 
   function applySelection(selectionValue) {
-    fixture.debugElement.query(By.directive(MatSelect))
-      .componentInstance.value = selectionValue;
+    fixture.debugElement.query(
+      By.directive(MatSelect)
+    ).componentInstance.value = selectionValue;
     component.selectedAction = selectionValue;
     fixture.detectChanges();
   }

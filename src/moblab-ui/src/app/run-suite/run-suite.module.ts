@@ -78,6 +78,6 @@ import {WidgetsModule} from './../widgets/widgets.module';
     RouterModule,
     WidgetsModule,
     WidgetsModule,
-  ]
+  ],
 })
 export class RunSuiteModule {}

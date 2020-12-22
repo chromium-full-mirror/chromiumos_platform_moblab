@@ -1,1 +1,1 @@
-export { FeedbackModule } from './feedback.module';
+export {FeedbackModule} from './feedback.module';

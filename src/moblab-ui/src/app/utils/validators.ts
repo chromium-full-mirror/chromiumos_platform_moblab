@@ -2,8 +2,8 @@ export function forbiddenIDValidator(control) {
   if (!control.value) {
     return null;
   }
-  const forbidden = !(new RegExp('^\\d+$').test(control.value));
-  return forbidden ? {'notANonnegativeNumber': {value: control.value}} : null;
+  const forbidden = !new RegExp('^\\d+$').test(control.value);
+  return forbidden ? {notANonnegativeNumber: {value: control.value}} : null;
 }
 
 export function forbiddenDateValidator(control) {
@@ -12,12 +12,12 @@ export function forbiddenDateValidator(control) {
   }
   const timestamp = new Date(control.value).getTime();
   if (isNaN(timestamp)) {
-    return {'failedDateParse': {value: control.value}}
+    return {failedDateParse: {value: control.value}};
   }
   if (timestamp <= 0) {
-    return {'dateOutOfBounds': {value: control.value}}
+    return {dateOutOfBounds: {value: control.value}};
   }
-  return null
+  return null;
 }
 
 export function numericValidator(control) {
@@ -26,15 +26,15 @@ export function numericValidator(control) {
   }
 
   if (isNaN(control.value)) {
-    return {'isNaN': {value: control.value}}
+    return {isNaN: {value: control.value}};
   }
-  return null
+  return null;
 }
 
 export function leadingTrailingWhitespaceValidator(control) {
   if (control.value.length !== control.value.trim().length) {
-    return { 'leadingTrailingwhitespace': true };
+    return {leadingTrailingwhitespace: true};
   } else {
-    return null
+    return null;
   }
 }

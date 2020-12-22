@@ -14,14 +14,16 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 
-import {forbiddenDateValidator, forbiddenIDValidator} from '../utils/validators';
+import {
+  forbiddenDateValidator,
+  forbiddenIDValidator,
+} from '../utils/validators';
 import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
 import {Job} from '../services/moblabrpc_pb';
 import {JobActionComponent} from './job-action/job-action.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
 import {TableHeaderSelectorComponent} from '../widgets/table-header-selector/table-header-selector.component';
-
 
 export const JOB_NAME = 'name';
 export const JOB_ID = 'id';
@@ -41,7 +43,7 @@ export const FILTER_PARAMETERS = [
   JOB_START_TIME_FROM_FILTER,
   JOB_START_TIME_TO_FILTER,
   PARENT_JOB_ID,
-  DUT_RUN_ON
+  DUT_RUN_ON,
 ];
 const FILTER_VALIDATORS = {};
 
@@ -62,7 +64,8 @@ export class MultiFilterForm {
     for (const filterName of filterParameters) {
       this.formControls[filterName] = new FormControl(
         '',
-        filterName in FILTER_VALIDATORS ? FILTER_VALIDATORS[filterName] : []);
+        filterName in FILTER_VALIDATORS ? FILTER_VALIDATORS[filterName] : []
+      );
     }
   }
 
@@ -98,7 +101,7 @@ export class MultiFilterForm {
   selector: 'app-view-jobs',
   templateUrl: './view-jobs.component.html',
   styleUrls: ['./view-jobs.component.css'],
-  providers: [DatePipe]
+  providers: [DatePipe],
 })
 export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   @Input() input: string;
@@ -110,7 +113,8 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   @Input() filtersOverride: MultiFilterForm;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(JobActionComponent) jobActionRef: JobActionComponent;
-  @ViewChild(TableHeaderSelectorComponent) tableHeadSelectorRef: TableHeaderSelectorComponent;
+  @ViewChild(TableHeaderSelectorComponent)
+  tableHeadSelectorRef: TableHeaderSelectorComponent;
   displayedColumns: string[] = [
     'job_id',
     'name',
@@ -128,7 +132,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   loading = false;
   numJobs = 0;
-  expandedElement: Job|null;
+  expandedElement: Job | null;
   startingPageSize: number;
 
   filters = new MultiFilterForm(FILTER_PARAMETERS);
@@ -147,16 +151,14 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   relationshipFilterOptions = [''].concat(
     Object.keys(Job.Relationship).slice(1)
   );
-  queueStatusFilterOptions = [''].concat(
-    Object.keys(Job.QueueStatus).slice(1)
-  );
+  queueStatusFilterOptions = [''].concat(Object.keys(Job.QueueStatus).slice(1));
 
   constructor(
     private readonly moblabGrpcService: MoblabGrpcService,
     private changeDetectorRefs: ChangeDetectorRef,
     private datePipe: DatePipe,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -164,8 +166,9 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       this.applyFilters(params);
     });
 
-    this.startingPageSize = this.pageSizeOverride ?
-      this.pageSizeOverride : DEFAULT_PAGE_SIZE;
+    this.startingPageSize = this.pageSizeOverride
+      ? this.pageSizeOverride
+      : DEFAULT_PAGE_SIZE;
 
     if (this.paginator) {
       this.paginator.pageSize = this.startingPageSize;
@@ -182,15 +185,13 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     if (!this.manualPopulate) {
-      this.moblabGrpcService.getNumJobs(
-        (numJobs: number) => { this.numJobs = numJobs; }
-      )
+      this.moblabGrpcService.getNumJobs((numJobs: number) => {
+        this.numJobs = numJobs;
+      });
       this.getNextPageJobs();
     }
 
-    this.paginator.page.subscribe(
-      () => this.getNextPageJobs()
-    );
+    this.paginator.page.subscribe(() => this.getNextPageJobs());
 
     this.changeDetectorRefs.detectChanges();
   }
@@ -204,11 +205,11 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   selectionChanged(event) {
-    if (event.selection === "All") {
+    if (event.selection === 'All') {
       this.selectAllJobs();
-    } else if (event.selection === "Visible") {
+    } else if (event.selection === 'Visible') {
       this.jobs.data.forEach(this.jobActionRef.selectJob, this.jobActionRef);
-    } else if (event.selection === "None") {
+    } else if (event.selection === 'None') {
       this.jobActionRef.clearSelectedJobs();
     }
   }
@@ -227,22 +228,33 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     const job_start_gt_filter = datestringToSecondsTimestamp(
       this.filters.getFormValue(JOB_START_TIME_FROM_FILTER)
     );
-    const job_queue_status_filter = this.filters.getFormValue(QUEUE_STATUS) ?
-      Number(Job.QueueStatus[this.filters.getFormValue(QUEUE_STATUS)]) : 0;
-    const job_relationship_filter =
-      this.filters.getFormValue(JOB_RELATIONSHIP) ?
-        Number(Job.Relationship[this.filters.getFormValue(JOB_RELATIONSHIP)]) : 0;
+    const job_queue_status_filter = this.filters.getFormValue(QUEUE_STATUS)
+      ? Number(Job.QueueStatus[this.filters.getFormValue(QUEUE_STATUS)])
+      : 0;
+    const job_relationship_filter = this.filters.getFormValue(JOB_RELATIONSHIP)
+      ? Number(Job.Relationship[this.filters.getFormValue(JOB_RELATIONSHIP)])
+      : 0;
     const parent_id_filter = this.filters.getFormValue(PARENT_JOB_ID);
     const dut_filter = this.filters.getFormValue(DUT_RUN_ON);
-    return [job_id_filter, job_name_filter, job_start_lt_filter,
-      job_start_gt_filter, job_queue_status_filter, job_relationship_filter,
-      parent_id_filter, dut_filter]
+    return [
+      job_id_filter,
+      job_name_filter,
+      job_start_lt_filter,
+      job_start_gt_filter,
+      job_queue_status_filter,
+      job_relationship_filter,
+      parent_id_filter,
+      dut_filter,
+    ];
   }
 
   selectJobIds(job_ids: number[]) {
     this.jobActionRef.selectJobs(job_ids);
     this.getNextPageJobs();
-    this.jobs.filteredData.forEach(this.jobActionRef.selectJob, this.jobActionRef);
+    this.jobs.filteredData.forEach(
+      this.jobActionRef.selectJob,
+      this.jobActionRef
+    );
   }
 
   selectAllJobs() {
@@ -252,13 +264,20 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
      */
     this.loading = true;
 
-    let [job_id_filter, job_name_filter, job_start_lt_filter,
-      job_start_gt_filter, job_queue_status_filter, job_relationship_filter,
-      parent_id_filter, dut_filter] = this.getJobFilters();
+    const [
+      job_id_filter,
+      job_name_filter,
+      job_start_lt_filter,
+      job_start_gt_filter,
+      job_queue_status_filter,
+      job_relationship_filter,
+      parent_id_filter,
+      dut_filter,
+    ] = this.getJobFilters();
 
     this.moblabGrpcService.getJobIds(
       (job_ids: number[]) => {
-        this.selectJobIds(job_ids)
+        this.selectJobIds(job_ids);
       },
       this.errorHandling,
       // get all jobs, so index 0
@@ -273,7 +292,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       job_queue_status_filter,
       job_relationship_filter,
       parent_id_filter,
-      dut_filter,
+      dut_filter
     );
   }
 
@@ -297,7 +316,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   filterSubmission() {
     this.resetPagination();
-    this.getNextPageJobs()
+    this.getNextPageJobs();
   }
 
   clearFilters() {
@@ -316,17 +335,26 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
      * Refreshes jobs table according to filter and paginator parameters.
      */
     this.loading = true;
-    const [job_id_filter, job_name_filter, job_start_lt_filter,
-      job_start_gt_filter, job_queue_status_filter, job_relationship_filter,
-      parent_id_filter, dut_filter] = this.getJobFilters();
+    const [
+      job_id_filter,
+      job_name_filter,
+      job_start_lt_filter,
+      job_start_gt_filter,
+      job_queue_status_filter,
+      job_relationship_filter,
+      parent_id_filter,
+      dut_filter,
+    ] = this.getJobFilters();
 
     this.moblabGrpcService.getJobs(
       (jobs: Job[]) => this.assignJobs(jobs),
       (message: string) => this.errorHandling(message),
-      this.paginator && this.paginator.pageIndex ?
-        this.paginator.pageIndex * this.paginator.pageSize : 0,
-      this.paginator && this.paginator.pageSize ?
-        this.paginator.pageSize : DEFAULT_PAGE_SIZE,
+      this.paginator && this.paginator.pageIndex
+        ? this.paginator.pageIndex * this.paginator.pageSize
+        : 0,
+      this.paginator && this.paginator.pageSize
+        ? this.paginator.pageSize
+        : DEFAULT_PAGE_SIZE,
       job_id_filter,
       job_name_filter,
       job_start_lt_filter,
@@ -334,11 +362,13 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       job_queue_status_filter,
       job_relationship_filter,
       parent_id_filter,
-      dut_filter,
+      dut_filter
     );
 
     this.moblabGrpcService.getNumJobs(
-      (numJobs: number) => { this.numJobs = numJobs; },
+      (numJobs: number) => {
+        this.numJobs = numJobs;
+      },
       job_id_filter,
       job_name_filter,
       job_start_lt_filter,
@@ -346,8 +376,8 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       job_queue_status_filter,
       job_relationship_filter,
       parent_id_filter,
-      dut_filter,
-    )
+      dut_filter
+    );
   }
 
   getNumVisibleJobs() {

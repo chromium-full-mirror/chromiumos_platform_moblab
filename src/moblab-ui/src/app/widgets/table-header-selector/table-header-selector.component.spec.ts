@@ -3,11 +3,10 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule} from '@angular/forms';
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatSelectModule} from '@angular/material/select'
+import {MatSelectModule} from '@angular/material/select';
 import {MatTooltipModule} from '@angular/material/tooltip';
 
-import { TableHeaderSelectorComponent } from './table-header-selector.component';
-
+import {TableHeaderSelectorComponent} from './table-header-selector.component';
 
 describe('TableHeaderSelectorComponent', () => {
   let component: TableHeaderSelectorComponent;
@@ -22,9 +21,8 @@ describe('TableHeaderSelectorComponent', () => {
         MatSelectModule,
         MatTooltipModule,
       ],
-      declarations: [ TableHeaderSelectorComponent ]
-    })
-    .compileComponents();
+      declarations: [TableHeaderSelectorComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,16 +1,23 @@
 import {fromEvent as observableFromEvent} from 'rxjs';
 
 import {takeUntil, finalize, map, mergeMap} from 'rxjs/operators';
-import {Component, ElementRef, Input, Output, EventEmitter, AfterViewInit, ViewChild, OnChanges} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  Output,
+  EventEmitter,
+  AfterViewInit,
+  ViewChild,
+  OnChanges,
+} from '@angular/core';
 import {FeedbackService} from '../feedback.service';
-
 
 @Component({
   selector: 'feedback-toolbar',
   templateUrl: './feedback-toolbar.component.html',
-  styleUrls: ['./feedback-toolbar.component.css']
+  styleUrls: ['./feedback-toolbar.component.css'],
 })
-
 export class FeedbackToolbarComponent implements AfterViewInit, OnChanges {
   @Input()
   public drawColor: string;
@@ -54,35 +61,46 @@ export class FeedbackToolbarComponent implements AfterViewInit, OnChanges {
   }
 
   public addDragListenerOnMoveBtn() {
-    const mouseUp = observableFromEvent(this.toggleMoveBtn.nativeElement, 'mouseup');
-    const mouseMove = observableFromEvent(document.documentElement, 'mousemove');
-    const mouseDown = observableFromEvent(this.toggleMoveBtn.nativeElement, 'mousedown');
-    const mouseDrag = mouseDown.pipe(mergeMap((md: MouseEvent) => {
-      this.feedbackService.setIsDraggingToolbar(true);
-      const startX = md.offsetX;
-      const startY = md.offsetY;
-      this.disableToolbarTips = true;
-      this.isDragging = true;
-      // Calculate dif with mousemove until mouseup
-      return mouseMove.pipe(
-        map((mm: MouseEvent) => {
-          mm.preventDefault();
-          return {
-            left: mm.clientX - startX,
-            top: mm.clientY - startY
-          };
-        }),
-        finalize(() => {
-          this.isDragging = false;
-          this.disableToolbarTips = false;
-          this.feedbackService.setIsDraggingToolbar(false);
-        }),
-        takeUntil(mouseUp));
-    }));
-    mouseDrag.subscribe(
-      (pos) => {
-        this.el.nativeElement.style.left = pos.left + 'px';
-        this.el.nativeElement.style.top = pos.top + 'px';
-      });
+    const mouseUp = observableFromEvent(
+      this.toggleMoveBtn.nativeElement,
+      'mouseup'
+    );
+    const mouseMove = observableFromEvent(
+      document.documentElement,
+      'mousemove'
+    );
+    const mouseDown = observableFromEvent(
+      this.toggleMoveBtn.nativeElement,
+      'mousedown'
+    );
+    const mouseDrag = mouseDown.pipe(
+      mergeMap((md: MouseEvent) => {
+        this.feedbackService.setIsDraggingToolbar(true);
+        const startX = md.offsetX;
+        const startY = md.offsetY;
+        this.disableToolbarTips = true;
+        this.isDragging = true;
+        // Calculate dif with mousemove until mouseup
+        return mouseMove.pipe(
+          map((mm: MouseEvent) => {
+            mm.preventDefault();
+            return {
+              left: mm.clientX - startX,
+              top: mm.clientY - startY,
+            };
+          }),
+          finalize(() => {
+            this.isDragging = false;
+            this.disableToolbarTips = false;
+            this.feedbackService.setIsDraggingToolbar(false);
+          }),
+          takeUntil(mouseUp)
+        );
+      })
+    );
+    mouseDrag.subscribe(pos => {
+      this.el.nativeElement.style.left = pos.left + 'px';
+      this.el.nativeElement.style.top = pos.top + 'px';
+    });
   }
 }

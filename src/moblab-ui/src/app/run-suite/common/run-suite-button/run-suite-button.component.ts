@@ -3,22 +3,22 @@ import {
   EventEmitter,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
-
 
 @Component({
   selector: 'app-run-suite-button',
   template: `
     <button
-        #runSuiteButton
-        mat-raised-button
-        color="primary"
-        [disabled]="this.isDisabled()">
+      #runSuiteButton
+      mat-raised-button
+      color="primary"
+      [disabled]="this.isDisabled()"
+    >
       Run Suite
     </button>
   `,
-  styleUrls: []
+  styleUrls: [],
 })
 /**
  * Component meant to be used at the end of all custom run suite forms.

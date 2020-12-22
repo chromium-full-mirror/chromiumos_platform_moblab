@@ -13,7 +13,6 @@ import {BuildSettings} from '../base_suite/base-suite.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 
-
 const SELECT_MODEL_PROMPT = 'Please select model.';
 const SELECT_BUILD_TARGET_PROMPT = 'Please select build target.';
 const SELECT_MILESTONE_PROMPT = 'Please select milestone.';
@@ -27,7 +26,7 @@ const SELECT_BUILD_VERSION_PROMPT = 'Please select build.';
 @Component({
   selector: 'app-build-select-forms',
   templateUrl: './build-select-forms.component.html',
-  styleUrls: ['./build-select-forms.component.css']
+  styleUrls: ['./build-select-forms.component.css'],
 })
 export class BuildSelectFormsComponent implements AfterViewInit {
   @ViewChild('modelSelector') modelSelector;
@@ -59,7 +58,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private moblabGrpcService: MoblabGrpcService,
-    private snackBar: MatSnackBar,
+    private snackBar: MatSnackBar
   ) {}
 
   ngAfterViewInit() {
@@ -75,7 +74,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   setOffError(dialogue: string) {
     const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
       verticalPosition: 'top',
-      panelClass: ['snack-error']
+      panelClass: ['snack-error'],
     });
   }
 
@@ -103,7 +102,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     this.models = newModels;
 
     if (newModels.length === 0) {
-      this.modelSelector.disable('No working DUT\'s detected.');
+      this.modelSelector.disable("No working DUT's detected.");
     } else {
       this.modelSelector.enable();
     }
@@ -133,7 +132,9 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     this.buildTargets = newBuildTargets;
 
     if (this.buildTargets.length === 0) {
-      this.boardSelector.disable('No build targets found in configured bucket.');
+      this.boardSelector.disable(
+        'No build targets found in configured bucket.'
+      );
     } else {
       this.boardSelector.enable();
     }
@@ -157,14 +158,16 @@ export class BuildSelectFormsComponent implements AfterViewInit {
         this.setErrorReason(this.milestoneSelector, error_msg);
         this.formLoaded.emit();
       }
-    )
+    );
   }
 
   updateMilestones(newMilestones: string[]) {
     this.milestones = newMilestones;
 
     if (this.milestones.length === 0) {
-      this.milestoneSelector.disable('No milestones found in configured bucket.');
+      this.milestoneSelector.disable(
+        'No milestones found in configured bucket.'
+      );
     } else {
       this.milestoneSelector.enable();
     }
@@ -218,7 +221,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
         },
         (error_msg: string) => {
           this.setErrorReason(this.poolSelector, error_msg);
-        });
+        }
+      );
     }
   }
 
@@ -242,8 +246,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
       model: this.selectedModel,
       milestone: this.milestone,
       buildVersionName: this.buildVersionName,
-      pool: this.selectedPool
-    })
+      pool: this.selectedPool,
+    });
   }
 
   unselectModel() {

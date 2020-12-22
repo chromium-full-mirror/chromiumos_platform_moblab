@@ -1,8 +1,4 @@
-import {
-  async,
-  ComponentFixture,
-  TestBed
-} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {FormsModule} from '@angular/forms';
 import {LayoutModule} from '@angular/cdk/layout';
@@ -22,42 +18,33 @@ import {RouterModule} from '@angular/router';
 import {AppSidebarComponent} from './app-sidebar.component';
 import {GlobalInfoService, ServicesModule} from 'app/services/services.module';
 
-
 describe('AppSidebarComponent', () => {
   let component: AppSidebarComponent;
   let fixture: ComponentFixture<AppSidebarComponent>;
 
   beforeEach(async(() => {
-    TestBed
-        .configureTestingModule({
-          declarations: [
-            AppSidebarComponent,
-          ],
-          imports: [
-            FormsModule,
-            LayoutModule,
-            MatButtonModule,
-            MatCardModule,
-            MatFormFieldModule,
-            MatIconModule,
-            MatListModule,
-            MatMenuModule,
-            MatSidenavModule,
-            MatTabsModule,
-            MatToolbarModule,
-            NoopAnimationsModule,
-            ServicesModule,
-            RouterModule,
-            RouterModule.forRoot([]),
-          ],
-          providers: [
-            {provide: GlobalInfoService, useClass: GlobalInfoService}
-          ],
-          schemas: [
-            NO_ERRORS_SCHEMA
-          ]
-        })
-        .compileComponents();
+    TestBed.configureTestingModule({
+      declarations: [AppSidebarComponent],
+      imports: [
+        FormsModule,
+        LayoutModule,
+        MatButtonModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatListModule,
+        MatMenuModule,
+        MatSidenavModule,
+        MatTabsModule,
+        MatToolbarModule,
+        NoopAnimationsModule,
+        ServicesModule,
+        RouterModule,
+        RouterModule.forRoot([]),
+      ],
+      providers: [{provide: GlobalInfoService, useClass: GlobalInfoService}],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

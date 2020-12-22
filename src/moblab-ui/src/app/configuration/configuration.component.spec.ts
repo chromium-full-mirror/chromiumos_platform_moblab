@@ -1,9 +1,5 @@
 /* tslint:disable:no-unused-variable */
-import {
-  async,
-  ComponentFixture,
-  TestBed
-} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -22,7 +18,6 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 import {ConfigurationComponent} from './configuration.component';
 import {RebootButtonComponent} from '../widgets/reboot-button/reboot-button.component';
-
 
 describe('ConfigurationComponent', () => {
   let component: ConfigurationComponent;
@@ -60,35 +55,30 @@ describe('ConfigurationComponent', () => {
         MatSnackBarModule,
         ReactiveFormsModule,
       ],
-      declarations: [
-        ConfigurationComponent,
-        RebootButtonComponent
-      ]
-    })
-      .compileComponents();
+      declarations: [ConfigurationComponent, RebootButtonComponent],
+    }).compileComponents();
   }));
   beforeEach(() => {
     fixture = TestBed.createComponent(ConfigurationComponent);
     component = fixture.componentInstance;
 
     getNetworkInfoSpy = spyOn<any>(component, 'getNetworkInfo').and.callFake(
-      function () {
-        component.setNetworkInfo(
-          '000.000.000.000',
-          true
-        )
-      });
+      () => {
+        component.setNetworkInfo('000.000.000.000', true);
+      }
+    );
 
     getVersionInfoSpy = spyOn<any>(component, 'getVersionInfo').and.callFake(
-      function () {
+      () => {
         component.refreshShownVersionInfo(
           'R00-00000.00.0',
           'mock-release',
           'Mock description.',
           'xxxxxxxxxxxxxxxxxxxxxx',
           'XXXXXXXXXXXX'
-        )
-      });
+        );
+      }
+    );
 
     fixture.detectChanges();
   });
@@ -108,27 +98,27 @@ describe('ConfigurationComponent', () => {
     const formElement = fixture.debugElement.nativeElement.querySelector(
       '#' + formId
     );
-    return formElement.getAttribute('readonly') === 'true'
+    return formElement.getAttribute('readonly') === 'true';
   }
 
   function toggleCheckbox(checkboxId: string) {
-    fixture.debugElement.query(
-      By.css('#' + checkboxId)
-    ).triggerEventHandler('change', new Event('change'));
+    fixture.debugElement
+      .query(By.css('#' + checkboxId))
+      .triggerEventHandler('change', new Event('change'));
     fixture.detectChanges();
   }
 
   function triggerCheckboxHoverStart(checkboxId: string) {
-    fixture.debugElement.query(
-      By.css('#' + checkboxId)
-    ).triggerEventHandler('mouseenter', new Event('mouseenter'));
+    fixture.debugElement
+      .query(By.css('#' + checkboxId))
+      .triggerEventHandler('mouseenter', new Event('mouseenter'));
     fixture.detectChanges();
   }
 
   function triggerCheckboxHoverStop(checkboxId: string) {
-    fixture.debugElement.query(
-      By.css('#' + checkboxId)
-    ).triggerEventHandler('mouseleave', new Event('mouseleave'));
+    fixture.debugElement
+      .query(By.css('#' + checkboxId))
+      .triggerEventHandler('mouseleave', new Event('mouseleave'));
     fixture.detectChanges();
   }
 
@@ -176,22 +166,15 @@ describe('ConfigurationComponent', () => {
     inputConfiguration('boto-key-secret-input', 'fake-secret-key');
     inputConfiguration('image-storage-url-input', 'gs://xxx/');
 
-    expect(
-      component.bucketURLForm.hasError('notAGSUrl')
-    ).toBeFalse();
-
+    expect(component.bucketURLForm.hasError('notAGSUrl')).toBeFalse();
 
     inputConfiguration('image-storage-url-input', 'gs:/xxx/');
     console.log(component.bucketURLForm.hasError('notAGSUrl'));
-    expect(
-      component.bucketURLForm.hasError('notAGSUrl')
-    ).toBeTrue();
+    expect(component.bucketURLForm.hasError('notAGSUrl')).toBeTrue();
 
     inputConfiguration('image-storage-url-input', 'gs://xxx');
     console.log(component.bucketURLForm.hasError('notAGSUrl'));
-    expect(
-      component.bucketURLForm.hasError('notAGSUrl')
-    ).toBeTrue();
+    expect(component.bucketURLForm.hasError('notAGSUrl')).toBeTrue();
   });
 
   it('hover over cloud checkbox will show clear warnings', () => {
@@ -243,110 +226,128 @@ describe('ConfigurationComponent', () => {
 
   it('good GCS URL shows link', () => {
     inputConfiguration('image-storage-url-input', 'gs://xxx/');
-    expect(fixture.debugElement.nativeElement.querySelector(
-      '#link-on-icon'
-    )).toBeTruthy();
-    expect(fixture.debugElement.nativeElement.querySelector(
-      '#link-off-icon'
-    )).toBeFalsy();
+    expect(
+      fixture.debugElement.nativeElement.querySelector('#link-on-icon')
+    ).toBeTruthy();
+    expect(
+      fixture.debugElement.nativeElement.querySelector('#link-off-icon')
+    ).toBeFalsy();
   });
 
   it('bad GCS URL does not show link', () => {
     inputConfiguration('image-storage-url-input', 'xxx');
-    expect(fixture.debugElement.nativeElement.querySelector(
-      '#link-on-icon'
-    )).toBeFalsy();
-    expect(fixture.debugElement.nativeElement.querySelector(
-      '#link-off-icon'
-    )).toBeTruthy();
+    expect(
+      fixture.debugElement.nativeElement.querySelector('#link-on-icon')
+    ).toBeFalsy();
+    expect(
+      fixture.debugElement.nativeElement.querySelector('#link-off-icon')
+    ).toBeTruthy();
   });
 
-  describe('configuration set tests', function () {
+  describe('configuration set tests', () => {
     const MOCK_NUM_JOBS = 100;
 
     beforeEach(() => {
       fixture = TestBed.createComponent(ConfigurationComponent);
       component = fixture.componentInstance;
-      getCloudConfigurationSpy = spyOn<any>(component, 'getCloudConfiguration').and.callFake(
-        function () {
-          component.updateCloudConfigurationForms(
-            'fake-boto-key',
-            'fake-secret-key',
-            'gs://xxx/',
-            true,
-            true
-          )
-        });
+      getCloudConfigurationSpy = spyOn<any>(
+        component,
+        'getCloudConfiguration'
+      ).and.callFake(() => {
+        component.updateCloudConfigurationForms(
+          'fake-boto-key',
+          'fake-secret-key',
+          'gs://xxx/',
+          true,
+          true
+        );
+      });
       getDutWifiInfoSpy = spyOn<any>(component, 'getDutWifiInfo').and.callFake(
-        function () {
+        () => {
           // @ts-ignore
-          component.setDutWifiInfo(
-            'fake-wifi-name',
-            'fake-wifi-pass',
-          )
-        });
+          component.setDutWifiInfo('fake-wifi-name', 'fake-wifi-pass');
+        }
+      );
       fixture.detectChanges();
     });
 
     it('cloud submit button only enabled on diff', () => {
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#cloud-config-submit-button'
-      ).disabled).toBeTruthy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#cloud-config-submit-button'
+        ).disabled
+      ).toBeTruthy();
 
       inputConfiguration('image-storage-url-input', 'gs://xxxx/');
       fixture.detectChanges();
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#cloud-config-submit-button'
-      ).disabled).toBeFalsy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#cloud-config-submit-button'
+        ).disabled
+      ).toBeFalsy();
 
       inputConfiguration('image-storage-url-input', 'gs://xxx/');
       fixture.detectChanges();
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#cloud-config-submit-button'
-      ).disabled).toBeTruthy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#cloud-config-submit-button'
+        ).disabled
+      ).toBeTruthy();
     });
 
     it('dut wifi info submit button only enabled on diff', () => {
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#dut-wifi-info-submit-button'
-      ).disabled).toBeTruthy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#dut-wifi-info-submit-button'
+        ).disabled
+      ).toBeTruthy();
 
       inputConfiguration('dut-wifi-name-input', 'fake-wifi-nam');
       fixture.detectChanges();
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#dut-wifi-info-submit-button'
-      ).disabled).toBeFalsy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#dut-wifi-info-submit-button'
+        ).disabled
+      ).toBeFalsy();
 
       inputConfiguration('dut-wifi-name-input', 'fake-wifi-name');
       fixture.detectChanges();
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#dut-wifi-info-submit-button'
-      ).disabled).toBeTruthy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#dut-wifi-info-submit-button'
+        ).disabled
+      ).toBeTruthy();
     });
 
     it('dut wifi has to be non-empty', () => {
       inputConfiguration('dut-wifi-name-input', '');
       fixture.detectChanges();
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#dut-wifi-info-submit-button'
-      ).disabled).toBeTruthy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#dut-wifi-info-submit-button'
+        ).disabled
+      ).toBeTruthy();
     });
 
     it('dut wifi has to have no leading/trailing whitespace', () => {
       inputConfiguration('dut-wifi-name-input', ' wifi-name');
       fixture.detectChanges();
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#dut-wifi-info-submit-button'
-      ).disabled).toBeTruthy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#dut-wifi-info-submit-button'
+        ).disabled
+      ).toBeTruthy();
     });
 
     it('dut wifi password can be empty', () => {
       inputConfiguration('dut-wifi-name-input', 'wifi-name');
       inputConfiguration('dut-wifi-password-input', '');
       fixture.detectChanges();
-      expect(fixture.debugElement.nativeElement.querySelector(
-        '#dut-wifi-info-submit-button'
-      ).disabled).toBeFalsy();
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '#dut-wifi-info-submit-button'
+        ).disabled
+      ).toBeFalsy();
     });
   });
 });

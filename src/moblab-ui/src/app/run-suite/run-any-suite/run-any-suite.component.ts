@@ -2,7 +2,7 @@ import {
   AfterContentInit,
   ChangeDetectorRef,
   Component,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -12,7 +12,6 @@ import {BaseSuite} from '../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../common/run-suite-button/run-suite-button.component';
 
-
 /** Component owns logic for run-any-suite form. This component allows for the
  *  execution of any runnable suite, but without custom arguments.
  * */
@@ -20,32 +19,35 @@ import {RunSuiteButtonComponent} from '../common/run-suite-button/run-suite-butt
   selector: 'app-run-any-suite',
   templateUrl: './run-any-suite.component.html',
 })
-export class RunAnySuiteComponent extends BaseSuite implements AfterContentInit {
+export class RunAnySuiteComponent
+  extends BaseSuite
+  implements AfterContentInit {
   @ViewChild('suiteInput') suiteInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
-  MANUAL_SUITE_ENTRY_DESC = ">> Enter suite name";
+  MANUAL_SUITE_ENTRY_DESC = '>> Enter suite name';
   public suiteList: string[] = [
     this.MANUAL_SUITE_ENTRY_DESC,
-    "au_fsi",
-    "bvt-cq",
-    "bvt-inline",
-    "bvt-tast-cq",
-    "usb-camera",
-    "wifi_matfunc",
-    "wifi_perf",
-    "labqual",
+    'au_fsi',
+    'bvt-cq',
+    'bvt-inline',
+    'bvt-tast-cq',
+    'usb-camera',
+    'wifi_matfunc',
+    'wifi_perf',
+    'labqual',
   ];
 
   public hideCustomInput = true;
 
-  public suiteName = "";
+  public suiteName = '';
 
   constructor(
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    snackBar: MatSnackBar) {
+    snackBar: MatSnackBar
+  ) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -67,7 +69,7 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterContentInit 
   }
 
   /** Method triggered on change of suite input form.
-  * */
+   * */
   suiteDropdownChanged(suiteName: string) {
     if (suiteName != this.MANUAL_SUITE_ENTRY_DESC) {
       this.hideCustomInput = true;
@@ -106,7 +108,7 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterContentInit 
     }
 
     this.moblabGrpcService.runSuite(
-      (response) => {
+      response => {
         this.onSuiteStarted();
       },
       (err, response) => {
@@ -118,7 +120,7 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterContentInit 
       this.selectedMilestone,
       this.selectedBoard,
       this.selectedModel,
-      this.selectedPool,
+      this.selectedPool
     );
   }
 }

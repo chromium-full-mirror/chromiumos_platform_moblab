@@ -8,25 +8,22 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {BasicInputFormComponent} from './basic-input.component';
 
-
 describe('BasicInputFormComponent', () => {
   let component: BasicInputFormComponent;
   let fixture: ComponentFixture<BasicInputFormComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          FormsModule,
-          MatFormFieldModule,
-          MatInputModule,
-          MatTooltipModule,
-          ReactiveFormsModule,
-        ],
-        declarations: [
-          BasicInputFormComponent,
-        ]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatTooltipModule,
+        ReactiveFormsModule,
+      ],
+      declarations: [BasicInputFormComponent],
+    }).compileComponents();
   }));
 
   function setInput(inputValue) {
@@ -67,7 +64,7 @@ describe('BasicInputFormComponent', () => {
     // when the user navigates away from a form.
     setInput('1');
 
-    fixture.whenStable().then(()=>{
+    fixture.whenStable().then(() => {
       expect(component.update.emit).toHaveBeenCalledTimes(1);
     });
   });

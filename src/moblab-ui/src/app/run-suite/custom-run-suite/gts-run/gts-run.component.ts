@@ -2,7 +2,7 @@ import {
   AfterContentInit,
   ChangeDetectorRef,
   Component,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -11,7 +11,6 @@ import {BaseSuite} from '../../common/base_suite/base-suite.component';
 import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-form.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
-
 
 /** Component owns logic for GTS suite run form.
  * */
@@ -24,10 +23,12 @@ export class GtsRunComponent extends BaseSuite implements AfterContentInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
   @ViewChild(BasicTextFormComponent) modulesTextForm;
 
-  constructor(private changeDetector: ChangeDetectorRef,
+  constructor(
+    private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    snackBar: MatSnackBar) {
+    snackBar: MatSnackBar
+  ) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -59,7 +60,7 @@ export class GtsRunComponent extends BaseSuite implements AfterContentInit {
     super.onRunSuiteClick('Starting GTS suite run.');
 
     this.moblabGrpcService.runGtsSuite(
-      (response) => {
+      response => {
         this.onSuiteStarted();
       },
       (err, response) => {
@@ -71,7 +72,7 @@ export class GtsRunComponent extends BaseSuite implements AfterContentInit {
       this.selectedBoard,
       this.selectedModel,
       this.selectedPool,
-      this.modulesTextForm.getCsvList(),
+      this.modulesTextForm.getCsvList()
     );
   }
 }

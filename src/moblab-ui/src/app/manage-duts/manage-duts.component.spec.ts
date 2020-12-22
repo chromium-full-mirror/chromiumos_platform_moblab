@@ -23,7 +23,6 @@ import {WidgetsModule} from 'app/widgets/widgets.module';
 
 import {PipesModule} from 'app/pipes/pipes.module';
 
-
 describe('ManageDutsComponent', () => {
   let component: ManageDutsComponent;
   let fixture: ComponentFixture<ManageDutsComponent>;
@@ -46,13 +45,14 @@ describe('ManageDutsComponent', () => {
         RouterModule,
         WidgetsModule,
       ],
-        declarations: [
-          EditAttributesComponent,
-          EnrollmentComponent,
-          FirmwareComponent,
-          ManageDutsComponent,
-          ViewDutsComponent
-        ]}).compileComponents();
+      declarations: [
+        EditAttributesComponent,
+        EnrollmentComponent,
+        FirmwareComponent,
+        ManageDutsComponent,
+        ViewDutsComponent,
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

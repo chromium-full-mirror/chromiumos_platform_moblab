@@ -7,13 +7,15 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BrowserModule, By} from '@angular/platform-browser';
 import {BuildSelectFormsComponent} from './build-select-forms.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {
+  MatAutocompleteModule,
+  MatAutocompleteSelectedEvent,
+} from '@angular/material/autocomplete';
 import {MatCardModule} from '@angular/material/card';
 import {MatInputModule} from '@angular/material/input';
 import {MatOption} from '@angular/material/core';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-
 
 describe('BuildSelectFormsComponent', () => {
   let component: BuildSelectFormsComponent;
@@ -32,40 +34,48 @@ describe('BuildSelectFormsComponent', () => {
   let buildSelectorComponent: BasicAutocompleteSelectorComponent;
   let poolSelectorComponent: BasicSelectorComponent;
 
-  function applyAutocompleteSelection(targetComponent: BasicAutocompleteSelectorComponent, value: string) {
-    targetComponent.onOptionSelect(new MatAutocompleteSelectedEvent(
-      this,
-      new MatOption(fixture.nativeElement, null, null, null)
-    ));
+  function applyAutocompleteSelection(
+    targetComponent: BasicAutocompleteSelectorComponent,
+    value: string
+  ) {
+    targetComponent.onOptionSelect(
+      new MatAutocompleteSelectedEvent(
+        this,
+        new MatOption(fixture.nativeElement, null, null, null)
+      )
+    );
     targetComponent.select.emit({value: value});
     fixture.detectChanges();
   }
 
-  function applySelection(targetComponent: BasicSelectorComponent, value: string) {
+  function applySelection(
+    targetComponent: BasicSelectorComponent,
+    value: string
+  ) {
     targetComponent.select.emit({value: value});
     fixture.detectChanges();
   }
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          BrowserModule,
-          FormsModule,
-          MatAutocompleteModule,
-          MatCardModule,
-          MatInputModule,
-          MatSelectModule,
-          MatSnackBarModule,
-          ReactiveFormsModule,
-        ],
-        declarations: [
-          BasicAutocompleteSelectorComponent,
-          BasicInputFormComponent,
-          BuildSelectFormsComponent,
-          BasicSelectorComponent,
-        ]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        BrowserModule,
+        FormsModule,
+        MatAutocompleteModule,
+        MatCardModule,
+        MatInputModule,
+        MatSelectModule,
+        MatSnackBarModule,
+        ReactiveFormsModule,
+      ],
+      declarations: [
+        BasicAutocompleteSelectorComponent,
+        BasicInputFormComponent,
+        BuildSelectFormsComponent,
+        BasicSelectorComponent,
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -73,23 +83,38 @@ describe('BuildSelectFormsComponent', () => {
     component = fixture.componentInstance;
 
     // @ts-ignore
-    listModelsSpy = spyOn<any>(component.moblabGrpcService, 'listModels').and.callFake(() => {
+    listModelsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'listModels'
+    ).and.callFake(() => {
       component.updateModels(['Model1', 'Model2']);
     });
     // @ts-ignore
-    listMilestonesSpy = spyOn<any>(component.moblabGrpcService, 'listMilestones').and.callFake(() => {
+    listMilestonesSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'listMilestones'
+    ).and.callFake(() => {
       component.updateMilestones(['R01', 'R02']);
     });
     // @ts-ignore
-    listBuildTargetsSpy = spyOn<any>(component.moblabGrpcService, 'listBuildTargets').and.callFake(() => {
+    listBuildTargetsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'listBuildTargets'
+    ).and.callFake(() => {
       component.updateBuildTargets(['BuildTarget1', 'BuildTarget2']);
     });
     // @ts-ignore
-    listBuildVersionsSpy = spyOn<any>(component.moblabGrpcService, 'listBuildVersions').and.callFake(() => {
+    listBuildVersionsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'listBuildVersions'
+    ).and.callFake(() => {
       component.updateBuildVersions(['BuildVersion/1', 'BuildVersion/2']);
     });
     // @ts-ignore
-    listPoolsSpy = spyOn<any>(component.moblabGrpcService, 'listPools').and.callFake(() => {
+    listPoolsSpy = spyOn<any>(
+      component.moblabGrpcService,
+      'listPools'
+    ).and.callFake(() => {
       component.updatePools(['TestPool1', 'TestPool2']);
     });
     // @ts-ignore
@@ -97,16 +122,20 @@ describe('BuildSelectFormsComponent', () => {
 
     fixture.detectChanges();
 
-    modelSelectorComponent = fixture.debugElement.query(By.css(
-      '#modelSelector')).componentInstance;
-    milestoneSelectorComponent = fixture.debugElement.query(By.css(
-      '#milestoneSelector')).componentInstance;
-    boardSelectorComponent = fixture.debugElement.query(By.css(
-      '#boardSelector')).componentInstance;
-    buildSelectorComponent = fixture.debugElement.query(By.css(
-      '#buildSelector')).componentInstance;
-    poolSelectorComponent = fixture.debugElement.query(By.css(
-      '#poolSelector')).componentInstance;
+    modelSelectorComponent = fixture.debugElement.query(
+      By.css('#modelSelector')
+    ).componentInstance;
+    milestoneSelectorComponent = fixture.debugElement.query(
+      By.css('#milestoneSelector')
+    ).componentInstance;
+    boardSelectorComponent = fixture.debugElement.query(
+      By.css('#boardSelector')
+    ).componentInstance;
+    buildSelectorComponent = fixture.debugElement.query(
+      By.css('#buildSelector')
+    ).componentInstance;
+    poolSelectorComponent = fixture.debugElement.query(By.css('#poolSelector'))
+      .componentInstance;
   });
 
   it('should create', () => {

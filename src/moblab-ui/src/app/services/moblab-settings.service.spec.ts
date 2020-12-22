@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { MoblabSettingsService } from './moblab-settings.service';
+import {MoblabSettingsService} from './moblab-settings.service';
 
 describe('MoblabSettingsService', () => {
   let service: MoblabSettingsService;

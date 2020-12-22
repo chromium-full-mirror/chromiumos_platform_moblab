@@ -22,7 +22,7 @@ import {FeedbackDirective} from './feedback.directive';
     FeedbackDialogComponent,
     FeedbackToolbarComponent,
     FeedbackRectangleComponent,
-    FeedbackDirective
+    FeedbackDirective,
   ],
   imports: [
     MatDialogModule,
@@ -35,17 +35,10 @@ import {FeedbackDirective} from './feedback.directive';
     FormsModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
-  exports: [
-    FeedbackDirective
-  ],
-  entryComponents: [
-    FeedbackDialogComponent
-  ],
-  providers: [
-    FeedbackService
-  ]
+  exports: [FeedbackDirective],
+  entryComponents: [FeedbackDialogComponent],
+  providers: [FeedbackService],
 })
-export class FeedbackModule {
-}
+export class FeedbackModule {}

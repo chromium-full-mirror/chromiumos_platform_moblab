@@ -28,7 +28,7 @@ const routes: Routes = [
       {path: 'bvtqual', component: StorageQualComponent},
       {path: 'powerqual', component: StorageQualComponent},
       {path: 'runsuite', component: StorageQualComponent},
-    ]
+    ],
   },
   {path: 'manage_dut', component: ManageDutsComponent},
   {path: 'config', component: ConfigurationComponent},
@@ -39,10 +39,8 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { enableTracing: true, useHash: true })],
+  imports: [RouterModule.forRoot(routes, {enableTracing: true, useHash: true})],
   exports: [RouterModule],
-  providers: [{provide: APP_BASE_HREF, useValue: ''}]
+  providers: [{provide: APP_BASE_HREF, useValue: ''}],
 })
-
-export class AppRoutingModule {
-}
+export class AppRoutingModule {}

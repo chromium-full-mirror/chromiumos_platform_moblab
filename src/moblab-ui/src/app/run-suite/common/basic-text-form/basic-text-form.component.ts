@@ -1,16 +1,11 @@
-import {
-  Component,
-  EventEmitter,
-  Output
-} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {BaseForm} from '../base-form/base-form.component';
-
 
 @Component({
   selector: 'app-basic-text-form',
   templateUrl: './basic-text-form.component.html',
-  styleUrls: ['./basic-text-form.component.css']
+  styleUrls: ['./basic-text-form.component.css'],
 })
 /**
  * Component meant to be used for text form items in run suite components.

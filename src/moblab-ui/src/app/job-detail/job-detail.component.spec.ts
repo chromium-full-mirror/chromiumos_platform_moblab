@@ -1,14 +1,7 @@
 /* tslint:disable:no-unused-variable */
-import {
-  async,
-  ComponentFixture,
-  TestBed
-} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {
-  FormsModule,
-  ReactiveFormsModule
-} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {By} from '@angular/platform-browser';
@@ -27,7 +20,6 @@ import {JobDetailComponent} from './job-detail.component';
 import {Job, Execution} from '../services/moblabrpc_pb';
 import {ViewJobsModule} from '../view-jobs/view-jobs.module';
 import {WidgetsModule} from '../widgets/widgets.module';
-
 
 function createMockJobInfo() {
   const mockJob = new Job();
@@ -63,26 +55,26 @@ describe('JobDetailComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [
-          BrowserAnimationsModule,
-          CommonModule,
-          FormsModule,
-          MatButtonModule,
-          MatCardModule,
-          MatDividerModule,
-          MatExpansionModule,
-          MatFormFieldModule,
-          MatInputModule,
-          MatTableModule,
-          MatSnackBarModule,
-          ReactiveFormsModule,
-          RouterModule,
-          RouterModule.forRoot([]),
-          ViewJobsModule,
-          WidgetsModule,
-        ],
-        declarations: [JobDetailComponent]})
-      .compileComponents();
+      imports: [
+        BrowserAnimationsModule,
+        CommonModule,
+        FormsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatDividerModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatTableModule,
+        MatSnackBarModule,
+        ReactiveFormsModule,
+        RouterModule,
+        RouterModule.forRoot([]),
+        ViewJobsModule,
+        WidgetsModule,
+      ],
+      declarations: [JobDetailComponent],
+    }).compileComponents();
   }));
 
   function inputJobQuery(val) {
@@ -94,23 +86,29 @@ describe('JobDetailComponent', () => {
     fixture.detectChanges();
   }
 
-  describe('Success case tests.', function () {
+  describe('Success case tests.', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(JobDetailComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
 
-      const childJobsRefSpy = spyOn<any>(component.childViewJobsTableRef, 'refreshJobs');
+      const childJobsRefSpy = spyOn<any>(
+        component.childViewJobsTableRef,
+        'refreshJobs'
+      );
       const getJobDetailsSpy = spyOn<any>(
         // @ts-ignore
         component.moblabGrpcService,
         'getJobDetails'
       ).and.callFake(
-        (callback: (x: Job) => void,
-         errorHandlingCallback: (errorMsg: string) => void,
-         id: string) => {
-          component.unpackJobInfoToTable(createMockJobInfo())
-        });
+        (
+          callback: (x: Job) => void,
+          errorHandlingCallback: (errorMsg: string) => void,
+          id: string
+        ) => {
+          component.unpackJobInfoToTable(createMockJobInfo());
+        }
+      );
     });
 
     it('should create', () => {
@@ -131,21 +129,22 @@ describe('JobDetailComponent', () => {
     });
 
     it('successful load of job information.', () => {
-      let jobDetailTableRows =
-        fixture.debugElement.nativeElement.querySelectorAll(
-        '#job-detail-table .mat-row');
+      let jobDetailTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+        '#job-detail-table .mat-row'
+      );
 
-      let jobHistoryTableRows =
-        fixture.debugElement.nativeElement.querySelectorAll(
-          '#job-execution-history-table .mat-row');
+      let jobHistoryTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+        '#job-execution-history-table .mat-row'
+      );
 
-      let associatedDutsTableRows =
-        fixture.debugElement.nativeElement.querySelectorAll(
-          '#associated-duts-table .mat-row');
+      let associatedDutsTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+        '#associated-duts-table .mat-row'
+      );
 
       // Loading overlay is visible before a job is loaded.
-      expect(fixture.debugElement.query(
-        By.css('#loading-overlay'))).toBeDefined();
+      expect(
+        fixture.debugElement.query(By.css('#loading-overlay'))
+      ).toBeDefined();
       expect(component.jobInfoTableRef.isEmpty()).toBe(true);
 
       inputJobQuery('1');
@@ -156,25 +155,26 @@ describe('JobDetailComponent', () => {
       fixture.detectChanges();
 
       jobDetailTableRows = fixture.debugElement.nativeElement.querySelectorAll(
-        '#job-detail-table .mat-row');
+        '#job-detail-table .mat-row'
+      );
 
       jobHistoryTableRows = fixture.debugElement.nativeElement.querySelectorAll(
-          '#job-execution-history-table .mat-row');
+        '#job-execution-history-table .mat-row'
+      );
 
-      associatedDutsTableRows =
-        fixture.debugElement.nativeElement.querySelectorAll(
-          '#associated-duts-table .mat-row');
+      associatedDutsTableRows = fixture.debugElement.nativeElement.querySelectorAll(
+        '#associated-duts-table .mat-row'
+      );
 
       // Loading overlay is gone after a job is loaded.
-      expect(fixture.debugElement.query(
-        By.css('#loading-overlay'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('#loading-overlay'))).toBeNull();
       expect(component.jobInfoTableRef.isEmpty()).toBe(false);
-      expect(jobHistoryTableRows.length > 0 ).toBeTruthy();
-      expect(associatedDutsTableRows.length > 0 ).toBeTruthy();
+      expect(jobHistoryTableRows.length > 0).toBeTruthy();
+      expect(associatedDutsTableRows.length > 0).toBeTruthy();
     });
   });
 
-  describe('Failure case tests.', function () {
+  describe('Failure case tests.', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(JobDetailComponent);
       component = fixture.componentInstance;
@@ -184,17 +184,21 @@ describe('JobDetailComponent', () => {
         component.moblabGrpcService,
         'getJobDetails'
       ).and.callFake(
-        (callback: (x: Job) => void,
-         errorHandlingCallback: (errorMsg: string) => void,
-         id: string) => {
+        (
+          callback: (x: Job) => void,
+          errorHandlingCallback: (errorMsg: string) => void,
+          id: string
+        ) => {
           errorHandlingCallback('Error message');
-        });
+        }
+      );
     });
 
     it('failure of job information load is handled correctly.', () => {
       // Loading overlay is visible before a job is loaded.
-      expect(fixture.debugElement.query(
-        By.css('#loading-overlay'))).toBeDefined();
+      expect(
+        fixture.debugElement.query(By.css('#loading-overlay'))
+      ).toBeDefined();
 
       inputJobQuery('9999');
       const jobQueryButton = fixture.debugElement.nativeElement.querySelector(
@@ -205,8 +209,9 @@ describe('JobDetailComponent', () => {
 
       // After a failed job query, job details section of page is still greyed
       // out.
-      expect(fixture.debugElement.query(
-        By.css('#loading-overlay'))).toBeDefined();
+      expect(
+        fixture.debugElement.query(By.css('#loading-overlay'))
+      ).toBeDefined();
     });
   });
 });

@@ -1,16 +1,10 @@
-import {
-  Component,
-  EventEmitter,
-  Inject,
-  Input,
-  Output
-} from '@angular/core';
+import {Component, EventEmitter, Inject, Input, Output} from '@angular/core';
 
-export enum LoadingOverlayStyle{
+export enum LoadingOverlayStyle {
   // renders overlay over entirety of the parent component.
   Center = 1,
   // renders overlay at the top of the parent component, as a tag.
-  Top
+  Top,
 }
 
 @Component({
@@ -18,7 +12,7 @@ export enum LoadingOverlayStyle{
   templateUrl: './loading-overlay.component.html',
   styleUrls: ['./loading-overlay.component.scss'],
 })
-export class LoadingOverlayComponent{
+export class LoadingOverlayComponent {
   @Input() style = LoadingOverlayStyle.Center;
 
   message = '';
@@ -40,7 +34,7 @@ export class LoadingOverlayComponent{
     this.show();
   }
 
-  setStyle(style: LoadingOverlayStyle) : void {
+  setStyle(style: LoadingOverlayStyle): void {
     this.style = style;
   }
 

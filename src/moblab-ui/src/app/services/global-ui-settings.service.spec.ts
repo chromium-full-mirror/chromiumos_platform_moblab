@@ -10,6 +10,6 @@ describe('Service: GlobalInfo', () => {
   });
 
   it('should ...', inject([GlobalInfoService], (service: GlobalInfoService) => {
-       expect(service).toBeTruthy();
-     }));
+    expect(service).toBeTruthy();
+  }));
 });

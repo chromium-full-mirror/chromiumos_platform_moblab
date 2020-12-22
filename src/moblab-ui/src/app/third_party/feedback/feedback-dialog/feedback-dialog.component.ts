@@ -1,7 +1,30 @@
-import {from, fromEvent as observableFromEvent, Observable, Subscription} from 'rxjs';
+import {
+  from,
+  fromEvent as observableFromEvent,
+  Observable,
+  Subscription,
+} from 'rxjs';
 
-import {takeUntil, finalize, map, mergeMap, timeout, skipWhile, filter, scan, first} from 'rxjs/operators';
-import {Component, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef, HostListener, Renderer2} from '@angular/core';
+import {
+  takeUntil,
+  finalize,
+  map,
+  mergeMap,
+  timeout,
+  skipWhile,
+  filter,
+  scan,
+  first,
+} from 'rxjs/operators';
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+  ChangeDetectorRef,
+  HostListener,
+  Renderer2,
+} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 
@@ -14,37 +37,64 @@ import {element} from 'protractor';
 @Component({
   selector: 'feedback-dialog',
   templateUrl: './feedback-dialog.component.html',
-  styleUrls: ['./feedback-dialog.component.css']
+  styleUrls: ['./feedback-dialog.component.css'],
 })
-
 export class FeedbackDialogComponent implements AfterViewInit {
   public showToolbar = false;
   public vars: object = {};
   public feedback = new Feedback();
   public contactEmailForm = new FormControl();
-  public includeScreenshot: boolean = true;
+  public includeScreenshot = true;
   public showSpinner = true;
   public screenshotEle: HTMLElement;
   public drawCanvas: HTMLCanvasElement;
-  public showToolbarTips: boolean = true;
+  public showToolbarTips = true;
   @ViewChild('screenshotParent')
   public screenshotParent: ElementRef;
   public drawColor: string = this.feedbackService.highlightedColor;
   public rectangles: Rectangle[] = [];
   private scrollWidth = document.documentElement.scrollWidth;
   private scrollHeight = document.documentElement.scrollHeight;
-  private elCouldBeHighlighted = ['button', 'a', 'span', 'em', 'i', 'h1', 'h2', 'h3', 'h4',
-    'h5', 'h6', 'p', 'strong', 'small', 'sub', 'sup', 'b', 'time', 'img',
-    'video', 'input', 'label', 'select', 'textarea', 'article', 'summary', 'section'];
+  private elCouldBeHighlighted = [
+    'button',
+    'a',
+    'span',
+    'em',
+    'i',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'p',
+    'strong',
+    'small',
+    'sub',
+    'sup',
+    'b',
+    'time',
+    'img',
+    'video',
+    'input',
+    'label',
+    'select',
+    'textarea',
+    'article',
+    'summary',
+    'section',
+  ];
   // the flag field 'isManuallyDrawRect' to solve conflict between manually draw and auto draw
   private manuallyDrawRect$: Subscription;
   private autoDrawRect$: Subscription;
-  public isDrawingRect: boolean = false;
+  public isDrawingRect = false;
 
-  constructor(public dialogRef: MatDialogRef<FeedbackDialogComponent>,
-              private feedbackService: FeedbackService,
-              private detector: ChangeDetectorRef,
-              private el: ElementRef) {
+  constructor(
+    public dialogRef: MatDialogRef<FeedbackDialogComponent>,
+    private feedbackService: FeedbackService,
+    private detector: ChangeDetectorRef,
+    private el: ElementRef
+  ) {
     this.feedback = new Feedback();
     this.feedback.description = '';
     this.feedback.contactEmail = '';
@@ -52,14 +102,14 @@ export class FeedbackDialogComponent implements AfterViewInit {
   }
 
   public ngAfterViewInit() {
-    this.feedbackService.screenshotCanvas$.subscribe((canvas) => {
+    this.feedbackService.screenshotCanvas$.subscribe(canvas => {
       this.showSpinner = false;
       this.feedback.screenshot = canvas.toDataURL('image/png');
       this.screenshotEle = this.feedbackService.getImgEle(canvas);
       this.appendScreenshot();
     });
 
-    this.feedbackService.isDraggingToolbar$.subscribe((isDragging) => {
+    this.feedbackService.isDraggingToolbar$.subscribe(isDragging => {
       if (isDragging) {
         this.destroyCanvasListeners();
       } else {
@@ -67,7 +117,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
       }
     });
 
-    this.dialogRef.afterClosed().subscribe((sendNow) => {
+    this.dialogRef.afterClosed().subscribe(sendNow => {
       if (sendNow === true) {
         this.feedbackService.setFeedback(this.feedback);
       }
@@ -126,11 +176,15 @@ export class FeedbackDialogComponent implements AfterViewInit {
   }
 
   private appendScreenshot() {
-    if (this.screenshotParent) { this.screenshotParent.nativeElement.appendChild(this.screenshotEle); }
+    if (this.screenshotParent) {
+      this.screenshotParent.nativeElement.appendChild(this.screenshotEle);
+    }
   }
 
   private initBackgroundCanvas() {
-    this.drawCanvas = document.getElementById('draw-canvas') as HTMLCanvasElement;
+    this.drawCanvas = document.getElementById(
+      'draw-canvas'
+    ) as HTMLCanvasElement;
     // The canvas to draw, must use this way to initial the height and width
     this.drawCanvas.style.height = this.scrollHeight + '';
     this.drawCanvas.style.width = this.scrollWidth + '';
@@ -166,7 +220,12 @@ export class FeedbackDialogComponent implements AfterViewInit {
       context.clearRect(rect.startX, rect.startY, rect.width, rect.height);
       this.rectangles.forEach(tmpRect => {
         if (tmpRect.color === this.feedbackService.highlightedColor) {
-          context.clearRect(tmpRect.startX, tmpRect.startY, tmpRect.width, tmpRect.height);
+          context.clearRect(
+            tmpRect.startX,
+            tmpRect.startY,
+            tmpRect.width,
+            tmpRect.height
+          );
         }
       });
     }
@@ -174,9 +233,9 @@ export class FeedbackDialogComponent implements AfterViewInit {
 
   private addCanvasListeners(): void {
     const mouseUp = observableFromEvent(document.documentElement, 'mouseup'),
-          mouseMove = observableFromEvent(document.documentElement, 'mousemove'),
-          mouseDown = observableFromEvent(document.documentElement, 'mousedown'),
-          scroll = observableFromEvent(window, 'scroll');
+      mouseMove = observableFromEvent(document.documentElement, 'mousemove'),
+      mouseDown = observableFromEvent(document.documentElement, 'mousedown'),
+      scroll = observableFromEvent(window, 'scroll');
 
     this.manuallyDrawRect(mouseDown, mouseMove, mouseUp);
     this.autoDrawRect(mouseMove);
@@ -187,10 +246,12 @@ export class FeedbackDialogComponent implements AfterViewInit {
     scroll.subscribe(
       event => {
         const currentWindowScrollX = window.scrollX,
-              currentWindowScrollY = window.scrollY;
+          currentWindowScrollY = window.scrollY;
         this.rectangles.forEach(rect => {
-          rect.startY = rect.startY - (currentWindowScrollY - rect.windowScrollY);
-          rect.startX = rect.startX - (currentWindowScrollX - rect.windowScrollX);
+          rect.startY =
+            rect.startY - (currentWindowScrollY - rect.windowScrollY);
+          rect.startX =
+            rect.startX - (currentWindowScrollX - rect.windowScrollX);
           rect.windowScrollY = currentWindowScrollY;
           rect.windowScrollX = currentWindowScrollX;
         });
@@ -201,58 +262,77 @@ export class FeedbackDialogComponent implements AfterViewInit {
   }
 
   private destroyCanvasListeners(): void {
-    if (this.manuallyDrawRect$) { this.manuallyDrawRect$.unsubscribe(); }
-    if (this.autoDrawRect$) { this.autoDrawRect$.unsubscribe(); }
+    if (this.manuallyDrawRect$) {
+      this.manuallyDrawRect$.unsubscribe();
+    }
+    if (this.autoDrawRect$) {
+      this.autoDrawRect$.unsubscribe();
+    }
   }
 
-  private manuallyDrawRect(mouseDown: Observable<Event>, mouseMove: Observable<Event>, mouseUp: Observable<Event>): void {
-    const mouseDrag = mouseDown.pipe(mergeMap((mouseDownEvent: MouseEvent) => {
-      if (this.showToolbarTips) { this.showToolbarTips = false; }
-      this.autoDrawRect$.unsubscribe();
-      this.isDrawingRect = true;
+  private manuallyDrawRect(
+    mouseDown: Observable<Event>,
+    mouseMove: Observable<Event>,
+    mouseUp: Observable<Event>
+  ): void {
+    const mouseDrag = mouseDown.pipe(
+      mergeMap((mouseDownEvent: MouseEvent) => {
+        if (this.showToolbarTips) {
+          this.showToolbarTips = false;
+        }
+        this.autoDrawRect$.unsubscribe();
+        this.isDrawingRect = true;
 
-      const newRectangle = new Rectangle();
-      newRectangle.startX = mouseDownEvent.clientX;
-      newRectangle.startY = mouseDownEvent.clientY;
-      newRectangle.color = this.drawColor;
+        const newRectangle = new Rectangle();
+        newRectangle.startX = mouseDownEvent.clientX;
+        newRectangle.startY = mouseDownEvent.clientY;
+        newRectangle.color = this.drawColor;
 
-      return mouseMove.pipe(
-        map((mouseMoveEvent: MouseEvent) => {
-          newRectangle.width = mouseMoveEvent.clientX - mouseDownEvent.clientX;
-          newRectangle.height = mouseMoveEvent.clientY - mouseDownEvent.clientY;
-          return newRectangle;
-        }),
-        finalize(() => {
-          // click to draw rectangle
-          if (newRectangle.width === undefined || newRectangle.height === undefined ||
-            newRectangle.width === 0 || newRectangle.height === 0) {
-            const rect = this.drawTempCanvasRectangle(mouseDownEvent);
-            if (rect) { this.rectangles.push(rect); }
-          } else {
-          // drag to draw rectangle
-            if (newRectangle.height < 0) {
-              newRectangle.startY = newRectangle.startY + newRectangle.height;
-              newRectangle.height = Math.abs(newRectangle.height);
+        return mouseMove.pipe(
+          map((mouseMoveEvent: MouseEvent) => {
+            newRectangle.width =
+              mouseMoveEvent.clientX - mouseDownEvent.clientX;
+            newRectangle.height =
+              mouseMoveEvent.clientY - mouseDownEvent.clientY;
+            return newRectangle;
+          }),
+          finalize(() => {
+            // click to draw rectangle
+            if (
+              newRectangle.width === undefined ||
+              newRectangle.height === undefined ||
+              newRectangle.width === 0 ||
+              newRectangle.height === 0
+            ) {
+              const rect = this.drawTempCanvasRectangle(mouseDownEvent);
+              if (rect) {
+                this.rectangles.push(rect);
+              }
+            } else {
+              // drag to draw rectangle
+              if (newRectangle.height < 0) {
+                newRectangle.startY = newRectangle.startY + newRectangle.height;
+                newRectangle.height = Math.abs(newRectangle.height);
+              }
+              if (newRectangle.width < 0) {
+                newRectangle.startX = newRectangle.startX + newRectangle.width;
+                newRectangle.width = Math.abs(newRectangle.width);
+              }
+              this.rectangles.push(newRectangle);
             }
-            if (newRectangle.width < 0) {
-              newRectangle.startX = newRectangle.startX + newRectangle.width;
-              newRectangle.width = Math.abs(newRectangle.width);
-            }
-            this.rectangles.push(newRectangle);
-          }
-          this.drawPersistCanvasRectangles();
-          this.autoDrawRect(mouseMove);
-          this.isDrawingRect = false;
-        }),
-        takeUntil(mouseUp));
-    }));
-
-    this.manuallyDrawRect$ = mouseDrag.subscribe(
-      (rec) => {
-        this.drawPersistCanvasRectangles();
-        this.drawRectangle(rec);
-      }
+            this.drawPersistCanvasRectangles();
+            this.autoDrawRect(mouseMove);
+            this.isDrawingRect = false;
+          }),
+          takeUntil(mouseUp)
+        );
+      })
     );
+
+    this.manuallyDrawRect$ = mouseDrag.subscribe(rec => {
+      this.drawPersistCanvasRectangles();
+      this.drawRectangle(rec);
+    });
   }
 
   private autoDrawRect(mouseMove: Observable<Event>): void {
@@ -275,10 +355,14 @@ export class FeedbackDialogComponent implements AfterViewInit {
   private drawTempCanvasRectangle(event: MouseEvent) {
     let rectangle: Rectangle = null;
     const clientX = event.clientX,
-          clientY = event.clientY,
-          els = document.elementsFromPoint(clientX, clientY),
-          el = els[2];
-    if ((!this.isExcludeRect(els)) && el && this.elCouldBeHighlighted.indexOf(el.nodeName.toLowerCase()) > -1) {
+      clientY = event.clientY,
+      els = document.elementsFromPoint(clientX, clientY),
+      el = els[2];
+    if (
+      !this.isExcludeRect(els) &&
+      el &&
+      this.elCouldBeHighlighted.indexOf(el.nodeName.toLowerCase()) > -1
+    ) {
       rectangle = new Rectangle();
       const rect = el.getBoundingClientRect();
       this.drawCanvas.style.cursor = 'pointer';
@@ -288,7 +372,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
         startY: rect.top,
         width: rect.width,
         height: rect.height,
-        color: this.drawColor
+        color: this.drawColor,
       });
       this.drawRectangle(rectangle);
     } else {
@@ -303,7 +387,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
   }
 
   private isExcludeRect(elements: Element[]): boolean {
-    const result = elements.some( el => {
+    const result = elements.some(el => {
       return el.getAttribute('exclude-rect') === 'true';
     });
     return result;

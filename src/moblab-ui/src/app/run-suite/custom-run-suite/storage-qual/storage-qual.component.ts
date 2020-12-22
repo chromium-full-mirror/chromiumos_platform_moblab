@@ -2,7 +2,7 @@ import {
   AfterContentInit,
   ChangeDetectorRef,
   Component,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 
 import {BaseSuite} from '../../common/base_suite/base-suite.component';
@@ -15,9 +15,11 @@ import {RunStorageQualificationSuiteRequest} from '../../../services/moblabrpc_p
 @Component({
   selector: 'app-storage-qual',
   templateUrl: './storage-qual.component.html',
-  styleUrls: ['./storage-qual.component.scss']
+  styleUrls: ['./storage-qual.component.scss'],
 })
-export class StorageQualComponent extends BaseSuite implements AfterContentInit {
+export class StorageQualComponent
+  extends BaseSuite
+  implements AfterContentInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
@@ -27,10 +29,12 @@ export class StorageQualComponent extends BaseSuite implements AfterContentInit 
   );
   variationSelection = 0;
 
-  constructor(private changeDetector: ChangeDetectorRef,
+  constructor(
+    private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    snackBar: MatSnackBar) {
+    snackBar: MatSnackBar
+  ) {
     super(moblabGrpcService, router, snackBar);
   }
 
@@ -60,8 +64,9 @@ export class StorageQualComponent extends BaseSuite implements AfterContentInit 
   /** Method triggered on change of variation selector
    * */
   variationChanged(newVariation) {
-    this.variationSelection = newVariation ? Number(
-      RunStorageQualificationSuiteRequest.Variation[newVariation]) : 0;
+    this.variationSelection = newVariation
+      ? Number(RunStorageQualificationSuiteRequest.Variation[newVariation])
+      : 0;
   }
 
   /** Method is triggered when build version form no longer has a valid
@@ -78,7 +83,7 @@ export class StorageQualComponent extends BaseSuite implements AfterContentInit 
     super.onRunSuiteClick('Starting storage qualification suite run.');
 
     this.moblabGrpcService.runStorageQualificationSuite(
-      (response) => {
+      response => {
         this.onSuiteStarted();
       },
       (err, response) => {
@@ -93,7 +98,7 @@ export class StorageQualComponent extends BaseSuite implements AfterContentInit 
       this.bugIdInput.getInput(),
       this.partNumberInput.getInput(),
       this.variationSelection,
-      0,    // Disk size in GB.
+      0, // Disk size in GB.
       false // Test dual namespace devices.
     );
   }

@@ -6,21 +6,19 @@ import {OnInit} from '@angular/core';
 
 import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.component';
 
-
 @Component({
   selector: 'app-update-button',
   templateUrl: './update-button.component.html',
   styleUrls: ['./update-button.component.css'],
 })
 export class UpdateButtonComponent implements OnInit {
-
   isUpdateAvailable = false;
   getUpdateStatusFailed = false;
 
   constructor(
     private moblabGrpcService: MoblabGrpcService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -32,7 +30,7 @@ export class UpdateButtonComponent implements OnInit {
         this.getUpdateStatusFailed = true;
         this.reportError(msg);
       }
-    )
+    );
   }
 
   getUpdateStatusMessage() {
@@ -49,10 +47,11 @@ export class UpdateButtonComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmationDialog, {
       width: '500px',
       data: {
-        'message': 'This software update will take 1-2 mins. Please ensure ' +
+        message:
+          'This software update will take 1-2 mins. Please ensure ' +
           'no tests are running before the update. Would you like to proceed?',
-        'title': 'Update Confirmation'
-      }
+        title: 'Update Confirmation',
+      },
     });
 
     const sub = dialogRef.componentInstance.onOk.subscribe(() => {
@@ -74,7 +73,7 @@ export class UpdateButtonComponent implements OnInit {
   reportError(dialogue) {
     const snackBarRef = this.snackBar.open(dialogue, '', {
       duration: 5000,
-      verticalPosition: 'top'
+      verticalPosition: 'top',
     });
   }
 }

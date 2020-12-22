@@ -1,10 +1,10 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {DebugElement} from '@angular/core';
+import {MatCardModule} from '@angular/material/card';
 
-import { MobmonitorComponent, MobmonitorPipe } from './mobmonitor.component';
+import {MobmonitorComponent, MobmonitorPipe} from './mobmonitor.component';
 
 describe('MobmonitorComponent', () => {
   let component: MobmonitorComponent;
@@ -12,9 +12,9 @@ describe('MobmonitorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        imports: [MatCardModule],
-        declarations: [MobmonitorComponent, MobmonitorPipe]})
-        .compileComponents();
+      imports: [MatCardModule],
+      declarations: [MobmonitorComponent, MobmonitorPipe],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

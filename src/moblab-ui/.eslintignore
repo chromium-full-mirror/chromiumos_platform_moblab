@@ -1,0 +1,7 @@
+build/
+**/*_pb.d.ts
+**/*_pb.js
+**/node_modules/*
+*.spec.ts
+*.conf.js
+

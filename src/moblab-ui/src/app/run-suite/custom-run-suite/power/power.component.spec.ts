@@ -10,8 +10,9 @@ describe('PowerComponent', () => {
   let fixture: ComponentFixture<PowerComponent>;
 
   beforeEach(async(() => {
-    TestBed.configureTestingModule({declarations: [PowerComponent]})
-        .compileComponents();
+    TestBed.configureTestingModule({
+      declarations: [PowerComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

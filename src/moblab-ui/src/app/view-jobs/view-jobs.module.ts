@@ -23,7 +23,6 @@ import {JobActionComponent} from './job-action/job-action.component';
 import {ViewJobsComponent} from './view-jobs.component';
 import {WidgetsModule} from '../widgets/widgets.module';
 
-
 @NgModule({
   imports: [
     BrowserAnimationsModule,
@@ -49,6 +48,6 @@ import {WidgetsModule} from '../widgets/widgets.module';
     WidgetsModule,
   ],
   declarations: [JobActionComponent, ViewJobsComponent],
-  exports: [ViewJobsComponent]
+  exports: [ViewJobsComponent],
 })
 export class ViewJobsModule {}

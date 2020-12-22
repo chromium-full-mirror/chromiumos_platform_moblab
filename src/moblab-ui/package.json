@@ -7,17 +7,17 @@
     "ng": "ng",
     "ng serve": "ng serve",
     "start": "ng serve",
-    "lint": "tslint \"src/**/*.ts\" --project src/tsconfig.json --type-check && tslint \"e2e/**/*.ts\" --project e2e/tsconfig.json --type-check",
+    "lint": "gts lint",
     "test": "ng test",
     "pree2e": "webdriver-manager update --standalone false --gecko false",
     "e2e": "protractor",
     "check": "gts check",
     "clean": "gts clean",
-    "compile": "tsc -p .",
+    "compile": "tsc",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run check"
+    "posttest": "npm run lint"
   },
   "private": true,
   "dependencies": {
@@ -59,12 +59,12 @@
     "@angular/compiler-cli": "^9.0.2",
     "@angular/core": "^9.0.2",
     "@types/jasmine": "3.5.4",
-    "@types/node": "^13.7.4",
+    "@types/node": "^14.11.2",
     "@typescript-eslint/eslint-plugin": "^3.0.0",
     "@typescript-eslint/parser": "^3.0.0",
     "eslint": "^7.1.0",
     "eslint-config-google": "^0.14.0",
-    "gts": "^1.1.2",
+    "gts": "^3.0.3",
     "jasmine-core": "3.5.0",
     "jasmine-spec-reporter": "4.2.1",
     "karma": "^4.4.1",
@@ -77,6 +77,6 @@
     "protractor": "^5.4.3",
     "rxjs": "^6.5.4",
     "ts-node": "8.6.2",
-    "typescript": "^3.7.5"
+    "typescript": "3.7"
   }
 }

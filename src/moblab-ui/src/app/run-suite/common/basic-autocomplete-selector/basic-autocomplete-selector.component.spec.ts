@@ -12,37 +12,36 @@ import {BasicAutocompleteSelectorComponent} from './basic-autocomplete-selector.
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 const MODULE_IMPORT_DEFINITIONS = [
-    BrowserAnimationsModule,
-    FormsModule,
-    MatAutocompleteModule,
-    MatCardModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTooltipModule,
-    ReactiveFormsModule,
-  ]
+  BrowserAnimationsModule,
+  FormsModule,
+  MatAutocompleteModule,
+  MatCardModule,
+  MatInputModule,
+  MatSelectModule,
+  MatTooltipModule,
+  ReactiveFormsModule,
+];
 
 @Component({
   selector: 'basic-autocomplete-wrapper',
-  template:
-    `
+  template: `
     <app-basic-autocomplete-selector
-        [title]="'Select option:'"
-        [placeholder]="['Pick from available options']"
-        [options]="['MockOption1', 'MockOption2']"
-        [isShown]="true"
-        (update)="selectChanged($event.value)">
+      [title]="'Select option:'"
+      [placeholder]="['Pick from available options']"
+      [options]="['MockOption1', 'MockOption2']"
+      [isShown]="true"
+      (update)="selectChanged($event.value)"
+    >
     </app-basic-autocomplete-selector>
   `,
 })
 class BasicAutocompleteWrapperComponent {
-  selectChanged(event) {
-  }
+  selectChanged(event) {}
 }
 
 describe('tests on autocomplete selector', () => {
   let component: BasicAutocompleteSelectorComponent;
-  let fixture: ComponentFixture<BasicAutocompleteWrapperComponent >;
+  let fixture: ComponentFixture<BasicAutocompleteWrapperComponent>;
 
   function fireEvent(identifier: string, event: string) {
     const inputEl = fixture.debugElement.nativeElement.querySelector(
@@ -62,13 +61,12 @@ describe('tests on autocomplete selector', () => {
   }
 
   beforeEach(async(() => {
-
     TestBed.configureTestingModule({
       imports: MODULE_IMPORT_DEFINITIONS,
       declarations: [
         BasicAutocompleteSelectorComponent,
-        BasicAutocompleteWrapperComponent
-      ]
+        BasicAutocompleteWrapperComponent,
+      ],
     }).compileComponents();
   }));
 
@@ -100,43 +98,41 @@ describe('tests on autocomplete selector', () => {
 
   it('check that selected and then changed input will update', () => {
     fireInputEvent('autocompleteInput', 'MockOption1');
-    fireEvent('autocomplete-wrapper','focus');
+    fireEvent('autocomplete-wrapper', 'focus');
     fireInputEvent('autocompleteInput', 'MockOption2');
     expect(component.getSelectedValue()).toBe('MockOption2');
   });
 
   it('check that focus and no change will not change selected value', () => {
     fireInputEvent('autocompleteInput', 'MockOption1');
-    fireEvent('autocomplete-wrapper','focus');
-    fireEvent('autocomplete-wrapper','blur');
+    fireEvent('autocomplete-wrapper', 'focus');
+    fireEvent('autocomplete-wrapper', 'blur');
     expect(component.getSelectedValue()).toBe('MockOption1');
   });
 
   it('check that focus and bad change will clear selected value', () => {
     fireInputEvent('autocompleteInput', 'MockOption1');
-    fireEvent('autocomplete-wrapper','focus');
+    fireEvent('autocomplete-wrapper', 'focus');
     fireInputEvent('autocompleteInput', 'MockOption3');
     expect(component.getSelectedValue()).toBe('');
   });
 });
 
-
 @Component({
   selector: 'basic-autocomplete-single-option-wrapper',
-  template:
-    `
+  template: `
     <app-basic-autocomplete-selector
-        [title]="'Select option:'"
-        [placeholder]="['Pick from available options']"
-        [options]="['MockOption1']"
-        [isShown]="true"
-        (update)="selectChanged($event.value)">
+      [title]="'Select option:'"
+      [placeholder]="['Pick from available options']"
+      [options]="['MockOption1']"
+      [isShown]="true"
+      (update)="selectChanged($event.value)"
+    >
     </app-basic-autocomplete-selector>
   `,
 })
 class BasicAutocompleteSingleOptionWrapperComponent {
-  selectChanged(event) {
-  }
+  selectChanged(event) {}
 }
 
 describe('tests on single-option autocomplete selector', () => {
@@ -144,18 +140,19 @@ describe('tests on single-option autocomplete selector', () => {
   let wrapperFixture: ComponentFixture<BasicAutocompleteSingleOptionWrapperComponent>;
 
   beforeEach(async(() => {
-
     TestBed.configureTestingModule({
-        imports: MODULE_IMPORT_DEFINITIONS,
-        declarations: [
-          BasicAutocompleteSelectorComponent,
-          BasicAutocompleteSingleOptionWrapperComponent,
-        ]})
-      .compileComponents();
+      imports: MODULE_IMPORT_DEFINITIONS,
+      declarations: [
+        BasicAutocompleteSelectorComponent,
+        BasicAutocompleteSingleOptionWrapperComponent,
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
-    wrapperFixture = TestBed.createComponent(BasicAutocompleteSingleOptionWrapperComponent);
+    wrapperFixture = TestBed.createComponent(
+      BasicAutocompleteSingleOptionWrapperComponent
+    );
     component = wrapperFixture.debugElement.children[0].componentInstance;
     wrapperFixture.detectChanges();
   });
@@ -168,4 +165,3 @@ describe('tests on single-option autocomplete selector', () => {
     expect(component.getSelectedValue()).toBe('MockOption1');
   });
 });
-

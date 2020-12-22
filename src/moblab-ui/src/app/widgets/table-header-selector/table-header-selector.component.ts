@@ -1,12 +1,12 @@
-import { Component, OnInit, EventEmitter, Input, Output } from "@angular/core";
-import { emit } from "cluster";
+import {Component, OnInit, EventEmitter, Input, Output} from '@angular/core';
+import {emit} from 'cluster';
 
 export const CHECKBOX_ID = 'inner-checkbox';
 
 @Component({
-  selector: "app-table-header-selector",
-  templateUrl: "./table-header-selector.component.html",
-  styleUrls: ["./table-header-selector.component.scss"]
+  selector: 'app-table-header-selector',
+  templateUrl: './table-header-selector.component.html',
+  styleUrls: ['./table-header-selector.component.scss'],
 })
 export class TableHeaderSelectorComponent implements OnInit {
   checkboxId = CHECKBOX_ID;
@@ -16,14 +16,14 @@ export class TableHeaderSelectorComponent implements OnInit {
   @Input() options: string[];
   @Output() update = new EventEmitter();
 
-  standardOptions = ["All", "None"];
+  standardOptions = ['All', 'None'];
 
   constructor() {}
 
   ngOnInit() {}
 
   selectionChange() {
-    this.update.emit({ selection: this.selectValue });
+    this.update.emit({selection: this.selectValue});
     if (this.selectValue == this.standardOptions[0]) {
       this.checkboxState = true;
     } else if (this.selectValue == this.standardOptions[1]) {
@@ -39,7 +39,7 @@ export class TableHeaderSelectorComponent implements OnInit {
     this.update.emit({
       selection: this.checkboxState
         ? this.standardOptions[0]
-        : this.standardOptions[1]
+        : this.standardOptions[1],
     });
   }
 
