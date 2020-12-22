@@ -68,4 +68,4 @@ USER moblab
 
 EXPOSE 6002
 
-CMD ["/etc/moblab/moblab_rpcserver/rpcserver.py", "-v"]
+CMD ["/etc/moblab/moblab_rpcserver/rpcserver.py"] 

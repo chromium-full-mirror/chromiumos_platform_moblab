@@ -257,3 +257,23 @@ class HostServicesConnector(object):
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error getting version number")
             raise HostServicesException("Error getting version number")
+
+    @classmethod
+    def get_disk_stats(cls):
+        """Get the disk usage information.
+
+        Raises:
+            HostServicesException: if there is an issue with the host server.
+
+        Returns:
+            DiskUsage:
+                int: available, the mount of available disk space (in MB).
+                int: total, the total mount of disk space (in MB).
+        """
+        cls.connect()
+        try:
+            return cls.stub.get_disk_usage_stats(empty_pb2.Empty())
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception("Error getting disk usage statistics")
+            raise HostServicesException("Error getting disk usage statistics")

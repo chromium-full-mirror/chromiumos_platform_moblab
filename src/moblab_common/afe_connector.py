@@ -759,3 +759,46 @@ class AFEConnector(object):
         response = self.decode_response(response, "result")
         return True if 'status_ok' in response and response['status_ok'] \
             else False
+<<<<<<< HEAD
+=======
+        )
+
+    def modify_hosts_lock_state(
+        self, new_locked_state, hosts_names, lock_reason
+    ):
+        """Lock/unlock given DUTs by host name
+
+        Args:
+            new_locked_state (bool): lock or unlock DUTs
+            hosts_names ([str]): list of host names (DUTs' IPs)
+            lock_reason: user facing text message
+        Returns:
+            A string. Errors message returned by AFE or None.
+        """
+
+        connected_duts = self.get_connected_devices()
+
+        _LOGGER.info("Connected DUTs: %s", connected_duts)
+
+        hosts_names = [
+            dut["hostname"]
+            for dut in connected_duts
+            if dut["hostname"] in hosts_names
+            and dut["locked"] != new_locked_state
+        ]
+
+        params = {
+            "host_filter_data": {"hostname__in": hosts_names},
+            "update_data": {
+                "locked": new_locked_state,
+                "lock_reason": lock_reason,
+            },
+        }
+        response = self.send_rpc_command("modify_hosts", params)
+        logging.debug(
+            "modify_hosts call to modified lock state "
+            "request: %s ,response: %s",
+            params,
+            response,
+        )
+        return self.decode_response(response, "error")

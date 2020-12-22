@@ -8,7 +8,11 @@ import grpc
 import logging
 import os
 import sys
+<<<<<<< HEAD
 import time
+=======
+import asyncio
+>>>>>>> 94bdb561... RpcServer: Disk space monitor
 
 from concurrent import futures
 
@@ -20,6 +24,8 @@ from moblab_common.proto import moblabrpc_pb2_grpc
 
 from moblab_common.proto import moblab_configuration_rpc_pb2
 from moblab_common.proto import moblab_configuration_rpc_pb2_grpc
+
+from disk_space_monitor_service import DiskSpaceMonitorService
 
 from grpc_reflection.v1alpha import reflection
 
@@ -52,7 +58,7 @@ def parse_arguments(argv):
     return parser.parse_args(argv)
 
 
-def serve():
+async def serve():
     options = parse_arguments(sys.argv[1:])
     logging_severity = logging.INFO
     if options.verbose:
@@ -76,6 +82,7 @@ def serve():
         )
         reflection.enable_server_reflection(SERVICE_NAMES, server)
 
+<<<<<<< HEAD
         server.add_insecure_port('[::]:6002')
         logging.info('Starting server on [::]:6002')
         server.start()
@@ -87,3 +94,27 @@ def serve():
 
 if __name__ == '__main__':
     serve()
+=======
+        serving_port = 6002
+        server.add_insecure_port("[::]:%s" % serving_port)
+
+        def run_grpc_server():
+            server.start()
+            logging.info("Starting server port %s" % serving_port)
+            server.wait_for_termination()
+
+        loop = asyncio.get_event_loop()
+        executor = futures.ThreadPoolExecutor()
+
+        await asyncio.gather(
+            loop.run_in_executor(executor, run_grpc_server),
+            DiskSpaceMonitorService().run(),
+        )
+
+    finally:
+        server.stop(0)
+
+
+if __name__ == "__main__":
+    asyncio.run(serve())
+>>>>>>> 94bdb561... RpcServer: Disk space monitor
