@@ -17,6 +17,7 @@ FROM ${BASE_REGISTRY_URI}/hadolint/hadolint:latest-debian as hadolint
 FROM ${BASE_REGISTRY_URI}/node:12-buster as base
 
 RUN npm install -g gts eslint
+ENV NODE_PATH=/usr/local/lib/node_modules/gts/node_modules:/usr/local/lib/node_modules
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
     https://packages.cloud.google.com/apt cloud-sdk main" | \
@@ -33,7 +34,6 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     gnupg \
     gnupg-agent \
     google-cloud-sdk \
-    grpcio-tools \
     python3 \
     python3-pip \
     python3-setuptools \
@@ -46,9 +46,9 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 # Install docker
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 RUN add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/debian \
-   $(lsb_release -cs) \
-   stable"
+    "deb [arch=amd64] https://download.docker.com/linux/debian \
+    $(lsb_release -cs) \
+    stable"
 RUN apt-get update && apt-get install docker-ce-cli
 
 # Install chrome
@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -yq google-chrome-stable
 
 COPY requirements.txt ./
 RUN python3 -m pip install -U pip && python3 -m pip install --no-cache-dir -r \
-     requirements.txt
+    requirements.txt
 
 # Install protoc
 COPY --from=protoc /protoc/* /usr/local/bin
