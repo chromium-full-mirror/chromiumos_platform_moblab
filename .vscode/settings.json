@@ -103,4 +103,5 @@
     "[typescript]": {
         "editor.formatOnSave": true
     },
+    "eslint.lintTask.options": "-c /moblab_source/moblab/src/moblab-ui/.eslintrc.json --ignore-path /moblab_source/moblab/src/moblab-ui/.eslintignore .",
 }

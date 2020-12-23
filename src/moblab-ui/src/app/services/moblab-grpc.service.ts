@@ -29,7 +29,6 @@ import {
   GetIsUpdateAvailableResponse,
   GetJobDetailsRequest,
   GetJobDetailsResponse,
-  GetJobIdsRequest,
   GetJobIdsResponse,
   GetJobsRequest,
   GetJobsResponse,
@@ -92,7 +91,7 @@ import {
 
 @Injectable({providedIn: 'root'})
 export class MoblabGrpcService {
-  moblabRpcService = null;
+  moblabRpcService: MoblabRpcServiceClient = null;
 
   constructor() {
     const url = new URL(window.location.href);
@@ -114,25 +113,25 @@ export class MoblabGrpcService {
   sendMoblabScreenshot(
     callback: (message: string) => void,
     error_callback: (message: string) => void,
-    contact_email,
-    description,
-    screenshot
+    contact_email: string,
+    description: string,
+    screenshot: string
   ) {
     const request = new SendMoblabScreenshotRequest();
     request.setContactEmail(contact_email);
     request.setDescription(description);
     request.setScreenshot(screenshot.substring(screenshot.indexOf(',') + 1));
 
-    const call = this.moblabRpcService.send_moblab_screenshot(
+    this.moblabRpcService.send_moblab_screenshot(
       request,
       {},
-      response => {
-        error_callback(response.message);
+      (err: grpcWeb.Error, response: SendMoblabScreenshotResponse) => {
+        if (err) {
+          error_callback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', response => {
-      callback(response.getMessage());
-    });
   }
 
   /** Generic run suite method that can run any of the specific suites defined below
@@ -164,9 +163,16 @@ export class MoblabGrpcService {
     request.setModel(model);
     request.setPool(pool);
 
-    const call = this.moblabRpcService.run_suite(request, {}, error_callback);
-
-    call.on('data', callback);
+    this.moblabRpcService.run_suite(
+      request,
+      {},
+      (err: grpcWeb.Error, response: RunSuiteResponse) => {
+        if (err) {
+          error_callback(err, response);
+        }
+        callback(response);
+      }
+    );
   }
 
   /** Starts CTS suite run.
@@ -203,13 +209,16 @@ export class MoblabGrpcService {
     request.setPool(pool);
     request.setSpecificModulesList(specific_modules_list);
 
-    const call = this.moblabRpcService.run_cts_suite(
+    this.moblabRpcService.run_cts_suite(
       request,
       {},
-      error_callback
+      (err: grpcWeb.Error, response: RunSuiteResponse) => {
+        if (err) {
+          error_callback(err, response);
+        }
+        callback(response);
+      }
     );
-
-    call.on('data', callback);
   }
 
   /** Starts GTS suite run.
@@ -242,13 +251,16 @@ export class MoblabGrpcService {
     request.setPool(pool);
     request.setSpecificModulesList(specific_modules_list);
 
-    const call = this.moblabRpcService.run_gts_suite(
+    this.moblabRpcService.run_gts_suite(
       request,
       {},
-      error_callback
+      (err: grpcWeb.Error, response: RunSuiteResponse) => {
+        if (err) {
+          error_callback(err, response);
+        }
+        callback(response);
+      }
     );
-
-    call.on('data', callback);
   }
 
   /** Starts hardware storage qualification suite run.
@@ -292,13 +304,16 @@ export class MoblabGrpcService {
     request.setDiskSizeGb(disk_size_gb);
     request.setIsDualNamespace(dual_namespace);
 
-    const call = this.moblabRpcService.run_storage_qualification_suite(
+    this.moblabRpcService.run_storage_qualification_suite(
       request,
       {},
-      error_callback
+      (err: grpcWeb.Error, response: RunSuiteResponse) => {
+        if (err) {
+          error_callback(err, response);
+        }
+        callback(response);
+      }
     );
-
-    call.on('data', callback);
   }
 
   /** Starts hardware memory qualification suite run.
@@ -334,29 +349,31 @@ export class MoblabGrpcService {
     request.setAvlProcessBugId(avl_process_bug_id);
     request.setAvlPartNumber(avl_part_number);
 
-    const call = this.moblabRpcService.run_memory_qualification_suite(
+    this.moblabRpcService.run_memory_qualification_suite(
       request,
       {},
-      error_callback
+      (err: grpcWeb.Error, response: RunSuiteResponse) => {
+        if (err) {
+          error_callback(err, response);
+        }
+        callback(response);
+      }
     );
-
-    call.on('data', callback);
   }
 
   listConnectedDuts(callback: (x: ConnectedDutInfo[]) => void) {
     const request = new ListConnectedDutsRequest();
 
-    const call = this.moblabRpcService.list_connected_duts(
+    this.moblabRpcService.list_connected_duts(
       request,
       {},
       (err: grpcWeb.Error, response: ListConnectedDutsResponse) => {
-        console.log(err);
+        if (err) {
+          console.log(err);
+        }
+        callback(response.getDutsList());
       }
     );
-
-    call.on('data', (response: ListConnectedDutsResponse) => {
-      callback(response.getDutsList());
-    });
   }
 
   getDutDetails(
@@ -367,22 +384,22 @@ export class MoblabGrpcService {
     const request = new GetDutDetailsRequest();
     request.setDut(dut);
 
-    const call = this.moblabRpcService.get_dut_details(
+    this.moblabRpcService.get_dut_details(
       request,
       {},
       (err: grpcWeb.Error, response: GetDutDetailsResponse) => {
-        console.log(
-          'Failed get_dut_details RPC call. Request: ',
-          request,
-          'Response: ',
-          err
-        );
-        errorHandlingCallback(err.message);
+        if (err) {
+          console.log(
+            'Failed get_dut_details RPC call. Request: ',
+            request,
+            'Response: ',
+            err
+          );
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getDutDetail());
       }
     );
-    call.on('data', (response: GetDutDetailsResponse) => {
-      callback(response.getDutDetail());
-    });
   }
 
   getNumJobs(
@@ -422,21 +439,21 @@ export class MoblabGrpcService {
       request.setDutHostnameFilter(dut_hostname_filter);
     }
 
-    const call = this.moblabRpcService.get_num_jobs(
+    this.moblabRpcService.get_num_jobs(
       request,
       {},
       (err: grpcWeb.Error, response: GetNumJobsResponse) => {
-        console.log(
-          'Failed get_num_jobs RPC call. Request: ',
-          request,
-          'Response: ',
-          err
-        );
+        if (err) {
+          console.log(
+            'Failed get_num_jobs RPC call. Request: ',
+            request,
+            'Response: ',
+            err
+          );
+        }
+        callback(response.getNumJobs());
       }
     );
-    call.on('data', (response: GetNumJobsResponse) => {
-      callback(response.getNumJobs());
-    });
   }
 
   getJobs(
@@ -481,22 +498,22 @@ export class MoblabGrpcService {
       request.setDutHostnameFilter(dut_hostname_filter);
     }
 
-    const call = this.moblabRpcService.get_jobs(
+    this.moblabRpcService.get_jobs(
       request,
       {},
       (err: grpcWeb.Error, response: GetJobsResponse) => {
-        errorHandlingCallback(err.message);
-        console.log(
-          'Failed get_jobs RPC call. Request: ',
-          request,
-          'Response: ',
-          err
-        );
+        if (err) {
+          errorHandlingCallback(err.message);
+          console.log(
+            'Failed get_jobs RPC call. Request: ',
+            request,
+            'Response: ',
+            err
+          );
+        }
+        callback(response.getJobsList());
       }
     );
-    call.on('data', (response: GetJobsResponse) => {
-      callback(response.getJobsList());
-    });
   }
 
   getJobIds(
@@ -559,15 +576,16 @@ export class MoblabGrpcService {
       request.setDutHostnameFilter(dut_hostname_filter);
     }
 
-    const call = this.moblabRpcService.get_job_ids(
+    this.moblabRpcService.get_job_ids(
       request,
       {},
-      (err: grpcWeb.Error, response: GetJobIdsResponse) =>
-        errorHandlingCallback(err.message)
+      (err: grpcWeb.Error, response: GetJobIdsResponse) => {
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getJobIdsList());
+      }
     );
-    call.on('data', (response: GetJobIdsResponse) => {
-      callback(response.getJobIdsList());
-    });
   }
 
   abortJobs(
@@ -578,16 +596,16 @@ export class MoblabGrpcService {
     const request = new AbortJobsRequest();
     request.setJobIdsList(jobIds);
 
-    const call = this.moblabRpcService.abort_jobs(
+    this.moblabRpcService.abort_jobs(
       request,
       {},
       (err: grpcWeb.Error, response: AbortJobsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: AbortJobsResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   getJobDetails(
@@ -598,22 +616,22 @@ export class MoblabGrpcService {
     const request = new GetJobDetailsRequest();
     request.setId(id);
 
-    const call = this.moblabRpcService.get_job_details(
+    this.moblabRpcService.get_job_details(
       request,
       {},
       (err: grpcWeb.Error, response: GetJobDetailsResponse) => {
-        console.log(
-          'Failed get_job_details RPC call. Request: ',
-          request,
-          'Response: ',
-          err
-        );
-        errorHandlingCallback(err.message);
+        if (err) {
+          console.log(
+            'Failed get_job_details RPC call. Request: ',
+            request,
+            'Response: ',
+            err
+          );
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getJobDetail());
       }
     );
-    call.on('data', (response: GetJobDetailsResponse) => {
-      callback(response.getJobDetail());
-    });
   }
 
   listBuildTargets(
@@ -629,17 +647,16 @@ export class MoblabGrpcService {
     const request = new ListBuildTargetsRequest();
     request.setModel(model);
 
-    const call = this.moblabRpcService.list_build_targets(
+    this.moblabRpcService.list_build_targets(
       request,
       {},
       (err: grpcWeb.Error, response: ListBuildTargetsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getBuildTargetsList());
       }
     );
-    call.on('data', (response: ListBuildTargetsResponse) => {
-      console.log(response);
-      callback(response.getBuildTargetsList());
-    });
   }
 
   listMilestones(
@@ -652,20 +669,20 @@ export class MoblabGrpcService {
     request.setBuildTarget(buildtarget);
     request.setModel(model);
 
-    const call = this.moblabRpcService.list_milestones(
+    this.moblabRpcService.list_milestones(
       request,
       {},
       (err: grpcWeb.Error, response: ListMilestonesResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        const milestoneNames = [];
+        for (const item of response.getMilestonesList()) {
+          milestoneNames.push(item.getValue());
+        }
+        callback(milestoneNames, response.getIsIncomplete());
       }
     );
-    call.on('data', (response: ListMilestonesResponse) => {
-      const milestoneNames = [];
-      for (const item of response.getMilestonesList()) {
-        milestoneNames.push(item.getValue());
-      }
-      callback(milestoneNames, response.getIsIncomplete());
-    });
   }
 
   listBuildVersions(
@@ -679,21 +696,20 @@ export class MoblabGrpcService {
     request.setBuildTarget(buildtarget);
     request.setModel(model);
     request.setMilestone(milestone);
-    const call = this.moblabRpcService.list_build_versions(
+    this.moblabRpcService.list_build_versions(
       request,
       {},
       (err: grpcWeb.Error, response: ListBuildVersionsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        const buildVersionNames = [];
+        for (const item of response.getBuildVersionsList()) {
+          buildVersionNames.push(item.getValue());
+        }
+        callback(buildVersionNames, response.getIsIncomplete());
       }
     );
-
-    call.on('data', (response: ListBuildVersionsResponse) => {
-      const buildVersionNames = [];
-      for (const item of response.getBuildVersionsList()) {
-        buildVersionNames.push(item.getValue());
-      }
-      callback(buildVersionNames, response.getIsIncomplete());
-    });
   }
 
   listModels(
@@ -701,17 +717,16 @@ export class MoblabGrpcService {
     errorHandlingCallback: (err_msg: string) => void
   ) {
     const request = new ListModelsRequest();
-
-    const call = this.moblabRpcService.list_models(
+    this.moblabRpcService.list_models(
       request,
       {},
       (err: grpcWeb.Error, response: ListModelsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getModelsList());
       }
     );
-    call.on('data', (response: ListModelsResponse) => {
-      callback(response.getModelsList());
-    });
   }
 
   listPools(
@@ -720,16 +735,16 @@ export class MoblabGrpcService {
   ) {
     const request = new ListPoolsRequest();
 
-    const call = this.moblabRpcService.list_pools(
+    this.moblabRpcService.list_pools(
       request,
       {},
       (err: grpcWeb.Error, response: ListPoolsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getPoolsList());
       }
     );
-    call.on('data', (response: ListPoolsResponse) => {
-      callback(response.getPoolsList());
-    });
   }
 
   enrollDuts(
@@ -739,16 +754,16 @@ export class MoblabGrpcService {
   ) {
     const request = new EnrollDutsRequest();
     request.setIpsList(ips);
-    const call = this.moblabRpcService.enroll_duts(
+    this.moblabRpcService.enroll_duts(
       request,
       {},
       (err: grpcWeb.Error, response: EnrollDutsResponse) => {
-        errorCallback(err.message);
+        if (err) {
+          errorCallback(err.message);
+        }
+        callback();
       }
     );
-    call.on('data', (response: EnrollDutsResponse) => {
-      callback();
-    });
   }
 
   unenrollDuts(
@@ -758,32 +773,32 @@ export class MoblabGrpcService {
   ) {
     const request = new EnrollDutsRequest();
     request.setIpsList(ips);
-    const call = this.moblabRpcService.unenroll_duts(
+    this.moblabRpcService.unenroll_duts(
       request,
       {},
       (err: grpcWeb.Error, response: EnrollDutsResponse) => {
-        errorCallback(err.message);
+        if (err) {
+          errorCallback(err.message);
+        }
+        callback();
       }
     );
-    call.on('data', (response: EnrollDutsResponse) => {
-      callback();
-    });
   }
 
   listConnectedDutsFirmware(callback: (x: ConnectedDutFirmwareInfo[]) => void) {
     const request = new ListConnectedDutsRequest();
 
-    const call = this.moblabRpcService.list_connected_duts_firmware(
+    this.moblabRpcService.list_connected_duts_firmware(
       request,
       {},
       (err: grpcWeb.Error, response: ListConnectedDutsFirmwareResponse) => {
-        console.log(err);
+        if (err) {
+          console.log(err);
+        }
+        console.log(response);
+        callback(response.getDutsList());
       }
     );
-    call.on('data', (response: ListConnectedDutsFirmwareResponse) => {
-      console.log(response);
-      callback(response.getDutsList());
-    });
   }
 
   updateFirmwareOnDuts(
@@ -792,16 +807,16 @@ export class MoblabGrpcService {
   ) {
     const request = new UpdateDutsFirmwareRequest();
     request.setIpsList(ips);
-    const call = this.moblabRpcService.update_duts_firmware(
+    this.moblabRpcService.update_duts_firmware(
       request,
       {},
       (err: grpcWeb.Error, response: UpdateDutsFirmwareResponse) => {
-        console.log(err);
+        if (err) {
+          console.log(err);
+        }
+        callback(response.getOutputsList());
       }
     );
-    call.on('data', (response: UpdateDutsFirmwareResponse) => {
-      callback(response.getOutputsList());
-    });
   }
 
   getNumDutTasks(
@@ -820,22 +835,22 @@ export class MoblabGrpcService {
       request.setEndTimeLt(end_time_lt);
     }
 
-    const call = this.moblabRpcService.get_num_dut_tasks(
+    this.moblabRpcService.get_num_dut_tasks(
       request,
       {},
       (err: grpcWeb.Error, response: GetNumDutTasksResponse) => {
-        console.log(
-          'Failed get_num_dut_actions RPC call. Request: ',
-          request,
-          'Response: ',
-          err
-        );
-        errorHandlingCallback(err.message);
+        if (err) {
+          console.log(
+            'Failed get_num_dut_actions RPC call. Request: ',
+            request,
+            'Response: ',
+            err
+          );
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getNumDutTasks());
       }
     );
-    call.on('data', (response: GetNumDutTasksResponse) => {
-      callback(response.getNumDutTasks());
-    });
   }
 
   getDutTasks(
@@ -858,22 +873,22 @@ export class MoblabGrpcService {
       request.setEndTimeLt(end_time_lt);
     }
 
-    const call = this.moblabRpcService.get_dut_tasks(
+    this.moblabRpcService.get_dut_tasks(
       request,
       {},
       (err: grpcWeb.Error, response: GetDutTasksResponse) => {
-        console.log(
-          'Failed get_dut_actions RPC call. Request: ',
-          request,
-          'Response: ',
-          err
-        );
-        errorHandlingCallback(err.message);
+        if (err) {
+          console.log(
+            'Failed get_dut_actions RPC call. Request: ',
+            request,
+            'Response: ',
+            err
+          );
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getTasksList());
       }
     );
-    call.on('data', (response: GetDutTasksResponse) => {
-      callback(response.getTasksList());
-    });
   }
 
   repairDut(
@@ -883,16 +898,16 @@ export class MoblabGrpcService {
   ) {
     const request = new RepairHostRequest();
     request.setDutHostname(dut_hostname);
-    const call = this.moblabRpcService.repair_host(
+    this.moblabRpcService.repair_host(
       request,
       {},
       (err: grpcWeb.Error, response: RepairHostResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: RepairHostResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   reverifyDut(
@@ -902,16 +917,16 @@ export class MoblabGrpcService {
   ) {
     const request = new ReverifyHostRequest();
     request.setDutHostname(dut_hostname);
-    const call = this.moblabRpcService.reverify_host(
+    this.moblabRpcService.reverify_host(
       request,
       {},
       (err: grpcWeb.Error, response: ReverifyHostResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: ReverifyHostResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   addAttributeToDuts(
@@ -926,16 +941,16 @@ export class MoblabGrpcService {
     request.setKey(key);
     request.setValue(value);
 
-    const call = this.moblabRpcService.add_attribute_to_duts(
+    this.moblabRpcService.add_attribute_to_duts(
       request,
       {},
       (err: grpcWeb.Error, response: AddAttributeToDutsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: AddAttributeToDutsResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   removeAttributeFromDuts(
@@ -947,16 +962,16 @@ export class MoblabGrpcService {
     const request = new RemoveAttributeFromDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setKey(key);
-    const call = this.moblabRpcService.remove_attribute_from_duts(
+    this.moblabRpcService.remove_attribute_from_duts(
       request,
       {},
       (err: grpcWeb.Error, response: RemoveAttributeFromDutsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: RemoveAttributeFromDutsResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   addLabelToDuts(
@@ -968,16 +983,16 @@ export class MoblabGrpcService {
     const request = new AddLabelToDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setLabel(label);
-    const call = this.moblabRpcService.add_label_to_duts(
+    this.moblabRpcService.add_label_to_duts(
       request,
       {},
       (err: grpcWeb.Error, response: AddLabelToDutsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: AddLabelToDutsResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   removeLabelFromDuts(
@@ -989,16 +1004,16 @@ export class MoblabGrpcService {
     const request = new RemoveLabelFromDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setLabel(label);
-    const call = this.moblabRpcService.remove_label_from_duts(
+    this.moblabRpcService.remove_label_from_duts(
       request,
       {},
       (err: grpcWeb.Error, response: RemoveLabelFromDutsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: RemoveLabelFromDutsResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   addPoolToDuts(
@@ -1016,16 +1031,16 @@ export class MoblabGrpcService {
     const request = new AddPoolToDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setPool(pool);
-    const call = this.moblabRpcService.add_pool_to_duts(
+    this.moblabRpcService.add_pool_to_duts(
       request,
       {},
       (err: grpcWeb.Error, response: AddPoolToDutsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: AddPoolToDutsResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   removePoolFromDuts(
@@ -1043,16 +1058,16 @@ export class MoblabGrpcService {
     const request = new RemovePoolFromDutsRequest();
     request.setDutHostnamesList(dut_ips);
     request.setPool(pool);
-    const call = this.moblabRpcService.remove_pool_from_duts(
+    this.moblabRpcService.remove_pool_from_duts(
       request,
       {},
       (err: grpcWeb.Error, response: RemovePoolFromDutsResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: RemovePoolFromDutsResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   get_network_info(
@@ -1060,16 +1075,17 @@ export class MoblabGrpcService {
     errorHandlingCallback: (errorMsg: string) => void
   ) {
     const request = new GetNetworkInfoRequest();
-    const call = this.moblabRpcService.get_network_info(
+    this.moblabRpcService.get_network_info(
       request,
       {},
       (err: grpcWeb.Error, response: GetNetworkInfoResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMoblabHostname(), response.getIsConnected());
+        }
       }
     );
-    call.on('data', (response: GetNetworkInfoResponse) => {
-      callback(response.getMoblabHostname(), response.getIsConnected());
-    });
   }
 
   get_cloud_configuration(
@@ -1085,23 +1101,23 @@ export class MoblabGrpcService {
   ) {
     const request = new GetCloudConfigurationRequest();
 
-    const call = this.moblabRpcService.get_cloud_configuration(
+    this.moblabRpcService.get_cloud_configuration(
       request,
       {},
       (err: grpcWeb.Error, response: GetCloudConfigurationResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(
+          response.getBotoKeyId(),
+          response.getBotoKeySecret(),
+          response.getGcsBucketUrl(),
+          response.getIsCloudEnabled(),
+          response.getIsRemoteConsoleEnabled(),
+          response.getIsRemoteCommandEnabled()
+        );
       }
     );
-    call.on('data', (response: GetCloudConfigurationResponse) => {
-      callback(
-        response.getBotoKeyId(),
-        response.getBotoKeySecret(),
-        response.getGcsBucketUrl(),
-        response.getIsCloudEnabled(),
-        response.getIsRemoteConsoleEnabled(),
-        response.getIsRemoteCommandEnabled()
-      );
-    });
   }
 
   set_cloud_configuration(
@@ -1122,16 +1138,16 @@ export class MoblabGrpcService {
     request.setIsRemoteConsoleEnabled(is_remote_console_enabled);
     request.setIsRemoteCommandEnabled(is_remote_command_enabled);
 
-    const call = this.moblabRpcService.set_cloud_configuration(
+    this.moblabRpcService.set_cloud_configuration(
       request,
       {},
       (err: grpcWeb.Error, response: SetCloudConfigurationResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: SetCloudConfigurationResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   get_dut_wifi_info(
@@ -1140,16 +1156,16 @@ export class MoblabGrpcService {
   ) {
     const request = new GetDutWifiInfoRequest();
 
-    const call = this.moblabRpcService.get_dut_wifi_info(
+    this.moblabRpcService.get_dut_wifi_info(
       request,
       {},
       (err: grpcWeb.Error, response: GetDutWifiInfoResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getDutWifiName(), response.getDutWifiPassword());
       }
     );
-    call.on('data', (response: GetDutWifiInfoResponse) => {
-      callback(response.getDutWifiName(), response.getDutWifiPassword());
-    });
   }
 
   set_dut_wifi_info(
@@ -1162,16 +1178,16 @@ export class MoblabGrpcService {
     request.setDutWifiName(dut_wifi_name);
     request.setDutWifiPassword(dut_wifi_password);
 
-    const call = this.moblabRpcService.set_dut_wifi_info(
+    this.moblabRpcService.set_dut_wifi_info(
       request,
       {},
       (err: grpcWeb.Error, response: SetDutWifiInfoResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-    call.on('data', (response: SetDutWifiInfoResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   get_version_info(
@@ -1186,31 +1202,34 @@ export class MoblabGrpcService {
   ) {
     const request = new GetVersionInfoRequest();
 
-    const call = this.moblabRpcService.get_version_info(
+    this.moblabRpcService.get_version_info(
       request,
       {},
       (err: grpcWeb.Error, response: GetVersionInfoResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        } else {
+          callback(
+            response.getChromeosReleaseVersion(),
+            response.getChromeosReleaseTrack(),
+            response.getChromeosReleaseDescription(),
+            response.getMoblabInstallId(),
+            response.getMoblabSerialNumber()
+          );
+        }
       }
     );
-
-    call.on('data', (response: GetVersionInfoResponse) => {
-      callback(
-        response.getChromeosReleaseVersion(),
-        response.getChromeosReleaseTrack(),
-        response.getChromeosReleaseDescription(),
-        response.getMoblabInstallId(),
-        response.getMoblabSerialNumber()
-      );
-    });
   }
 
   reboot_moblab(error_callback: (msg: string) => void) {
-    const call = this.moblabRpcService.reboot_moblab(
+    this.moblabRpcService.reboot_moblab(
       new RebootMoblabRequest(),
       {},
       (err: grpcWeb.Error, response: RebootMoblabResponse) => {
-        error_callback(err.message);
+        if (err) {
+          error_callback(err.message);
+        }
+        console.log(response);
       }
     );
   }
@@ -1224,17 +1243,16 @@ export class MoblabGrpcService {
     callback: (isUpdateAvailable: boolean) => void,
     error_callback: (msg: string) => void
   ) {
-    const call = this.moblabRpcService.get_is_update_available(
+    this.moblabRpcService.get_is_update_available(
       new GetIsUpdateAvailableRequest(),
       {},
       (err: grpcWeb.Error, response: GetIsUpdateAvailableResponse) => {
-        error_callback(err.message);
+        if (err) {
+          error_callback(err.message);
+        }
+        callback(response.getIsUpdateAvailable());
       }
     );
-
-    call.on('data', (response: GetIsUpdateAvailableResponse) => {
-      callback(response.getIsUpdateAvailable());
-    });
   }
 
   update_moblab(
@@ -1246,17 +1264,16 @@ export class MoblabGrpcService {
      *  @param callback: function invoked in success scenarios.
      *  @param error_callback: function invoked in failure scenarios.
      *  */
-    const call = this.moblabRpcService.update_moblab(
+    this.moblabRpcService.update_moblab(
       new UpdateMoblabRequest(),
       {},
       (err: grpcWeb.Error, response: UpdateMoblabResponse) => {
-        error_callback(err.message);
+        if (err) {
+          error_callback(err.message);
+        }
+        callback(response.getMessage());
       }
     );
-
-    call.on('data', (response: UpdateMoblabResponse) => {
-      callback(response.getMessage());
-    });
   }
 
   /**
@@ -1270,17 +1287,16 @@ export class MoblabGrpcService {
   ) {
     const request = new GetRemoteAgentConfigurationRequest();
 
-    const call = this.moblabRpcService.get_remote_agent_configuration(
+    this.moblabRpcService.get_remote_agent_configuration(
       request,
       {},
-      (err: grpcWeb.Error, response: GetCloudConfigurationResponse) => {
-        errorHandlingCallback(err.message);
+      (err: grpcWeb.Error, response: GetRemoteAgentConfigurationResponse) => {
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getIsEnabled());
       }
     );
-
-    call.on('data', (response: GetRemoteAgentConfigurationResponse) => {
-      callback(response.getIsEnabled());
-    });
   }
 
   /**
@@ -1297,16 +1313,15 @@ export class MoblabGrpcService {
     const request = new SetRemoteAgentConfigurationRequest();
     request.setIsEnabled(is_enabled);
 
-    const call = this.moblabRpcService.set_remote_agent_configuration(
+    this.moblabRpcService.set_remote_agent_configuration(
       request,
       {},
       (err: grpcWeb.Error, response: SetRemoteAgentConfigurationResponse) => {
-        errorHandlingCallback(err.message);
+        if (err) {
+          errorHandlingCallback(err.message);
+        }
+        callback(response.getIsSucceeded());
       }
     );
-
-    call.on('data', (response: SetRemoteAgentConfigurationResponse) => {
-      callback(response.getIsSucceeded());
-    });
   }
 }

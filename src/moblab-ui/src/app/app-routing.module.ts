@@ -43,4 +43,4 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [{provide: APP_BASE_HREF, useValue: ''}],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

@@ -71,7 +71,7 @@ export class RunAnySuiteComponent
   /** Method triggered on change of suite input form.
    * */
   suiteDropdownChanged(suiteName: string) {
-    if (suiteName != this.MANUAL_SUITE_ENTRY_DESC) {
+    if (suiteName !== this.MANUAL_SUITE_ENTRY_DESC) {
       this.hideCustomInput = true;
       this.suiteName = suiteName;
       this.suiteInput.disable('Please select build.');
@@ -79,7 +79,7 @@ export class RunAnySuiteComponent
     } else {
       this.hideCustomInput = false;
       this.suiteInput.enable();
-      this.suiteName = null;
+      this.suiteName = '';
       this.runSuiteButton.disable();
     }
   }

@@ -65,7 +65,7 @@ export class CtsRunComponent extends BaseSuite implements AfterContentInit {
   /** Method triggered on complete setting of build-related arguments.
    * ( model, build-target, milestone, build-version ).
    * */
-  onBuildSetCustom(event: BuildSettings) {
+  onBuildSetCustom(event) {
     this.modulesTextForm.enable();
     this.versionSelectForm.enable();
   }

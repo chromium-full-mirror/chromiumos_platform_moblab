@@ -11,12 +11,15 @@ FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
 
 ######################################################################
 
-FROM ${BASE_REGISTRY_URI}/node:12 as build
+FROM ${BASE_REGISTRY_URI}/node:15 as build
 
 # install chrome for protractor tests
 # RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 # RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 # RUN apt-get update && apt-get install -yq google-chrome-stable
+
+RUN npm install -g gts eslint
+ENV NODE_PATH=/usr/local/lib/node_modules/gts/node_modules:/usr/local/lib/node_modules
 
 WORKDIR /app
 
@@ -29,8 +32,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 COPY ./moblab-ui/package.json /app
 COPY ./moblab-ui/package-lock.json /app
 
-RUN npm install
-RUN npm install -g gts
+RUN npm install --ignore-scripts
 
 RUN ngcc
 

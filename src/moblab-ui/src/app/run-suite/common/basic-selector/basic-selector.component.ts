@@ -24,16 +24,16 @@ import {MatSelect, MatSelectChange} from '@angular/material/select';
 export class BasicSelectorComponent
   extends BaseForm
   implements OnChanges, OnInit {
-  @ViewChild(MatSelect) selector;
+  @ViewChild(MatSelect) selector: MatSelect;
 
   @Input() autoselect = true;
-  @Input() options: string[];
-  @Input() placeholder: string;
-  @Input() title: string;
+  @Input() options: string[] = [];
+  @Input() placeholder = '';
+  @Input() title = '';
 
   @Output() select = new EventEmitter();
 
-  selected: string = null;
+  selected = '';
 
   ngOnInit() {
     this.autoSelectedSingleOption();
@@ -47,7 +47,7 @@ export class BasicSelectorComponent
   }
 
   clearSelection() {
-    this.selected = undefined;
+    this.selected = '';
     this.selector.writeValue(null);
   }
 
@@ -64,7 +64,7 @@ export class BasicSelectorComponent
   }
 
   getSelectedValue(): string {
-    return !this.isShown ? null : this.selected;
+    return !this.isShown ? '' : this.selected;
   }
 
   selectOption(optionIndex) {

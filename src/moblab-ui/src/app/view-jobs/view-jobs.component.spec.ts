@@ -114,7 +114,7 @@ function createMockJobIds(
     [hideActionBar]="true"
   ></app-view-jobs>`,
 })
-class ViewJobsTestWrapperComponent {}
+class ViewJobsTestWrapperComponent { }
 
 describe('ViewJobsComponent', () => {
   let component: ViewJobsComponent;
@@ -313,7 +313,7 @@ describe('ViewJobsComponent', () => {
 
     it(
       'checking all jobs, then unchecking one job, then' +
-        ' unchecking all jobs, then re-checking all jobs',
+      ' unchecking all jobs, then re-checking all jobs',
       () => {
         const selectJobsButton = fixture.debugElement.nativeElement.querySelector(
           '#' + CHECKBOX_ID
@@ -388,7 +388,7 @@ describe('ViewJobsComponent', () => {
       startToFilterInput.value = new Date(
         // TS timestamps need to be milisecond granularity, hence * 1000.
         (BASELINE_TIME_SEC + (createMockJobs().length + 2) * TIME_OFFSET_SEC) *
-          1000
+        1000
       ).toLocaleString();
       startToFilterInput.dispatchEvent(new Event('input'));
       filterButton.dispatchEvent(new Event('click'));

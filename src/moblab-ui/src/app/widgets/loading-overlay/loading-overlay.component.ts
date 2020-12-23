@@ -21,11 +21,11 @@ export class LoadingOverlayComponent {
   constructor() {}
 
   isCenterOverlay() {
-    return this.style == LoadingOverlayStyle.Center;
+    return this.style === LoadingOverlayStyle.Center;
   }
 
   isTopOverlay() {
-    return this.style == LoadingOverlayStyle.Top;
+    return this.style === LoadingOverlayStyle.Top;
   }
 
   updateStatus(message: string, style: LoadingOverlayStyle = 1): void {

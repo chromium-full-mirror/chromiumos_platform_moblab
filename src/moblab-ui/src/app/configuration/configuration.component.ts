@@ -16,8 +16,6 @@ import {MoblabSettingsService} from '../services/moblab-settings.service';
 import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
 import {MoblabSettingsConstains} from '../constants';
 
-const URL = 'https://google.com/api/';
-
 function gsURLValidator(control) {
   if (!control.value) {
     return null;
@@ -73,14 +71,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   lastFetchedDutWifiName = '';
   lastFetchedDutWifiPassword = '';
 
-  chromeosReleaseVersion: string;
-  chromeosReleaseTrack: string;
-  chromeosReleaseDescription: string;
-  moblabInstallId: string;
-  moblabSerialNumber: string;
+  chromeosReleaseVersion = '';
+  chromeosReleaseTrack = '';
+  chromeosReleaseDescription = '';
+  moblabInstallId = '';
+  moblabSerialNumber = '';
 
-  moblabHostname: string;
-  isConnectedToInternet: boolean;
+  moblabHostname = '';
+  isConnectedToInternet = false;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -205,12 +203,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * values.
      */
     return (
-      this.lastFetchedBotoKeyID != this.botoKeyIDForm.value ||
-      this.lastFetchedBotoKeySecret != this.botoKeySecretForm.value ||
-      this.lastFetchedBucketURL != this.bucketURLForm.value ||
-      this.lastFetchedIsCloudEnabled != this.isCloudEnabled ||
-      this.lastFetchedIsRemoteConsoleEnabled != this.isRemoteConsoleEnabled ||
-      this.lastFetchedIsRemoteCommandEnabled != this.isRemoteCommandEnabled
+      this.lastFetchedBotoKeyID !== this.botoKeyIDForm.value ||
+      this.lastFetchedBotoKeySecret !== this.botoKeySecretForm.value ||
+      this.lastFetchedBucketURL !== this.bucketURLForm.value ||
+      this.lastFetchedIsCloudEnabled !== this.isCloudEnabled ||
+      this.lastFetchedIsRemoteConsoleEnabled !== this.isRemoteConsoleEnabled ||
+      this.lastFetchedIsRemoteCommandEnabled !== this.isRemoteCommandEnabled
     );
   }
 
@@ -219,8 +217,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.dutWifiNameForm.value.length &&
       !this.dutWifiNameForm.errors &&
       !this.dutWifiPasswordForm.errors &&
-      (this.lastFetchedDutWifiName != this.dutWifiNameForm.value ||
-        this.lastFetchedDutWifiPassword != this.dutWifiPasswordForm.value)
+      (this.lastFetchedDutWifiName !== this.dutWifiNameForm.value ||
+        this.lastFetchedDutWifiPassword !== this.dutWifiPasswordForm.value)
     );
   }
 

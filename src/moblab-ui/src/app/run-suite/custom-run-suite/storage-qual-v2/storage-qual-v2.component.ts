@@ -5,7 +5,10 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import {BaseSuite} from '../../common/base_suite/base-suite.component';
+import {
+  BaseSuite,
+  BuildSettings,
+} from '../../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
 import {Router} from '@angular/router';
@@ -55,6 +58,7 @@ export class StorageQualV2Component
     this.changeDetector.detectChanges();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBuildSetCustom(event) {
     this.diskSizeInput.enable();
     this.suiteSelector.enable();
@@ -91,7 +95,7 @@ export class StorageQualV2Component
 
   /** Method triggered on change of variation selector
    * */
-  suiteChanged(newSuite) {
+  suiteChanged(newSuite: string) {
     this.suiteIndex = newSuite ? this.suiteOptions.indexOf(newSuite) : 0;
   }
 
@@ -116,10 +120,10 @@ export class StorageQualV2Component
     super.onRunSuiteClick('Starting storage qualification suite run.');
 
     this.moblabGrpcService.runStorageQualificationSuite(
-      response => {
+      _response => {
         this.onSuiteStarted();
       },
-      (err, response) => {
+      (err, _response) => {
         this.onRunSuiteFailed(err.message);
         this.runSuiteButton.enable();
       },

@@ -1,4 +1,4 @@
-import {EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -27,16 +27,17 @@ export enum SuiteChangeType {
  * Base class meant to parent all implementations of run suite logic. Contains
  * some logic that is common to all suites.
  */
+@Component({template: ''})
 export abstract class BaseSuite {
   @Output() suiteFormChange = new EventEmitter();
 
   runSuiteButtonDisabled = true;
 
-  selectedBuild: string;
-  selectedBoard: string;
-  selectedMilestone: string;
-  selectedModel: string;
-  selectedPool: string;
+  selectedBuild = '';
+  selectedBoard = '';
+  selectedMilestone = '';
+  selectedModel = '';
+  selectedPool = '';
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
@@ -59,7 +60,7 @@ export abstract class BaseSuite {
    */
   abstract onBuildSetCustom(event: BuildSettings);
 
-  onFormLoading(event) {
+  onFormLoading(event: Event) {
     this.suiteFormChange.emit({
       changeType: SuiteChangeType.FormLoadingStart,
       message: event,
@@ -70,16 +71,16 @@ export abstract class BaseSuite {
     this.suiteFormChange.emit({changeType: SuiteChangeType.FormLoadingFinish});
   }
 
-  onRunSuiteClick(message: string = null) {
-    if (message) {
+  onRunSuiteClick(message = '') {
+    if (message !== '') {
       this.setOffPopup(message);
     }
 
     this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteStart});
   }
 
-  onRunSuiteFailed(message: string = null) {
-    if (message) {
+  onRunSuiteFailed(message = '') {
+    if (message !== '') {
       this.setOffError(message);
     }
     this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteFailed});
@@ -99,7 +100,7 @@ export abstract class BaseSuite {
 
   // sets off a persistent, error-themed popup.
   setOffError(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
+    this.snackBar.open(dialogue, 'Dismiss', {
       verticalPosition: 'top',
       panelClass: ['snack-error'],
     });
@@ -107,7 +108,7 @@ export abstract class BaseSuite {
 
   // sets off a neutral-themed popup that fades after 'duration' miliseconds
   setOffPopup(dialogue: string, duration = 5000) {
-    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
+    this.snackBar.open(dialogue, 'Dismiss', {
       duration: duration,
       verticalPosition: 'top',
     });

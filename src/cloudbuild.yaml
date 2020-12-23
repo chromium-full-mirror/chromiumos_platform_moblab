@@ -56,11 +56,7 @@ steps:
     waitFor: ['-']
   - id: node-buster
     name: "docker:19.03.8"
-    args: ["pull", "${_BASE_REGISTRY_URI}/node:12-buster"]
-    waitFor: ['-']
-  - id: node12
-    name: "docker:19.03.8"
-    args: ["pull", "${_BASE_REGISTRY_URI}/node:12"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:15-buster"]
     waitFor: ['-']
   - id: node15
     name: "docker:19.03.8"
@@ -426,7 +422,7 @@ steps:
       ]
     waitFor:
       - "protogen-ui"
-      - "node12"
+      - "node15"
       - "nginx-alpine"
     env:
       - "DOCKER_BUILDKIT=1"

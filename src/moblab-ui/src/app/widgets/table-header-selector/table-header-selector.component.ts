@@ -24,9 +24,9 @@ export class TableHeaderSelectorComponent implements OnInit {
 
   selectionChange() {
     this.update.emit({selection: this.selectValue});
-    if (this.selectValue == this.standardOptions[0]) {
+    if (this.selectValue === this.standardOptions[0]) {
       this.checkboxState = true;
-    } else if (this.selectValue == this.standardOptions[1]) {
+    } else if (this.selectValue === this.standardOptions[1]) {
       this.checkboxState = false;
     } else {
       this.checkboxState = true;

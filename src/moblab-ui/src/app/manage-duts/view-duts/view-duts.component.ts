@@ -121,11 +121,11 @@ export class ViewDutsComponent implements OnInit {
   }
 
   selectionChanged(event) {
-    if (event.selection == 'All') {
+    if (event.selection === 'All') {
       this.duts.data.forEach(row => this.selection.select(row));
-    } else if (event.selection == 'None') {
+    } else if (event.selection === 'None') {
       this.selection.clear();
-    } else if (event.selection == this.selectOptions[0]) {
+    } else if (event.selection === this.selectOptions[0]) {
       this.duts.data.filter(row => {
         if (row.getIsEnrolled()) {
           this.selection.select(row);
@@ -133,7 +133,7 @@ export class ViewDutsComponent implements OnInit {
           this.selection.deselect(row);
         }
       });
-    } else if (event.selection == this.selectOptions[1]) {
+    } else if (event.selection === this.selectOptions[1]) {
       this.duts.data.filter(row => {
         if (!row.getIsEnrolled()) {
           this.selection.select(row);

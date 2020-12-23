@@ -103,7 +103,7 @@ export class BasicAutocompleteSelectorComponent
   }
 
   isExactMatchToOption() {
-    return this.options.indexOf(this.selectFormControl.value) != -1;
+    return this.options.indexOf(this.selectFormControl.value) !== -1;
   }
 
   isNextUp() {

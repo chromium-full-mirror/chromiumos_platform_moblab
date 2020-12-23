@@ -69,15 +69,15 @@ export class MultiFilterForm {
     }
   }
 
-  getFormControl(filterName) {
+  getFormControl(filterName: string) {
     return this.formControls[filterName];
   }
 
-  getFormValue(filterName) {
+  getFormValue(filterName: string) {
     return this.getFormControl(filterName).value;
   }
 
-  setFormValue(filterName, value) {
+  setFormValue(filterName: string, value: string | undefined) {
     this.getFormControl(filterName).setValue(value);
   }
 
@@ -104,12 +104,12 @@ export class MultiFilterForm {
   providers: [DatePipe],
 })
 export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
-  @Input() input: string;
-  @Input() manualPopulate: boolean;
-  @Input() hideActionBar: boolean;
-  @Input() hideFilters: boolean;
-  @Input() hideSelectors: boolean;
-  @Input() pageSizeOverride: number;
+  @Input() input = '';
+  @Input() manualPopulate = false;
+  @Input() hideActionBar = false;
+  @Input() hideFilters = false;
+  @Input() hideSelectors = false;
+  @Input() pageSizeOverride = 0;
   @Input() filtersOverride: MultiFilterForm;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(JobActionComponent) jobActionRef: JobActionComponent;
@@ -132,8 +132,8 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   loading = false;
   numJobs = 0;
-  expandedElement: Job | null;
-  startingPageSize: number;
+  expandedElement: Job | null = null;
+  startingPageSize = 0;
 
   filters = new MultiFilterForm(FILTER_PARAMETERS);
   jobId: string = JOB_ID;
@@ -196,7 +196,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     this.changeDetectorRefs.detectChanges();
   }
 
-  applyFilters(params) {
+  applyFilters(params: {[x: string]: any}) {
     for (const filter_id of FILTER_PARAMETERS) {
       if (filter_id in params) {
         this.filters.getFormControl(filter_id).setValue(params[filter_id]);
@@ -204,7 +204,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     }
   }
 
-  selectionChanged(event) {
+  selectionChanged(event: {selection: string}) {
     if (event.selection === 'All') {
       this.selectAllJobs();
     } else if (event.selection === 'Visible') {
@@ -296,14 +296,14 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     );
   }
 
-  getPriorityFromNum(priorityNum) {
+  getPriorityFromNum(priorityNum: string | number) {
     return INT_TO_PRIORITY[priorityNum];
   }
-  getStatusFromNum(statusNum) {
+  getStatusFromNum(statusNum: string | number) {
     return INT_TO_JOBSTATUS[statusNum];
   }
 
-  assignJobs(jobs) {
+  assignJobs(jobs: Job[] | undefined) {
     this.jobs = new MatTableDataSource(jobs);
     this.loading = false;
   }
@@ -396,7 +396,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     Stops redirect to job-details page from happening when the user selects a job's
     checkbox.
   */
-  checkboxClick(e) {
+  checkboxClick(e: {stopPropagation: () => void}) {
     e.stopPropagation();
   }
 
@@ -417,7 +417,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     this.filters.setFormValue(DUT_RUN_ON, dut);
   }
 
-  setOffPopup(dialogue) {
+  setOffPopup(dialogue: string) {
     const snackBarRef = this.snackBar.open(dialogue, '', {
       duration: 5000,
       verticalPosition: 'top',

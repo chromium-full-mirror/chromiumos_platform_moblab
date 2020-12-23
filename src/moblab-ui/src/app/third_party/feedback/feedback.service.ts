@@ -18,7 +18,6 @@ export class FeedbackService {
   public isDraggingToolbar$: Observable<boolean> = this.isDraggingToolbarSource.asObservable();
 
   public initScreenshotCanvas() {
-    const that = this;
     const body = document.body;
     html2canvas(body, {
       logging: false,

@@ -71,10 +71,10 @@ export class FirmwareComponent implements OnInit {
     });
   }
 
-  selectionChanged(event) {
-    if (event.selection == 'All') {
+  selectionChanged(event: {selection: string}) {
+    if (event.selection === 'All') {
       this.firmware_duts.forEach(row => this.selection.select(row));
-    } else if (event.selection == 'None') {
+    } else if (event.selection === 'None') {
       this.selection.clear();
     }
   }

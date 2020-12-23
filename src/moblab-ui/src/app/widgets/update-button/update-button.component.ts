@@ -54,7 +54,7 @@ export class UpdateButtonComponent implements OnInit {
       },
     });
 
-    const sub = dialogRef.componentInstance.onOk.subscribe(() => {
+    dialogRef.componentInstance.onOk.subscribe(() => {
       this.updateMoblab();
     });
   }
@@ -70,8 +70,8 @@ export class UpdateButtonComponent implements OnInit {
     );
   }
 
-  reportError(dialogue) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
+  reportError(dialogue: string) {
+    this.snackBar.open(dialogue, '', {
       duration: 5000,
       verticalPosition: 'top',
     });

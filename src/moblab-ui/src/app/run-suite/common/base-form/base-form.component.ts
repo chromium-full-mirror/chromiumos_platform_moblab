@@ -6,6 +6,8 @@ const DISABLED_NAME = 'This form is disabled.';
  * Class meant to parent all custom form items for suite runs. (e.g., selectors
  *  input forms, etc ).
  */
+
+@Component({template: ''})
 export abstract class BaseForm {
   @Input() isShown: boolean;
 
