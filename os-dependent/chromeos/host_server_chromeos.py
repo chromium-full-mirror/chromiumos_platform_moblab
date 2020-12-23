@@ -306,8 +306,8 @@ class HostServerChromeOS(host_server_base.HostServerBase):
         disk_stats = disk_stats[0]
 
         response = hostservice_pb2.GetDiskUsageStatsResponse()
-        response.available_MB = int(disk_stats[3].rtrim("M"))
-        response.total_MB = int(disk_stats[1].rtrim("M"))
+        response.available_MB = int(disk_stats[3].rstrip("M"))
+        response.total_MB = int(disk_stats[1].rstrip("M"))
         return response
 
 
