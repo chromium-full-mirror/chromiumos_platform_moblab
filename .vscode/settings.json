@@ -1,4 +1,8 @@
 {
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
+    "[typescript]": {
+        "editor.formatOnSave": true
+    },
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -95,12 +99,8 @@
         "**/node_modules/*/**": true,
         "**/core": true
     },
-    "cSpell.diagnosticLevel": "Hint",
-    "eslint.validate": [
-        "typescript"
-    ],
-    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
-    "[typescript]": {
-        "editor.formatOnSave": true
-    },
+
+    "cSpell.diagnosticLevel": "Hint"
 }
+
+
