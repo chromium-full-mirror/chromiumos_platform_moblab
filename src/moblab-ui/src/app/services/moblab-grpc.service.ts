@@ -500,7 +500,7 @@ export class MoblabGrpcService {
   }
 
   getJobIds(
-    callback: (job_ids: Number[]) => void,
+    callback: (job_ids: number[]) => void,
     errorHandlingCallback: (errorMsg: string) => void,
     queryStart: number,
     queryLimit: number,

@@ -30,6 +30,7 @@ COPY ./moblab-ui/package.json /app
 COPY ./moblab-ui/package-lock.json /app
 
 RUN npm install
+RUN npm install -g gts
 
 RUN ngcc
 

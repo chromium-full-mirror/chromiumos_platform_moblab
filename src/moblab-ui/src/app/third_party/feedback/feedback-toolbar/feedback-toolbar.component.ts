@@ -1,6 +1,6 @@
 import {fromEvent as observableFromEvent} from 'rxjs';
 
-import {takeUntil, finalize, map, mergeMap} from 'rxjs/operators';
+import {takeUntil, finalize, map, mergeMap, skipUntil} from 'rxjs/operators';
 import {
   Component,
   ElementRef,
@@ -61,27 +61,33 @@ export class FeedbackToolbarComponent implements AfterViewInit, OnChanges {
   }
 
   public addDragListenerOnMoveBtn() {
-    const mouseUp = observableFromEvent(
-      this.toggleMoveBtn.nativeElement,
-      'mouseup'
-    );
-    const mouseMove = observableFromEvent(
-      document.documentElement,
-      'mousemove'
-    );
-    const mouseDown = observableFromEvent(
+    const mouseDown$ = observableFromEvent<MouseEvent>(
       this.toggleMoveBtn.nativeElement,
       'mousedown'
     );
-    const mouseDrag = mouseDown.pipe(
-      mergeMap((md: MouseEvent) => {
+    const mouseUp$ = observableFromEvent<MouseEvent>(
+      this.toggleMoveBtn.nativeElement,
+      'mouseup'
+    );
+    const mouseMove$ = observableFromEvent<MouseEvent>(
+      this.toggleMoveBtn.nativeElement,
+      'mousemove'
+    );
+
+    //Mouse drag event
+    const mouseDragging$ = mouseMove$.pipe(
+      skipUntil(mouseDown$),
+      takeUntil(mouseUp$)
+    );
+    const move$ = mouseDragging$.pipe(
+      mergeMap((md: MouseEvent, index: number) => {
         this.feedbackService.setIsDraggingToolbar(true);
         const startX = md.offsetX;
         const startY = md.offsetY;
         this.disableToolbarTips = true;
         this.isDragging = true;
         // Calculate dif with mousemove until mouseup
-        return mouseMove.pipe(
+        return mouseMove$.pipe(
           map((mm: MouseEvent) => {
             mm.preventDefault();
             return {
@@ -94,11 +100,11 @@ export class FeedbackToolbarComponent implements AfterViewInit, OnChanges {
             this.disableToolbarTips = false;
             this.feedbackService.setIsDraggingToolbar(false);
           }),
-          takeUntil(mouseUp)
+          takeUntil(mouseUp$)
         );
       })
     );
-    mouseDrag.subscribe(pos => {
+    move$.subscribe((pos: {left: number; top: number}) => {
       this.el.nativeElement.style.left = pos.left + 'px';
       this.el.nativeElement.style.top = pos.top + 'px';
     });
