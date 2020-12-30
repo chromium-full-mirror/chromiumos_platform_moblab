@@ -964,19 +964,21 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
         version_info = moblab_info.get_version_info()
         response = moblabrpc_pb2.GetVersionInfoResponse(
-            chromeos_release_version=version_info[
-                MoblabConstants.BUILD_VERSION_NAME
-            ],
-            chromeos_release_track=version_info[MoblabConstants.CHANNEL_NAME],
-            chromeos_release_description=version_info[
-                MoblabConstants.DESCRIPTION_NAME
-            ],
-            moblab_install_id=version_info[
-                MoblabConstants.MOBLAB_INSTALL_ID_NAME
-            ],
-            moblab_serial_number=version_info[
-                MoblabConstants.MOBLAB_HOST_ID_NAME
-            ],
+            chromeos_release_version=version_info.get(
+                MoblabConstants.BUILD_VERSION_NAME, "No Os Version"
+            ),
+            chromeos_release_track=version_info.get(
+                MoblabConstants.CHANNEL_NAME, "No Track Name"
+            ),
+            chromeos_release_description=version_info.get(
+                MoblabConstants.DESCRIPTION_NAME, "No Description"
+            ),
+            moblab_install_id=version_info.get(
+                MoblabConstants.MOBLAB_INSTALL_ID_NAME, "No Install ID"
+            ),
+            moblab_serial_number=version_info.get(
+                MoblabConstants.MOBLAB_HOST_ID_NAME, "No Host ID"
+            ),
         )
         return response
 

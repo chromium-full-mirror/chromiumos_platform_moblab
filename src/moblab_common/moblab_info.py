@@ -22,9 +22,6 @@ _ID_FILE_LOCK_PATH = "%s.lock" % MOBLAB_ID_FILENAME
 # TODO(guocb): Remove get_moblab_id() and get_moblab_serialnumber() completely
 # from autotest code base.
 
-# File where information about the current device is stored.
-_ETC_LSB_RELEASE = "/etc/lsb-release"
-
 
 class MoblabInfoError(Exception):
     pass
@@ -92,8 +89,8 @@ def get_network_info():
     """
         Gets network info of Moblab.
 
-        TCP socket is used to test the connectivity. If there is no connectivity,
-        try to get the public IP with UDP socket.
+        TCP socket is used to test the connectivity. If there is no
+        connectivity, try to get the public IP with UDP socket.
 
     Returns:
         A dict of network information ( specifically, a 'server_ip' and
@@ -115,20 +112,29 @@ def get_version_info():
         A dict of ChromeOS and Moblab information (ex. serial number,
         release version )
     """
-    lines = open(_ETC_LSB_RELEASE).readlines()
-    version_info = {
-        x.split("=")[0]: x.split("=")[1] for x in lines if "=" in x
-    }
+    version_info = {}
     version_info[MoblabConstants.MOBLAB_INSTALL_ID_NAME] = get_or_create_id()
     version_info[MoblabConstants.MOBLAB_HOST_ID_NAME] = get_serial_number()
 
+    host_version_info = None
     try:
-        version_info[MoblabConstants.BUILD_VERSION_NAME] = (
-            version_info[MoblabConstants.BUILDER_PATH].split("/")[1].strip()
+        host_version_info = (
+            host_connector.HostServicesConnector.get_system_version()
         )
-    except (KeyError, IndexError):
-        msg = "Unable to parse ChromeOS release version."
+    except host_connector.HostServicesException:
+        msg = "Failed to get version information from host."
         _LOGGER.exception(msg)
         raise MoblabInfoError(msg)
 
+    version_info[
+        MoblabConstants.BUILD_VERSION_NAME
+    ] = host_version_info.version
+
+    version_info[
+        MoblabConstants.DESCRIPTION_NAME
+    ] = host_version_info.description
+
+    version_info[MoblabConstants.CHANNEL_NAME] = host_version_info.track
+
+    _LOGGER.info(version_info)
     return version_info
