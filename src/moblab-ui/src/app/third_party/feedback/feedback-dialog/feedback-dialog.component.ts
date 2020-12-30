@@ -1,9 +1,4 @@
-import {
-  from,
-  fromEvent as observableFromEvent,
-  Observable,
-  Subscription,
-} from 'rxjs';
+import {fromEvent as observableFromEvent, Observable, Subscription} from 'rxjs';
 
 import {
   takeUntil,
@@ -16,6 +11,7 @@ import {
   scan,
   first,
 } from 'rxjs/operators';
+
 import {
   Component,
   AfterViewInit,
@@ -232,13 +228,22 @@ export class FeedbackDialogComponent implements AfterViewInit {
   }
 
   private addCanvasListeners(): void {
-    const mouseUp = observableFromEvent(document.documentElement, 'mouseup'),
-      mouseMove = observableFromEvent(document.documentElement, 'mousemove'),
-      mouseDown = observableFromEvent(document.documentElement, 'mousedown'),
-      scroll = observableFromEvent(window, 'scroll');
+    const mouseDown$ = observableFromEvent<MouseEvent>(
+      document.documentElement,
+      'mousedown'
+    );
+    const mouseUp$ = observableFromEvent<MouseEvent>(
+      document.documentElement,
+      'mouseup'
+    );
+    const mouseMove$ = observableFromEvent<MouseEvent>(
+      document.documentElement,
+      'mousemove'
+    );
+    const scroll = observableFromEvent<Event>(window, 'scroll');
 
-    this.manuallyDrawRect(mouseDown, mouseMove, mouseUp);
-    this.autoDrawRect(mouseMove);
+    this.manuallyDrawRect(mouseDown$, mouseMove$, mouseUp$);
+    this.autoDrawRect(mouseMove$);
     this.changeRectPosition(scroll);
   }
 
@@ -271,9 +276,9 @@ export class FeedbackDialogComponent implements AfterViewInit {
   }
 
   private manuallyDrawRect(
-    mouseDown: Observable<Event>,
-    mouseMove: Observable<Event>,
-    mouseUp: Observable<Event>
+    mouseDown: Observable<MouseEvent>,
+    mouseMove: Observable<MouseEvent>,
+    mouseUp: Observable<MouseEvent>
   ): void {
     const mouseDrag = mouseDown.pipe(
       mergeMap((mouseDownEvent: MouseEvent) => {
@@ -335,7 +340,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
     });
   }
 
-  private autoDrawRect(mouseMove: Observable<Event>): void {
+  private autoDrawRect(mouseMove: Observable<MouseEvent>): void {
     this.autoDrawRect$ = mouseMove.subscribe({
       next: (mouseMoveEvent: MouseEvent) => {
         this.drawPersistCanvasRectangles();
