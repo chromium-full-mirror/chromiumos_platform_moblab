@@ -27,3 +27,5 @@ src/dockerfiles/compose/docker-compose.override.yml
 src/local_registry.mk
 src/moblab_common/proto/*
 src/moblab_rpcserver/coverage/*
+*build/
+core

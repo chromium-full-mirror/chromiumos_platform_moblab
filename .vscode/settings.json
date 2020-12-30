@@ -8,7 +8,9 @@
         "**/node_modules": true,
         "**/*.pyc": {
             "when": "$(basename).py"
-        }
+        },
+        "**/core": true,
+        "**/build": true,
     },
     "editor.rulers": [
         79
