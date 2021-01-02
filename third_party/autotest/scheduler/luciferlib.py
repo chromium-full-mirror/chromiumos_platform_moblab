@@ -11,11 +11,11 @@ import socket
 import subprocess
 
 import common
-from autotest_lib.client.bin import local_host
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.scheduler.drone_manager import PidfileId
-from autotest_lib.server.hosts import ssh_host
-from autotest_lib.frontend.afe import models
+from client.bin import local_host
+from client.common_lib import global_config
+from scheduler.drone_manager import PidfileId
+from server.hosts import ssh_host
+from frontend.afe import models
 
 _config = global_config.global_config
 _SECTION = 'LUCIFER'

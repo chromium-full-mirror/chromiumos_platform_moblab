@@ -5,9 +5,9 @@
 import dbus, gobject, os, sys
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import session_manager
-from autotest_lib.client.cros import ownership
+from client.common_lib import error
+from client.common_lib.cros import session_manager
+from client.cros import ownership
 
 """Utility class for tests that generate, push and fetch policies.
 

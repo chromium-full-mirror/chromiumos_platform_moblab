@@ -13,15 +13,15 @@ import logging
 import time
 
 import common
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.client.common_lib import utils
-from autotest_lib.server.cros.power import servo_charger
-from autotest_lib.server.cros.servo import servo
-from autotest_lib.server.hosts import cros_constants
-from autotest_lib.server.hosts import repair_utils
-from autotest_lib.server.hosts import servo_constants
-from autotest_lib.server.cros.servo.topology import servo_topology
-from autotest_lib.site_utils.admin_audit import servo_updater
+from client.common_lib import hosts
+from client.common_lib import utils
+from server.cros.power import servo_charger
+from server.cros.servo import servo
+from server.hosts import cros_constants
+from server.hosts import repair_utils
+from server.hosts import servo_constants
+from server.cros.servo.topology import servo_topology
+from site_utils.admin_audit import servo_updater
 import six
 
 metrics = utils.metrics_mock

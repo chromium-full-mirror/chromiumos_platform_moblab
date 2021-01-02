@@ -13,8 +13,8 @@ import six
 
 import common
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import seven
+from client.bin import utils
+from client.common_lib import seven
 
 
 DBUS_INTERFACE_OBJECT_MANAGER = 'org.freedesktop.DBus.ObjectManager'

@@ -13,9 +13,9 @@ import sys
 import tempfile
 import time
 
-from autotest_lib.client.bin import test, utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import chrome, arc_common
+from client.bin import test, utils
+from client.common_lib import error
+from client.common_lib.cros import chrome, arc_common
 
 _ADB_KEYS_PATH = '/tmp/adb_keys'
 _ADB_VENDOR_KEYS = 'ADB_VENDOR_KEYS'

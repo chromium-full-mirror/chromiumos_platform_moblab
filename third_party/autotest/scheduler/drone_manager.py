@@ -3,14 +3,14 @@ import os
 import logging
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.scheduler import drone_task_queue
-from autotest_lib.scheduler import drone_utility
-from autotest_lib.scheduler import drones
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.scheduler import thread_lib
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import utils
+from scheduler import drone_task_queue
+from scheduler import drone_utility
+from scheduler import drones
+from scheduler import scheduler_config
+from scheduler import thread_lib
 
 # results on drones will be placed under the drone_installation_directory in a
 # directory with this name
@@ -277,7 +277,7 @@ class DroneManager(object):
         # option. Therefore, if server_manager_utils is imported at the
         # beginning of this module, test_that will fail since django is not
         # setup yet.
-        from autotest_lib.site_utils import server_manager_utils
+        from site_utils import server_manager_utils
         config = global_config.global_config
         section = scheduler_config.CONFIG_SECTION
         config.parse_config_file()

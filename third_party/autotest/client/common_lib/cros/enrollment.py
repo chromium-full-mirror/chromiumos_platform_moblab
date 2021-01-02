@@ -4,8 +4,8 @@
 
 import logging
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros import chrome
+from client.bin import utils
+from client.common_lib.cros import chrome
 
 
 def _ExecuteOobeCmd(browser, cmd):

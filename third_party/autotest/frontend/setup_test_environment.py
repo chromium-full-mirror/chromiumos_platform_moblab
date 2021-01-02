@@ -11,12 +11,12 @@ for name in ['default', 'global', 'readonly', 'server']:
     if name not in settings.DATABASES:
         settings.DATABASES[name] = {}
     settings.DATABASES[name]['ENGINE'] = (
-            'autotest_lib.frontend.db.backends.afe_sqlite')
+            'frontend.db.backends.afe_sqlite')
     settings.DATABASES[name]['NAME'] = ':memory:'
 
 
 from django.db import connections
-from autotest_lib.frontend.afe import readonly_connection
+from frontend.afe import readonly_connection
 
 connection = connections['default']
 connection_readonly = connections['readonly']

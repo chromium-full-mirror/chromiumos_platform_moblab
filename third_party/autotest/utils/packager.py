@@ -6,10 +6,10 @@ Utility to upload or remove the packages from the packages repository.
 
 import logging, optparse, os, shutil, sys, tempfile
 import common
-from autotest_lib.client.common_lib import utils as client_utils
-from autotest_lib.client.common_lib import global_config, error
-from autotest_lib.client.common_lib import packages
-from autotest_lib.server import utils as server_utils
+from client.common_lib import utils as client_utils
+from client.common_lib import global_config, error
+from client.common_lib import packages
+from server import utils as server_utils
 
 c = global_config.global_config
 logging.basicConfig(level=logging.DEBUG)

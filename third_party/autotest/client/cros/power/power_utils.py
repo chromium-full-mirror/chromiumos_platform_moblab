@@ -7,10 +7,10 @@ import os
 import re
 import shutil
 import time
-from autotest_lib.client.bin import utils
-from autotest_lib.client.bin.input.input_device import InputDevice
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import upstart
+from client.bin import utils
+from client.bin.input.input_device import InputDevice
+from client.common_lib import error
+from client.cros import upstart
 
 
 # Possible display power settings. Copied from chromeos::DisplayPowerState

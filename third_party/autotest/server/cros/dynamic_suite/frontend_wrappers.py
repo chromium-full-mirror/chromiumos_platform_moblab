@@ -7,12 +7,12 @@ import math
 import threading
 
 import common
-from autotest_lib.client.common_lib import env
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.frontend.afe.json_rpc import proxy
-from autotest_lib.server import frontend
+from client.common_lib import env
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros import retry
+from frontend.afe.json_rpc import proxy
+from server import frontend
 try:
     from chromite.lib import retry_util
     from chromite.lib import timeout_util

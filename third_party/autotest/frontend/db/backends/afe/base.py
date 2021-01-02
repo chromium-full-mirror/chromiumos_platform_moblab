@@ -12,7 +12,7 @@ except ImportError, e:
 
 class DatabaseOperations(MySQLOperations):
     """Custom database backend wrapper."""
-    compiler_module = "autotest_lib.frontend.db.backends.afe.compiler"
+    compiler_module = "frontend.db.backends.afe.compiler"
 
 
 class DatabaseWrapper(MySQLDatabaseWrapper):

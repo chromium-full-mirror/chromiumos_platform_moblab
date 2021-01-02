@@ -7,9 +7,9 @@ import logging
 import re
 
 import common
-from autotest_lib.client.common_lib import error, global_config
-from autotest_lib.server import test
-from autotest_lib.server.hosts import moblab_host
+from client.common_lib import error, global_config
+from server import test
+from server.hosts import moblab_host
 
 
 DEFAULT_IMAGE_STORAGE_SERVER = global_config.global_config.get_config_value(

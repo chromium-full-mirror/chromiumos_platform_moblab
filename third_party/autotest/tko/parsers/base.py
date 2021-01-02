@@ -1,6 +1,6 @@
 import traceback
 
-from autotest_lib.tko import status_lib, utils as tko_utils
+from tko import status_lib, utils as tko_utils
 
 
 class parser(object):

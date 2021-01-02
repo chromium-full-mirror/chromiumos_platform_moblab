@@ -5,11 +5,11 @@ import abc
 import logging
 import time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros import chrome
-from autotest_lib.client.cros.audio import audio_helper
-from autotest_lib.client.cros.input_playback import keyboard
-from autotest_lib.client.cros.power import power_test
+from client.bin import utils
+from client.common_lib.cros import chrome
+from client.cros.audio import audio_helper
+from client.cros.input_playback import keyboard
+from client.cros.power import power_test
 
 
 class power_VideoTest(power_test.power_Test):

@@ -11,9 +11,9 @@ import time
 import six.moves.xmlrpc_client
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import retry
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros import retry
 
 try:
     import jsonrpclib

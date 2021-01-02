@@ -16,8 +16,8 @@ except ImportError:
     logging.error('selenium module failed to be imported.')
     pass
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros import chrome
+from client.bin import utils
+from client.common_lib.cros import chrome
 
 CHROMEDRIVER_EXE_PATH = '/usr/local/chromedriver/chromedriver'
 X_SERVER_DISPLAY = ':0'

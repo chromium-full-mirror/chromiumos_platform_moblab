@@ -7,9 +7,9 @@ import logging
 import re
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.network import xmlrpc_datatypes
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros.network import xmlrpc_datatypes
 
 
 # Used to represent stations we parse out of scan results.

@@ -2,7 +2,7 @@
 # Copyright Google, Martin J. Bligh <mbligh@google.com>, Jan 2009
 import os, sys
 import common
-from autotest_lib.server import frontend
+from server import frontend
 
 try:
     old = frontend.AFE(web_server='http://' + sys.argv[1])

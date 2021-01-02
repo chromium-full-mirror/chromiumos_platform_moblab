@@ -25,19 +25,19 @@ import six
 import six.moves.xmlrpc_client
 import calendar
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.server.cros.servo import servo
-from autotest_lib.server.hosts import servo_repair
-from autotest_lib.server.hosts import base_servohost
-from autotest_lib.server.hosts import servo_constants
-from autotest_lib.server.cros.faft.utils import config
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.site_utils.admin_audit import servo_updater
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib import hosts
+from client.common_lib import lsbrelease_utils
+from client.common_lib.cros import retry
+from client.common_lib.cros.network import ping_runner
+from server.cros.servo import servo
+from server.hosts import servo_repair
+from server.hosts import base_servohost
+from server.hosts import servo_constants
+from server.cros.faft.utils import config
+from client.common_lib import global_config
+from site_utils.admin_audit import servo_updater
 
 metrics = utils.metrics_mock
 
@@ -579,7 +579,7 @@ class ServoHost(base_servohost.BaseServoHost):
         """Get the cached servo.Servo object.
 
         @return: a servo.Servo object.
-        @rtype: autotest_lib.server.cros.servo.servo.Servo
+        @rtype: server.cros.servo.servo.Servo
         """
         return self._servo
 

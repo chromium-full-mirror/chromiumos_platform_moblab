@@ -7,7 +7,7 @@ import os
 import logging
 
 import common
-from autotest_lib.client.common_lib import utils as client_utils
+from client.common_lib import utils as client_utils
 
 try:
     from chromite.lib import metrics

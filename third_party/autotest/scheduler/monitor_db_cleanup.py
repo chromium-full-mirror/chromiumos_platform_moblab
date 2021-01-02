@@ -5,11 +5,11 @@ import logging
 import random
 import time
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import host_protections
+from client.common_lib import utils
+from frontend.afe import models
+from scheduler import scheduler_config
+from client.common_lib import global_config
+from client.common_lib import host_protections
 
 
 _METRICS_PREFIX = 'chromeos/autotest/scheduler/cleanup'

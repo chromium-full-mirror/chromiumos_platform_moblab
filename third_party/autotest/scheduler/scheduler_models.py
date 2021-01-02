@@ -28,16 +28,16 @@ import weakref
 
 #import google.protobuf.internal.well_known_types as types
 
-from autotest_lib.client.common_lib import global_config, host_protections
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import models, model_attributes
-from autotest_lib.scheduler import drone_manager
-from autotest_lib.scheduler import rdb_lib
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.scheduler import scheduler_lib
-from autotest_lib.server import afe_urls
-from autotest_lib.server.cros import provision
+from client.common_lib import global_config, host_protections
+from client.common_lib import time_utils
+from client.common_lib import utils
+from frontend.afe import models, model_attributes
+from scheduler import drone_manager
+from scheduler import rdb_lib
+from scheduler import scheduler_config
+from scheduler import scheduler_lib
+from server import afe_urls
+from server.cros import provision
 
 
 _notify_email_statuses = []

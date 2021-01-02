@@ -22,10 +22,10 @@ except:
     pass
 import common
 
-from autotest_lib.client.bin import os_dep, utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import logging_config, logging_manager
-from autotest_lib.client.common_lib import seven
+from client.bin import os_dep, utils
+from client.common_lib import error
+from client.common_lib import logging_config, logging_manager
+from client.common_lib import seven
 
 
 def generate_random_string(length):

@@ -15,11 +15,11 @@ from contextlib import contextmanager
 import docker
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import interface
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.site_utils.ssp_containers import constants
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros.network import interface
+from client.common_lib import global_config
+from site_utils.ssp_containers import constants
 
 def path_exists(container_name, path):
     """Check if path exists.

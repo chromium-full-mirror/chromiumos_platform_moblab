@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.cros.power import power_dashboard
+from client.cros.power import power_dashboard
 
 class ServerTestDashboard(power_dashboard.BaseDashboard):
     """Dashboard class for autotests that run on server side.
@@ -18,7 +18,7 @@ class ServerTestDashboard(power_dashboard.BaseDashboard):
             testname: name of current test
             resultsdir: directory to save the power json
             uploadurl: url to upload power data
-            host: autotest_lib.server.hosts.cros_host.CrosHost object of DUT
+            host: server.hosts.cros_host.CrosHost object of DUT
             note: note for current test run
         """
 

@@ -8,9 +8,9 @@ import unittest
 import mock
 
 import common
-from autotest_lib.server.cros.storage import storage_validate
-from autotest_lib.server.cros.device_health_profile import device_health_profile
-from autotest_lib.server.cros.device_health_profile import profile_constants
+from server.cros.storage import storage_validate
+from server.cros.device_health_profile import device_health_profile
+from server.cros.device_health_profile import profile_constants
 
 
 class MockHostInfoStore(object):

@@ -19,10 +19,10 @@ import shutil
 import six
 
 import common
-from autotest_lib.client.bin import os_dep
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
+from client.bin import os_dep
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import utils
 
 
 # the name of the checksum file that stores the packages' checksums
@@ -361,7 +361,7 @@ class BasePackageManager(object):
         '''
         Clean up custom upload/download areas
         '''
-        from autotest_lib.server import subcommand
+        from server import subcommand
         if not custom_repos:
             # Not all package types necessarily require or allow custom repos
             try:
@@ -508,7 +508,7 @@ class BasePackageManager(object):
 
     def upload_pkg(self, pkg_path, upload_path=None, update_checksum=False,
                    timeout=300):
-        from autotest_lib.server import subcommand
+        from server import subcommand
         if upload_path:
             upload_path_list = [upload_path]
             self.upkeep(upload_path_list)

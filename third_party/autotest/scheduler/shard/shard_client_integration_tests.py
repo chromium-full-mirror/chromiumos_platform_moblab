@@ -8,13 +8,13 @@
 import unittest
 
 import common
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import frontend_test_utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.scheduler import rdb_testing_utils
-from autotest_lib.scheduler import scheduler_models
-from autotest_lib.scheduler.shard import shard_client
+from client.common_lib import global_config
+from frontend import setup_django_environment
+from frontend.afe import frontend_test_utils
+from frontend.afe import models
+from scheduler import rdb_testing_utils
+from scheduler import scheduler_models
+from scheduler.shard import shard_client
 
 
 class ShardClientIntegrationTest(rdb_testing_utils.AbstractBaseRDBTester,

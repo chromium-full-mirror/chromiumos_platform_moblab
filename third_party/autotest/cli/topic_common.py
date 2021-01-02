@@ -68,9 +68,9 @@ import urllib2
 
 import common
 
-from autotest_lib.cli import rpc
-from autotest_lib.client.common_lib.test_utils import mock
-from autotest_lib.client.common_lib import autotemp
+from cli import rpc
+from client.common_lib.test_utils import mock
+from client.common_lib import autotemp
 
 
 # Maps the AFE keys to printable names.

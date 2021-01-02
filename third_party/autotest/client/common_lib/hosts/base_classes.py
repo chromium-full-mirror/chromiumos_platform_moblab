@@ -23,8 +23,8 @@ stutsman@google.com (Ryan Stutsman)
 
 import json, logging, os, re, time
 
-from autotest_lib.client.common_lib import global_config, error, utils
-from autotest_lib.client.common_lib.cros import path_utils
+from client.common_lib import global_config, error, utils
+from client.common_lib.cros import path_utils
 import six
 
 

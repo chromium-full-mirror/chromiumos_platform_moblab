@@ -20,12 +20,12 @@ if len(sys.argv) == 2 and sys.argv[1] == '--prespawn_autotest':
     # Do common imports (to save startup time).
     # pylint: disable=W0611
     import common
-    import autotest_lib.client.bin.job
-    from autotest_lib.client.common_lib import seven
+    import client.bin.job
+    from client.common_lib import seven
 
     if os.environ.get('CROS_DISABLE_SITE_SYSINFO'):
-        from autotest_lib.client.bin import sysinfo, base_sysinfo
-        sysinfo.sysinfo = autotest_lib.client.bin.base_sysinfo.base_sysinfo
+        from client.bin import sysinfo, base_sysinfo
+        sysinfo.sysinfo = client.bin.base_sysinfo.base_sysinfo
 
     # Wait for environment and autotest arguments.
     env, sys.argv = pickle.load(sys.stdin)

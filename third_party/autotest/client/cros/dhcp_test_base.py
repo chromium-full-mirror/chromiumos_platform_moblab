@@ -23,13 +23,13 @@ import struct
 import time
 import traceback
 
-from autotest_lib.client.bin import test
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import virtual_ethernet_pair
-from autotest_lib.client.cros import dhcp_handling_rule
-from autotest_lib.client.cros import dhcp_packet
-from autotest_lib.client.cros import dhcp_test_server
-from autotest_lib.client.cros.networking import shill_proxy
+from client.bin import test
+from client.common_lib import error
+from client.common_lib.cros import virtual_ethernet_pair
+from client.cros import dhcp_handling_rule
+from client.cros import dhcp_packet
+from client.cros import dhcp_test_server
+from client.cros.networking import shill_proxy
 
 
 # These are keys that may be used with the DBus dictionary returned from

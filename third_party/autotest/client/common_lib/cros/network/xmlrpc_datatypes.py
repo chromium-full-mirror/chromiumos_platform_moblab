@@ -7,8 +7,8 @@ import logging
 import pprint
 import sys
 
-from autotest_lib.client.common_lib.cros import xmlrpc_types
-from autotest_lib.client.common_lib.cros.network import xmlrpc_security_types
+from client.common_lib.cros import xmlrpc_types
+from client.common_lib.cros.network import xmlrpc_security_types
 
 
 def deserialize(serialized):

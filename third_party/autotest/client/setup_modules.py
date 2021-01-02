@@ -128,7 +128,7 @@ def setup(base_path, root_module_name=""):
     or on a test machine that just has the client directories installed.
     """
     # Hack... Any better ideas?
-    if (root_module_name == 'autotest_lib.client' and
+    if (root_module_name == 'client' and
         os.path.exists(os.path.join(os.path.dirname(__file__),
                                     '..', 'server'))):
         root_module_name = 'autotest_lib'

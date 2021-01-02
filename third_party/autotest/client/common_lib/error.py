@@ -127,7 +127,7 @@ class CmdError(TestError):
     """Indicates that a command failed, is fatal to the test unless caught.
 
     @type command: str
-    @type result_obj: autotest_lib.client.common_lib.utils.CmdResult
+    @type result_obj: client.common_lib.utils.CmdResult
     @type additional_text: str | None
     """
     def __init__(self, command, result_obj, additional_text=None):

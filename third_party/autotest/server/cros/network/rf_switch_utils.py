@@ -5,8 +5,8 @@
 import common
 import logging
 
-from autotest_lib.server import frontend
-from autotest_lib.server import site_utils
+from server import frontend
+from server import site_utils
 
 RF_SWITCH_LABEL = 'rf_switch'
 LOCK_REASON = 'Locked for the tests.'

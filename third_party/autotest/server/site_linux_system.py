@@ -14,13 +14,13 @@ import os
 import random
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import path_utils
-from autotest_lib.client.common_lib.cros import virtual_ethernet_pair
-from autotest_lib.client.common_lib.cros.network import interface
-from autotest_lib.client.common_lib.cros.network import iw_runner
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.server.cros.network import packet_capturer
+from client.common_lib import error
+from client.common_lib.cros import path_utils
+from client.common_lib.cros import virtual_ethernet_pair
+from client.common_lib.cros.network import interface
+from client.common_lib.cros.network import iw_runner
+from client.common_lib.cros.network import ping_runner
+from server.cros.network import packet_capturer
 import six
 from six.moves import range
 

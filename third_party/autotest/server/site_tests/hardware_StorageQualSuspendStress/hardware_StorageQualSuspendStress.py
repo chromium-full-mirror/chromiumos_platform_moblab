@@ -2,11 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import autotest
-from autotest_lib.server import hosts
-from autotest_lib.server import test
+from client.bin import utils
+from client.common_lib import error
+from server import autotest
+from server import hosts
+from server import test
 
 
 class hardware_StorageQualSuspendStress(test.test):

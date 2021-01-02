@@ -8,8 +8,8 @@ import time
 import logging
 import array
 
-from autotest_lib.client.bin import utils
-from autotest_lib.server.cros.bluetooth import bluetooth_adapter_tests
+from client.bin import utils
+from server.cros.bluetooth import bluetooth_adapter_tests
 
 
 class TestMonitor():

@@ -7,7 +7,7 @@
 # Collect network stats from the DUT.
 # For now just collect the byte count from the default interface.
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 def get_network_stats(machine):
     try:

@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 import fcntl, logging, os, re, stat, struct, time
-from autotest_lib.client.bin import fio_util, test, utils
-from autotest_lib.client.common_lib import error
+from client.bin import fio_util, test, utils
+from client.common_lib import error
 
 
 class FioTest(test.test):

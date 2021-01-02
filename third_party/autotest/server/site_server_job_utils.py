@@ -11,8 +11,8 @@ test_item: extends the basic test tuple to add include/exclude attributes and
 
 
 import logging, os, six.moves.queue
-from autotest_lib.client.common_lib import error, utils
-from autotest_lib.server import autotest, hosts, host_attributes
+from client.common_lib import error, utils
+from server import autotest, hosts, host_attributes
 
 
 class test_item(object):

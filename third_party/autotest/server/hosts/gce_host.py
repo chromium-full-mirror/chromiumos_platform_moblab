@@ -9,10 +9,10 @@ import string
 import common
 from chromite.lib import gce
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.client.cros import constants as client_constants
-from autotest_lib.server.hosts import abstract_ssh
+from client.common_lib import error
+from client.common_lib import lsbrelease_utils
+from client.cros import constants as client_constants
+from server.hosts import abstract_ssh
 
 SSH_KEYS_METADATA_KEY = "sshKeys"
 TMP_DIR='/usr/local/tmp'

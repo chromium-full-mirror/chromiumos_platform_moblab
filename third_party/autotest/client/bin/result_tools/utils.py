@@ -46,13 +46,13 @@ import time
 import traceback
 
 try:
-    from autotest_lib.client.bin.result_tools import dedupe_file_throttler
-    from autotest_lib.client.bin.result_tools import delete_file_throttler
-    from autotest_lib.client.bin.result_tools import result_info
-    from autotest_lib.client.bin.result_tools import shrink_file_throttler
-    from autotest_lib.client.bin.result_tools import throttler_lib
-    from autotest_lib.client.bin.result_tools import utils_lib
-    from autotest_lib.client.bin.result_tools import zip_file_throttler
+    from client.bin.result_tools import dedupe_file_throttler
+    from client.bin.result_tools import delete_file_throttler
+    from client.bin.result_tools import result_info
+    from client.bin.result_tools import shrink_file_throttler
+    from client.bin.result_tools import throttler_lib
+    from client.bin.result_tools import utils_lib
+    from client.bin.result_tools import zip_file_throttler
 except ImportError:
     import dedupe_file_throttler
     import delete_file_throttler

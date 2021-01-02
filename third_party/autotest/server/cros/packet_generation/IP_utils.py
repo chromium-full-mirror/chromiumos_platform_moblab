@@ -4,7 +4,7 @@
 
 import os
 
-from autotest_lib.server.hosts import ssh_host
+from server.hosts import ssh_host
 
 RA_SCRIPT = 'sendra.py'
 SCAPY = 'scapy-2.2.0.tar.gz'

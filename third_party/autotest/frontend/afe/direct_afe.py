@@ -4,8 +4,8 @@
 # found in the LICENSE file.
 
 import common
-import autotest_lib.server.frontend as frontend
-from autotest_lib.frontend.afe import rpc_interface
+import server.frontend as frontend
+from frontend.afe import rpc_interface
 
 class directAFE(frontend.AFE):
     """

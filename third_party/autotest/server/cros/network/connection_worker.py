@@ -5,13 +5,13 @@
 import logging
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import iw_runner
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.client.common_lib.cros.network import xmlrpc_datatypes
-from autotest_lib.server import hosts
-from autotest_lib.server.cros.network import wifi_client
-from autotest_lib.server.cros.network import netperf_runner
+from client.common_lib import error
+from client.common_lib.cros.network import iw_runner
+from client.common_lib.cros.network import ping_runner
+from client.common_lib.cros.network import xmlrpc_datatypes
+from server import hosts
+from server.cros.network import wifi_client
+from server.cros.network import netperf_runner
 
 WORK_CLIENT_CONNECTION_RETRIES = 3
 WAIT_FOR_CONNECTION = 10

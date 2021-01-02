@@ -8,9 +8,9 @@ import os, logging, time
 import six
 from six.moves import urllib
 import re
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import utils
-from autotest_lib.server.hosts import base_classes
+from client.common_lib import error
+from server import utils
+from server.hosts import base_classes
 
 
 class RemoteHost(base_classes.Host):

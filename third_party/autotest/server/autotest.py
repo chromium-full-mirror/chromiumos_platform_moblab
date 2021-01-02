@@ -16,17 +16,17 @@ import time
 import traceback
 
 import common
-from autotest_lib.client.bin.result_tools import runner as result_tools_runner
-from autotest_lib.client.common_lib import autotemp
-from autotest_lib.client.common_lib import base_job
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import packages
-from autotest_lib.client.common_lib import utils as client_utils
-from autotest_lib.server import installable_object
-from autotest_lib.server import utils
-from autotest_lib.server import utils as server_utils
-from autotest_lib.server.cros.dynamic_suite.constants import JOB_REPO_URL
+from client.bin.result_tools import runner as result_tools_runner
+from client.common_lib import autotemp
+from client.common_lib import base_job
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import packages
+from client.common_lib import utils as client_utils
+from server import installable_object
+from server import utils
+from server import utils as server_utils
+from server.cros.dynamic_suite.constants import JOB_REPO_URL
 import six
 from six.moves import map
 
@@ -236,8 +236,8 @@ class Autotest(installable_object.InstallableObject):
         except Exception as e:
             # TODO(pprabhu): We really want to catch host_info.StoreError here,
             # but we can't import host_info from this module.
-            #   - autotest_lib.hosts.host_info pulls in (naturally)
-            #   autotest_lib.hosts.__init__
+            #   - hosts.host_info pulls in (naturally)
+            #   hosts.__init__
             #   - This pulls in all the host classes ever defined
             #   - That includes abstract_ssh, which depends on autotest
             logging.warning('Failed to obtain host info: %r', e)
@@ -659,12 +659,12 @@ class Autotest(installable_object.InstallableObject):
 
         This method runs a static/class/module autotest method on the client.
         For example:
-          run_static_method("autotest_lib.client.cros.cros_ui", "reboot")
+          run_static_method("client.cros.cros_ui", "reboot")
 
-        Will run autotest_lib.client.cros.cros_ui.reboot() on the client.
+        Will run client.cros.cros_ui.reboot() on the client.
 
         @param module: module name as you would refer to it when importing in a
-            control file. e.g. autotest_lib.client.common_lib.module_name.
+            control file. e.g. client.common_lib.module_name.
         @param method: the method you want to call.
         @param results_dir: A str path where the results should be stored
             on the local filesystem.

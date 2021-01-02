@@ -13,7 +13,7 @@ from six.moves import range
 from six import StringIO
 from os import path
 import re, six, string
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 __all__ = ['config_loader']
 

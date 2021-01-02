@@ -13,15 +13,15 @@ import urlparse
 from datetime import datetime, timedelta
 from xml.etree import ElementTree
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.client.cros.update_engine import dlc_util
-from autotest_lib.client.cros.update_engine import update_engine_event as uee
-from autotest_lib.client.cros.update_engine import update_engine_util
-from autotest_lib.server import autotest
-from autotest_lib.server import test
-from autotest_lib.server.cros.dynamic_suite import tools
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros import dev_server
+from client.cros.update_engine import dlc_util
+from client.cros.update_engine import update_engine_event as uee
+from client.cros.update_engine import update_engine_util
+from server import autotest
+from server import test
+from server.cros.dynamic_suite import tools
 from chromite.lib import auto_updater
 from chromite.lib import auto_updater_transfer
 from chromite.lib import remote_access

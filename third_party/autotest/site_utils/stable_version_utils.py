@@ -8,9 +8,9 @@
 import common
 import logging
 import django.core.exceptions
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import models
+from client.common_lib import global_config
+from frontend import setup_django_environment
+from frontend.afe import models
 
 
 # Name of the default board. For boards that don't have stable version
@@ -63,7 +63,7 @@ def set(version, board=DEFAULT):
     """
 
     logging.warning("stable_version_utils::set: attmpted to set stable version. setting the stable version is not permitted")
-    return None    
+    return None
 
 
 def delete(board):

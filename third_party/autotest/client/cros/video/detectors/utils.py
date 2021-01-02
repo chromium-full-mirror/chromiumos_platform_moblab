@@ -4,8 +4,8 @@
 
 import itertools
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import cros_config
+from client.common_lib import utils
+from client.common_lib.cros import cros_config
 
 
 def detect_camera(iface):

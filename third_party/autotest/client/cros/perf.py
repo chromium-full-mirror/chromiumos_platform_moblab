@@ -4,8 +4,8 @@
 
 import logging, threading, time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.cros import service_stopper
+from client.bin import utils
+from client.cros import service_stopper
 
 
 class PerfControl(object):

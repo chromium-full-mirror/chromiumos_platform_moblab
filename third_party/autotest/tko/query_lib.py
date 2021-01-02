@@ -9,8 +9,8 @@ import re
 import sys
 
 import common
-from autotest_lib.tko import display
-from autotest_lib.tko import frontend
+from tko import display
+from tko import frontend
 
 def parse_scrub_and_gen_condition(condition, valid_field_dict):
     me = parse_scrub_and_gen_condition   # shorten the name

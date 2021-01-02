@@ -21,7 +21,7 @@ import urllib
 import urllib2
 
 import common
-from autotest_lib.tko import utils as tko_utils
+from tko import utils as tko_utils
 
 _ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 _PRESENTATION_CONFIG_FILE = os.path.join(

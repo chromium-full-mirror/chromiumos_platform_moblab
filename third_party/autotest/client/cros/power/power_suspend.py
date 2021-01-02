@@ -4,14 +4,14 @@
 
 import collections, logging, os, re, subprocess, time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import cros_logging
-from autotest_lib.client.cros.power import power_status
-from autotest_lib.client.cros.power import power_utils
-from autotest_lib.client.cros.power import sys_power
+from client.bin import utils
+from client.common_lib import error
+from client.cros import cros_logging
+from client.cros.power import power_status
+from client.cros.power import power_utils
+from client.cros.power import sys_power
 #pylint: disable=W0611
-from autotest_lib.client.cros import flimflam_test_path
+from client.cros import flimflam_test_path
 import flimflam
 
 class Suspender(object):

@@ -9,4 +9,4 @@ import os
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                      'autotest_lib.frontend.settings_readonly')
+                      'frontend.settings_readonly')

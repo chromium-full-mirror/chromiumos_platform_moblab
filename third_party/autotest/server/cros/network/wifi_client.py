@@ -11,17 +11,17 @@ import time
 from contextlib import contextmanager
 from collections import namedtuple
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.network import interface
-from autotest_lib.client.common_lib.cros.network import iw_runner
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.client.cros import constants
-from autotest_lib.server import autotest
-from autotest_lib.server import site_linux_system
-from autotest_lib.server.cros.network import wpa_cli_proxy
-from autotest_lib.server.cros.network import wpa_mon
-from autotest_lib.server.hosts import cast_os_host
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros.network import interface
+from client.common_lib.cros.network import iw_runner
+from client.common_lib.cros.network import ping_runner
+from client.cros import constants
+from server import autotest
+from server import site_linux_system
+from server.cros.network import wpa_cli_proxy
+from server.cros.network import wpa_mon
+from server.hosts import cast_os_host
 
 # Wake-on-WiFi feature strings
 WAKE_ON_WIFI_NONE = 'none'

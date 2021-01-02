@@ -8,10 +8,10 @@ import os.path
 import time
 import uuid
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import path_utils
-from autotest_lib.client.common_lib.cros.network import iw_runner
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros import path_utils
+from client.common_lib.cros.network import iw_runner
 
 
 class PacketCapturesDisabledError(Exception):

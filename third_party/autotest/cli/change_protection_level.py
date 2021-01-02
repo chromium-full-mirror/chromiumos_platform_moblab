@@ -4,7 +4,7 @@
 
 import sys, optparse, traceback, pwd, os
 import common
-from autotest_lib.cli import rpc, host
+from cli import rpc, host
 
 usage = 'usage: %prog [options] new_protection_level machine1 machine2 ...'
 parser = optparse.OptionParser(usage=usage)

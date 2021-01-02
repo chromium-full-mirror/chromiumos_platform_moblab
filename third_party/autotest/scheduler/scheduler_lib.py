@@ -10,14 +10,14 @@ import os
 
 import common
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import logging_config
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.client.common_lib import utils
-from autotest_lib.database import database_connection
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import readonly_connection
-from autotest_lib.server import utils as server_utils
+from client.common_lib import global_config
+from client.common_lib import logging_config
+from client.common_lib import logging_manager
+from client.common_lib import utils
+from database import database_connection
+from frontend import setup_django_environment
+from frontend.afe import readonly_connection
+from server import utils as server_utils
 
 
 DB_CONFIG_SECTION = 'AUTOTEST_WEB'

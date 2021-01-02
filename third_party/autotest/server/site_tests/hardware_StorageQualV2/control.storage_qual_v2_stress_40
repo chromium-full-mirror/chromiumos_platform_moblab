@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 AUTHOR = 'abergman, chromeos-engprod-platform-syd'
 NAME = 'storage_qual_v2_stress_40'

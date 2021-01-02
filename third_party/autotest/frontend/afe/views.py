@@ -3,13 +3,13 @@ import httplib2, os, sys, traceback, cgi
 from django.http import HttpResponse, HttpResponsePermanentRedirect
 from django.http import HttpResponseServerError
 from django.template import Context, loader
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend import views_common
-from autotest_lib.frontend.afe import models, rpc_handler, rpc_interface
-from autotest_lib.frontend.afe import rpc_utils
+from client.common_lib import utils
+from frontend import views_common
+from frontend.afe import models, rpc_handler, rpc_interface
+from frontend.afe import rpc_utils
 
 moblab_rpc_interface = utils.import_site_module(
-        __file__, 'autotest_lib.frontend.afe.moblab_rpc_interface',
+        __file__, 'frontend.afe.moblab_rpc_interface',
         dummy=object())
 
 # since moblab_rpc_interface is later in the list, its methods will

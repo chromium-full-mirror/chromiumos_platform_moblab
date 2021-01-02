@@ -1,4 +1,4 @@
-from autotest_lib.client.common_lib.cros.cfm.metrics import (
+from client.common_lib.cros.cfm.metrics import (
         media_metrics_collector)
 
 import mock

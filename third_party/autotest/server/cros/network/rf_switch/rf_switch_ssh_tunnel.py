@@ -29,9 +29,9 @@ pub keys.
 
 import contextlib
 
-from autotest_lib.server.cros.network.rf_switch import rf_switch
-from autotest_lib.server.cros.network.rf_switch import scpi
-from autotest_lib.server.cros.network.rf_switch import scpi_ssh_tunnel
+from server.cros.network.rf_switch import rf_switch
+from server.cros.network.rf_switch import scpi
+from server.cros.network.rf_switch import scpi_ssh_tunnel
 
 
 class RfSwitchSshTunnel(scpi_ssh_tunnel.ScpiSshTunnel, rf_switch.RfSwitch):

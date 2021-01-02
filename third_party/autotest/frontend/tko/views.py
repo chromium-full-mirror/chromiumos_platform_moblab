@@ -1,6 +1,6 @@
-from autotest_lib.frontend.tko import rpc_interface
-from autotest_lib.frontend.tko import csv_encoder
-from autotest_lib.frontend.afe import rpc_handler
+from frontend.tko import rpc_interface
+from frontend.tko import csv_encoder
+from frontend.afe import rpc_handler
 
 rpc_handler_obj = rpc_handler.RpcHandler((rpc_interface,),
                                          document_module=rpc_interface)

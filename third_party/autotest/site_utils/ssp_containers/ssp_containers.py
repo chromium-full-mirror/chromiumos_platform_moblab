@@ -9,12 +9,12 @@ import json
 import docker
 
 import common
-from autotest_lib.client.bin import utils as common_utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.server import utils as server_utils
-from autotest_lib.site_utils.ssp_containers import constants
+from client.bin import utils as common_utils
+from client.common_lib import error
+from client.common_lib.cros import dev_server
+from client.common_lib.cros import retry
+from server import utils as server_utils
+from site_utils.ssp_containers import constants
 
 def get_container_info(container_path, **filters):
     """Get a collection of container information in the given container path.

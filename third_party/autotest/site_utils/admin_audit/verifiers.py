@@ -13,10 +13,10 @@ import time
 import os
 import re
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils as client_utils
-from autotest_lib.server.cros.storage import storage_validate as storage
-from autotest_lib.server.cros import servo_keyboard_utils
+from client.common_lib import error
+from client.common_lib import utils as client_utils
+from server.cros.storage import storage_validate as storage
+from server.cros import servo_keyboard_utils
 
 try:
     from chromite.lib import metrics

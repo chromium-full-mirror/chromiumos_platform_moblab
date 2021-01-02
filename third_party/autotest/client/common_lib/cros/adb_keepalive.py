@@ -14,9 +14,9 @@ import sys
 import time
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import logging_config
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib import logging_config
 
 _ADB_POLLING_INTERVAL_SECONDS = 10
 _ADB_CONNECT_INTERVAL_SECONDS = 1

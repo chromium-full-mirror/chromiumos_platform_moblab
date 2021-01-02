@@ -24,8 +24,8 @@ import socket
 import subprocess
 import urllib
 import urllib2
-from autotest_lib.client.common_lib import error as exceptions
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import error as exceptions
+from client.common_lib import global_config
 
 from json import decoder
 

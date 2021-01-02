@@ -6,8 +6,8 @@
 
 import os
 
-from autotest_lib.server import test
-from autotest_lib.server.cros.power import wrapper_test_runner
+from server import test
+from server.cros.power import wrapper_test_runner
 
 
 class PowerBaseWrapper(test.test):

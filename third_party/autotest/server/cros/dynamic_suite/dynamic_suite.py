@@ -9,18 +9,18 @@ import warnings
 
 import common
 
-from autotest_lib.client.common_lib import base_job
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import priorities
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.server.cros.dynamic_suite.suite import ProvisionSuite
-from autotest_lib.server.cros.dynamic_suite.suite import Suite
-from autotest_lib.tko import utils as tko_utils
+from client.common_lib import base_job
+from client.common_lib import error
+from client.common_lib import priorities
+from client.common_lib import time_utils
+from client.common_lib import utils
+from client.common_lib.cros import dev_server
+from server.cros import provision
+from server.cros.dynamic_suite import constants
+from server.cros.dynamic_suite import frontend_wrappers
+from server.cros.dynamic_suite.suite import ProvisionSuite
+from server.cros.dynamic_suite.suite import Suite
+from tko import utils as tko_utils
 
 
 """CrOS dynamic test suite generation and execution module.
@@ -43,8 +43,8 @@ sub-jobs to do the needed reimaging and test running.
 Example control file:
 
 import common
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import dynamic_suite
+from server.cros import provision
+from server.cros.dynamic_suite import dynamic_suite
 
 dynamic_suite.reimage_and_run(
     builds={provision.CROS_VERSION_PREFIX: build}, board=board, name='bvt',

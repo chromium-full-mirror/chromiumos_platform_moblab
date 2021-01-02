@@ -1,5 +1,5 @@
 import common
-from autotest_lib.client.common_lib import autotest_enum
+from client.common_lib import autotest_enum
 
 
 # common enums for Job attributes

@@ -8,7 +8,7 @@ Define some helper functions as required.
 import optparse, os, sys
 from os import path
 import common
-from autotest_lib.tko.parsers.test import scenario_base
+from tko.parsers.test import scenario_base
 
 
 usage = 'usage: %prog [options] scenario_dirpath'

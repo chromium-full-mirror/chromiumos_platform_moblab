@@ -13,9 +13,9 @@ import json
 import logging
 import six
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import autotest
-from autotest_lib.server.cros.dynamic_suite import suite
+from client.common_lib import error
+from server import autotest
+from server.cros.dynamic_suite import suite
 
 
 class WrapperTestRunner(object):

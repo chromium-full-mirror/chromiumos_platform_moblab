@@ -35,9 +35,9 @@ provision_QuickProvision
 """
 
 
-from autotest_lib.client.bin import sysinfo
-from autotest_lib.client.common_lib import error, utils
-from autotest_lib.client.cros import constants
+from client.bin import sysinfo
+from client.common_lib import error, utils
+from client.cros import constants
 
 
 # Uncomment the below line, and change it to the correct value if you are

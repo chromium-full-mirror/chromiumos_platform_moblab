@@ -81,9 +81,9 @@ import collections
 import logging
 
 import common
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.global_config import global_config
-from autotest_lib.scheduler import rdb_utils
+from client.common_lib import utils
+from client.common_lib.global_config import global_config
+from scheduler import rdb_utils
 
 
 MEMOIZE_KEY = 'memoized_hosts'

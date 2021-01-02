@@ -5,18 +5,18 @@ import logging
 import re
 import time
 
-from autotest_lib.client.bin import test
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.common_lib.cros.network import interface
-from autotest_lib.client.cros import ec
-from autotest_lib.client.cros import service_stopper
-from autotest_lib.client.cros.camera import camera_utils
-from autotest_lib.client.cros.power import power_dashboard
-from autotest_lib.client.cros.power import power_status
-from autotest_lib.client.cros.power import power_telemetry_utils
-from autotest_lib.client.cros.power import power_utils
-from autotest_lib.client.cros.video import histogram_verifier
+from client.bin import test
+from client.common_lib import error
+from client.common_lib.cros import retry
+from client.common_lib.cros.network import interface
+from client.cros import ec
+from client.cros import service_stopper
+from client.cros.camera import camera_utils
+from client.cros.power import power_dashboard
+from client.cros.power import power_status
+from client.cros.power import power_telemetry_utils
+from client.cros.power import power_utils
+from client.cros.video import histogram_verifier
 
 class power_Test(test.test):
     """Optional base class power related tests."""

@@ -7,8 +7,8 @@ __author__ = """Copyright Andy Whitcroft, Martin J. Bligh - 2006, 2007"""
 
 import sys, os, signal, time, six.moves.cPickle, logging
 
-from autotest_lib.client.common_lib import error, utils
-from autotest_lib.client.common_lib.cros import retry
+from client.common_lib import error, utils
+from client.common_lib.cros import retry
 from six.moves import zip
 
 

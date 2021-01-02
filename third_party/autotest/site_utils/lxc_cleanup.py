@@ -23,11 +23,11 @@ import os
 import signal
 
 import common
-from autotest_lib.client.common_lib import logging_config
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib import utils
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.site_utils import lxc
+from client.common_lib import logging_config
+from client.common_lib import time_utils
+from client.common_lib import utils
+from server.cros.dynamic_suite import frontend_wrappers
+from site_utils import lxc
 
 
 AFE = frontend_wrappers.RetryingAFE(timeout_min=0.1, delay_sec=10)

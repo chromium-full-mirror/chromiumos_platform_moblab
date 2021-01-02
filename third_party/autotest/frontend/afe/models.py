@@ -13,19 +13,19 @@ except django.core.exceptions.ImproperlyConfigured:
     raise ImportError('Django database not yet configured. Import either '
                        'setup_django_environment or '
                        'setup_django_lite_environment from '
-                       'autotest_lib.frontend before any imports that '
+                       'frontend before any imports that '
                        'depend on django models.')
 from django.db import utils as django_utils
 from xml.sax import saxutils
 import common
-from autotest_lib.frontend.afe import model_logic, model_attributes
-from autotest_lib.frontend.afe import rdb_model_extensions
-from autotest_lib.frontend import settings, thread_local
-from autotest_lib.client.common_lib import enum, error, host_protections
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import host_queue_entry_states
-from autotest_lib.client.common_lib import control_data, priorities, decorators
-from autotest_lib.server import utils as server_utils
+from frontend.afe import model_logic, model_attributes
+from frontend.afe import rdb_model_extensions
+from frontend import settings, thread_local
+from client.common_lib import enum, error, host_protections
+from client.common_lib import global_config
+from client.common_lib import host_queue_entry_states
+from client.common_lib import control_data, priorities, decorators
+from server import utils as server_utils
 
 # job options and user preferences
 DEFAULT_REBOOT_BEFORE = model_attributes.RebootBefore.IF_DIRTY

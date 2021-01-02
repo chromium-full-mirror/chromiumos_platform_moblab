@@ -4,9 +4,9 @@
 
 import cgi, os
 
-from autotest_lib.client.bin import test
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros import chrome
+from client.bin import test
+from client.bin import utils
+from client.common_lib.cros import chrome
 
 _DEFAULT_TIMEOUT = 60  # Seconds a tester has to respond to prompts
 

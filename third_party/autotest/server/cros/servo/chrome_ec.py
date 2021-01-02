@@ -7,9 +7,9 @@ import logging
 import re
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import ec
-from autotest_lib.server.cros.servo import servo
+from client.common_lib import error
+from client.cros import ec
+from server.cros.servo import servo
 
 # Hostevent codes, copied from:
 #     ec/include/ec_commands.h

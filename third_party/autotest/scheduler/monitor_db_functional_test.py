@@ -4,15 +4,15 @@
 import logging, os, signal, unittest
 import common
 import mock
-from autotest_lib.client.common_lib import enum, global_config, host_protections
-from autotest_lib.database import database_connection
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import frontend_test_utils, models
-from autotest_lib.frontend.afe import model_attributes
-from autotest_lib.scheduler import drone_manager, email_manager
-from autotest_lib.scheduler import monitor_db, scheduler_models
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.scheduler import scheduler_lib
+from client.common_lib import enum, global_config, host_protections
+from database import database_connection
+from frontend import setup_django_environment
+from frontend.afe import frontend_test_utils, models
+from frontend.afe import model_attributes
+from scheduler import drone_manager, email_manager
+from scheduler import monitor_db, scheduler_models
+from scheduler import scheduler_config
+from scheduler import scheduler_lib
 
 HqeStatus = models.HostQueueEntry.Status
 HostStatus = models.Host.Status
@@ -355,7 +355,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         scheduler_models.initialize_globals()
 
         patcher = mock.patch(
-                'autotest_lib.scheduler.luciferlib.is_lucifer_enabled',
+                'scheduler.luciferlib.is_lucifer_enabled',
                 lambda: False)
         patcher.start()
         self.addCleanup(patcher.stop)

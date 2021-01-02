@@ -18,7 +18,7 @@ import subprocess
 import tempfile
 import wave
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 from six.moves import map
 from six.moves import range
 

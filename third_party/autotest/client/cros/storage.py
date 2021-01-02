@@ -8,9 +8,9 @@
 
 import logging, re, os, time, hashlib
 
-from autotest_lib.client.bin import test, utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import liststorage
+from client.bin import test, utils
+from client.common_lib import error
+from client.cros import liststorage
 
 
 class StorageException(error.TestError):

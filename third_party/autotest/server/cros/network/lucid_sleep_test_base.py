@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server.cros import dark_resume_utils
-from autotest_lib.server.cros.network import wifi_cell_test_base
+from client.common_lib import error
+from server.cros import dark_resume_utils
+from server.cros.network import wifi_cell_test_base
 
 class LucidSleepTestBase(wifi_cell_test_base.WiFiCellTestBase):
     """An abstract base class for Lucid Sleep autotests in WiFi cells.

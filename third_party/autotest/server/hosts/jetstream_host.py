@@ -12,10 +12,10 @@ typicaly used in Jetstream autotests.
 import logging
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.server.hosts import cros_host
-from autotest_lib.server.hosts import cros_repair
+from client.common_lib import error
+from client.common_lib import lsbrelease_utils
+from server.hosts import cros_host
+from server.hosts import cros_repair
 
 
 # Presence of any of these processes indicates that the host is up:

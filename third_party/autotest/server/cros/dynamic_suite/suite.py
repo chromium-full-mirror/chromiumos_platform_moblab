@@ -18,26 +18,26 @@ import warnings
 
 import common
 
-from autotest_lib.frontend.afe.json_rpc import proxy
-from autotest_lib.client.common_lib import enum
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import priorities
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import model_attributes
-from autotest_lib.frontend.afe.json_rpc import proxy
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.cros.dynamic_suite import control_file_getter
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.server.cros.dynamic_suite import job_status
-from autotest_lib.server.cros.dynamic_suite import suite_common
-from autotest_lib.server.cros.dynamic_suite import tools
-from autotest_lib.server.cros.dynamic_suite.job_status import Status
+from frontend.afe.json_rpc import proxy
+from client.common_lib import enum
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import priorities
+from client.common_lib import time_utils
+from client.common_lib import utils
+from frontend.afe import model_attributes
+from frontend.afe.json_rpc import proxy
+from server.cros import provision
+from server.cros.dynamic_suite import constants
+from server.cros.dynamic_suite import control_file_getter
+from server.cros.dynamic_suite import frontend_wrappers
+from server.cros.dynamic_suite import job_status
+from server.cros.dynamic_suite import suite_common
+from server.cros.dynamic_suite import tools
+from server.cros.dynamic_suite.job_status import Status
 
 try:
-    from autotest_lib.server.cros.dynamic_suite import boolparse_lib
+    from server.cros.dynamic_suite import boolparse_lib
 except ImportError as e:
     print('Unable to import boolparse_lib: %s' % (e,))
     print('This script must be either:')
@@ -1735,7 +1735,7 @@ class _EmailReporter(_ResultReporter):
         # only used in this function, move the imports here avoid the
         # requirement of building site packages to use other functions in this
         # module.
-        from autotest_lib.server.cros.dynamic_suite import reporting
+        from server.cros.dynamic_suite import reporting
 
         job_views = self._suite._tko.run('get_detailed_test_views',
                                          afe_job_id=result.id)
@@ -1758,7 +1758,7 @@ class _EmailReporter(_ResultReporter):
         # only used in this function, move the imports here avoid the
         # requirement of building site packages to use other functions in this
         # module.
-        from autotest_lib.server.cros.dynamic_suite import reporting_utils
+        from server.cros.dynamic_suite import reporting_utils
 
         # Try to merge with bug template in test control file.
         template = reporting_utils.BugTemplate(self._bug_template)
@@ -1783,7 +1783,7 @@ class _EmailReporter(_ResultReporter):
         # modules are only used in this function, move the
         # imports here avoid the requirement of building site
         # packages to use other functions in this module.
-        from autotest_lib.server.cros.dynamic_suite import reporting
+        from server.cros.dynamic_suite import reporting
 
         reporting.send_email(
                 self._get_test_bug(result),

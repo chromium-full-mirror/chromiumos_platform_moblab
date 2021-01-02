@@ -5,8 +5,8 @@
 import os
 
 import common
-from autotest_lib.client.bin import utils as common_utils
-from autotest_lib.client.common_lib.global_config import global_config
+from client.bin import utils as common_utils
+from client.common_lib.global_config import global_config
 
 
 # Name of the base container.

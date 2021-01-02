@@ -46,11 +46,11 @@ import json
 import logging
 
 import common
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.server import afe_utils
-from autotest_lib.server.hosts import repair_utils
-from autotest_lib.server.hosts import cros_constants
+from client.common_lib import global_config
+from client.common_lib import hosts
+from server import afe_utils
+from server.hosts import repair_utils
+from server.hosts import cros_constants
 
 from chromite.lib import timeout_util
 import six

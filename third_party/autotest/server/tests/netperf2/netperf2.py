@@ -2,8 +2,8 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from autotest_lib.server import autotest, hosts, subcommand, test
-from autotest_lib.server import utils
+from server import autotest, hosts, subcommand, test
+from server import utils
 
 class netperf2(test.test):
     version = 2

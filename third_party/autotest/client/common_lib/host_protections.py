@@ -1,5 +1,5 @@
 import logging
-from autotest_lib.client.common_lib import autotest_enum, global_config
+from client.common_lib import autotest_enum, global_config
 
 # Changing this file has consequences that need to be understood.
 # Adding a protection level to the enum requires you to append your change to

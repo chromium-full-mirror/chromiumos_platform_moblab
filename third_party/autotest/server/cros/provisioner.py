@@ -12,13 +12,13 @@ import six
 import sys
 import six.moves.urllib.parse
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.client.common_lib.cros import kernel_utils
-from autotest_lib.server import autotest
-from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
-from autotest_lib.server.cros.dynamic_suite import tools
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros import dev_server
+from client.common_lib.cros import kernel_utils
+from server import autotest
+from server.cros.dynamic_suite import constants as ds_constants
+from server.cros.dynamic_suite import tools
 
 try:
     from chromite.lib import metrics

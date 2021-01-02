@@ -8,7 +8,7 @@ import subprocess
 import time
 import threading
 
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 class MemoryEater(object):
     """A util class which run programs to consume memory in the background.

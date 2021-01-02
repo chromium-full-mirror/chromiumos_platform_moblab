@@ -8,10 +8,10 @@ import re
 import shutil
 
 import common
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib import utils
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
+from client.common_lib import time_utils
+from client.common_lib import utils
+from server.cros.dynamic_suite import constants
+from server.cros.dynamic_suite import frontend_wrappers
 
 metrics = utils.metrics_mock
 

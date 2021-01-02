@@ -19,10 +19,10 @@ from six.moves import range
 from six.moves import zip
 import time
 
-from autotest_lib.client.bin import test
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import chromedriver
-from autotest_lib.client.common_lib.global_config import global_config
+from client.bin import test
+from client.common_lib import error
+from client.common_lib.cros import chromedriver
+from client.common_lib.global_config import global_config
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait

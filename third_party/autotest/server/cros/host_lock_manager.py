@@ -6,8 +6,8 @@ import logging
 import signal
 import common
 
-from autotest_lib.server import site_utils
-from autotest_lib.server.cros.chaos_lib import chaos_datastore_utils
+from server import site_utils
+from server.cros.chaos_lib import chaos_datastore_utils
 """HostLockManager class, for the dynamic_suite module.
 
 A HostLockManager instance manages locking and unlocking a set of autotest DUTs.

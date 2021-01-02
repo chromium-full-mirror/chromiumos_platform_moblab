@@ -11,7 +11,7 @@ import logging
 from six.moves import map
 from six.moves import zip
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 def from_addr(addr, prefix_len=None):
     """Build a Netblock object.

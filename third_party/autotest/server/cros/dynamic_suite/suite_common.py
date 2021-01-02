@@ -14,15 +14,15 @@ import re
 
 import common
 
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.cros.dynamic_suite import control_file_getter
-from autotest_lib.server.cros.dynamic_suite import tools
+from client.common_lib import control_data
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import time_utils
+from client.common_lib.cros import dev_server
+from server.cros import provision
+from server.cros.dynamic_suite import constants
+from server.cros.dynamic_suite import control_file_getter
+from server.cros.dynamic_suite import tools
 
 ENABLE_CONTROLS_IN_BATCH = global_config.global_config.get_config_value(
         'CROS', 'enable_getting_controls_in_batch', type=bool, default=False)

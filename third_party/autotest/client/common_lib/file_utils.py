@@ -10,7 +10,7 @@ import shutil
 from six.moves import urllib
 import subprocess
 
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import global_config
 
 def rm_dir_if_exists(dir_to_remove):
     """

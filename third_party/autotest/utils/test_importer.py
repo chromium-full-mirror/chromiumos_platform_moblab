@@ -27,10 +27,10 @@ Most options should be fairly self explanatory, use --help to display them.
 import common
 import logging, re, os, sys, optparse, compiler
 
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import models
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import logging_config, logging_manager
+from frontend import setup_django_environment
+from frontend.afe import models
+from client.common_lib import control_data
+from client.common_lib import logging_config, logging_manager
 
 
 class TestImporterLoggingConfig(logging_config.LoggingConfig):

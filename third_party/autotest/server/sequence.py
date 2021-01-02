@@ -15,12 +15,12 @@ import logging
 import os
 
 import common
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import priorities
-from autotest_lib.server import utils
-from autotest_lib.server.cros.dynamic_suite import control_file_getter
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.site_utils import job_directories
+from client.common_lib import control_data
+from client.common_lib import priorities
+from server import utils
+from server.cros.dynamic_suite import control_file_getter
+from server.cros.dynamic_suite import frontend_wrappers
+from site_utils import job_directories
 import six
 from six.moves import range
 

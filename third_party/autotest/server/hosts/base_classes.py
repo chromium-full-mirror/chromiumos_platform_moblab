@@ -17,8 +17,8 @@ poirier@google.com (Benjamin Poirier),
 stutsman@google.com (Ryan Stutsman)
 """
 
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.server import utils
+from client.common_lib import hosts
+from server import utils
 
 
 class Host(hosts.Host):

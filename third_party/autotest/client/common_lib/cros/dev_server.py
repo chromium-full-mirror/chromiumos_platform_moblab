@@ -15,12 +15,12 @@ import time
 import urllib2
 import urlparse
 
-from autotest_lib.client.bin import utils as bin_utils
-from autotest_lib.client.common_lib import android_utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import retry
+from client.bin import utils as bin_utils
+from client.common_lib import android_utils
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import utils
+from client.common_lib.cros import retry
 # TODO(cmasone): redo this class using requests module; http://crosbug.com/30107
 
 metrics = utils.metrics_mock

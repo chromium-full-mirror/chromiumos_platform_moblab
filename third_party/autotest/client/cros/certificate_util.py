@@ -5,7 +5,7 @@
 
 import tempfile
 
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 class PEMCertificate(object):
     """Object enclosing a PEM certificate.

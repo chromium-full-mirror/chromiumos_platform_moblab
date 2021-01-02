@@ -8,11 +8,11 @@ import sys
 import unittest
 
 import common
-from autotest_lib.cli import atest, rpc
-from autotest_lib.frontend.afe import rpc_client_lib
-from autotest_lib.frontend.afe.json_rpc import proxy
-from autotest_lib.client.common_lib.test_utils import mock
-from autotest_lib.client.common_lib import autotemp
+from cli import atest, rpc
+from frontend.afe import rpc_client_lib
+from frontend.afe.json_rpc import proxy
+from client.common_lib.test_utils import mock
+from client.common_lib import autotemp
 
 CLI_USING_PDB = False
 CLI_UT_DEBUG = False

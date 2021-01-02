@@ -1,7 +1,7 @@
 import os, sys
 import common
 
-from autotest_lib.client.common_lib import error, utils, packages
+from client.common_lib import error, utils, packages
 
 
 class ProfilerNotPresentError(error.JobError):

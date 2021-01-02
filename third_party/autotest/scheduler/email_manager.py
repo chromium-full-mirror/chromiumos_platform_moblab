@@ -9,8 +9,8 @@ import time
 import traceback
 
 import common
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.site_utils  import gmail_lib
+from client.common_lib import global_config
+from site_utils  import gmail_lib
 
 
 CONFIG_SECTION = 'SCHEDULER'

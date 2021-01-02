@@ -7,7 +7,7 @@ __author__ = 'showard@google.com (Steve Howard)'
 
 import getpass, os
 from json_rpc import proxy
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 
 class AuthError(Exception):
@@ -57,5 +57,5 @@ def _base_authorization_headers(username, server):
 
 
 authorization_headers = utils.import_site_function(
-        __file__, 'autotest_lib.frontend.afe.site_rpc_client_lib',
+        __file__, 'frontend.afe.site_rpc_client_lib',
         'authorization_headers', _base_authorization_headers)

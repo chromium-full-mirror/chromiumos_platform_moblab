@@ -24,9 +24,9 @@ import glob, logging, os, re, shutil, socket, sys, six.moves._thread, time, trac
 from abc import abstractmethod
 from six import StringIO
 
-from autotest_lib.client.bin import utils as client_utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import test, utils
+from client.bin import utils as client_utils
+from client.common_lib import error
+from server import test, utils
 
 
 # How long to wait for the mini-Omaha server to come up.

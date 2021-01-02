@@ -3,10 +3,10 @@ import os
 import re
 
 import common
-from autotest_lib.tko import models
-from autotest_lib.tko import status_lib
-from autotest_lib.tko import utils as tko_utils
-from autotest_lib.tko.parsers import base
+from tko import models
+from tko import status_lib
+from tko import utils as tko_utils
+from tko.parsers import base
 
 class NoHostnameError(Exception):
     pass

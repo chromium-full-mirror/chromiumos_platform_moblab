@@ -15,11 +15,11 @@ from six.moves import zip
 
 import common
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import autotemp, error
-from autotest_lib.client.cros import dbus_util
-from autotest_lib.client.cros.mainloop import ExceptionForward
-from autotest_lib.client.cros.mainloop import GenericTesterMainLoop
+from client.bin import utils
+from client.common_lib import autotemp, error
+from client.cros import dbus_util
+from client.cros.mainloop import ExceptionForward
+from client.cros.mainloop import GenericTesterMainLoop
 
 
 """This module contains several helper classes for writing tests to verify the

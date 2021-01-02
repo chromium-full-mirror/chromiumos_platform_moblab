@@ -7,8 +7,8 @@ import mock
 import unittest
 
 import common
-from autotest_lib.server.cros.servo.topology import topology_constants as stc
-from autotest_lib.server.cros.servo.topology import servo_topology
+from server.cros.servo.topology import topology_constants as stc
+from server.cros.servo.topology import servo_topology
 
 # pylint: disable=missing-docstring
 

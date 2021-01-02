@@ -6,10 +6,10 @@ import logging
 import socket
 
 import common
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.server import utils
-from autotest_lib.server.hosts import servo_constants
-from autotest_lib.server.hosts import cros_constants
+from client.common_lib import hosts
+from server import utils
+from server.hosts import servo_constants
+from server.hosts import cros_constants
 
 from chromite.lib import timeout_util
 

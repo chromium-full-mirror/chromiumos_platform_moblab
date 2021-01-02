@@ -5,8 +5,8 @@
 import dbus
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import dbus_util
+from client.common_lib import error
+from client.cros import dbus_util
 
 MANAGER_INTERFACE = 'org.chromium.Buffet.Manager'
 SERVICE_NAME = 'org.chromium.Buffet'

@@ -12,9 +12,9 @@ import os
 import sys
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros import chrome, xmlrpc_server
-from autotest_lib.client.cros import constants
+from client.bin import utils
+from client.common_lib.cros import chrome, xmlrpc_server
+from client.cros import constants
 
 
 class InteractiveXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):

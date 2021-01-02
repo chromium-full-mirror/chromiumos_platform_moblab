@@ -30,14 +30,14 @@ import socket
 import sys
 import time
 
-from autotest_lib.cli import action_common, rpc, topic_common
-from autotest_lib.client.bin import utils as bin_utils
-from autotest_lib.client.common_lib import error, host_protections
-from autotest_lib.server import frontend, hosts
-from autotest_lib.server.hosts import host_info
-from autotest_lib.server.lib.status_history import HostJobHistory
-from autotest_lib.server.lib.status_history import UNUSED, WORKING
-from autotest_lib.server.lib.status_history import BROKEN, UNKNOWN
+from cli import action_common, rpc, topic_common
+from client.bin import utils as bin_utils
+from client.common_lib import error, host_protections
+from server import frontend, hosts
+from server.hosts import host_info
+from server.lib.status_history import HostJobHistory
+from server.lib.status_history import UNUSED, WORKING
+from server.lib.status_history import BROKEN, UNKNOWN
 
 
 

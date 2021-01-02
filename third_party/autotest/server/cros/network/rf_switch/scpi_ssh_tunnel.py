@@ -36,8 +36,8 @@ import subprocess
 import sys
 import time
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.server.cros.network.rf_switch import scpi
+from client.common_lib import utils
+from server.cros.network.rf_switch import scpi
 
 
 class ScpiSshTunnel(scpi.Scpi):

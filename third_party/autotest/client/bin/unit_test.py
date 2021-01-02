@@ -4,8 +4,8 @@
 
 import logging, os
 
-from autotest_lib.client.bin import test
-from autotest_lib.client.common_lib import utils
+from client.bin import test
+from client.common_lib import utils
 
 class unit_test(test.test):
     """

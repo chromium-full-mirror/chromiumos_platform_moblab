@@ -19,7 +19,7 @@ See topic_common.py for a High Level Design and Algorithm.
 
 import warnings
 
-from autotest_lib.cli import topic_common, action_common
+from cli import topic_common, action_common
 
 
 class suite(topic_common.atest):

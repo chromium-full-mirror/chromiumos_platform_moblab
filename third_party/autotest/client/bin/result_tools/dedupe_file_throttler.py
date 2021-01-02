@@ -16,10 +16,10 @@ import os
 import re
 
 try:
-    from autotest_lib.client.bin.result_tools import result_info_lib
+    from client.bin.result_tools import result_info_lib
 
-    from autotest_lib.client.bin.result_tools import throttler_lib
-    from autotest_lib.client.bin.result_tools import utils_lib
+    from client.bin.result_tools import throttler_lib
+    from client.bin.result_tools import utils_lib
 except ImportError:
     import result_info_lib
     import throttler_lib

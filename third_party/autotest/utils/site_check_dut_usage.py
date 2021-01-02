@@ -17,7 +17,7 @@ import optparse
 import sys
 
 import common
-from autotest_lib.database import database_connection
+from database import database_connection
 
 _DATE_FORMAT = '%m/%d/%Y'
 

@@ -11,10 +11,10 @@ import argparse
 import datetime as datetime_base
 
 import common
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import models
-from autotest_lib.frontend.tko import models as tko_models
+from client.common_lib import global_config
+from frontend import setup_django_environment
+from frontend.afe import models
+from frontend.tko import models as tko_models
 
 CONFIG = global_config.global_config
 AUTOTEST_SERVER = CONFIG.get_config_value('SERVER', 'hostname', type=str)

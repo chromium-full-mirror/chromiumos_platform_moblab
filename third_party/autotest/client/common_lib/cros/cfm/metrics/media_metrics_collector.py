@@ -1,6 +1,6 @@
 from __future__ import division
 
-from autotest_lib.client.common_lib.cros.cfm.metrics import (
+from client.common_lib.cros.cfm.metrics import (
         media_info_metrics_extractor)
 
 MEDIA_TYPE = media_info_metrics_extractor.MediaType

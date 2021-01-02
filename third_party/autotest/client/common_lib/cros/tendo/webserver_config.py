@@ -5,7 +5,7 @@
 import collections
 import json
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 
 # Represents one instance of a protocol handler that the webserver can be

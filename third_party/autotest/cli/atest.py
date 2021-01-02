@@ -21,9 +21,9 @@ __author__ = 'jmeurin@google.com (Jean-Marc Eurin)'
 import os, sys, re, traceback
 
 import common
-from autotest_lib.cli import topic_common
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.server import utils
+from cli import topic_common
+from client.common_lib import lsbrelease_utils
+from server import utils
 
 
 def main():
@@ -59,7 +59,7 @@ def main():
     if not os.path.exists(os.path.join(cli_dir, '%s.py' % topic)):
         syntax_obj.invalid_syntax('Invalid topic %s' % topic)
     topic_module = common.setup_modules.import_module(topic,
-                                                      'autotest_lib.cli')
+                                                      'cli')
 
     # If we have a syntax error now, it should
     # refer to the topic class.

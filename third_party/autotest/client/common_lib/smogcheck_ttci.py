@@ -23,7 +23,7 @@ Notes:
 """
 
 import logging
-from autotest_lib.client.common_lib import smogcheck_ina219, smogcheck_pca9555
+from client.common_lib import smogcheck_ina219, smogcheck_pca9555
 
 
 # I2C agent addresses of INA219 module

@@ -44,8 +44,8 @@ with virtual_ethernet_pair.VirtualEthernetPair(...) as vif:
 
 import logging
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros.network import interface
+from client.bin import utils
+from client.common_lib.cros.network import interface
 
 class VirtualEthernetPair(object):
     """ Class for configuring virtual ethernet device pair. """

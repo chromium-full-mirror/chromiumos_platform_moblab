@@ -6,8 +6,8 @@ import logging
 import re
 import time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.server.cros.servo import chrome_ec
+from client.bin import utils
+from server.cros.servo import chrome_ec
 
 
 class PDTesterError(Exception):

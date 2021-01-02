@@ -11,7 +11,7 @@
 # 6. Retrieve usb device based on product and manufacture.
 #
 import cStringIO
-from autotest_lib.client.common_lib.cros import textfsm
+from client.common_lib.cros import textfsm
 
 USB_DEVICES_TPLT = (
     'Value Required Vendor ([0-9a-fA-F]+)\n'

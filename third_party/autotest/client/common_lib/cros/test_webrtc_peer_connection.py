@@ -2,14 +2,14 @@ import logging
 import os
 import time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import chrome
-from autotest_lib.client.common_lib.cros import system_metrics_collector
-from autotest_lib.client.common_lib.cros import webrtc_utils
-from autotest_lib.client.cros.graphics import graphics_utils
-from autotest_lib.client.cros.multimedia import system_facade_native
-from autotest_lib.client.cros.video import helper_logger
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros import chrome
+from client.common_lib.cros import system_metrics_collector
+from client.common_lib.cros import webrtc_utils
+from client.cros.graphics import graphics_utils
+from client.cros.multimedia import system_facade_native
+from client.cros.video import helper_logger
 from telemetry.util import image_util
 
 

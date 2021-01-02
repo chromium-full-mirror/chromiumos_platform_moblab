@@ -10,9 +10,9 @@ unittest for SCPI and RF Switch.
 
 import socket
 
-from autotest_lib.client.common_lib.test_utils import mock
-from autotest_lib.server.cros.network.rf_switch import rf_switch
-from autotest_lib.server.cros.network.rf_switch import scpi
+from client.common_lib.test_utils import mock
+from server.cros.network.rf_switch import rf_switch
+from server.cros.network.rf_switch import scpi
 
 
 class SocketMock(mock.mock_class):

@@ -4,8 +4,8 @@
 
 """Power utils for server tests."""
 
-from autotest_lib.server import autotest
-from autotest_lib.server.cros.power import servo_charger
+from server import autotest
+from server.cros.power import servo_charger
 
 def put_host_battery_in_range(host, min_level, max_level, timeout):
     """

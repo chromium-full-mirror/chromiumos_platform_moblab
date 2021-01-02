@@ -26,7 +26,7 @@ import threading
 import logging
 
 import common
-from autotest_lib.scheduler import drone_task_queue
+from scheduler import drone_task_queue
 
 
 class ExceptionRememberingThread(threading.Thread):

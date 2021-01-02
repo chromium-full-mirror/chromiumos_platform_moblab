@@ -8,7 +8,7 @@ import contextlib
 import logging
 
 import common
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 
 _RUN_BACKGROUND_TEMPLATE = '( %(cmd)s ) </dev/null >/dev/null 2>&1 & echo -n $!'

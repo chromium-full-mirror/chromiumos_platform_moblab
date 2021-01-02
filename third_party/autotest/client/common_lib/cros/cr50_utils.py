@@ -6,7 +6,7 @@ import argparse
 import logging
 import re
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 
 RO = 'ro'

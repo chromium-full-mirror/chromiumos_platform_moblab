@@ -12,8 +12,8 @@ import os
 import re
 
 import common
-from autotest_lib.client.bin.result_tools import utils_lib
-from autotest_lib.client.common_lib import global_config
+from client.bin.result_tools import utils_lib
+from client.common_lib import global_config
 
 
 CONFIG = global_config.global_config

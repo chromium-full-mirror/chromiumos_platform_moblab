@@ -4,8 +4,8 @@
 
 import logging
 
-from autotest_lib.client.cros import constants
-from autotest_lib.server import autotest
+from client.cros import constants
+from server import autotest
 
 POWER_DIR = '/var/lib/power_manager'
 TMP_POWER_DIR = '/tmp/power_manager'

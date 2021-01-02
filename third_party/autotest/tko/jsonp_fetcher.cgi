@@ -2,7 +2,7 @@
 
 import cgi, traceback, urllib2
 import common
-from autotest_lib.frontend.afe.json_rpc import serviceHandler
+from frontend.afe.json_rpc import serviceHandler
 
 script = """\
 Content-Type: text/javascript

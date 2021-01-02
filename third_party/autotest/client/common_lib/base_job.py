@@ -11,7 +11,7 @@ import tempfile
 import time
 import traceback
 import weakref
-from autotest_lib.client.common_lib import autotemp, error, log
+from client.common_lib import autotemp, error, log
 
 
 class job_directory(object):
@@ -469,7 +469,7 @@ class status_log_entry(object):
         """Construct a status.log entry.
 
         @param status_code: A message status code. Must match the codes
-            accepted by autotest_lib.common_lib.log.is_valid_status.
+            accepted by common_lib.log.is_valid_status.
         @param subdir: A valid job subdirectory, or None.
         @param operation: Description of the operation, or None.
         @param message: A printable string describing event to be recorded.

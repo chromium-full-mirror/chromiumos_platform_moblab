@@ -11,8 +11,8 @@ import time
 
 import common
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
+from client.bin import utils
+from client.common_lib import error
 
 
 def CheckInterfaceForDestination(host, expected_interface,

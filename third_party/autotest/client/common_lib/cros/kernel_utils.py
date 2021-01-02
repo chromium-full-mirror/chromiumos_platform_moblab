@@ -7,7 +7,7 @@ import logging
 import os
 import re
 
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 _KERNEL_A = {'name': 'KERN-A', 'kernel': 2, 'root': 3}
 _KERNEL_B = {'name': 'KERN-B', 'kernel': 4, 'root': 5}

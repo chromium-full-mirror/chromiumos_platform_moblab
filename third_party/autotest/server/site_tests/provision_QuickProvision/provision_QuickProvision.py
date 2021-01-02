@@ -7,14 +7,14 @@ import re
 import sys
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.server import afe_utils
-from autotest_lib.server import test
-from autotest_lib.server import utils
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros import provisioner
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib.cros import dev_server
+from server import afe_utils
+from server import test
+from server import utils
+from server.cros import provision
+from server.cros import provisioner
 
 try:
     from chromite.lib import metrics

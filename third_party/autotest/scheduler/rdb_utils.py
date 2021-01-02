@@ -10,8 +10,8 @@ Do not import rdb or autotest modules here to avoid cyclic dependencies.
 import collections
 
 import common
-from autotest_lib.client.common_lib import priorities
-from autotest_lib.client.common_lib import utils
+from client.common_lib import priorities
+from client.common_lib import utils
 
 
 RDB_STATS_KEY = 'rdb'

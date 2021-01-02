@@ -16,8 +16,8 @@ from __future__ import print_function
 import atexit, os, re, shutil, textwrap, sys, tempfile, types
 import six
 
-from autotest_lib.client.common_lib import barrier, utils
-from autotest_lib.server import subcommand
+from client.common_lib import barrier, utils
+from server import subcommand
 
 
 # A dictionary of pid and a list of tmpdirs for that pid
@@ -182,7 +182,7 @@ def unarchive(host, source_material):
 
 
 def get_server_dir():
-    path = os.path.dirname(sys.modules['autotest_lib.server.utils'].__file__)
+    path = os.path.dirname(sys.modules['server.utils'].__file__)
     return os.path.abspath(path)
 
 

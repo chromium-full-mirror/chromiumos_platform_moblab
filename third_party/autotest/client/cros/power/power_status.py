@@ -18,13 +18,13 @@ import struct
 import threading
 import time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import autotest_enum
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.common_lib.utils import poll_for_condition_ex
-from autotest_lib.client.cros import kernel_trace
-from autotest_lib.client.cros.power import power_utils
+from client.bin import utils
+from client.common_lib import autotest_enum
+from client.common_lib import error
+from client.common_lib.cros import retry
+from client.common_lib.utils import poll_for_condition_ex
+from client.cros import kernel_trace
+from client.cros.power import power_utils
 
 BatteryDataReportType = autotest_enum.AutotestEnum('CHARGE', 'ENERGY')
 
@@ -2118,7 +2118,7 @@ class PowerLogger(MeasurementLogger):
     def create_measurements(self):
         """Create power measurements based on device config."""
         # Import here to avoid import loop.
-        from autotest_lib.client.cros.power import power_rapl
+        from client.cros.power import power_rapl
 
         measurements = []
         status = get_status()

@@ -11,8 +11,8 @@ configuration file as well as starting and stopping the service.
 import os
 import signal
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
+from client.common_lib import error
+from client.common_lib import utils
 
 # Filenames used for execution.
 DHCPV6_SERVER_EXECUTABLE = '/usr/local/sbin/dhcpd'

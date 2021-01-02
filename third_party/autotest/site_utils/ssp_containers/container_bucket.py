@@ -8,15 +8,15 @@ import time
 
 import common
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.site_utils.ssp_containers import config as ssp_container_config
-from autotest_lib.site_utils.ssp_containers import constants
-from autotest_lib.site_utils.ssp_containers import ssp_containers
-from autotest_lib.site_utils.ssp_containers.cleanup_if_fail import cleanup_if_fail
+from client.bin import utils
+from client.common_lib import error
+from site_utils.ssp_containers import config as ssp_container_config
+from site_utils.ssp_containers import constants
+from site_utils.ssp_containers import ssp_containers
+from site_utils.ssp_containers.cleanup_if_fail import cleanup_if_fail
 
-from autotest_lib.site_utils.ssp_containers.container import Container
-from autotest_lib.site_utils.ssp_containers.container_factory import ContainerFactory
+from site_utils.ssp_containers.container import Container
+from site_utils.ssp_containers.container_factory import ContainerFactory
 
 
 class ContainerBucket(object):

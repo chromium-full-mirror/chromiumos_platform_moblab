@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import global_config
 _CONFIG = global_config.global_config
 
 # Names of the host attributes in the database that represent the values for

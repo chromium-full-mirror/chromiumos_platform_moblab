@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-from autotest_lib.client.common_lib.cros.cfm.usb import usb_port_manager
+from client.common_lib.cros.cfm.usb import usb_port_manager
 
 import logging
 import os

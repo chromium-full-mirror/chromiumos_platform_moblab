@@ -21,9 +21,9 @@
 
 import os, logging, resource, glob
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib import test as common_test
-from autotest_lib.client.bin import os_dep
+from client.common_lib import utils
+from client.common_lib import test as common_test
+from client.bin import os_dep
 
 
 class test(common_test.base_test):

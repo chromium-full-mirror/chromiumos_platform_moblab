@@ -7,7 +7,7 @@ scenario package and renamed with a _unittest suffix.
 import os, unittest
 from os import path
 import common
-from autotest_lib.tko.parsers.test import scenario_base
+from tko.parsers.test import scenario_base
 
 GOLDEN = 'golden'
 

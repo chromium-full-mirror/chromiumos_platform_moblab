@@ -3,8 +3,8 @@
 import os, sys, re, tempfile
 from optparse import OptionParser
 import common
-from autotest_lib.client.common_lib import utils
-from autotest_lib.database import database_connection
+from client.common_lib import utils
+from database import database_connection
 
 MIGRATE_TABLE = 'migrate_info'
 

@@ -2,7 +2,7 @@
 
 import sys, optparse
 import common
-from autotest_lib.cli import rpc
+from cli import rpc
 
 
 def parse_options():

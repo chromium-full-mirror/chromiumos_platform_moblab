@@ -26,7 +26,7 @@ Example usage:
 test_that autoupdate_Basic <DUT> --board=<board> --args="job_repo_url=http://<devserver IP>:8082/static/<board>-release/RXX-XXXXX.X.X/autotest/packages"
 """
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 args_dict = utils.args_to_dict(args)
 
 def run(machine):

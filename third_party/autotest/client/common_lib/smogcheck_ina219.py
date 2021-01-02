@@ -25,7 +25,7 @@ from __future__ import division
 from __future__ import print_function
 
 import logging, re
-from autotest_lib.client.common_lib import i2c_node
+from client.common_lib import i2c_node
 import six
 
 

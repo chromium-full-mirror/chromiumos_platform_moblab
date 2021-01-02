@@ -7,7 +7,7 @@
 import sys
 
 import common
-from autotest_lib.client.cros.networking import wifi_proxy
+from client.cros.networking import wifi_proxy
 
 SERVICE_PROP_PARSERS = {
     'EAP.AnonymousIdentity': unicode,

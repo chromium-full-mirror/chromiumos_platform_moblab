@@ -9,9 +9,9 @@ import requests
 import subprocess
 import urlparse
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import autotemp
-from autotest_lib.client.common_lib import error
+from client.bin import utils
+from client.common_lib import autotemp
+from client.common_lib import error
 
 
 # JSON attributes used in payload properties. Look at nebraska.py for more

@@ -4,9 +4,9 @@
 
 import tempfile
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import cryptohome
+from client.bin import utils
+from client.common_lib import error
+from client.cros import cryptohome
 
 class TPMStore(object):
     """Context enclosing the use of the TPM."""

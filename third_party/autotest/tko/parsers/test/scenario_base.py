@@ -5,10 +5,10 @@ from os import path
 import ConfigParser, os, shelve, shutil, sys, tarfile, time
 import difflib, itertools
 import common
-from autotest_lib.client.common_lib import utils, autotemp
-from autotest_lib.tko import parser_lib
-from autotest_lib.tko.parsers.test import templates
-from autotest_lib.tko.parsers.test import unittest_hotfix
+from client.common_lib import utils, autotemp
+from tko import parser_lib
+from tko.parsers.test import templates
+from tko.parsers.test import unittest_hotfix
 
 TEMPLATES_DIRPATH = templates.__path__[0]
 # Set TZ used to UTC

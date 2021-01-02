@@ -21,13 +21,13 @@ import logging
 from django.core import exceptions as django_exceptions
 
 import common
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import rdb_model_extensions as rdb_models
-from autotest_lib.frontend.afe import models as afe_models
-from autotest_lib.scheduler import rdb_requests
-from autotest_lib.scheduler import rdb_utils
-from autotest_lib.server import constants
-from autotest_lib.utils import labellib
+from client.common_lib import utils
+from frontend.afe import rdb_model_extensions as rdb_models
+from frontend.afe import models as afe_models
+from scheduler import rdb_requests
+from scheduler import rdb_utils
+from server import constants
+from utils import labellib
 
 
 class RDBHost(object):
@@ -194,7 +194,7 @@ class RDBClientHostWrapper(RDBHost):
         super(RDBClientHostWrapper, self).__init__(**kwargs)
 
         # TODO(beeps): Remove this once we transition to urls
-        from autotest_lib.scheduler import rdb
+        from scheduler import rdb
         self.update_request_manager = rdb_requests.RDBRequestManager(
                 rdb_requests.UpdateHostRequest, rdb.update_hosts)
         self.dbg_str = ''

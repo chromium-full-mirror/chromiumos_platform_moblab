@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.common_lib.cros.network import apmanager_constants
-from autotest_lib.client.cros import constants
-from autotest_lib.server import autotest
-from autotest_lib.server.cros.network import hostap_config
+from client.common_lib.cros.network import apmanager_constants
+from client.cros import constants
+from server import autotest
+from server.cros.network import hostap_config
 
 XMLRPC_BRINGUP_TIMEOUT_SECONDS = 60
 

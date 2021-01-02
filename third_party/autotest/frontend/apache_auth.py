@@ -3,10 +3,9 @@ from django.contrib.auth import backends
 from django.contrib import auth
 from django import http
 
-from autotest_lib.client.cros import constants
-from autotest_lib.frontend import thread_local
-from autotest_lib.frontend.afe import models, management
-from autotest_lib.server import utils
+from client.cros import constants
+from frontend import thread_local
+from frontend.afe import models, management
 
 DEBUG_USER = 'debug_user'
 
@@ -63,7 +62,7 @@ class GetApacheUserMiddleware(object):
             user = request.META.get('HTTP_AUTHORIZATION')
         if user is None:
             # no user info - assume we're in development mode
-            user = constants.MOBLAB_USER if utils.is_moblab() else DEBUG_USER
+            user = constants.MOBLAB_USER
         thread_local.set_user(user)
 
 

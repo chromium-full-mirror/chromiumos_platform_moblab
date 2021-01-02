@@ -1,7 +1,7 @@
 import os, sys
 import common
 
-from autotest_lib.client.common_lib import utils, error, profiler_manager
+from client.common_lib import utils, error, profiler_manager
 
 
 class profilers(profiler_manager.profiler_manager):
@@ -17,7 +17,7 @@ class profilers(profiler_manager.profiler_manager):
             raise profiler_manager.ProfilerNotPresentError(profiler)
 
         profiler_module = common.setup_modules.import_module(
-            profiler, "autotest_lib.client.profilers.%s" % profiler)
+            profiler, "client.profilers.%s" % profiler)
 
         newprofiler = getattr(profiler_module, profiler)(self.job)
 

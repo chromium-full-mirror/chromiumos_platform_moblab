@@ -7,7 +7,7 @@
 import os
 import re
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 
 def emit_event(event_name):

@@ -21,7 +21,7 @@ Notes:
 """
 
 import logging
-from autotest_lib.client.common_lib import i2c_node
+from client.common_lib import i2c_node
 
 
 # I2C constants

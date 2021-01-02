@@ -18,16 +18,16 @@ import struct
 import sys
 import time
 
-from autotest_lib.client.bin import test
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros.input_playback import input_playback
-from autotest_lib.client.cros.power import power_utils
+from client.bin import test
+from client.bin import utils
+from client.common_lib import error
+from client.cros.input_playback import input_playback
+from client.cros.power import power_utils
 from functools import wraps
 
 # The uinput module might not be available at SDK test time.
 try:
-  from autotest_lib.client.cros.graphics import graphics_uinput
+  from client.cros.graphics import graphics_uinput
 except ImportError:
   graphics_uinput = None
 

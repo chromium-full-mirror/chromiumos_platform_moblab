@@ -12,8 +12,8 @@ import re
 from six.moves import range
 import time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
+from client.bin import utils
+from client.common_lib import error
 
 # en-US key matrix (from "kb membrane pin matrix.pdf")
 KEYMATRIX = {'`': (3, 1), '1': (6, 1), '2': (6, 4), '3': (6, 2), '4': (6, 3),

@@ -22,7 +22,7 @@ Notes:
 
 import datetime, logging
 
-from autotest_lib.client.common_lib import smogcheck_ttci
+from client.common_lib import smogcheck_ttci
 # Use explicit import to make code more readable
 from ctypes import c_uint, c_uint32, cdll, c_bool, Structure, POINTER, \
     c_ubyte, c_byte, byref, c_uint16, cast, create_string_buffer, c_uint64, \

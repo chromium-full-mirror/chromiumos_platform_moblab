@@ -3,13 +3,13 @@
 import cgi, os, socket, sys, urllib2
 import common
 from multiprocessing import pool
-from autotest_lib.frontend import setup_django_environment
+from frontend import setup_django_environment
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.bin import utils
-from autotest_lib.frontend.afe.json_rpc import serviceHandler
-from autotest_lib.server import system_utils
-from autotest_lib.server import utils as server_utils
+from client.common_lib import global_config
+from client.bin import utils
+from frontend.afe.json_rpc import serviceHandler
+from server import system_utils
+from server import utils as server_utils
 
 
 _PAGE = """\
@@ -25,11 +25,11 @@ def _retrieve_logs_dummy(job_path):
     pass
 
 site_retrieve_logs = utils.import_site_function(__file__,
-    "autotest_lib.tko.site_retrieve_logs", "site_retrieve_logs",
+    "tko.site_retrieve_logs", "site_retrieve_logs",
     _retrieve_logs_dummy)
 
 site_find_repository_host = utils.import_site_function(__file__,
-    "autotest_lib.tko.site_retrieve_logs", "site_find_repository_host",
+    "tko.site_retrieve_logs", "site_find_repository_host",
     _retrieve_logs_dummy)
 
 form = cgi.FieldStorage(keep_blank_values=True)

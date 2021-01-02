@@ -1,5 +1,5 @@
-from autotest_lib.server import autotest, hosts, subcommand, test
-from autotest_lib.server import utils
+from server import autotest, hosts, subcommand, test
+from server import utils
 
 class netpipe(test.test):
     version = 2

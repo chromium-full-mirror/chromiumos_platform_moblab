@@ -6,7 +6,7 @@ import time
 
 import common
 
-from autotest_lib.client.common_lib import logging_config
+from client.common_lib import logging_config
 
 
 class DroneLoggingConfig(logging_config.LoggingConfig):

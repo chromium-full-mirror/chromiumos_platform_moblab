@@ -4,10 +4,10 @@
 import unittest
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import frontend_test_utils
-from autotest_lib.frontend.afe import models, model_logic
+from client.common_lib import error
+from frontend import setup_django_environment
+from frontend.afe import frontend_test_utils
+from frontend.afe import models, model_logic
 
 
 class AclGroupTest(unittest.TestCase,

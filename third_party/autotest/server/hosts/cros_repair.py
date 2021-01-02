@@ -12,21 +12,21 @@ import logging
 import time
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.common_lib.cros import tpm_utils
-from autotest_lib.server import afe_utils
-from autotest_lib.server import crashcollect
-from autotest_lib.server.cros import provisioner
-from autotest_lib.server.cros.dynamic_suite import tools
-from autotest_lib.server.hosts import cros_constants
-from autotest_lib.server.hosts import cros_firmware
-from autotest_lib.server.hosts import repair_utils
-from autotest_lib.site_utils.admin_audit import constants as audit_const
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import hosts
+from client.common_lib import utils
+from client.common_lib.cros import dev_server
+from client.common_lib.cros import retry
+from client.common_lib.cros import tpm_utils
+from server import afe_utils
+from server import crashcollect
+from server.cros import provisioner
+from server.cros.dynamic_suite import tools
+from server.hosts import cros_constants
+from server.hosts import cros_firmware
+from server.hosts import repair_utils
+from site_utils.admin_audit import constants as audit_const
 from six.moves import range
 
 metrics = utils.metrics_mock

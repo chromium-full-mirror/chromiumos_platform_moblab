@@ -60,8 +60,8 @@ import threading
 import time
 import traceback
 
-from autotest_lib.client.cros import dhcp_packet
-from autotest_lib.client.cros import dhcp_handling_rule
+from client.cros import dhcp_packet
+from client.cros import dhcp_handling_rule
 
 # From socket.h
 SO_BINDTODEVICE = 25

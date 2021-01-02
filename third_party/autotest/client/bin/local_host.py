@@ -11,8 +11,8 @@ import shutil
 import sys
 
 import common
-from autotest_lib.client.common_lib import hosts, error
-from autotest_lib.client.bin import utils
+from client.common_lib import hosts, error
+from client.bin import utils
 
 
 class LocalHost(hosts.Host):

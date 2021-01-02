@@ -9,7 +9,7 @@ import json
 import time
 import logging
 
-from autotest_lib.server.cros.device_health_profile.profile_constants import *
+from server.cros.device_health_profile.profile_constants import *
 
 
 class DeviceHealthProfileError(Exception):

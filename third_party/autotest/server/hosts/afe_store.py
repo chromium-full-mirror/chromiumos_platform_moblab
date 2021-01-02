@@ -5,9 +5,9 @@
 import logging
 
 import common
-from autotest_lib.frontend.afe.json_rpc import proxy as rpc_proxy
-from autotest_lib.server.hosts import host_info
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
+from frontend.afe.json_rpc import proxy as rpc_proxy
+from server.hosts import host_info
+from server.cros.dynamic_suite import frontend_wrappers
 
 class AfeStore(host_info.CachingHostInfoStore):
     """Directly interact with the (given) AFE for host information."""

@@ -4,7 +4,7 @@
 
 import logging
 
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 
 _ASAN_SYMBOL = "__asan_init"

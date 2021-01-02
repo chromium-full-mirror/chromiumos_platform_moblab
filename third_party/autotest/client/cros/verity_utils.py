@@ -6,8 +6,8 @@
 import logging, mmap, os, time
 
 import common
-from autotest_lib.client.bin import os_dep, test
-from autotest_lib.client.common_lib import error, logging_manager, utils
+from client.bin import os_dep, test
+from client.common_lib import error, logging_manager, utils
 
 """ a wrapper for using verity/dm-verity with a test backing store """
 

@@ -20,7 +20,7 @@ import struct
 import time
 
 import common
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
     """Handler for a streaming logging request.

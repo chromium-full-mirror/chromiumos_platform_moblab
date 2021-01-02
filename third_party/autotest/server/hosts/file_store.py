@@ -6,7 +6,7 @@ import contextlib
 import errno
 
 import common
-from autotest_lib.server.hosts import host_info
+from server.hosts import host_info
 from chromite.lib import locking
 from chromite.lib import retry_util
 

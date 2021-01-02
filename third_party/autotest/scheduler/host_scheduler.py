@@ -60,17 +60,17 @@ import sys
 import time
 
 import common
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend import setup_django_environment
+from client.common_lib import utils
+from frontend import setup_django_environment
 
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.scheduler import query_managers
-from autotest_lib.scheduler import rdb_lib
-from autotest_lib.scheduler import rdb_utils
-from autotest_lib.scheduler import scheduler_lib
-from autotest_lib.scheduler import scheduler_models
-from autotest_lib.site_utils import server_manager_utils
+from client.common_lib import global_config
+from scheduler import query_managers
+from scheduler import rdb_lib
+from scheduler import rdb_utils
+from scheduler import scheduler_lib
+from scheduler import scheduler_models
+from site_utils import server_manager_utils
 
 
 _db_manager = None
@@ -395,7 +395,7 @@ def initialize(testing=False):
     if testing:
         # Don't import testing utilities unless we're in testing mode,
         # as the database imports have side effects.
-        from autotest_lib.scheduler import rdb_testing_utils
+        from scheduler import rdb_testing_utils
         rdb_testing_utils.FileDatabaseHelper().initialize_database_for_testing(
                 db_file_path=rdb_testing_utils.FileDatabaseHelper.DB_FILE)
     global _db_manager

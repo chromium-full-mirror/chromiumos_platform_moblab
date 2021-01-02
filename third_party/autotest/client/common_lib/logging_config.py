@@ -9,7 +9,7 @@ import six
 import sys
 import time
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 # Set up a simple catchall configuration for use during import time.  Some code
 # may log messages at import time and we don't want those to get completely

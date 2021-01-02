@@ -20,11 +20,11 @@ logging.basicConfig(
 
 # This sets up import paths for autotest.
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.cros import constants
-from autotest_lib.client.cros.multimedia import display_facade_native
-from autotest_lib.client.cros.multimedia import facade_resource
-from autotest_lib.client.common_lib.cros import chrome
+from client.bin import utils
+from client.cros import constants
+from client.cros.multimedia import display_facade_native
+from client.cros.multimedia import facade_resource
+from client.common_lib.cros import chrome
 
 
 @contextlib.contextmanager

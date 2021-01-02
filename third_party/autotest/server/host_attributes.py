@@ -14,7 +14,7 @@ class base_host_attributes(object):
 
 
 site_host_attributes = utils.import_site_class(
-    __file__, "autotest_lib.server.site_host_attributes",
+    __file__, "server.site_host_attributes",
     "HostAttributes", base_host_attributes)
 
 

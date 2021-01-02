@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.common_lib.cros import kernel_utils
-from autotest_lib.server.cros.update_engine import update_engine_test
+from client.common_lib.cros import kernel_utils
+from server.cros.update_engine import update_engine_test
 
 
 class autoupdate_Basic(update_engine_test.UpdateEngineTest):

@@ -5,7 +5,7 @@ from __future__ import division
 from __future__ import print_function
 import logging, os, select, six, subprocess, sys, unittest
 import common
-from autotest_lib.client.common_lib import logging_manager, logging_config
+from client.common_lib import logging_manager, logging_config
 
 
 class PipedStringIO(object):

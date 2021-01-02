@@ -4,7 +4,7 @@
 
 """Interactive feedback layer abstraction."""
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 
 # All known queries.

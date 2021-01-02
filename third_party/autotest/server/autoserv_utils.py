@@ -6,8 +6,8 @@
 import os
 
 import common
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import control_data
+from client.common_lib import global_config
 
 AUTOTEST_INSTALL_DIR = global_config.global_config.get_config_value('SCHEDULER',
                                                  'drone_installation_directory')

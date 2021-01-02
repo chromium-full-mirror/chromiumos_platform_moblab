@@ -8,8 +8,8 @@ import os
 import re
 
 import common
-from autotest_lib.client.common_lib import error, utils
-from autotest_lib.client.common_lib.cros import dev_server
+from client.common_lib import error, utils
+from client.common_lib.cros import dev_server
 
 
 # Relevant CrosDynamicSuiteExceptions are defined in client/common_lib/error.py.

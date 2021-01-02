@@ -8,18 +8,18 @@ import logging
 from contextlib import closing
 from contextlib import contextmanager
 
-from autotest_lib.client.bin import local_host
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import deprecation
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.server import utils as server_utils
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.hosts import cros_host
-from autotest_lib.server.hosts import host_info
-#from autotest_lib.server.hosts import gce_host
-from autotest_lib.server.hosts import ssh_host
-from autotest_lib.server.hosts import file_store
+from client.bin import local_host
+from client.bin import utils
+from client.common_lib import deprecation
+from client.common_lib import error
+from client.common_lib import global_config
+from server import utils as server_utils
+from server.cros.dynamic_suite import constants
+from server.hosts import cros_host
+from server.hosts import host_info
+#from server.hosts import gce_host
+from server.hosts import ssh_host
+from server.hosts import file_store
 
 
 CONFIG = global_config.global_config

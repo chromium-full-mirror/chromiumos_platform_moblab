@@ -4,9 +4,9 @@
 
 import collections
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import process_utils
-from autotest_lib.client.common_lib import utils
+from client.common_lib import error
+from client.common_lib import process_utils
+from client.common_lib import utils
 
 # Use this with ProcessWatcher to start your process in a minijail.  This
 # is useful for instance if you would like to drop autotest's default root

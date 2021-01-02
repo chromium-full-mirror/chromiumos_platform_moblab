@@ -57,13 +57,13 @@ or Archiving postjob task, and an eventual Failed status for the HQE.
 import logging
 import re
 
-from autotest_lib.client.common_lib import host_protections
-from autotest_lib.frontend.afe import models
-from autotest_lib.scheduler import agent_task
-from autotest_lib.scheduler import drone_manager
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.server import autoserv_utils
-from autotest_lib.server.cros import provision
+from client.common_lib import host_protections
+from frontend.afe import models
+from scheduler import agent_task
+from scheduler import drone_manager
+from scheduler import scheduler_config
+from server import autoserv_utils
+from server.cros import provision
 
 
 class PreJobTask(agent_task.SpecialAgentTask):

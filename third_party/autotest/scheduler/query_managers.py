@@ -12,13 +12,13 @@ import logging
 
 import common
 
-from autotest_lib.frontend import setup_django_environment
+from frontend import setup_django_environment
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.scheduler import scheduler_models
-from autotest_lib.scheduler import scheduler_lib
+from client.common_lib import utils
+from frontend.afe import models
+from server.cros.dynamic_suite import constants
+from scheduler import scheduler_models
+from scheduler import scheduler_lib
 
 
 _job_timer_name = 'chromeos/autotest/scheduler/job_query_durations/%s'

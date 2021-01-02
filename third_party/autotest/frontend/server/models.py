@@ -8,10 +8,10 @@
 from django.db import models as dbmodels
 
 import common
-from autotest_lib.client.common_lib import enum
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.frontend.afe import model_logic
+from client.common_lib import enum
+from client.common_lib import error
+from client.common_lib.cros.network import ping_runner
+from frontend.afe import model_logic
 
 
 class Server(dbmodels.Model, model_logic.ModelExtensions):

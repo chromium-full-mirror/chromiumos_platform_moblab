@@ -4,7 +4,7 @@
 
 """An adapter to remotely access the bluetooth hid facade on DUT."""
 
-from autotest_lib.server.cros.bluetooth.bluetooth_device import BluetoothDevice
+from server.cros.bluetooth.bluetooth_device import BluetoothDevice
 
 
 class BluetoothHIDFacadeRemoteAdapter(BluetoothDevice):

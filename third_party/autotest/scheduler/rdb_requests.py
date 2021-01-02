@@ -15,7 +15,7 @@ request object the request managers use to identify a response with a request.
 import collections
 
 import common
-from autotest_lib.scheduler import rdb_utils
+from scheduler import rdb_utils
 
 
 class RDBRequestManager(object):

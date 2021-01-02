@@ -8,11 +8,11 @@ import subprocess
 import os
 
 import common
-from autotest_lib.server.hosts import ssh_host
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
+from server.hosts import ssh_host
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import utils
+from server.cros.dynamic_suite import frontend_wrappers
 
 
 @contextlib.contextmanager

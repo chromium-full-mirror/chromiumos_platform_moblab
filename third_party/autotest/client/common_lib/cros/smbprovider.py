@@ -8,7 +8,7 @@ import sys
 
 import dbus
 
-from autotest_lib.client.cros import upstart
+from client.cros import upstart
 
 def _proto_to_blob(proto):
     return dbus.ByteArray(proto.SerializeToString())

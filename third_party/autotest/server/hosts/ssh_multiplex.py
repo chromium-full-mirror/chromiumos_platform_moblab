@@ -12,8 +12,8 @@ import multiprocessing
 import os
 import threading
 
-from autotest_lib.client.common_lib import autotemp
-from autotest_lib.server import utils
+from client.common_lib import autotemp
+from server import utils
 import six
 
 _CLIENT_SSH_COMMAND_TEMPLATE = (

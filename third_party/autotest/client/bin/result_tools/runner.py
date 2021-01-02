@@ -14,9 +14,9 @@ import logging
 import os
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils as client_utils
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import utils as client_utils
 
 metrics = client_utils.metrics_mock
 

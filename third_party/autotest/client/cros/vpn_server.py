@@ -4,9 +4,9 @@
 
 import logging
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.cros import network_chroot
-from autotest_lib.client.common_lib.cros import site_eap_certs
+from client.bin import utils
+from client.cros import network_chroot
+from client.common_lib.cros import site_eap_certs
 
 class VPNServer(object):
     """Context enclosing the use of a VPN server instance."""

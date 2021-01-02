@@ -6,8 +6,8 @@
 
 import grp, logging, os, pwd, re, stat, sys, shutil, pwd, grp
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
+from client.bin import utils
+from client.common_lib import error
 
 USER_TOKEN_PREFIX = 'User TPM Token '
 TMP_CHAPS_DIR = '/tmp/chaps'

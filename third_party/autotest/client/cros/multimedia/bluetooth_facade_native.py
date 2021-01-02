@@ -25,23 +25,23 @@ import functools
 import time
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros.bluetooth import bluetooth_socket
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import dbus_util
-from autotest_lib.client.cros.udev_helpers import UdevadmInfo, UdevadmTrigger
-from autotest_lib.client.cros import xmlrpc_server
-from autotest_lib.client.cros.audio import (audio_test_data as
+from client.bin import utils
+from client.common_lib.cros.bluetooth import bluetooth_socket
+from client.common_lib import error
+from client.cros import dbus_util
+from client.cros.udev_helpers import UdevadmInfo, UdevadmTrigger
+from client.cros import xmlrpc_server
+from client.cros.audio import (audio_test_data as
                                             audio_test_data_module)
-from autotest_lib.client.cros.audio import check_quality
-from autotest_lib.client.cros.audio import cras_utils
-from autotest_lib.client.cros.audio.sox_utils import (
+from client.cros.audio import check_quality
+from client.cros.audio import cras_utils
+from client.cros.audio.sox_utils import (
         convert_format, convert_raw_file, get_file_length,
         trim_silence_from_wav_file)
-from autotest_lib.client.cros.bluetooth import advertisement
-from autotest_lib.client.cros.bluetooth import adv_monitor_helper
-from autotest_lib.client.cros.bluetooth import output_recorder
-from autotest_lib.client.cros.power import sys_power
+from client.cros.bluetooth import advertisement
+from client.cros.bluetooth import adv_monitor_helper
+from client.cros.bluetooth import output_recorder
+from client.cros.power import sys_power
 import six
 from six.moves import map
 from six.moves import range

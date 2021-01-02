@@ -3,7 +3,7 @@ import os
 
 import common
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'autotest_lib.frontend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'frontend.settings')
 
 def _enable_autocommit_by_name(name):
     """Enable autocommit for the connection with matching name.

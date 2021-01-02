@@ -10,7 +10,7 @@ import os
 from google.protobuf import json_format
 
 import common
-from autotest_lib.utils.side_effects.proto import config_pb2
+from utils.side_effects.proto import config_pb2
 
 _SIDE_EFFECTS_CONFIG_FILE = 'side_effects_config.json'
 

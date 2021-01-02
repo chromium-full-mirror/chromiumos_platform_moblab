@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Build relative paths for files with root of autotest_lib.
+# Build relative paths for files with root of
 
 import os, sys
 dirname = os.path.dirname(sys.modules[__name__].__file__)

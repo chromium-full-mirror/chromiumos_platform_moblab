@@ -8,8 +8,8 @@ import random
 import time
 
 
-from autotest_lib.client.common_lib import base_job, global_config, log
-from autotest_lib.client.common_lib import time_utils
+from client.common_lib import base_job, global_config, log
+from client.common_lib import time_utils
 
 _DEFAULT_POLL_INTERVAL_SECONDS = 30.0
 
