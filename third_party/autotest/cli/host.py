@@ -132,9 +132,7 @@ class host_list(action_common.atest_list, host):
         self.parser.add_option('-b', '--label',
                                default='',
                                help='Only list hosts with all these labels '
-                               '(comma separated). When --skylab is provided, '
-                               'a label must be in the format of '
-                               'label-key:label-value (e.g., board:lumpy).')
+                               '(comma separated).')
         self.parser.add_option('-s', '--status',
                                default='',
                                help='Only list hosts with any of these '
@@ -445,10 +443,7 @@ class BaseHostModCreate(host):
                                      'be unset by providing an empty value.'),
                                action='append')
         self.parser.add_option('-b', '--labels',
-                               help=('Comma separated list of labels. '
-                                     'When --skylab is provided, a label must '
-                                     'be in the format of label-key:label-value'
-                                     ' (e.g., board:lumpy).'))
+                               help=('Comma separated list of labels. '))
         self.parser.add_option('-B', '--blist',
                                help='File listing the labels',
                                type='string',
@@ -460,9 +455,7 @@ class BaseHostModCreate(host):
                                type='string',
                                metavar='ACL_FLIST')
         self.parser.add_option('-t', '--platform',
-                               help=('Sets the platform label. %s Please set '
-                                     'platform in labels (e.g., -b '
-                                     'platform:platform_name) with --skylab.'))
+                               help=('Sets the platform label.'))
 
 
     def parse(self):
