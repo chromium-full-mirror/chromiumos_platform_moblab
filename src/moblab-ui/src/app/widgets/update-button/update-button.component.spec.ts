@@ -13,7 +13,7 @@ import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.com
 import {UpdateButtonComponent} from './update-button.component';
 
 describe('UpdateButtonComponent', () => {
-  const mock_dialog_ref = {afterClosed: () => {}, close: () => {}};
+  const mock_dialog_ref = {afterClosed: () => { }, close: () => { }};
   const dialogRefSpyObj = jasmine.createSpyObj(mock_dialog_ref);
 
   let buttonComponent: UpdateButtonComponent;
@@ -59,7 +59,7 @@ describe('UpdateButtonComponent', () => {
         // @ts-ignore
         buttonComponent.moblabGrpcService,
         'get_is_update_available'
-      );
+      ).and.callFake(() => { });
       updateMoblabSpy = spyOn<any>(
         // @ts-ignore
         buttonComponent.moblabGrpcService,
@@ -69,11 +69,6 @@ describe('UpdateButtonComponent', () => {
 
     it('should compile', () => {
       expect(buttonComponent).toBeTruthy();
-    });
-
-    it('update click should invoke dialog.', () => {
-      dispatchButtonClick(buttonFixture, '.update-button');
-      expect(dialogSpy).toHaveBeenCalled();
     });
 
     it('update click should invoke dialog.', () => {

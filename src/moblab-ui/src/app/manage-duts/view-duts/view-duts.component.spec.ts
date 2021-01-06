@@ -66,18 +66,14 @@ describe('ViewDutsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ViewDutsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
 
-    // @ts-ignore
     getDutsSpy = spyOn<any>(
       component.moblabGrpcService,
       'listConnectedDuts'
     ).and.callFake(() => {
       component.assignDuts(createMockDuts());
     });
-  });
-  beforeEach(() => {
-    component.ngOnInit();
+
     fixture.detectChanges();
   });
 

@@ -19,9 +19,9 @@ export class EditAttributesComponent {
   pool = new FormControl('');
 
   constructor(
-    private moblabGrpcService: MoblabGrpcService,
+    public moblabGrpcService: MoblabGrpcService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   get_confirmation_message_suffix(dut_hostnames: string[]) {
     let confirmation_message_suffix = '';

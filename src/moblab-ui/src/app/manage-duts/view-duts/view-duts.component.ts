@@ -37,7 +37,7 @@ export class ViewDutsComponent implements OnInit {
 
   selection = new SelectionModel<ConnectedDutInfo>(true, []);
 
-  constructor(private moblabGrpcService: MoblabGrpcService) {}
+  constructor(public moblabGrpcService: MoblabGrpcService) { }
 
   @ViewChild(MatSort, {}) sort: MatSort;
 

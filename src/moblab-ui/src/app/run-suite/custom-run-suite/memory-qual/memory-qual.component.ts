@@ -1,5 +1,5 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ViewChild,
@@ -18,7 +18,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
   templateUrl: './memory-qual.component.html',
   styleUrls: ['./memory-qual.component.scss'],
 })
-export class MemoryQualComponent extends BaseSuite implements AfterContentInit {
+export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
@@ -34,7 +34,7 @@ export class MemoryQualComponent extends BaseSuite implements AfterContentInit {
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterContentInit(): void {
+  ngAfterViewInit(): void {
     this.bugIdInput.disable('Please select build.');
     this.partNumberInput.disable('Please select build.');
     this.changeDetector.detectChanges();

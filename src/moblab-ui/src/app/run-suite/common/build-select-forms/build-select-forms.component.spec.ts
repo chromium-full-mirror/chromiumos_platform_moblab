@@ -40,7 +40,7 @@ describe('BuildSelectFormsComponent', () => {
   ) {
     targetComponent.onOptionSelect(
       new MatAutocompleteSelectedEvent(
-        this,
+        null,
         new MatOption(fixture.nativeElement, null, null, null)
       )
     );

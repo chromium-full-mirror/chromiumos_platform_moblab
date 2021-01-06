@@ -94,7 +94,7 @@ export class MoblabGrpcService {
   moblabRpcService: MoblabRpcServiceClient = null;
 
   constructor() {
-    const url = new URL(window.location.href);
+    const url = new URL("http://localhost/");//window.location.href);
     let service_url = new String(url.protocol);
     service_url = service_url.concat('//', url.hostname, ':', url.port, '/rpc');
     console.log(service_url);
@@ -128,8 +128,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: SendMoblabScreenshotResponse) => {
         if (err) {
           error_callback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -169,8 +170,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RunSuiteResponse) => {
         if (err) {
           error_callback(err, response);
+        } else {
+          callback(response);
         }
-        callback(response);
       }
     );
   }
@@ -215,8 +217,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RunSuiteResponse) => {
         if (err) {
           error_callback(err, response);
+        } else {
+          callback(response);
         }
-        callback(response);
       }
     );
   }
@@ -257,8 +260,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RunSuiteResponse) => {
         if (err) {
           error_callback(err, response);
+        } else {
+          callback(response);
         }
-        callback(response);
       }
     );
   }
@@ -310,8 +314,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RunSuiteResponse) => {
         if (err) {
           error_callback(err, response);
+        } else {
+          callback(response);
         }
-        callback(response);
       }
     );
   }
@@ -355,8 +360,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RunSuiteResponse) => {
         if (err) {
           error_callback(err, response);
+        } else {
+          callback(response);
         }
-        callback(response);
       }
     );
   }
@@ -370,8 +376,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListConnectedDutsResponse) => {
         if (err) {
           console.log(err);
+        } else {
+          callback(response.getDutsList());
         }
-        callback(response.getDutsList());
       }
     );
   }
@@ -396,8 +403,9 @@ export class MoblabGrpcService {
             err
           );
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getDutDetail());
         }
-        callback(response.getDutDetail());
       }
     );
   }
@@ -450,8 +458,9 @@ export class MoblabGrpcService {
             'Response: ',
             err
           );
+        } else {
+          callback(response.getNumJobs());
         }
-        callback(response.getNumJobs());
       }
     );
   }
@@ -510,8 +519,9 @@ export class MoblabGrpcService {
             'Response: ',
             err
           );
+        } else {
+          callback(response.getJobsList());
         }
-        callback(response.getJobsList());
       }
     );
   }
@@ -582,8 +592,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: GetJobIdsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getJobIdsList());
         }
-        callback(response.getJobIdsList());
       }
     );
   }
@@ -602,8 +613,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: AbortJobsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -628,8 +640,9 @@ export class MoblabGrpcService {
             err
           );
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getJobDetail());
         }
-        callback(response.getJobDetail());
       }
     );
   }
@@ -653,8 +666,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListBuildTargetsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getBuildTargetsList());
         }
-        callback(response.getBuildTargetsList());
       }
     );
   }
@@ -675,12 +689,13 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListMilestonesResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          const milestoneNames = [];
+          for (const item of response.getMilestonesList()) {
+            milestoneNames.push(item.getValue());
+          }
+          callback(milestoneNames, response.getIsIncomplete());
         }
-        const milestoneNames = [];
-        for (const item of response.getMilestonesList()) {
-          milestoneNames.push(item.getValue());
-        }
-        callback(milestoneNames, response.getIsIncomplete());
       }
     );
   }
@@ -702,12 +717,13 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListBuildVersionsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          const buildVersionNames = [];
+          for (const item of response.getBuildVersionsList()) {
+            buildVersionNames.push(item.getValue());
+          }
+          callback(buildVersionNames, response.getIsIncomplete());
         }
-        const buildVersionNames = [];
-        for (const item of response.getBuildVersionsList()) {
-          buildVersionNames.push(item.getValue());
-        }
-        callback(buildVersionNames, response.getIsIncomplete());
       }
     );
   }
@@ -723,8 +739,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListModelsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getModelsList());
         }
-        callback(response.getModelsList());
       }
     );
   }
@@ -741,8 +758,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListPoolsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getPoolsList());
         }
-        callback(response.getPoolsList());
       }
     );
   }
@@ -760,8 +778,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: EnrollDutsResponse) => {
         if (err) {
           errorCallback(err.message);
+        } else {
+          callback();
         }
-        callback();
       }
     );
   }
@@ -779,8 +798,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: EnrollDutsResponse) => {
         if (err) {
           errorCallback(err.message);
+        } else {
+          callback();
         }
-        callback();
       }
     );
   }
@@ -794,9 +814,10 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListConnectedDutsFirmwareResponse) => {
         if (err) {
           console.log(err);
+        } else {
+          console.log(response);
+          callback(response.getDutsList());
         }
-        console.log(response);
-        callback(response.getDutsList());
       }
     );
   }
@@ -813,8 +834,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: UpdateDutsFirmwareResponse) => {
         if (err) {
           console.log(err);
+        } else {
+          callback(response.getOutputsList());
         }
-        callback(response.getOutputsList());
       }
     );
   }
@@ -847,8 +869,9 @@ export class MoblabGrpcService {
             err
           );
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getNumDutTasks());
         }
-        callback(response.getNumDutTasks());
       }
     );
   }
@@ -885,8 +908,9 @@ export class MoblabGrpcService {
             err
           );
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getTasksList());
         }
-        callback(response.getTasksList());
       }
     );
   }
@@ -904,8 +928,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RepairHostResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -923,8 +948,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ReverifyHostResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -947,8 +973,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: AddAttributeToDutsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -968,8 +995,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RemoveAttributeFromDutsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -989,8 +1017,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: AddLabelToDutsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -1010,8 +1039,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RemoveLabelFromDutsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -1037,8 +1067,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: AddPoolToDutsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -1064,8 +1095,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RemovePoolFromDutsResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -1107,15 +1139,16 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: GetCloudConfigurationResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(
+            response.getBotoKeyId(),
+            response.getBotoKeySecret(),
+            response.getGcsBucketUrl(),
+            response.getIsCloudEnabled(),
+            response.getIsRemoteConsoleEnabled(),
+            response.getIsRemoteCommandEnabled()
+          );
         }
-        callback(
-          response.getBotoKeyId(),
-          response.getBotoKeySecret(),
-          response.getGcsBucketUrl(),
-          response.getIsCloudEnabled(),
-          response.getIsRemoteConsoleEnabled(),
-          response.getIsRemoteCommandEnabled()
-        );
       }
     );
   }
@@ -1144,8 +1177,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: SetCloudConfigurationResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -1162,8 +1196,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: GetDutWifiInfoResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getDutWifiName(), response.getDutWifiPassword());
         }
-        callback(response.getDutWifiName(), response.getDutWifiPassword());
       }
     );
   }
@@ -1184,8 +1219,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: SetDutWifiInfoResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -1228,8 +1264,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: RebootMoblabResponse) => {
         if (err) {
           error_callback(err.message);
+        } else {
+          console.log(response);
         }
-        console.log(response);
       }
     );
   }
@@ -1249,8 +1286,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: GetIsUpdateAvailableResponse) => {
         if (err) {
           error_callback(err.message);
+        } else {
+          callback(response.getIsUpdateAvailable());
         }
-        callback(response.getIsUpdateAvailable());
       }
     );
   }
@@ -1270,8 +1308,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: UpdateMoblabResponse) => {
         if (err) {
           error_callback(err.message);
+        } else {
+          callback(response.getMessage());
         }
-        callback(response.getMessage());
       }
     );
   }
@@ -1293,8 +1332,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: GetRemoteAgentConfigurationResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getIsEnabled());
         }
-        callback(response.getIsEnabled());
       }
     );
   }
@@ -1319,8 +1359,9 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: SetRemoteAgentConfigurationResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
+        } else {
+          callback(response.getIsSucceeded());
         }
-        callback(response.getIsSucceeded());
       }
     );
   }

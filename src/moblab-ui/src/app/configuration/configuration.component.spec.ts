@@ -259,6 +259,7 @@ describe('ConfigurationComponent', () => {
           'fake-secret-key',
           'gs://xxx/',
           true,
+          true,
           true
         );
       });

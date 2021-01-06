@@ -154,12 +154,12 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   queueStatusFilterOptions = [''].concat(Object.keys(Job.QueueStatus).slice(1));
 
   constructor(
-    private readonly moblabGrpcService: MoblabGrpcService,
+    public readonly moblabGrpcService: MoblabGrpcService,
     private changeDetectorRefs: ChangeDetectorRef,
     private datePipe: DatePipe,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {

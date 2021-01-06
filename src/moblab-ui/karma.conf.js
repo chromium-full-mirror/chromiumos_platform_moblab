@@ -35,7 +35,7 @@ module.exports = function (config) {
         : ['spec'],
     specReporter: {
       maxLogLines: 5,
-      suppressErrorSummary: true,
+      suppressErrorSummary: false,
       suppressFailed: false,
       suppressPassed: false,
       suppressSkipped: true,

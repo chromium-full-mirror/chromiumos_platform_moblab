@@ -1,5 +1,5 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ViewChild,
@@ -21,7 +21,7 @@ import {RunSuiteButtonComponent} from '../common/run-suite-button/run-suite-butt
 })
 export class RunAnySuiteComponent
   extends BaseSuite
-  implements AfterContentInit {
+  implements AfterViewInit {
   @ViewChild('suiteInput') suiteInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
@@ -53,7 +53,7 @@ export class RunAnySuiteComponent
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterContentInit(): void {
+  ngAfterViewInit(): void {
     this.suiteInput.disable('Please select build.');
     this.changeDetector.detectChanges();
   }

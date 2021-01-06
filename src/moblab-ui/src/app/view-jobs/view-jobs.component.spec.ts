@@ -189,7 +189,7 @@ describe('ViewJobsComponent', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(ViewJobsComponent);
       component = fixture.componentInstance;
-      this.hideActionBar = false;
+      component.hideActionBar = false;
 
       // @ts-ignore
       getJobsSpy = spyOn<any>(

@@ -57,9 +57,9 @@ export class BuildSelectFormsComponent implements AfterViewInit {
 
   constructor(
     private changeDetector: ChangeDetectorRef,
-    private moblabGrpcService: MoblabGrpcService,
+    public moblabGrpcService: MoblabGrpcService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngAfterViewInit() {
     this.getModels();

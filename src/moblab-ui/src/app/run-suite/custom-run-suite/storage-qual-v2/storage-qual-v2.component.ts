@@ -1,5 +1,5 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ViewChild,
@@ -22,7 +22,7 @@ import {RunStorageQualificationSuiteRequest} from '../../../services/moblabrpc_p
 })
 export class StorageQualV2Component
   extends BaseSuite
-  implements AfterContentInit {
+  implements AfterViewInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild('diskSizeInput') diskSizeInput;
@@ -51,7 +51,7 @@ export class StorageQualV2Component
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterContentInit(): void {
+  ngAfterViewInit(): void {
     this.disableTestParamControls();
     this.bugIdInput.disable('Please select disk size.');
     this.partNumberInput.disable('Please select disk size.');
@@ -59,7 +59,7 @@ export class StorageQualV2Component
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onBuildSetCustom(event) {
+  onBuildSetCustom() {
     this.diskSizeInput.enable();
     this.suiteSelector.enable();
     this.dualNamespace.enable();
@@ -135,7 +135,7 @@ export class StorageQualV2Component
       this.bugIdInput.getInput(),
       this.partNumberInput.getInput(),
       this.suiteIndex +
-        Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2),
+      Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2),
       this.diskSizeInput.getInput(),
       this.dualNamespace.getChecked()
     );

@@ -30,9 +30,9 @@ export class DutTaskTableComponent implements AfterViewInit {
   DEFAULT_PAGE_SIZE = 10;
 
   constructor(
-    private readonly moblabGrpcService: MoblabGrpcService,
+    readonly moblabGrpcService: MoblabGrpcService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngAfterViewInit() {
     this.paginator.page.subscribe(() => this.getNextPageDutTasks());

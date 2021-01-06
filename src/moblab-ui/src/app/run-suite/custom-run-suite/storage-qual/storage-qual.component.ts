@@ -1,5 +1,5 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ViewChild,
@@ -19,7 +19,7 @@ import {RunStorageQualificationSuiteRequest} from '../../../services/moblabrpc_p
 })
 export class StorageQualComponent
   extends BaseSuite
-  implements AfterContentInit {
+  implements AfterViewInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
@@ -40,7 +40,7 @@ export class StorageQualComponent
 
   /** Sets initial form enable/disable states.
    * */
-  ngAfterContentInit(): void {
+  ngAfterViewInit(): void {
     this.bugIdInput.disable('Please select build.');
     this.partNumberInput.disable('Please select build.');
     this.changeDetector.detectChanges();

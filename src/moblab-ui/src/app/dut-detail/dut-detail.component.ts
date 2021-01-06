@@ -31,10 +31,10 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
 
   constructor(
     private cd: ChangeDetectorRef,
-    private readonly moblabGrpcService: MoblabGrpcService,
+    readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {

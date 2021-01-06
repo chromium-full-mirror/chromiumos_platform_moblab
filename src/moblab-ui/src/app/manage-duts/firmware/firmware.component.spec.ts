@@ -7,6 +7,7 @@ import {FirmwareComponent} from './firmware.component';
 
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatDialogModule} from '@angular/material/dialog';
 import {MatTableModule} from '@angular/material/table';
 
 describe('FirmwareComponent', () => {
@@ -15,7 +16,7 @@ describe('FirmwareComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [MatCardModule, MatCheckboxModule, MatTableModule],
+      imports: [MatCardModule, MatCheckboxModule, MatTableModule, MatDialogModule],
       declarations: [FirmwareComponent],
     }).compileComponents();
   }));

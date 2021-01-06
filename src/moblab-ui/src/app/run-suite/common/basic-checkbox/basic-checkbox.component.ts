@@ -15,30 +15,26 @@ export class BasicCheckboxFormComponent extends BaseForm implements OnInit {
   @Input() name: string;
   @Output() update = new EventEmitter();
 
-  private check = new FormControl('');
+  checkForm = new FormControl('');
 
   ngOnInit(): void {
-    this.check.setValue(false);
-    this.check.valueChanges.subscribe(value => {
-      this.update.emit(this.check.value);
+    this.checkForm.setValue(false);
+    this.checkForm.valueChanges.subscribe(value => {
+      this.update.emit(this.checkForm.value);
     });
   }
 
   getChecked() {
-    return this.check.value;
-  }
-
-  getCheckboxFormControl() {
-    return this.check;
+    return this.checkForm.value;
   }
 
   enable() {
     super.enable();
-    this.check.enable();
+    this.checkForm.enable();
   }
 
   disable(message?: string) {
     super.disable(message);
-    this.check.disable();
+    this.checkForm.disable();
   }
 }
