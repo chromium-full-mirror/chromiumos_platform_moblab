@@ -72,7 +72,7 @@ def _clean_up_hqes(hqes):
 def _clean_up_hosts(host_ids):
     models = autotest.load('frontend.afe.models')
     transaction = autotest.deps_load('django.db.transaction')
-    with transaction.commit_on_success():
+    with transaction.atomic():
         active_hosts = {
             id for id in (models.HostQueueEntry.objects
                           .filter(active=True, complete=False)

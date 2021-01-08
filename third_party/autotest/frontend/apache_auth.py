@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User, Group, check_password
 from django.contrib.auth import backends
 from django.contrib import auth
 from django import http
@@ -6,6 +5,8 @@ from django import http
 from client.cros import constants
 from frontend import thread_local
 from frontend.afe import models, management
+
+from datetime import datetime
 
 DEBUG_USER = 'debug_user'
 
@@ -23,6 +24,7 @@ class SimpleAuthBackend(backends.ModelBackend):
             user = User(username=username,
                         password='apache authentication')
             user.is_staff = True
+            user.last_login = datetime.utcnow()
             user.save() # need to save before adding groups
             user.groups.add(Group.objects.get(
                 name=management.BASIC_ADMIN))

@@ -238,7 +238,7 @@ def _create_label_everywhere(id, hosts):
             id=label.id, platform=label.platform)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def label_add_hosts(id, hosts):
     """Adds a label with the given id to the given hosts.
 
@@ -280,7 +280,7 @@ def remove_label_from_hosts(id, hosts):
     label.host_set.remove(*host_objs)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def label_remove_hosts(id, hosts):
     """Removes a label of the given id from the given hosts.
 
@@ -344,7 +344,7 @@ def add_host(hostname, status=None, locked=None, lock_reason='', protection=None
                                   protection=protection).id
 
 
-@rpc_utils.route_rpc_to_primary
+
 def modify_host(id, **kwargs):
     """Modify local attributes of a host.
 
@@ -397,7 +397,7 @@ def modify_host_local(id, **kwargs):
     models.Host.smart_get(id).update_object(kwargs)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def modify_hosts(host_filter_data, update_data):
     """Modify local attributes of multiple hosts.
 
@@ -484,7 +484,7 @@ def add_labels_to_host(id, labels):
         host.labels.add(*non_static_labels)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def host_add_labels(id, labels):
     """Adds labels to a given host.
 
@@ -537,7 +537,7 @@ def remove_labels_from_host(id, labels):
                          'labels.', static_labels, id)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def host_remove_labels(id, labels):
     """Removes labels from a given host.
 
@@ -579,7 +579,7 @@ def get_host_attribute(attribute, **host_filter_data):
     return rpc_utils.prepare_for_serialization(host_attr_dicts)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def set_host_attribute(attribute, value, **host_filter_data):
     """Set an attribute on hosts.
 
@@ -608,7 +608,6 @@ def set_host_attribute_impl(attribute, value, **host_filter_data):
     """
     assert host_filter_data # disallow accidental actions on all hosts
     hosts = models.Host.query_objects(host_filter_data)
-    models.AclGroup.check_for_acl_violation_hosts(hosts)
     for host in hosts:
         host.set_or_delete_attribute(attribute, value)
 
@@ -642,8 +641,6 @@ def get_hosts(multiple_labels=(), exclude_only_if_needed_labels=False,
     hosts = list(hosts)
     models.Host.objects.populate_relationships(hosts, models.Label,
                                                'label_list')
-    models.Host.objects.populate_relationships(hosts, models.AclGroup,
-                                               'acl_list')
     models.Host.objects.populate_relationships(hosts, models.HostAttribute,
                                                'attribute_list')
     models.Host.objects.populate_relationships(hosts,
@@ -652,7 +649,6 @@ def get_hosts(multiple_labels=(), exclude_only_if_needed_labels=False,
     host_dicts = []
     for host_obj in hosts:
         host_dict = host_obj.get_object_dict()
-        host_dict['acls'] = [acl.name for acl in host_obj.acl_list]
         host_dict['attributes'] = dict((attribute.attribute, attribute.value)
                                        for attribute in host_obj.attribute_list)
         if RESPECT_STATIC_LABELS:
@@ -781,67 +777,6 @@ def get_users(**filter_data):
         models.User.list_objects(filter_data))
 
 
-# acl groups
-
-def add_acl_group(name, description=None):
-    group = models.AclGroup.add_object(name=name, description=description)
-    group.users.add(models.User.current_user())
-    return group.id
-
-
-def modify_acl_group(id, **data):
-    group = models.AclGroup.smart_get(id)
-    group.check_for_acl_violation_acl_group()
-    group.update_object(data)
-    group.add_current_user_if_empty()
-
-
-def acl_group_add_users(id, users):
-    group = models.AclGroup.smart_get(id)
-    group.check_for_acl_violation_acl_group()
-    users = models.User.smart_get_bulk(users)
-    group.users.add(*users)
-
-
-def acl_group_remove_users(id, users):
-    group = models.AclGroup.smart_get(id)
-    group.check_for_acl_violation_acl_group()
-    users = models.User.smart_get_bulk(users)
-    group.users.remove(*users)
-    group.add_current_user_if_empty()
-
-
-def acl_group_add_hosts(id, hosts):
-    group = models.AclGroup.smart_get(id)
-    group.check_for_acl_violation_acl_group()
-    hosts = models.Host.smart_get_bulk(hosts)
-    group.hosts.add(*hosts)
-    group.on_host_membership_change()
-
-
-def acl_group_remove_hosts(id, hosts):
-    group = models.AclGroup.smart_get(id)
-    group.check_for_acl_violation_acl_group()
-    hosts = models.Host.smart_get_bulk(hosts)
-    group.hosts.remove(*hosts)
-    group.on_host_membership_change()
-
-
-def delete_acl_group(id):
-    models.AclGroup.smart_get(id).delete()
-
-
-def get_acl_groups(**filter_data):
-    acl_groups = models.AclGroup.list_objects(filter_data)
-    for acl_group in acl_groups:
-        acl_group_obj = models.AclGroup.objects.get(id=acl_group['id'])
-        acl_group['users'] = [user.login
-                              for user in acl_group_obj.users.all()]
-        acl_group['hosts'] = [host.hostname
-                              for host in acl_group_obj.hosts.all()]
-    return rpc_utils.prepare_for_serialization(acl_groups)
-
-
 # jobs
 
 def generate_control_file(tests=(), profilers=(),
@@ -961,7 +896,7 @@ def create_job_page_handler(name, priority, control_file, control_type,
                       hostless=hostless, test_args=test_args, **kwargs)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def create_job(
         name,
         priority,
@@ -1079,7 +1014,6 @@ def abort_host_queue_entries(**filter_data):
     #   1. Jobs that have already completed (whether or not they were aborted)
     #   2. Jobs that we have already been aborted (but may not have completed)
     query = query.filter(complete=False).filter(aborted=False)
-    models.AclGroup.check_abort_permissions(query)
     host_queue_entries = list(query.select_related())
     rpc_utils.check_abort_synchronous_jobs(host_queue_entries)
 
@@ -1105,7 +1039,6 @@ def _call_special_tasks_on_hosts(task, hosts):
 
     @returns A list of hostnames that a special task was created for.
     """
-    models.AclGroup.check_for_acl_violation_hosts(hosts)
     shard_host_map = rpc_utils.bucket_hosts_by_shard(hosts)
     if shard_host_map and not utils.is_shard():
         raise ValueError('The following hosts are on shards, please '
@@ -1826,7 +1759,7 @@ def _get_control_file_by_suite(suite_name):
     return getter.get_control_file_contents_by_name(suite_name)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def create_suite_job(
         name='',
         board='',
@@ -2190,7 +2123,7 @@ def add_board_to_shard(hostname, labels):
 # Remove board RPCs are rare, so we can afford to make them a bit more
 # expensive (by performing in a transaction) in order to guarantee
 # atomicity.
-@transaction.commit_on_success
+@transaction.atomic
 def remove_board_from_shard(hostname, label):
     """Remove board from the given shard.
     @param hostname: The hostname of the shard to be changed.
@@ -2273,7 +2206,7 @@ def get_servers(hostname=None, role=None, status=None):
     return [s.get_details() for s in servers]
 
 
-@rpc_utils.route_rpc_to_primary
+
 def get_stable_version(board=stable_version_utils.DEFAULT, android=False):
     """Get stable version for the given board.
 
@@ -2291,7 +2224,7 @@ def get_stable_version(board=stable_version_utils.DEFAULT, android=False):
     return stable_version_utils.get(board=board)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def get_all_stable_versions():
     """Get stable versions for all boards.
 
@@ -2300,7 +2233,7 @@ def get_all_stable_versions():
     return stable_version_utils.get_all()
 
 
-@rpc_utils.route_rpc_to_primary
+
 def set_stable_version(version, board=stable_version_utils.DEFAULT):
     """Modify stable version for the given board.
 
@@ -2311,7 +2244,7 @@ def set_stable_version(version, board=stable_version_utils.DEFAULT):
     return None
 
 
-@rpc_utils.route_rpc_to_primary
+
 def delete_stable_version(board):
     """Modify stable version for the given board.
 
@@ -2401,7 +2334,7 @@ def get_tests_by_build(build, ignore_invalid_tests=True):
     return rpc_utils.prepare_for_serialization(test_objects)
 
 
-@rpc_utils.route_rpc_to_primary
+
 def get_lab_health_indicators(board=None):
     """Get the healthy indicators for whole lab.
 

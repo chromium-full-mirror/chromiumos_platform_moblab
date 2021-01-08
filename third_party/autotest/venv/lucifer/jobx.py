@@ -139,7 +139,7 @@ def prepare_keyvals_files(job, workdir):
 
 def write_aborted_keyvals_and_status(job, workdir):
     """Write the keyvals and status for an aborted job."""
-    aborted_by = 'autotest_system'
+    aborted_by = 'moblab'
     aborted_on = int(time.time())
     for hqe in job.hostqueueentry_set.all():
         if not hasattr(hqe, 'abortedhostqueueentry'):

@@ -55,15 +55,13 @@ def main(args):
 def _main_loop(jobdir):
     transaction = autotest.deps_load('django.db.transaction')
 
-    @transaction.commit_manually
-    def flush_transaction():
-        """Flush transaction https://stackoverflow.com/questions/3346124/"""
-        transaction.commit()
+    @transaction.atomic
+    def main_loop_atomic(jobdir):
+        _main_loop_body(jobdir)
 
     while True:
         logger.debug('Tick')
-        _main_loop_body(jobdir)
-        flush_transaction()
+        main_loop_atomic(jobdir)
         time.sleep(20)
 
 

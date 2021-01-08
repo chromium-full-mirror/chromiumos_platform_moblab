@@ -19,7 +19,6 @@ c = global_config.global_config
 _section = 'AUTOTEST_WEB'
 
 DEBUG = False
-TEMPLATE_DEBUG = False
 
 FULL_ADMIN = False
 
@@ -40,6 +39,17 @@ DATABASES = {'default': AUTOTEST_DEFAULT,
              'global': AUTOTEST_GLOBAL,
              'readonly': AUTOTEST_READONLY,
              'server': AUTOTEST_SERVER,}
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'OPTIONS': {'debug': True,
+                    'loaders': ['django.template.loaders.filesystem.Loader',
+                                'django.template.loaders.app_directories.Loader'
+                               ]
+                   }
+    }
+]
 
 # Have to set SECRET_KEY before importing connections because of this bug:
 # https://code.djangoproject.com/ticket/20704
@@ -62,7 +72,7 @@ TKO_URL_PREFIX = 'new_tko/server/'
 # although not all variations may be possible on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Los_Angeles'
+TIME_ZONE = 'UTC'
 
 # Language code for this installation. All choices can be found here:
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
@@ -91,20 +101,8 @@ STATIC_URL = '/' + URL_PREFIX + 'admin/'
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'frontend.apache_auth.ApacheAuthMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.doc.XViewMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = 'frontend.urls'
@@ -113,17 +111,6 @@ INSTALLED_APPS = (
     'frontend.afe',
     'frontend.tko',
     'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.sites',
 )
-
-AUTHENTICATION_BACKENDS = (
-    'frontend.apache_auth.SimpleAuthBackend',
-)
-# TODO(scottz): Temporary addition until time can be spent untangling middleware
-# session crosbug.com/31608
-SESSION_COOKIE_AGE = 1200
-
-AUTOTEST_CREATE_ADMIN_GROUPS = True

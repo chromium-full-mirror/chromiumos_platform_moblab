@@ -54,7 +54,6 @@ public class JobListView extends TabView implements TableActionsListener {
     private TableDecorator tableDecorator;
     private JobStateFilter jobStateFilter;
     private JobTypeFilter jobTypeFilter;
-    private Filter ownerFilter;
     private SearchFilter nameFilter;
     private JobStartingDatetimeFilter startingDatetimeFilter;
     private SelectionManager selectionManager;
@@ -174,10 +173,6 @@ public class JobListView extends TabView implements TableActionsListener {
         jobTable.setWidgetFactory(selectionManager);
         tableDecorator.addTableActionsPanel(this, true);
         addWidget(tableDecorator, "job_table");
-
-        ownerFilter = new JobOwnerFilter("owner");
-        jobTable.addFilter(ownerFilter);
-        addWidget(ownerFilter.getWidget(), "user_list");
 
         nameFilter = new SearchFilter("name", "Filter", false);
         jobTable.addFilter(nameFilter);

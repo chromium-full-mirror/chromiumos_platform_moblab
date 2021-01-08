@@ -35,9 +35,6 @@ from client.bin import utils as bin_utils
 from client.common_lib import error, host_protections
 from server import frontend, hosts
 from server.hosts import host_info
-from server.lib.status_history import HostJobHistory
-from server.lib.status_history import UNUSED, WORKING
-from server.lib.status_history import BROKEN, UNKNOWN
 
 
 
@@ -205,13 +202,6 @@ class host_list(action_common.atest_list, host):
 
             filters['status__in'] = statuses
             check_results['status__in'] = None
-
-        if self.acl:
-            filters['aclgroup__name'] = self.acl
-            check_results['aclgroup__name'] = None
-        if self.user:
-            filters['aclgroup__users__login'] = self.user
-            check_results['aclgroup__users__login'] = None
 
         if self.locked or self.unlocked:
             filters['locked'] = self.locked
@@ -500,30 +490,6 @@ class BaseHostModCreate(host):
         return (options, leftover)
 
 
-    def _set_acls(self, hosts, acls):
-        """Add hosts to acls (and remove from all other acls).
-
-        @param hosts: list of hostnames
-        @param acls: list of acl names
-        """
-        # Remove from all ACLs except 'Everyone' and ACLs in list
-        # Skip hosts that don't exist
-        for host in hosts:
-            if host not in self.host_ids:
-                continue
-            host_id = self.host_ids[host]
-            for a in self.execute_rpc('get_acl_groups', hosts=host_id):
-                if a['name'] not in self.acls and a['id'] != 1:
-                    self.execute_rpc('acl_group_remove_hosts', id=a['id'],
-                                     hosts=self.hosts)
-
-        # Add hosts to the ACLs
-        self.check_and_create_items('get_acl_groups', 'add_acl_group',
-                                    self.acls)
-        for a in acls:
-            self.execute_rpc('acl_group_add_hosts', id=a, hosts=hosts)
-
-
     def _remove_labels(self, host, condition):
         """Remove all labels from host that meet condition(label).
 
@@ -627,7 +593,6 @@ class host_mod(BaseHostModCreate):
         if options.force_modify_locking:
              self.data['force_modify_locking'] = True
 
-        self.remove_acls = options.remove_acls
         self.remove_labels = options.remove_labels
         self.new_env = options.new_env
 
@@ -666,10 +631,6 @@ class host_mod(BaseHostModCreate):
             except topic_common.CliError as full_error:
                 # Already logged by execute_rpc()
                 pass
-
-        if self.acls or self.remove_acls:
-            self._set_acls(self.hosts, self.acls)
-
         return successes
 
 
@@ -830,8 +791,6 @@ class host_create(BaseHostModCreate):
                 pass
 
         if successful_hosts:
-            self._set_acls(successful_hosts, self.acls)
-
             if not self.locked:
                 for host in successful_hosts:
                     self.execute_rpc('modify_host', id=host, locked=False,

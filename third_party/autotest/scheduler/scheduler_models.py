@@ -789,21 +789,7 @@ class HostQueueEntry(DBObject):
 
 
     def _load_abort_info(self):
-        """ Fetch info about who aborted the job. """
-        if hasattr(self, "_aborted_by"):
-            return
-        rows = _db.execute("""
-                SELECT afe_users.login,
-                        afe_aborted_host_queue_entries.aborted_on
-                FROM afe_aborted_host_queue_entries
-                INNER JOIN afe_users
-                ON afe_users.id = afe_aborted_host_queue_entries.aborted_by_id
-                WHERE afe_aborted_host_queue_entries.queue_entry_id = %s
-                """, (self.id,))
-        if rows:
-            self._aborted_by, self._aborted_on = rows[0]
-        else:
-            self._aborted_by = self._aborted_on = None
+        return
 
 
     def on_pending(self):

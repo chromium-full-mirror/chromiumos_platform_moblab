@@ -53,17 +53,14 @@ class BaseHostQueryManager(object):
 
 
     @rdb_hosts.return_rdb_host
-    def find_hosts(self, deps, acls):
-        """Finds valid hosts matching deps, acls.
+    def find_hosts(self, deps, _):
+        """Finds valid hosts matching deps.
 
         @param deps: A list/frozenset of dependencies (label id) to match.
-        @param acls: A list/frozenset of acls, at least one of which must
-            coincide with an acl group the chosen host is in.
 
         @return: A set of matching hosts available.
         """
         hosts_available = self.host_objects.filter(invalid=0)
-        hosts_available = hosts_available.filter(Q(aclgroup__id__in=acls))
         hosts_available = models.Host.get_hosts_with_label_ids(
                 list(deps), hosts_available)
         return set(hosts_available)
@@ -281,15 +278,12 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
                     'Cannot assign a different host for request: %s, it '
                     'already has one: %s ' % (request, host.id))
 
-        # Getting all labels and acls might result in large queries, so
+        # Getting all labels might result in large queries, so
         # bail early if the host is already leased.
         if host.leased:
             return False
-        # If a host is invalid it must be a one time host added to the
-        # afe specifically for this purpose, so it doesn't require acl checking.
-        acl_match = (request.acls.intersection(host.acls) or host.invalid)
         label_match = (request.deps.intersection(host.labels) == request.deps)
-        return acl_match and label_match
+        return label_match
 
 
     @classmethod
@@ -338,7 +332,7 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
         hosts = kwargs.get(rdb_cache_manager.MEMOIZE_KEY, [])
         if not hosts:
             hosts = self.host_query_manager.find_hosts(
-                            request.deps, request.acls)
+                            request.deps, None)
 
         # <-----[:attempt_lease_hosts](evicted)--------> <-(returned, cached)->
         # |   -leased_hosts-  |   -stale cached hosts-  | -unleased matching- |

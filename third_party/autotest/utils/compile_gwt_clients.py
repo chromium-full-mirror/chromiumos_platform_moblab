@@ -106,12 +106,16 @@ def compile_and_install_client(project_client, extra_args='',
 
     logging.info('Compiling client %s', project_client)
     try:
-        utils.run(cmd, verbose=True)
+        result = utils.run(cmd, verbose=True)
+        if result.exit_status != 0:
+            logging.info(result.stdout)
+            logging.info(result.stderr)
         if install_client:
             return install_completed_client(java_args['compile_dir'],
                                             project_client)
         return True
-    except error.CmdError:
+    except error.CmdError as e:
+        logging.error(e)
         logging.error('Error compiling %s, leaving old client', project_client)
 
     return False

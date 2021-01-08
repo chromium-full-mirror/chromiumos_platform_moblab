@@ -77,6 +77,9 @@ def _monkeypatch_body():
     # Dummy out common imports as they may cause problems.
     sys.meta_path.insert(0, _CommonRemovingFinder())
 
+    # Set up Django environment variables.
+    importlib.import_module('frontend.setup_django_environment')
+
     # Add chromite's third-party to the import path (chromite does this
     # on import).
     try:
@@ -91,18 +94,13 @@ Could not find chromite; adding system packages and retrying \
             site.addsitedir(d)
         importlib.import_module('chromite')
 
-    # Set up Django environment variables.
-    importlib.import_module('frontend.setup_django_environment')
 
     # Make Django app paths absolute.
     settings = importlib.import_module('frontend.settings')
     settings.INSTALLED_APPS = (
             'frontend.afe',
             'frontend.tko',
-            'django.contrib.admin',
-            'django.contrib.auth',
             'django.contrib.contenttypes',
-            'django.contrib.sessions',
             'django.contrib.sites',
     )
 

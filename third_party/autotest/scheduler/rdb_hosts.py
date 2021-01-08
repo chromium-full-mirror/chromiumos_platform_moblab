@@ -102,7 +102,6 @@ class RDBServerHostWrapper(RDBHost):
         host_fields = RDBHost.get_required_fields_from_host(host)
         super(RDBServerHostWrapper, self).__init__(**host_fields)
         self.labels = rdb_utils.LabelIterator(host.labels.all())
-        self.acls = [aclgroup.id for aclgroup in host.aclgroup_set.all()]
         self.protection = host.protection
         platform = host.platform()
         # Platform needs to be a method, not an attribute, for
@@ -162,7 +161,6 @@ class RDBServerHostWrapper(RDBHost):
 
         if unwrap_foreign_keys:
             host_info['labels'] = self.labels.get_label_names()
-            host_info['acls'] = self.acls
             host_info['platform_name'] = self.platform_name
             host_info['protection'] = self.protection
         return host_info

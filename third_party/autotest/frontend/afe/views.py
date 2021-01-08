@@ -35,16 +35,6 @@ def rpc_documentation(request):
     return rpc_handler_obj.get_rpc_documentation()
 
 
-def model_documentation(request):
-    """Get the model documentation.
-
-    @param request: the RPC request.
-    """
-    model_names = ('Label', 'Host', 'Test', 'User', 'AclGroup', 'Job',
-                   'AtomicGroup')
-    return views_common.model_documentation(models, model_names)
-
-
 def redirect_with_extra_data(request, url, **kwargs):
     """Redirect according to the extra data.
 
@@ -84,11 +74,11 @@ def handler500(request):
     """
     t = loader.get_template('500.html')
     trace = traceback.format_exc()
-    context = Context({
-        'type': sys.exc_type,
-        'value': sys.exc_value,
+    context = {
+        'type': sys.exc_info(),
+        'value': sys.exc_info(),
         'traceback': cgi.escape(trace)
-    })
+    }
     return HttpResponseServerError(t.render(context))
 
 

@@ -13,6 +13,7 @@ import django.db.models.sql.where
 from client.common_lib import error
 from frontend.afe import rdb_model_extensions
 
+from django.db.models.sql.constants import INNER, LOUTER
 
 class ValidationError(django.core.exceptions.ValidationError):
     """\
@@ -28,8 +29,8 @@ def _quote_name(name):
 class LeasedHostManager(dbmodels.Manager):
     """Query manager for unleased, unlocked hosts.
     """
-    def get_query_set(self):
-        return (super(LeasedHostManager, self).get_query_set().filter(
+    def get_queryset(self):
+        return (super(LeasedHostManager, self).get_queryset().filter(
                 leased=0, locked=0))
 
 
@@ -135,9 +136,9 @@ class ExtendedManager(dbmodels.Manager):
         if join_condition:
             full_join_condition += ' AND (' + join_condition + ')'
         if exclude or force_left_join:
-            join_type = query_set.query.LOUTER
+            join_type = LOUTER
         else:
-            join_type = query_set.query.INNER
+            join_type = INNER
 
         query_set = self.CustomQuery.convert_query(query_set)
         query_set.query.add_custom_join(join_table,
@@ -486,7 +487,7 @@ class ModelWithInvalidManager(ExtendedManager):
     """
     Manager for objects with an "invalid" bit
     """
-    def get_query_set(self):
+    def get_queryset(self):
         return ModelWithInvalidQuerySet(self.model)
 
 
@@ -494,8 +495,8 @@ class ValidObjectsManager(ModelWithInvalidManager):
     """
     Manager returning only objects with invalid=False.
     """
-    def get_query_set(self):
-        queryset = super(ValidObjectsManager, self).get_query_set()
+    def get_queryset(self):
+        queryset = super(ValidObjectsManager, self).get_queryset()
         return queryset.filter(invalid=False)
 
 
@@ -1135,7 +1136,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
             'for type %s' % type(self))
 
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def update_from_serialized(self, serialized):
         """Updates local fields of an existing object from a serialized form.
 

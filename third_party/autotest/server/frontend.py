@@ -501,8 +501,7 @@ class AFE(RpcClient):
 
 
     def reverify_hosts(self, hostnames=(), status=None, label=None):
-        query_args = dict(locked=False,
-                          aclgroup__users__login=self.user)
+        query_args = dict(locked=False)
         query_args.update(self._dict_for_host_query(hostnames=hostnames,
                                                     status=status,
                                                     label=label))
@@ -510,8 +509,7 @@ class AFE(RpcClient):
 
 
     def repair_hosts(self, hostnames=(), status=None, label=None):
-        query_args = dict(locked=False,
-                          aclgroup__users__login=self.user)
+        query_args = dict(locked=False)
         query_args.update(self._dict_for_host_query(hostnames=hostnames,
                                                     status=status,
                                                     label=label))
@@ -540,22 +538,6 @@ class AFE(RpcClient):
     def create_label(self, name, **dargs):
         id = self.run('add_label', name=name, **dargs)
         return self.get_labels(id=id)[0]
-
-
-    def get_acls(self, **dargs):
-        acls = self.run('get_acl_groups', **dargs)
-        return [Acl(self, a) for a in acls]
-
-
-    def create_acl(self, name, **dargs):
-        id = self.run('add_acl_group', name=name, **dargs)
-        return self.get_acls(id=id)[0]
-
-
-    def get_users(self, **dargs):
-        users = self.run('get_users', **dargs)
-        return [User(self, u) for u in users]
-
 
     def generate_control_file(self, tests, **dargs):
         ret = self.run('generate_control_file', tests=tests, **dargs)

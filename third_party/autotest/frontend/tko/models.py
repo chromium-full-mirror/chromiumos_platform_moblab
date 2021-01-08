@@ -1,6 +1,8 @@
 from django.db import models as dbmodels, connection
 from frontend.afe import model_logic, readonly_connection
 
+from django.db.models.sql.constants import LOUTER
+
 _quote_name = connection.ops.quote_name
 
 class TempManager(model_logic.ExtendedManager):
@@ -255,7 +257,7 @@ class IterationAttribute(dbmodels.Model, model_logic.ModelExtensions):
     """Models an iteration attribute."""
     # This isn't really a primary key, but it's necessary to appease Django
     # and is harmless as long as we're careful.
-    test = dbmodels.ForeignKey(Test, db_column='test_idx', primary_key=True)
+    test = dbmodels.ForeignKey(Test, db_column='test_idx')
     iteration = dbmodels.IntegerField()
     attribute = dbmodels.CharField(max_length=90)
     value = dbmodels.CharField(blank=True, max_length=300)
@@ -270,7 +272,7 @@ class IterationAttribute(dbmodels.Model, model_logic.ModelExtensions):
 class IterationResult(dbmodels.Model, model_logic.ModelExtensions):
     """Models an iteration result."""
     # See comment on IterationAttribute regarding primary_key=True.
-    test = dbmodels.ForeignKey(Test, db_column='test_idx', primary_key=True)
+    test = dbmodels.ForeignKey(Test, db_column='test_idx')
     iteration = dbmodels.IntegerField()
     attribute = dbmodels.CharField(max_length=256)
     value = dbmodels.FloatField(null=True, blank=True)
@@ -314,8 +316,8 @@ class SavedQuery(dbmodels.Model, model_logic.ModelExtensions):
 class TestViewManager(TempManager):
     """A Test View Manager."""
 
-    def get_query_set(self):
-        query = super(TestViewManager, self).get_query_set()
+    def get_queryset(self):
+        query = super(TestViewManager, self).get_queryset()
 
         # add extra fields to selects, using the SQL itself as the "alias"
         extra_select = dict((sql, sql)
@@ -360,7 +362,7 @@ class TestViewManager(TempManager):
                                   'tko_test_labels_tests' + suffix))
         query_set.query.add_custom_join('tko_test_labels',
                                         second_join_condition,
-                                        query_set.query.LOUTER,
+                                        LOUTER,
                                         alias=second_join_alias)
         return query_set
 
@@ -525,7 +527,7 @@ class TestViewManager(TempManager):
         return query_set
 
 
-    def get_query_set_with_joins(self, filter_data):
+    def get_queryset_with_joins(self, filter_data):
         """Add joins for querying over test-related items.
 
         These parameters are supported going forward:
@@ -566,7 +568,7 @@ class TestViewManager(TempManager):
         @return A QuerySet.
 
         """
-        query_set = self.get_query_set()
+        query_set = self.get_queryset()
 
         test_attributes = filter_data.pop('test_attribute_fields', [])
         for attribute in test_attributes:
@@ -737,7 +739,7 @@ class TestView(dbmodels.Model, model_logic.ModelExtensions):
     def query_objects(cls, filter_data, initial_query=None,
                       apply_presentation=True):
         if initial_query is None:
-            initial_query = cls.objects.get_query_set_with_joins(filter_data)
+            initial_query = cls.objects.get_queryset_with_joins(filter_data)
         return super(TestView, cls).query_objects(
                 filter_data, initial_query=initial_query,
                 apply_presentation=apply_presentation)

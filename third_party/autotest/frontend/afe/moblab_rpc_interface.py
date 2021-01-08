@@ -75,7 +75,8 @@ class GsUtil:
     @classmethod
     def get_gsutil_cmd(cls):
       if not cls._GSUTIL_CMD:
-         cls._GSUTIL_CMD = 'gsutil -m'
+         # gsutil fails if you have python 2.7 site packages on your PYTHONPATH
+         cls._GSUTIL_CMD = 'PYTHONPATH="" gsutil -m'
 
       return cls._GSUTIL_CMD
 
@@ -358,11 +359,11 @@ def _get_bucket_name_from_url(bucket_url):
 
 
 def _is_valid_boto_key(key_id, key_secret, directory):
-  try:
-      _run_bucket_performance_test(key_id, key_secret, directory)
-  except BucketPerformanceTestException as e:
-       return(False, str(e))
-  return(True, None)
+    try:
+        _run_bucket_performance_test(key_id, key_secret, directory)
+    except BucketPerformanceTestException as e:
+        return(False, str(e))
+    return(True, None)
 
 
 def _validate_cloud_storage_info(cloud_storage_info):
@@ -441,14 +442,6 @@ def submit_wizard_config_info(
 
     _CONFIG.parse_config_file()
     _enable_notification_using_credentials_in_bucket()
-    services = ['moblab-devserver-init',
-    'moblab-devserver-cleanup-init', 'moblab-gsoffloader_s-init',
-    'moblab-scheduler-init', 'moblab-gsoffloader-init']
-    cmd = 'export ATEST_RESULTS_DIR=/usr/local/autotest/results;'
-    cmd += ' stop ' + '; stop '.join(services)
-    cmd += '; start ' + '; start '.join(services)
-    cmd += '; apache2 -k graceful'
-    logging.info(cmd)
 
     return _create_operation_status_response(True, None)
 

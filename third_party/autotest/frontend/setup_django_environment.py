@@ -1,9 +1,13 @@
 import logging
 import os
 
+import django
+
 import common
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'frontend.settings')
+
+django.setup()
 
 def _enable_autocommit_by_name(name):
     """Enable autocommit for the connection with matching name.
@@ -11,6 +15,7 @@ def _enable_autocommit_by_name(name):
     @param name: Name of the connection.
     """
     from django.db import connections
+
     # ensure a connection is open
     logging.info('Enabling autocommit for %s(%s)',
                  name, connections[name].settings_dict['HOST'])

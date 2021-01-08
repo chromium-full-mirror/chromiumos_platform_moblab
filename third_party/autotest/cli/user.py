@@ -75,10 +75,6 @@ class user_list(action_common.atest_list, user):
     def execute(self):
         filters = {}
         check_results = {}
-        if self.acl:
-            filters['aclgroup__name__in'] = [self.acl]
-            check_results['aclgroup__name__in'] = None
-
         if self.access_level:
             filters['access_level__in'] = [self.access_level]
             check_results['access_level__in'] = None

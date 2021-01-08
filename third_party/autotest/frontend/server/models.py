@@ -41,6 +41,7 @@ class Server(dbmodels.Model, model_logic.ModelExtensions):
     class Meta:
         """Metadata for class Server."""
         db_table = 'servers'
+        app_label = 'afe'
 
 
     def __unicode__(self):
@@ -126,6 +127,7 @@ class ServerRole(dbmodels.Model, model_logic.ModelExtensions):
     class Meta:
         """Metadata for the ServerRole class."""
         db_table = 'server_roles'
+        app_label = 'afe'
 
 
 class ServerAttribute(dbmodels.Model, model_logic.ModelExtensions):
@@ -140,6 +142,7 @@ class ServerAttribute(dbmodels.Model, model_logic.ModelExtensions):
     class Meta:
         """Metadata for the ServerAttribute class."""
         db_table = 'server_attributes'
+        app_label = 'afe'
 
 
 # Valid values for each type of input.
