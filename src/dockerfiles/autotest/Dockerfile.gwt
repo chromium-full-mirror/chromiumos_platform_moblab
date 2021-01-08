@@ -20,6 +20,8 @@ COPY ./third_party/autotest/ /moblab/third_party/autotest/
 RUN mkdir -p /usr/local/autotest
 RUN ln -s /moblab/third_party/autotest/* /usr/local/autotest
 
+ENV PYTHONPATH=/moblab/third_party/autotest:/usr/local/lib/python2.7/site-packages
+
 RUN /usr/local/autotest/utils/compile_gwt_clients.py -a -e"-Djava.util.prefs.userRoot=/tmp"
 
 RUN rm -rf /moblab/third_party/autotest/frontend/client/www/*.old

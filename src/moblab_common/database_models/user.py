@@ -23,7 +23,7 @@ class User(declarative_base()):
     ACCESS_ADMIN = 1
     ACCESS_USER = 0
 
-    AUTOTEST_SYSTEM = "autotest_system"
+    AUTOTEST_SYSTEM = "moblab"
 
     id = Column(Integer, primary_key=True)
     login = Column(String(length=255), unique=True)

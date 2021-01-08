@@ -32,4 +32,5 @@ mysql -h db -u root "${PASSWD_STRING}" -e "${SQL_GRANT_COMMAND}"
 
 
 /usr/local/autotest/database/migrate.py sync -f
-/usr/local/autotest/frontend/manage.py syncdb --noinput
+/usr/local/autotest/frontend/manage.py loaddata initial_data
+/usr/local/autotest/frontend/manage.py migrate || true

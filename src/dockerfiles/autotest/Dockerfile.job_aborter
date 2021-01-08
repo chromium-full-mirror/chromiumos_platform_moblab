@@ -26,4 +26,6 @@ RUN apt-get clean
 
 RUN ln -sf /usr/local/bin/py* /usr/bin
 
+ENV PYTHONPATH=/moblab/third_party/autotest:/usr/local/autotest/venv:/moblab/third_party/autotest/site-packages
+
 CMD ["/job_aborter.sh"]
