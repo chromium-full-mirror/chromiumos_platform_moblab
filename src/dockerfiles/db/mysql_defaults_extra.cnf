@@ -3,11 +3,42 @@
 [mysqld]
 log_bin
 
-max_connections=500
+log_output=FILE
+log_error=/var/log/moblab/db_error.log
+
 
 # We do not want to limit the size of the table
 innodb_data_file_path=ibdata1:50M:autoextend
+innodb_log_file_size=32M
 
 # In MariaDB 10.2 STRICT_TRANS_TABLES was enabled by default
 # causing "Data too long for column" error, revert to 10.1 mode.
 sql_mode=NO_ENGINE_SUBSTITUTION
+
+join_buffer_size=5M
+max_connections=100
+max_heap_table_size=32M
+query_cache_min_res_unit=32K
+query_cache_size=64M
+query_cache_type=1
+skip_name_resolve=1
+thread_cache_size=50
+thread_handling=pool-of-threads
+tmp_table_size=32M
+wait_timeout=180
+key_buffer_size=32M
+
+max_allowed_packet=256M
+
+# Profiling / debugging settings only below here
+#performance_schema=ON
+#log-queries-not-using-indexes
+#slow_query_log
+#slow_query_log_file=/var/log/moblab/db_slow.log
+#long_query_time=1
+#general_log
+#general_log_file=/var/log/moblab/db_general.log
+
+
+
+

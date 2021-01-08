@@ -7,6 +7,17 @@ FROM ${BASE_REGISTRY_URI}/mariadb:10.5
 
 COPY mysql_defaults_extra.cnf /etc/mysql/conf.d/
 
+# Tools that are useful for debugging/ tuning settings on the database, here
+# for documentation, not for production use.
+# RUN apt-get update && apt-get install --no-install-recommends -yq \
+#     git wget
+
+# WORKDIR /tmp
+# ENV GIT_SSL_NO_VERIFY=true
+# RUN git clone https://github.com/FromDual/mariadb-sys.git
+# RUN wget --no-check-certificate https://raw.githubusercontent.com/major/MySQLTuner-perl/master/mysqltuner.pl
+# WORKDIR /
+
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
