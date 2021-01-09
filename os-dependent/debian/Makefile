@@ -7,10 +7,33 @@ INSTALL_DIR = /etc/moblab/host_server
 
 .PHONY: all init clean
 
-all: init install
+all: init dependencies host_server
+
+developer: init dependencies host_server local_registry
+
+dependencies:
+	apt install pip
+	pip install -y grpcio-tools netifaces
+
+local_registry:
+	service docker stop
+	# Remove the first line - should be open bracket.
+	# TODO fix this so if the file is empty it works correctly.
+	sed -i '1d' /etc/docker/daemon.json
+	# Add in our insecure registry 
+	REGIPADDR=$(hostname -I | awk -F ' ' '{print $1}') \
+	sed -i "1 i\{\n  \"insecure-registries\": [\"${REGIPADDR}:5000\"]," /etc/docker/daemon.json
+	cat /etc/docker/daemon.json
+	service docker start
+	cp init/moblab-docker-registry /etc/init.d
+	systemctl daemon-reload
+	systemctl enable moblab-docker-registry.service
+	systemctl start moblab-docker-registry.service
 
 init:
 	mkdir -p ${INSTALL_DIR}
+	mkdir -p /var/log/bootup/
+	chmod uog+rw /var/log/bootup
 
 clean:
 	rm -rf ${INSTALL_DIR}
@@ -32,13 +55,11 @@ python: proto
 	install -D host_server_debian.py ${INSTALL_DIR}
 	install -D ../common/host*.py ${INSTALL_DIR}
 
-INIT_FILES := moblab-docker-registry moblab-host-server
-install: python
-	for file in $(INIT_FILES); do \
-		cp init/$${file} /etc/init.d; \
-		systemctl daemon-reload; \
-		systemctl enable $${file}.service; \
-		systemctl start $${file}.service; \
+host_server: python
+		cp init/ moblab-host-server /etc/init.d;
+		systemctl daemon-reload;
+		systemctl enable moblab-host-server.service;
+		systemctl start moblab-host-server.service;
 	done
 
 networking:

@@ -1,0 +1,71 @@
+substitutions:
+  _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+  _REGISTRY_URI: gcr.io/chromeos-partner-moblab
+  _LABEL: autopush
+
+steps:
+  - id: buster-slim
+    name: "docker:19.03.8"
+    args: ["pull", "${_BASE_REGISTRY_URI}/debian:buster-slim"]
+    waitFor: ['-']
+  - id: node-buster
+    name: "docker:19.03.8"
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:15-buster"]
+    waitFor: ['-']
+  - id: hadolint
+    name: "docker:19.03.8"
+    args: ["pull", "${_BASE_REGISTRY_URI}/hadolint/hadolint:latest-debian"]
+    waitFor: ['-']
+  - id: bufbuild
+    name: "docker:19.03.8"
+    args: ["pull", "${_BASE_REGISTRY_URI}/bufbuild/buf"]
+    waitFor: ['-']
+  
+  - id: protoc
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
+        "-t",
+        "${_REGISTRY_URI}/protoc:${_LABEL}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "buster-slim"
+
+  
+
+  - id: moblab-dev-environment
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "-f",
+        "/workspace/dev_environment/Dockerfile.base",
+        "-t",
+        "${_REGISTRY_URI}/protoc:${_LABEL}",
+        "/workspace/dev_environment/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "protoc"
+      - "node-buster"
+      - "bufbuild"
+      - "hadolint"
+
+images:
+  [
+    "${_REGISTRY_URI}/moblab-dev-environment:${_LABEL}",
+  ]
+
+options:
+  # Use higher CPU machines so the caching and build steps are faster.
+  machineType: "N1_HIGHCPU_32"
+  substitution_option: "ALLOW_LOOSE"
+
+timeout: 18000s

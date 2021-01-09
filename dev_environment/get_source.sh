@@ -18,3 +18,16 @@ chmod +x $f
 
 # Set up all the git hooks
 hooks4git --init
+
+# Set up google cloud access
+gcloud auth login
+gcloud auth configure-docker
+gcloud auth configure-docker us-docker.pkg.dev
+
+# Create an override just using the defaults
+cp moblab/src/dockerfiles/compose/.env moblab/src/dockerfiles/compose/override.env
+
+echo "export REGISTRY=$(hostname -I | awk -F ' ' '{print $1}'):5000" > moblab/src/local_registry.mk
+# Let the user know to set up git credentials
+echo "In a browser go to https://www.googlesource.com/new-password and paste"
+echo "the generated code into this shell."
