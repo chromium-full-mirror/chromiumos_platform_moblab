@@ -13,9 +13,7 @@ RUN chmod uog+rx /usr/local/bin/get_source.sh
 
 RUN adduser --gecos "" --disabled-password --uid ${USERID} ${USER}
 
-RUN echo "$USER     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-ENV PATH=/moblab_source/depot_tools:$PATH
+RUN echo "$USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN chown -R $USER /moblab_source
 RUN chmod u+rwx /moblab_source

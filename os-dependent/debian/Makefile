@@ -56,11 +56,10 @@ python: proto
 	install -D ../common/host*.py ${INSTALL_DIR}
 
 host_server: python
-		cp init/ moblab-host-server /etc/init.d;
-		systemctl daemon-reload;
-		systemctl enable moblab-host-server.service;
-		systemctl start moblab-host-server.service;
-	done
+	cp init/ moblab-host-server /etc/init.d
+	systemctl daemon-reload
+	systemctl enable moblab-host-server.service
+	systemctl start moblab-host-server.service
 
 networking:
 	cp init/moblab-networking /etc/init.d
