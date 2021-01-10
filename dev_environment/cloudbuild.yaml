@@ -47,7 +47,7 @@ steps:
         "-f",
         "/workspace/dev_environment/Dockerfile.base",
         "-t",
-        "${_REGISTRY_URI}/protoc:${_LABEL}",
+        "${_REGISTRY_URI}/moblab-dev-environment:${_LABEL}",
         "/workspace/dev_environment/",
       ]
     env:
