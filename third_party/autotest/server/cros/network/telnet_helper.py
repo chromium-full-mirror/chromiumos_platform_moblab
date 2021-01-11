@@ -5,7 +5,7 @@
 import socket
 import telnetlib
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 SHORT_TIMEOUT = 2
 LONG_TIMEOUT = 30

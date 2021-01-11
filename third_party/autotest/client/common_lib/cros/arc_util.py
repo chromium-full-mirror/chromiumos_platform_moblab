@@ -10,10 +10,10 @@ import logging
 import os
 import tempfile
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import file_utils
-from autotest_lib.client.common_lib.cros import arc_common
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib import file_utils
+from client.common_lib.cros import arc_common
 from telemetry.core import exceptions
 from telemetry.internal.browser import extension_page
 

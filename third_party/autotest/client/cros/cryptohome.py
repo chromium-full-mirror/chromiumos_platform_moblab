@@ -13,10 +13,10 @@ from six.moves import map
 
 import common
 
-from autotest_lib.client.cros import constants
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros.cros_disks import DBusClient
+from client.cros import constants
+from client.bin import utils
+from client.common_lib import error
+from client.cros.cros_disks import DBusClient
 
 CRYPTOHOME_CMD = '/usr/sbin/cryptohome'
 GUEST_USER_NAME = '$guest'

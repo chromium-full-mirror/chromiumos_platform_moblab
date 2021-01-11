@@ -7,12 +7,12 @@ import logging
 
 import common
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.server import site_utils
-from autotest_lib.server.cros.dynamic_suite import job_status
-from autotest_lib.server.cros.dynamic_suite import reporting_utils
-from autotest_lib.server.cros.dynamic_suite import tools
-from autotest_lib.site_utils  import gmail_lib
+from client.common_lib import global_config
+from server import site_utils
+from server.cros.dynamic_suite import job_status
+from server.cros.dynamic_suite import reporting_utils
+from server.cros.dynamic_suite import tools
+from site_utils  import gmail_lib
 
 
 metrics = site_utils.metrics_mock

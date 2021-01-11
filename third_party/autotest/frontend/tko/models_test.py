@@ -4,9 +4,9 @@
 import unittest
 
 import common
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend import setup_test_environment
-from autotest_lib.frontend.tko import models
+from frontend import setup_django_environment
+from frontend import setup_test_environment
+from frontend.tko import models
 
 
 class TKOTestTest(unittest.TestCase):

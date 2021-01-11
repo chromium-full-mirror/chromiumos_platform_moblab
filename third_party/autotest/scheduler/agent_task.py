@@ -113,16 +113,16 @@ import urllib
 
 import common
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.scheduler import drone_manager
-from autotest_lib.scheduler import pidfile_monitor
-from autotest_lib.scheduler import rdb_lib
-from autotest_lib.scheduler import scheduler_lib
-from autotest_lib.scheduler import scheduler_models
-from autotest_lib.server import autoserv_utils
-from autotest_lib.server import system_utils
+from client.common_lib import global_config
+from client.common_lib import utils
+from frontend.afe import models
+from scheduler import drone_manager
+from scheduler import pidfile_monitor
+from scheduler import rdb_lib
+from scheduler import scheduler_lib
+from scheduler import scheduler_models
+from server import autoserv_utils
+from server import system_utils
 
 
 CONFIG = global_config.global_config

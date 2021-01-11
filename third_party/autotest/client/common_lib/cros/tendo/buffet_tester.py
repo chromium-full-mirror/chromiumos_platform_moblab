@@ -10,23 +10,23 @@ import shutil
 import tempfile
 import time
 
-from autotest_lib.client.cros import dbus_util
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.fake_device_server import \
+from client.cros import dbus_util
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros.fake_device_server import \
         fake_gcd_helper
-from autotest_lib.client.common_lib.cros.fake_device_server.client_lib import \
+from client.common_lib.cros.fake_device_server.client_lib import \
         commands
-from autotest_lib.client.common_lib.cros.fake_device_server.client_lib import \
+from client.common_lib.cros.fake_device_server.client_lib import \
         devices
-from autotest_lib.client.common_lib.cros.fake_device_server.client_lib import \
+from client.common_lib.cros.fake_device_server.client_lib import \
         fail_control
-from autotest_lib.client.common_lib.cros.fake_device_server.client_lib import \
+from client.common_lib.cros.fake_device_server.client_lib import \
         oauth
-from autotest_lib.client.common_lib.cros.fake_device_server.client_lib import \
+from client.common_lib.cros.fake_device_server.client_lib import \
         registration
-from autotest_lib.client.common_lib.cros.tendo import buffet_config
-from autotest_lib.client.common_lib.cros.tendo import buffet_dbus_helper
+from client.common_lib.cros.tendo import buffet_config
+from client.common_lib.cros.tendo import buffet_dbus_helper
 
 
 TEST_NAME = 'test_name '

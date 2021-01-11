@@ -1,5 +1,5 @@
 
-from autotest_lib.client.common_lib import autotest_enum
+from client.common_lib import autotest_enum
 
 # We include a 'Default' level just below what BVT will run at so that when
 # the priority rework code is rolled out, any code that doesn't specify a

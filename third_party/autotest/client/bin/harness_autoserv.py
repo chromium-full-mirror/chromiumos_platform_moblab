@@ -1,7 +1,7 @@
 import os, logging, six.moves.configparser
-from autotest_lib.client.common_lib import autotemp, packages, error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.bin import harness
+from client.common_lib import autotemp, packages, error
+from client.common_lib import global_config
+from client.bin import harness
 
 
 class harness_autoserv(harness.harness):

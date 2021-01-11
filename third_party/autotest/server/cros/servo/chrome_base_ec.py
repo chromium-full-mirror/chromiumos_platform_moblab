@@ -5,8 +5,8 @@
 import logging
 import re
 
-from autotest_lib.client.cros import ec
-from autotest_lib.server.cros.servo import chrome_ec
+from client.cros import ec
+from server.cros.servo import chrome_ec
 
 
 class ChromeBaseEC(chrome_ec.ChromeConsole):
@@ -26,7 +26,7 @@ class ChromeBaseEC(chrome_ec.ChromeConsole):
         """Initialize the object.
 
         Args:
-          servo: An autotest_lib.server.cros.servo.Servo object.
+          servo: An server.cros.servo.Servo object.
           board: A string of the board name for the base, e.g. "hammer".
         """
         self.board = board

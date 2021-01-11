@@ -5,7 +5,7 @@
 import re
 import logging
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 
 class FAFTCheckers(object):

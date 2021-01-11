@@ -5,8 +5,8 @@
 import logging
 import os
 
-from autotest_lib.client.cros.video import method_logger
-from autotest_lib.client.common_lib import error
+from client.cros.video import method_logger
+from client.common_lib import error
 
 
 class Verifier(object):

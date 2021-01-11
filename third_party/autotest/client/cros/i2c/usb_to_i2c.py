@@ -13,7 +13,7 @@ import re
 import serial
 import time
 
-from autotest_lib.client.cros import tty
+from client.cros import tty
 
 # Least significant bit of I2C address.
 WRITE_BIT = 0

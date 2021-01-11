@@ -10,10 +10,10 @@ import traceback
 
 import common
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.scheduler import drone_manager
-from autotest_lib.scheduler import scheduler_config
+from client.common_lib import utils
+from client.common_lib import global_config
+from scheduler import drone_manager
+from scheduler import scheduler_config
 
 
 def _get_pidfile_timeout_secs():

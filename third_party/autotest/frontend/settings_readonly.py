@@ -6,7 +6,7 @@ import common
 # We then overwrite the relevant settings to set readonly access.
 # This allows us to update the generic settings without having duplicated
 # entries between the readonly and non-readonly settings.
-from autotest_lib.frontend.settings import *
+from frontend.settings import *
 
 
 AUTOTEST_DEFAULT['USER'] = AUTOTEST_DEFAULT['READONLY_USER']

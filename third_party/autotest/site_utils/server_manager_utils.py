@@ -15,10 +15,10 @@ import sys
 import common
 
 import django.core.exceptions
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.global_config import global_config
-from autotest_lib.frontend.server import models as server_models
-from autotest_lib.site_utils.lib import infra
+from client.common_lib import utils
+from client.common_lib.global_config import global_config
+from frontend.server import models as server_models
+from site_utils.lib import infra
 
 
 class ServerActionError(Exception):

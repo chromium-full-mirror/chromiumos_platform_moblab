@@ -6,9 +6,9 @@ import logging
 import random
 import string
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.fake_device_server import oauth
-from autotest_lib.client.common_lib.cros.fake_device_server import server
+from client.common_lib import utils
+from client.common_lib.cros.fake_device_server import oauth
+from client.common_lib.cros.fake_device_server import server
 
 TEST_CONFIG_PATH = '/tmp/buffet.fake.conf'
 TEST_STATE_PATH = '/tmp/buffet.fake.state'

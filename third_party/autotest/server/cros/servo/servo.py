@@ -17,11 +17,11 @@ import xmlrpclib
 
 import six
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.server import utils as server_utils
-from autotest_lib.server.cros.servo import firmware_programmer
-from autotest_lib.server.cros.faft.utils.config import Config as FAFTConfig
+from client.common_lib import error
+from client.common_lib import lsbrelease_utils
+from server import utils as server_utils
+from server.cros.servo import firmware_programmer
+from server.cros.faft.utils.config import Config as FAFTConfig
 
 
 # Regex to match XMLRPC errors due to a servod control not existing.
@@ -553,7 +553,7 @@ class Servo(object):
 
         @param servo_host: A ServoHost object representing
                            the host running servod.
-        @type servo_host: autotest_lib.server.hosts.servo_host.ServoHost
+        @type servo_host: server.hosts.servo_host.ServoHost
         @param servo_serial: Serial number of the servo board.
         """
         # TODO(fdeng): crbug.com/298379

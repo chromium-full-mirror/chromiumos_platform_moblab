@@ -41,11 +41,11 @@ We are taking the risk because
 """
 
 
-from autotest_lib.client.bin import sysinfo
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import constants
-from autotest_lib.server import afe_utils
-from autotest_lib.server import utils as server_utils
+from client.bin import sysinfo
+from client.common_lib import error
+from client.cros import constants
+from server import afe_utils
+from server import utils as server_utils
 
 
 def run(machine):

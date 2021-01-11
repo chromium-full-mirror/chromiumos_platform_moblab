@@ -57,8 +57,8 @@ import time
 
 from six.moves import range
 
-from autotest_lib.client.bin import utils as bin_utils
-from autotest_lib.client.common_lib import utils as common_lib_utils
+from client.bin import utils as bin_utils
+from client.common_lib import utils as common_lib_utils
 
 TRACE_ROOT = '/sys/kernel/debug/tracing/'
 VBLANK_SWITCH = os.path.join(TRACE_ROOT, 'events/drm/drm_vblank_event/enable')

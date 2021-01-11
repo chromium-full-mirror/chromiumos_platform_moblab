@@ -6,8 +6,8 @@
 
 import common
 
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.hosts import base_label
+from server.cros.dynamic_suite import constants
+from server.hosts import base_label
 
 
 class OSLabel(base_label.StringPrefixLabel):

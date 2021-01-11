@@ -11,7 +11,7 @@ import os
 import time
 
 import common
-from autotest_lib.client.common_lib import time_utils
+from client.common_lib import time_utils
 
 # TODO(beeps): The right way to create these status logs is by creating a job
 # object and invoking job.record on it. However we perform this template

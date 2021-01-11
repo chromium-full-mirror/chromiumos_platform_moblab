@@ -13,7 +13,7 @@ import select
 import subprocess
 import threading
 
-from autotest_lib.client.common_lib.utils import TEE_TO_LOGS
+from client.common_lib.utils import TEE_TO_LOGS
 
 _popen_lock = threading.Lock()
 _logging_service = None

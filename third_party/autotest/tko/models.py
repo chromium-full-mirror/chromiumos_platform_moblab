@@ -1,10 +1,10 @@
 import json
 import os
 
-from autotest_lib.server.hosts import file_store
-from autotest_lib.client.common_lib import utils
-from autotest_lib.tko import tast
-from autotest_lib.tko import utils as tko_utils
+from server.hosts import file_store
+from client.common_lib import utils
+from tko import tast
+from tko import utils as tko_utils
 
 
 class HostKeyvalError(Exception):

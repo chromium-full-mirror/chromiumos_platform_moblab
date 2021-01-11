@@ -7,10 +7,10 @@ import shutil
 import time
 import urlparse
 
-from autotest_lib.client.bin import test, utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros.update_engine import dlc_util
-from autotest_lib.client.cros.update_engine import update_engine_util
+from client.bin import test, utils
+from client.common_lib import error
+from client.cros.update_engine import dlc_util
+from client.cros.update_engine import update_engine_util
 
 class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
     """Base class for update engine client tests."""

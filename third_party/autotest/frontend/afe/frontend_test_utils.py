@@ -1,11 +1,11 @@
 import datetime
 
 import common
-from autotest_lib.frontend import setup_test_environment
-from autotest_lib.frontend import thread_local
-from autotest_lib.frontend.afe import models, model_attributes
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib.test_utils import mock
+from frontend import setup_test_environment
+from frontend import thread_local
+from frontend.afe import models, model_attributes
+from client.common_lib import global_config
+from client.common_lib.test_utils import mock
 
 class FrontendTestMixin(object):
     # pylint: disable=missing-docstring

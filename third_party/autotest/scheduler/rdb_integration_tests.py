@@ -8,17 +8,17 @@ import collections
 import unittest
 
 import common
-from autotest_lib.client.common_lib import host_queue_entry_states
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import frontend_test_utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.frontend.afe import rdb_model_extensions
-from autotest_lib.scheduler import rdb
-from autotest_lib.scheduler import rdb_hosts
-from autotest_lib.scheduler import rdb_lib
-from autotest_lib.scheduler import rdb_requests
-from autotest_lib.scheduler import rdb_testing_utils
-from autotest_lib.server.cros import provision
+from client.common_lib import host_queue_entry_states
+from frontend import setup_django_environment
+from frontend.afe import frontend_test_utils
+from frontend.afe import models
+from frontend.afe import rdb_model_extensions
+from scheduler import rdb
+from scheduler import rdb_hosts
+from scheduler import rdb_lib
+from scheduler import rdb_requests
+from scheduler import rdb_testing_utils
+from server.cros import provision
 
 
 class AssignmentValidator(object):

@@ -10,7 +10,7 @@ A functional test of autotest's Barrier mechanisms for synchronizing
 events between two clients without the help of the server.
 """
 
-from autotest_lib.server import utils
+from server import utils
 from six.moves import zip
 
 def run(pair):

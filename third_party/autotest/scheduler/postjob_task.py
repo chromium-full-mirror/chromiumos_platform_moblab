@@ -10,12 +10,12 @@ if necessary.
 
 import os
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import models, model_attributes
-from autotest_lib.scheduler import agent_task, drones, drone_manager
-from autotest_lib.scheduler import pidfile_monitor
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.server import autoserv_utils
+from client.common_lib import utils
+from frontend.afe import models, model_attributes
+from scheduler import agent_task, drones, drone_manager
+from scheduler import pidfile_monitor
+from scheduler import scheduler_config
+from server import autoserv_utils
 
 _parser_path = os.path.join(drones.AUTOTEST_INSTALL_DIR, 'tko', 'parse')
 

@@ -4,8 +4,8 @@ see http://linux.die.net/man/8/tc for details about traffic controls in linux.
 
 Example
   import common
-  from autotest_lib.client.bin.net.net_tc import *
-  from autotest_lib.client.bin.net.net_utils import *
+  from client.bin.net.net_tc import *
+  from client.bin.net.net_utils import *
 
   class mock_netif(object):
 
@@ -39,8 +39,8 @@ Example
 
 import commands, os, re
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.bin.net import net_utils
+from client.common_lib import error
+from client.bin.net import net_utils
 
 # TODO (chavey) clean up those global here and new_handle()
 handle_counter = 0

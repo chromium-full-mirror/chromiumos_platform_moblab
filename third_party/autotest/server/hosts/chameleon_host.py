@@ -7,12 +7,12 @@
 
 import logging
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.cros.chameleon import chameleon
-from autotest_lib.server.cros import dnsname_mangler
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.server.hosts import ssh_host
+from client.bin import utils
+from client.common_lib import global_config
+from client.cros.chameleon import chameleon
+from server.cros import dnsname_mangler
+from server.cros.dynamic_suite import frontend_wrappers
+from server.hosts import ssh_host
 
 
 # Names of the host attributes in the database that represent the values for
@@ -107,7 +107,7 @@ class ChameleonHost(ssh_host.SSHHost):
         """Get the list of local processes to wait for in wait_up.
 
         Override get_wait_up_processes in
-        autotest_lib.client.common_lib.hosts.base_classes.Host.
+        client.common_lib.hosts.base_classes.Host.
         Wait for chameleond process to go up. Called by base class when
         rebooting the device.
 

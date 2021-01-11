@@ -4,10 +4,10 @@
 
 import dbus
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import dbus_send
-from autotest_lib.client.common_lib.cros.cfm.usb import usb_device_collector
-from autotest_lib.client.common_lib.cros.cfm.usb import cfm_usb_devices
+from client.common_lib import utils
+from client.common_lib.cros import dbus_send
+from client.common_lib.cros.cfm.usb import usb_device_collector
+from client.common_lib.cros.cfm.usb import cfm_usb_devices
 
 ATRUS = cfm_usb_devices.ATRUS
 

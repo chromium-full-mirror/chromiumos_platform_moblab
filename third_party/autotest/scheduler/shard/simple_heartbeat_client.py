@@ -30,10 +30,10 @@ import urllib2
 
 import common
 
-from autotest_lib.scheduler.shard import simple_heartbeat_server
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import frontend_test_utils
-from autotest_lib.frontend.afe import models
+from scheduler.shard import simple_heartbeat_server
+from frontend import setup_django_environment
+from frontend.afe import frontend_test_utils
+from frontend.afe import models
 
 json_decoder = decoder.JSONDecoder()
 

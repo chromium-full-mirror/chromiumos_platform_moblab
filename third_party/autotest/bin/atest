@@ -6,4 +6,4 @@
 # Run a test job, reporting changes to AFE and TKO.
 set -eu
 readonly bin_dir="$(dirname -- "$(readlink -e -- "$0")")"
-exec "${bin_dir}/python_venv" -m autotest_lib.cli.atest_venv_entry "$@"
+exec "${bin_dir}/python_venv" -m cli.atest_venv_entry "$@"

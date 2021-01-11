@@ -4,9 +4,9 @@
 
 import logging
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server.cros.network import attenuator
-from autotest_lib.server.cros.network import attenuator_hosts
+from client.common_lib import error
+from server.cros.network import attenuator
+from server.cros.network import attenuator_hosts
 
 from chromite.lib import timeout_util
 

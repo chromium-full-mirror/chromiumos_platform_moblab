@@ -13,7 +13,7 @@ import datetime
 import six
 import time
 
-from autotest_lib.client.common_lib import decorators
+from client.common_lib import decorators
 
 
 try:

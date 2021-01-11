@@ -3,7 +3,7 @@ import common
 
 import sys, os, time, subprocess
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 # We want to set the output (stdout&stderr) of the autotest binary onto our
 # stdout channel. We went to get the status stream of autotest back on our

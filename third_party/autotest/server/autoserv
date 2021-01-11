@@ -22,18 +22,18 @@ import six
 from six.moves import urllib
 
 import common
-from autotest_lib.client.bin.result_tools import utils as result_utils
-from autotest_lib.client.bin.result_tools import view as result_view
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import enum
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import host_queue_entry_states
-from autotest_lib.client.common_lib import host_states
-from autotest_lib.server.cros.dynamic_suite import suite
+from client.bin.result_tools import utils as result_utils
+from client.bin.result_tools import view as result_view
+from client.common_lib import control_data
+from client.common_lib import enum
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import host_queue_entry_states
+from client.common_lib import host_states
+from server.cros.dynamic_suite import suite
 
 
-from autotest_lib.client.common_lib import utils as common_utils
+from client.common_lib import utils as common_utils
 metrics = common_utils.metrics_mock
 import mock
 cloud_trace = mock.MagicMock()
@@ -44,16 +44,16 @@ _CONFIG = global_config.global_config
 TESTING_MODE_SLEEP_SECS = 1
 
 
-from autotest_lib.server import frontend
-from autotest_lib.server import server_logging_config
-from autotest_lib.server import server_job, utils, autoserv_parser, autotest
-from autotest_lib.server import utils as server_utils
-from autotest_lib.server import site_utils
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.site_utils import job_directories
-from autotest_lib.site_utils import ssp_containers
-from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
-from autotest_lib.client.common_lib import pidfile, logging_manager
+from server import frontend
+from server import server_logging_config
+from server import server_job, utils, autoserv_parser, autotest
+from server import utils as server_utils
+from server import site_utils
+from server.cros.dynamic_suite import frontend_wrappers
+from site_utils import job_directories
+from site_utils import ssp_containers
+from site_utils.ssp_containers import utils as ssp_container_utils
+from client.common_lib import pidfile, logging_manager
 
 
 # Control segment to stage server-side package.

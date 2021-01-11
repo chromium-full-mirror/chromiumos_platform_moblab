@@ -15,8 +15,8 @@ import sys
 import time
 
 import common
-from autotest_lib.client.common_lib.global_config import global_config as config
-from autotest_lib.site_utils import log_socket_server
+from client.common_lib.global_config import global_config as config
+from site_utils import log_socket_server
 
 
 DEFAULT_PORT = 9080

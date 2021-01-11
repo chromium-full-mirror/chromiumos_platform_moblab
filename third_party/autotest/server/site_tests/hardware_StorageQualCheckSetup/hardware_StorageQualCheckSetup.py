@@ -4,9 +4,9 @@
 
 import logging
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import test
-from autotest_lib.server import frontend
+from client.common_lib import error
+from server import test
+from server import frontend
 
 class hardware_StorageQualCheckSetup(test.test):
     """

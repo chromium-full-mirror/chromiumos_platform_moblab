@@ -12,8 +12,8 @@ import os
 import time
 
 import common
-from autotest_lib.client.cros import rtc
-from autotest_lib.client.cros import upstart
+from client.cros import rtc
+from client.cros import upstart
 
 SYSFS_POWER_STATE = '/sys/power/state'
 SYSFS_WAKEUP_COUNT = '/sys/power/wakeup_count'

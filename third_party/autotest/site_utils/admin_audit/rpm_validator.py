@@ -14,8 +14,8 @@ import six
 import time
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.site_utils.rpm_control_system import rpm_client
+from client.common_lib import error
+from site_utils.rpm_control_system import rpm_client
 
 
 def _is_rpm_config_present(host):

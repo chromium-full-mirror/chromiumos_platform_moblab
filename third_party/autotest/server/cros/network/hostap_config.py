@@ -6,9 +6,9 @@ import collections
 import copy
 import logging
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import xmlrpc_security_types
-from autotest_lib.server.cros.network import packet_capturer
+from client.common_lib import error
+from client.common_lib.cros.network import xmlrpc_security_types
+from server.cros.network import packet_capturer
 
 
 class HostapConfig(object):

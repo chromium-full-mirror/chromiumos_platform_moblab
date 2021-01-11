@@ -25,8 +25,8 @@ from __future__ import print_function
 from six.moves import range
 import logging, optparse, os, re, sys, string, struct
 
-from autotest_lib.client.common_lib import logging_config
-from autotest_lib.client.common_lib import logging_manager
+from client.common_lib import logging_config
+from client.common_lib import logging_manager
 
 
 def _str_to_num(n):

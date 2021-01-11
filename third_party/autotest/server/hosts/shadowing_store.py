@@ -8,8 +8,8 @@ from __future__ import print_function
 import logging
 
 import common
-from autotest_lib.server.hosts import host_info
-from autotest_lib.client.common_lib import utils as client_utils
+from server.hosts import host_info
+from client.common_lib import utils as client_utils
 
 metrics = client_utils.metrics_mock
 

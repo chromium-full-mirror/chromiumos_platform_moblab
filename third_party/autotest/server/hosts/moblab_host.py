@@ -13,11 +13,11 @@ import re
 import time
 
 import common
-from autotest_lib.client.common_lib import error, global_config
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.server.hosts import cros_host
-from autotest_lib.server.hosts import cros_repair
+from client.common_lib import error, global_config
+from client.common_lib.cros import retry
+from server.cros.dynamic_suite import frontend_wrappers
+from server.hosts import cros_host
+from server.hosts import cros_repair
 
 from chromite.lib import timeout_util
 import six

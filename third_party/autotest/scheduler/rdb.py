@@ -12,12 +12,12 @@ import common
 from django.core import exceptions as django_exceptions
 from django.db.models import fields
 from django.db.models import Q
-from autotest_lib.frontend.afe import models
-from autotest_lib.scheduler import rdb_cache_manager
-from autotest_lib.scheduler import rdb_hosts
-from autotest_lib.scheduler import rdb_requests
-from autotest_lib.scheduler import rdb_utils
-from autotest_lib.server import utils
+from frontend.afe import models
+from scheduler import rdb_cache_manager
+from scheduler import rdb_hosts
+from scheduler import rdb_requests
+from scheduler import rdb_utils
+from server import utils
 
 _rdb_timer_name = 'chromeos/autotest/scheduler/rdb/durations/%s'
 _is_client = not utils.is_shard()

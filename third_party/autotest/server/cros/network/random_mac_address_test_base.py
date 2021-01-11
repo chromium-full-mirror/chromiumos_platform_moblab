@@ -5,10 +5,10 @@
 import logging
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import tcpdump_analyzer
-from autotest_lib.server.cros.network import hostap_config
-from autotest_lib.server.cros.network import wifi_cell_test_base
+from client.common_lib import error
+from client.common_lib.cros.network import tcpdump_analyzer
+from server.cros.network import hostap_config
+from server.cros.network import wifi_cell_test_base
 
 class RandomMACAddressTestBase(wifi_cell_test_base.WiFiCellTestBase):
     """An abstract base class for MAC address randomization tests in WiFi cells.

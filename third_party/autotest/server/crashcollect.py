@@ -9,11 +9,11 @@ import shutil
 import time
 
 import common
-from autotest_lib.client.bin.result_tools import runner as result_tools_runner
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.cros import constants
-from autotest_lib.server import utils
+from client.bin.result_tools import runner as result_tools_runner
+from client.common_lib import error
+from client.common_lib import global_config
+from client.cros import constants
+from server import utils
 
 metrics = utils.metrics_mock
 
@@ -183,19 +183,19 @@ def _get_file_stats(host, path):
 
 # import any site hooks for the crashdump and crashinfo collection
 get_site_crashdumps = utils.import_site_function(
-    __file__, "autotest_lib.server.site_crashcollect", "get_site_crashdumps",
+    __file__, "server.site_crashcollect", "get_site_crashdumps",
     lambda host, test_start_time: None)
 get_site_crashinfo = utils.import_site_function(
-    __file__, "autotest_lib.server.site_crashcollect", "get_site_crashinfo",
+    __file__, "server.site_crashcollect", "get_site_crashinfo",
     lambda host, test_start_time: None)
 report_crashdumps = utils.import_site_function(
-    __file__, "autotest_lib.server.site_crashcollect", "report_crashdumps",
+    __file__, "server.site_crashcollect", "report_crashdumps",
     lambda host: None)
 fetch_orphaned_crashdumps = utils.import_site_function(
-    __file__, "autotest_lib.server.site_crashcollect", "fetch_orphaned_crashdumps",
+    __file__, "server.site_crashcollect", "fetch_orphaned_crashdumps",
     lambda host, host_resultdir: None)
 get_host_infodir = utils.import_site_function(
-    __file__, "autotest_lib.server.site_crashcollect", "get_host_infodir",
+    __file__, "server.site_crashcollect", "get_host_infodir",
     lambda host: None)
 
 

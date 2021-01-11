@@ -1,5 +1,5 @@
 import common
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import global_config
 
 CONFIG_SECTION = 'SCHEDULER'
 

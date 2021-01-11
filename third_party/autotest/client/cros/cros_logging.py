@@ -13,9 +13,9 @@ import subprocess
 
 import common
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros.constants import CLEANUP_LOGS_PAUSED_FILE
+from client.bin import utils
+from client.common_lib import error
+from client.cros.constants import CLEANUP_LOGS_PAUSED_FILE
 
 
 def strip_timestamp(msg):

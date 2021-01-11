@@ -21,10 +21,10 @@ import re
 import time
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import pxssh
-from autotest_lib.server import utils
-from autotest_lib.server.hosts import abstract_ssh
+from client.common_lib import error
+from client.common_lib import pxssh
+from server import utils
+from server.hosts import abstract_ssh
 import six
 
 # In case cros_host is being ran via SSP on an older Moblab version with an

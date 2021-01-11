@@ -4,10 +4,10 @@
 
 import json
 
-from autotest_lib.client.common_lib.cros import site_eap_certs
-from autotest_lib.client.common_lib.cros.network import xmlrpc_datatypes
-from autotest_lib.client.common_lib.cros.network import xmlrpc_security_types
-from autotest_lib.server.cros.network import hostap_config
+from client.common_lib.cros import site_eap_certs
+from client.common_lib.cros.network import xmlrpc_datatypes
+from client.common_lib.cros.network import xmlrpc_security_types
+from server.cros.network import hostap_config
 
 
 def __get_altsubject_match_positive_test_cases(outer_auth_type,

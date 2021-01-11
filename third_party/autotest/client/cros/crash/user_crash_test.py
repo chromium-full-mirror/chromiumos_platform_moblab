@@ -13,8 +13,8 @@ import stat
 import subprocess
 
 import crash_test
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
+from client.bin import utils
+from client.common_lib import error
 
 
 CRASHER = 'crasher_nobreakpad'

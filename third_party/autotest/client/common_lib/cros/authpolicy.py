@@ -11,9 +11,9 @@ import sys
 
 import dbus
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.cros import upstart
+from client.common_lib import error
+from client.common_lib import utils
+from client.cros import upstart
 
 
 class AuthPolicy(object):

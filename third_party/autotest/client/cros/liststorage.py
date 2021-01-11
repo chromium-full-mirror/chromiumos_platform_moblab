@@ -27,9 +27,9 @@ import six
 # installation/repository or as a python module used on a client-side test.
 import common
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib import seven
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib import seven
 
 
 INFO_PATH = "/sys/block"

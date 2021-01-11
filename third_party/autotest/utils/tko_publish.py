@@ -11,8 +11,8 @@ has been published yet).
 import sys, os, re, optparse
 
 import common
-from autotest_lib.client.common_lib import utils
-from autotest_lib.server import frontend
+from client.common_lib import utils
+from server import frontend
 
 options = optparse.Values()
 

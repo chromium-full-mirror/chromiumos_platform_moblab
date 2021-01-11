@@ -8,7 +8,7 @@ database. It is a stand alone module as these status strings
 are need from vairous disconnected pieces of code.
 """
 
-from autotest_lib.client.common_lib import autotest_enum
+from client.common_lib import autotest_enum
 
 Status = autotest_enum.AutotestEnum('Verifying', 'Running', 'Ready',
                                     'Repairing', 'Repair Failed', 'Cleaning',

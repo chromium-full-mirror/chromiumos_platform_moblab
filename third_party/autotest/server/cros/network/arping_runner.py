@@ -4,8 +4,8 @@
 
 import re
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import path_utils
+from client.common_lib import error
+from client.common_lib.cros import path_utils
 
 
 class ArpingRunner(object):

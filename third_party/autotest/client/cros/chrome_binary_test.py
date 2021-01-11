@@ -10,10 +10,10 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 import common
-from autotest_lib.client.bin import test, utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import file_utils
-from autotest_lib.client.cros import constants
+from client.bin import test, utils
+from client.common_lib import error
+from client.common_lib import file_utils
+from client.cros import constants
 
 
 class ChromeBinaryTest(test.test):

@@ -3,7 +3,6 @@ import os
 import sys
 
 import common
-
-from autotest_lib.cli import atest
+from cli import atest
 
 sys.exit(atest.main())

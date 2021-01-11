@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils as sys_utils
-from autotest_lib.client.cros import upstart
+from client.common_lib import error
+from client.common_lib import utils as sys_utils
+from client.cros import upstart
 """Provides utility methods for CUPS."""
 
 

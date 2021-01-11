@@ -16,7 +16,7 @@ __author__ = 'cranger@google.com (Colby Ranger)'
 
 import platform
 import common
-from autotest_lib.client.common_lib import barrier
+from client.common_lib import barrier
 import six
 
 # Client control file snippet used to synchronize profiler start & stop.

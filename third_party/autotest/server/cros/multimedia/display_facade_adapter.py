@@ -17,8 +17,8 @@ import six.moves.xmlrpc_client
 
 from PIL import Image
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros.multimedia.display_info import DisplayInfo
+from client.common_lib import error
+from client.cros.multimedia.display_info import DisplayInfo
 
 
 class DisplayFacadeRemoteAdapter(object):

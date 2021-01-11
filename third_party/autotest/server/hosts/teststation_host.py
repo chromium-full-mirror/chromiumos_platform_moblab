@@ -9,13 +9,13 @@ import os
 
 import common
 
-from autotest_lib.client.bin import local_host
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.cros import constants as cros_constants
-from autotest_lib.server.hosts import base_classes
-from autotest_lib.server.hosts import moblab_host
-from autotest_lib.server.hosts import ssh_host
+from client.bin import local_host
+from client.common_lib import error
+from client.common_lib.cros import retry
+from client.cros import constants as cros_constants
+from server.hosts import base_classes
+from server.hosts import moblab_host
+from server.hosts import ssh_host
 
 
 # TODO(kevcheng): Update the creation method so it's not a research project

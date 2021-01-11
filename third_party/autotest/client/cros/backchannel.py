@@ -8,10 +8,10 @@ import os
 import re
 import time
 
-from autotest_lib.client.bin import local_host
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import interface
+from client.bin import local_host
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros.network import interface
 
 # Flag file used to tell backchannel script it's okay to run.
 BACKCHANNEL_FILE = '/mnt/stateful_partition/etc/enable_backchannel_network'

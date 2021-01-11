@@ -9,7 +9,7 @@ class Enum(object):
 
     TODO: b/170215553, this file will be delete prior to completion of Python 3
     migrations in Q4 2020/ Q1 2021. Instead import/use
-    autotest_lib.client.common_lib.autotest_enum.AutotestEnum.
+    client.common_lib.autotest_enum.AutotestEnum.
 
 
     Utility class to implement Enum-like functionality.

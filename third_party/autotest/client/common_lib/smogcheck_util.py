@@ -5,7 +5,7 @@
 """A Python utility library for TPM module testing."""
 
 import logging, subprocess, time
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 
 def runInSubprocess(args, rc_list=None):

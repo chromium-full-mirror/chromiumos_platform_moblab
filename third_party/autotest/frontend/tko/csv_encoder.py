@@ -1,7 +1,7 @@
 import csv
 import django.http
 import common
-from autotest_lib.frontend.afe import rpc_utils
+from frontend.afe import rpc_utils
 
 class CsvEncoder(object):
     def __init__(self, request, response):

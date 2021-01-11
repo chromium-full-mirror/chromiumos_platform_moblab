@@ -6,13 +6,13 @@ import logging
 import os
 import re
 import shutil
-from autotest_lib.client.common_lib import utils as client_utils
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.cros import constants
-from autotest_lib.server.cros.dynamic_suite.constants import JOB_BUILD_KEY
-from autotest_lib.server.crashcollect import collect_log_file
-from autotest_lib.server import utils
+from client.common_lib import utils as client_utils
+from client.common_lib.cros import dev_server
+from client.common_lib.cros import retry
+from client.cros import constants
+from server.cros.dynamic_suite.constants import JOB_BUILD_KEY
+from server.crashcollect import collect_log_file
+from server import utils
 
 try:
     from chromite.lib import metrics

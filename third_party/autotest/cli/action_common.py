@@ -44,7 +44,7 @@ For 'atest label add':
 from __future__ import print_function
 
 import types
-from autotest_lib.cli import topic_common
+from cli import topic_common
 
 
 #

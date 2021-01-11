@@ -5,9 +5,9 @@
 import time
 import uuid
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import process_watcher
-from autotest_lib.client.common_lib.cros.fake_device_server.client_lib import \
+from client.common_lib import error
+from client.common_lib.cros import process_watcher
+from client.common_lib.cros.fake_device_server.client_lib import \
         meta
 
 

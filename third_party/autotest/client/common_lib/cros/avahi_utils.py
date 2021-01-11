@@ -9,9 +9,9 @@ import logging
 import shlex
 import time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import dbus_send
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros import dbus_send
 
 BUS_NAME = 'org.freedesktop.Avahi'
 INTERFACE_SERVER = 'org.freedesktop.Avahi.Server'

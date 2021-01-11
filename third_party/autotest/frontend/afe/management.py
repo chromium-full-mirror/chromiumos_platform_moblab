@@ -4,7 +4,7 @@ from django.db.models import signals
 from django.contrib import auth
 from django.conf import settings
 # In this file, it is critical that we import models *just like this*.  In
-# particular, we *cannot* do import common; from autotest_lib... import models.
+# particular, we *cannot* do import common; from .. import models.
 # This is because when we pass the models module to signal.connect(), it
 # calls id() on the module, and the id() of a module can differ depending on how
 # it was imported.  For that reason, we must import models as Django does -- not

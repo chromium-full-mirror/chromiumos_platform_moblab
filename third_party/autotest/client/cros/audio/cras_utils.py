@@ -9,8 +9,8 @@ import logging
 import re
 import subprocess
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.cros.audio import cmd_utils
+from client.bin import utils
+from client.cros.audio import cmd_utils
 
 _CRAS_TEST_CLIENT = '/usr/bin/cras_test_client'
 

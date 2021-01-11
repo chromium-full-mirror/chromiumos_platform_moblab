@@ -5,13 +5,13 @@
 import logging
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import avahi_utils
-from autotest_lib.client.common_lib.cros import virtual_ethernet_pair
-from autotest_lib.client.common_lib.cros.network import netblock
-from autotest_lib.client.cros import network_chroot
-from autotest_lib.client.cros import service_stopper
-from autotest_lib.client.cros import tcpdump
+from client.common_lib import error
+from client.common_lib.cros import avahi_utils
+from client.common_lib.cros import virtual_ethernet_pair
+from client.common_lib.cros.network import netblock
+from client.cros import network_chroot
+from client.cros import service_stopper
+from client.cros import tcpdump
 
 
 class ChrootedAvahi(object):

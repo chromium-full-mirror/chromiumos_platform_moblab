@@ -10,8 +10,8 @@ from django.db import transaction
 from django.db.models.sql import query
 import django.db.models.sql.where
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.frontend.afe import rdb_model_extensions
+from client.common_lib import error
+from frontend.afe import rdb_model_extensions
 
 
 class ValidationError(django.core.exceptions.ValidationError):

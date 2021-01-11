@@ -47,12 +47,12 @@ except ImportError:
 
 import common
 
-from autotest_lib.client.common_lib import env
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.client.common_lib import metrics_mock_class
-from autotest_lib.client.cros import constants
+from client.common_lib import env
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import logging_manager
+from client.common_lib import metrics_mock_class
+from client.cros import constants
 
 try:
     from moblab_common import host_connector
@@ -60,7 +60,7 @@ except ImportError:
     pass
 
 # pylint: disable=wildcard-import
-from autotest_lib.client.common_lib.lsbrelease_utils import *
+from client.common_lib.lsbrelease_utils import *
 
 
 def deprecated(func):

@@ -15,9 +15,9 @@ import time
 import logging
 
 # import autotest libraries
-from autotest_lib.tko import models
-from autotest_lib.tko import tko_pb2
-from autotest_lib.tko import utils
+from tko import models
+from tko import tko_pb2
+from tko import utils
 
 __author__ = 'darrenkuo@google.com (Darren Kuo)'
 

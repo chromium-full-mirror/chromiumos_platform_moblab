@@ -7,10 +7,10 @@ import datetime
 import os
 import urllib2
 
-from autotest_lib.client.bin import test, utils
-from autotest_lib.client.common_lib import error, file_utils, lsbrelease_utils
-from autotest_lib.client.cros import constants
-from autotest_lib.client.cros.image_comparison import image_comparison_factory
+from client.bin import test, utils
+from client.common_lib import error, file_utils, lsbrelease_utils
+from client.cros import constants
+from client.cros.image_comparison import image_comparison_factory
 from PIL import Image
 from PIL import ImageDraw
 

@@ -21,8 +21,8 @@ import optparse, os, shutil, sys
 from os import path
 
 import common
-from autotest_lib.tko.parsers.test import scenario_base
-from autotest_lib.client.common_lib import autotemp
+from tko.parsers.test import scenario_base
+from client.common_lib import autotemp
 
 usage = 'usage: %prog [options] results_dirpath scenerios_dirpath'
 parser = optparse.OptionParser(usage=usage)

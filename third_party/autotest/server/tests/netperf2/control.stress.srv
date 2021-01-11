@@ -8,7 +8,7 @@ SYNC_COUNT = 2
 DOC = """
 netperf_stress is a 2 machine test (server/client) that measures the performance
 of various network attributes. This test will cycle through the various types
-of supported tests and streams, and will take about 1 hour to run. 
+of supported tests and streams, and will take about 1 hour to run.
 You can adjust the streams by changing the values of the streams list in the
 run function.
 
@@ -24,7 +24,7 @@ stream_list   - A list containing the number of streams to run the test for. If
                 bidirectional streams.
 """
 
-from autotest_lib.server import utils
+from server import utils
 
 
 def run(pair):

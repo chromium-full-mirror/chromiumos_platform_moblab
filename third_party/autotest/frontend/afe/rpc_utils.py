@@ -16,15 +16,15 @@ import sys
 import django.db.utils
 import django.http
 
-from autotest_lib.frontend import thread_local
-from autotest_lib.frontend.afe import models, model_logic
-from autotest_lib.client.common_lib import control_data, error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.server import utils as server_utils
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
+from frontend import thread_local
+from frontend.afe import models, model_logic
+from client.common_lib import control_data, error
+from client.common_lib import global_config
+from client.common_lib import time_utils
+from client.common_lib.cros import dev_server
+from server import utils as server_utils
+from server.cros import provision
+from server.cros.dynamic_suite import frontend_wrappers
 
 NULL_DATETIME = datetime.datetime.max
 NULL_DATE = datetime.date.max

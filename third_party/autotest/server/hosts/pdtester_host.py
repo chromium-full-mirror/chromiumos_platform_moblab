@@ -10,7 +10,7 @@
 
 import logging
 
-from autotest_lib.server.hosts import servo_host
+from server.hosts import servo_host
 
 
 # Names of the host attributes in the database that represent the values for

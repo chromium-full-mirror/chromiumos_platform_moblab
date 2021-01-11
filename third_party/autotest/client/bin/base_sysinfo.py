@@ -9,9 +9,9 @@ import subprocess
 
 from distutils import dir_util
 
-from autotest_lib.client.common_lib import log
-from autotest_lib.client.cros import constants
-from autotest_lib.client.bin import utils, package
+from client.common_lib import log
+from client.cros import constants
+from client.bin import utils, package
 
 _DEFAULT_COMMANDS_TO_LOG_PER_TEST = []
 _DEFAULT_COMMANDS_TO_LOG_PER_BOOT = [

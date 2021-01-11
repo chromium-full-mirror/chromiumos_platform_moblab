@@ -14,9 +14,9 @@ import re
 from six.moves import map
 from six.moves import range
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.network import iw_event_logger
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros.network import iw_event_logger
 
 # These must mirror the values in 'iw list' output.
 CHAN_FLAG_DISABLED = 'disabled'

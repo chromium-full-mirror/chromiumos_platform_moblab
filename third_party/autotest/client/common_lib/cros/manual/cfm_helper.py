@@ -10,9 +10,9 @@ import logging
 import re
 import time
 import common
-from autotest_lib.client.common_lib.cros.manual import get_usb_devices
-from autotest_lib.client.common_lib.cros import cros_config
-from autotest_lib.client.common_lib.cros import power_cycle_usb_util
+from client.common_lib.cros.manual import get_usb_devices
+from client.common_lib.cros import cros_config
+from client.common_lib.cros import power_cycle_usb_util
 
 CORE_DIR_LINES = 3
 ATRUS = '18d1:8001'

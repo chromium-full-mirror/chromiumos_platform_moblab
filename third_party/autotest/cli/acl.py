@@ -17,7 +17,7 @@ See topic_common.py for a High Level Design and Algorithm.
 
 """
 
-from autotest_lib.cli import topic_common, action_common
+from cli import topic_common, action_common
 
 
 class acl(topic_common.atest):

@@ -7,8 +7,8 @@ import socket
 import struct
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import interface
+from client.common_lib import error
+from client.common_lib.cros.network import interface
 
 
 class InterfaceHost(object):

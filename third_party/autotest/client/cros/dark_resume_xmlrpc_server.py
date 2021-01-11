@@ -8,11 +8,11 @@ import logging
 import logging.handlers
 
 import common
-from autotest_lib.client.cros import constants
-from autotest_lib.client.cros import dark_resume_listener
-from autotest_lib.client.cros import xmlrpc_server
-from autotest_lib.client.cros.power import sys_power
-from autotest_lib.client.cros.power import power_utils
+from client.cros import constants
+from client.cros import dark_resume_listener
+from client.cros import xmlrpc_server
+from client.cros.power import sys_power
+from client.cros.power import power_utils
 
 
 class DarkResumeXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):

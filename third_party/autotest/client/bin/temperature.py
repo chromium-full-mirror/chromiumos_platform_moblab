@@ -24,7 +24,7 @@ argparser.set_defaults(temperature_type='all')
 args = argparser.parse_args()
 
 import common
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 TEMPERATURE_TYPE = {
     'Maximum': utils.get_current_temperature_max,

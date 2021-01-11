@@ -1,11 +1,11 @@
 import itertools
 import operator
 from django.db import models as dbmodels
-from autotest_lib.client.common_lib import priorities
-from autotest_lib.frontend.afe import rpc_utils, model_logic
-from autotest_lib.frontend.afe import models as afe_models, readonly_connection
-from autotest_lib.frontend.tko import models, tko_rpc_utils
-from autotest_lib.frontend.tko import preconfigs
+from client.common_lib import priorities
+from frontend.afe import rpc_utils, model_logic
+from frontend.afe import models as afe_models, readonly_connection
+from frontend.tko import models, tko_rpc_utils
+from frontend.tko import preconfigs
 
 
 # table/spreadsheet view support

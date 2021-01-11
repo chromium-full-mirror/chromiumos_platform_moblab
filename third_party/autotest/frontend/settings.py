@@ -12,8 +12,8 @@ For more details on how the routing works, see db_router.py.
 """
 
 import common
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.frontend import database_settings_helper
+from client.common_lib import global_config
+from frontend import database_settings_helper
 
 c = global_config.global_config
 _section = 'AUTOTEST_WEB'
@@ -50,7 +50,7 @@ SECRET_KEY = 'pn-t15u(epetamdflb%dqaaxw+5u&2#0u-jah70w1l*_9*)=n7'
 # Do not do this here or from the router, or most unit tests will fail.
 # from django.db import connection
 
-DATABASE_ROUTERS = ['autotest_lib.frontend.db_router.Router']
+DATABASE_ROUTERS = ['frontend.db_router.Router']
 
 # prefix applied to all URLs - useful if requests are coming through apache,
 # and you need this app to coexist with others

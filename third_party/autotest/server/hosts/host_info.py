@@ -13,7 +13,7 @@ import json
 import logging
 
 import common
-from autotest_lib.server.cros import provision
+from server.cros import provision
 import six
 
 

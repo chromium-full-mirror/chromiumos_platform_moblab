@@ -16,27 +16,27 @@ import sys
 import time
 
 import common
-from autotest_lib.frontend import setup_django_environment
+from frontend import setup_django_environment
 
 import django.db
 
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.scheduler import agent_task, drone_manager
-from autotest_lib.scheduler import host_scheduler
-from autotest_lib.scheduler import luciferlib
-from autotest_lib.scheduler import monitor_db_cleanup, prejob_task
-from autotest_lib.scheduler import postjob_task
-from autotest_lib.scheduler import query_managers
-from autotest_lib.scheduler import scheduler_lib
-from autotest_lib.scheduler import scheduler_models
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.server import autoserv_utils
-from autotest_lib.server import system_utils
-from autotest_lib.server import utils as server_utils
-from autotest_lib.site_utils import server_manager_utils
+from client.common_lib import control_data
+from client.common_lib import global_config
+from client.common_lib import utils
+from frontend.afe import models
+from scheduler import agent_task, drone_manager
+from scheduler import host_scheduler
+from scheduler import luciferlib
+from scheduler import monitor_db_cleanup, prejob_task
+from scheduler import postjob_task
+from scheduler import query_managers
+from scheduler import scheduler_lib
+from scheduler import scheduler_models
+from scheduler import scheduler_config
+from server import autoserv_utils
+from server import system_utils
+from server import utils as server_utils
+from site_utils import server_manager_utils
 
 
 PID_FILE_PREFIX = 'monitor_db'

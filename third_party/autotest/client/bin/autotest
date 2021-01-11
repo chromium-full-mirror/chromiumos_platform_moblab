@@ -5,8 +5,8 @@
 import os, sys
 import common
 from optparse import OptionParser
-from autotest_lib.client.bin import job
-from autotest_lib.client.common_lib import global_config
+from client.bin import job
+from client.common_lib import global_config
 
 
 # Use the name of the binary to find the real installation directory
@@ -84,7 +84,7 @@ drop_caches = global_config.global_config.get_config_value('CLIENT',
                                                            default=True)
 
 if options.client_test_setup:
-    from autotest_lib.client.bin import setup_job
+    from client.bin import setup_job
     exit_code = 0
     try:
         setup_job.setup_tests(options)

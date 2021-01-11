@@ -26,10 +26,10 @@ import powerlog
 
 from servo import measure_power
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros.power import power_status
-from autotest_lib.client.cros.power import power_telemetry_utils as utils
-from autotest_lib.server.cros.power import power_dashboard
+from client.common_lib import error
+from client.cros.power import power_status
+from client.cros.power import power_telemetry_utils as utils
+from server.cros.power import power_dashboard
 
 
 # If a sample has over 10% NaN values, the data might be very unreliable if

@@ -12,8 +12,8 @@ from __future__ import print_function
 __author__ = 'lucasmr@br.ibm.com (Lucas Meneghel Rodrigues)'
 
 import os, re
-from autotest_lib.client.bin import os_dep, utils
-from autotest_lib.client.common_lib import error
+from client.bin import os_dep, utils
+from client.common_lib import error
 
 # As more package methods are implemented, this list grows up
 KNOWN_PACKAGE_MANAGERS = ['rpm', 'dpkg']

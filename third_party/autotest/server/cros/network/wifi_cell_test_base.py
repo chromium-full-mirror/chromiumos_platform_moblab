@@ -4,10 +4,10 @@
 
 import logging
 
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.network import xmlrpc_datatypes
-from autotest_lib.server import test
-from autotest_lib.server.cros.network import wifi_test_context_manager
+from client.common_lib import utils
+from client.common_lib.cros.network import xmlrpc_datatypes
+from server import test
+from server.cros.network import wifi_test_context_manager
 
 class WiFiCellTestBase(test.test):
     """An abstract base class for autotests in WiFi cells.

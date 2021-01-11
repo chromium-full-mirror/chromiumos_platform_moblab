@@ -22,31 +22,31 @@ import types
 import weakref
 
 import common
-from autotest_lib.client.bin import client_logging_config
-from autotest_lib.client.bin import harness
-from autotest_lib.client.bin import local_host
-from autotest_lib.client.bin import parallel
-from autotest_lib.client.bin import partition as partition_lib
-from autotest_lib.client.bin import profilers
-from autotest_lib.client.bin import sysinfo
-from autotest_lib.client.bin import test
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import barrier
-from autotest_lib.client.common_lib import base_job
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.client.common_lib import packages
-from autotest_lib.client.cros import cros_logging
-from autotest_lib.client.tools import html_report
+from client.bin import client_logging_config
+from client.bin import harness
+from client.bin import local_host
+from client.bin import parallel
+from client.bin import partition as partition_lib
+from client.bin import profilers
+from client.bin import sysinfo
+from client.bin import test
+from client.bin import utils
+from client.common_lib import barrier
+from client.common_lib import base_job
+from client.common_lib import control_data
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import logging_manager
+from client.common_lib import packages
+from client.cros import cros_logging
+from client.tools import html_report
 
 GLOBAL_CONFIG = global_config.global_config
 
 LAST_BOOT_TAG = object()
 JOB_PREAMBLE = """
-from autotest_lib.client.common_lib.error import *
-from autotest_lib.client.bin.utils import *
+from client.common_lib.error import *
+from client.bin.utils import *
 """
 
 

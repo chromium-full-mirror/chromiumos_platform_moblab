@@ -2,11 +2,11 @@
 
 import common
 import logging, unittest
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.database import database_connection
-from autotest_lib.frontend.afe import frontend_test_utils, models
-from autotest_lib.scheduler import monitor_db_cleanup, scheduler_config
-from autotest_lib.client.common_lib import host_protections
+from frontend import setup_django_environment
+from database import database_connection
+from frontend.afe import frontend_test_utils, models
+from scheduler import monitor_db_cleanup, scheduler_config
+from client.common_lib import host_protections
 
 class UserCleanupTest(unittest.TestCase, frontend_test_utils.FrontendTestMixin):
     def setUp(self):

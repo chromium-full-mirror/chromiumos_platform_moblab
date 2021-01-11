@@ -16,7 +16,7 @@ See topic_common.py for a High Level Design and Algorithm.
 """
 
 import sys
-from autotest_lib.cli import topic_common, action_common
+from cli import topic_common, action_common
 
 
 class shard(topic_common.atest):

@@ -13,21 +13,21 @@ import time
 import traceback
 
 import common
-from autotest_lib.client.bin.result_tools import utils as result_utils
-from autotest_lib.client.bin.result_tools import utils_lib as result_utils_lib
-from autotest_lib.client.bin.result_tools import runner as result_runner
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import mail, pidfile
-from autotest_lib.client.common_lib import utils
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.tko import models as tko_models
-from autotest_lib.server import site_utils
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.tko import db as tko_db, utils as tko_utils
-from autotest_lib.tko import models, parser_lib
-from autotest_lib.tko.perf_upload import perf_uploader
-from autotest_lib.utils.side_effects import config_loader
+from client.bin.result_tools import utils as result_utils
+from client.bin.result_tools import utils_lib as result_utils_lib
+from client.bin.result_tools import runner as result_runner
+from client.common_lib import control_data
+from client.common_lib import global_config
+from client.common_lib import mail, pidfile
+from client.common_lib import utils
+from frontend import setup_django_environment
+from frontend.tko import models as tko_models
+from server import site_utils
+from server.cros.dynamic_suite import constants
+from tko import db as tko_db, utils as tko_utils
+from tko import models, parser_lib
+from tko.perf_upload import perf_uploader
+from utils.side_effects import config_loader
 
 
 metrics = utils.metrics_mock
@@ -314,7 +314,7 @@ def export_tko_job_to_file(job, jobname, filename):
     @param jobname: the job name as string.
     @param filename: The path to the results to be parsed.
     """
-    from autotest_lib.tko import job_serializer
+    from tko import job_serializer
 
     serializer = job_serializer.JobSerializer()
     serializer.serialize_to_binary(job, jobname, filename)
@@ -419,7 +419,7 @@ def parse_one(db, pid_file_manager, jobname, path, parse_options):
     binary_file_name = os.path.join(path, "job.serialize")
     if export_tko_to_file:
         export_tko_job_to_file(job, jobname, binary_file_name)
-    
+
     if not dry_run:
         # send out a email report of failure
         if len(message) > 2 and mail_on_failure:

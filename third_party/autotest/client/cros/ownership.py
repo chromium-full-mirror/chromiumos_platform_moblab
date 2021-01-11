@@ -5,9 +5,9 @@
 import logging, os, shutil, tempfile
 
 import common, constants, cryptohome
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import autotemp, error
-from autotest_lib.client.cros import cros_ui
+from client.bin import utils
+from client.common_lib import autotemp, error
+from client.cros import cros_ui
 
 
 PK12UTIL = 'pk12util'

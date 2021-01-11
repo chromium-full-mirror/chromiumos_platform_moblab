@@ -9,9 +9,9 @@ import sys
 import warnings
 
 import common
-from autotest_lib.server.cros import provision_actionables as actionables
-from autotest_lib.utils import labellib
-from autotest_lib.utils.labellib import Key
+from server.cros import provision_actionables as actionables
+from utils import labellib
+from utils.labellib import Key
 
 
 ### Constants for label prefixes

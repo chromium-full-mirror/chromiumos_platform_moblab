@@ -4,7 +4,7 @@
 
 import logging
 
-from autotest_lib.server.cros.network import netperf_runner
+from server.cros.network import netperf_runner
 
 class NetperfSession(object):
     """Abstracts a network performance measurement to reduce variance."""

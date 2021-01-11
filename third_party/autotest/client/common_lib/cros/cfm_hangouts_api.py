@@ -4,8 +4,8 @@
 
 import logging
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
+from client.bin import utils
+from client.common_lib import error
 
 DEFAULT_TIMEOUT = 30
 DIAGNOSTIC_RUN_TIMEOUT = 180

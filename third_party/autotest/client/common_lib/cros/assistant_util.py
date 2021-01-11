@@ -5,8 +5,8 @@
 # assistant_util.py is supposed to be called from chrome.py for Assistant
 # specific logic.
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
+from client.common_lib import error
+from client.common_lib import utils
 from telemetry.core import exceptions
 
 

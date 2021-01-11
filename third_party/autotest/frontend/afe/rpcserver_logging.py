@@ -1,7 +1,7 @@
 import logging, logging.handlers, time, os
 import common
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.site_utils import rpc_logserver
+from client.common_lib import global_config
+from site_utils import rpc_logserver
 
 
 config = global_config.global_config

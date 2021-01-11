@@ -16,11 +16,11 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 import common
-from autotest_lib.client.common_lib import error, logging_manager
-from autotest_lib.server import server_logging_config
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.hosts import factory
-from autotest_lib.site_utils import test_runner_utils
+from client.common_lib import error, logging_manager
+from server import server_logging_config
+from server.cros.dynamic_suite import constants
+from server.hosts import factory
+from site_utils import test_runner_utils
 
 
 _QUICKMERGE_SCRIPTNAME = '/mnt/host/source/chromite/bin/autotest_quickmerge'

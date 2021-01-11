@@ -8,8 +8,8 @@
 import six.moves.xmlrpc_client
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.feedback import client
+from client.common_lib import error
+from client.common_lib.feedback import client
 
 
 # Query return codes.

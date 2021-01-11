@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import common
-from autotest_lib.client.common_lib.global_config import global_config
+from client.common_lib.global_config import global_config
 
 FROM_AFE = "FROM_AFE"
 FROM_HOST_CONFIG = "FROM_HOST_CONFIG"

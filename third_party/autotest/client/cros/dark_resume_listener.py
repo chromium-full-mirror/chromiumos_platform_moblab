@@ -10,7 +10,7 @@ import dbus.mainloop.glib
 import gobject
 import os
 
-from autotest_lib.client.cros.input_playback import keyboard
+from client.cros.input_playback import keyboard
 
 DARK_SUSPEND_DELAY_MILLISECONDS = 50000
 

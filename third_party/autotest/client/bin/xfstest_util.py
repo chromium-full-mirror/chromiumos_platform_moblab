@@ -7,7 +7,7 @@
 """
 
 import os
-from autotest_lib.client.bin import partition
+from client.bin import partition
 
 class xfstests_env:
     """

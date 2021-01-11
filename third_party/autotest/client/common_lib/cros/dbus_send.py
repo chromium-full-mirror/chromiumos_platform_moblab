@@ -9,8 +9,8 @@ import pipes
 import re
 import shlex
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
+from client.bin import utils
+from client.common_lib import error
 
 
 # Represents the result of a dbus-send call.  |sender| refers to the temporary

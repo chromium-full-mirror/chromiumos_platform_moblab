@@ -13,9 +13,9 @@ from __future__ import print_function
 import os, warnings, logging
 import six
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.bin import os_dep
+from client.common_lib import error
+from client.common_lib import utils
+from client.bin import os_dep
 
 
 class RevisionControlError(Exception):

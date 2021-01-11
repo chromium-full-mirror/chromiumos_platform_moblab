@@ -12,7 +12,7 @@ Please refer go/rf-switch for more info on the switch.
 import contextlib
 import logging
 
-from autotest_lib.server.cros.network.rf_switch import scpi
+from server.cros.network.rf_switch import scpi
 
 
 class RfSwitchException(Exception):

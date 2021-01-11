@@ -5,7 +5,7 @@
 import logging
 import time
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 # USB ID for the virtual U2F HID Device.
 U2F_VID = '18D1'

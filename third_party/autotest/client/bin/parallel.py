@@ -12,7 +12,7 @@ import sys
 import time
 import traceback
 
-from autotest_lib.client.common_lib import error, utils
+from client.common_lib import error, utils
 
 def fork_start(tmp, l):
     sys.stdout.flush()

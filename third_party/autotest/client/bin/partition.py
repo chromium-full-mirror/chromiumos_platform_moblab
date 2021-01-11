@@ -10,8 +10,8 @@ and formatting.
 # pylint: disable=missing-docstring
 
 import os, re, string, sys, fcntl, logging
-from autotest_lib.client.bin import os_dep, utils
-from autotest_lib.client.common_lib import error
+from client.bin import os_dep, utils
+from client.common_lib import error
 
 
 class FsOptions(object):
@@ -922,6 +922,6 @@ class virtual_partition:
 
 # import a site partition module to allow it to override functions
 try:
-    from autotest_lib.client.bin.site_partition import *
+    from client.bin.site_partition import *
 except ImportError:
     pass

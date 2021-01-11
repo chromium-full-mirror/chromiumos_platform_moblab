@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""This module provides access to the autotest_lib.client namespace. It must be
+"""This module provides access to the client namespace. It must be
    included before any of the modules from that namespace."""
 
 import os, sys
@@ -15,4 +15,4 @@ import setup_modules
 
 sys.path.pop(0)
 setup_modules.setup(base_path=client_dir,
-                    root_module_name="autotest_lib.client")
+                    root_module_name="client")

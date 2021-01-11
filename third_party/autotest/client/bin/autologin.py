@@ -13,7 +13,7 @@ import argparse
 import getpass
 import sys
 
-from autotest_lib.client.common_lib.cros import chrome
+from client.common_lib.cros import chrome
 
 
 def main(args):

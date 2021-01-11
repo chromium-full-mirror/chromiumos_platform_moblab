@@ -4,9 +4,9 @@
 
 import common
 import logging
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.server.hosts import cros_constants
-from autotest_lib.server.hosts import repair_utils
+from client.common_lib import hosts
+from server.hosts import cros_constants
+from server.hosts import repair_utils
 
 from chromite.lib import timeout_util
 

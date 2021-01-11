@@ -4,15 +4,15 @@
 
 import logging
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.client.common_lib.cros.network import xmlrpc_datatypes
-from autotest_lib.server import hosts
-from autotest_lib.server import site_linux_router
-from autotest_lib.server import site_linux_system
-from autotest_lib.server.cros import dnsname_mangler
-from autotest_lib.server.cros.network import attenuator_controller
-from autotest_lib.server.cros.network import wifi_client
+from client.common_lib import error
+from client.common_lib.cros.network import ping_runner
+from client.common_lib.cros.network import xmlrpc_datatypes
+from server import hosts
+from server import site_linux_router
+from server import site_linux_system
+from server.cros import dnsname_mangler
+from server.cros.network import attenuator_controller
+from server.cros.network import wifi_client
 
 class WiFiTestContextManager(object):
     """A context manager for state used in WiFi autotests.

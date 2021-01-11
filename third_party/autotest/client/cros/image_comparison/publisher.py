@@ -8,8 +8,8 @@ import glob
 import os
 import shutil
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.cros import constants
+from client.bin import utils
+from client.cros import constants
 from string import Template
 
 class ImageDiffPublisher(object):

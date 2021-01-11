@@ -24,19 +24,19 @@ from six.moves import range
 from six.moves import urllib
 
 import common
-from autotest_lib.client.bin.result_tools import utils as result_utils
-from autotest_lib.client.bin.result_tools import utils_lib as result_utils_lib
-from autotest_lib.client.bin.result_tools import view as result_view
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import file_utils
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import host_queue_entry_states
-from autotest_lib.client.common_lib import host_states
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.cros.dynamic_suite import job_status
+from client.bin.result_tools import utils as result_utils
+from client.bin.result_tools import utils_lib as result_utils_lib
+from client.bin.result_tools import view as result_view
+from client.common_lib import lsbrelease_utils
+from client.common_lib import utils
+from client.common_lib import error
+from client.common_lib import file_utils
+from client.common_lib import global_config
+from client.common_lib import host_queue_entry_states
+from client.common_lib import host_states
+from server.cros import provision
+from server.cros.dynamic_suite import constants
+from server.cros.dynamic_suite import job_status
 
 metrics = utils.metrics_mock
 

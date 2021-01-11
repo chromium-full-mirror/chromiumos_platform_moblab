@@ -9,7 +9,7 @@ import logging, re
 # http://docs.python.org/2/library/errno.html
 import errno
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 class WatchdogTester(object):
     """Helper class to perform various watchdog tests."""

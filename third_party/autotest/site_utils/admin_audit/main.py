@@ -19,11 +19,11 @@ import socket
 import errno
 
 import common
-from autotest_lib.client.common_lib import autotest_enum
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.server import server_logging_config
-from autotest_lib.server.hosts import factory
-from autotest_lib.server.hosts import servo_host
+from client.common_lib import autotest_enum
+from client.common_lib import logging_manager
+from server import server_logging_config
+from server.hosts import factory
+from server.hosts import servo_host
 
 import verifiers
 

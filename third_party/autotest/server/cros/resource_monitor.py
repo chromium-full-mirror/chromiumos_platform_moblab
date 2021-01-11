@@ -14,7 +14,7 @@ import random
 import re
 import collections
 
-from autotest_lib.client.common_lib.cros import path_utils
+from client.common_lib.cros import path_utils
 
 class ResourceMonitorRawResult(object):
     """Encapsulates raw resource_monitor results."""

@@ -6,11 +6,11 @@
 import logging, os, pickle, re, sys
 import common
 
-from autotest_lib.client.bin import job as client_job
-from autotest_lib.client.common_lib import base_job
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.client.common_lib import packages
+from client.bin import job as client_job
+from client.common_lib import base_job
+from client.common_lib import error
+from client.common_lib import logging_manager
+from client.common_lib import packages
 
 
 class setup_job(client_job.job):

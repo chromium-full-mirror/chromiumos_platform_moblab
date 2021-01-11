@@ -6,11 +6,11 @@ import logging
 import os
 import re
 
-from autotest_lib.client.common_lib.cros import arc_common
-from autotest_lib.client.common_lib.cros import arc_util
-from autotest_lib.client.common_lib.cros import assistant_util
-from autotest_lib.client.cros import constants
-from autotest_lib.client.bin import utils
+from client.common_lib.cros import arc_common
+from client.common_lib.cros import arc_util
+from client.common_lib.cros import assistant_util
+from client.cros import constants
+from client.bin import utils
 from telemetry.core import cros_interface, exceptions
 from telemetry.internal.browser import browser_finder, browser_options
 from telemetry.internal.browser import extension_to_load

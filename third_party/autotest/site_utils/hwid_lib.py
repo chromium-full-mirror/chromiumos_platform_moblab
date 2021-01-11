@@ -6,7 +6,7 @@ import json
 import logging
 import urllib2
 
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import global_config
 
 # HWID info types to request.
 HWID_INFO_LABEL = 'dutlabel'

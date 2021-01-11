@@ -36,30 +36,30 @@ import warnings
 
 from datetime import datetime
 
-from autotest_lib.client.bin import sysinfo
-from autotest_lib.client.common_lib import base_job
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.client.common_lib import packages
-from autotest_lib.client.common_lib import utils
-from autotest_lib.server import profilers
-from autotest_lib.server import site_gtest_runner
-from autotest_lib.server import subcommand
-from autotest_lib.server import test
-from autotest_lib.server.autotest import OFFLOAD_ENVVAR
-from autotest_lib.server import utils as server_utils
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.server import hosts
-from autotest_lib.server.hosts import abstract_ssh
-from autotest_lib.server.hosts import afe_store
-from autotest_lib.server.hosts import file_store
-from autotest_lib.server.hosts import shadowing_store
-from autotest_lib.server.hosts import factory as host_factory
-from autotest_lib.server.hosts import host_info
-from autotest_lib.server.hosts import ssh_multiplex
-from autotest_lib.tko import models as tko_models
-from autotest_lib.tko import parser_lib
+from client.bin import sysinfo
+from client.common_lib import base_job
+from client.common_lib import control_data
+from client.common_lib import error
+from client.common_lib import logging_manager
+from client.common_lib import packages
+from client.common_lib import utils
+from server import profilers
+from server import site_gtest_runner
+from server import subcommand
+from server import test
+from server.autotest import OFFLOAD_ENVVAR
+from server import utils as server_utils
+from server.cros.dynamic_suite import frontend_wrappers
+from server import hosts
+from server.hosts import abstract_ssh
+from server.hosts import afe_store
+from server.hosts import file_store
+from server.hosts import shadowing_store
+from server.hosts import factory as host_factory
+from server.hosts import host_info
+from server.hosts import ssh_multiplex
+from tko import models as tko_models
+from tko import parser_lib
 from six.moves import zip
 
 metrics = utils.metrics_mock
@@ -1385,14 +1385,14 @@ class server_job(base_job.base_job):
         # This is the equivalent of prepending a bunch of import statements to
         # the front of the control script.
         namespace.update(os=os, sys=sys, logging=logging)
-        _import_names('autotest_lib.server',
+        _import_names('server',
                 ('hosts', 'autotest', 'standalone_profiler'))
-        _import_names('autotest_lib.server.subcommand',
+        _import_names('server.subcommand',
                       ('parallel', 'parallel_simple', 'subcommand'))
-        _import_names('autotest_lib.server.utils',
+        _import_names('server.utils',
                       ('run', 'get_tmp_dir', 'sh_escape', 'parse_machine'))
-        _import_names('autotest_lib.client.common_lib.error')
-        _import_names('autotest_lib.client.common_lib.barrier', ('barrier',))
+        _import_names('client.common_lib.error')
+        _import_names('client.common_lib.barrier', ('barrier',))
 
         # Inject ourself as the job object into other classes within the API.
         # (Yuck, this injection is a gross thing be part of a public API. -gps)

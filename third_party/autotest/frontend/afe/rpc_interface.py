@@ -46,30 +46,30 @@ from django.db.models import Count
 from django.db.utils import DatabaseError
 
 import common
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import priorities
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.frontend.afe import control_file as control_file_lib
-from autotest_lib.frontend.afe import model_attributes
-from autotest_lib.frontend.afe import model_logic
-from autotest_lib.frontend.afe import models
-from autotest_lib.frontend.afe import rpc_utils
-from autotest_lib.frontend.tko import models as tko_models
-from autotest_lib.frontend.tko import rpc_interface as tko_rpc_interface
-from autotest_lib.server import frontend
-from autotest_lib.server import utils
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.cros.dynamic_suite import control_file_getter
-from autotest_lib.server.cros.dynamic_suite import suite_common
-from autotest_lib.server.cros.dynamic_suite import tools
-from autotest_lib.server.cros.dynamic_suite.suite import Suite
-from autotest_lib.server.lib import status_history
-from autotest_lib.site_utils import job_history
-from autotest_lib.site_utils import server_manager_utils
-from autotest_lib.site_utils import stable_version_utils
+from client.common_lib import control_data
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import priorities
+from client.common_lib.cros import dev_server
+from frontend.afe import control_file as control_file_lib
+from frontend.afe import model_attributes
+from frontend.afe import model_logic
+from frontend.afe import models
+from frontend.afe import rpc_utils
+from frontend.tko import models as tko_models
+from frontend.tko import rpc_interface as tko_rpc_interface
+from server import frontend
+from server import utils
+from server.cros import provision
+from server.cros.dynamic_suite import constants
+from server.cros.dynamic_suite import control_file_getter
+from server.cros.dynamic_suite import suite_common
+from server.cros.dynamic_suite import tools
+from server.cros.dynamic_suite.suite import Suite
+from server.lib import status_history
+from site_utils import job_history
+from site_utils import server_manager_utils
+from site_utils import stable_version_utils
 
 
 _CONFIG = global_config.global_config

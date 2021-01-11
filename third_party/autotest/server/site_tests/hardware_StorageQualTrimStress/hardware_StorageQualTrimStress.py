@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 import time
-from autotest_lib.server import autotest
-from autotest_lib.server import hosts
-from autotest_lib.server import test
+from server import autotest
+from server import hosts
+from server import test
 
 class hardware_StorageQualTrimStress(test.test):
     """Do traffic and trim while suspending aggressively."""

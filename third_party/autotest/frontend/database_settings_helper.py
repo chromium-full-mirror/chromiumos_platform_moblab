@@ -32,7 +32,7 @@ The complexity to do this, is combined in this file.
 # on the builders, and this is also used by tko/db.py so failures like this
 # may occur: http://crbug.com/421565
 import common
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import global_config
 
 config = global_config.global_config
 SHARD_HOSTNAME = config.get_config_value('SHARD', 'shard_hostname',
@@ -137,7 +137,7 @@ def _get_database_config(getter):
     @return A dictionary that can be used in the Django DATABASES setting.
     """
     config = {
-        'ENGINE': 'autotest_lib.frontend.db.backends.afe',
+        'ENGINE': 'frontend.db.backends.afe',
         'PORT': getter('port', default=''),
         'HOST': getter('host'),
         'NAME': getter('database'),

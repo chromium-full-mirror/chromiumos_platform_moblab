@@ -7,8 +7,8 @@ import heapq, logging
 from PIL import Image
 from PIL import ImageChops
 
-from autotest_lib.client.cros.image_comparison import comparison_result
-from autotest_lib.client.cros.video import method_logger
+from client.cros.image_comparison import comparison_result
+from client.cros.video import method_logger
 
 
 """
@@ -82,11 +82,11 @@ class RGBImageComparer(object):
         diff_pixels = sum(t[0] for t in above_thres_tuples)
 
         return comparison_result.ComparisonResult(diff_pixels, '')
-    
-    
+
+
     def __enter__(self):
         return self
-    
-    
+
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass

@@ -4,8 +4,8 @@
 
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
+from client.common_lib import error
+from client.common_lib import utils
 
 def pkill_process(process_name, is_full_name=True,
                   timeout_seconds=60, host=None,

@@ -66,10 +66,10 @@ import os
 import socket
 
 import common
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.site_utils.ssp_containers import constants
-from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
+from client.common_lib import global_config
+from client.common_lib import utils
+from site_utils.ssp_containers import constants
+from site_utils.ssp_containers import utils as ssp_container_utils
 
 import logging
 

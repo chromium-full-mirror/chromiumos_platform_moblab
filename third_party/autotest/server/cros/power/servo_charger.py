@@ -13,8 +13,8 @@ import logging
 from six.moves import range
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import retry
+from client.common_lib import error
+from client.common_lib.cros import retry
 
 # Base delay time in seconds for Servo role change and PD negotiation.
 _DELAY_SEC = 0.1

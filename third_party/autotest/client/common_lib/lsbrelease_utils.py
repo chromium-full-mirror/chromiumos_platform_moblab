@@ -9,7 +9,7 @@ import os
 import re
 
 import common
-from autotest_lib.client.cros import constants
+from client.cros import constants
 
 
 JETSTREAM_BOARDS = frozenset(['arkham', 'gale', 'mistral', 'whirlwind'])

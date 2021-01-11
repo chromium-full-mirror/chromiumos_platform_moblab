@@ -10,9 +10,9 @@ from django.core import exceptions as django_exceptions
 from django.db import models as dbmodels
 
 
-from autotest_lib.client.common_lib import host_protections
-from autotest_lib.client.common_lib import host_states
-from autotest_lib.frontend import settings
+from client.common_lib import host_protections
+from client.common_lib import host_states
+from frontend import settings
 
 
 class ModelValidators(object):

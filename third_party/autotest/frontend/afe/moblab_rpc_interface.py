@@ -24,10 +24,10 @@ import time
 import common
 import docker
 
-from autotest_lib.client.common_lib import error, global_config, utils
-from autotest_lib.frontend.afe import models, rpc_utils
-from autotest_lib.server import frontend
-from autotest_lib.server.hosts import moblab_host
+from client.common_lib import error, global_config, utils
+from frontend.afe import models, rpc_utils
+from server import frontend
+from server.hosts import moblab_host
 from moblab_common import host_connector, moblab_info
 
 _CONFIG = global_config.global_config

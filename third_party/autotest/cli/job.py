@@ -21,9 +21,9 @@ See topic_common.py for a High Level Design and Algorithm.
 from __future__ import print_function
 
 import getpass, re
-from autotest_lib.cli import topic_common, action_common
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import priorities
+from cli import topic_common, action_common
+from client.common_lib import control_data
+from client.common_lib import priorities
 
 
 class job(topic_common.atest):

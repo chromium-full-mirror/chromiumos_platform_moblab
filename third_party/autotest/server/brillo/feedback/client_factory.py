@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import site_utils
+from client.common_lib import error
+from server import site_utils
 
 
 _AVAILABLE_AUDIO_CLIENTS = set(('loop', 'interactive'))
@@ -39,10 +39,10 @@ def _get_client(fb_client_name, available_clients, test_name, machine,
     args = args_str.split(',') if args_str else []
 
     if fb_client_name == 'loop':
-        from autotest_lib.server.brillo.feedback import closed_loop_audio_client
+        from server.brillo.feedback import closed_loop_audio_client
         return closed_loop_audio_client.Client(*args)
     elif fb_client_name == 'interactive':
-        from autotest_lib.client.common_lib.feedback import tester_feedback_client
+        from client.common_lib.feedback import tester_feedback_client
         return tester_feedback_client.Client(test_name, dut_name, *args)
     else:
         raise error.TestError(

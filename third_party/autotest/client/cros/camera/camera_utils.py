@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import glob, os
-from autotest_lib.client.cros.video import device_capability
+from client.cros.video import device_capability
 
 def find_cameras():
     """

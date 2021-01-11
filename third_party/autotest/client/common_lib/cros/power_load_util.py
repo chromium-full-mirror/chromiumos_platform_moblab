@@ -4,7 +4,7 @@
 
 import tempfile
 
-from autotest_lib.client.common_lib import file_utils
+from client.common_lib import file_utils
 
 _URL_BASE = ('https://sites.google.com/a/chromium.org/dev/chromium-os'
              '/testing/power-testing/pltp')

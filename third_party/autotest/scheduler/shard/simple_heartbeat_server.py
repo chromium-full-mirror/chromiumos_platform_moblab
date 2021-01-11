@@ -39,13 +39,13 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 from BaseHTTPServer import HTTPServer
 
 import common
-from autotest_lib.client.common_lib.global_config import global_config as config
-from autotest_lib.frontend import setup_django_environment
+from client.common_lib.global_config import global_config as config
+from frontend import setup_django_environment
 
 
 # Populated with command line database credentials.
 DB_SETTINGS = {
-    'ENGINE': 'autotest_lib.frontend.db.backends.afe',
+    'ENGINE': 'frontend.db.backends.afe',
 }
 
 # Indent level used when formatting json for the browser.
@@ -181,14 +181,14 @@ if __name__ == '__main__':
 
     # We need these lazy imports to allow command line specification of
     # database credentials.
-    from autotest_lib.frontend import settings
+    from frontend import settings
     DB_SETTINGS['HOST'] = args.db_host
     DB_SETTINGS['NAME'] = args.db_name
     DB_SETTINGS['USER'] = args.db_user
     DB_SETTINGS['PASSWORD'] = args.db_password
     DB_SETTINGS['PORT'] = args.db_port
     settings.DATABASES['default'] = DB_SETTINGS
-    from autotest_lib.frontend.afe import models
+    from frontend.afe import models
     from django.core.serializers import json as django_encoder
 
     server.serve_forever()

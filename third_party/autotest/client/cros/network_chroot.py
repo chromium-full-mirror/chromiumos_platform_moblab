@@ -13,7 +13,7 @@ import shutil
 import six
 import time
 
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 class NetworkChroot(object):
     """Implements a chroot environment that runs in a separate network

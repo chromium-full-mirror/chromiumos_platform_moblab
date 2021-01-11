@@ -9,8 +9,8 @@ import sys
 import threading
 import time
 
-from autotest_lib.client.common_lib import env
-from autotest_lib.client.common_lib import error
+from client.common_lib import env
+from client.common_lib import error
 
 
 def install_sigalarm_handler(new_handler):

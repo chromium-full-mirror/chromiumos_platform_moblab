@@ -30,9 +30,9 @@ import tempfile
 import time
 import traceback
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils as client_utils
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib import utils as client_utils
 
 metrics = client_utils.metrics_mock
 

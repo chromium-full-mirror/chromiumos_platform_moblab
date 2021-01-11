@@ -15,11 +15,11 @@ import six
 from six.moves import range
 import time
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import cr50_utils
-from autotest_lib.server.cros.servo import chrome_ec
-from autotest_lib.server.cros.servo import servo
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros import cr50_utils
+from server.cros.servo import chrome_ec
+from server.cros.servo import servo
 
 
 def dts_control_command(func):

@@ -2,7 +2,7 @@
 
 import re, time, traceback
 import common
-from autotest_lib.client.common_lib import global_config
+from client.common_lib import global_config
 
 RECONNECT_FOREVER = object()
 

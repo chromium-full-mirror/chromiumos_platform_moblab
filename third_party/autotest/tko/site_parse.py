@@ -33,12 +33,12 @@ import os
 import sys
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.tko import models
-from autotest_lib.tko import parse
-from autotest_lib.tko import utils as tko_utils
-from autotest_lib.tko.parsers import version_0
+from client.bin import utils
+from client.common_lib import global_config
+from tko import models
+from tko import parse
+from tko import utils as tko_utils
+from tko.parsers import version_0
 
 
 # Name of the report file to produce upon completion.

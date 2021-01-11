@@ -36,14 +36,14 @@ the logs explaining a failure or repair event.
 
 import common
 import os
-from autotest_lib.frontend import setup_django_environment
+from frontend import setup_django_environment
 from django.db import models as django_models
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.frontend.afe import models as afe_models
-from autotest_lib.server import constants
+from client.common_lib import global_config
+from client.common_lib import utils
+from client.common_lib import time_utils
+from frontend.afe import models as afe_models
+from server import constants
 
 
 # Values used to describe the diagnosis of a DUT.  These values are

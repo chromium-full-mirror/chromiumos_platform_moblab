@@ -1,5 +1,5 @@
-from autotest_lib.server import crashcollect
-from autotest_lib.server import utils
+from server import crashcollect
+from server import utils
 
 
 def crashinfo(machine):

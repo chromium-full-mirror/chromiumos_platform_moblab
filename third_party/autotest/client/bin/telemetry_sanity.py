@@ -19,10 +19,10 @@ import sys
 
 # This sets up import paths for autotest.
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros import arc, arc_common, chrome
-from autotest_lib.client.common_lib.error import TestFail
-from autotest_lib.client.cros import cryptohome
+from client.bin import utils
+from client.common_lib.cros import arc, arc_common, chrome
+from client.common_lib.error import TestFail
+from client.cros import cryptohome
 
 
 class TelemetrySanity(object):

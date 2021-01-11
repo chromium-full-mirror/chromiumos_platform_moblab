@@ -10,7 +10,7 @@ The real utils module is utils.py
 import warnings
 
 import common
-from autotest_lib.client.common_lib import deprecation
+from client.common_lib import deprecation
 
 # pylint: disable=wildcard-import,unused-wildcard-import,redefined-builtin
 from .utils import *

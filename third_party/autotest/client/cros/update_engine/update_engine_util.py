@@ -10,10 +10,10 @@ import shutil
 import time
 import urlparse
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import kernel_utils
-from autotest_lib.client.cros.update_engine import update_engine_event
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros import kernel_utils
+from client.cros.update_engine import update_engine_event
 
 _DEFAULT_RUN = utils.run
 _DEFAULT_COPY = shutil.copy

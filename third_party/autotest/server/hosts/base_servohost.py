@@ -15,19 +15,19 @@ import logging
 import socket
 import six.moves.xmlrpc_client
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import enum
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.client.common_lib.cros import kernel_utils
-from autotest_lib.client.cros import constants as client_constants
-from autotest_lib.server import autotest
-from autotest_lib.server import site_utils as server_utils
-from autotest_lib.server.cros import autoupdater
-from autotest_lib.server.hosts import ssh_host
-#from autotest_lib.site_utils.rpm_control_system import rpm_client
+from client.bin import utils
+from client.common_lib import enum
+from client.common_lib import error
+from client.common_lib import hosts
+from client.common_lib import lsbrelease_utils
+from client.common_lib.cros import dev_server
+from client.common_lib.cros import kernel_utils
+from client.cros import constants as client_constants
+from server import autotest
+from server import site_utils as server_utils
+from server.cros import autoupdater
+from server.hosts import ssh_host
+#from site_utils.rpm_control_system import rpm_client
 
 
 class BaseServoHost(ssh_host.SSHHost):

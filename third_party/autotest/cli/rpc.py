@@ -5,9 +5,9 @@
 from __future__ import print_function
 
 import os
-from autotest_lib.frontend.afe import rpc_client_lib
-from autotest_lib.frontend.afe.json_rpc import proxy
-from autotest_lib.client.common_lib import global_config, utils
+from frontend.afe import rpc_client_lib
+from frontend.afe.json_rpc import proxy
+from client.common_lib import global_config, utils
 
 GLOBAL_CONFIG = global_config.global_config
 DEFAULT_SERVER = 'autotest-afe'

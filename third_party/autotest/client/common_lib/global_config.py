@@ -20,9 +20,9 @@ import re
 import six.moves.configparser as ConfigParser
 import sys
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.client.common_lib import seven
+from client.common_lib import error
+from client.common_lib import lsbrelease_utils
+from client.common_lib import seven
 
 
 class ConfigError(error.AutotestError):

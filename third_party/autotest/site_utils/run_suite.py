@@ -60,24 +60,24 @@ from django.core import exceptions as django_exceptions
 config_reader = None
 skylab = None
 
-from autotest_lib.client.common_lib import control_data
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import priorities
-from autotest_lib.client.common_lib import time_utils
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.frontend.afe import rpc_client_lib
-from autotest_lib.frontend.afe.json_rpc import proxy
-from autotest_lib.server import site_utils
-from autotest_lib.server import utils
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import constants
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.server.cros.dynamic_suite import reporting_utils
-from autotest_lib.server.cros.dynamic_suite import suite_common
-from autotest_lib.server.cros.dynamic_suite import tools
+from client.common_lib import control_data
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import priorities
+from client.common_lib import time_utils
+from client.common_lib.cros import retry
+from frontend.afe import rpc_client_lib
+from frontend.afe.json_rpc import proxy
+from server import site_utils
+from server import utils
+from server.cros import provision
+from server.cros.dynamic_suite import constants
+from server.cros.dynamic_suite import frontend_wrappers
+from server.cros.dynamic_suite import reporting_utils
+from server.cros.dynamic_suite import suite_common
+from server.cros.dynamic_suite import tools
 try:
-    from autotest_lib.site_utils import diagnosis_utils
+    from site_utils import diagnosis_utils
 except django_exceptions.ImproperlyConfigured as e:
     if 'Error loading MySQLdb module: libmariadbclient' in str(e):
         logging.error('Unable to import a necessary MySQLdb module. This is '
@@ -88,8 +88,8 @@ except django_exceptions.ImproperlyConfigured as e:
                       'of the chroot accordingly.')
     raise
 
-from autotest_lib.site_utils import paygen
-from autotest_lib.site_utils import run_suite_common
+from site_utils import paygen
+from site_utils import run_suite_common
 
 CONFIG = global_config.global_config
 

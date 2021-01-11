@@ -13,24 +13,24 @@ import sys
 import six.moves.http_client
 import six.moves.xmlrpc_client
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.cros import constants
-from autotest_lib.server import autotest
-from autotest_lib.server.cros.multimedia import assistant_facade_adapter
-from autotest_lib.server.cros.multimedia import audio_facade_adapter
-from autotest_lib.server.cros.multimedia import bluetooth_facade_adapter
-from autotest_lib.server.cros.multimedia import browser_facade_adapter
-from autotest_lib.server.cros.multimedia import cfm_facade_adapter
-from autotest_lib.server.cros.multimedia import display_facade_adapter
-from autotest_lib.server.cros.multimedia import graphics_facade_adapter
-from autotest_lib.server.cros.multimedia import input_facade_adapter
-from autotest_lib.server.cros.multimedia import kiosk_facade_adapter
-from autotest_lib.server.cros.multimedia import system_facade_adapter
-from autotest_lib.server.cros.multimedia import usb_facade_adapter
-from autotest_lib.server.cros.multimedia import video_facade_adapter
+from client.bin import utils
+from client.common_lib import logging_manager
+from client.common_lib import error
+from client.common_lib.cros import retry
+from client.cros import constants
+from server import autotest
+from server.cros.multimedia import assistant_facade_adapter
+from server.cros.multimedia import audio_facade_adapter
+from server.cros.multimedia import bluetooth_facade_adapter
+from server.cros.multimedia import browser_facade_adapter
+from server.cros.multimedia import cfm_facade_adapter
+from server.cros.multimedia import display_facade_adapter
+from server.cros.multimedia import graphics_facade_adapter
+from server.cros.multimedia import input_facade_adapter
+from server.cros.multimedia import kiosk_facade_adapter
+from server.cros.multimedia import system_facade_adapter
+from server.cros.multimedia import usb_facade_adapter
+from server.cros.multimedia import video_facade_adapter
 
 
 # Log the client messages in the DEBUG level, with the prefix [client].

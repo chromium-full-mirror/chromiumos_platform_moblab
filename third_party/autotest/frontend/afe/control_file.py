@@ -7,11 +7,11 @@ __author__ = 'showard@google.com (Steve Howard)'
 import re, os
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.frontend.afe import model_logic
-from autotest_lib.server.cros.dynamic_suite import control_file_getter
-from autotest_lib.server.cros.dynamic_suite import suite_common
+from client.common_lib import error
+from client.common_lib.cros import dev_server
+from frontend.afe import model_logic
+from server.cros.dynamic_suite import control_file_getter
+from server.cros.dynamic_suite import suite_common
 import frontend.settings
 
 AUTOTEST_DIR = os.path.abspath(os.path.join(

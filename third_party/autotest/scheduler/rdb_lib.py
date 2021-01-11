@@ -5,10 +5,10 @@
 """This module manages translation between monitor_db and the rdb. """
 
 import common
-from autotest_lib.scheduler import rdb
-from autotest_lib.scheduler import rdb_hosts
-from autotest_lib.scheduler import rdb_requests
-from autotest_lib.server.cros import provision
+from scheduler import rdb
+from scheduler import rdb_hosts
+from scheduler import rdb_requests
+from server.cros import provision
 
 
 # Adapters for scheduler specific objects: Convert job information to a
@@ -26,7 +26,7 @@ class JobQueryManager(object):
         """
         # TODO(beeps): Break this dependency on the host_query_manager,
         # crbug.com/336934.
-        from autotest_lib.scheduler import query_managers
+        from scheduler import query_managers
         self.query_manager = query_managers.AFEHostQueryManager()
         jobs = [queue_entry.job_id for queue_entry in queue_entries]
         self._job_acls = self.query_manager._get_job_acl_groups(jobs)

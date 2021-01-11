@@ -5,10 +5,10 @@
 import logging
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.site_utils.ssp_containers import constants
-from autotest_lib.site_utils.ssp_containers import container
+from client.bin import utils
+from client.common_lib import error
+from site_utils.ssp_containers import constants
+from site_utils.ssp_containers import container
 
 
 

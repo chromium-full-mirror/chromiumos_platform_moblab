@@ -5,8 +5,8 @@
 import logging, os
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import constants
+from client.common_lib import error
+from client.cros import constants
 
 
 _PASSWD_FILE = '/var/tmp/tpm_password'

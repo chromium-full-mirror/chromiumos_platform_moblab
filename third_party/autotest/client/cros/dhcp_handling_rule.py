@@ -17,7 +17,7 @@ should be be removed from the test server's handling rule queue.
 import logging
 import time
 
-from autotest_lib.client.cros import dhcp_packet
+from client.cros import dhcp_packet
 
 # Drops the packet and acts like it never happened.
 RESPONSE_NO_ACTION = 0

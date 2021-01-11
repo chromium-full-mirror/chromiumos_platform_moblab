@@ -27,7 +27,7 @@ import six
 from six.moves import range
 
 import common
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 
 class fio_graph_generator():

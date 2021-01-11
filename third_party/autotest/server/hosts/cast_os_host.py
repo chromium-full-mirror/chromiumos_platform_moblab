@@ -4,7 +4,7 @@
 
 """Implements a Cast OS host type."""
 
-from autotest_lib.server.hosts import ssh_host
+from server.hosts import ssh_host
 
 OS_TYPE_CAST_OS = 'cast_os'
 

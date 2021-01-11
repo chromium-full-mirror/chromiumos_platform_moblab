@@ -7,7 +7,7 @@ import logging
 import os
 import subprocess
 
-from autotest_lib.client.bin import utils
+from client.bin import utils
 
 class Tcpdump(object):
     """tcpdump capture process wrapper."""

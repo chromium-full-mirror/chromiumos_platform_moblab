@@ -5,7 +5,7 @@ import unittest
 
 import mock
 
-from autotest_lib.server.cros.network import rf_switch_utils
+from server.cros.network import rf_switch_utils
 
 
 class RfSwitchUtilsTest(unittest.TestCase):
@@ -14,8 +14,8 @@ class RfSwitchUtilsTest(unittest.TestCase):
 
     def setUp(self):
         """Initial set up for the tests."""
-        self.patcher1 = mock.patch('autotest_lib.server.frontend.AFE')
-        self.patcher2 = mock.patch('autotest_lib.server.frontend.Host')
+        self.patcher1 = mock.patch('server.frontend.AFE')
+        self.patcher2 = mock.patch('server.frontend.Host')
         self.mock_afe = self.patcher1.start()
         self.mock_host = self.patcher2.start()
 

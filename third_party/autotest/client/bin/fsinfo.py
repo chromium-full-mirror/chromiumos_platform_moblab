@@ -13,7 +13,7 @@ import os, re, tempfile
 import six
 
 import common
-from autotest_lib.client.common_lib import error, utils
+from client.common_lib import error, utils
 
 
 def opt_string2dict(opt_string):

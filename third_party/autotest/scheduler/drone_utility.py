@@ -29,14 +29,14 @@ import traceback
 
 import common
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import logging_manager
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.scheduler import drone_logging_config
-from autotest_lib.scheduler import scheduler_config
-from autotest_lib.server import subcommand
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import logging_manager
+from client.common_lib import utils
+from client.common_lib.cros import retry
+from scheduler import drone_logging_config
+from scheduler import scheduler_config
+from server import subcommand
 
 
 # An environment variable we add to the environment to enable us to
@@ -555,7 +555,7 @@ class ProcessRefresher(object):
 def create_host(hostname):
     # TODO(crbug.com/739466) Delay import to avoid a ~0.7 second penalty
     # drone_utility calls that don't actually interact with DUTs.
-    from autotest_lib.server import hosts
+    from server import hosts
     username = global_config.global_config.get_config_value(
         'SCHEDULER', hostname + '_username', default=getpass.getuser())
     return hosts.SSHHost(hostname, user=username)

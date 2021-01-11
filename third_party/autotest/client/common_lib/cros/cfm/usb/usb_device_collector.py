@@ -1,8 +1,8 @@
 import cStringIO
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib.cros import textfsm
-from autotest_lib.client.common_lib.cros.cfm.usb import usb_device
+from client.bin import utils
+from client.common_lib.cros import textfsm
+from client.common_lib.cros.cfm.usb import usb_device
 
 
 class UsbDeviceCollector(object):

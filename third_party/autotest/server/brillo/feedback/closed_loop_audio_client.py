@@ -9,10 +9,10 @@ import os
 import tempfile
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.feedback import client
-from autotest_lib.server.brillo import audio_utils
-from autotest_lib.server.brillo import host_utils
+from client.common_lib import error
+from client.common_lib.feedback import client
+from server.brillo import audio_utils
+from server.brillo import host_utils
 
 
 # Constants used when recording playback.

@@ -8,9 +8,9 @@
 import logging
 
 import common
-from autotest_lib.server.hosts import afe_store
-from autotest_lib.server.hosts import host_info
-from autotest_lib.server.hosts import shadowing_store
+from server.hosts import afe_store
+from server.hosts import host_info
+from server.hosts import shadowing_store
 
 
 def forever_exists_decorate(exists):

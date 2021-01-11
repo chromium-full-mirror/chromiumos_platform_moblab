@@ -10,18 +10,18 @@ import os
 
 import common
 
-from autotest_lib.database import database_connection
-from autotest_lib.frontend import setup_django_environment
-from autotest_lib.frontend.afe import frontend_test_utils
-from autotest_lib.frontend.afe import models
-from autotest_lib.frontend.afe import rdb_model_extensions as rdb_models
-from autotest_lib.scheduler import monitor_db
-from autotest_lib.scheduler import query_managers
-from autotest_lib.scheduler import scheduler_lib
-from autotest_lib.scheduler import scheduler_models
-from autotest_lib.scheduler import rdb_hosts
-from autotest_lib.scheduler import rdb_requests
-from autotest_lib.server.cros import provision
+from database import database_connection
+from frontend import setup_django_environment
+from frontend.afe import frontend_test_utils
+from frontend.afe import models
+from frontend.afe import rdb_model_extensions as rdb_models
+from scheduler import monitor_db
+from scheduler import query_managers
+from scheduler import scheduler_lib
+from scheduler import scheduler_models
+from scheduler import rdb_hosts
+from scheduler import rdb_requests
+from server.cros import provision
 
 
 # Set for verbose table creation output.
@@ -305,7 +305,7 @@ class FileDatabaseHelper(object):
             db_file_path = self.DB_FILE
         # TODO: Move the translating database elsewhere. Monitor_db circular
         # imports host_scheduler.
-        from autotest_lib.frontend import setup_test_environment
+        from frontend import setup_test_environment
         from django.conf import settings
         self.old_django_db_name = settings.DATABASES['default']['NAME']
         settings.DATABASES['default']['NAME'] = db_file_path

@@ -10,16 +10,16 @@ import shutil
 import codecs
 
 import common
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.network import ap_constants
-from autotest_lib.client.common_lib.cros.network import iw_runner
-from autotest_lib.server import hosts
-from autotest_lib.server import site_utils
-from autotest_lib.server.cros.ap_configurators import ap_configurator
-from autotest_lib.server.cros.ap_configurators import ap_cartridge
-from autotest_lib.server.cros.ap_configurators import ap_spec as ap_spec_module
-from autotest_lib.server.cros.chaos_lib import chaos_datastore_utils
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros.network import ap_constants
+from client.common_lib.cros.network import iw_runner
+from server import hosts
+from server import site_utils
+from server.cros.ap_configurators import ap_configurator
+from server.cros.ap_configurators import ap_cartridge
+from server.cros.ap_configurators import ap_spec as ap_spec_module
+from server.cros.chaos_lib import chaos_datastore_utils
 
 
 def allocate_packet_capturer(lock_manager):

@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server.cros.network import telnet_helper
+from client.common_lib import error
+from server.cros.network import telnet_helper
 
 
 class Attenuator(object):

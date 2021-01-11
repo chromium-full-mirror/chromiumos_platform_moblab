@@ -9,18 +9,18 @@ import sys
 
 import six
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import afe_utils
-from autotest_lib.server.hosts import base_label
-from autotest_lib.server.hosts import cros_label
-from autotest_lib.server.hosts import labstation_repair
-from autotest_lib.server.cros import provision
-from autotest_lib.server.hosts import base_servohost
-from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
-from autotest_lib.server.cros.dynamic_suite import tools
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.server import utils as server_utils
-#from autotest_lib.site_utils.rpm_control_system import rpm_client
+from client.common_lib import error
+from server import afe_utils
+from server.hosts import base_label
+from server.hosts import cros_label
+from server.hosts import labstation_repair
+from server.cros import provision
+from server.hosts import base_servohost
+from server.cros.dynamic_suite import constants as ds_constants
+from server.cros.dynamic_suite import tools
+from client.common_lib.cros import dev_server
+from server import utils as server_utils
+#from site_utils.rpm_control_system import rpm_client
 
 class LabstationHost(base_servohost.BaseServoHost):
     """Labstation specific host class"""

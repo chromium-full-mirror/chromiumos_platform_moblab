@@ -1,5 +1,5 @@
-from autotest_lib.client.common_lib.cros.cfm import cras_input_node
-from autotest_lib.client.common_lib.cros.cfm import cras_output_node
+from client.common_lib.cros.cfm import cras_input_node
+from client.common_lib.cros.cfm import cras_output_node
 
 class CrasNodeCollector(object):
     """Utility class for obtaining node data from cras_test_client."""

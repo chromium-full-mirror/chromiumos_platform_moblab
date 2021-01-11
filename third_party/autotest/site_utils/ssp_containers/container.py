@@ -15,11 +15,11 @@ import tarfile
 import docker
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.site_utils.ssp_containers import constants
-from autotest_lib.site_utils.ssp_containers import ssp_containers
-from autotest_lib.site_utils.ssp_containers import utils as ssp_container_utils
+from client.bin import utils
+from client.common_lib import error
+from site_utils.ssp_containers import constants
+from site_utils.ssp_containers import ssp_containers
+from site_utils.ssp_containers import utils as ssp_container_utils
 
 
 # Naming convention of test container, e.g., test_300_1422862512_2424, where:

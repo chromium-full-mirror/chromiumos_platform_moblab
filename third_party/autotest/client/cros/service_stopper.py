@@ -23,8 +23,8 @@ code path out of the test.
 import logging
 import os
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.cros import upstart
+from client.bin import utils
+from client.cros import upstart
 
 
 class ServiceStopper(object):

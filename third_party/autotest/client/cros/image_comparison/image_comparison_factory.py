@@ -4,11 +4,11 @@
 
 import ConfigParser
 
-from autotest_lib.client.cros.image_comparison import pdiff_image_comparer
-from autotest_lib.client.cros.image_comparison import publisher
-from autotest_lib.client.cros.image_comparison import rgb_image_comparer
-from autotest_lib.client.cros.image_comparison import verifier
-from autotest_lib.client.cros.video import method_logger
+from client.cros.image_comparison import pdiff_image_comparer
+from client.cros.image_comparison import publisher
+from client.cros.image_comparison import rgb_image_comparer
+from client.cros.image_comparison import verifier
+from client.cros.video import method_logger
 
 
 class ImageComparisonFactory(object):

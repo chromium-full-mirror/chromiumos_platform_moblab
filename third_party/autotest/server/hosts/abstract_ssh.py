@@ -11,16 +11,16 @@ import os, time, socket, shutil, glob, logging, tempfile, re
 import shlex
 import subprocess
 
-from autotest_lib.client.bin.result_tools import runner as result_tools_runner
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.client.common_lib.global_config import global_config
-from autotest_lib.server import utils, autotest
-from autotest_lib.server.hosts import host_info
-from autotest_lib.server.hosts import remote
-from autotest_lib.server.hosts import rpc_server_tracker
-from autotest_lib.server.hosts import ssh_multiplex
+from client.bin.result_tools import runner as result_tools_runner
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros.network import ping_runner
+from client.common_lib.global_config import global_config
+from server import utils, autotest
+from server.hosts import host_info
+from server.hosts import remote
+from server.hosts import rpc_server_tracker
+from server.hosts import ssh_multiplex
 import six
 from six.moves import filter
 

@@ -14,10 +14,10 @@ import re
 from six.moves import map
 from six.moves import range
 
-from autotest_lib.client.bin import local_host
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros.network import netblock
+from client.bin import local_host
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib.cros.network import netblock
 
 # A tuple consisting of a readable part number (one of NAME_* below)
 # and a kernel module that provides the driver for this part (e.g. ath9k).

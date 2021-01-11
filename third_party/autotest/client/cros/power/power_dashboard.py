@@ -13,12 +13,12 @@ import time
 import urllib
 import urllib2
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.cros.power import power_status
-from autotest_lib.client.cros.power import power_utils
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib import lsbrelease_utils
+from client.common_lib.cros import retry
+from client.cros.power import power_status
+from client.cros.power import power_utils
 
 _HTML_CHART_STR = '''
 <!DOCTYPE html>

@@ -1,5 +1,5 @@
-from autotest_lib.server import utils
-from autotest_lib.server.cros import provision
+from server import utils
+from server.cros import provision
 
 metrics = utils.metrics_mock
 

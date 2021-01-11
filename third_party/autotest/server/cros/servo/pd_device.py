@@ -12,8 +12,8 @@ import logging
 from six.moves import range
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server.cros.servo import pd_console
+from client.common_lib import error
+from server.cros.servo import pd_console
 
 
 class PDDevice(object):

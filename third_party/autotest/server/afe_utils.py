@@ -14,15 +14,15 @@ import logging
 import traceback
 import urlparse
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.server.cros import autoupdater
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
-from autotest_lib.site_utils import stable_version_classify as sv
-from autotest_lib.server import site_utils as server_utils
-from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
-from autotest_lib.server.cros.dynamic_suite import tools
-from autotest_lib.server.cros.dynamic_suite import frontend_wrappers
+from client.common_lib import global_config
+from server.cros import autoupdater
+from server.cros import provision
+from server.cros.dynamic_suite import frontend_wrappers
+#from site_utils import stable_version_classify as sv
+from server import site_utils as server_utils
+from server.cros.dynamic_suite import constants as ds_constants
+from server.cros.dynamic_suite import tools
+from server.cros.dynamic_suite import frontend_wrappers
 
 from chromite.lib import auto_updater
 from chromite.lib import remote_access

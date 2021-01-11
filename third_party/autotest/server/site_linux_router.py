@@ -16,15 +16,15 @@ import string
 import tempfile
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-from autotest_lib.client.common_lib.cros import path_utils
-from autotest_lib.client.common_lib.cros.network import interface
-from autotest_lib.client.common_lib.cros.network import netblock
-from autotest_lib.client.common_lib.cros.network import ping_runner
-from autotest_lib.server import hosts
-from autotest_lib.server import site_linux_system
-from autotest_lib.server.cros import dnsname_mangler
+from client.common_lib import error
+from client.common_lib import utils
+from client.common_lib.cros import path_utils
+from client.common_lib.cros.network import interface
+from client.common_lib.cros.network import netblock
+from client.common_lib.cros.network import ping_runner
+from server import hosts
+from server import site_linux_system
+from server.cros import dnsname_mangler
 import six
 from six.moves import range
 

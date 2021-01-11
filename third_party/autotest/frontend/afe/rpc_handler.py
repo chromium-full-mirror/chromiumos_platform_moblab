@@ -11,10 +11,10 @@ import re
 import traceback
 import urllib
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.frontend.afe import models, rpc_utils
-from autotest_lib.frontend.afe import rpcserver_logging
-from autotest_lib.frontend.afe.json_rpc import serviceHandler
+from client.common_lib import error
+from frontend.afe import models, rpc_utils
+from frontend.afe import rpcserver_logging
+from frontend.afe.json_rpc import serviceHandler
 
 LOGGING_REGEXPS = [r'.*add_.*',
                    r'delete_.*',

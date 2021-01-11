@@ -9,7 +9,7 @@ import os
 
 import common
 
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 # Name of the Autotest test case that runs Tast tests.
 _TAST_AUTOTEST_NAME = 'tast'

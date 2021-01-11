@@ -7,7 +7,7 @@ import os
 import pipes
 import threading
 
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 class _HelperThread(threading.Thread):
     """Make a thread to run the command in."""

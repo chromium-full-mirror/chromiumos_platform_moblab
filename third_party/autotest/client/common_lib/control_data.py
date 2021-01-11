@@ -17,9 +17,9 @@ import textwrap
 import re
 import six
 
-from autotest_lib.client.common_lib import autotest_enum
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import priorities
+from client.common_lib import autotest_enum
+from client.common_lib import global_config
+from client.common_lib import priorities
 
 REQUIRED_VARS = set(['author', 'doc', 'name', 'time', 'test_type'])
 OBSOLETE_VARS = set(['experimental'])

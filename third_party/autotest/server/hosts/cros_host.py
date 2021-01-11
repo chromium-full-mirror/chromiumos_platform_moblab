@@ -14,37 +14,37 @@ import sys
 import time
 
 import common
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import autotemp
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.client.common_lib import lsbrelease_utils
-from autotest_lib.client.common_lib import utils as common_utils
-from autotest_lib.client.common_lib.cros import cros_config
-from autotest_lib.client.common_lib.cros import dev_server
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.client.cros import constants as client_constants
-from autotest_lib.client.cros import cros_ui
-from autotest_lib.server import afe_utils
-from autotest_lib.server import utils as server_utils
-from autotest_lib.server.cros import provision
-from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
-from autotest_lib.server.cros.dynamic_suite import tools, frontend_wrappers
-from autotest_lib.server.cros.device_health_profile import device_health_profile
-from autotest_lib.server.cros.servo import pdtester
-from autotest_lib.server.hosts import abstract_ssh
-from autotest_lib.server.hosts import base_label
-#from autotest_lib.server.hosts import chameleon_host
-from autotest_lib.server.hosts import cros_constants
-from autotest_lib.server.hosts import cros_label
-from autotest_lib.server.hosts import cros_repair
-from autotest_lib.server.hosts import pdtester_host
-from autotest_lib.server.hosts import servo_host
-from autotest_lib.server.hosts import servo_constants
-#from autotest_lib.site_utils.rpm_control_system import rpm_client
-from autotest_lib.site_utils.admin_audit import constants as audit_const
-from autotest_lib.site_utils.admin_audit import verifiers as audit_verify
+from client.bin import utils
+from client.common_lib import autotemp
+from client.common_lib import error
+from client.common_lib import global_config
+from client.common_lib import hosts
+from client.common_lib import lsbrelease_utils
+from client.common_lib import utils as common_utils
+from client.common_lib.cros import cros_config
+from client.common_lib.cros import dev_server
+from client.common_lib.cros import retry
+from client.cros import constants as client_constants
+from client.cros import cros_ui
+from server import afe_utils
+from server import utils as server_utils
+from server.cros import provision
+from server.cros.dynamic_suite import constants as ds_constants
+from server.cros.dynamic_suite import tools, frontend_wrappers
+from server.cros.device_health_profile import device_health_profile
+from server.cros.servo import pdtester
+from server.hosts import abstract_ssh
+from server.hosts import base_label
+#from server.hosts import chameleon_host
+from server.hosts import cros_constants
+from server.hosts import cros_label
+from server.hosts import cros_repair
+from server.hosts import pdtester_host
+from server.hosts import servo_host
+from server.hosts import servo_constants
+#from site_utils.rpm_control_system import rpm_client
+from site_utils.admin_audit import constants as audit_const
+from site_utils.admin_audit import verifiers as audit_verify
 from six.moves import zip
 
 # In case cros_host is being ran via SSP on an older Moblab version with an
@@ -2400,8 +2400,8 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
 
         @return: 'internal_display' if one is present; None otherwise.
         """
-        from autotest_lib.client.cros.graphics import graphics_utils
-        from autotest_lib.client.common_lib import utils as common_utils
+        from client.cros.graphics import graphics_utils
+        from client.common_lib import utils as common_utils
 
         def __system_output(cmd):
             return self.run(cmd).stdout

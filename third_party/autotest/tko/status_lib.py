@@ -1,6 +1,6 @@
 import collections, re
 import common
-from autotest_lib.client.common_lib import log
+from client.common_lib import log
 
 
 statuses = log.job_statuses

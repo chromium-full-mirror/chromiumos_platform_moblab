@@ -7,7 +7,7 @@ import logging
 import os
 
 import common
-from autotest_lib.client.common_lib import error
+from client.common_lib import error
 
 
 # Path to the local checkout of the fw-testing-configs repo

@@ -11,9 +11,9 @@ import shutil
 import time
 
 import common
-from autotest_lib.client.bin import test, utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.cros import constants, cros_logging
+from client.bin import test, utils
+from client.common_lib import error
+from client.cros import constants, cros_logging
 
 
 class CrashTest(test.test):

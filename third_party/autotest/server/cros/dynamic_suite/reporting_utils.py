@@ -10,8 +10,8 @@ import six
 
 import common
 
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.frontend.afe import rpc_client_lib
+from client.common_lib import global_config
+from frontend.afe import rpc_client_lib
 
 
 # Number of times to retry if a gs command fails. Defaults to 10,

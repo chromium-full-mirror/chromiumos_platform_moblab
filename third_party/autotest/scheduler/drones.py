@@ -6,9 +6,9 @@ import os
 import time
 
 import common
-from autotest_lib.scheduler import drone_utility
-from autotest_lib.client.bin import local_host
-from autotest_lib.client.common_lib import error, global_config
+from scheduler import drone_utility
+from client.bin import local_host
+from client.common_lib import error, global_config
 
 CONFIG = global_config.global_config
 AUTOTEST_INSTALL_DIR = CONFIG.get_config_value('SCHEDULER',

@@ -13,7 +13,7 @@ import os
 import re
 
 import common
-from autotest_lib.client.common_lib import utils
+from client.common_lib import utils
 
 
 class TraceNotFound(RuntimeError):

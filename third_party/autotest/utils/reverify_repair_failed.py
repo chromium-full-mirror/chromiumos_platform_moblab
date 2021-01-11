@@ -11,7 +11,7 @@ hosts have overcome whatever issue caused the failure and are useful again.
 import optparse, os, sys
 
 import common
-from autotest_lib.server import frontend
+from server import frontend
 
 
 def main():

@@ -18,11 +18,11 @@ import subprocess
 import tempfile
 import time
 
-from autotest_lib.client.bin import test
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import file_utils
-from autotest_lib.client.cros.input_playback import input_playback
+from client.bin import test
+from client.bin import utils
+from client.common_lib import error
+from client.common_lib import file_utils
+from client.cros.input_playback import input_playback
 
 
 class touch_playback_test_base(test.test):

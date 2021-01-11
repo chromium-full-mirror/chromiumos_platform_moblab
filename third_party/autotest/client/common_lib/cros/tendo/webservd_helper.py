@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from autotest_lib.client.bin import utils as bin_utils
-from autotest_lib.client.common_lib import utils
+from client.bin import utils as bin_utils
+from client.common_lib import utils
 
 def run_and_check_result(host, command):
     """Run a command on |host| and return whether it succeeded.

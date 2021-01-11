@@ -6,9 +6,9 @@ from django.forms.util import flatatt
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 
-from autotest_lib.cli import rpc, host
-from autotest_lib.frontend import settings
-from autotest_lib.frontend.afe import model_logic, models
+from cli import rpc, host
+from frontend import settings
+from frontend.afe import model_logic, models
 
 
 class SiteAdmin(admin.ModelAdmin):

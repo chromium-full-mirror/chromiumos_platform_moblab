@@ -1,7 +1,7 @@
 # Lint as: python2, python3
 import sys, socket, errno, logging
 from time import time, sleep
-from autotest_lib.client.common_lib import error, utils
+from client.common_lib import error, utils
 
 # default barrier port
 _DEFAULT_PORT = 11922

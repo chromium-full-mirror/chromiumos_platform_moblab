@@ -1,7 +1,7 @@
 
 import common
 
-from autotest_lib.site_utils import ssp_containers
+from site_utils import ssp_containers
 
 
 if __name__=='__main__':

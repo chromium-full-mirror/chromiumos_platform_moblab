@@ -8,7 +8,7 @@ import pprint
 import sys
 
 import common
-from autotest_lib.client.cros.networking import shill_proxy
+from client.cros.networking import shill_proxy
 
 def usage():
     """ Prints a script usage message. """

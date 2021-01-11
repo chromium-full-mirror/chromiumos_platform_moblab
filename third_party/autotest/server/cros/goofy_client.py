@@ -13,9 +13,9 @@ import time
 
 import common
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib.cros import retry
-from autotest_lib.server import utils
+from client.common_lib import error
+from client.common_lib.cros import retry
+from server import utils
 
 
 GOOFY_JSONRPC_SERVER_PORT = 0x0FAC

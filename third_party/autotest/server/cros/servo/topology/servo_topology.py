@@ -15,8 +15,8 @@ import base64
 import logging
 
 import common
-from autotest_lib.client.common_lib import hosts
-from autotest_lib.server.cros.servo.topology import topology_constants as stc
+from client.common_lib import hosts
+from server.cros.servo.topology import topology_constants as stc
 
 
 class ServoTopologyError(Exception):

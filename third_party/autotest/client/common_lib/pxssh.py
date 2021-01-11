@@ -12,8 +12,8 @@ from __future__ import print_function
 from six.moves import range
 import time
 
-from autotest_lib.client.common_lib.pexpect import *
-from autotest_lib.client.common_lib import pexpect
+from client.common_lib.pexpect import *
+from client.common_lib import pexpect
 
 
 __all__ = ['ExceptionPxssh', 'pxssh']

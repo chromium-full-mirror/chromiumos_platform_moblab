@@ -9,8 +9,8 @@ import tempfile
 import threading
 import time
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.server import autotest
+from client.common_lib import error
+from server import autotest
 
 ROOT_DIR = '/tmp/graphics_Power/'
 DEFAULT_SIGNAL_RUNNING_FILE = os.path.join(ROOT_DIR, 'signal_running')

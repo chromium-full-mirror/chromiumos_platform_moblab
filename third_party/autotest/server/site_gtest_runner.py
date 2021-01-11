@@ -5,9 +5,9 @@
 """A utility class used to run a gtest suite parsing individual tests."""
 
 import logging, os
-from autotest_lib.server import autotest, hosts, host_attributes
-from autotest_lib.server import site_server_job_utils
-from autotest_lib.client.common_lib import gtest_parser
+from server import autotest, hosts, host_attributes
+from server import site_server_job_utils
+from client.common_lib import gtest_parser
 
 
 class gtest_runner(object):

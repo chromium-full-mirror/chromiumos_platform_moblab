@@ -6,8 +6,8 @@ import os
 import re
 
 try:
-    from autotest_lib.client.bin.result_tools import throttler_lib
-    from autotest_lib.client.bin.result_tools import utils_lib
+    from client.bin.result_tools import throttler_lib
+    from client.bin.result_tools import utils_lib
 except ImportError:
     import throttler_lib
     import utils_lib

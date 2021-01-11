@@ -11,14 +11,14 @@ import os
 
 import common
 
-from autotest_lib.client.bin import utils
-from autotest_lib.client.common_lib import global_config
-from autotest_lib.client.cros.audio import cras_utils
-from autotest_lib.server.cros.dynamic_suite import constants as ds_constants
-from autotest_lib.server.hosts import base_label
-from autotest_lib.server.hosts import common_label
-from autotest_lib.server.hosts import servo_constants
-from autotest_lib.site_utils import hwid_lib
+from client.bin import utils
+from client.common_lib import global_config
+from client.cros.audio import cras_utils
+from server.cros.dynamic_suite import constants as ds_constants
+from server.hosts import base_label
+from server.hosts import common_label
+from server.hosts import servo_constants
+from site_utils import hwid_lib
 
 # pylint: disable=missing-docstring
 LsbOutput = collections.namedtuple('LsbOutput', ['unibuild', 'board'])
@@ -627,8 +627,8 @@ class InternalDisplayLabel(base_label.StringLabel):
     _NAME = 'internal_display'
 
     def generate_labels(self, host):
-        from autotest_lib.client.cros.graphics import graphics_utils
-        from autotest_lib.client.common_lib import utils as common_utils
+        from client.cros.graphics import graphics_utils
+        from client.common_lib import utils as common_utils
 
         def __system_output(cmd):
             return host.run(cmd).stdout

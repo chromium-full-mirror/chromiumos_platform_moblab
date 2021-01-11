@@ -1,6 +1,6 @@
 import logging
 
-from autotest_lib.server import crashcollect
+from server import crashcollect
 
 
 def crashdumps(machine):

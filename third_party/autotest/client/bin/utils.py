@@ -29,12 +29,12 @@ import tempfile
 import time
 import uuid
 
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import magic
-from autotest_lib.client.common_lib import utils
-#from autotest_lib.client.common_lib.cros import cros_config
+from client.common_lib import error
+from client.common_lib import magic
+from client.common_lib import utils
+#from client.common_lib.cros import cros_config
 
-from autotest_lib.client.common_lib.utils import *
+from client.common_lib.utils import *
 
 
 def grep(pattern, file):
@@ -1807,7 +1807,7 @@ def wait_for_cool_machine():
 def report_temperature(test, keyname):
     """Report current max observed temperature with given keyname.
 
-    @param test: autotest_lib.client.bin.test.test instance
+    @param test: client.bin.test.test instance
     @param keyname: key to be used when reporting perf value.
     """
     temperature = get_current_temperature_max()

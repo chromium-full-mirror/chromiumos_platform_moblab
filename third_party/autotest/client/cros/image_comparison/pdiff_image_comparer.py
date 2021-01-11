@@ -8,8 +8,8 @@ import logging
 import subprocess
 import tempfile
 
-from autotest_lib.client.cros.image_comparison import comparison_result
-from autotest_lib.client.cros.video import method_logger
+from client.cros.image_comparison import comparison_result
+from client.cros.video import method_logger
 
 
 class PdiffImageComparer(object):
