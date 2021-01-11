@@ -25,9 +25,9 @@ gcloud auth configure-docker
 gcloud auth configure-docker us-docker.pkg.dev
 
 # Create an override just using the defaults
-cp moblab/src/dockerfiles/compose/.env moblab/src/dockerfiles/compose/override.env
+cp src/dockerfiles/compose/.env src/dockerfiles/compose/override.env
 
-echo "export REGISTRY=$(hostname -I | awk -F ' ' '{print $1}'):5000" > moblab/src/local_registry.mk
+echo "export REGISTRY=$(hostname -I | awk -F ' ' '{print $1}'):5000" > src/local_registry.mk
 # Let the user know to set up git credentials
 echo "In a browser go to https://www.googlesource.com/new-password and paste"
 echo "the generated code into this shell."

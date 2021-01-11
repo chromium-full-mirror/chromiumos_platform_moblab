@@ -13,7 +13,7 @@ developer: init dependencies host_server local_registry
 
 dependencies:
 	apt install pip
-	pip install -y grpcio-tools netifaces
+	pip install grpcio-tools netifaces
 
 local_registry:
 	service docker stop
@@ -21,8 +21,7 @@ local_registry:
 	# TODO fix this so if the file is empty it works correctly.
 	sed -i '1d' /etc/docker/daemon.json
 	# Add in our insecure registry 
-	REGIPADDR=$(hostname -I | awk -F ' ' '{print $1}') \
-	sed -i "1 i\{\n  \"insecure-registries\": [\"${REGIPADDR}:5000\"]," /etc/docker/daemon.json
+	sed -i "1 i\{\n  \"insecure-registries\": [\"$$(hostname -I | awk -F ' ' '{print $$1}'):5000\"]," /etc/docker/daemon.json
 	cat /etc/docker/daemon.json
 	service docker start
 	cp init/moblab-docker-registry /etc/init.d
@@ -56,7 +55,7 @@ python: proto
 	install -D ../common/host*.py ${INSTALL_DIR}
 
 host_server: python
-	cp init/ moblab-host-server /etc/init.d
+	cp init/moblab-host-server /etc/init.d
 	systemctl daemon-reload
 	systemctl enable moblab-host-server.service
 	systemctl start moblab-host-server.service

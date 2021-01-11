@@ -16,7 +16,7 @@ FROM ${BASE_REGISTRY_URI}/hadolint/hadolint:latest-debian as hadolint
 
 FROM ${BASE_REGISTRY_URI}/node:15-buster as base
 
-RUN npm install -g gts eslint
+RUN npm install -g gts eslint @angular/cli
 ENV NODE_PATH=/usr/local/lib/node_modules/gts/node_modules:/usr/local/lib/node_modules
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
@@ -29,8 +29,6 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     ca-certificates \
     curl \
     git-core \
-    git-gui \
-    gitk \
     gnupg \
     gnupg-agent \
     google-cloud-sdk \

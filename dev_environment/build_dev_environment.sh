@@ -14,6 +14,7 @@ curl https://chromium.googlesource.com/chromiumos/platform/moblab/+/refs/heads/m
 curl https://chromium.googlesource.com/chromiumos/platform/moblab/+/refs/heads/main/dev_environment/reset_moblab.sh?format=TEXT \
     | base64 -d > reset_moblab.sh
 
+docker pull gcr.io/chromeos-partner-moblab/moblab-dev-environment:autopush
 docker build -t mymoblabdev --build-arg USER=$USER --build-arg  USERID=$(id -u) .
 
 echo "Installing script that starts build environment."
