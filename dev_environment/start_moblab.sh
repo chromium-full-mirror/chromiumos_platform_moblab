@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 REGIPADDR=$(hostname -I | awk -F ' ' '{print $1}')
+docker volume create --name=leases
 docker run \
     --rm \
     --name compose \

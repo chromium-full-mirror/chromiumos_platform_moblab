@@ -26,6 +26,7 @@ local_registry:
 	service docker start
 	cp init/moblab-docker-registry /etc/init.d
 	systemctl daemon-reload
+	systemctl stop moblab-docker-registry.service || true
 	systemctl enable moblab-docker-registry.service
 	systemctl start moblab-docker-registry.service
 
