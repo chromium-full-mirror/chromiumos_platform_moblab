@@ -11,4 +11,4 @@ docker run \
     -e LABEL=${USER} \
     -e REGISTRY_URI=${REGIPADDR}:5000 \
     -e SSH_PORT=2222 \
-    192.168.121.108:5000/moblab-compose:${USER} up > /var/log/bootup/moblab-compose-up.log
+    $(hostname -I | awk -F ' ' '{print $1}'):5000/moblab-compose:${USER} up > /var/log/bootup/moblab-compose-up.log

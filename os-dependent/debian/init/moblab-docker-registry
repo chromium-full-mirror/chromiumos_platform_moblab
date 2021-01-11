@@ -18,11 +18,11 @@ set -e
 case "$1" in
     start)
         echo "Starting script moblab "
-        docker run -d -p 5000:5000 --name registry registry:2 || true
+        /usr/bin/docker run --rm -d -p 5000:5000 --name registry gcr.io/chromeos-partner-moblab/registry:2
     ;;
     stop)
         echo "Stopping script moblab-registry"
-        docker stop registry
+        /usr/bin/docker stop registry
     ;;
     e)
         echo "Usage: /etc/init.d/moblab-docker-registry {start|stop}"
