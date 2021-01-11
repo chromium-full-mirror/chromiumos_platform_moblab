@@ -28,5 +28,3 @@ class SQLUpdateCompiler(mysql_compiler.SQLUpdateCompiler, SQLCompiler):
 class SQLAggregateCompiler(mysql_compiler.SQLAggregateCompiler, SQLCompiler):
     pass
 
-class SQLDateCompiler(mysql_compiler.SQLDateCompiler, SQLCompiler):
-    pass

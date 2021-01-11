@@ -2,7 +2,7 @@
 
 from django import forms
 from django.contrib import admin, messages
-from django.forms.util import flatatt
+from django.forms.utils import flatatt
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 
@@ -41,6 +41,7 @@ class ModelWithInvalidForm(forms.ModelForm):
 class AtomicGroupForm(ModelWithInvalidForm):
     class Meta:
         model = models.AtomicGroup
+        fields = '__all__'
 
 
 class AtomicGroupAdmin(SiteAdmin):
@@ -57,6 +58,7 @@ admin.site.register(models.AtomicGroup, AtomicGroupAdmin)
 class LabelForm(ModelWithInvalidForm):
     class Meta:
         model = models.Label
+        fields = '__all__'
 
 
 class LabelAdmin(SiteAdmin):
@@ -146,6 +148,7 @@ class HostForm(ModelWithInvalidForm):
 
     class Meta:
         model = models.Host
+        fields = '__all__'
 
 
 class HostAttributeInline(admin.TabularInline):
@@ -272,28 +275,6 @@ class ProfilerAdmin(SiteAdmin):
     search_fields = ('name',)
 
 admin.site.register(models.Profiler, ProfilerAdmin)
-
-
-class AclGroupAdmin(SiteAdmin):
-    list_display = ('name', 'description')
-    search_fields = ('name',)
-    filter_horizontal = ('users', 'hosts')
-
-    def queryset(self, request):
-        return models.AclGroup.objects.exclude(name='Everyone')
-
-    def save_model(self, request, obj, form, change):
-        super(AclGroupAdmin, self).save_model(request, obj, form, change)
-        _orig_save_m2m = form.save_m2m
-
-        def save_m2m():
-            _orig_save_m2m()
-            obj.perform_after_save(change)
-
-        form.save_m2m = save_m2m
-
-admin.site.register(models.AclGroup, AclGroupAdmin)
-
 
 class DroneSetForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

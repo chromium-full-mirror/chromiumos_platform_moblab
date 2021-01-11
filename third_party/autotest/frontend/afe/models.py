@@ -246,14 +246,10 @@ class Drone(dbmodels.Model, model_logic.ModelExtensions):
 
 
     def save(self, *args, **kwargs):
-        if not User.current_user().is_superuser():
-            raise Exception('Only superusers may edit drones')
         super(Drone, self).save(*args, **kwargs)
 
 
     def delete(self):
-        if not User.current_user().is_superuser():
-            raise Exception('Only superusers may delete drones')
         super(Drone, self).delete()
 
 
@@ -288,14 +284,10 @@ class DroneSet(dbmodels.Model, model_logic.ModelExtensions):
 
 
     def save(self, *args, **kwargs):
-        if not User.current_user().is_superuser():
-            raise Exception('Only superusers may edit drone sets')
         super(DroneSet, self).save(*args, **kwargs)
 
 
     def delete(self):
-        if not User.current_user().is_superuser():
-            raise Exception('Only superusers may delete drone sets')
         super(DroneSet, self).delete()
 
 
@@ -339,13 +331,7 @@ class DroneSet(dbmodels.Model, model_logic.ModelExtensions):
         @param cls: Implicit class object.
         @param drone_set_name: A drone set name.
         """
-        if not cls.drone_sets_enabled():
-            return None
-
-        user = User.current_user()
-        user_drone_set_name = user.drone_set and user.drone_set.name
-
-        return drone_set_name or user_drone_set_name or cls.get_default().name
+        return None
 
 
     def get_drone_hostnames(self):
@@ -375,7 +361,7 @@ class User(dbmodels.Model, model_logic.ModelExtensions):
     ACCESS_ADMIN = 1
     ACCESS_USER = 0
 
-    AUTOTEST_SYSTEM = 'autotest_system'
+    AUTOTEST_SYSTEM = 'moblab'
 
     login = dbmodels.CharField(max_length=255, unique=True)
     access_level = dbmodels.IntegerField(default=ACCESS_USER, blank=True)
@@ -394,34 +380,15 @@ class User(dbmodels.Model, model_logic.ModelExtensions):
     objects = model_logic.ExtendedManager()
 
 
-    def save(self, *args, **kwargs):
-        # is this a new object being saved for the first time?
-        first_time = (self.id is None)
-        user = thread_local.get_user()
-        if user and not user.is_superuser() and user.login != self.login:
-            raise AclAccessViolation("You cannot modify user " + self.login)
-        super(User, self).save(*args, **kwargs)
-        if first_time:
-            everyone = AclGroup.objects.get(name='Everyone')
-            everyone.users.add(self)
-
-
-    def is_superuser(self):
-        """Returns whether the user has superuser access."""
-        return self.access_level >= self.ACCESS_ROOT
-
-
     @classmethod
     def current_user(cls):
         """Returns the current user.
 
         @param cls: Implicit class object.
         """
-        user = thread_local.get_user()
-        if user is None:
-            user, _ = cls.objects.get_or_create(login=cls.AUTOTEST_SYSTEM)
-            user.access_level = cls.ACCESS_ROOT
-            user.save()
+        user, _ = cls.objects.get_or_create(login=cls.AUTOTEST_SYSTEM)
+        user.access_level = cls.ACCESS_ROOT
+        user.save()
         return user
 
 
@@ -722,7 +689,7 @@ class Host(model_logic.ModelWithInvalid, rdb_model_extensions.AbstractHostModel,
 
 
     def clean_object(self):
-        self.aclgroup_set.clear()
+        # self.aclgroup_set.clear()
         self.labels.clear()
         self.static_labels.clear()
 
@@ -732,13 +699,10 @@ class Host(model_logic.ModelWithInvalid, rdb_model_extensions.AbstractHostModel,
         self.hostname = self.hostname.strip()
         # is this a new object being saved for the first time?
         first_time = (self.id is None)
-        if not first_time:
-            AclGroup.check_for_acl_violation_hosts([self])
         # If locked is changed, send its status and user made the change to
         # metaDB. Locks are important in host history because if a device is
         # locked then we don't really care what state it is in.
         if self.locked and not self.locked_by:
-            self.locked_by = User.current_user()
             if not self.lock_time:
                 self.lock_time = datetime.utcnow()
             self.dirty = True
@@ -746,18 +710,10 @@ class Host(model_logic.ModelWithInvalid, rdb_model_extensions.AbstractHostModel,
             self.locked_by = None
             self.lock_time = None
         super(Host, self).save(*args, **kwargs)
-        if first_time:
-            everyone = AclGroup.objects.get(name='Everyone')
-            everyone.hosts.add(self)
-            # remove attributes that may have lingered from an old host and
-            # should not be associated with a new host
-            for host_attribute in self.hostattribute_set.all():
-                self.delete_attribute(host_attribute.attribute)
         self._check_for_updated_attributes()
 
 
     def delete(self):
-        AclGroup.check_for_acl_violation_hosts([self])
         logging.info('Preconditions for deleting host %s...', self.hostname)
         for queue_entry in self.hostqueueentry_set.all():
             logging.info('  Deleting and aborting hqe %s...', queue_entry)
@@ -1121,170 +1077,6 @@ class Profiler(dbmodels.Model, model_logic.ModelExtensions):
         return unicode(self.name)
 
 
-class AclGroup(dbmodels.Model, model_logic.ModelExtensions):
-    """\
-    Required:
-    name: name of ACL group
-
-    Optional:
-    description: arbitrary description of group
-    """
-
-    SERIALIZATION_LINKS_TO_FOLLOW = set(['users'])
-
-    name = dbmodels.CharField(max_length=255, unique=True)
-    description = dbmodels.CharField(max_length=255, blank=True)
-    users = dbmodels.ManyToManyField(User, blank=False,
-                                     db_table='afe_acl_groups_users')
-    hosts = dbmodels.ManyToManyField(Host, blank=True,
-                                     db_table='afe_acl_groups_hosts')
-
-    name_field = 'name'
-    objects = model_logic.ExtendedManager()
-
-    @staticmethod
-    def check_for_acl_violation_hosts(hosts):
-        """Verify the current user has access to the specified hosts.
-
-        @param hosts: The hosts to verify against.
-        @raises AclAccessViolation if the current user doesn't have access
-            to a host.
-        """
-        user = User.current_user()
-        if user.is_superuser():
-            return
-        accessible_host_ids = set(
-            host.id for host in Host.objects.filter(aclgroup__users=user))
-        for host in hosts:
-            # Check if the user has access to this host,
-            # but only if it is not a metahost or a one-time-host.
-            no_access = (isinstance(host, Host)
-                         and not host.invalid
-                         and int(host.id) not in accessible_host_ids)
-            if no_access:
-                raise AclAccessViolation("%s does not have access to %s" %
-                                         (str(user), str(host)))
-
-
-    @staticmethod
-    def check_abort_permissions(queue_entries):
-        """Look for queue entries that aren't abortable by the current user.
-
-        An entry is not abortable if:
-           * the job isn't owned by this user, and
-           * the machine isn't ACL-accessible, or
-           * the machine is in the "Everyone" ACL
-
-        @param queue_entries: The queue entries to check.
-        @raises AclAccessViolation if a queue entry is not abortable by the
-            current user.
-        """
-        user = User.current_user()
-        if user.is_superuser():
-            return
-        not_owned = queue_entries.exclude(job__owner=user.login)
-        # I do this using ID sets instead of just Django filters because
-        # filtering on M2M dbmodels is broken in Django 0.96. It's better in
-        # 1.0.
-        # TODO: Use Django filters, now that we're using 1.0.
-        accessible_ids = set(
-            entry.id for entry
-            in not_owned.filter(host__aclgroup__users__login=user.login))
-        public_ids = set(entry.id for entry
-                         in not_owned.filter(host__aclgroup__name='Everyone'))
-        cannot_abort = [entry for entry in not_owned.select_related()
-                        if entry.id not in accessible_ids
-                        or entry.id in public_ids]
-        if len(cannot_abort) == 0:
-            return
-        entry_names = ', '.join('%s-%s/%s' % (entry.job.id, entry.job.owner,
-                                              entry.host_or_metahost_name())
-                                for entry in cannot_abort)
-        raise AclAccessViolation('You cannot abort the following job entries: '
-                                 + entry_names)
-
-
-    def check_for_acl_violation_acl_group(self):
-        """Verifies the current user has acces to this ACL group.
-
-        @raises AclAccessViolation if the current user doesn't have access to
-            this ACL group.
-        """
-        user = User.current_user()
-        if user.is_superuser():
-            return
-        if self.name == 'Everyone':
-            raise AclAccessViolation("You cannot modify 'Everyone'!")
-        if not user in self.users.all():
-            raise AclAccessViolation("You do not have access to %s"
-                                     % self.name)
-
-    @staticmethod
-    def on_host_membership_change():
-        """Invoked when host membership changes."""
-        everyone = AclGroup.objects.get(name='Everyone')
-
-        # find hosts that aren't in any ACL group and add them to Everyone
-        # TODO(showard): this is a bit of a hack, since the fact that this query
-        # works is kind of a coincidence of Django internals.  This trick
-        # doesn't work in general (on all foreign key relationships).  I'll
-        # replace it with a better technique when the need arises.
-        orphaned_hosts = Host.valid_objects.filter(aclgroup__id__isnull=True)
-        everyone.hosts.add(*orphaned_hosts.distinct())
-
-        # find hosts in both Everyone and another ACL group, and remove them
-        # from Everyone
-        hosts_in_everyone = Host.valid_objects.filter(aclgroup__name='Everyone')
-        acled_hosts = set()
-        for host in hosts_in_everyone:
-            # Has an ACL group other than Everyone
-            if host.aclgroup_set.count() > 1:
-                acled_hosts.add(host)
-        everyone.hosts.remove(*acled_hosts)
-
-
-    def delete(self):
-        if (self.name == 'Everyone'):
-            raise AclAccessViolation("You cannot delete 'Everyone'!")
-        self.check_for_acl_violation_acl_group()
-        super(AclGroup, self).delete()
-        self.on_host_membership_change()
-
-
-    def add_current_user_if_empty(self):
-        """Adds the current user if the set of users is empty."""
-        if not self.users.count():
-            self.users.add(User.current_user())
-
-
-    def perform_after_save(self, change):
-        """Called after a save.
-
-        @param change: Whether there was a change.
-        """
-        if not change:
-            self.users.add(User.current_user())
-        self.add_current_user_if_empty()
-        self.on_host_membership_change()
-
-
-    def save(self, *args, **kwargs):
-        change = bool(self.id)
-        if change:
-            # Check the original object for an ACL violation
-            AclGroup.objects.get(id=self.id).check_for_acl_violation_acl_group()
-        super(AclGroup, self).save(*args, **kwargs)
-        self.perform_after_save(change)
-
-
-    class Meta:
-        """Metadata for class AclGroup."""
-        db_table = 'afe_acl_groups'
-
-    def __unicode__(self):
-        return unicode(self.name)
-
-
 class ParameterizedJob(dbmodels.Model):
     """
     Auxiliary configuration for a parameterized job.
@@ -1595,7 +1387,6 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
         @param options: An options object.
         @param hosts: The hosts to use.
         """
-        AclGroup.check_for_acl_violation_hosts(hosts)
 
         control_file = options.get('control_file')
 
@@ -1604,8 +1395,6 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
             options['reboot_before'] = user.get_reboot_before_display()
         if options.get('reboot_after') is None:
             options['reboot_after'] = user.get_reboot_after_display()
-
-        drone_set = DroneSet.resolve_name(options.get('drone_set'))
 
         if options.get('timeout_mins') is None and options.get('timeout'):
             options['timeout_mins'] = options['timeout'] * 60
@@ -1627,7 +1416,6 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
             reboot_after=options.get('reboot_after'),
             parse_failed_repair=options.get('parse_failed_repair'),
             created_on=datetime.utcnow(),
-            drone_set=drone_set,
             parent_job=options.get('parent_job_id'),
             test_retry=options.get('test_retry'),
             run_reset=options.get('run_reset'),

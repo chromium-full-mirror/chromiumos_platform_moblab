@@ -44,7 +44,7 @@ def get_group_counts(group_by, header_groups=None, fixed_headers=None,
       The keys for the extra_select_fields are determined by the "AS" alias of
       the field.
     """
-    query = models.TestView.objects.get_query_set_with_joins(filter_data)
+    query = models.TestView.objects.get_queryset_with_joins(filter_data)
     # don't apply presentation yet, since we have extra selects to apply
     query = models.TestView.query_objects(filter_data, initial_query=query,
                                           apply_presentation=False)
@@ -65,7 +65,7 @@ def get_num_groups(group_by, **filter_data):
     """
     Gets the count of unique groups with the given grouping fields.
     """
-    query = models.TestView.objects.get_query_set_with_joins(filter_data)
+    query = models.TestView.objects.get_queryset_with_joins(filter_data)
     query = models.TestView.query_objects(filter_data, initial_query=query)
     return models.TestView.objects.get_num_groups(query, group_by)
 
@@ -95,7 +95,7 @@ def get_latest_tests(group_by, header_groups=[], fixed_headers={},
                       field of the return dictionary.
     """
     # find latest test per group
-    initial_query = models.TestView.objects.get_query_set_with_joins(
+    initial_query = models.TestView.objects.get_queryset_with_joins(
             filter_data)
     query = models.TestView.query_objects(filter_data,
                                           initial_query=initial_query,
@@ -392,31 +392,15 @@ def set_test_attribute(attribute, value, **test_filter_data):
 # saved queries
 
 def get_saved_queries(**filter_data):
-    return rpc_utils.prepare_for_serialization(
-        models.SavedQuery.list_objects(filter_data))
+    return
 
 
 def add_saved_query(name, url_token):
-    name = name.strip()
-    owner = afe_models.User.current_user().login
-    existing_list = list(models.SavedQuery.objects.filter(owner=owner,
-                                                          name=name))
-    if existing_list:
-        query_object = existing_list[0]
-        query_object.url_token = url_token
-        query_object.save()
-        return query_object.id
-
-    return models.SavedQuery.add_object(owner=owner, name=name,
-                                        url_token=url_token).id
+    return
 
 
 def delete_saved_queries(id_list):
-    user = afe_models.User.current_user().login
-    query = models.SavedQuery.objects.filter(id__in=id_list, owner=user)
-    if query.count() == 0:
-        raise model_logic.ValidationError('No such queries found for this user')
-    query.delete()
+    return
 
 
 # other

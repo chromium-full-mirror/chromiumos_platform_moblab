@@ -223,7 +223,7 @@ def _mark_hqe_aborted(hqe):
     models = autotest.load('frontend.afe.models')
     transaction = autotest.deps_load('django.db.transaction')
     Status = models.HostQueueEntry.Status
-    with transaction.commit_on_success():
+    with transaction.atomic():
         if hqe.status in (Status.GATHERING, Status.PARSING):
             return
         if hqe.status in (Status.STARTING, Status.PENDING, Status.RUNNING):
@@ -279,7 +279,7 @@ def _retry_db_errors(func):
             if i == 0:
                 raise
             logger.debug('Got database error %s, retrying', e)
-            django.db.close_connection()
+            django.db.close_old_connections()
             time.sleep(5)
         else:
             break

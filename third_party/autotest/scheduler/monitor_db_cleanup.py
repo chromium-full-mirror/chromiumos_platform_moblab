@@ -177,8 +177,6 @@ class UserCleanup(PeriodicCleanup):
 
     def _check_all_invalid_related_objects(self):
         model_pairs = ((models.Host, 'labels', models.Label, 'host_set'),
-                       (models.AclGroup, 'hosts', models.Host, 'aclgroup_set'),
-                       (models.AclGroup, 'users', models.User, 'aclgroup_set'),
                        (models.Test, 'dependency_labels', models.Label,
                         'test_set'))
         for first_model, first_field, second_model, second_field in model_pairs:

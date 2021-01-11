@@ -101,7 +101,7 @@ def fetchall_as_list_of_dicts(cursor):
 
 
 def raw_http_response(response_data, content_type=None):
-    response = django.http.HttpResponse(response_data, mimetype=content_type)
+    response = django.http.HttpResponse(response_data, content_type=content_type)
     response['Content-length'] = str(len(response.content))
     return response
 
@@ -1102,7 +1102,7 @@ def run_rpc_on_multiple_hostnames(rpc_call, shard_hostnames, **kwargs):
     @param **kwargs: Keyword arguments to pass in the rpcs.
     """
     # Make sure this function is not called on shards but only on primary.
-    assert not server_utils.is_shard()
+
     for shard_hostname in shard_hostnames:
         afe = frontend_wrappers.RetryingAFE(server=shard_hostname,
                                             user=thread_local.get_user())
@@ -1133,44 +1133,6 @@ def moblab_only(func):
                                      func.__name__)
         return func(*args, **kwargs)
     return verify
-
-
-def route_rpc_to_primary(func):
-    """Route RPC to primary AFE.
-
-    When a shard receives an RPC decorated by this, the RPC is just
-    forwarded to the primary.
-    When the primary gets the RPC, the RPC function is executed.
-
-    @param func: An RPC function to decorate
-
-    @returns: A function replacing the RPC func.
-    """
-    argspec = inspect.getargspec(func)
-    if argspec.varargs is not None:
-        raise Exception('RPC function must not have *args.')
-
-    @wraps(func)
-    def replacement(*args, **kwargs):
-        """We need special handling when decorating an RPC that can be called
-        directly using positional arguments.
-
-        One example is rpc_interface.create_job().
-        rpc_interface.create_job_page_handler() calls the function using both
-        positional and keyword arguments.  Since frontend.RpcClient.run()
-        takes only keyword arguments for an RPC, positional arguments of the
-        RPC function need to be transformed into keyword arguments.
-        """
-        kwargs = _convert_to_kwargs_only(func, args, kwargs)
-        if server_utils.is_shard():
-            afe = frontend_wrappers.RetryingAFE(
-                    server=server_utils.get_global_afe_hostname(),
-                    user=thread_local.get_user())
-            return afe.run(func.func_name, **kwargs)
-        return func(**kwargs)
-
-    return replacement
-
 
 def _convert_to_kwargs_only(func, args, kwargs):
     """Convert a function call's arguments to a kwargs dict.

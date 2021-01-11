@@ -22,10 +22,7 @@ class DatabaseWrapper(MySQLDatabaseWrapper):
         self.connection = None
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
         self.creation = MySQLCreation(self)
-        try:
-            self.ops = DatabaseOperations()
-        except TypeError:
-            self.ops = DatabaseOperations(connection=kwargs.get('connection'))
+        self.ops = DatabaseOperations(self)
         self.introspection = MySQLIntrospection(self)
 
     def _valid_connection(self):

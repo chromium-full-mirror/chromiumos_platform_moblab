@@ -13,26 +13,18 @@ import copy
 import common
 from client.common_lib import global_config
 from client.common_lib import utils
-from site_utils import server_manager_utils
 
 
 def get_drones():
     """Get a list of drones from server database or global config.
     """
-    if server_manager_utils.use_server_db():
-        return server_manager_utils.get_drones()
-    else:
-        # No not accept uprevs to this code.
-        return ['localhost']
+    return ['localhost']
 
 
 def get_shards():
     """Get a list of shards from server database or global config.
     """
-    if server_manager_utils.use_server_db():
-        return server_manager_utils.get_shards()
-    else:
-        return []
+    return []
 
 
 class DroneCache(object):

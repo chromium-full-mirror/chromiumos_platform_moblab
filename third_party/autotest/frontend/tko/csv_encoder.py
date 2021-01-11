@@ -15,7 +15,7 @@ class CsvEncoder(object):
 
 
     def _build_response(self):
-        response = django.http.HttpResponse(mimetype='text/csv')
+        response = django.http.HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = (
             'attachment; filename=tko_query.csv')
         writer = csv.writer(response)

@@ -26,8 +26,6 @@ from server import site_utils
 from server.cros.dynamic_suite import constants
 from tko import db as tko_db, utils as tko_utils
 from tko import models, parser_lib
-from tko.perf_upload import perf_uploader
-from utils.side_effects import config_loader
 
 
 metrics = utils.metrics_mock
@@ -427,14 +425,6 @@ def parse_one(db, pid_file_manager, jobname, path, parse_options):
                                 % (jobname, job.user))
             mailfailure(jobname, job, message)
 
-        # Upload perf values to the perf dashboard, if applicable.
-        if parse_options.disable_perf_upload:
-            tko_utils.dprint("Skipping results upload to chrome perf as it is "
-                "disabled by config")
-        else:
-            for test in job.tests:
-                perf_uploader.upload_test(job, test, jobname)
-
         _write_job_to_db(db, jobname, job)
 
         # Verify the job data is written to the database.
@@ -721,8 +711,6 @@ def _main_with_options(options, args):
     results_dir = os.path.abspath(args[0])
     assert os.path.exists(results_dir)
 
-    _update_db_config_from_json(options, results_dir)
-
     parse_options = _ParseOptions(options.reparse, options.mailit,
                                   options.dry_run, options.suite_report,
                                   options.datastore_creds,
@@ -776,40 +764,6 @@ def _main_with_options(options, args):
         raise
     else:
         pid_file_manager.close_file(0)
-
-
-def _update_db_config_from_json(options, test_results_dir):
-    """Uptade DB config options using a side_effects_config.json file.
-
-    @param options: parsed args to be updated.
-    @param test_results_dir: path to test results dir.
-
-    @raises: json_format.ParseError if the file is not a valid JSON.
-             ValueError if the JSON config is incomplete.
-             OSError if some files from the JSON config are missing.
-    """
-    # results_dir passed to tko/parse is a subdir of the root results dir
-    config_dir = os.path.join(test_results_dir, os.pardir)
-    tko_utils.dprint("Attempting to read side_effects.Config from %s" %
-        config_dir)
-    config = config_loader.load(config_dir)
-
-    if config:
-        tko_utils.dprint("Validating side_effects.Config.tko")
-        config_loader.validate_tko(config)
-
-        tko_utils.dprint("Using the following DB config params from "
-            "side_effects.Config.tko:\n%s" % config.tko)
-        options.db_host = config.tko.proxy_socket
-        options.db_user = config.tko.mysql_user
-
-        with open(config.tko.mysql_password_file, 'r') as f:
-            options.db_pass = f.read().rstrip('\n')
-
-        options.disable_perf_upload = not config.chrome_perf.enabled
-    else:
-        tko_utils.dprint("No side_effects.Config found in %s - "
-            "defaulting to DB config values from shadow config" % config_dir)
 
 
 if __name__ == "__main__":
