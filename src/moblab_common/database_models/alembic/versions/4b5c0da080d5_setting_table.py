@@ -1,7 +1,7 @@
 """setting table
 
 Revision ID: 4b5c0da080d5
-Revises: e5e47d7777bd
+Revises:
 Create Date: 2020-11-06 14:08:18.869247
 
 """

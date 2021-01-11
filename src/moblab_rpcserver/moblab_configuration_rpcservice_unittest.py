@@ -7,6 +7,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
+from moblab_common.database_models.moblab_settings import MoblabSettings
 import settings_store
 import moblab_common
 
@@ -16,6 +17,8 @@ from moblab_common.proto.moblab_configuration_rpc_pb2 import (
     PauseHostSchedulerResponse,
     PauseRequestor,
 )
+from moblab_common.proto.moblab_settings_pb2 import MoblabSettingKey
+
 
 from moblab_configuration_rpcservice import ConfigurationRpcService
 
@@ -32,8 +35,8 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
     @patch.object(
         moblab_common.afe_connector.AFEConnector, "get_connected_devices"
     )
-    @patch.object(settings_store.SettingsStore, "get_settings")
-    @patch.object(settings_store.SettingsStore, "set_setting")
+    @patch.object(settings_store.MoblabSettingsStore, "get_settings")
+    @patch.object(settings_store.MoblabSettingsStore, "set_setting")
     def test_pause(
         self,
         mock_set_setting,
@@ -42,10 +45,13 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
         mock_modify_hosts_lock_state,
     ):
         mock_get_settings.return_value = [
-            '{ "key": "MOBLAB_SETTING_LOW_DISK_SPACE",'
-            '"value": { "boolValue": false } }'
+            MoblabSettings(
+                key=MoblabSettingKey.MOBLAB_SETTING_LOW_DISK_SPACE,
+                value='{ "key": "MOBLAB_SETTING_LOW_DISK_SPACE",'
+                '"value": { "boolValue": false } }',
+            )
         ]
-        mock_modify_hosts_lock_state.return_value = True
+        mock_modify_hosts_lock_state.return_value = False
         mock_get_connected_duts.return_value = [
             {"hostname": "0.0.0.1"},
             {"hostname": "0.0.0.2"},
@@ -68,8 +74,8 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
     @patch.object(
         moblab_common.afe_connector.AFEConnector, "get_connected_devices"
     )
-    @patch.object(settings_store.SettingsStore, "get_settings")
-    @patch.object(settings_store.SettingsStore, "set_setting")
+    @patch.object(settings_store.MoblabSettingsStore, "get_settings")
+    @patch.object(settings_store.MoblabSettingsStore, "set_setting")
     def test_resume(
         self,
         mock_set_setting,
@@ -78,10 +84,13 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
         mock_modify_hosts_lock_state,
     ):
         mock_get_settings.return_value = [
-            '{ "key": "MOBLAB_SETTING_PAUSED_BY_USER",'
-            '"value": { "boolValue": true } }'
+            MoblabSettings(
+                key=MoblabSettingKey.MOBLAB_SETTING_LOW_DISK_SPACE,
+                value='{ "key": "MOBLAB_SETTING_PAUSED_BY_USER",'
+                '"value": { "boolValue": true } }',
+            )
         ]
-        mock_modify_hosts_lock_state.return_value = True
+        mock_modify_hosts_lock_state.return_value = False
         mock_get_connected_duts.return_value = [
             {"hostname": "0.0.0.1"},
             {"hostname": "0.0.0.2"},
@@ -98,27 +107,6 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
             '{\n  "key": "MOBLAB_SETTING_PAUSED_BY_USER",'
             '\n  "value": {\n    "boolValue": false\n  }\n}',
         )
-
-    # @mock.patch.object(settings_store.SettingsStore, "set_setting")
-    # def test_resume(self, mock_set_setting):
-    #    mock_get_settings.return_value = [
-    #        '{ "key": "MOBLAB_SETTING_LOW_DISK_SPACE", "value": { "doubleValue": 123.0 } }'
-    #    ]
-    #    result = self.configurationRpcService.resume_host_scheduler(
-    #        request=GetSettingsRequest(keys=[MOBLAB_SETTING_LOW_DISK_SPACE]),
-    #        context={},
-    #    )
-    #    self.assertEqual(
-    #        result,
-    #        GetSettingsResponse(
-    #            moblabSettings=[
-    #                MoblabSetting(
-    #                    key=MOBLAB_SETTING_LOW_DISK_SPACE,
-    #                    value=Value(double_value=123.0),
-    #                )
-    #            ]
-    #        ),
-    #    )
 
 
 if __name__ == "__main__":

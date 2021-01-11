@@ -14,10 +14,14 @@ message MoblabSetting {
 
 // List of all Moblab settings keys
 enum MoblabSettingKey {
-  // Moblab is running out of free disk space
+  // Moblab is running out of free disk space flag (bool value)
   MOBLAB_SETTING_LOW_DISK_SPACE = 0;
-  // User requested pause of tests scheduling
+  // User requested pause of tests scheduling flag (bool value)
   MOBLAB_SETTING_PAUSED_BY_USER = 1;
+  // System default of Stable CrOS version setting (string value)
+  STABLE_CROS_VERSION_DEFAULT = 2;
+  // User override of Stable CrOS version setting (string value)
+  STABLE_CROS_VERSION_OVERRIDE = 3;
 }
 
 // Structured value type to unify serialization

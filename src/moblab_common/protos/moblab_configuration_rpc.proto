@@ -6,7 +6,7 @@ import "google/protobuf/empty.proto";
 
 // Service exposes Moblab static and runtime configuration
 service MoblabConfigurationService {
-  // request to pause host scheduling 
+  // request to pause host scheduling
   rpc pause_host_scheduler(PauseHostSchedulerRequest)
     returns (PauseHostSchedulerResponse) {}
   // request to unpause host scheduling
@@ -15,6 +15,13 @@ service MoblabConfigurationService {
   // returns the list of requestors currently requesting to pause
   rpc get_host_scheduler_pause_status(google.protobuf.Empty)
     returns (GetHostSchedulerPauseStatusResponse) {}
+  // returns the known good CrOS version resolved
+  // from system default and user override
+  rpc get_stable_build_version(GetStableBuildVersionRequest)
+    returns (GetStableBuildVersionResponse) {}
+  // sets a user override for known good CrOS version
+  rpc set_stable_build_version(SetStableBuildVersionRequest)
+    returns (SetStableBuildVersionResponse) {}
 }
 
 // NEXT_TAG = 2
@@ -50,4 +57,29 @@ enum PauseRequestor {
   PAUSE_REQUESTOR_LOW_DISK_SPACE = 0;
   // User requested pause of tests scheduling
   PAUSE_REQUESTOR_PAUSED_BY_USER = 1;
+}
+
+// NEXT_TAG = 1
+message GetStableBuildVersionRequest {
+}
+
+// NEXT_TAG = 2
+message GetStableBuildVersionResponse {
+  StableVersion stable_version = 1;
+}
+
+// NEXT_TAG = 2
+message SetStableBuildVersionRequest {
+  StableVersion stable_version = 1;
+}
+
+// NEXT_TAG = 2
+message SetStableBuildVersionResponse {
+  StableVersion stable_version = 1;
+}
+
+// NEXT_TAG = 3
+message StableVersion {
+  string default_version = 1;
+  string override_version = 2;
 }
