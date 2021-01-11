@@ -18,6 +18,7 @@ chmod +x $f
 
 # Set up all the git hooks
 hooks4git --init
+rm .hooks4git-*
 
 # Set up google cloud access
 gcloud auth login
