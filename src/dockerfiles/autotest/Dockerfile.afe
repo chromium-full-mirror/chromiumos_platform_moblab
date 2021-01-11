@@ -100,6 +100,7 @@ COPY ssh_config /home/moblab/.ssh/config
 RUN touch /home/moblab/.boto
 RUN sudo usermod -aG docker $USER
 
+ENV PYTHONPATH=/moblab/third_party/autotest:/moblab/third_party/autotest/site-packages
 
 EXPOSE 8888
 CMD ["/afe_startup.sh"]

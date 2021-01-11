@@ -96,3 +96,5 @@ RUN mkdir -p /moblab/third_party/autotest/leases
 RUN mkdir -p /moblab/third_party/autotest/containers
 
 RUN chown -R moblab:moblab /moblab/third_party/autotest
+
+ENV PYTHONPATH=/moblab/third_party/autotest

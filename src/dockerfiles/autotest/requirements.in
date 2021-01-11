@@ -1,5 +1,5 @@
 crcmod
-django==1.5.12
+django==1.11.29
 dnspython
 docker
 faulthandler
@@ -46,3 +46,4 @@ pytest-catchlog
 pytest-cov
 scandir
 subprocess32
+six

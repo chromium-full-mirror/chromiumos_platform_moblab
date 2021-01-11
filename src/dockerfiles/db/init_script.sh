@@ -16,8 +16,8 @@ while ! mysqladmin status -h db -uroot -p${passwd} --silent; do
 done
 
 # In the case we have updated to a new version of the db - upgrade
-mysqlcheck -h db --no-defaults --fix-db-names --fix-table-names -uroot \
+mysqlcheck -h db --fix-db-names --fix-table-names -uroot \
      "${PASSWD_STRING}" --all-databases -v
-mysqlcheck -h db --no-defaults --check-upgrade --auto-repair -uroot \
+mysqlcheck -h db --check-upgrade --auto-repair -uroot \
      "${PASSWD_STRING}" --all-databases -v
 
