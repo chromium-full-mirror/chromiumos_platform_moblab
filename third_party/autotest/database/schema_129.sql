@@ -697,22 +697,11 @@ CREATE TABLE `afe_special_tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+-- DEPRECATED IN MOBLAB
 --
 -- Table structure for table `afe_stable_versions`
 --
-
 DROP TABLE IF EXISTS `afe_stable_versions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `afe_stable_versions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `board` varchar(255) NOT NULL,
-  `version` varchar(255) NOT NULL,
-  `archive_url` text,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `board_UNIQUE` (`board`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `afe_static_host_attributes`

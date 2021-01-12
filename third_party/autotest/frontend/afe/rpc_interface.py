@@ -29,7 +29,7 @@ get_jobs(owner='showard', status='Queued')
 See doctests/001_rpc_test.txt for (lots) more examples.
 """
 
-__author__ = 'showard@google.com (Steve Howard)'
+__author__ = "showard@google.com (Steve Howard)"
 
 import ast
 import collections
@@ -76,24 +76,27 @@ _CONFIG = global_config.global_config
 
 # Definition of LabHealthIndicator
 LabHealthIndicator = collections.namedtuple(
-        'LabHealthIndicator',
-        [
-                'if_lab_close',
-                'available_duts',
-                'devserver_health',
-                'upcoming_builds',
-        ]
+    "LabHealthIndicator",
+    [
+        "if_lab_close",
+        "available_duts",
+        "devserver_health",
+        "upcoming_builds",
+    ],
 )
 
 RESPECT_STATIC_LABELS = global_config.global_config.get_config_value(
-        'SKYLAB', 'respect_static_labels', type=bool, default=False)
+    "SKYLAB", "respect_static_labels", type=bool, default=False
+)
 
 RESPECT_STATIC_ATTRIBUTES = global_config.global_config.get_config_value(
-        'SKYLAB', 'respect_static_attributes', type=bool, default=False)
+    "SKYLAB", "respect_static_attributes", type=bool, default=False
+)
 
 # Relevant CrosDynamicSuiteExceptions are defined in client/common_lib/error.py.
 
 # labels
+
 
 def modify_label(id, **data):
     """Modify a label.
@@ -104,16 +107,18 @@ def modify_label(id, **data):
     label_model = models.Label.smart_get(id)
     if label_model.is_replaced_by_static():
         raise error.UnmodifiableLabelException(
-                'Failed to delete label "%s" because it is a static label. '
-                'Use go/chromeos-skylab-inventory-tools to modify this '
-                'label.' % label_model.name)
+            'Failed to delete label "%s" because it is a static label. '
+            "Use go/chromeos-skylab-inventory-tools to modify this "
+            "label." % label_model.name
+        )
 
     label_model.update_object(data)
 
     # primary forwards the RPC to shards
     if not utils.is_shard():
-        rpc_utils.fanout_rpc(label_model.host_set.all(), 'modify_label', False,
-                             id=id, **data)
+        rpc_utils.fanout_rpc(
+            label_model.host_set.all(), "modify_label", False, id=id, **data
+        )
 
 
 def delete_label(id):
@@ -124,9 +129,10 @@ def delete_label(id):
     label_model = models.Label.smart_get(id)
     if label_model.is_replaced_by_static():
         raise error.UnmodifiableLabelException(
-                'Failed to delete label "%s" because it is a static label. '
-                'Use go/chromeos-skylab-inventory-tools to modify this '
-                'label.' % label_model.name)
+            'Failed to delete label "%s" because it is a static label. '
+            "Use go/chromeos-skylab-inventory-tools to modify this "
+            "label." % label_model.name
+        )
 
     # Hosts that have the label to be deleted. Save this info before
     # the label is deleted to use it later.
@@ -137,7 +143,7 @@ def delete_label(id):
 
     # primary forwards the RPC to shards
     if not utils.is_shard():
-        rpc_utils.fanout_rpc(hosts, 'delete_label', False, id=id)
+        rpc_utils.fanout_rpc(hosts, "delete_label", False, id=id)
 
 
 def add_label(name, ignore_exception_if_exists=False, **kwargs):
@@ -186,7 +192,7 @@ def add_label_to_hosts(id, hosts):
     if label.platform:
         models.Host.check_no_platform(host_objs)
     # Ensure a host has no more than one board label with it.
-    if label.name.startswith('board:'):
+    if label.name.startswith("board:"):
         models.Host.check_board_labels_allowed(host_objs, [label.name])
     label.host_set.add(*host_objs)
 
@@ -216,9 +222,10 @@ def _create_label_everywhere(id, hosts):
         if isinstance(id, basestring):
             label = models.Label.smart_get(add_label(id))
         else:
-            raise ValueError('Label id (%s) does not exist. Please specify '
-                             'the argument, id, as a string (label name).'
-                             % id)
+            raise ValueError(
+                "Label id (%s) does not exist. Please specify "
+                "the argument, id, as a string (label name)." % id
+            )
 
     # Make sure the label exists on the shard with the same id
     # as it is on the primary.
@@ -233,10 +240,14 @@ def _create_label_everywhere(id, hosts):
     # We ignore exception in such a case.
     host_objs = models.Host.smart_get_bulk(hosts)
     rpc_utils.fanout_rpc(
-            host_objs, 'add_label', include_hostnames=False,
-            name=label.name, ignore_exception_if_exists=True,
-            id=label.id, platform=label.platform)
-
+        host_objs,
+        "add_label",
+        include_hostnames=False,
+        name=label.name,
+        ignore_exception_if_exists=True,
+        id=label.id,
+        platform=label.platform,
+    )
 
 
 def label_add_hosts(id, hosts):
@@ -260,7 +271,7 @@ def label_add_hosts(id, hosts):
 
     # Add it to the shards.
     host_objs = models.Host.smart_get_bulk(hosts)
-    rpc_utils.fanout_rpc(host_objs, 'add_label_to_hosts', id=id)
+    rpc_utils.fanout_rpc(host_objs, "add_label_to_hosts", id=id)
 
 
 def remove_label_from_hosts(id, hosts):
@@ -273,12 +284,12 @@ def remove_label_from_hosts(id, hosts):
     label = models.Label.smart_get(id)
     if label.is_replaced_by_static():
         raise error.UnmodifiableLabelException(
-                'Failed to remove label "%s" for hosts "%r" because it is a '
-                'static label. Use go/chromeos-skylab-inventory-tools to '
-                'modify this label.' % (label.name, hosts))
+            'Failed to remove label "%s" for hosts "%r" because it is a '
+            "static label. Use go/chromeos-skylab-inventory-tools to "
+            "modify this label." % (label.name, hosts)
+        )
 
     label.host_set.remove(*host_objs)
-
 
 
 def label_remove_hosts(id, hosts):
@@ -292,7 +303,7 @@ def label_remove_hosts(id, hosts):
     host_objs = models.Host.smart_get_bulk(hosts)
     remove_label_from_hosts(id, hosts)
 
-    rpc_utils.fanout_rpc(host_objs, 'remove_label_from_hosts', id=id)
+    rpc_utils.fanout_rpc(host_objs, "remove_label_from_hosts", id=id)
 
 
 def get_labels(exclude_filters=(), **filter_data):
@@ -320,13 +331,13 @@ def get_labels(exclude_filters=(), **filter_data):
     replaced_ids = {r.label_id for r in replaced}
     replaced_label_names = {l.name for l in labels if l.id in replaced_ids}
 
-    return_lists  = []
+    return_lists = []
     for non_static_label in non_static_lists:
-        if non_static_label.get('id') not in replaced_ids:
+        if non_static_label.get("id") not in replaced_ids:
             return_lists.append(non_static_label)
 
     for static_label in static_lists:
-        if static_label.get('name') in replaced_label_names:
+        if static_label.get("name") in replaced_label_names:
             return_lists.append(static_label)
 
     return return_lists
@@ -334,15 +345,22 @@ def get_labels(exclude_filters=(), **filter_data):
 
 # hosts
 
-def add_host(hostname, status=None, locked=None, lock_reason='', protection=None):
+
+def add_host(
+    hostname, status=None, locked=None, lock_reason="", protection=None
+):
     if locked and not lock_reason:
         raise model_logic.ValidationError(
-            {'locked': 'Please provide a reason for locking when adding host.'})
+            {"locked": "Please provide a reason for locking when adding host."}
+        )
 
-    return models.Host.add_object(hostname=hostname, status=status,
-                                  locked=locked, lock_reason=lock_reason,
-                                  protection=protection).id
-
+    return models.Host.add_object(
+        hostname=hostname,
+        status=status,
+        locked=locked,
+        lock_reason=lock_reason,
+        protection=protection,
+    ).id
 
 
 def modify_host(id, **kwargs):
@@ -363,21 +381,29 @@ def modify_host(id, **kwargs):
     try:
         rpc_utils.check_modify_host_locking(host, kwargs)
     except model_logic.ValidationError as e:
-        if not kwargs.get('force_modify_locking', False):
+        if not kwargs.get("force_modify_locking", False):
             raise
-        logging.exception('The following exception will be ignored and lock '
-                          'modification will be enforced. %s', e)
+        logging.exception(
+            "The following exception will be ignored and lock "
+            "modification will be enforced. %s",
+            e,
+        )
 
     # This is required to make `lock_time` for a host be exactly same
     # between the primary and a shard.
-    if kwargs.get('locked', None) and 'lock_time' not in kwargs:
-        kwargs['lock_time'] = datetime.datetime.utcnow()
+    if kwargs.get("locked", None) and "lock_time" not in kwargs:
+        kwargs["lock_time"] = datetime.datetime.utcnow()
 
     # force_modifying_locking is not an internal field in database, remove.
     shard_kwargs = dict(kwargs)
-    shard_kwargs.pop('force_modify_locking', None)
-    rpc_utils.fanout_rpc([host], 'modify_host_local',
-                         include_hostnames=False, id=id, **shard_kwargs)
+    shard_kwargs.pop("force_modify_locking", None)
+    rpc_utils.fanout_rpc(
+        [host],
+        "modify_host_local",
+        include_hostnames=False,
+        id=id,
+        **shard_kwargs
+    )
 
     # Update the local DB **after** RPC fanout is complete.
     # This guarantees that the primary state is only updated if the shards were
@@ -395,7 +421,6 @@ def modify_host_local(id, **kwargs):
     @param kwargs: key=value pairs of values to set on the host.
     """
     models.Host.smart_get(id).update_object(kwargs)
-
 
 
 def modify_hosts(host_filter_data, update_data):
@@ -433,10 +458,13 @@ def modify_hosts(host_filter_data, update_data):
         try:
             rpc_utils.check_modify_host_locking(host, update_data)
         except model_logic.ValidationError as e:
-            if not update_data.get('force_modify_locking', False):
+            if not update_data.get("force_modify_locking", False):
                 raise
-            logging.exception('The following exception will be ignored and '
-                              'lock modification will be enforced. %s', e)
+            logging.exception(
+                "The following exception will be ignored and "
+                "lock modification will be enforced. %s",
+                e,
+            )
 
         if host.shard:
             affected_shard_hostnames.add(host.shard.hostname)
@@ -444,17 +472,19 @@ def modify_hosts(host_filter_data, update_data):
 
     # This is required to make `lock_time` for a host be exactly same
     # between the primary and a shard.
-    if update_data.get('locked', None) and 'lock_time' not in update_data:
-        update_data['lock_time'] = datetime.datetime.utcnow()
+    if update_data.get("locked", None) and "lock_time" not in update_data:
+        update_data["lock_time"] = datetime.datetime.utcnow()
     for host in hosts:
         host.update_object(update_data)
 
-    update_data.pop('force_modify_locking', None)
+    update_data.pop("force_modify_locking", None)
     # Caution: Changing the filter from the original here. See docstring.
     rpc_utils.run_rpc_on_multiple_hostnames(
-            'modify_hosts_local', affected_shard_hostnames,
-            host_filter_data={'id__in': affected_host_ids},
-            update_data=update_data)
+        "modify_hosts_local",
+        affected_shard_hostnames,
+        host_filter_data={"id__in": affected_host_ids},
+        update_data=update_data,
+    )
 
 
 def modify_hosts_local(host_filter_data, update_data):
@@ -478,11 +508,11 @@ def add_labels_to_host(id, labels):
         models.Host.smart_get(id).labels.add(*label_objs)
     else:
         static_labels, non_static_labels = models.Host.classify_label_objects(
-            label_objs)
+            label_objs
+        )
         host = models.Host.smart_get(id)
         host.static_labels.add(*static_labels)
         host.labels.add(*non_static_labels)
-
 
 
 def host_add_labels(id, labels):
@@ -502,18 +532,23 @@ def host_add_labels(id, labels):
     platforms = [label.name for label in label_objs if label.platform]
     if len(platforms) > 1:
         raise model_logic.ValidationError(
-            {'labels': ('Adding more than one platform: %s' %
-                        ', '.join(platforms))})
+            {
+                "labels": (
+                    "Adding more than one platform: %s" % ", ".join(platforms)
+                )
+            }
+        )
 
     host_obj = models.Host.smart_get(id)
     if platforms:
         models.Host.check_no_platform([host_obj])
-    if any(label_name.startswith('board:') for label_name in labels):
+    if any(label_name.startswith("board:") for label_name in labels):
         models.Host.check_board_labels_allowed([host_obj], labels)
     add_labels_to_host(id, labels)
 
-    rpc_utils.fanout_rpc([host_obj], 'add_labels_to_host', False,
-                         id=id, labels=labels)
+    rpc_utils.fanout_rpc(
+        [host_obj], "add_labels_to_host", False, id=id, labels=labels
+    )
 
 
 def remove_labels_from_host(id, labels):
@@ -527,15 +562,19 @@ def remove_labels_from_host(id, labels):
         models.Host.smart_get(id).labels.remove(*label_objs)
     else:
         static_labels, non_static_labels = models.Host.classify_label_objects(
-                label_objs)
+            label_objs
+        )
         host = models.Host.smart_get(id)
         host.labels.remove(*non_static_labels)
         if static_labels:
-            logging.info('Cannot remove labels "%r" for host "%r" due to they '
-                         'are static labels. Use '
-                         'go/chromeos-skylab-inventory-tools to modify these '
-                         'labels.', static_labels, id)
-
+            logging.info(
+                'Cannot remove labels "%r" for host "%r" due to they '
+                "are static labels. Use "
+                "go/chromeos-skylab-inventory-tools to modify these "
+                "labels.",
+                static_labels,
+                id,
+            )
 
 
 def host_remove_labels(id, labels):
@@ -547,8 +586,9 @@ def host_remove_labels(id, labels):
     remove_labels_from_host(id, labels)
 
     host_obj = models.Host.smart_get(id)
-    rpc_utils.fanout_rpc([host_obj], 'remove_labels_from_host', False,
-                         id=id, labels=labels)
+    rpc_utils.fanout_rpc(
+        [host_obj], "remove_labels_from_host", False, id=id, labels=labels
+    )
 
 
 def get_host_attribute(attribute, **host_filter_data):
@@ -559,8 +599,9 @@ def get_host_attribute(attribute, **host_filter_data):
     """
     hosts = rpc_utils.get_host_query((), False, True, host_filter_data)
     hosts = list(hosts)
-    models.Host.objects.populate_relationships(hosts, models.HostAttribute,
-                                               'attribute_list')
+    models.Host.objects.populate_relationships(
+        hosts, models.HostAttribute, "attribute_list"
+    )
     host_attr_dicts = []
     host_objs = []
     for host_obj in hosts:
@@ -572,12 +613,12 @@ def get_host_attribute(attribute, **host_filter_data):
     if RESPECT_STATIC_ATTRIBUTES:
         for host_attr, host_obj in zip(host_attr_dicts, host_objs):
             static_attrs = models.StaticHostAttribute.query_objects(
-                    {'host_id': host_obj.id, 'attribute': attribute})
+                {"host_id": host_obj.id, "attribute": attribute}
+            )
             if len(static_attrs) > 0:
-                host_attr['value'] = static_attrs[0].value
+                host_attr["value"] = static_attrs[0].value
 
     return rpc_utils.prepare_for_serialization(host_attr_dicts)
-
 
 
 def set_host_attribute(attribute, value, **host_filter_data):
@@ -606,15 +647,21 @@ def set_host_attribute_impl(attribute, value, **host_filter_data):
     @param host_filter_data: filter data to apply to Hosts to choose hosts to
                              act upon
     """
-    assert host_filter_data # disallow accidental actions on all hosts
+    assert host_filter_data  # disallow accidental actions on all hosts
     hosts = models.Host.query_objects(host_filter_data)
     for host in hosts:
         host.set_or_delete_attribute(attribute, value)
 
     # primary forwards this RPC to shards.
     if not utils.is_shard():
-        rpc_utils.fanout_rpc(hosts, 'set_host_attribute_impl', False,
-                attribute=attribute, value=value, **host_filter_data)
+        rpc_utils.fanout_rpc(
+            hosts,
+            "set_host_attribute_impl",
+            False,
+            attribute=attribute,
+            value=value,
+            **host_filter_data
+        )
 
 
 @rpc_utils.forward_single_host_rpc_to_shard
@@ -622,8 +669,13 @@ def delete_host(id):
     models.Host.smart_get(id).delete()
 
 
-def get_hosts(multiple_labels=(), exclude_only_if_needed_labels=False,
-              valid_only=True, include_current_job=False, **filter_data):
+def get_hosts(
+    multiple_labels=(),
+    exclude_only_if_needed_labels=False,
+    valid_only=True,
+    include_current_job=False,
+    **filter_data
+):
     """Get a list of dictionaries which contains the information of hosts.
 
     @param multiple_labels: match hosts in all of the labels given.  Should
@@ -633,24 +685,28 @@ def get_hosts(multiple_labels=(), exclude_only_if_needed_labels=False,
             job and special task.
     """
     if exclude_only_if_needed_labels:
-        raise error.RPCException('exclude_only_if_needed_labels is deprecated')
+        raise error.RPCException("exclude_only_if_needed_labels is deprecated")
 
-    hosts = rpc_utils.get_host_query(multiple_labels,
-                                     exclude_only_if_needed_labels,
-                                     valid_only, filter_data)
+    hosts = rpc_utils.get_host_query(
+        multiple_labels, exclude_only_if_needed_labels, valid_only, filter_data
+    )
     hosts = list(hosts)
-    models.Host.objects.populate_relationships(hosts, models.Label,
-                                               'label_list')
-    models.Host.objects.populate_relationships(hosts, models.HostAttribute,
-                                               'attribute_list')
-    models.Host.objects.populate_relationships(hosts,
-                                               models.StaticHostAttribute,
-                                               'staticattribute_list')
+    models.Host.objects.populate_relationships(
+        hosts, models.Label, "label_list"
+    )
+    models.Host.objects.populate_relationships(
+        hosts, models.HostAttribute, "attribute_list"
+    )
+    models.Host.objects.populate_relationships(
+        hosts, models.StaticHostAttribute, "staticattribute_list"
+    )
     host_dicts = []
     for host_obj in hosts:
         host_dict = host_obj.get_object_dict()
-        host_dict['attributes'] = dict((attribute.attribute, attribute.value)
-                                       for attribute in host_obj.attribute_list)
+        host_dict["attributes"] = dict(
+            (attribute.attribute, attribute.value)
+            for attribute in host_obj.attribute_list
+        )
         if RESPECT_STATIC_LABELS:
             label_list = []
             # Only keep static labels which has a corresponding entries in
@@ -662,60 +718,70 @@ def get_hosts(multiple_labels=(), exclude_only_if_needed_labels=False,
                 else:
                     label_list.append(label)
 
-            host_dict['labels'] = [label.name for label in label_list]
-            host_dict['platform'] = rpc_utils.find_platform(
-                    host_obj.hostname, label_list)
+            host_dict["labels"] = [label.name for label in label_list]
+            host_dict["platform"] = rpc_utils.find_platform(
+                host_obj.hostname, label_list
+            )
         else:
-            host_dict['labels'] = [label.name for label in host_obj.label_list]
-            host_dict['platform'] = rpc_utils.find_platform(
-                    host_obj.hostname, host_obj.label_list)
+            host_dict["labels"] = [label.name for label in host_obj.label_list]
+            host_dict["platform"] = rpc_utils.find_platform(
+                host_obj.hostname, host_obj.label_list
+            )
 
         if RESPECT_STATIC_ATTRIBUTES:
             # Overwrite attribute with values in afe_static_host_attributes.
             for attr in host_obj.staticattribute_list:
-                if attr.attribute in host_dict['attributes']:
-                    host_dict['attributes'][attr.attribute] = attr.value
+                if attr.attribute in host_dict["attributes"]:
+                    host_dict["attributes"][attr.attribute] = attr.value
 
         if include_current_job:
-            host_dict['current_job'] = None
-            host_dict['current_special_task'] = None
+            host_dict["current_job"] = None
+            host_dict["current_special_task"] = None
             entries = models.HostQueueEntry.objects.filter(
-                    host_id=host_dict['id'], active=True, complete=False)
+                host_id=host_dict["id"], active=True, complete=False
+            )
             if entries:
-                host_dict['current_job'] = (
-                        entries[0].get_object_dict()['job'])
+                host_dict["current_job"] = entries[0].get_object_dict()["job"]
             tasks = models.SpecialTask.objects.filter(
-                    host_id=host_dict['id'], is_active=True, is_complete=False)
+                host_id=host_dict["id"], is_active=True, is_complete=False
+            )
             if tasks:
-                host_dict['current_special_task'] = (
-                        '%d-%s' % (tasks[0].get_object_dict()['id'],
-                                   tasks[0].get_object_dict()['task'].lower()))
+                host_dict["current_special_task"] = "%d-%s" % (
+                    tasks[0].get_object_dict()["id"],
+                    tasks[0].get_object_dict()["task"].lower(),
+                )
         host_dicts.append(host_dict)
 
     return rpc_utils.prepare_for_serialization(host_dicts)
 
 
-def get_num_hosts(multiple_labels=(), exclude_only_if_needed_labels=False,
-                  valid_only=True, **filter_data):
+def get_num_hosts(
+    multiple_labels=(),
+    exclude_only_if_needed_labels=False,
+    valid_only=True,
+    **filter_data
+):
     """
     Same parameters as get_hosts().
 
     @returns The number of matching hosts.
     """
     if exclude_only_if_needed_labels:
-        raise error.RPCException('exclude_only_if_needed_labels is deprecated')
+        raise error.RPCException("exclude_only_if_needed_labels is deprecated")
 
-    hosts = rpc_utils.get_host_query(multiple_labels,
-                                     exclude_only_if_needed_labels,
-                                     valid_only, filter_data)
+    hosts = rpc_utils.get_host_query(
+        multiple_labels, exclude_only_if_needed_labels, valid_only, filter_data
+    )
     return len(hosts)
 
 
 # tests
 
+
 def get_tests(**filter_data):
     return rpc_utils.prepare_for_serialization(
-        models.Test.list_objects(filter_data))
+        models.Test.list_objects(filter_data)
+    )
 
 
 def get_tests_status_counts_by_job_name_label(job_name_prefix, label_name):
@@ -729,29 +795,33 @@ def get_tests_status_counts_by_job_name_label(job_name_prefix, label_name):
 
     @returns A summary of the counts of all the passed and failed tests.
     """
-    job_ids = list(models.Job.objects.filter(
+    job_ids = list(
+        models.Job.objects.filter(
             name__istartswith=job_name_prefix,
-            dependency_labels__name=label_name).values_list(
-                'pk', flat=True))
-    summary = {'passed': 0, 'failed': 0}
+            dependency_labels__name=label_name,
+        ).values_list("pk", flat=True)
+    )
+    summary = {"passed": 0, "failed": 0}
     if not job_ids:
         return summary
 
-    counts = (tko_models.TestView.objects.filter(
-            afe_job_id__in=job_ids).exclude(
-                test_name='SERVER_JOB').exclude(
-                    test_name__startswith='CLIENT_JOB').values(
-                        'status').annotate(
-                            count=Count('status')))
+    counts = (
+        tko_models.TestView.objects.filter(afe_job_id__in=job_ids)
+        .exclude(test_name="SERVER_JOB")
+        .exclude(test_name__startswith="CLIENT_JOB")
+        .values("status")
+        .annotate(count=Count("status"))
+    )
     for status in counts:
-        if status['status'] == 'GOOD':
-            summary['passed'] += status['count']
+        if status["status"] == "GOOD":
+            summary["passed"] += status["count"]
         else:
-            summary['failed'] += status['count']
+            summary["failed"] += status["count"]
     return summary
 
 
 # profilers
+
 
 def add_profiler(name, description=None):
     return models.Profiler.add_object(name=name, description=description).id
@@ -767,22 +837,31 @@ def delete_profiler(id):
 
 def get_profilers(**filter_data):
     return rpc_utils.prepare_for_serialization(
-        models.Profiler.list_objects(filter_data))
+        models.Profiler.list_objects(filter_data)
+    )
 
 
 # users
 
+
 def get_users(**filter_data):
     return rpc_utils.prepare_for_serialization(
-        models.User.list_objects(filter_data))
+        models.User.list_objects(filter_data)
+    )
 
 
 # jobs
 
-def generate_control_file(tests=(), profilers=(),
-                          client_control_file='', use_container=False,
-                          profile_only=None, db_tests=True,
-                          test_source_build=None):
+
+def generate_control_file(
+    tests=(),
+    profilers=(),
+    client_control_file="",
+    use_container=False,
+    profile_only=None,
+    db_tests=True,
+    test_source_build=None,
+):
     """
     Generates a client-side control file to run tests.
 
@@ -816,24 +895,40 @@ def generate_control_file(tests=(), profilers=(),
         dependencies: A list of the names of labels on which the job depends.
     """
     if not tests and not client_control_file:
-        return dict(control_file='', is_server=False, synch_count=1,
-                    dependencies=[])
+        return dict(
+            control_file="", is_server=False, synch_count=1, dependencies=[]
+        )
 
-    cf_info, test_objects, profiler_objects = (
-        rpc_utils.prepare_generate_control_file(tests, profilers,
-                                                db_tests))
-    cf_info['control_file'] = control_file_lib.generate_control(
-        tests=test_objects, profilers=profiler_objects,
-        is_server=cf_info['is_server'],
-        client_control_file=client_control_file, profile_only=profile_only,
-        test_source_build=test_source_build)
+    (
+        cf_info,
+        test_objects,
+        profiler_objects,
+    ) = rpc_utils.prepare_generate_control_file(tests, profilers, db_tests)
+    cf_info["control_file"] = control_file_lib.generate_control(
+        tests=test_objects,
+        profilers=profiler_objects,
+        is_server=cf_info["is_server"],
+        client_control_file=client_control_file,
+        profile_only=profile_only,
+        test_source_build=test_source_build,
+    )
     return cf_info
 
 
-def create_job_page_handler(name, priority, control_file, control_type,
-                            image=None, hostless=False, firmware_rw_build=None,
-                            firmware_ro_build=None, test_source_build=None,
-                            is_cloning=False, cheets_build=None, **kwargs):
+def create_job_page_handler(
+    name,
+    priority,
+    control_file,
+    control_type,
+    image=None,
+    hostless=False,
+    firmware_rw_build=None,
+    firmware_ro_build=None,
+    test_source_build=None,
+    is_cloning=False,
+    cheets_build=None,
+    **kwargs
+):
     """\
     Create and enqueue a job.
 
@@ -857,26 +952,27 @@ def create_job_page_handler(name, priority, control_file, control_type,
     @returns The created Job id number.
     """
     test_args = {}
-    if kwargs.get('args'):
+    if kwargs.get("args"):
         # args' format is: ['disable_sysinfo=False', 'fast=True', ...]
-        args = kwargs.get('args')
+        args = kwargs.get("args")
         for arg in args:
-            k, v = arg.split('=')[0], arg.split('=')[1]
+            k, v = arg.split("=")[0], arg.split("=")[1]
             test_args[k] = v
 
     if is_cloning:
-        logging.info('Start to clone a new job')
+        logging.info("Start to clone a new job")
         # When cloning a job, hosts and meta_hosts should not exist together,
         # which would cause host-scheduler to schedule two hqe jobs to one host
         # at the same time, and crash itself. Clear meta_hosts for this case.
-        if kwargs.get('hosts') and kwargs.get('meta_hosts'):
-            kwargs['meta_hosts'] = []
+        if kwargs.get("hosts") and kwargs.get("meta_hosts"):
+            kwargs["meta_hosts"] = []
     else:
-        logging.info('Start to create a new job')
+        logging.info("Start to create a new job")
     control_file = rpc_utils.encode_ascii(control_file)
     if not control_file:
-        raise model_logic.ValidationError({
-                'control_file' : "Control file cannot be empty"})
+        raise model_logic.ValidationError(
+            {"control_file": "Control file cannot be empty"}
+        )
 
     if image and hostless:
         builds = {}
@@ -888,44 +984,58 @@ def create_job_page_handler(name, priority, control_file, control_type,
         if firmware_ro_build:
             builds[provision.FW_RO_VERSION_PREFIX] = firmware_ro_build
         return create_suite_job(
-                name=name, control_file=control_file, priority=priority,
-                builds=builds, test_source_build=test_source_build,
-                is_cloning=is_cloning, test_args=test_args, **kwargs)
+            name=name,
+            control_file=control_file,
+            priority=priority,
+            builds=builds,
+            test_source_build=test_source_build,
+            is_cloning=is_cloning,
+            test_args=test_args,
+            **kwargs
+        )
 
-    return create_job(name, priority, control_file, control_type, image=image,
-                      hostless=hostless, test_args=test_args, **kwargs)
-
-
-
-def create_job(
+    return create_job(
         name,
         priority,
         control_file,
         control_type,
-        hosts=(),
-        meta_hosts=(),
-        one_time_hosts=(),
-        synch_count=None,
-        is_template=False,
-        timeout=None,
-        timeout_mins=None,
-        max_runtime_mins=None,
-        run_verify=False,
-        email_list='',
-        dependencies=(),
-        reboot_before=None,
-        reboot_after=None,
-        parse_failed_repair=None,
-        hostless=False,
-        keyvals=None,
-        drone_set=None,
-        image=None,
-        parent_job_id=None,
-        test_retry=0,
-        run_reset=True,
-        require_ssp=None,
-        test_args=None,
-        **kwargs):
+        image=image,
+        hostless=hostless,
+        test_args=test_args,
+        **kwargs
+    )
+
+
+def create_job(
+    name,
+    priority,
+    control_file,
+    control_type,
+    hosts=(),
+    meta_hosts=(),
+    one_time_hosts=(),
+    synch_count=None,
+    is_template=False,
+    timeout=None,
+    timeout_mins=None,
+    max_runtime_mins=None,
+    run_verify=False,
+    email_list="",
+    dependencies=(),
+    reboot_before=None,
+    reboot_after=None,
+    parse_failed_repair=None,
+    hostless=False,
+    keyvals=None,
+    drone_set=None,
+    image=None,
+    parent_job_id=None,
+    test_retry=0,
+    run_reset=True,
+    require_ssp=None,
+    test_args=None,
+    **kwargs
+):
     """\
     Create and enqueue a job.
 
@@ -975,30 +1085,31 @@ def create_job(
     if image:
         dependencies += (provision.image_version_to_label(image),)
     return rpc_utils.create_job_common(
-            name=name,
-            priority=priority,
-            control_type=control_type,
-            control_file=control_file,
-            hosts=hosts,
-            meta_hosts=meta_hosts,
-            one_time_hosts=one_time_hosts,
-            synch_count=synch_count,
-            is_template=is_template,
-            timeout=timeout,
-            timeout_mins=timeout_mins,
-            max_runtime_mins=max_runtime_mins,
-            run_verify=run_verify,
-            email_list=email_list,
-            dependencies=dependencies,
-            reboot_before=reboot_before,
-            reboot_after=reboot_after,
-            parse_failed_repair=parse_failed_repair,
-            hostless=hostless,
-            keyvals=keyvals,
-            drone_set=drone_set,
-            parent_job_id=parent_job_id,
-            run_reset=run_reset,
-            require_ssp=require_ssp)
+        name=name,
+        priority=priority,
+        control_type=control_type,
+        control_file=control_file,
+        hosts=hosts,
+        meta_hosts=meta_hosts,
+        one_time_hosts=one_time_hosts,
+        synch_count=synch_count,
+        is_template=is_template,
+        timeout=timeout,
+        timeout_mins=timeout_mins,
+        max_runtime_mins=max_runtime_mins,
+        run_verify=run_verify,
+        email_list=email_list,
+        dependencies=dependencies,
+        reboot_before=reboot_before,
+        reboot_after=reboot_after,
+        parse_failed_repair=parse_failed_repair,
+        hostless=hostless,
+        keyvals=keyvals,
+        drone_set=drone_set,
+        parent_job_id=parent_job_id,
+        run_reset=run_reset,
+        require_ssp=require_ssp,
+    )
 
 
 def abort_host_queue_entries(**filter_data):
@@ -1018,8 +1129,10 @@ def abort_host_queue_entries(**filter_data):
     rpc_utils.check_abort_synchronous_jobs(host_queue_entries)
 
     models.HostQueueEntry.abort_host_queue_entries(host_queue_entries)
-    hqe_info = [{'HostQueueEntry': hqe.id, 'Job': hqe.job_id,
-                 'Job name': hqe.job.name} for hqe in host_queue_entries]
+    hqe_info = [
+        {"HostQueueEntry": hqe.id, "Job": hqe.job_id, "Job name": hqe.job.name}
+        for hqe in host_queue_entries
+    ]
     return hqe_info
 
 
@@ -1041,9 +1154,11 @@ def _call_special_tasks_on_hosts(task, hosts):
     """
     shard_host_map = rpc_utils.bucket_hosts_by_shard(hosts)
     if shard_host_map and not utils.is_shard():
-        raise ValueError('The following hosts are on shards, please '
-                         'follow the link to the shards and create jobs '
-                         'there instead. %s.' % shard_host_map)
+        raise ValueError(
+            "The following hosts are on shards, please "
+            "follow the link to the shards and create jobs "
+            "there instead. %s." % shard_host_map
+        )
     for host in hosts:
         models.SpecialTask.schedule_special_task(host, task)
     return list(sorted(host.hostname for host in hosts))
@@ -1081,9 +1196,10 @@ def _forward_special_tasks_on_hosts(task, rpc, **filter_data):
             # with the overall architecture of redirection functions in
             # rpc_utils.
             shard_filter = filter_data.copy()
-            shard_filter['hostname__in'] = hostnames
+            shard_filter["hostname__in"] = hostnames
             rpc_utils.run_rpc_on_multiple_hostnames(
-                    rpc, [shard], **shard_filter)
+                rpc, [shard], **shard_filter
+            )
 
     # There is a race condition here if someone assigns a shard to one of these
     # hosts before we create the task. The host will stay on the primary if:
@@ -1107,7 +1223,8 @@ def reverify_hosts(**filter_data):
     @returns A list of hostnames that a verify task was created for.
     """
     return _forward_special_tasks_on_hosts(
-            models.SpecialTask.Task.VERIFY, 'reverify_hosts', **filter_data)
+        models.SpecialTask.Task.VERIFY, "reverify_hosts", **filter_data
+    )
 
 
 def repair_hosts(**filter_data):
@@ -1117,11 +1234,19 @@ def repair_hosts(**filter_data):
     @returns A list of hostnames that a repair task was created for.
     """
     return _forward_special_tasks_on_hosts(
-            models.SpecialTask.Task.REPAIR, 'repair_hosts', **filter_data)
+        models.SpecialTask.Task.REPAIR, "repair_hosts", **filter_data
+    )
 
 
-def get_jobs(not_yet_run=False, running=False, finished=False,
-             suite=False, sub=False, standalone=False, **filter_data):
+def get_jobs(
+    not_yet_run=False,
+    running=False,
+    finished=False,
+    suite=False,
+    sub=False,
+    standalone=False,
+    **filter_data
+):
     """\
     Extra status filter args for get_jobs:
     -not_yet_run: Include only jobs that have not yet started running.
@@ -1136,41 +1261,50 @@ def get_jobs(not_yet_run=False, running=False, finished=False,
     -standalone: Inlcude only jobs with no child or parent jobs.
     At most one of these three fields should be specified.
     """
-    extra_args = rpc_utils.extra_job_status_filters(not_yet_run,
-                                                    running,
-                                                    finished)
-    filter_data['extra_args'] = rpc_utils.extra_job_type_filters(extra_args,
-                                                                 suite,
-                                                                 sub,
-                                                                 standalone)
+    extra_args = rpc_utils.extra_job_status_filters(
+        not_yet_run, running, finished
+    )
+    filter_data["extra_args"] = rpc_utils.extra_job_type_filters(
+        extra_args, suite, sub, standalone
+    )
     job_dicts = []
     jobs = list(models.Job.query_objects(filter_data))
-    models.Job.objects.populate_relationships(jobs, models.Label,
-                                              'dependencies')
-    models.Job.objects.populate_relationships(jobs, models.JobKeyval, 'keyvals')
+    models.Job.objects.populate_relationships(
+        jobs, models.Label, "dependencies"
+    )
+    models.Job.objects.populate_relationships(
+        jobs, models.JobKeyval, "keyvals"
+    )
     for job in jobs:
         job_dict = job.get_object_dict()
-        job_dict['dependencies'] = ','.join(label.name
-                                            for label in job.dependencies)
-        job_dict['keyvals'] = dict((keyval.key, keyval.value)
-                                   for keyval in job.keyvals)
+        job_dict["dependencies"] = ",".join(
+            label.name for label in job.dependencies
+        )
+        job_dict["keyvals"] = dict(
+            (keyval.key, keyval.value) for keyval in job.keyvals
+        )
         job_dicts.append(job_dict)
     return rpc_utils.prepare_for_serialization(job_dicts)
 
 
-def get_num_jobs(not_yet_run=False, running=False, finished=False,
-                 suite=False, sub=False, standalone=False,
-                 **filter_data):
+def get_num_jobs(
+    not_yet_run=False,
+    running=False,
+    finished=False,
+    suite=False,
+    sub=False,
+    standalone=False,
+    **filter_data
+):
     """\
     See get_jobs() for documentation of extra filter parameters.
     """
-    extra_args = rpc_utils.extra_job_status_filters(not_yet_run,
-                                                    running,
-                                                    finished)
-    filter_data['extra_args'] = rpc_utils.extra_job_type_filters(extra_args,
-                                                                 suite,
-                                                                 sub,
-                                                                 standalone)
+    extra_args = rpc_utils.extra_job_status_filters(
+        not_yet_run, running, finished
+    )
+    filter_data["extra_args"] = rpc_utils.extra_job_type_filters(
+        extra_args, suite, sub, standalone
+    )
     return models.Job.query_count(filter_data)
 
 
@@ -1185,14 +1319,15 @@ def get_jobs_summary(**filter_data):
     format specified under get_group_counts.
     """
     jobs = get_jobs(**filter_data)
-    ids = [job['id'] for job in jobs]
+    ids = [job["id"] for job in jobs]
     all_status_counts = models.Job.objects.get_status_counts(ids)
     for job in jobs:
-        job['status_counts'] = all_status_counts[job['id']]
-        job['result_counts'] = tko_rpc_interface.get_status_counts(
-                ['afe_job_id', 'afe_job_id'],
-                header_groups=[['afe_job_id'], ['afe_job_id']],
-                **{'afe_job_id': job['id']})
+        job["status_counts"] = all_status_counts[job["id"]]
+        job["result_counts"] = tko_rpc_interface.get_status_counts(
+            ["afe_job_id", "afe_job_id"],
+            header_groups=[["afe_job_id"], ["afe_job_id"]],
+            **{"afe_job_id": job["id"]}
+        )
     return rpc_utils.prepare_for_serialization(jobs)
 
 
@@ -1201,40 +1336,46 @@ def get_info_for_clone(id, preserve_metahosts, queue_entry_filter_data=None):
     Retrieves all the information needed to clone a job.
     """
     job = models.Job.objects.get(id=id)
-    job_info = rpc_utils.get_job_info(job,
-                                      preserve_metahosts,
-                                      queue_entry_filter_data)
+    job_info = rpc_utils.get_job_info(
+        job, preserve_metahosts, queue_entry_filter_data
+    )
 
     host_dicts = []
-    for host in job_info['hosts']:
+    for host in job_info["hosts"]:
         host_dict = get_hosts(id=host.id)[0]
-        other_labels = host_dict['labels']
-        if host_dict['platform']:
-            other_labels.remove(host_dict['platform'])
-        host_dict['other_labels'] = ', '.join(other_labels)
+        other_labels = host_dict["labels"]
+        if host_dict["platform"]:
+            other_labels.remove(host_dict["platform"])
+        host_dict["other_labels"] = ", ".join(other_labels)
         host_dicts.append(host_dict)
 
-    for host in job_info['one_time_hosts']:
-        host_dict = dict(hostname=host.hostname,
-                         id=host.id,
-                         platform='(one-time host)',
-                         locked_text='')
+    for host in job_info["one_time_hosts"]:
+        host_dict = dict(
+            hostname=host.hostname,
+            id=host.id,
+            platform="(one-time host)",
+            locked_text="",
+        )
         host_dicts.append(host_dict)
 
     # convert keys from Label objects to strings (names of labels)
-    meta_host_counts = dict((meta_host.name, count) for meta_host, count
-                            in job_info['meta_host_counts'].iteritems())
+    meta_host_counts = dict(
+        (meta_host.name, count)
+        for meta_host, count in job_info["meta_host_counts"].iteritems()
+    )
 
-    info = dict(job=job.get_object_dict(),
-                meta_host_counts=meta_host_counts,
-                hosts=host_dicts)
-    info['job']['dependencies'] = job_info['dependencies']
-    info['hostless'] = job_info['hostless']
-    info['drone_set'] = job.drone_set and job.drone_set.name
+    info = dict(
+        job=job.get_object_dict(),
+        meta_host_counts=meta_host_counts,
+        hosts=host_dicts,
+    )
+    info["job"]["dependencies"] = job_info["dependencies"]
+    info["hostless"] = job_info["hostless"]
+    info["drone_set"] = job.drone_set and job.drone_set.name
 
-    image = _get_image_for_job(job, job_info['hostless'])
+    image = _get_image_for_job(job, job_info["hostless"])
     if image:
-        info['job']['image'] = image
+        info["job"]["image"] = image
 
     return rpc_utils.prepare_for_serialization(info)
 
@@ -1254,96 +1395,104 @@ def _get_image_for_job(job, hostless):
     @returns The image build used for the job.
     """
     keyvals = job.keyval_dict()
-    image = keyvals.get('build')
+    image = keyvals.get("build")
     if not image:
-        value = keyvals.get('builds')
+        value = keyvals.get("builds")
         builds = None
         if isinstance(value, dict):
             builds = value
         elif isinstance(value, basestring):
             builds = ast.literal_eval(value)
         if builds:
-            image = builds.get('cros-version')
+            image = builds.get("cros-version")
     if not image and hostless and job.control_file:
         try:
-            control_obj = control_data.parse_control_string(
-                    job.control_file)
-            if hasattr(control_obj, 'build'):
-                image = getattr(control_obj, 'build')
-            if not image and hasattr(control_obj, 'builds'):
-                builds = getattr(control_obj, 'builds')
-                image = builds.get('cros-version')
+            control_obj = control_data.parse_control_string(job.control_file)
+            if hasattr(control_obj, "build"):
+                image = getattr(control_obj, "build")
+            if not image and hasattr(control_obj, "builds"):
+                builds = getattr(control_obj, "builds")
+                image = builds.get("cros-version")
         except:
-            logging.warning('Failed to parse control file for job: %s',
-                            job.name)
+            logging.warning(
+                "Failed to parse control file for job: %s", job.name
+            )
     return image
 
 
 def get_host_queue_entries_by_insert_time(
-    insert_time_after=None, insert_time_before=None, **filter_data):
+    insert_time_after=None, insert_time_before=None, **filter_data
+):
     """Like get_host_queue_entries, but using the insert index table.
 
     @param insert_time_after: A lower bound on insert_time
     @param insert_time_before: An upper bound on insert_time
     @returns A sequence of nested dictionaries of host and job information.
     """
-    assert insert_time_after is not None or insert_time_before is not None, \
-      ('Caller to get_host_queue_entries_by_insert_time must provide either'
-       ' insert_time_after or insert_time_before.')
+    assert insert_time_after is not None or insert_time_before is not None, (
+        "Caller to get_host_queue_entries_by_insert_time must provide either"
+        " insert_time_after or insert_time_before."
+    )
     # Get insert bounds on the index of the host queue entries.
     if insert_time_after:
         query = models.HostQueueEntryStartTimes.objects.filter(
             # Note: '-insert_time' means descending. We want the largest
             # insert time smaller than the insert time.
-            insert_time__lte=insert_time_after).order_by('-insert_time')
+            insert_time__lte=insert_time_after
+        ).order_by("-insert_time")
         try:
             constraint = query[0].highest_hqe_id
-            if 'id__gte' in filter_data:
-                constraint = max(constraint, filter_data['id__gte'])
-            filter_data['id__gte'] = constraint
+            if "id__gte" in filter_data:
+                constraint = max(constraint, filter_data["id__gte"])
+            filter_data["id__gte"] = constraint
         except IndexError:
             pass
 
     # Get end bounds.
     if insert_time_before:
         query = models.HostQueueEntryStartTimes.objects.filter(
-            insert_time__gte=insert_time_before).order_by('insert_time')
+            insert_time__gte=insert_time_before
+        ).order_by("insert_time")
         try:
             constraint = query[0].highest_hqe_id
-            if 'id__lte' in filter_data:
-                constraint = min(constraint, filter_data['id__lte'])
-            filter_data['id__lte'] = constraint
+            if "id__lte" in filter_data:
+                constraint = min(constraint, filter_data["id__lte"])
+            filter_data["id__lte"] = constraint
         except IndexError:
             pass
 
     return rpc_utils.prepare_rows_as_nested_dicts(
-            models.HostQueueEntry.query_objects(filter_data),
-            ('host', 'job'))
+        models.HostQueueEntry.query_objects(filter_data), ("host", "job")
+    )
 
 
 def get_host_queue_entries(start_time=None, end_time=None, **filter_data):
     """\
     @returns A sequence of nested dictionaries of host and job information.
     """
-    filter_data = rpc_utils.inject_times_to_filter('started_on__gte',
-                                                   'started_on__lte',
-                                                   start_time,
-                                                   end_time,
-                                                   **filter_data)
+    filter_data = rpc_utils.inject_times_to_filter(
+        "started_on__gte",
+        "started_on__lte",
+        start_time,
+        end_time,
+        **filter_data
+    )
     return rpc_utils.prepare_rows_as_nested_dicts(
-            models.HostQueueEntry.query_objects(filter_data),
-            ('host', 'job'))
+        models.HostQueueEntry.query_objects(filter_data), ("host", "job")
+    )
 
 
 def get_num_host_queue_entries(start_time=None, end_time=None, **filter_data):
     """\
     Get the number of host queue entries associated with this job.
     """
-    filter_data = rpc_utils.inject_times_to_filter('started_on__gte',
-                                                   'started_on__lte',
-                                                   start_time,
-                                                   end_time,
-                                                   **filter_data)
+    filter_data = rpc_utils.inject_times_to_filter(
+        "started_on__gte",
+        "started_on__lte",
+        start_time,
+        end_time,
+        **filter_data
+    )
     return models.HostQueueEntry.query_count(filter_data)
 
 
@@ -1361,6 +1510,7 @@ def get_hqe_percentage_complete(**filter_data):
 
 
 # special tasks
+
 
 def get_special_tasks(**filter_data):
     """Get special task entries from the local database.
@@ -1380,8 +1530,8 @@ def get_special_tasks(**filter_data):
 
     """
     return rpc_utils.prepare_rows_as_nested_dicts(
-            models.SpecialTask.query_objects(filter_data),
-            ('host', 'queue_entry'))
+        models.SpecialTask.query_objects(filter_data), ("host", "queue_entry")
+    )
 
 
 def get_host_special_tasks(host_id, **filter_data):
@@ -1407,8 +1557,9 @@ def get_host_special_tasks(host_id, **filter_data):
         # call AFE.run() to get the raw, serializable output from
         # the shard.
         shard_afe = frontend.AFE(server=host.shard.hostname)
-        return shard_afe.run('get_special_tasks',
-                             host_id=host_id, **filter_data)
+        return shard_afe.run(
+            "get_special_tasks", host_id=host_id, **filter_data
+        )
 
 
 def get_num_special_tasks(**kwargs):
@@ -1442,7 +1593,7 @@ def get_host_num_special_tasks(host, **kwargs):
         return get_num_special_tasks(host=host, **kwargs)
     else:
         shard_afe = frontend.AFE(server=host_model.shard.hostname)
-        return shard_afe.run('get_num_special_tasks', host=host, **kwargs)
+        return shard_afe.run("get_num_special_tasks", host=host, **kwargs)
 
 
 def get_status_task(host_id, end_time):
@@ -1467,8 +1618,9 @@ def get_status_task(host_id, end_time):
 
     """
     tasklist = rpc_utils.prepare_rows_as_nested_dicts(
-            status_history.get_status_task(host_id, end_time),
-            ('host', 'queue_entry'))
+        status_history.get_status_task(host_id, end_time),
+        ("host", "queue_entry"),
+    )
     return tasklist[0] if tasklist else None
 
 
@@ -1496,8 +1648,9 @@ def get_host_status_task(host_id, end_time):
         # call AFE.run() to get the raw, serializable output from
         # the shard.
         shard_afe = frontend.AFE(server=host.shard.hostname)
-        return shard_afe.run('get_status_task',
-                             host_id=host_id, end_time=end_time)
+        return shard_afe.run(
+            "get_status_task", host_id=host_id, end_time=end_time
+        )
 
 
 def get_host_diagnosis_interval(host_id, end_time, success):
@@ -1529,18 +1682,21 @@ def get_host_diagnosis_interval(host_id, end_time, success):
     host = models.Host.smart_get(host_id)
     if not host.shard or utils.is_shard():
         return status_history.get_diagnosis_interval(
-                host_id, end_time, success)
+            host_id, end_time, success
+        )
     else:
         shard_afe = frontend.AFE(server=host.shard.hostname)
         return shard_afe.get_host_diagnosis_interval(
-                host_id, end_time, success)
+            host_id, end_time, success
+        )
 
 
 # support for host detail view
 
-def get_host_queue_entries_and_special_tasks(host, query_start=None,
-                                             query_limit=None, start_time=None,
-                                             end_time=None):
+
+def get_host_queue_entries_and_special_tasks(
+    host, query_start=None, query_limit=None, start_time=None, end_time=None
+):
     """
     @returns an interleaved list of HostQueueEntries and SpecialTasks,
             in approximate run order.  each dict contains keys for type, host,
@@ -1549,41 +1705,56 @@ def get_host_queue_entries_and_special_tasks(host, query_start=None,
     total_limit = None
     if query_limit is not None:
         total_limit = query_start + query_limit
-    filter_data_common = {'host': host,
-                          'query_limit': total_limit,
-                          'sort_by': ['-id']}
+    filter_data_common = {
+        "host": host,
+        "query_limit": total_limit,
+        "sort_by": ["-id"],
+    }
 
     filter_data_special_tasks = rpc_utils.inject_times_to_filter(
-            'time_started__gte', 'time_started__lte', start_time, end_time,
-            **filter_data_common)
+        "time_started__gte",
+        "time_started__lte",
+        start_time,
+        end_time,
+        **filter_data_common
+    )
 
     queue_entries = get_host_queue_entries(
-            start_time, end_time, **filter_data_common)
+        start_time, end_time, **filter_data_common
+    )
     special_tasks = get_host_special_tasks(host, **filter_data_special_tasks)
 
-    interleaved_entries = rpc_utils.interleave_entries(queue_entries,
-                                                       special_tasks)
+    interleaved_entries = rpc_utils.interleave_entries(
+        queue_entries, special_tasks
+    )
     if query_start is not None:
         interleaved_entries = interleaved_entries[query_start:]
     if query_limit is not None:
         interleaved_entries = interleaved_entries[:query_limit]
     return rpc_utils.prepare_host_queue_entries_and_special_tasks(
-            interleaved_entries, queue_entries)
+        interleaved_entries, queue_entries
+    )
 
 
-def get_num_host_queue_entries_and_special_tasks(host, start_time=None,
-                                                 end_time=None):
-    filter_data_common = {'host': host}
+def get_num_host_queue_entries_and_special_tasks(
+    host, start_time=None, end_time=None
+):
+    filter_data_common = {"host": host}
 
-    filter_data_queue_entries, filter_data_special_tasks = (
-            rpc_utils.inject_times_to_hqe_special_tasks_filters(
-                    filter_data_common, start_time, end_time))
+    (
+        filter_data_queue_entries,
+        filter_data_special_tasks,
+    ) = rpc_utils.inject_times_to_hqe_special_tasks_filters(
+        filter_data_common, start_time, end_time
+    )
 
-    return (models.HostQueueEntry.query_count(filter_data_queue_entries)
-            + get_host_num_special_tasks(**filter_data_special_tasks))
+    return models.HostQueueEntry.query_count(
+        filter_data_queue_entries
+    ) + get_host_num_special_tasks(**filter_data_special_tasks)
 
 
 # other
+
 
 def echo(data=""):
     """\
@@ -1626,61 +1797,70 @@ def get_static_data():
     """
 
     default_drone_set_name = models.DroneSet.default_drone_set_name()
-    drone_sets = ([default_drone_set_name] +
-                  sorted(drone_set.name for drone_set in
-                         models.DroneSet.objects.exclude(
-                                 name=default_drone_set_name)))
+    drone_sets = [default_drone_set_name] + sorted(
+        drone_set.name
+        for drone_set in models.DroneSet.objects.exclude(
+            name=default_drone_set_name
+        )
+    )
 
     result = {}
-    result['priorities'] = priorities.Priority.choices()
-    result['default_priority'] = 'Default'
-    result['max_schedulable_priority'] = priorities.Priority.DEFAULT
-    result['users'] = get_users(sort_by=['login'])
+    result["priorities"] = priorities.Priority.choices()
+    result["default_priority"] = "Default"
+    result["max_schedulable_priority"] = priorities.Priority.DEFAULT
+    result["users"] = get_users(sort_by=["login"])
 
-    label_exclude_filters = [{'name__startswith': 'cros-version'},
-                             {'name__startswith': 'fw-version'},
-                             {'name__startswith': 'fwrw-version'},
-                             {'name__startswith': 'fwro-version'}]
-    result['labels'] = get_labels(
-        label_exclude_filters,
-        sort_by=['-platform', 'name'])
+    label_exclude_filters = [
+        {"name__startswith": "cros-version"},
+        {"name__startswith": "fw-version"},
+        {"name__startswith": "fwrw-version"},
+        {"name__startswith": "fwro-version"},
+    ]
+    result["labels"] = get_labels(
+        label_exclude_filters, sort_by=["-platform", "name"]
+    )
 
-    result['tests'] = get_tests(sort_by=['name'])
-    result['profilers'] = get_profilers(sort_by=['name'])
-    result['current_user'] = rpc_utils.prepare_for_serialization(
-        models.User.current_user().get_object_dict())
-    result['host_statuses'] = sorted(models.Host.Status.names)
-    result['job_statuses'] = sorted(models.HostQueueEntry.Status.names)
-    result['job_timeout_mins_default'] = models.Job.DEFAULT_TIMEOUT_MINS
-    result['job_max_runtime_mins_default'] = (
-        models.Job.DEFAULT_MAX_RUNTIME_MINS)
-    result['parse_failed_repair_default'] = bool(
-        models.Job.DEFAULT_PARSE_FAILED_REPAIR)
-    result['reboot_before_options'] = model_attributes.RebootBefore.names
-    result['reboot_after_options'] = model_attributes.RebootAfter.names
-    result['motd'] = rpc_utils.get_motd()
-    result['drone_sets_enabled'] = models.DroneSet.drone_sets_enabled()
-    result['drone_sets'] = drone_sets
+    result["tests"] = get_tests(sort_by=["name"])
+    result["profilers"] = get_profilers(sort_by=["name"])
+    result["current_user"] = rpc_utils.prepare_for_serialization(
+        models.User.current_user().get_object_dict()
+    )
+    result["host_statuses"] = sorted(models.Host.Status.names)
+    result["job_statuses"] = sorted(models.HostQueueEntry.Status.names)
+    result["job_timeout_mins_default"] = models.Job.DEFAULT_TIMEOUT_MINS
+    result[
+        "job_max_runtime_mins_default"
+    ] = models.Job.DEFAULT_MAX_RUNTIME_MINS
+    result["parse_failed_repair_default"] = bool(
+        models.Job.DEFAULT_PARSE_FAILED_REPAIR
+    )
+    result["reboot_before_options"] = model_attributes.RebootBefore.names
+    result["reboot_after_options"] = model_attributes.RebootAfter.names
+    result["motd"] = rpc_utils.get_motd()
+    result["drone_sets_enabled"] = models.DroneSet.drone_sets_enabled()
+    result["drone_sets"] = drone_sets
 
-    result['status_dictionary'] = {"Aborted": "Aborted",
-                                   "Verifying": "Verifying Host",
-                                   "Provisioning": "Provisioning Host",
-                                   "Pending": "Waiting on other hosts",
-                                   "Running": "Running autoserv",
-                                   "Completed": "Autoserv completed",
-                                   "Failed": "Failed to complete",
-                                   "Queued": "Queued",
-                                   "Starting": "Next in host's queue",
-                                   "Stopped": "Other host(s) failed verify",
-                                   "Parsing": "Awaiting parse of final results",
-                                   "Gathering": "Gathering log files",
-                                   "Waiting": "Waiting for scheduler action",
-                                   "Archiving": "Archiving results",
-                                   "Resetting": "Resetting hosts"}
+    result["status_dictionary"] = {
+        "Aborted": "Aborted",
+        "Verifying": "Verifying Host",
+        "Provisioning": "Provisioning Host",
+        "Pending": "Waiting on other hosts",
+        "Running": "Running autoserv",
+        "Completed": "Autoserv completed",
+        "Failed": "Failed to complete",
+        "Queued": "Queued",
+        "Starting": "Next in host's queue",
+        "Stopped": "Other host(s) failed verify",
+        "Parsing": "Awaiting parse of final results",
+        "Gathering": "Gathering log files",
+        "Waiting": "Waiting for scheduler action",
+        "Archiving": "Archiving results",
+        "Resetting": "Resetting hosts",
+    }
 
-    result['wmatrix_url'] = rpc_utils.get_wmatrix_url()
-    result['stainless_url'] = rpc_utils.get_stainless_url()
-    result['is_moblab'] = bool(utils.is_moblab())
+    result["wmatrix_url"] = rpc_utils.get_wmatrix_url()
+    result["stainless_url"] = rpc_utils.get_stainless_url()
+    result["is_moblab"] = bool(utils.is_moblab())
 
     return result
 
@@ -1708,8 +1888,9 @@ def get_hosts_by_attribute(attribute, value):
     @returns List of hostnames that all have the same host attribute and
              value.
     """
-    rows = models.HostAttribute.query_objects({'attribute': attribute,
-                                               'value': value})
+    rows = models.HostAttribute.query_objects(
+        {"attribute": attribute, "value": value}
+    )
     if RESPECT_STATIC_ATTRIBUTES:
         returned_hosts = set()
         # Add hosts:
@@ -1722,7 +1903,8 @@ def get_hosts_by_attribute(attribute, value):
                 continue
 
             static_hosts = models.StaticHostAttribute.query_objects(
-                {'host_id': row.host.id, 'attribute': attribute})
+                {"host_id": row.host.id, "attribute": attribute}
+            )
             values = [static_host.value for static_host in static_hosts]
             if len(values) == 0 or values[0] == value:
                 returned_hosts.add(row.host.hostname)
@@ -1735,7 +1917,8 @@ def get_hosts_by_attribute(attribute, value):
         #       corresponding entry in afe_host_attribute since it is ensured
         #       in inventory sync.
         static_rows = models.StaticHostAttribute.query_objects(
-                {'attribute': attribute, 'value': value})
+            {"attribute": attribute, "value": value}
+        )
         for row in static_rows:
             if row.host.invalid != 0:
                 continue
@@ -1754,39 +1937,39 @@ def _get_control_file_by_suite(suite_name):
     @returns: Control file contents as string.
     """
     getter = control_file_getter.FileSystemGetter(
-            [_CONFIG.get_config_value('SCHEDULER',
-                                      'drone_installation_directory')])
+        [_CONFIG.get_config_value("SCHEDULER", "drone_installation_directory")]
+    )
     return getter.get_control_file_contents_by_name(suite_name)
 
 
-
 def create_suite_job(
-        name='',
-        board='',
-        pool='',
-        child_dependencies=(),
-        control_file='',
-        check_hosts=True,
-        num=None,
-        file_bugs=False,
-        timeout=24,
-        timeout_mins=None,
-        priority=priorities.Priority.DEFAULT,
-        suite_args=None,
-        wait_for_results=True,
-        job_retry=False,
-        max_retries=None,
-        max_runtime_mins=None,
-        suite_min_duts=0,
-        offload_failures_only=False,
-        builds=None,
-        test_source_build=None,
-        run_prod_code=False,
-        delay_minutes=0,
-        is_cloning=False,
-        job_keyvals=None,
-        test_args=None,
-        **kwargs):
+    name="",
+    board="",
+    pool="",
+    child_dependencies=(),
+    control_file="",
+    check_hosts=True,
+    num=None,
+    file_bugs=False,
+    timeout=24,
+    timeout_mins=None,
+    priority=priorities.Priority.DEFAULT,
+    suite_args=None,
+    wait_for_results=True,
+    job_retry=False,
+    max_retries=None,
+    max_runtime_mins=None,
+    suite_min_duts=0,
+    offload_failures_only=False,
+    builds=None,
+    test_source_build=None,
+    run_prod_code=False,
+    delay_minutes=0,
+    is_cloning=False,
+    job_keyvals=None,
+    test_args=None,
+    **kwargs
+):
     """
     Create a job to run a test suite on the given device with the given image.
 
@@ -1853,7 +2036,7 @@ def create_suite_job(
     @return: the job ID of the suite; -1 on error.
     """
     if num is not None:
-        warnings.warn('num is deprecated for create_suite_job')
+        warnings.warn("num is deprecated for create_suite_job")
     del num
 
     if builds is None:
@@ -1863,7 +2046,8 @@ def create_suite_job(
     # run_prod_code is set to False.
     if not run_prod_code:
         test_source_build = Suite.get_test_source_build(
-                builds, test_source_build=test_source_build)
+            builds, test_source_build=test_source_build
+        )
 
     sample_dut = rpc_utils.get_sample_dut(board, pool)
 
@@ -1873,7 +2057,8 @@ def create_suite_job(
         keyvals = {}
     else:
         ds, keyvals = suite_common.stage_build_artifacts(
-                test_source_build, hostname=sample_dut)
+            test_source_build, hostname=sample_dut
+        )
     keyvals[constants.SUITE_MIN_DUTS_KEY] = suite_min_duts
 
     # Do not change this naming convention without updating
@@ -1881,9 +2066,9 @@ def create_suite_job(
     if run_prod_code:
         # If run_prod_code is True, test_source_build is not set, use the
         # first build in the builds list for the sutie job name.
-        name = '%s-%s' % (builds.values()[0], suite_name)
+        name = "%s-%s" % (builds.values()[0], suite_name)
     else:
-        name = '%s-%s' % (test_source_build, suite_name)
+        name = "%s-%s" % (test_source_build, suite_name)
 
     timeout_mins = timeout_mins or timeout * 60
     max_runtime_mins = max_runtime_mins or timeout * 60
@@ -1897,7 +2082,8 @@ def create_suite_job(
     if not control_file:
         # No control file was supplied so look it up from the build artifacts.
         control_file = suite_common.get_control_file_by_build(
-                test_source_build, ds, suite_name)
+            test_source_build, ds, suite_name
+        )
 
     # Prepend builds and board to the control file.
     if is_cloning:
@@ -1907,41 +2093,43 @@ def create_suite_job(
         suite_args = dict()
 
     inject_dict = {
-        'board': board,
+        "board": board,
         # `build` is needed for suites like AU to stage image inside suite
         # control file.
-        'build': test_source_build,
-        'builds': builds,
-        'check_hosts': check_hosts,
-        'pool': pool,
-        'child_dependencies': child_dependencies,
-        'file_bugs': file_bugs,
-        'timeout': timeout,
-        'timeout_mins': timeout_mins,
-        'devserver_url': ds.url(),
-        'priority': priority,
-        'wait_for_results': wait_for_results,
-        'job_retry': job_retry,
-        'max_retries': max_retries,
-        'max_runtime_mins': max_runtime_mins,
-        'offload_failures_only': offload_failures_only,
-        'test_source_build': test_source_build,
-        'run_prod_code': run_prod_code,
-        'delay_minutes': delay_minutes,
-        'job_keyvals': job_keyvals,
-        'test_args': test_args,
+        "build": test_source_build,
+        "builds": builds,
+        "check_hosts": check_hosts,
+        "pool": pool,
+        "child_dependencies": child_dependencies,
+        "file_bugs": file_bugs,
+        "timeout": timeout,
+        "timeout_mins": timeout_mins,
+        "devserver_url": ds.url(),
+        "priority": priority,
+        "wait_for_results": wait_for_results,
+        "job_retry": job_retry,
+        "max_retries": max_retries,
+        "max_runtime_mins": max_runtime_mins,
+        "offload_failures_only": offload_failures_only,
+        "test_source_build": test_source_build,
+        "run_prod_code": run_prod_code,
+        "delay_minutes": delay_minutes,
+        "job_keyvals": job_keyvals,
+        "test_args": test_args,
     }
     inject_dict.update(suite_args)
     control_file = tools.inject_vars(inject_dict, control_file)
 
-    return rpc_utils.create_job_common(name,
-                                       priority=priority,
-                                       timeout_mins=timeout_mins,
-                                       max_runtime_mins=max_runtime_mins,
-                                       control_type='Server',
-                                       control_file=control_file,
-                                       hostless=True,
-                                       keyvals=keyvals)
+    return rpc_utils.create_job_common(
+        name,
+        priority=priority,
+        timeout_mins=timeout_mins,
+        max_runtime_mins=max_runtime_mins,
+        control_type="Server",
+        control_file=control_file,
+        hostless=True,
+        keyvals=keyvals,
+    )
 
 
 def get_job_history(**filter_data):
@@ -1953,13 +2141,19 @@ def get_job_history(**filter_data):
               as the hosts run the job and the special tasks executed before
               and after the job.
     """
-    job_id = filter_data['job_id']
+    job_id = filter_data["job_id"]
     job_info = job_history.get_job_info(job_id)
     return rpc_utils.prepare_for_serialization(job_info.get_history())
 
 
-def shard_heartbeat(shard_hostname, jobs=(), hqes=(), known_job_ids=(),
-                    known_host_ids=(), known_host_statuses=()):
+def shard_heartbeat(
+    shard_hostname,
+    jobs=(),
+    hqes=(),
+    known_job_ids=(),
+    known_host_ids=(),
+    known_host_statuses=(),
+):
     """Receive updates for job statuses from shards and assign hosts and jobs.
 
     @param shard_hostname: Hostname of the calling shard
@@ -2017,13 +2211,13 @@ def shard_heartbeat(shard_hostname, jobs=(), hqes=(), known_job_ids=(),
             host_model.save()
 
     hosts, jobs, suite_keyvals, inc_ids = rpc_utils.find_records_for_shard(
-            shard_obj, known_job_ids=known_job_ids,
-            known_host_ids=known_host_ids)
+        shard_obj, known_job_ids=known_job_ids, known_host_ids=known_host_ids
+    )
     return {
-        'hosts': [host.serialize() for host in hosts],
-        'jobs': [job.serialize() for job in jobs],
-        'suite_keyvals': [kv.serialize() for kv in suite_keyvals],
-        'incorrect_host_ids': [int(i) for i in inc_ids],
+        "hosts": [host.serialize() for host in hosts],
+        "jobs": [job.serialize() for job in jobs],
+        "suite_keyvals": [kv.serialize() for kv in suite_keyvals],
+        "incorrect_host_ids": [int(i) for i in inc_ids],
     }
 
 
@@ -2035,7 +2229,7 @@ def get_shards(**filter_data):
     shards = models.Shard.query_objects(filter_data)
     serialized_shards = rpc_utils.prepare_rows_as_nested_dicts(shards, ())
     for serialized, shard in zip(serialized_shards, shards):
-        serialized['labels'] = [label.name for label in shard.labels.all()]
+        serialized["labels"] = [label.name for label in shard.labels.all()]
 
     return serialized_shards
 
@@ -2056,15 +2250,17 @@ def _assign_board_to_shard_precheck(labels):
     @returns: A list of label models that ready to be added to shard.
     """
     if not labels:
-      # allow creation of label-less shards (labels='' would otherwise fail the
-      # checks below)
-      return []
-    labels = labels.split(',')
+        # allow creation of label-less shards (labels='' would otherwise fail the
+        # checks below)
+        return []
+    labels = labels.split(",")
     label_models = []
     for label in labels:
         # Check whether the board label is in correct format.
-        if not label.startswith('board:'):
-            raise error.RPCException('Sharding only supports `board:.*` label.')
+        if not label.startswith("board:"):
+            raise error.RPCException(
+                "Sharding only supports `board:.*` label."
+            )
         # Check whether the board label exist. If not, exception will be thrown
         # by smart_get function.
         label = models.Label.smart_get(label)
@@ -2072,7 +2268,8 @@ def _assign_board_to_shard_precheck(labels):
         try:
             shard = models.Shard.objects.get(labels=label)
             raise error.RPCException(
-                    '%s is already on shard %s' % (label, shard.hostname))
+                "%s is already on shard %s" % (label, shard.hostname)
+            )
         except models.Shard.DoesNotExist:
             # board is not on any shard, so it's valid.
             label_models.append(label)
@@ -2137,13 +2334,15 @@ def remove_board_from_shard(hostname, label):
     label = models.Label.smart_get(label)
     if label not in shard.labels.all():
         raise error.RPCException(
-          'Cannot remove label from shard that does not belong to it.')
+            "Cannot remove label from shard that does not belong to it."
+        )
 
     shard.labels.remove(label)
     if label.is_replaced_by_static():
         static_label = models.StaticLabel.smart_get(label.name)
-        models.Host.objects.filter(
-                static_labels__in=[static_label]).update(shard=None)
+        models.Host.objects.filter(static_labels__in=[static_label]).update(
+            shard=None
+        )
     else:
         models.Host.objects.filter(labels__in=[label]).update(shard=None)
 
@@ -2165,8 +2364,10 @@ def delete_shard(hostname):
     #
     # We don't need atomicity here, so the new cleanup method is iterative, in
     # chunks of 100k jobs.
-    QUERY = ('UPDATE afe_jobs SET shard_id = NULL WHERE shard_id = %s '
-             'LIMIT 100000')
+    QUERY = (
+        "UPDATE afe_jobs SET shard_id = NULL WHERE shard_id = %s "
+        "LIMIT 100000"
+    )
     try:
         with contextlib.closing(db_connection.cursor()) as cursor:
             clear_jobs = True
@@ -2177,7 +2378,7 @@ def delete_shard(hostname):
     # Unit tests use sqlite backend instead of MySQL. sqlite does not support
     # UPDATE ... LIMIT, so fall back to the old behavior.
     except DatabaseError as e:
-        if 'syntax error' in str(e):
+        if "syntax error" in str(e):
             models.Job.objects.filter(shard=shard).update(shard=None)
         else:
             raise
@@ -2199,12 +2400,14 @@ def get_servers(hostname=None, role=None, status=None):
     @return: A list of server names for servers with matching role and status.
     """
     if not server_manager_utils.use_server_db():
-        raise error.RPCException('Server database is not enabled. Please try '
-                                 'retrieve servers from global config.')
-    servers = server_manager_utils.get_servers(hostname=hostname, role=role,
-                                               status=status)
+        raise error.RPCException(
+            "Server database is not enabled. Please try "
+            "retrieve servers from global config."
+        )
+    servers = server_manager_utils.get_servers(
+        hostname=hostname, role=role, status=status
+    )
     return [s.get_details() for s in servers]
-
 
 
 def get_stable_version(board=stable_version_utils.DEFAULT, android=False):
@@ -2220,9 +2423,8 @@ def get_stable_version(board=stable_version_utils.DEFAULT, android=False):
              of CROS.stable_cros_version if stable_versinos table does not have
              entry of board DEFAULT.
     """
-    assert not android, 'get_stable_version no longer supports `android`.'
+    assert not android, "get_stable_version no longer supports `android`."
     return stable_version_utils.get(board=board)
-
 
 
 def get_all_stable_versions():
@@ -2233,27 +2435,16 @@ def get_all_stable_versions():
     return stable_version_utils.get_all()
 
 
-
 def set_stable_version(version, board=stable_version_utils.DEFAULT):
     """Modify stable version for the given board.
 
     @param version: The new value of stable version for given board.
     @param board: Name of the board, default to value `DEFAULT`.
     """
-    logging.warning("rpc_interface::set_stable_version: attempted to set stable version. setting the stable version is not permitted")
+    logging.warning(
+        "rpc_interface::set_stable_version: attempted to set stable version. setting the stable version is not permitted"
+    )
     return None
-
-
-
-def delete_stable_version(board):
-    """Modify stable version for the given board.
-
-    Delete a stable version entry in afe_stable_versions table for a given
-    board, so default stable version will be used.
-
-    @param board: Name of the board.
-    """
-    stable_version_utils.delete(board=board)
 
 
 def get_tests_by_build(build, ignore_invalid_tests=True):
@@ -2280,25 +2471,39 @@ def get_tests_by_build(build, ignore_invalid_tests=True):
             control_file = control_file_info_list[control_file_path]
         else:
             control_file = cfile_getter.get_control_file_contents(
-                    control_file_path)
+                control_file_path
+            )
         try:
             control_obj = control_data.parse_control_string(control_file)
         except:
-            logging.info('Failed to parse control file: %s', control_file_path)
+            logging.info("Failed to parse control file: %s", control_file_path)
             if not ignore_invalid_tests:
                 raise
 
         # Extract the values needed for the AFE from the control_obj.
         # The keys list represents attributes in the control_obj that
         # are required by the AFE
-        keys = ['author', 'doc', 'name', 'time', 'test_type', 'experimental',
-                'test_category', 'test_class', 'dependencies', 'run_verify',
-                'sync_count', 'job_retries', 'path']
+        keys = [
+            "author",
+            "doc",
+            "name",
+            "time",
+            "test_type",
+            "experimental",
+            "test_category",
+            "test_class",
+            "dependencies",
+            "run_verify",
+            "sync_count",
+            "job_retries",
+            "path",
+        ]
 
         test_object = {}
         for key in keys:
-            test_object[key] = getattr(control_obj, key) if hasattr(
-                    control_obj, key) else ''
+            test_object[key] = (
+                getattr(control_obj, key) if hasattr(control_obj, key) else ""
+            )
 
         # Unfortunately, the AFE expects different key-names for certain
         # values, these must be corrected to avoid the risk of tests
@@ -2306,33 +2511,32 @@ def get_tests_by_build(build, ignore_invalid_tests=True):
         # The 'id' is an additional value used in the AFE.
         # The control_data parsing does not reference 'run_reset', but it
         # is also used in the AFE and defaults to True.
-        test_object['id'] = _id
-        test_object['run_reset'] = True
-        test_object['description'] = test_object.get('doc', '')
-        test_object['test_time'] = test_object.get('time', 0)
+        test_object["id"] = _id
+        test_object["run_reset"] = True
+        test_object["description"] = test_object.get("doc", "")
+        test_object["test_time"] = test_object.get("time", 0)
 
         # TODO(crbug.com/873716) DEPRECATED. Remove entirely.
-        test_object['test_retry'] = 0
+        test_object["test_retry"] = 0
 
         # Fix the test name to be consistent with the current presentation
         # of test names in the AFE.
         testpath, subname = os.path.split(control_file_path)
         testname = os.path.basename(testpath)
-        subname = subname.split('.')[1:]
+        subname = subname.split(".")[1:]
         if subname:
-            testname = '%s:%s' % (testname, ':'.join(subname))
+            testname = "%s:%s" % (testname, ":".join(subname))
 
-        test_object['name'] = testname
+        test_object["name"] = testname
 
         # Correct the test path as parse_control_string sets an empty string.
-        test_object['path'] = control_file_path
+        test_object["path"] = control_file_path
 
         _id += 1
         test_objects.append(test_object)
 
-    test_objects = sorted(test_objects, key=lambda x: x.get('name'))
+    test_objects = sorted(test_objects, key=lambda x: x.get("name"))
     return rpc_utils.prepare_for_serialization(test_objects)
-
 
 
 def get_lab_health_indicators(board=None):

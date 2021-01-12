@@ -2076,26 +2076,3 @@ class SpecialTask(dbmodels.Model, model_logic.ModelExtensions):
             result += u' (active)'
 
         return result
-
-
-class StableVersion(dbmodels.Model, model_logic.ModelExtensions):
-
-    board = dbmodels.CharField(max_length=255, unique=True)
-    version = dbmodels.CharField(max_length=255)
-
-    class Meta:
-        """Metadata for class StableVersion."""
-        db_table = 'afe_stable_versions'
-
-    def save(self, *args, **kwargs):
-        if os.getenv("OVERRIDE_STABLE_VERSION_BAN"):
-            super(StableVersion, self).save(*args, **kwargs)
-        else:
-            raise RuntimeError("the ability to save StableVersions has been intentionally removed")
-
-    # pylint:disable=undefined-variable
-    def delete(self):
-        if os.getenv("OVERRIDE_STABLE_VERSION_BAN"):
-            super(StableVersion, self).delete(*args, **kwargs)
-        else:
-            raise RuntimeError("the ability to delete StableVersions has been intentionally removed")
