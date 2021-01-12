@@ -50,6 +50,11 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     validators: [Validators.required, gsURLValidator],
   });
 
+  userCrOSVersionForm = new FormControl('');
+  defaultCrOSVersionForm = new FormControl('');
+
+  userCrOSVersionValue = 'None';
+
   bucketLink = '';
   cloudConfigDisabledMessage = '';
 
@@ -86,9 +91,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
     private moblabConfigurationRpcService: MoblabConfigurationGrpcService
-  ) {}
+  ) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.bucketURLForm.valueChanges.subscribe(value => {
       this.formatBucketLink();
     });
@@ -101,6 +106,38 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.getCloudConfiguration();
     this.getVersionInfo();
     this.getDutWifiInfo();
+    this.defaultCrOSVersionForm.disable();
+    await this.getStableCrOSVersion();
+  }
+
+  public async getStableCrOSVersion() {
+    this.userCrOSVersionForm.disable();
+    try {
+      const version = await this.moblabConfigurationRpcService.get_stable_build_version();
+      this.userCrOSVersionValue = version.UserOverrideVersion;
+      this.userCrOSVersionForm.setValue(version.UserOverrideVersion);
+      this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
+    } catch (error) {
+      console.log('get_stable_build_version call failed with:' + error);
+      this.setOffError('Failed to fetch stable Chrome OS version: ' + error);
+    } finally {
+      this.userCrOSVersionForm.enable();
+    }
+  }
+
+  public async setStableCrOSVersion(override_value: string) {
+    this.userCrOSVersionForm.disable();
+    try {
+      const version = await this.moblabConfigurationRpcService.set_stable_build_version(override_value);
+      this.userCrOSVersionValue = version.UserOverrideVersion;
+      this.userCrOSVersionForm.setValue(version.UserOverrideVersion);
+      this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
+    } catch (error) {
+      console.log('get_stable_build_version call failed with:' + error);
+      this.setOffError('Failed to fetch stable Chrome OS version: ' + error);
+    } finally {
+      this.userCrOSVersionForm.enable();
+    }
   }
 
   getNetworkInfo() {
@@ -220,6 +257,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       (this.lastFetchedDutWifiName !== this.dutWifiNameForm.value ||
         this.lastFetchedDutWifiPassword !== this.dutWifiPasswordForm.value)
     );
+  }
+
+  isStableCrOsVersionChanged() {
+    return this.userCrOSVersionForm.value !== this.userCrOSVersionValue;
   }
 
   private setDutWifiInfo(dut_wifi_name: string, dut_wifi_password: string) {
