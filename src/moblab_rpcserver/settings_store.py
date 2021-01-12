@@ -3,11 +3,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 import logging
+import collections
 
-from moblab_common.database_models.moblab_settings import MoblabSettings
-
+from google.protobuf.json_format import MessageToJson, Parse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from moblab_common.database_models.moblab_settings import MoblabSettings
+from moblab_common.proto.moblab_settings_pb2 import (
+    MoblabSettingKey,
+    MoblabSetting,
+    Value,
+)
 
 
 class MoblabDb:
@@ -21,14 +28,14 @@ class MoblabDb:
         return MoblabDb._Session()
 
 
-class SettingsStore:
+class MoblabSettingsStore:
     """Abstraction around persistence layer"""
 
     def __init__(self):
         self.db = MoblabDb()
 
-    def get_settings(self, keys):
-        """Returns the list of active"""
+    def get_settings(self, keys: [str]) -> [MoblabSettings]:
+        """Returns the list of MoblabSettings"""
         if keys:
             session = self.db.get_session()
             results = (
@@ -37,11 +44,19 @@ class SettingsStore:
                 .all()
             )
             session.close()
-            if results:
-                return [r.value or r.default_value for r in results]
+            return results
         return None
 
-    def set_setting(self, key, value):
+    def set_setting(
+        self,
+        key: [str],
+        value: [str],
+    ) -> None:
+        """Create or update setting by key.
+        Args:
+            key: string that uniquely identifies the setting;
+            value: user value;
+        """
         session = self.db.get_session()
         try:
             setting = session.query(MoblabSettings).filter_by(key=key).first()
@@ -51,7 +66,6 @@ class SettingsStore:
                     MoblabSettings(
                         key=key,
                         value=value,
-                        default_value=value,
                     )
                 )
             else:
@@ -65,3 +79,32 @@ class SettingsStore:
             session.commit()
         finally:
             session.close()
+
+
+class SettingsService:
+    """Provides a proto messages abstraction layer of moblab settings"""
+
+    def __init__(self):
+        self._settings_store = MoblabSettingsStore()
+
+    def get_settings(self, keys: [MoblabSettingKey]) -> [MoblabSetting]:
+        """Read MoblabSetting from persistence layer.
+
+        Returns:
+            The list of MoblabSetting objects.
+        """
+        string_keys = [MoblabSettingKey.Name(key) for key in keys]
+
+        logging.info("inside get_settings(%s)", string_keys)
+
+        moblab_settings = self._settings_store.get_settings(string_keys)
+        if moblab_settings:
+            return [Parse(s.value, MoblabSetting()) for s in moblab_settings]
+        return []
+
+    def set_setting(self, setting: MoblabSetting):
+        """Persist MoblabSetting."""
+        serialized_value = MessageToJson(setting)
+        self._settings_store.set_setting(
+            MoblabSettingKey.Name(setting.key), serialized_value
+        )

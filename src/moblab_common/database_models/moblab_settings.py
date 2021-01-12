@@ -15,5 +15,4 @@ class MoblabSettings(Base):
     id = Column(Integer, primary_key=True)
     key = Column(String(length=255), nullable=False, unique=True)
     value = Column(String(length=max), nullable=False)
-    default_value = Column(String(length=max), nullable=False)
     description = Column(Text, default=False)

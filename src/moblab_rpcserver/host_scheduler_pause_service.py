@@ -2,10 +2,8 @@
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-from google.protobuf.json_format import MessageToJson, Parse
-
 from moblab_common.afe_connector import AFEConnector
-from settings_store import SettingsStore
+from settings_store import SettingsService
 from moblab_common.proto.moblab_settings_pb2 import (
     MoblabSettingKey,
     MoblabSetting,
@@ -30,7 +28,7 @@ class HostSchedulerPauseService:
     """
 
     def __init__(self):
-        self._settings_store = SettingsStore()
+        self._settings_service = SettingsService()
         self._afe_connector = AFEConnector()
 
     def pause_moblab(self, requestor_setting):
@@ -158,17 +156,12 @@ class HostSchedulerPauseService:
             The list of PauseRequestor.
         """
         keys = [
-            MoblabSettingKey.Name(
-                MoblabSettingKey.MOBLAB_SETTING_LOW_DISK_SPACE
-            ),
-            MoblabSettingKey.Name(
-                MoblabSettingKey.MOBLAB_SETTING_PAUSED_BY_USER
-            ),
+            MoblabSettingKey.MOBLAB_SETTING_LOW_DISK_SPACE,
+            MoblabSettingKey.MOBLAB_SETTING_PAUSED_BY_USER,
         ]
 
-        serialized_values = self._settings_store.get_settings(keys)
-        if serialized_values:
-            settings = [Parse(sv, MoblabSetting()) for sv in serialized_values]
+        settings = self._settings_service.get_settings(keys)
+        if settings:
             return [
                 setting.key for setting in settings if setting.value.bool_value
             ]
@@ -183,7 +176,4 @@ class HostSchedulerPauseService:
             key=MoblabSettingKey.Name(requestor),
             value=Value(bool_value=is_paused),
         )
-        serialized_value = MessageToJson(setting)
-        self._settings_store.set_setting(
-            MoblabSettingKey.Name(setting.key), serialized_value
-        )
+        self._settings_service.set_setting(setting)
