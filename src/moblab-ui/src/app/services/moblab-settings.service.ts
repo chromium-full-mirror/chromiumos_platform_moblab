@@ -12,8 +12,9 @@ export class MoblabSettingsService {
   private pauseRequestorsSubject = new BehaviorSubject<string[]>([]);
   public pauseRequestors = this.pauseRequestorsSubject.asObservable();
 
+  // Starting a background process to check on system pause state
   constructor(private grpcService: MoblabConfigurationGrpcService) {
-    interval(5000)
+    interval(60000)
       .pipe(startWith(0))
       .subscribe(i => this.readHostSchedulingStatus());
   }
