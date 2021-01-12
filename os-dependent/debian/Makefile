@@ -21,7 +21,7 @@ local_registry:
 	# TODO fix this so if the file is empty it works correctly.
 	sed -i '1d' /etc/docker/daemon.json
 	# Add in our insecure registry
-	sed -i "1 i\{\n  \"insecure-registries\": [\"$$(hostname -I | awk -F ' ' '{print $$1}'):5000\"]," /etc/docker/daemon.json
+	sed -i "1 i\{\n  \"insecure-registries\": [\"$$(hostname -i | awk -F ' ' '{print $$1}'):5000\"]," /etc/docker/daemon.json
 	cat /etc/docker/daemon.json
 	service docker start
 	cp init/moblab-docker-registry /etc/init.d
