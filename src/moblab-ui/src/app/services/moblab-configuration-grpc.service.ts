@@ -10,9 +10,19 @@ import {
   ResumeHostSchedulerResponse,
   PauseRequestor,
   GetHostSchedulerPauseStatusResponse,
+  GetStableBuildVersionRequest,
+  GetStableBuildVersionResponse,
+  SetStableBuildVersionRequest,
+  SetStableBuildVersionResponse,
+  StableVersion,
 } from './moblab_configuration_rpc_pb';
 
 import {MoblabSettingsConstains} from '../constants';
+
+export class StableCrOSVersion {
+  public DefaultVersion: string = "";
+  public UserOverrideVersion: string = "";
+}
 
 @Injectable({providedIn: 'root'})
 export class MoblabConfigurationGrpcService {
@@ -69,6 +79,31 @@ export class MoblabConfigurationGrpcService {
       .then((response: ResumeHostSchedulerResponse) =>
         response.getPauserequestorsList().map(this.map_requestors)
       );
+  }
+
+  get_stable_build_version() {
+    const request = new GetStableBuildVersionRequest();
+    return this.configurationRpcClient
+      .get_stable_build_version(request)
+      .then((response: GetStableBuildVersionResponse) => {
+        let result = new StableCrOSVersion();
+        result.DefaultVersion = response.getStableVersion().getDefaultVersion();
+        result.UserOverrideVersion = response.getStableVersion().getOverrideVersion();
+        return result;
+      });
+  }
+
+  set_stable_build_version(override_version: string) {
+    const request = new SetStableBuildVersionRequest();
+    request.setStableVersion(new StableVersion().setOverrideVersion(override_version));
+    return this.configurationRpcClient
+      .set_stable_build_version(request)
+      .then((response: SetStableBuildVersionResponse) => {
+        let result = new StableCrOSVersion();
+        result.DefaultVersion = response.getStableVersion().getDefaultVersion();
+        result.UserOverrideVersion = response.getStableVersion().getOverrideVersion();
+        return result;
+      });
   }
 
   private map_requestors(requestor: PauseRequestor) {
