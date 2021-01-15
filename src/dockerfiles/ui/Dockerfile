@@ -7,10 +7,6 @@ ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 ######################################################################
 
-FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
-
-######################################################################
-
 FROM ${BASE_REGISTRY_URI}/node:15 as build
 
 # install chrome for protractor tests

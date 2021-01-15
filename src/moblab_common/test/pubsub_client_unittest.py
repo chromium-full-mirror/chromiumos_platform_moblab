@@ -1,15 +1,15 @@
 """Unit tests for pubsub_client module"""
 
-from unittest import TestCase, main
+import unittest
 from unittest.mock import patch
 from google.cloud.pubsub_v1.publisher.futures import Future
 
-import pubsub_client
+from moblab_common import pubsub_client
 
 # pylint: disable=missing-function-docstring
 
 
-class PubSubBasedClientTest(TestCase):
+class PubSubBasedClientTest(unittest.TestCase):
     """Unit tests for PubSubBasedClient class."""
 
     DUT_ATTR_ONE = {"moblab_dut_id": "id_one", "status": "DUT_STATUS_READY"}
@@ -39,7 +39,7 @@ class PubSubBasedClientTest(TestCase):
 
     def setUp(self):
         self.publisher_client_patcher = patch(
-            "pubsub_client.pubsub_v1.PublisherClient"
+            "moblab_common.pubsub_client.pubsub_v1.PublisherClient"
         )
         self.mock_publisher_client = self.publisher_client_patcher.start()
         self.test_pubsub_based_client = pubsub_client.PubSubBasedClient()
@@ -47,7 +47,7 @@ class PubSubBasedClientTest(TestCase):
     def tearDown(self):
         self.publisher_client_patcher.stop()
 
-    @patch("pubsub_client.PubSubClient.publish_notifications")
+    @patch("moblab_common.pubsub_client.PubSubClient.publish_notifications")
     def test_send_messages_with_attributes_creates_correct_msgs(
         self, mock_publish_notifs
     ):
@@ -68,7 +68,7 @@ class PubSubBasedClientTest(TestCase):
             self.pubsub_topic, expected_msgs
         )
 
-    @patch("pubsub_client.callback")
+    @patch("moblab_common.pubsub_client.callback")
     def test_send_messages_with_attributes_succeeds_with_two_msgs(
         self, mock_callback
     ):
@@ -108,4 +108,4 @@ class PubSubBasedClientTest(TestCase):
 
 
 if __name__ == "__main__":
-    main()
+    unittest.main()

@@ -6,10 +6,10 @@ import sys
 import unittest
 
 from unittest import mock
+from moblab_common.build_connector import MoblabBuildConnector
 
 sys.modules["google.auth"] = mock.MagicMock()
 sys.modules["google.cloud.storage"] = mock.MagicMock()
-from build_connector import MoblabBuildConnector
 
 
 class BuildConnectorTest(unittest.TestCase):
@@ -43,7 +43,9 @@ class BuildConnectorTest(unittest.TestCase):
         return mock_blob_itr
 
     def _create_mock_storage_client(self):
-        self.gcs_client_patcher = mock.patch("build_connector.GcsClient")
+        self.gcs_client_patcher = mock.patch(
+            "moblab_common.build_connector.GcsClient"
+        )
         self.mock_gcs_client = self.gcs_client_patcher.start()
         mock_gcs_bucket = mock.MagicMock()
         mock_gcs_bucket.list_blobs = self._mock_list_blobs

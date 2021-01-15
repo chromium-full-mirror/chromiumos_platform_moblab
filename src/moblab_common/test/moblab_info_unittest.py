@@ -8,21 +8,13 @@ import os
 import sys
 import subprocess
 import unittest
-import mock
-
+from unittest import mock
 from unittest.mock import MagicMock
 
+from moblab_common import host_connector
+from moblab_common import moblab_info
 
-# To make moblab_common imports work.
-sys.path.insert(0, os.path.dirname(__file__).rsplit("/", 1)[0])
-sys.modules["host_services"] = MagicMock()
-from moblab_common.host_connector import HostServicesException
-
-sys.modules["moblab_common.host_connector"] = MagicMock()
-sys.modules["moblab_common.lock_util"] = MagicMock()
-
-import moblab_info
-
+from moblab_common.proto.hostservice_pb2 import SystemVersionResponse
 
 MOCK_IP = "0.0.0.0"
 MOCK_ID = "6fcecb39f90348d68ea684280ffe8fbf"
@@ -36,8 +28,8 @@ MOCK_ETC_LSB_RELEASE_INCOMPLETE = [
 ]
 
 MOCK_VERSION_INFO = {
-    "CHROMEOS_RELEASE_BUILDER_PATH": "fizz-moblab-release/R84-13099.19.0",
-    "CHROMEOS_RELEASE_NAME": "Chrome OS",
+    "CHROMEOS_RELEASE_DESCRIPTION": "fizz moblab release R84",
+    "CHROMEOS_RELEASE_TRACK": "Dummy track",
     "CHROMEOS_RELEASE_VERSION": "R84-13099.19.0",
     "MOBLAB_ID": MOCK_ID,
     "MOBLAB_SERIAL_NUMBER": MOCK_SERIAL_NO,
@@ -50,7 +42,9 @@ class MoblabInfoTest(unittest.TestCase):
     def test_get_moblab_id(self):
         """Test for getting moblab id."""
         id_ = "moblabid"
-        with mock.patch("moblab_info.open", mock.mock_open(read_data=id_)):
+        with mock.patch(
+            "moblab_common.moblab_info.open", mock.mock_open(read_data=id_)
+        ):
             self.assertEqual(moblab_info.get_or_create_id(), id_)
 
     def test_create_moblab_id_by_another_process(self):
@@ -62,7 +56,9 @@ class MoblabInfoTest(unittest.TestCase):
         # pylint: disable=protected-access
         moblab_info._ID_FILE_LOCK_PATH = "/tmp/moblab_id_lock"
 
-        with mock.patch("moblab_info.open", mock.mock_open()) as m:
+        with mock.patch(
+            "moblab_common.moblab_info.open", mock.mock_open()
+        ) as m:
             # The 1st call of `open` failed, but the 2nd call is good. This
             # means another process created it, so stop creating it.
             m.side_effect = [IOError(), mock_read]
@@ -76,7 +72,9 @@ class MoblabInfoTest(unittest.TestCase):
         mock_write = mock.MagicMock()
         new_id = "new_uuid"
 
-        with mock.patch("moblab_info.open", mock.mock_open()) as m:
+        with mock.patch(
+            "moblab_common.moblab_info.open", mock.mock_open()
+        ) as m:
             # The 1st and 2nd call of `open` both failed, so we have to create
             # the id file.
             m.side_effect = (IOError(), IOError(), mock_write)
@@ -88,38 +86,42 @@ class MoblabInfoTest(unittest.TestCase):
                 )
 
     @mock.patch(
-        "moblab_info.host_connector.HostServicesConnector.get_host_identifier"
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_host_identifier"
     )
     def test_get_moblab_serial_number_from_vpd(self, mock_get_host_identifier):
         """Test for getting moblab SN from system VPD."""
         mock_get_host_identifier.return_value = MOCK_SERIAL_NO
 
-        with mock.patch("subprocess.check_output") as mock_output:
+        with mock.patch("subprocess.check_output"):
             self.assertEqual(moblab_info.get_serial_number(), MOCK_SERIAL_NO)
 
     @mock.patch(
-        "moblab_info.host_connector.HostServicesConnector.get_host_identifier"
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_host_identifier"
     )
     def test_get_moblab_serial_number_from_mac(self, mock_get_host_identifier):
         """Test for getting moblab SN from MAC."""
         mock_get_host_identifier.return_value = MOCK_SERIAL_NO
 
-        runtime_error = subprocess.CalledProcessError(1, "bad cmd", "")
-        with mock.patch("subprocess.check_output") as mock_output:
+        subprocess.CalledProcessError(1, "bad cmd", "")
+        with mock.patch("subprocess.check_output"):
             self.assertEqual(moblab_info.get_serial_number(), MOCK_SERIAL_NO)
 
     @mock.patch(
-        "moblab_info.host_connector.HostServicesConnector.get_host_identifier"
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_host_identifier"
     )
     def test_get_moblab_serial_number_no_sn(self, mock_get_host_identifier):
         """Test for trying to get moblab SN but failed."""
-        mock_get_host_identifier.side_effect = [HostServicesException]
+        mock_get_host_identifier.side_effect = [
+            host_connector.HostServicesException
+        ]
 
         self.assertEqual(
             moblab_info.get_serial_number(), moblab_info.NO_SERIAL_NUMBER
         )
 
-    @mock.patch("moblab_info.host_connector.HostServicesConnector.get_ip")
+    @mock.patch(
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_ip"
+    )
     def test_get_network_info(self, mock_get_ip):
         mock_get_ip.return_value = MOCK_IP
 
@@ -128,9 +130,11 @@ class MoblabInfoTest(unittest.TestCase):
             {"server_ip": MOCK_IP, "is_connected": True},
         )
 
-    @mock.patch("moblab_info.host_connector.HostServicesConnector.get_ip")
+    @mock.patch(
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_ip"
+    )
     def test_get_network_info_failed(self, mock_get_ip):
-        mock_get_ip.side_effect = [HostServicesException]
+        mock_get_ip.side_effect = [host_connector.HostServicesException]
 
         self.assertEqual(
             moblab_info.get_network_info(),
@@ -144,19 +148,31 @@ class MoblabInfoTest(unittest.TestCase):
         return mock_file
 
     @mock.patch(
-        "moblab_info.host_connector.HostServicesConnector.get_host_identifier"
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_system_version"
+    )
+    @mock.patch(
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_host_identifier"
     )
     @mock.patch("builtins.open")
-    def test_get_version_info(self, mock_open, mock_get_host_identifier):
+    def test_get_version_info(
+        self, mock_open, mock_get_host_identifier, mock_get_system_version
+    ):
         mock_open.return_value = self._get_mock_file(
             MOCK_ETC_LSB_RELEASE_COMPLETE
         )
         mock_get_host_identifier.return_value = MOCK_SERIAL_NO
+        mock_get_system_version.return_value = SystemVersionResponse(
+            version="R84-13099.19.0",
+            track="Dummy track",
+            description="fizz moblab release R84",
+        )
 
-        self.assertEqual(moblab_info.get_version_info(), MOCK_VERSION_INFO)
+        result = moblab_info.get_version_info()
+
+        self.assertEqual(result, MOCK_VERSION_INFO)
 
     @mock.patch(
-        "moblab_info.host_connector.HostServicesConnector.get_host_identifier"
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_host_identifier"
     )
     @mock.patch("builtins.open")
     def test_get_version_info_failed(
@@ -167,12 +183,12 @@ class MoblabInfoTest(unittest.TestCase):
         )
         mock_get_host_identifier.return_value = MOCK_SERIAL_NO
 
-        with self.assertLogs("moblab_info", level="INFO") as log:
+        with self.assertLogs("moblab_common.moblab_info", level="INFO") as log:
             self.assertRaises(
                 moblab_info.MoblabInfoError, moblab_info.get_version_info
             )
             self.assertIn(
-                "Unable to parse ChromeOS release version.", log.output[0]
+                "Failed to get version information from host.", log.output[0]
             )
 
 

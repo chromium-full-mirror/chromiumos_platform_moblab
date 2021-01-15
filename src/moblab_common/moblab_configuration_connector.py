@@ -10,9 +10,7 @@ import logging
 import grpc
 
 from moblab_common.proto import moblab_configuration_rpc_pb2
-from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
-    MoblabConfigurationServiceStub,
-)
+from moblab_common.proto import moblab_configuration_rpc_pb2_grpc as grpc_stub
 
 from moblab_common.moblabrpc_connector import MoblabRpcConnectorError
 
@@ -42,7 +40,9 @@ class MoblabConfigurationRpcConnector(object):
         if not cls.channel or not cls.stub:
             cls.channel = grpc.insecure_channel(DEFAULT_SERVER)
             if cls.channel:
-                cls.stub = MoblabConfigurationServiceStub(cls.channel)
+                cls.stub = grpc_stub.MoblabConfigurationServiceStub(
+                    cls.channel
+                )
                 if not cls.stub:
                     raise MoblabRpcConnectorError(
                         "Unable to connect to server %s" % DEFAULT_SERVER

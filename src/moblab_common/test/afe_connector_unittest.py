@@ -12,12 +12,11 @@ import unittest
 
 from datetime import datetime
 from unittest import mock
-from unittest.mock import MagicMock, PropertyMock
+from unittest.mock import MagicMock
+from moblab_common import afe_connector
 
 sys.modules["docker"] = MagicMock()
 sys.modules["requests"] = MagicMock()
-
-import afe_connector
 
 
 class AFEConnectorTest(unittest.TestCase):
@@ -26,27 +25,25 @@ class AFEConnectorTest(unittest.TestCase):
     def setUp(self):
         self.afe_conn = afe_connector.AFEConnector()
 
-    @mock.patch("afe_connector.requests.post")
+    @mock.patch("moblab_common.afe_connector.requests.post")
     def test_send_rpc_command(self, mock_post):
         self.afe_conn.send_rpc_command("fake_method", "fake_params")
         mock_post.assert_called_once_with(
-            "http://localhost:80/afe/server/rpc/",
-            data='{"params": ["fake_params"], "id": 0, "method": "fake_method"}',
+            "http://autotest-afe:8888/afe/server/rpc/",
+            data='{"id": 0, "method": "fake_method", "params": ["fake_params"]}',
         )
 
-    @mock.patch("afe_connector.requests.post")
-    @mock.patch("chromite.lib.cros_logging.error")
-    def test_send_rpc_command_fail(self, mock_logging, mock_post):
+    @mock.patch("moblab_common.afe_connector.requests.post")
+    def test_send_rpc_command_fail(self, mock_post):
         test_exception = afe_connector.requests.exceptions.RequestException(
             "Testing"
         )
         mock_post.side_effect = test_exception
         self.afe_conn.send_rpc_command("fake_method", "fake_params")
         mock_post.assert_called_once_with(
-            "http://localhost:80/afe/server/rpc/",
-            data='{"params": ["fake_params"], "id": 0, "method": "fake_method"}',
+            "http://autotest-afe:8888/afe/server/rpc/",
+            data='{"id": 0, "method": "fake_method", "params": ["fake_params"]}',
         )
-        mock_logging.assert_called_once_with(test_exception)
 
     def test_decode_response(self):
         response = mock.Mock()
@@ -71,8 +68,8 @@ class AFEConnectorTest(unittest.TestCase):
 
         self.assertEqual({}, self.afe_conn.decode_response(response, "result"))
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
-    @mock.patch("afe_connector.AFEConnector.decode_response")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.decode_response")
     def test_get_config_values(
         self, mock_decode_response, mock_send_rpc_command
     ):
@@ -99,8 +96,8 @@ class AFEConnectorTest(unittest.TestCase):
             result,
         )
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
-    @mock.patch("afe_connector.AFEConnector.decode_response")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.decode_response")
     def test_get_connected_devices(
         self, mock_decode_response, mock_send_rpc_command
     ):
@@ -108,11 +105,11 @@ class AFEConnectorTest(unittest.TestCase):
 
         result = self.afe_conn.get_connected_devices()
 
-        mock_send_rpc_command.assert_called_once_with("get_hosts")
+        mock_send_rpc_command.assert_called_once_with("get_hosts", {})
         mock_decode_response.assert_called_once()
         self.assertEqual("Testing", result)
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_get_jobs(self, mock_send_rpc_command):
         jobs_dict = [
             {"id": 1, "name": "job1"},
@@ -138,23 +135,24 @@ class AFEConnectorTest(unittest.TestCase):
         mock_send_rpc_command.assert_called_once_with(
             "get_jobs_summary",
             {
-                "created_on__gt": datetime.utcfromtimestamp(
-                    int(dummy_timestamp)
-                ).strftime("%Y-%m-%d %H:%M:%S"),
-                "name__icontains": "job_name",
-                "sub": "true",
                 "query_start": 0,
                 "query_limit": 25,
+                "sort_by": ["-created_on"],
                 "id__icontains": 1,
-                "finished": "true",
-                "created_on__lt": datetime.utcfromtimestamp(
+                "name__icontains": "job_name",
+                "created_on__lte": datetime.fromtimestamp(
                     int(dummy_timestamp)
                 ).strftime("%Y-%m-%d %H:%M:%S"),
+                "created_on__gte": datetime.fromtimestamp(
+                    int(dummy_timestamp)
+                ).strftime("%Y-%m-%d %H:%M:%S"),
+                "sub": "true",
+                "finished": "true",
             },
         )
         self.assertEqual(jobs_dict, result)
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_get_jobs_by_ids(self, mock_send_rpc_command):
         jobs_id = [1, 2]
         jobs_dict = [
@@ -170,7 +168,7 @@ class AFEConnectorTest(unittest.TestCase):
         )
         self.assertEqual(jobs_dict, result)
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_get_special_tasks(self, mock_send_rpc_command):
         tasks_id = [1, 2]
         tasks_dict = [
@@ -184,11 +182,11 @@ class AFEConnectorTest(unittest.TestCase):
         result = self.afe_conn.get_special_tasks(tasks_id)
 
         mock_send_rpc_command.assert_called_once_with(
-            "get_special_tasks", {"id__in": tasks_id}
+            "get_special_tasks", {"id__in": tasks_id, "sort_by": ["-id"]}
         )
         self.assertEqual(tasks_dict, result)
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_get_host_queue_entries(self, mock_send_rpc_command):
         job_id = 1
         hqes = [{"key1": "value1"}, {"key2": "value2"}]
@@ -202,7 +200,7 @@ class AFEConnectorTest(unittest.TestCase):
         )
         self.assertEqual(hqes, result)
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_run_suite(self, mock_send_rpc_command):
         self.afe_conn.run_suite(
             board="test_board",
@@ -234,12 +232,12 @@ class AFEConnectorTest(unittest.TestCase):
             },
         )
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_get_dut_wifi_info(self, mock_send_rpc_command):
         self.afe_conn.get_dut_wifi_info()
         mock_send_rpc_command.assert_called_once_with("get_dut_wifi_info", {})
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_set_configuration_info_cloud(self, mock_send_rpc_command):
         MOCK_BOTO_ACCESS_ID = "GOOGRKMVD3VCFI51JHWM"
         MOCK_BOTO_ACCESS_KEY = "QlZThtrb9hNfWL2R6MHbUfU7tjHUwAZPy8nyQ3c86"
@@ -265,7 +263,7 @@ class AFEConnectorTest(unittest.TestCase):
             },
         )
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_set_configuration_info_dut_wifi(self, mock_send_rpc_command):
         MOCK_DUT_WIFI_NAME = "Fake Wifi"
         MOCK_DUT_WIFI_PASSWORD = "perhaps934999linux"
@@ -285,7 +283,7 @@ class AFEConnectorTest(unittest.TestCase):
             },
         )
 
-    @mock.patch("afe_connector.AFEConnector.send_rpc_command")
+    @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_set_is_remote_agent_enabled(self, mock_send_rpc_command):
         MOCK_IS_ENABLED = True
         self.afe_conn.set_is_remote_agent_enabled(is_enabled=MOCK_IS_ENABLED)

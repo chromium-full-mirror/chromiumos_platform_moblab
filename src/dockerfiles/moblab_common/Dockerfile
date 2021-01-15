@@ -7,18 +7,18 @@ ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=release
 
 ######################################################################
+# Python 3 build stage
 
-FROM ${REGISTRY_URI}/protoc:${LABEL} as protoc
-
-######################################################################
-
-FROM ${BASE_REGISTRY_URI}/python:3.8-buster as python3
+FROM ${BASE_REGISTRY_URI}/python:3.8-buster as python3-build
 
 WORKDIR /src/tools/
 COPY src/tools/create-moblab-id.py .
 
 WORKDIR /src/moblab_common
 COPY src/moblab_common/ .
+
+RUN mkdir /test
+RUN mv test/ /
 
 COPY src/dockerfiles/moblab_common/setup.py /
 RUN python3 -m pip install --upgrade pip
@@ -29,8 +29,9 @@ WORKDIR /wheel
 RUN cp /src/moblab_common/dist/* .
 
 ######################################################################
+# Python 2 build stage
 
-FROM ${BASE_REGISTRY_URI}/python:2-buster as python2
+FROM ${BASE_REGISTRY_URI}/python:2-buster as python2-build
 
 WORKDIR /src/tools/
 COPY src/tools/create-moblab-id.py .
@@ -47,13 +48,30 @@ RUN python2 /setup.py bdist_wheel
 WORKDIR /wheel
 RUN ls /src/moblab_common/
 RUN cp /src/moblab_common/dist/* .
-#RUN rm -rf /src
 
 ######################################################################
+# Unit testing stage
+
+FROM python3-build as python3-test
+
+# Installs Moblab API client library
+WORKDIR /tmp/moblab_api_client_library
+RUN curl https://storage.googleapis.com/moblab-api-distribution/google-chromeos-moblab.tar.gz -o google-chromeos-moblab.tar.gz
+RUN tar -xvzf google-chromeos-moblab.tar.gz
+RUN python3 -m pip install .
+RUN rm -rf /tmp/moblab_api_client_library
+
+WORKDIR /test
+RUN python3 -m pip install /src/moblab_common/dist/*.whl
+
+RUN rm -rf /src
+
+######################################################################
+# Wheel package distribution stage
 
 FROM ${BASE_REGISTRY_URI}/debian:buster-slim
 
 WORKDIR /wheel
 
-COPY --from=python3 /wheel/* .
-COPY --from=python2 /wheel/* .
+COPY --from=python3-build /wheel/* .
+COPY --from=python2-build /wheel/* .
