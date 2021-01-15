@@ -107,14 +107,28 @@ class MoblabDUTConnector(object):
                     else ""
                 )
 
-                exit_code = host_output.exit_code
+                # Extracts details from host_output.exception to construct an
+                # error message.
+                try:
+                    if host_output.exception:
+                        logging.info("Found a host output exception: %s",
+                                     host_output.exception)
+                        exception_msg = host_output.exception.args[0]
+                        exception_args = host_output.exception.args[1:]
+                        stderr += exception_msg.strerror % exception_args
+                except IndexError:
+                    logging.exception(
+                        "Failed to extract information from " +
+                        "host_output.exception: %s",
+                        host_output.exception)
+                except TypeError:
+                    logging.exception(
+                        "Failed to construct the stderr from " +
+                        "host_output.exception: %s",
+                        host_output.exception)
 
-                if host_output.exception:
-                    exception_msg = host_output.exception.args[0]
-                    exception_args = host_output.exception.args[1:]
-                    stderr += exception_msg % exception_args
                 command_results.append(
-                    (host_output.host, stdout, stderr, exit_code)
+                    (host_output.host, stdout, stderr, host_output.exit_code)
                 )
             logging.info(
                 "Running command %s on %s resulted in %s",
