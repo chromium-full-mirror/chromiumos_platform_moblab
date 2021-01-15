@@ -136,6 +136,40 @@ class HostServerDebian(host_server_base.HostServerBase):
 
         return response
 
+    def get_disk_usage_stats(self, request, context):
+        """Get information about available disk space.
+
+        Returns:
+            GetDiskUsageStatsResponse:
+                free_MB: amount of available disk space in MB.
+        """
+        if not self.docker_dir:
+            cmd = ["docker info | grep 'Root Dir'"]
+            cmd_result = subprocess.run(
+                cmd, stdout=subprocess.PIPE, shell=True
+            )
+            self.docker_dir = cmd_result.stdout.split(b": ")[1].strip()
+        disk_stats = [
+            s.split()
+            for s in os.popen("df -BM %s" % self.docker_dir)
+            .read()
+            .splitlines()
+        ]
+        # Ex. output:
+        # Filesystem   1M-blocks    Used Available Use% Mounted on
+        # /dev/mmcblk0   790388M 168009M   582163M  23% /
+        # ...
+        if len(disk_stats) != 1:
+            raise DiskSpaceException(
+                "%s stateful partitions found, expected one" % len(disk_stats)
+            )
+        disk_stats = disk_stats[0]
+
+        response = hostservice_pb2.GetDiskUsageStatsResponse()
+        response.available_MB = int(disk_stats[3].rstrip("M"))
+        response.total_MB = int(disk_stats[1].rstrip("M"))
+        return response
+
 
 if __name__ == "__main__":
     host_server = HostServerDebian()
