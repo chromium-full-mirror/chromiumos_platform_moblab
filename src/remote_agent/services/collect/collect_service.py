@@ -96,6 +96,11 @@ class CollectService(Constants):
             self.moblab_install_id = self.moblab_version_info[
                 self.MOBLAB_INSTALL_ID_NAME
             ].rstrip()
+            _LOGGER.info("Successfully collected moblab host id: %s, moblab "
+                         "install id: %s and moblab version info: %s",
+                         self.moblab_host_id,
+                         self.moblab_install_id,
+                         self.moblab_version_info)
             return True
         except KeyError as err:
             _LOGGER.exception(
@@ -165,6 +170,8 @@ class CollectService(Constants):
                 "Failed to get moblab version attributes for missing key: %s",
                 err,
             )
+
+        _LOGGER.info("Successfully created Moblab basic message: %s", moblab)
         return moblab
 
     def _calculate_disk_in_bytes(self, disk_space_list):
@@ -230,7 +237,6 @@ class CollectService(Constants):
                 used_disk_size_bytes + free_disk_size_bytes
             )
             return disk_stats
-
         except AttributeError as err:
             _LOGGER.exception("Failed to get disk info for the error: %s", err)
         except IndexError as err:
@@ -259,6 +265,9 @@ class CollectService(Constants):
         moblab.disk_stats.total_disk_size_bytes = (
             disk_stats.total_disk_size_bytes
         )
+
+        _LOGGER.info("Successfully created Moblab disk stats message: %s",
+                     moblab)
         return moblab
 
     def create_moblab_network_message(self):
@@ -288,8 +297,9 @@ class CollectService(Constants):
             moblab.network_stats.broken_connections = network_json[
                 "connection_breaks"
             ]
+            _LOGGER.info("Successfully created Moblab network stats message: "
+                         "%s", moblab)
             return moblab
-
         except (RunCommandError, KeyError) as err:
             _LOGGER.exception(
                 "Failed to get network status from network diagonosis: %s", err
@@ -381,6 +391,7 @@ class CollectService(Constants):
         if moblab_dut.is_locked:
             moblab_dut.lock_reason = dut_info_dict["lock_reason"]
 
+        _LOGGER.info("Successfully created DUT basic message: %s", moblab_dut)
         return moblab_dut
 
     def create_dut_status_message(self, dut_info_dict, dut_id):
@@ -408,6 +419,7 @@ class CollectService(Constants):
             _LOGGER.exception("Unrecorded dut status: %s", err)
             return None
 
+        _LOGGER.info("Successfully created DUT status message: %s", moblab_dut)
         return moblab_dut
 
     def collect_attr_for_moblab(self, attribute_type):
@@ -442,6 +454,8 @@ class CollectService(Constants):
                 "Moblab does not have attribute type: %s", attribute_type
             )
 
+        _LOGGER.info("Successfully collected Moblab information for the "
+                     "attribute: %s", attribute_type)
         return moblab
 
     def collect_attr_for_duts(self, attribute_type):
@@ -473,7 +487,7 @@ class CollectService(Constants):
             or not moblab_dut_ids
             or len(moblab_dut_ids) == 0
         ):
-            _LOGGER.exception(
+            _LOGGER.warning(
                 "Dut serial numbers or connected devices list is empty/none."
             )
             return duts
@@ -512,4 +526,6 @@ class CollectService(Constants):
                     )  # in millisecond
                     duts.append(dut)
 
+        _LOGGER.info("Successfully collected DUT information for the "
+                     "attribute: %s", attribute_type)
         return duts
