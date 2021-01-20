@@ -5,8 +5,8 @@
 """Unit tests for the mob-remote-scheduler"""
 
 import unittest
-from . import devserver_connector
 from unittest import mock
+from moblab_common import devserver_connector
 
 
 class DevserverConnectorTest(unittest.TestCase):
@@ -17,7 +17,7 @@ class DevserverConnectorTest(unittest.TestCase):
             ("test_storage_bucket")
         )
 
-    @mock.patch("devserver_connector.requests.get")
+    @mock.patch("moblab_common.devserver_connector.requests.get")
     def test_devserver_command(self, mock_get_request):
         response = mock.Mock()
         response.status_code = 200
@@ -29,10 +29,10 @@ class DevserverConnectorTest(unittest.TestCase):
 
         self.assertTrue(result)
         mock_get_request.assert_called_once_with(
-            "http://localhost:8080/testcommand?test_params", timeout=600
+            "http://devserver:8080/testcommand?test_params", timeout=600
         )
 
-    @mock.patch("devserver_connector.requests.get")
+    @mock.patch("moblab_common.devserver_connector.requests.get")
     def test_devserver_command_error(self, mock_get_request):
         response = mock.Mock()
         response.status_code = 302
@@ -44,12 +44,11 @@ class DevserverConnectorTest(unittest.TestCase):
 
         self.assertFalse(result)
         mock_get_request.assert_called_once_with(
-            "http://localhost:8080/testcommand?test_params", timeout=600
+            "http://devserver:8080/testcommand?test_params", timeout=600
         )
 
-    @mock.patch("devserver_connector.requests.get")
-    @mock.patch("chromite.lib.cros_logging.error")
-    def test_devserver_command_raises(self, mock_logging, mock_get_request):
+    @mock.patch("moblab_common.devserver_connector.requests.get")
+    def test_devserver_command_raises(self, mock_get_request):
         test_exception = (
             devserver_connector.requests.exceptions.RequestException("Testing")
         )
@@ -61,12 +60,12 @@ class DevserverConnectorTest(unittest.TestCase):
 
         self.assertFalse(result)
         mock_get_request.assert_called_once_with(
-            "http://localhost:8080/testcommand?test_params", timeout=600
+            "http://devserver:8080/testcommand?test_params", timeout=600
         )
-        mock_logging.assert_called_once_with(test_exception)
 
     @mock.patch(
-        "devserver_connector.DevserverConnector.send_devserver_command"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.send_devserver_command"
     )
     def test_stage_build_on_devserver(self, mock_send_devserver_command):
 
@@ -82,7 +81,8 @@ class DevserverConnectorTest(unittest.TestCase):
         self.assertTrue(result)
 
     @mock.patch(
-        "devserver_connector.DevserverConnector.send_devserver_command"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.send_devserver_command"
     )
     def test_check_build_staged_on_devserver(
         self, mock_send_devserver_command
@@ -100,12 +100,14 @@ class DevserverConnectorTest(unittest.TestCase):
         self.assertTrue(result)
 
     @mock.patch(
-        "devserver_connector.DevserverConnector.check_build_staged_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.check_build_staged_on_devserver"
     )
     @mock.patch(
-        "devserver_connector.DevserverConnector.stage_build_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.stage_build_on_devserver"
     )
-    @mock.patch("chromite.lib.cros_logging.info")
+    @mock.patch("logging.info")
     def test_stage_build(
         self,
         mock_logging,
@@ -124,12 +126,14 @@ class DevserverConnectorTest(unittest.TestCase):
         )
 
     @mock.patch(
-        "devserver_connector.DevserverConnector.check_build_staged_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.check_build_staged_on_devserver"
     )
     @mock.patch(
-        "devserver_connector.DevserverConnector.stage_build_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.stage_build_on_devserver"
     )
-    @mock.patch("chromite.lib.cros_logging.info")
+    @mock.patch("logging.info")
     def test_stage_build_custom_build(
         self,
         mock_logging,
@@ -150,12 +154,14 @@ class DevserverConnectorTest(unittest.TestCase):
         )
 
     @mock.patch(
-        "devserver_connector.DevserverConnector.check_build_staged_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.check_build_staged_on_devserver"
     )
     @mock.patch(
-        "devserver_connector.DevserverConnector.stage_build_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.stage_build_on_devserver"
     )
-    @mock.patch("chromite.lib.cros_logging.info")
+    @mock.patch("logging.info")
     def test_stage_build_already_staged(
         self,
         mock_logging,
@@ -171,12 +177,14 @@ class DevserverConnectorTest(unittest.TestCase):
         self.assertEqual(0, mock_stage_build_on_devserver.call_count)
 
     @mock.patch(
-        "devserver_connector.DevserverConnector.check_build_staged_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.check_build_staged_on_devserver"
     )
     @mock.patch(
-        "devserver_connector.DevserverConnector.stage_build_on_devserver"
+        "moblab_common.devserver_connector"
+        ".DevserverConnector.stage_build_on_devserver"
     )
-    @mock.patch("chromite.lib.cros_logging.info")
+    @mock.patch("logging.info")
     def test_stage_build_failed(
         self,
         mock_logging,

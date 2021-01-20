@@ -11,13 +11,11 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock  # , PropertyMock
 
+from moblab_common.monitoring.collect_logs import collect_logs
+
 MOCKED_DOCKER = MagicMock()
 sys.modules["docker"] = MOCKED_DOCKER
-sys.modules["moblab_common"] = MagicMock()
-sys.modules["moblab_common.utils"] = MagicMock()
 sys.modules["shutil"] = MagicMock()
-
-from collect_logs import collect_logs
 
 
 _NUM_MOCK_CONTAINERS = 10
@@ -74,11 +72,13 @@ class CollectLogsTest(unittest.TestCase):
 
     @mock.patch("os.chmod")
     @mock.patch("tempfile.TemporaryDirectory")
-    @mock.patch("collect_logs.cli")
-    @mock.patch("collect_logs._write_to_file")
-    @mock.patch("collect_logs.docker.from_env")
-    @mock.patch("collect_logs.docker.APIClient")
-    @mock.patch("collect_logs.host_connector.HostServicesConnector")
+    @mock.patch("moblab_common.monitoring.collect_logs.cli")
+    @mock.patch("moblab_common.monitoring.collect_logs._write_to_file")
+    @mock.patch("moblab_common.monitoring.collect_logs.docker.from_env")
+    @mock.patch("moblab_common.monitoring.collect_logs.docker.APIClient")
+    @mock.patch(
+        "moblab_common.monitoring.collect_logs.host_connector.HostServicesConnector"
+    )
     def test_collect_logs(
         self,
         mock_host_services_connector,

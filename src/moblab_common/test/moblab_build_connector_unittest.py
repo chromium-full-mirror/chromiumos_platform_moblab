@@ -5,9 +5,10 @@
 """Unit tests for the moblab_build_connector"""
 
 import unittest
+
 from unittest import mock
 
-from moblab_build_connector import MoblabBuildConnector
+from moblab_common.moblab_build_connector import MoblabBuildConnector
 
 from google.chromeos.moblab_v1beta1.types import build_service
 from google.chromeos.moblab_v1beta1.types import resources
@@ -37,7 +38,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
             ),
             milestone=str(self.MILESTONE),
         )
-        expect = (
+        (
             self.mock_build_service_client.list_builds.return_value
         ) = build_service.ListBuildsResponse(
             builds=[build],
@@ -60,7 +61,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
             milestone=str(self.MILESTONE),
             build_version=self.BUILD_VERSION,
         )
-        expect = (
+        (
             self.mock_build_service_client.list_builds.return_value
         ) = build_service.ListBuildsResponse(
             builds=[build],
@@ -76,12 +77,8 @@ class MoblabBuildConnectorTest(unittest.TestCase):
         self.mock_build_service_client.list_builds.assert_called_once()
 
     def test_check_build_stage_status(self):
-        staged_build_artifact = resources.BuildArtifact(
-            bucket=self.DESTINATION_BUCKET
-        )
-        source_build_artifact = resources.BuildArtifact(
-            bucket=self.SOURCE_BUCKET
-        )
+        resources.BuildArtifact(bucket=self.DESTINATION_BUCKET)
+        resources.BuildArtifact(bucket=self.SOURCE_BUCKET)
 
         self.assertTrue(
             self.moblab_build_connector.check_build_stage_status(

@@ -237,4 +237,14 @@ rpcserver-test: rpcserver
 	docker run -w /etc/moblab/moblab_rpcserver -v "${PWD}/moblab_rpcserver/coverage":/etc/moblab/moblab_rpcserver/coverage --rm ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
 		bash -c 'coverage run -m unittest discover -p "*_unittest.py" && coverage html -d coverage --omit "*_unittest.py"'
 
-test:	rpcserver-test
+test-common: export DOCKER_BUILDKIT=1
+test-common:
+	./moblab_common/protos/run_protogen.sh
+	docker build ${EXTRA_ARGS} -t moblab_common_test_py3:${LABEL} \
+		--target python3-test -f dockerfiles/moblab_common/Dockerfile ..
+
+	docker run -it moblab_common_test_py3:${LABEL} \
+		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v /test/'
+
+test:	rpcserver-test \
+		test-common

@@ -68,7 +68,9 @@ def sudo_run_command(cmd, user="root", error_code_ok=False, shell=False):
         sudo_cmd = ["sudo"] + cmd
     else:
         sudo_cmd = ["sudo", "-u", user] + cmd
-    return run_command(cmd, log=True, error_code_ok=error_code_ok, shell=shell)
+    return run_command(
+        sudo_cmd, log=True, error_code_ok=error_code_ok, shell=shell
+    )
 
 
 def create_tarball(tarball_name, directory, starting_directory=None):
@@ -147,7 +149,7 @@ def resolve_symlink(file_name, root="/"):
         if count > 128:
             raise ValueError("Too many link levels for %s." % file_name)
         link = os.readlink(file_name)
-        if link.startswith(b"/"):
+        if link.startswith("/"):
             file_name = os.path.join(root, link[1:])
         else:
             file_name = os.path.join(os.path.dirname(file_name), link)

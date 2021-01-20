@@ -4,33 +4,33 @@
 # found in the LICENSE file.
 
 import unittest
-import mock
+from unittest import mock
 
-import cli
+from moblab_common.utils import cli
 
 
 class TestRunCommand(unittest.TestCase):
     def test_run_command(self):
         output = cli.run_command(["echo", "hello"])
-        self.assertEqual(output, "hello\n")
+        self.assertEqual(output, b"hello\n")
 
     def test_run_command_error(self):
         with self.assertRaises(cli.RunCommandError):
             cli.run_command(["false"])
 
     def test_run_command_error_code_ok(self):
-        output = cli.run_command(["false"], error_code_ok=True)
+        cli.run_command(["false"], error_code_ok=True)
 
-    @mock.patch("cli.LOGGER")
+    @mock.patch("moblab_common.utils.cli.LOGGER")
     def test_run_command_log(self, MockLogger):
         cli.run_command(["echo", "hello"], log=True)
         MockLogger.info.assert_any_call("echo hello")
-        MockLogger.info.assert_any_call("hello\n")
+        MockLogger.info.assert_any_call(b"hello\n")
 
 
 class TestSudoRunCommand(unittest.TestCase):
-    @mock.patch("cli.LOGGER")
-    @mock.patch("cli.subprocess")
+    @mock.patch("moblab_common.utils.cli.LOGGER")
+    @mock.patch("moblab_common.utils.cli.subprocess")
     def test_sudo_as_root(self, MockLogger, MockSubprocess):
         cli.subprocess.check_output.return_value = "test"
         output = cli.sudo_run_command(["echo", "hello"])
@@ -41,8 +41,8 @@ class TestSudoRunCommand(unittest.TestCase):
         )
         cli.LOGGER.info.assert_any_call("sudo echo hello")
 
-    @mock.patch("cli.LOGGER")
-    @mock.patch("cli.subprocess")
+    @mock.patch("moblab_common.utils.cli.LOGGER")
+    @mock.patch("moblab_common.utils.cli.subprocess")
     def test_sudo_as_other_user(self, MockLogger, MockSubprocess):
         cli.subprocess.check_output.return_value = "test"
         output = cli.sudo_run_command(["echo", "hello"], user="moblab")
@@ -55,7 +55,7 @@ class TestSudoRunCommand(unittest.TestCase):
 
 
 class TestCreateTarball(unittest.TestCase):
-    @mock.patch("cli.run_command")
+    @mock.patch("moblab_common.utils.cli.run_command")
     def test_create_tarball(self, MockRunCommand):
         cli.create_tarball("mytarball.tgz", "/my/dir")
         cli.run_command.assert_called_with(
@@ -64,27 +64,27 @@ class TestCreateTarball(unittest.TestCase):
 
 
 class TestSafeMkdir(unittest.TestCase):
-    @mock.patch("cli.run_command")
+    @mock.patch("moblab_common.utils.cli.run_command")
     def test_safe_mkdir(self, MockRunCommand):
         cli.safe_mkdir("/path/to/my/dir")
         cli.run_command.assert_called_with(["mkdir", "-p", "/path/to/my/dir"])
 
 
 class TestRmDir(unittest.TestCase):
-    @mock.patch("cli.shutil")
-    @mock.patch("cli.run_command")
+    @mock.patch("moblab_common.utils.cli.shutil")
+    @mock.patch("moblab_common.utils.cli.run_command")
     def test_rm_dir(self, MockShutil, MockRunCommand):
         cli.rm_dir("rm/this/old/dir")
 
-    @mock.patch("cli.shutil")
-    @mock.patch("cli.run_command")
+    @mock.patch("moblab_common.utils.cli.shutil")
+    @mock.patch("moblab_common.utils.cli.run_command")
     def test_rm_dir_error(self, MockShutil, MockRunCommand):
         cli.shutil.rmtree.side_effect = EnvironmentError()
         with self.assertRaises(EnvironmentError):
             cli.rm_dir("rm/this/old/dir")
 
-    @mock.patch("cli.shutil")
-    @mock.patch("cli.run_command")
+    @mock.patch("moblab_common.utils.cli.shutil")
+    @mock.patch("moblab_common.utils.cli.run_command")
     def test_ignore_missing(self, MockShutil, MockRunCommand):
         def side_effect(arg):
             error = EnvironmentError()
@@ -93,8 +93,8 @@ class TestRmDir(unittest.TestCase):
         cli.shutil.rmtree.side_effect = side_effect
         cli.rm_dir("rm/this/old/dir", ignore_missing=True)
 
-    @mock.patch("cli.shutil")
-    @mock.patch("cli.run_command")
+    @mock.patch("moblab_common.utils.cli.shutil")
+    @mock.patch("moblab_common.utils.cli.run_command")
     def test_rm_dir_root(self, MockShutil, MockRunCommand):
         cli.rm_dir("rm/this/old/dir", sudo=True)
         cli.run_command.assert_called_with(
@@ -104,9 +104,9 @@ class TestRmDir(unittest.TestCase):
             shell=False,
         )
 
-    @mock.patch("cli.shutil")
-    @mock.patch("cli.run_command")
-    @mock.patch("cli.os")
+    @mock.patch("moblab_common.utils.cli.shutil")
+    @mock.patch("moblab_common.utils.cli.run_command")
+    @mock.patch("moblab_common.utils.cli.os")
     def test_rm_dir_root_ignore_missing(
         self, MockShutil, MockRunCommand, MockOs
     ):
@@ -120,9 +120,9 @@ class TestRmDir(unittest.TestCase):
             shell=False,
         )
 
-    @mock.patch("cli.shutil")
-    @mock.patch("cli.run_command")
-    @mock.patch("cli.os")
+    @mock.patch("moblab_common.utils.cli.shutil")
+    @mock.patch("moblab_common.utils.cli.run_command")
+    @mock.patch("moblab_common.utils.cli.os")
     def test_rm_dir_root_error(self, MockShutil, MockRunCommand, MockOs):
         cli.run_command.side_effect = cli.RunCommandError("", 1)
         with self.assertRaises(cli.RunCommandError):
@@ -130,7 +130,7 @@ class TestRmDir(unittest.TestCase):
 
 
 class TestResolveSymlink(unittest.TestCase):
-    @mock.patch("cli.os")
+    @mock.patch("moblab_common.utils.cli.os")
     def test_resolve_symlink(self, MockOs):
         cli.os.path.islink.side_effect = [True, False]
         cli.os.readlink.return_value = "/my/file"
@@ -138,7 +138,7 @@ class TestResolveSymlink(unittest.TestCase):
         file_name = cli.resolve_symlink("file")
         self.assertEqual(file_name, "/path/to/my/file")
 
-    @mock.patch("cli.os")
+    @mock.patch("moblab_common.utils.cli.os")
     def test_symlink_error(self, MockOs):
         cli.os.path.islink.return_value = True
         cli.os.readlink.return_value = "/my/file"
@@ -148,18 +148,18 @@ class TestResolveSymlink(unittest.TestCase):
 
 
 class TestRunGcloudBucketDiagnosis(unittest.TestCase):
-    @mock.patch("cli.run_command")
+    @mock.patch("moblab_common.utils.cli.run_command")
     def test_run_gcloud_bucket_diagnosis_called_with_correct_args(
         self, mock_run_cmd
     ):
         cli.run_gcloud_bucket_diagnosis("test.json", "test_bucket")
         mock_run_cmd.assert_called_with(
-            ["gsutil perfdiag -o test.json gs://test_bucket"],
+            ["gsutil perfdiag -o test.json -s 40M gs://test_bucket"],
             log=True,
             shell=True,
         )
 
-    @mock.patch("cli.subprocess.check_output")
+    @mock.patch("moblab_common.utils.cli.subprocess.check_output")
     def test_run_gcloud_bucket_diagnosis_raises_exception(
         self, mock_check_output
     ):
@@ -168,8 +168,9 @@ class TestRunGcloudBucketDiagnosis(unittest.TestCase):
         )
         with self.assertRaises(
             cli.subprocess.CalledProcessError
-        ), self.assertLogs("cli") as log:
+        ), self.assertLogs("moblab_common.utils.cli") as log:
             cli.run_gcloud_bucket_diagnosis("test.json", "test_bucket")
+        self.assertEqual(len(log.output), 3)
         self.assertIn(
             "Failed to run performance diagnosis on given google storage bucket: "
             "Command 'bad_cmd' returned non-zero exit status 1.",

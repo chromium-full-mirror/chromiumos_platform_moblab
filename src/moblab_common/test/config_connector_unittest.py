@@ -5,7 +5,7 @@
 """Unit test for the configuration connector."""
 
 import unittest
-from . import config_connector
+from moblab_common import config_connector
 from unittest import mock
 
 
@@ -18,7 +18,9 @@ class MoblabConfigConnector(unittest.TestCase):
             self.mock_afe_connector
         )
 
-    @mock.patch("config_connector.MoblabConfigConnector.load_config")
+    @mock.patch(
+        "moblab_common.config_connector.MoblabConfigConnector.load_config"
+    )
     def test_get_no_config(self, mock_load_config):
         self.connector.get("testingsection", "testingkey")
         mock_load_config.assert_called_once()

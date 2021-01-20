@@ -4,10 +4,7 @@
 # found in the LICENSE file.
 """Interface to the AFE RPC server for all moblab code."""
 
-try:
-    from chromite.lib import cros_logging as logging
-except ImportError:
-    import logging
+import logging
 
 # pylint: disable=no-name-in-module, import-error
 from google.cloud.storage import Client as GcsClient
