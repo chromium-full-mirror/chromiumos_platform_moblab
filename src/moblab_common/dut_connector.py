@@ -40,16 +40,19 @@ class MoblabDUTConnector(object):
 
     def __init__(self):
         self.connected_ip_addresses = []
+        self.disconnected_ip_addresses = []
         self.connected_duts = cachetools.TTLCache(25, 30 * 60)
 
     def find_duts(self):
         active_hosts = self._get_active_network_devices()
         self.connected_ip_addresses = []
+        self.disconnected_ip_addresses = []
         for host in list(self._get_dhcp_dut_leases()):
             if host in active_hosts:
                 self.connected_ip_addresses.append(host)
             else:
-                logging.info("Rejecting %s %s", host, active_hosts)
+                self.disconnected_ip_addresses.append(host)
+                logging.warning("Rejecting %s from %s", host, active_hosts)
 
     def _get_dhcp_dut_leases(self):
         """Extract information about connected duts from the dhcp server.
@@ -266,3 +269,12 @@ class MoblabDUTConnector(object):
             else:
                 results.append((host, stdout))
         return results
+
+    def get_disconnected_dut_ips(self):
+        """Gets the IP address of the disconnected DUTs.
+
+        Returns:
+            Tuple of IP addresses.
+        """
+        self.find_duts()
+        return self.disconnected_ip_addresses
