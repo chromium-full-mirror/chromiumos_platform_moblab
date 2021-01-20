@@ -18,6 +18,7 @@
 
 #pylint: disable=C0111
 
+import errno
 import fcntl
 import json
 import logging
