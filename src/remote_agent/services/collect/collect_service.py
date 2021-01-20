@@ -306,8 +306,12 @@ class CollectService(Constants):
             )
             return None
 
-    def _initiate_dut_message(self, dut_id):
-        """Creates an initial dut message with required attributes.
+    def _initiate_dut_message(self, dut_ip):
+        """Creates an initial dut message with required attributes for a given
+        DUT IP address.
+
+        Args:
+            dut_ip: A DUT IP address
 
         Returns: A MoblabDut protobuf message instance.
         """
@@ -334,7 +338,7 @@ class CollectService(Constants):
         moblab_dut = remoteagentrpc_pb2.MoblabDut()
         moblab_dut.moblab_host_id = self.moblab_host_id
         moblab_dut.moblab_install_id = self.moblab_install_id
-        moblab_dut.moblab_dut_id = dut_id
+        moblab_dut.ip_address = dut_ip
         moblab_dut.bucket_name = self.bucket_name
         return moblab_dut
 
@@ -474,23 +478,19 @@ class CollectService(Constants):
         if not self.collect_moblab_key_attributes():
             return duts
 
-        # Obtains two lists containing different information about all connected duts. For example:
-        #   moblab_dut_ids = [('192.168.231.19', '0QSK91'), ('192.168.231.11', '0QSK91')]
-        #   connected_devices = [{'hostname': '192.168.231.11', 'labels': [], 'status': 'Running'},
-        #                        {'hostname': '192.168.231.19', 'labels': [], 'status': 'Ready'}]
-        moblab_dut_ids = self.dut_connector.get_connected_dut_serialno()
+        # Obtains two lists containing different information about all connected
+        # duts. For example:
+        #   connected_moblab_dut_ids = [('192.168.231.19', '0QSK91'),
+        #                               ('192.168.231.11', '0QSK91')]
+        #   connected_devices =
+        #   [{'hostname': '192.168.231.11', 'labels': [], 'status': 'Running'},
+        #     {'hostname': '192.168.231.19', 'labels': [], 'status': 'Ready'}]
+        connected_moblab_dut_ids = self.dut_connector.get_connected_dut_serialno()
         connected_devices = self.afe_connector.get_connected_devices()
-
-        if (
-            not connected_devices
-            or len(connected_devices) == 0
-            or not moblab_dut_ids
-            or len(moblab_dut_ids) == 0
-        ):
-            _LOGGER.warning(
-                "Dut serial numbers or connected devices list is empty/none."
-            )
-            return duts
+        _LOGGER.info("Found connected DUT serial numbers: %s",
+                     connected_moblab_dut_ids)
+        _LOGGER.info("Found connected DUT device information: %s",
+                     connected_devices)
 
         message_attributes = {
             "DUT_BASIC": self.create_dut_basic_message,
@@ -505,26 +505,35 @@ class CollectService(Constants):
 
         create_msg_func = message_attributes[attribute_type]
 
+        # Generates pubsub messages for connected DUTs.
         moblab_duts_ids_map = {}
-        for dut in moblab_dut_ids:
+        for dut in connected_moblab_dut_ids:
             # dut[0] is the dut ip, dut[1] is the dut id
             if dut[1]:
                 moblab_duts_ids_map[dut[0]] = dut[1]
-
         if not moblab_duts_ids_map:
             return duts
-
         for dut_info_dict in connected_devices:
             dut_ip = dut_info_dict["hostname"]
             if dut_ip in moblab_duts_ids_map:
-                dut_id = moblab_duts_ids_map[dut_ip]
-                dut = create_msg_func(dut_info_dict, dut_id)
+                dut = create_msg_func(dut_info_dict, dut_ip)
                 if dut:
-                    dut.ip_address = dut_ip
+                    dut.moblab_dut_id = moblab_duts_ids_map[dut_ip]
                     dut.last_update_time = round(
                         time.time() * 1000
                     )  # in millisecond
                     duts.append(dut)
+
+        # Generates pubsub messages for disconnected DUTs.
+        disconnected_moblab_dut_ips = \
+            self.dut_connector.get_disconnected_dut_ips()
+        _LOGGER.warning("Found disconnected DUT IPs: %s",
+                        disconnected_moblab_dut_ips)
+        for dut_ip in disconnected_moblab_dut_ips:
+            dut = self._initiate_dut_message(dut_ip)
+            dut.status = remoteagentrpc_pb2.DutStatus.DUT_STATUS_DISCONNECTED
+            dut.last_update_time = round(time.time() * 1000)  # in millisecond
+            duts.append(dut)
 
         _LOGGER.info("Successfully collected DUT information for the "
                      "attribute: %s", attribute_type)

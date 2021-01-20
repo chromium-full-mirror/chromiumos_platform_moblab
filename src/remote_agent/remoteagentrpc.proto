@@ -3,66 +3,67 @@ syntax = "proto3";
 package moblab;
 
 service RemoteLoggingAgent {
-    // TODO(chromium:1106420): Enable remote agent to be able to receive
-    // gRPC calls from other services in order to provide other logging
-    // services (specifically what kinds of logging services are to be
-    // determined).
+  // TODO(chromium:1106420): Enable remote agent to be able to receive
+  // gRPC calls from other services in order to provide other logging
+  // services (specifically what kinds of logging services are to be
+  // determined).
 }
 
 enum DutStatus {
- // TODO(chromium:1106420): share DutStatus with the moblab-rpcserver
- // code base.
- DUT_STATUS_UNKNOWN = 0;
- DUT_STATUS_READY = 1;
- DUT_STATUS_RUNNING = 2;
- DUT_STATUS_REPAIRING = 3;
- DUT_STATUS_REPAIR_FAILED = 4;
- DUT_STATUS_CLEANING = 5;
- DUT_STATUS_PENDING = 6;
- DUT_STATUS_RESETTING = 7;
- DUT_STATUS_PROVISIONING = 8;
- DUT_STATUS_VERIFYING = 9;
+  // TODO(chromium:1106420): share DutStatus with the moblab-rpcserver
+  // code base.
+  DUT_STATUS_UNKNOWN = 0;
+  DUT_STATUS_READY = 1;
+  DUT_STATUS_RUNNING = 2;
+  DUT_STATUS_REPAIRING = 3;
+  DUT_STATUS_REPAIR_FAILED = 4;
+  DUT_STATUS_CLEANING = 5;
+  DUT_STATUS_PENDING = 6;
+  DUT_STATUS_RESETTING = 7;
+  DUT_STATUS_PROVISIONING = 8;
+  DUT_STATUS_VERIFYING = 9;
+  DUT_STATUS_DISCONNECTED = 10;
 }
 
 message DiskStats {
- uint64 total_disk_size_bytes = 1;
- uint64 free_disk_size_bytes = 2;
+  uint64 total_disk_size_bytes = 1;
+  uint64 free_disk_size_bytes = 2;
 }
 
 message NetworkStats {
- uint64 upload_bits_per_second = 1;
- uint64 download_bits_per_second = 2;
- // The number of HTTP 5xx errors
- optional uint32 server_errors = 3;
- // The number of HTTP connections broken
- optional uint32 broken_connections = 4;
+  uint64 upload_bits_per_second = 1;
+  uint64 download_bits_per_second = 2;
+  // The number of HTTP 5xx errors
+  optional uint32 server_errors = 3;
+  // The number of HTTP connections broken
+  optional uint32 broken_connections = 4;
 }
 
 message MoblabHost {
-string moblab_host_id = 1;
-string moblab_install_id = 2;
-string bucket_name = 3;
-optional uint32 milestone = 4;
-optional string build_version = 5;
-optional string ip_address = 6;
-optional string channel = 7;
-optional string description = 8;
-optional DiskStats disk_stats = 9;
-optional NetworkStats network_stats = 10;
-optional uint64 last_update_time = 11; // in millisecond
+  string moblab_host_id = 1;
+  string moblab_install_id = 2;
+  string bucket_name = 3;
+  optional uint32 milestone = 4;
+  optional string build_version = 5;
+  optional string ip_address = 6;
+  optional string channel = 7;
+  optional string description = 8;
+  optional DiskStats disk_stats = 9;
+  optional NetworkStats network_stats = 10;
+  optional uint64 last_update_time = 11; // in millisecond
 }
 
 message MoblabDut {
-string moblab_host_id = 1;
-string moblab_install_id = 2;
-string bucket_name = 3;
-string moblab_dut_id = 4;
-optional string ip_address = 5;
-optional string build_target = 6;
-optional string model = 7;
-optional DutStatus status = 8;
-repeated string label = 9;
-optional bool is_locked = 10;
-optional string lock_reason = 11;
-optional uint64 last_update_time = 12; // in millisecond
+  string moblab_host_id = 1;
+  string moblab_install_id = 2;
+  string bucket_name = 3;
+  string moblab_dut_id = 4;
+  optional string ip_address = 5;
+  optional string build_target = 6;
+  optional string model = 7;
+  optional DutStatus status = 8;
+  repeated string label = 9;
+  optional bool is_locked = 10;
+  optional string lock_reason = 11;
+  optional uint64 last_update_time = 12; // in millisecond
 }
