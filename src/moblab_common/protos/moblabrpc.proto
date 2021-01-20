@@ -166,6 +166,7 @@ message ConnectedDutInfo {
   string name = 1;
   string ip = 2;
   string mac_addr = 3;
+  // TODO (chromium:1168372): Change the DUT status type from String to Enum.
   string status = 4;
   string build_target = 5;
   string model  = 6;
