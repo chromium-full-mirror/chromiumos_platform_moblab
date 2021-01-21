@@ -39,11 +39,11 @@
       <span>Job Scheduler is paused due to:</span>
       <mat-chip-list>
         <mat-chip *ngFor="let message of getPausedDueToUser()" color="primary" selected="true"
-          matTooltip="Resume scheduler from the Configurations page." matTooltipPosition="above">
+          matTooltip="Resume job scheduler on Configurations page." matTooltipPosition="above">
           {{ message }}
         </mat-chip>
         <mat-chip *ngFor="let message of getPausedDueToLowDisk()" color="warn" selected="true"
-          matTooltip="Free up memory to results job scheduler." matTooltipPosition="above">
+          matTooltip="Free up disk space to resume job scheduler." matTooltipPosition="above">
           {{ message }}
         </mat-chip>
       </mat-chip-list>
