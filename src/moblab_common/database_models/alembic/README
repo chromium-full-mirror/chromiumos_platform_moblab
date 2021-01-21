@@ -11,7 +11,7 @@ Generate schema migration
 For now you will need to install SQLAlchemy and Alembic locally:
 `pip install sqlalchemy alembic`
 
-MAke sure your db is up and running:
+Make sure your db is up and running:
 - `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "gcr.io/chromeos-partner-moblab/moblab-compose:autopush" db`
 tip: make sure your .env is configured to run autotest images
 
