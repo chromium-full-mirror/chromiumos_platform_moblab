@@ -26,7 +26,7 @@ export class StableCrOSVersion {
 
 @Injectable({providedIn: 'root'})
 export class MoblabConfigurationGrpcService {
-  configurationRpcClient = null;
+  configurationRpcClient: MoblabConfigurationServicePromiseClient = null;
 
   constructor() {
     const url = new URL(window.location.href);
@@ -42,26 +42,56 @@ export class MoblabConfigurationGrpcService {
   /**
    *  Returns a promise that resolves to the list of pause requestors
    *  */
-  get_pause_state() {
+  getPauseState() {
     return this.configurationRpcClient
       .get_host_scheduler_pause_status(new Empty())
       .then((response: GetHostSchedulerPauseStatusResponse) =>
-        response.getPauserequestorsList().map(this.map_requestors)
+        response.getPauserequestorsList().map(this.mapRequestors)
       );
+  }
+
+  subscribeToPauseStatusUpdates(onDataCallback: (pauseRequesters: string[]) => void) {
+    var stream = this.configurationRpcClient.stream_host_scheduler_pause_status(new Empty());
+    this.configureStream(stream, onDataCallback);
+  }
+
+  private configureStream(
+    stream: grpcWeb.ClientReadableStream<GetHostSchedulerPauseStatusResponse>,
+    onDataCallback: (pauseRequesters: string[]) => void) {
+
+    stream.on('data', (response: GetHostSchedulerPauseStatusResponse) => {
+      const pauseRequestors = response.getPauserequestorsList().map(this.mapRequestors)
+      console.log(pauseRequestors);
+      onDataCallback(pauseRequestors);
+    });
+    stream.on('status', (status: grpcWeb.Status) => {
+      console.log(
+        "Status: Code: " + status.code +
+        "Details: " + status.details +
+        "Metadata: " + status.metadata);
+    });
+    stream.on('end', () => {
+      console.log("stream_host_scheduler_pause_status stream is closed!");
+      this.subscribeToPauseStatusUpdates(onDataCallback)
+    });
+    stream.on('error', (er) => {
+      console.log("Error in stream_host_scheduler_pause_status:", er);
+      this.subscribeToPauseStatusUpdates(onDataCallback)
+    });
   }
 
   /**
    *  Request to pause host scheduling.
    *  Returns a promise that resolves to the list of pause requestors.
    *  */
-  pause_host_scheduling() {
+  pauseHostScheduling() {
     const request = new PauseHostSchedulerRequest();
     request.setPauserequestor(PauseRequestor.PAUSE_REQUESTOR_PAUSED_BY_USER);
 
     return this.configurationRpcClient
       .pause_host_scheduler(request)
       .then((response: PauseHostSchedulerResponse) =>
-        response.getPauserequestorsList().map(this.map_requestors)
+        response.getPauserequestorsList().map(this.mapRequestors)
       );
   }
 
@@ -69,7 +99,7 @@ export class MoblabConfigurationGrpcService {
    *  Request to unpause host scheduling.
    *  Returns a promise that resolves to the list of pause requestors.
    *  */
-  resume_host_scheduler() {
+  resumeHostScheduler() {
     const request = new ResumeHostSchedulerRequest().setPauserequestor(
       PauseRequestor.PAUSE_REQUESTOR_PAUSED_BY_USER
     );
@@ -77,11 +107,11 @@ export class MoblabConfigurationGrpcService {
     return this.configurationRpcClient
       .resume_host_scheduler(request)
       .then((response: ResumeHostSchedulerResponse) =>
-        response.getPauserequestorsList().map(this.map_requestors)
+        response.getPauserequestorsList().map(this.mapRequestors)
       );
   }
 
-  get_stable_build_version() {
+  getStableBuildVersion() {
     const request = new GetStableBuildVersionRequest();
     return this.configurationRpcClient
       .get_stable_build_version(request)
@@ -93,7 +123,7 @@ export class MoblabConfigurationGrpcService {
       });
   }
 
-  set_stable_build_version(override_version: string) {
+  setStableBuildVersion(override_version: string) {
     const request = new SetStableBuildVersionRequest();
     request.setStableVersion(new StableVersion().setOverrideVersion(override_version));
     return this.configurationRpcClient
@@ -106,7 +136,7 @@ export class MoblabConfigurationGrpcService {
       });
   }
 
-  private map_requestors(requestor: PauseRequestor) {
+  private mapRequestors(requestor: PauseRequestor) {
     switch (requestor) {
       case PauseRequestor.PAUSE_REQUESTOR_LOW_DISK_SPACE:
         return MoblabSettingsConstains.LOW_DISK_SPACE_STRING;

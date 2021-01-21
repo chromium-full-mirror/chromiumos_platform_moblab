@@ -113,12 +113,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   public async getStableCrOSVersion() {
     this.userCrOSVersionForm.disable();
     try {
-      const version = await this.moblabConfigurationRpcService.get_stable_build_version();
+      const version = await this.moblabConfigurationRpcService.getStableBuildVersion();
       this.userCrOSVersionValue = version.UserOverrideVersion;
       this.userCrOSVersionForm.setValue(version.UserOverrideVersion);
       this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
     } catch (error) {
-      console.log('get_stable_build_version call failed with:' + error);
+      console.log('getStableBuildVersion call failed with:' + error);
       this.setOffError('Failed to fetch stable Chrome OS version: ' + error);
     } finally {
       this.userCrOSVersionForm.enable();
@@ -128,12 +128,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   public async setStableCrOSVersion(override_value: string) {
     this.userCrOSVersionForm.disable();
     try {
-      const version = await this.moblabConfigurationRpcService.set_stable_build_version(override_value);
+      const version = await this.moblabConfigurationRpcService.setStableBuildVersion(override_value);
       this.userCrOSVersionValue = version.UserOverrideVersion;
       this.userCrOSVersionForm.setValue(version.UserOverrideVersion);
       this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
     } catch (error) {
-      console.log('get_stable_build_version call failed with:' + error);
+      console.log('setStableBuildVersion call failed with:' + error);
       this.setOffError('Failed to fetch stable Chrome OS version: ' + error);
     } finally {
       this.userCrOSVersionForm.enable();
@@ -488,10 +488,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   public async pauseClick() {
     this.pauseButton.setIsLoadingStatus(true);
     try {
-      const pauseRequesters = await this.moblabConfigurationRpcService.pause_host_scheduling();
+      const pauseRequesters = await this.moblabConfigurationRpcService.pauseHostScheduling();
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
-      console.log('pause_host_scheduling call failed with:' + error);
+      console.log('pauseHostScheduling call failed with:' + error);
       this.setOffError('Failed to pause host scheduling: ' + error);
     } finally {
       this.pauseButton.setIsLoadingStatus(false);
@@ -501,10 +501,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   public async resumeClick() {
     this.resumeButton.setIsLoadingStatus(true);
     try {
-      const pauseRequesters = await this.moblabConfigurationRpcService.resume_host_scheduler();
+      const pauseRequesters = await this.moblabConfigurationRpcService.resumeHostScheduler();
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
-      console.log('resume_host_scheduler call failed with:' + error);
+      console.log('resumeHostScheduler call failed with:' + error);
       this.setOffError('Failed to resume host scheduling: ' + error);
     } finally {
       this.resumeButton.setIsLoadingStatus(false);

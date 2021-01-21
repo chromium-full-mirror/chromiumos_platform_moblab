@@ -95,7 +95,7 @@ class SettingsService:
         """
         string_keys = [MoblabSettingKey.Name(key) for key in keys]
 
-        logging.info("inside get_settings(%s)", string_keys)
+        logging.debug("inside get_settings(%s)", string_keys)
 
         moblab_settings = self._settings_store.get_settings(string_keys)
         if moblab_settings:
