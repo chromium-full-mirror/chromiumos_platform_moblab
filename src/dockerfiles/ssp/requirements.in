@@ -9,6 +9,7 @@ lxml
 mock
 numpy
 pip
+protobuf
 pyparsing
 python-dateutil
 setuptools
