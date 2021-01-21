@@ -4,11 +4,12 @@
 
 PyYAML
 crcmod
+grpcio
 lxml
+mock
 numpy
 pip
 pyparsing
+python-dateutil
 setuptools
 wheel
-mock
-python-dateutil
