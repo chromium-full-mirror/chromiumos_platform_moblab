@@ -10,6 +10,7 @@ from __future__ import print_function
 import json
 import logging
 import time
+import math
 
 import common
 from autotest_lib.client.common_lib import error
@@ -122,6 +123,9 @@ class ACPowerVerifier(hosts.Verifier):
 
     # Battery discharging state in power_supply_info file.
     BATTERY_DISCHARGING = 'Discharging'
+    # Power controller can discharge battery any time till 90% for any model.
+    # Setting level to 90% in case we have wearout of it.
+    BATTERY_DISCHARGE_MIN = 90
 
     @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
