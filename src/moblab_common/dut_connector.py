@@ -118,7 +118,7 @@ class MoblabDUTConnector(object):
                                      host_output.exception)
                         exception_msg = host_output.exception.args[0]
                         exception_args = host_output.exception.args[1:]
-                        stderr += exception_msg.strerror % exception_args
+                        stderr += exception_msg % exception_args
                 except IndexError:
                     logging.exception(
                         "Failed to extract information from " +
