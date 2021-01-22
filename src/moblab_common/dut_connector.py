@@ -249,8 +249,8 @@ class MoblabDUTConnector(object):
         """
             Will attempt to read serial numbers for all connected duts.
         Returns:
-            Tuple pairs where the first item is the hostname (IP) and the second item
-            is the parsed serial number.
+            Tuple pairs where the first item is the hostname (IP) and the second
+            item is the parsed serial number.
         """
         command_results = self.run_command_on_connected_duts(
             "timeout 20 vpd -g serial_number", timeout=20
@@ -262,9 +262,8 @@ class MoblabDUTConnector(object):
                     (host, "Failed to parse s/n for {}".format(host))
                 )
                 logging.error(
-                    "Attempted to discover serial no of {} exited with error: {}".format(
-                        stderr
-                    )
+                    "Attempted to discover serial numbers of {} exited with error: {}".format(
+                        host, stderr)
                 )
             else:
                 results.append((host, stdout))
