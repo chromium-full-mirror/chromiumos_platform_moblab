@@ -21,6 +21,7 @@ from moblab_common.utils.cli import (
     run_gcloud_bucket_diagnosis,
     RunCommandError,
 )
+from moblab_common.utils.constants import Constants as MoblabConstants
 
 # pylint: disable=no-member
 # pylint: disable=no-self-use
@@ -91,10 +92,10 @@ class CollectService(Constants):
         try:
             self.moblab_version_info = get_version_info()
             self.moblab_host_id = self.moblab_version_info[
-                self.MOBLAB_HOST_ID_NAME
+                MoblabConstants.MOBLAB_HOST_ID_NAME
             ].rstrip()
             self.moblab_install_id = self.moblab_version_info[
-                self.MOBLAB_INSTALL_ID_NAME
+                MoblabConstants.MOBLAB_INSTALL_ID_NAME
             ].rstrip()
             _LOGGER.info("Successfully collected moblab host id: %s, moblab "
                          "install id: %s and moblab version info: %s",
@@ -152,19 +153,21 @@ class CollectService(Constants):
             return None
 
         try:
-            moblab.milestone = int(
-                self.moblab_version_info[self.MILESTONE_NAME].rstrip()
-            )
-            moblab.build_version = self.moblab_version_info[
-                self.BUILD_VERSION_NAME
-            ].rstrip()
+            build_version = self.moblab_version_info.get(
+                MoblabConstants.BUILD_VERSION_NAME, "No available OS version"
+            ).rstrip()
+            moblab.build_version = build_version
+
+            end = build_version.find('-')
+            moblab.milestone = int(build_version[1:end]) if end != -1 else 0
+
             moblab.ip_address = self.host_connector.get_ip()
-            moblab.channel = self.moblab_version_info[
-                self.CHANNEL_NAME
-            ].rstrip()
-            moblab.description = self.moblab_version_info[
-                self.DESCRIPTION_NAME
-            ].rstrip()
+            moblab.channel = self.moblab_version_info.get(
+                MoblabConstants.CHANNEL_NAME, "No available channel"
+            ).rstrip()
+            moblab.description = self.moblab_version_info.get(
+                MoblabConstants.DESCRIPTION_NAME, "No available description"
+            ).rstrip()
         except KeyError as err:
             _LOGGER.exception(
                 "Failed to get moblab version attributes for missing key: %s",
