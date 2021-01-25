@@ -514,29 +514,31 @@ class CollectService(Constants):
             # dut[0] is the dut ip, dut[1] is the dut id
             if dut[1]:
                 moblab_duts_ids_map[dut[0]] = dut[1]
-        if not moblab_duts_ids_map:
-            return duts
-        for dut_info_dict in connected_devices:
-            dut_ip = dut_info_dict["hostname"]
-            if dut_ip in moblab_duts_ids_map:
-                dut = create_msg_func(dut_info_dict, dut_ip)
-                if dut:
-                    dut.moblab_dut_id = moblab_duts_ids_map[dut_ip]
-                    dut.last_update_time = round(
-                        time.time() * 1000
-                    )  # in millisecond
-                    duts.append(dut)
+        if moblab_duts_ids_map:
+            for dut_info_dict in connected_devices:
+                dut_ip = dut_info_dict["hostname"]
+                if dut_ip in moblab_duts_ids_map:
+                    dut = create_msg_func(dut_info_dict, dut_ip)
+                    if dut:
+                        dut.moblab_dut_id = moblab_duts_ids_map[dut_ip]
+                        dut.last_update_time = round(
+                            time.time() * 1000
+                        )  # in millisecond
+                        duts.append(dut)
 
         # Generates pubsub messages for disconnected DUTs.
         disconnected_moblab_dut_ips = \
             self.dut_connector.get_disconnected_dut_ips()
-        _LOGGER.warning("Found disconnected DUT IPs: %s",
-                        disconnected_moblab_dut_ips)
-        for dut_ip in disconnected_moblab_dut_ips:
-            dut = self._initiate_dut_message(dut_ip)
-            dut.status = remoteagentrpc_pb2.DutStatus.DUT_STATUS_DISCONNECTED
-            dut.last_update_time = round(time.time() * 1000)  # in millisecond
-            duts.append(dut)
+        if disconnected_moblab_dut_ips:
+            _LOGGER.info("Found disconnected DUT IPs: %s",
+                            disconnected_moblab_dut_ips)
+            for dut_ip in disconnected_moblab_dut_ips:
+                dut = self._initiate_dut_message(dut_ip)
+                dut.status = \
+                    remoteagentrpc_pb2.DutStatus.DUT_STATUS_DISCONNECTED
+                dut.last_update_time = \
+                    round(time.time() * 1000)  # in millisecond
+                duts.append(dut)
 
         _LOGGER.info("Successfully collected DUT information for the "
                      "attribute: %s", attribute_type)
