@@ -5,7 +5,7 @@ import {MoblabSettingsService} from './moblab-settings.service';
 import {MoblabConfigurationGrpcService} from 'app/services/moblab-configuration-grpc.service';
 
 class MoblabConfigurationGrpcServiceFake {
-  async get_pause_state() {
+  async getPauseState() {
     return ['A'];
   }
 }

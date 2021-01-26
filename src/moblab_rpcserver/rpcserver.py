@@ -4,7 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 import argparse
-import grpc
+import grpc.aio
 import logging
 import os
 import sys
@@ -69,7 +69,7 @@ async def serve():
         logging_severity = logging.DEBUG
     setup_logging(logging_severity)
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
+    server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=500))
     try:
         add_MoblabRpcServiceServicer_to_server(
             moblab_rpcservice.MoblabRpcService(), server
@@ -93,16 +93,13 @@ async def serve():
         serving_port = 6002
         server.add_insecure_port("[::]:%s" % serving_port)
 
-        def run_grpc_server():
-            server.start()
+        async def run_grpc_server():
+            await server.start()
             logging.info("Starting server port %s" % serving_port)
-            server.wait_for_termination()
-
-        loop = asyncio.get_event_loop()
-        executor = futures.ThreadPoolExecutor()
+            await server.wait_for_termination()
 
         await asyncio.gather(
-            loop.run_in_executor(executor, run_grpc_server),
+            run_grpc_server(),
             DiskSpaceMonitorService().run(),
         )
 

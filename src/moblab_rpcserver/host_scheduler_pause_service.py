@@ -162,10 +162,10 @@ class HostSchedulerPauseService:
 
         settings = self._settings_service.get_settings(keys)
         if settings:
-            return [
+            return {
                 setting.key for setting in settings if setting.value.bool_value
-            ]
-        return []
+            }
+        return {}
 
     def _get_all_hosts(self):
         duts = self._afe_connector.get_connected_devices()

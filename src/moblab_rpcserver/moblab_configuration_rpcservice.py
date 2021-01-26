@@ -4,6 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 import logging
+import asyncio
 from google.protobuf import empty_pb2
 
 from moblab_common.proto.moblab_configuration_rpc_pb2 import (
@@ -34,7 +35,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         self.pause_service = HostSchedulerPauseService()
         self._settings_service = SettingsService()
 
-    def pause_host_scheduler(self, request, context):
+    async def pause_host_scheduler(self, request, context):
         """Request pause of host scheduling"""
         requestors = self.pause_service.pause_moblab(
             self._map_to_setting(request.pauseRequestor)
@@ -43,7 +44,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
             pauseRequestors=self._map_to_requestors(requestors)
         )
 
-    def resume_host_scheduler(self, request, context):
+    async def resume_host_scheduler(self, request, context):
         """Request resume of host scheduling"""
         requestors = self.pause_service.unpause_moblab(
             self._map_to_setting(request.pauseRequestor)
@@ -52,14 +53,32 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
             pauseRequestors=self._map_to_requestors(requestors)
         )
 
-    def get_host_scheduler_pause_status(self, request, context):
+    async def get_host_scheduler_pause_status(self, request, context):
         """Request pause of host scheduling"""
         requestors = self.pause_service.get_pause_status()
         return GetHostSchedulerPauseStatusResponse(
             pauseRequestors=self._map_to_requestors(requestors)
         )
 
-    def get_stable_build_version(self, request, context):
+    async def stream_host_scheduler_pause_status(self, request, context):
+        requestors = self.pause_service.get_pause_status()
+        yield GetHostSchedulerPauseStatusResponse(
+            pauseRequestors=self._map_to_requestors(requestors)
+        )
+
+        while True:
+            # TODO: look into replacing polling with change event subscription
+            # rpc server is the only place that changes the pause state
+            await asyncio.sleep(30)
+            newRequestors = self.pause_service.get_pause_status()
+            if newRequestors != requestors:
+                logging.info("New event in stream_host_scheduler_pause_status")
+                requestors = newRequestors
+                yield GetHostSchedulerPauseStatusResponse(
+                    pauseRequestors=self._map_to_requestors(requestors)
+                )
+
+    async def get_stable_build_version(self, request, context):
         """Read stable build version configuration"""
         return GetStableBuildVersionResponse(
             stable_version=self._get_stable_build_version()

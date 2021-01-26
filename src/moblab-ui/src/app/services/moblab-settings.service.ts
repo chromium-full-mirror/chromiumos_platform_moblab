@@ -1,7 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, timer} from 'rxjs';
-import {startWith} from 'rxjs/operators';
-import {interval} from 'rxjs/internal/observable/interval';
+import {BehaviorSubject} from 'rxjs';
 import {MoblabConfigurationGrpcService} from 'app/services/moblab-configuration-grpc.service';
 
 // The service provides live updates to test runner status.
@@ -14,23 +12,16 @@ export class MoblabSettingsService {
 
   // Starting a background process to check on system pause state
   constructor(private grpcService: MoblabConfigurationGrpcService) {
-    interval(60000)
-      .pipe(startWith(0))
-      .subscribe(i => this.readHostSchedulingStatus());
+    this.grpcService.subscribeToPauseStatusUpdates((pauseRequesters: string[]) =>
+      this.updateHostSchedulingStatus(pauseRequesters)
+    );
   }
 
-  updateHostSchedulingStatus(pauseRequesters: string[]): void {
-    this.pauseRequestorsSubject.next(pauseRequesters);
-  }
-
-  private async readHostSchedulingStatus() {
+  public updateHostSchedulingStatus(pauseRequesters: string[]): void {
     try {
-      const pause_requesters = await this.grpcService.get_pause_state();
-      this.pauseRequestorsSubject.next(pause_requesters);
+      this.pauseRequestorsSubject.next(pauseRequesters);
     } catch (ex) {
-      console.log(
-        'Get job scheduler pause state background call failed: ' + ex.message
-      );
+      console.log('UpdateHostSchedulingStatus error: ' + ex.message);
     }
   }
 }

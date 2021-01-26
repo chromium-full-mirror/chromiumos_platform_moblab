@@ -22,6 +22,7 @@ static_resources:
         typed_config:
           "@type": type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
           codec_type: auto
+          stream_idle_timeout: 86400s
           stat_prefix: ingress_http
           access_log:
           - name: envoy.file_access_log

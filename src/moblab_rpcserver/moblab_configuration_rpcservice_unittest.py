@@ -23,7 +23,7 @@ from moblab_common.proto.moblab_settings_pb2 import MoblabSettingKey
 from moblab_configuration_rpcservice import ConfigurationRpcService
 
 
-class ConfigurationRpcServiceTest(unittest.TestCase):
+class ConfigurationRpcServiceTest(unittest.IsolatedAsyncioTestCase):
     """Testing the ConfigurationRpcService code."""
 
     def setUp(self):
@@ -37,7 +37,7 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
     )
     @patch.object(settings_store.MoblabSettingsStore, "get_settings")
     @patch.object(settings_store.MoblabSettingsStore, "set_setting")
-    def test_pause(
+    async def test_pause(
         self,
         mock_set_setting,
         mock_get_settings,
@@ -57,12 +57,13 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
             {"hostname": "0.0.0.2"},
         ]
 
-        _ = self.configurationRpcService.pause_host_scheduler(
+        _ = await self.configurationRpcService.pause_host_scheduler(
             request=PauseHostSchedulerRequest(
                 pauseRequestor=PauseRequestor.PAUSE_REQUESTOR_LOW_DISK_SPACE
             ),
             context={},
         )
+        mock_get_settings.assert_called()
         mock_set_setting.assert_called_once_with(
             "MOBLAB_SETTING_LOW_DISK_SPACE",
             '{\n  "value": {\n    "boolValue": true\n  }\n}',
@@ -76,7 +77,7 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
     )
     @patch.object(settings_store.MoblabSettingsStore, "get_settings")
     @patch.object(settings_store.MoblabSettingsStore, "set_setting")
-    def test_resume(
+    async def test_resume(
         self,
         mock_set_setting,
         mock_get_settings,
@@ -96,12 +97,13 @@ class ConfigurationRpcServiceTest(unittest.TestCase):
             {"hostname": "0.0.0.2"},
         ]
 
-        _ = self.configurationRpcService.resume_host_scheduler(
+        _ = await self.configurationRpcService.resume_host_scheduler(
             request=PauseHostSchedulerRequest(
                 pauseRequestor=PauseRequestor.PAUSE_REQUESTOR_PAUSED_BY_USER
             ),
             context={},
         )
+        mock_get_settings.assert_called()
         mock_set_setting.assert_called_once_with(
             "MOBLAB_SETTING_PAUSED_BY_USER",
             '{\n  "key": "MOBLAB_SETTING_PAUSED_BY_USER",'

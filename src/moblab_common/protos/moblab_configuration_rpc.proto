@@ -15,6 +15,9 @@ service MoblabConfigurationService {
   // returns the list of requestors currently requesting to pause
   rpc get_host_scheduler_pause_status(google.protobuf.Empty)
     returns (GetHostSchedulerPauseStatusResponse) {}
+  // opens an infinite stream of pause state updates
+  rpc stream_host_scheduler_pause_status(google.protobuf.Empty)
+    returns (stream GetHostSchedulerPauseStatusResponse) {}
   // returns the known good CrOS version resolved
   // from system default and user override
   rpc get_stable_build_version(GetStableBuildVersionRequest)
