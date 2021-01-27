@@ -286,8 +286,8 @@ class AFEConnector(object):
         response = self.send_rpc_command("get_jobs_summary", params)
         return self.decode_response(response, "result")
 
-    def get_job_history(self, id):
-        params = {"job_id": str(id)}
+    def get_job_history(self, job_id):
+        params = {"job_id": str(job_id)}
         response = self.send_rpc_command("get_job_history", params)
         return self.decode_response(response, "result")
 
@@ -399,9 +399,9 @@ class AFEConnector(object):
         params = {}
 
         if job_id:
-            params["id"] = job_id
+            params["job__id"] = job_id
         if host_id:
-            params["host"] = host_id
+            params["host__id"] = host_id
 
         response = self.send_rpc_command("get_num_host_queue_entries", params)
         return self.decode_response(response, "result")
@@ -428,9 +428,9 @@ class AFEConnector(object):
             params["query_limit"] = query_limit
 
         if job_id:
-            params["id"] = job_id
+            params["job__id"] = job_id
         if host_id:
-            params["host"] = host_id
+            params["host__id"] = host_id
 
         response = self.send_rpc_command("get_host_queue_entries", params)
         return self.decode_response(response, "result")
