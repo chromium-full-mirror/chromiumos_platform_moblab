@@ -196,7 +196,7 @@ class AFEConnectorTest(unittest.TestCase):
         result = self.afe_conn.get_host_queue_entries(job_id)
 
         mock_send_rpc_command.assert_called_once_with(
-            "get_host_queue_entries", {"id": job_id}
+            "get_host_queue_entries", {"job__id": job_id}
         )
         self.assertEqual(hqes, result)
 
