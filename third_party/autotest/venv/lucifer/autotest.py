@@ -19,9 +19,9 @@ an external module is needed, chromite and autotest imports may also be done at
 the top level of a module using deferred_load() and deferred_chromite_load().
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import ast
 import contextlib
@@ -36,7 +36,7 @@ import types
 
 AUTOTEST_DIR = '/usr/local/autotest/'
 _SITEPKG_DIR = os.path.join(AUTOTEST_DIR, 'site-packages')
-_SYSTEM_PYTHON = '/usr/bin/python2.7'
+_SYSTEM_PYTHON = '/usr/bin/python3.7'
 
 _setup_done = False
 
@@ -73,6 +73,7 @@ def _monkeypatch_body():
     """The body of monkeypatch() running within _global_setup() context."""
     # Add Autotest's site-packages.
     site.addsitedir(_SITEPKG_DIR)
+    site.addsitedir(AUTOTEST_DIR)
 
     # Dummy out common imports as they may cause problems.
     sys.meta_path.insert(0, _CommonRemovingFinder())

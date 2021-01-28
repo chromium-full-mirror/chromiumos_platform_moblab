@@ -344,12 +344,12 @@ class _SuiteSpec(object):
         self._translate_builds()
         self._add_builds_to_suite_deps()
 
-        for key, value in dargs.iteritems():
+        for key, value in dargs.items():
             warnings.warn('Ignored key %r was passed to suite with value %r'
                           % (key, value))
 
     def _check_init_params(self, **kwargs):
-        for key, expected_type in self._REQUIRED_KEYWORDS.iteritems():
+        for key, expected_type in self._REQUIRED_KEYWORDS.items():
             value = kwargs.get(key)
             # TODO(ayatane): `not value` includes both the cases where value is
             # None and where value is the correct type, but empty (e.g., empty
@@ -417,7 +417,7 @@ class _SuiteSpec(object):
         """
         self.suite_dependencies.extend(
                 provision.join(version_prefix, build)
-                for version_prefix, build in self.builds.iteritems()
+                for version_prefix, build in self.builds.items()
         )
 
 
@@ -645,10 +645,10 @@ def byteify(input):
     """Walk a json object, turning unicode strings into byte strings."""
     if isinstance(input, dict):
         return {byteify(key): byteify(value)
-                for key, value in input.iteritems()}
+                for key, value in input.items()}
     elif isinstance(input, list):
         return [byteify(element) for element in input]
-    elif isinstance(input, unicode):
+    elif isinstance(input, str):
         return input.encode('utf-8')
     else:
         return input

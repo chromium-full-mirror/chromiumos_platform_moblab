@@ -9,7 +9,7 @@ import stat
 
 from client.common_lib import log
 from client.common_lib import error, utils, global_config
-from client.bin import base_sysinfo, utils
+from autotest_lib.client.bin import base_sysinfo
 from client.cros import constants
 
 get_value = global_config.global_config.get_config_value
@@ -406,7 +406,7 @@ class site_sysinfo(base_sysinfo.base_sysinfo):
             ignore_status=True).splitlines()
         lsb_dict = dict(item.split("=") for item in lsb_lines)
 
-        for lsb_key in lsb_dict.keys():
+        for lsb_key in list(lsb_dict.keys()):
             # Special handling for build number
             if lsb_key == "CHROMEOS_RELEASE_DESCRIPTION":
                 keyval["CHROMEOS_BUILD"] = (

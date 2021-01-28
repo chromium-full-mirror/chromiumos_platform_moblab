@@ -15,14 +15,14 @@ import pickle
 import logging
 import multiprocessing
 import select
-import SocketServer
+import socketserver
 import struct
 import time
 
 import common
 from client.common_lib import utils
 
-class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
+class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
 
     This basically logs the record using whatever logging policy is
@@ -76,7 +76,7 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
         logger.handle(record)
 
 
-class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
+class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
     """Simple TCP socket-based logging receiver.
     """
 
@@ -86,7 +86,7 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
                  handler=LogRecordStreamHandler):
         if not port:
             port = utils.get_unused_port()
-        SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
+        socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.abort = 0
         self.timeout = 1
         self.logname = None
@@ -95,7 +95,7 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
 
     def serve_until_stopped(self):
         """Run the socket receiver until aborted."""
-        print 'Log Record Socket Receiver is started.'
+        print('Log Record Socket Receiver is started.')
         abort = 0
         while not abort:
             rd, wr, ex = select.select([self.socket.fileno()], [], [],
@@ -103,7 +103,7 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
             if rd:
                 self.handle_request()
             abort = self.abort
-        print 'Log Record Socket Receiver is stopped.'
+        print('Log Record Socket Receiver is stopped.')
 
 
 class LogSocketServer:
@@ -132,7 +132,7 @@ class LogSocketServer:
         while not server_started.value:
             time.sleep(0.1)
         LogSocketServer.port = port.value
-        print 'Log Record Socket Server is started at port %d.' % port.value
+        print('Log Record Socket Server is started at port %d.' % port.value)
 
 
     @staticmethod

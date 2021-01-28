@@ -58,7 +58,7 @@ class Enum(object):
 
     def choices(self):
         'Return choice list suitable for Django model choices.'
-        return zip(self.values, self.names)
+        return list(zip(self.values, self.names))
 
 
     def get_value(self, name):
@@ -66,7 +66,7 @@ class Enum(object):
         Convert a string name to it's corresponding value.  If a value
         is passed in, it is returned.
         """
-        if isinstance(name, (int, long)) and not self.string_values:
+        if isinstance(name, int) and not self.string_values:
             # name is already a value
             return name
         return getattr(self, self.get_attr_name(name))

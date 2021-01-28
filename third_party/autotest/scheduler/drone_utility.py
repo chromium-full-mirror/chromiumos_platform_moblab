@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """Utility module that executes management commands on the drone.
 
@@ -47,13 +47,6 @@ DARK_MARK_ENVIRONMENT_VAR = 'AUTOTEST_SCHEDULER_DARK_MARK'
 _TEMPORARY_DIRECTORY = 'drone_tmp'
 _TRANSFER_FAILED_FILE = '.transfer_failed'
 
-# script and log file for cleaning up orphaned lxc containers.
-LXC_CLEANUP_SCRIPT = os.path.join(common.autotest_dir, 'site_utils',
-                                  'lxc_cleanup.py')
-LXC_CLEANUP_LOG_FILE = os.path.join(common.autotest_dir, 'logs',
-                                    'lxc_cleanup.log')
-
-
 class _MethodCall(object):
     def __init__(self, method, args, kwargs):
         self._method = method
@@ -69,7 +62,7 @@ class _MethodCall(object):
     def __str__(self):
         args = ', '.join(repr(arg) for arg in self._args)
         kwargs = ', '.join('%s=%r' % (key, value) for key, value in
-                           self._kwargs.iteritems())
+                           self._kwargs.items())
         full_args = ', '.join(item for item in (args, kwargs) if item)
         return '%s(%s)' % (self._method, full_args)
 
@@ -178,7 +171,7 @@ class DroneUtility(object):
                 processes_to_kill[signal_queue] = (
                         processes_to_kill.get(signal_queue, []) + [p])
             sig_counts = {}
-            for signal_queue, processes in processes_to_kill.iteritems():
+            for signal_queue, processes in processes_to_kill.items():
                 sig_counts.update(utils.nuke_pids(
                         [-process.pid for process in processes],
                         signal_queue=signal_queue))
@@ -400,7 +393,7 @@ class DroneUtility(object):
             call_count.setdefault(call._method, 0)
             call_count[call._method] += 1
         call_summary = '\n'.join('%d %s' % (count, method)
-                                 for method, count in call_count.iteritems())
+                                 for method, count in call_count.items())
         self._warn('Execution took %f sec\n%s' % (duration, call_summary))
 
 
@@ -542,7 +535,7 @@ class ProcessRefresher(object):
 
         marked_proc_infos = []
         warnings = []
-        for marked, info in itertools.izip(dark_marks, proc_infos):
+        for marked, info in zip(dark_marks, proc_infos):
             if marked:
                 marked_proc_infos.append(info)
             else:
@@ -570,7 +563,7 @@ def parse_input():
     pickled_input = ''.join(input_chunks)
 
     try:
-        return pickle.loads(pickled_input)
+        return pickle.loads(pickled_input.encode())
     except Exception:
         separator = '*' * 50
         raise ValueError('Unpickling input failed\n'
@@ -590,7 +583,7 @@ def _parse_args(args):
 
 
 def return_data(data):
-    print pickle.dumps(data)
+    print(pickle.dumps(data, 0).decode("utf-8"))
 
 def _process_has_dark_mark(pid):
     """Checks if a process was launched earlier by drone_utility.
@@ -625,7 +618,7 @@ def _get_process_info():
     ps_output = run_ps()
     # split each line into the columns output by ps
     split_lines = [line.split(None, 4) for line in ps_output.splitlines()]
-    return (dict(itertools.izip(_PS_ARGS, line_components))
+    return (dict(zip(_PS_ARGS, line_components))
             for line_components in split_lines)
 
 

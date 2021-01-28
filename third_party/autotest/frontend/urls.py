@@ -16,7 +16,7 @@ handler404 = 'django.views.defaults.page_not_found'
 handler500 = 'frontend.afe.views.handler500'
 
 urlpatterns = [
-        url(RE_PREFIX + r'admin/', include(admin.site.urls)),
+        url(RE_PREFIX + r'admin/', admin.site.urls),
         url(RE_PREFIX, include('frontend.afe.urls')),
         url(TKO_RE_PREFIX, include('frontend.tko.urls')),
 ]

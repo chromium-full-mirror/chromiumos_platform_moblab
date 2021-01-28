@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -34,7 +34,7 @@ def print_message(message, newlines=2):
     """
     padding = newlines * '\n'
     message = padding + message + padding
-    print message
+    print(message)
 
 
 def handle_errors(func):
@@ -246,7 +246,7 @@ class NfcClient(object):
             return
         for adapter in adapters:
             print_message('  ' + str(adapter), newlines=0)
-        print
+        print()
 
     def _dbus_array_to_string(self, array):
         string = '[ '
@@ -266,13 +266,13 @@ class NfcClient(object):
         if not props:
             return
         print_message('Status ' + adapter + ': ', newlines=0)
-        for key, value in props.iteritems():
+        for key, value in props.items():
             if type(value) == dbus.Array:
                 value = self._dbus_array_to_string(value)
             else:
                 value = str(value)
             print_message('  ' + key + ' = ' + value, newlines=0)
-        print
+        print()
 
     @handle_errors
     def set_powered(self, adapter, powered):
@@ -329,7 +329,7 @@ class NfcClient(object):
             return
         props = tag_proxy.GetProperties()
         print_message('Tag ' + tag + ': ', newlines=1)
-        for key, value in props.iteritems():
+        for key, value in props.items():
             if key != 'Records':
                 print_message('  ' + key + ' = ' + str(value), newlines=0)
         records = props['Records']
@@ -338,7 +338,7 @@ class NfcClient(object):
         print_message('Records: ', newlines=1)
         for record in records:
             self.show_record_data(str(record))
-        print
+        print()
 
     @handle_errors
     def show_device_data(self, device):
@@ -360,7 +360,7 @@ class NfcClient(object):
         print_message('Records: ', newlines=1)
         for record in records:
             self.show_record_data(str(record))
-        print
+        print()
 
     @handle_errors
     def show_record_data(self, record):
@@ -376,9 +376,9 @@ class NfcClient(object):
             return
         props = record_proxy.GetProperties()
         print_message('Record ' + record + ': ', newlines=1)
-        for key, value in props.iteritems():
-            print '  ' + key + ' = ' + value
-        print
+        for key, value in props.items():
+            print('  ' + key + ' = ' + value)
+        print()
 
     def _create_record_data(self, record_type, params):
         if record_type == 'Text':
@@ -391,7 +391,7 @@ class NfcClient(object):
             print_message('Writing record type "' + record_type +
                           '" currently not supported.')
             return None
-        for key, value in params.iteritems():
+        for key, value in params.items():
             if key in possible_keys:
                 tag_data[key] = value
         return tag_data
@@ -645,7 +645,7 @@ class NfcConsole(cmd.Cmd):
         if args:
             print_message('Command "exit" expects no arguments.')
             return
-        resp = raw_input('Are you sure? (yes/no): ')
+        resp = input('Are you sure? (yes/no): ')
         if resp == 'yes':
             print_message('Goodbye!')
             self._nfc_client.end()

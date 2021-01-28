@@ -5,9 +5,9 @@ Wrapper around ConfigParser to manage testcases configuration.
 @author rsalveti@linux.vnet.ibm.com (Ricardo Salveti de Araujo)
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 from six.moves.configparser import ConfigParser
 from six.moves import range
 from six import StringIO

@@ -3,9 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import dbus, gobject, logging, os, random, re, shutil, string, sys, time
 from dbus.mainloop.glib import DBusGMainLoop
@@ -468,7 +468,7 @@ def is_vault_mounted(user, regexes=None, allow_fail=False):
             return False
 
         device_regex = None
-        for fs_regex in regexes.keys():
+        for fs_regex in list(regexes.keys()):
             if re.match(fs_regex, mount_info[2]):
                 device_regex = regexes[fs_regex]
                 break
@@ -691,7 +691,7 @@ class CryptohomeProxy(DBusClient):
           result = self.wait_for_signal(signal)
       except utils.TimeoutError:
           return {}
-      for k in data.keys():
+      for k in list(data.keys()):
           if k not in result or result[k] != data[k]:
             return {}
       return result
@@ -806,7 +806,7 @@ class CryptohomeProxy(DBusClient):
         """
         take_tpm_ownership()
         self.wait_for_install_attributes_ready()
-        for key, value in attrs.items():
+        for key, value in list(attrs.items()):
             if not self.__call(self.iface.InstallAttributesSet, key,
                                dbus.ByteArray(value + '\0')):
                 return False

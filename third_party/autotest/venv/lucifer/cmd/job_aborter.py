@@ -15,9 +15,9 @@ This daemon does a number of upkeep tasks:
 See also http://goto.google.com/monitor_db_per_job_refactor
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import argparse
 import logging

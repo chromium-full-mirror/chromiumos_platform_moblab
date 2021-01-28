@@ -40,8 +40,8 @@ def parse_scrub_and_gen_condition(condition, valid_field_dict):
     # double quotes are escaped....i.e.  '''' is the same as "'"
     regex = r'^(%s)[ \t]*(%s)[ \t]*' + \
             r'(\'((\'\'|[^\'])*)\'|"((""|[^"])*)"|([^\'"].*))$'
-    regex = regex % ('|'.join(valid_field_dict.keys()),
-                     '|'.join(compare_ops.keys()))
+    regex = regex % ('|'.join(list(valid_field_dict.keys())),
+                     '|'.join(list(compare_ops.keys())))
     match = re.match(regex, condition)
     if match:
         field = valid_field_dict[match.group(1)]
@@ -53,7 +53,7 @@ def parse_scrub_and_gen_condition(condition, valid_field_dict):
         elif match.group(8):
             val = match.group(8)
         else:
-            raise "Internal error"
+            raise Exception("Internal error")
         return ("%s %s %%s" % (field, op), [val])
 
-    raise "Could not parse '%s' (%s)" % (condition, regex)
+    raise Exception("Could not parse '%s' (%s)" % (condition, regex))

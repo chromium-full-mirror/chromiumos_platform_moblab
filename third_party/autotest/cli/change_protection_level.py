@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 # change_protection_level.py "No protection" machine1 machine2 machine3
 
@@ -23,11 +23,11 @@ hosts = afe_proxy.run('get_hosts', hostname__in=leftover_args[1:])
 for host in hosts:
     try:
         afe_proxy.run('modify_host', host['id'], protection=protection_level)
-    except Exception, exc:
-        print('For host %s:', host['hostname'])
+    except Exception as exc:
+        print(('For host %s:', host['hostname']))
         traceback.print_exc()
     else:
-        print('Host %s succeeded' % host['hostname'])
+        print(('Host %s succeeded' % host['hostname']))
 
 print('Invalid hosts:')
-print(','.join(set(leftover_args[1:]) - set(host['hostname'] for host in hosts)))
+print((','.join(set(leftover_args[1:]) - set(host['hostname'] for host in hosts))))

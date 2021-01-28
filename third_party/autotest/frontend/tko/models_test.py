@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 # pylint: disable=missing-docstring
 
 import unittest
@@ -45,11 +45,11 @@ class TKOTestTest(unittest.TestCase):
         test1.set_attribute('test_attribute1', 'test_value1')
 
         attributes = self._get_attributes(test1)
-        self.assertEquals(attributes['test_attribute1'], 'test_value1')
+        self.assertEqual(attributes['test_attribute1'], 'test_value1')
 
         test1.set_or_delete_attribute('test_attribute1', None)
         attributes = self._get_attributes(test1)
-        self.assertNotIn('test_attribute1', attributes.keys())
+        self.assertNotIn('test_attribute1', list(attributes.keys()))
 
 
     def test_set_attribute(self):
@@ -58,4 +58,4 @@ class TKOTestTest(unittest.TestCase):
         test1.set_attribute('test_attribute1', 'test_value1')
         test1.set_or_delete_attribute('test_attribute1', 'test_value2')
         attributes = self._get_attributes(test1)
-        self.assertEquals(attributes['test_attribute1'], 'test_value2')
+        self.assertEqual(attributes['test_attribute1'], 'test_value2')

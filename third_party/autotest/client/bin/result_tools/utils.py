@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -27,10 +27,10 @@ The content of the json file looks like:
 }
 """
 
-from __future__ import division
-from __future__ import print_function
 
-from __future__ import absolute_import
+
+
+
 
 import argparse
 import copy

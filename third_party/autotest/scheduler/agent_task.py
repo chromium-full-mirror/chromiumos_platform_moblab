@@ -109,7 +109,7 @@ AgentTask
 import logging
 import os
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import common
 
@@ -374,7 +374,7 @@ class AgentTask(object):
         filtered_drones = None
         has_unrestricted_host = False
         if (self.hostnames and restricted_subnets and enable_drone_in_subnet):
-            for hostname in self.hostnames.values():
+            for hostname in list(self.hostnames.values()):
                 subnet = utils.get_restricted_subnet(hostname,
                                                      restricted_subnets)
 
@@ -547,7 +547,7 @@ class TaskWithJobKeyvals(object):
 
     def _write_keyvals_before_job_helper(self, keyval_dict, keyval_path):
         keyval_contents = '\n'.join(self._format_keyval(key, value)
-                                    for key, value in keyval_dict.iteritems())
+                                    for key, value in keyval_dict.items())
         # always end with a newline to allow additional keyvals to be written
         keyval_contents += '\n'
         self._drone_manager.attach_file_to_execution(self._working_directory(),
@@ -563,7 +563,7 @@ class TaskWithJobKeyvals(object):
         keyval_path = os.path.join(self._working_directory(), 'host_keyvals',
                                    host.hostname)
         platform, all_labels = host.platform_and_labels()
-        all_labels = [ urllib.quote(label) for label in all_labels ]
+        all_labels = [ urllib.parse.quote(label) for label in all_labels ]
         keyval_dict = dict(platform=platform, labels=','.join(all_labels))
         self._write_keyvals_before_job_helper(keyval_dict, keyval_path)
 

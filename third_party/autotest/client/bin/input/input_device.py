@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright (c) 2011 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,8 +12,8 @@
 
 """ Read properties and events of a linux input device. """
 
-from __future__ import division
-from __future__ import print_function
+
+
 
 import array
 import copy
@@ -26,7 +26,7 @@ import time
 
 from collections import OrderedDict
 
-from linux_input import *
+from client.bin.input.linux_input import *
 from six.moves import range
 
 
@@ -611,7 +611,7 @@ class InputDevice:
 
     def print_slots(self):
         slot_dict = self.get_slots()
-        for slot_id, slot in slot_dict.items():
+        for slot_id, slot in list(slot_dict.items()):
             print('slot #%d' % slot_id)
             for a in slot:
                 abs = EV_STRINGS[EV_ABS].get(a, '?')

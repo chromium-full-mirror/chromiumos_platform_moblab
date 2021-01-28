@@ -78,7 +78,7 @@ class profilers(profiler_manager.profiler_manager):
 
         # determine what valid host objects we already have installed
         profiler_hosts = set()
-        for host, at, profiler_dir in self.installed_hosts.values():
+        for host, at, profiler_dir in list(self.installed_hosts.values()):
             if host.path_exists(profiler_dir):
                 profiler_hosts.add(host.hostname)
             else:

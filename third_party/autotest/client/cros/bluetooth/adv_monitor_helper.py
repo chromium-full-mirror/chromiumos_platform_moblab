@@ -328,7 +328,7 @@ class AdvMonitorApp(dbus.service.Object):
 
         # Emit the InterfacesRemoved signal before removing the Monitor object.
         self.InterfacesRemoved(monitor.get_path(),
-                               monitor.get_properties().keys())
+                               list(monitor.get_properties().keys()))
 
         monitor.remove_monitor()
 
@@ -623,7 +623,7 @@ class AdvMonitorAppMgr():
                                        DBUS_OM_IFACE)
             objects = remote_om.GetManagedObjects()
 
-            for o, props in objects.items():
+            for o, props in list(objects.items()):
                 if ADV_MONITOR_MANAGER_IFACE in props:
                     return dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, o),
                                           ADV_MONITOR_MANAGER_IFACE)

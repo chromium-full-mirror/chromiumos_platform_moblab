@@ -45,14 +45,14 @@ class RDBHost(object):
 
         @param new_attributes: A dictionary of attributes to update.
         """
-        for name, value in new_attributes.iteritems():
+        for name, value in new_attributes.items():
             setattr(self, name, value)
 
 
     def __init__(self, **kwargs):
         if self.required_fields - set(kwargs.keys()):
             raise rdb_utils.RDBException('Creating %s requires %s, got %s '
-                    % (self.__class__, self.required_fields, kwargs.keys()))
+                    % (self.__class__, self.required_fields, list(kwargs.keys())))
         self._update_attributes(kwargs)
 
 

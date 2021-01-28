@@ -8,7 +8,7 @@ import os
 import re
 import shutil
 import time
-import urlparse
+import urllib.parse
 
 from client.common_lib import error
 from client.common_lib import utils
@@ -399,14 +399,14 @@ class UpdateEngineUtil(object):
         """
         # TODO(ahassani): This doesn't work (or maybe should not) for queries
         # with multiple values for a specific key.
-        parsed_url = list(urlparse.urlsplit(url))
-        parsed_query = urlparse.parse_qs(parsed_url[3])
-        for k, v in query_dict.items():
+        parsed_url = list(urllib.parse.urlsplit(url))
+        parsed_query = urllib.parse.parse_qs(parsed_url[3])
+        for k, v in list(query_dict.items()):
             parsed_query[k] = [v]
         parsed_url[3] = '&'.join(
-            '%s=%s' % (k, v[0]) for k, v in parsed_query.items()
+            '%s=%s' % (k, v[0]) for k, v in list(parsed_query.items())
             if v[0] is not None)
-        return urlparse.urlunsplit(parsed_url)
+        return urllib.parse.urlunsplit(parsed_url)
 
 
     def _check_for_update(self, update_url, interactive=True,
@@ -669,7 +669,7 @@ class UpdateEngineUtil(object):
             return None
 
         MATCH_STR = r'eventtype="(.*?)"'
-        for i in xrange(len(requests) - 1, -1, -1):
+        for i in range(len(requests) - 1, -1, -1):
             search = re.search(MATCH_STR, requests[i])
             if (not search or
                 (search.group(1) ==

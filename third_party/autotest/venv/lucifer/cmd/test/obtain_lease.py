@@ -7,9 +7,9 @@
 This is used for testing leasing.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 import sys
@@ -29,7 +29,7 @@ def main(args):
     with leasing.obtain_lease(args[0]) as path:
         logger.debug('Obtained lease %s', path)
         print('done')
-        raw_input()
+        input()
         logger.debug('Finishing successfully')
     print('finish')
 

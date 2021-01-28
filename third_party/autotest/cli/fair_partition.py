@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
-from __future__ import print_function
+
+
 
 from math import modf
 import random as r
@@ -48,7 +48,7 @@ def descending_fair_sort_indices(xs):
     """
     for idx, _, _ in sorted(
             _enumerate_with_random(xs),
-            key=(lambda (_, v, tiebreaker): (v, tiebreaker)),
+            key=(lambda __v_tiebreaker: (__v_tiebreaker[1], __v_tiebreaker[2])),
             reverse=True):
         yield idx
 

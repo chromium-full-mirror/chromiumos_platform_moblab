@@ -2,9 +2,9 @@
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 import os
@@ -407,7 +407,7 @@ class EC_USBPD_Port(EC_Common):
         if self._amodes is None:
             self._amodes = self._get_amodes()
 
-        if svid in self._amodes.keys():
+        if svid in list(self._amodes.keys()):
             return True
         return False
 
@@ -446,7 +446,7 @@ class EC_USBPD_Port(EC_Common):
         if self._amodes is None:
             self._amodes = self._get_amodes()
 
-        if svid not in self._amodes.keys():
+        if svid not in list(self._amodes.keys()):
             raise error.TestError("SVID %s not supported" % svid)
 
         if opos > len(self._amodes[svid]['configs']):

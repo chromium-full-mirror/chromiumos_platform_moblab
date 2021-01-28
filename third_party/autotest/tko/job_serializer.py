@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """A script that provides convertion between models.job and a protocol
 buffer object.
@@ -194,7 +194,7 @@ class JobSerializer(object):
             newtest = pb_job.tests.add()
             self.set_pb_test(test, newtest)
 
-        for key, val in tko_job.keyval_dict.iteritems():
+        for key, val in tko_job.keyval_dict.items():
             newkeyval = pb_job.keyval_dict.add()
             newkeyval.name = key
             newkeyval.value = str(val)
@@ -269,7 +269,7 @@ class JobSerializer(object):
             pb_iteration = pb_test.iterations.add()
             self.set_pb_iteration(current_iteration, pb_iteration)
 
-        for key, val in tko_test.attributes.iteritems():
+        for key, val in tko_test.attributes.items():
             newkeyval = pb_test.attributes.add()
             newkeyval.name = key
             newkeyval.value = str(val)
@@ -354,12 +354,12 @@ class JobSerializer(object):
         self.set_trivial_attr(tko_iteration, pb_iteration,
                               self.iteration_type_dict)
 
-        for key, val in tko_iteration.attr_keyval.iteritems():
+        for key, val in tko_iteration.attr_keyval.items():
             newkeyval = pb_iteration.attr_keyval.add()
             newkeyval.name = key
             newkeyval.value = str(val)
 
-        for key, val in tko_iteration.perf_keyval.iteritems():
+        for key, val in tko_iteration.perf_keyval.items():
             newkeyval = pb_iteration.perf_keyval.add()
             newkeyval.name = key
             newkeyval.value = str(val)
@@ -380,9 +380,9 @@ class JobSerializer(object):
         """
 
         resultdict = {}
-        for field, field_type in objdict.items():
+        for field, field_type in list(objdict.items()):
             value = getattr(obj, field)
-            if field_type in (str, int, long):
+            if field_type in (str, int, int):
                 resultdict[field] = field_type(value)
             elif field_type == datetime:
                 resultdict[field] = (
@@ -406,14 +406,14 @@ class JobSerializer(object):
         are working with.
 
         """
-        for attr, attr_type in objdict.iteritems():
+        for attr, attr_type in objdict.items():
             if attr_type == datetime:
                 t = getattr(tko_obj, attr)
                 if not t:
                     self.set_attr_safely(pb_obj, attr, t, int)
                 else:
                     t = mktime(t.timetuple()) + 1e-6 * t.microsecond
-                    setattr(pb_obj, attr, long(t*1000))
+                    setattr(pb_obj, attr, int(t*1000))
             else:
                 value = getattr(tko_obj, attr)
                 self.set_attr_safely(pb_obj, attr, value, attr_type)
@@ -435,7 +435,7 @@ class JobSerializer(object):
 
         """
 
-        supported_types = [int, long, str]
+        supported_types = [int, int, str]
         if vartype in supported_types:
             if value is None:
                 value = vartype()

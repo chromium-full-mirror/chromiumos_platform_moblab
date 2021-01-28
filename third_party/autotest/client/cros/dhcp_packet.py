@@ -28,9 +28,9 @@ Note that if you make changes, make sure that the tests in the bottom of this
 file still pass.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import collections
 import logging
@@ -784,6 +784,6 @@ class DhcpPacket(object):
         return "".join(data)
 
     def __str__(self):
-        options = [k.name + "=" + str(v) for k, v in self._options.items()]
-        fields = [k.name + "=" + str(v) for k, v in self._fields.items()]
+        options = [k.name + "=" + str(v) for k, v in list(self._options.items())]
+        fields = [k.name + "=" + str(v) for k, v in list(self._fields.items())]
         return "<DhcpPacket fields=%s, options=%s>" % (fields, options)

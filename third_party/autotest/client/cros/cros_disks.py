@@ -4,9 +4,9 @@
 # found in the LICENSE file.
 
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+
+
+
 
 import dbus, gobject, logging, os, stat
 from dbus.mainloop.glib import DBusGMainLoop
@@ -118,7 +118,7 @@ class DBusClient(object):
         self.__signal_content[signal_name] = None
 
         def signal_handler(*args):
-            self.__signal_content[signal_name] = dict(zip(argument_names, args))
+            self.__signal_content[signal_name] = dict(list(zip(argument_names, args)))
 
         logging.debug('Handling D-Bus signal "%s(%s)" on interface "%s"',
                       signal_name, ', '.join(argument_names), interface)

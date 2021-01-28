@@ -2,9 +2,9 @@
 # Copyright 2007 Google Inc. Released under the GPL v2
 #pylint: disable-msg=C0111
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import glob
 import logging
@@ -633,7 +633,7 @@ class Autotest(installable_object.InstallableObject):
         if not self.installed:
             self.install(host)
 
-        opts = ["%s=%s" % (o[0], repr(o[1])) for o in dargs.items()]
+        opts = ["%s=%s" % (o[0], repr(o[1])) for o in list(dargs.items())]
         cmd = ", ".join([repr(test_name)] + list(map(repr, args)) + opts)
         control = "job.run_test(%s)\n" % cmd
         self.run(control, results_dir, host, timeout=timeout,

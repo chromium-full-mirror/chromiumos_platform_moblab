@@ -8,11 +8,11 @@
 # Python version of include/linux/input.h
 #  as of kernel v2.6.39
 
-from __future__ import division
-from __future__ import print_function
+
+
 from six.moves import range
 
-from linux_ioctl import *
+from client.bin.input.linux_ioctl import *
 # The event structure itself
 #   struct input_event {
 #       struct timeval time;

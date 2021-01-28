@@ -3,7 +3,7 @@
 """
 lockfile.py - Platform-independent advisory file locks.
 
-Forked from python2.7/dist-packages/lockfile version 0.8.
+Forked from python3.7/dist-packages/lockfile version 0.8.
 
 Usage:
 
@@ -48,9 +48,9 @@ Exceptions:
             NotMyLock - File was locked but not by the current thread/process
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 import socket

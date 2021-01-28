@@ -45,7 +45,7 @@ function probe_dut {
 }
 
 function probe_chameleon {
-  RN42_MODULE="/usr/lib/python2.7/site-packages/chameleond-0.0.2-py2.7.egg/chameleond/utils/bluetooth_rn42.py"
+  RN42_MODULE="/usr/lib/python3.7/site-packages/chameleond-0.0.2-py2.7.egg/chameleond/utils/bluetooth_rn42.py"
 
   chameleon="$1-chameleon.cros"
 

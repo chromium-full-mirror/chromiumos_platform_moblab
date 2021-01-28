@@ -149,7 +149,7 @@ def GetVersion(versions, name):
     """
     ver = None
     key = None
-    for k, v in versions.iteritems():
+    for k, v in versions.items():
         if name in k:
             if v == DUMMY_VER:
                 logging.info('Detected invalid %s %s', name, v)

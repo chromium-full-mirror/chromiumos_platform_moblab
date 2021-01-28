@@ -114,7 +114,7 @@ class RequestAccountant(object):
             self.requests_to_counts[request] = count
         self.min_duts_map = dict(
                 (r.parent_job_id, r.suite_min_duts)
-                for r in self.requests_to_counts.iterkeys() if r.parent_job_id)
+                for r in self.requests_to_counts.keys() if r.parent_job_id)
 
 
     @classmethod
@@ -130,7 +130,7 @@ class RequestAccountant(object):
         """
         sort_function = lambda request: (request[0].priority,
                                          -request[0].parent_job_id)
-        return sorted(collections.Counter(requests).items(), key=sort_function,
+        return sorted(list(collections.Counter(requests).items()), key=sort_function,
                       reverse=True)
 
 

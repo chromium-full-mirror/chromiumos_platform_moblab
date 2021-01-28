@@ -15,12 +15,10 @@ from client.common_lib.cros import dev_server
 # Relevant CrosDynamicSuiteExceptions are defined in client/common_lib/error.py.
 
 
-class ControlFileGetter(object):
+class ControlFileGetter(object, metaclass=abc.ABCMeta):
     """
     Interface for classes that can list and fetch known control files.
     """
-
-    __metaclass__ = abc.ABCMeta
 
 
     @abc.abstractmethod
@@ -100,7 +98,7 @@ class CacheingAndFilteringControlFileGetter(ControlFileGetter):
         """
         files = self._get_control_file_list(suite_name=suite_name)
         for cf_filter in self.CONTROL_FILE_FILTERS:
-          files = filter(lambda path: not path.endswith(cf_filter), files)
+          files = [path for path in files if not path.endswith(cf_filter)]
         self._files = files
         return self._files
 
@@ -129,7 +127,7 @@ class CacheingAndFilteringControlFileGetter(ControlFileGetter):
             regexp = re.compile(os.path.join(test_name, 'control$'))
         else:
             regexp = re.compile(test_name + '$')
-        candidates = filter(regexp.search, self._files)
+        candidates = list(filter(regexp.search, self._files))
         if not candidates:
             logging.debug('Cannot find %s in %r', regexp.pattern, self._files)
             raise error.ControlFileNotFound('No control file for ' + test_name)
@@ -240,7 +238,8 @@ class FileSystemGetter(CacheingAndFilteringControlFileGetter):
         """
         try:
             return utils.read_file(test_path)
-        except EnvironmentError as (errno, strerror):
+        except EnvironmentError as e:
+            (errno, strerror) = e.args
             msg = "Can't retrieve {0}: {1} ({2})".format(test_path,
                                                          strerror,
                                                          errno)
@@ -343,8 +342,8 @@ class DevServerGetter(CacheingAndFilteringControlFileGetter,
             {path1: content1, path2: content2, ..., pathX: contentX}
         """
         file_contents = self._list_suite_controls(suite_name=suite_name)
-        files = file_contents.keys()
+        files = list(file_contents.keys())
         for cf_filter in self.CONTROL_FILE_FILTERS:
-            files = filter(lambda path: not path.endswith(cf_filter), files)
+            files = [path for path in files if not path.endswith(cf_filter)]
         self._files = files
         return {f: file_contents[f] for f in files}

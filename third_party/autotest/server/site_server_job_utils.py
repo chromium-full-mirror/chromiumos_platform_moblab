@@ -52,7 +52,7 @@ class test_item(object):
 
     def __str__(self):
         """Return an info string of this test."""
-        params = ['%s=%s' % (k, v) for k, v in self.test_args.items()]
+        params = ['%s=%s' % (k, v) for k, v in list(self.test_args.items())]
         msg = '%s(%s)' % (self.test_name, params)
         if self.inc_set:
             msg += ' include=%s' % [s for s in self.inc_set]

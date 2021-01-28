@@ -61,7 +61,7 @@ def gwt_forward(request, forward_addr):
         headers, content = httplib2.Http().request(url, 'POST',
                                                    body=request.body)
     http_response = HttpResponse(content)
-    for header, value in headers.iteritems():
+    for header, value in headers.items():
         if header not in ('connection',):
             http_response[header] = value
     return http_response
@@ -94,7 +94,7 @@ def handle_file_upload(request):
     if request.method == 'POST':
         TEMPT_DIR = '/tmp/'
         file_paths = []
-        for file_name, upload_file in request.FILES.iteritems():
+        for file_name, upload_file in request.FILES.items():
             file_path = os.path.join(
                     TEMPT_DIR, '_'.join([file_name, upload_file.name]))
             with open(file_path, 'wb+') as destination:

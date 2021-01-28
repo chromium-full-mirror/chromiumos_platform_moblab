@@ -90,7 +90,7 @@ class PrivetHelper(object):
             headers['Content-Type'] = 'application/json; charset=utf8'
             args.append('--data')
             args.append(request_data)
-        for header in headers.iteritems():
+        for header in headers.items():
             args.append('--header')
             args.append(': '.join(header))
         # TODO(wiley do cert checking

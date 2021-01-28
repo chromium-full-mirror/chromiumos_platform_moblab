@@ -258,7 +258,7 @@ def find_opt_in_extension_page(browser):
     try:
         extension_pages = browser.extensions.GetByExtensionId(
             opt_in_extension_id)
-    except Exception, e:
+    except Exception as e:
         raise error.TestFail('Could not locate extension for arc opt-in. '
                              'Make sure disable_default_apps is False. '
                              '"%s".' % e)
@@ -279,7 +279,7 @@ def find_opt_in_extension_page(browser):
         for condition in js_code_did_start_conditions:
             extension_main_page.WaitForJavaScriptCondition(condition,
                                                            timeout=60)
-    except Exception, e:
+    except Exception as e:
         raise error.TestError('Error waiting for "%s": "%s".' % (condition, e))
 
     return extension_main_page
@@ -299,7 +299,7 @@ def opt_in_and_wait_for_completion(extension_main_page):
     try:
         extension_main_page.WaitForJavaScriptCondition('!appWindow',
                                                        timeout=_SIGN_IN_TIMEOUT)
-    except Exception, e:
+    except Exception as e:
         js_read_error_message = """
             err = appWindow.contentWindow.document.getElementById(
                     "error-message");

@@ -7,13 +7,13 @@
 
 import ast
 import contextlib
-import httplib
+import http.client
 import logging
 import os
 import re
 import socket
 import time
-import xmlrpclib
+import xmlrpc.client
 
 import six
 
@@ -74,7 +74,7 @@ class ResponsiveConsoleError(ConsoleError):
     pass
 
 
-class ServodBadStatusLine(httplib.BadStatusLine):
+class ServodBadStatusLine(http.client.BadStatusLine):
     """Error for failures to communicate with servod"""
     def __init__(self, when, line):
         """
@@ -593,7 +593,7 @@ class Servo(object):
         """
         try:
             yield
-        except httplib.BadStatusLine as e:
+        except http.client.BadStatusLine as e:
             exc = ServodBadStatusLine(description, e.line)
             six.reraise(type(exc), exc)
         except socket.error as e:
@@ -999,7 +999,7 @@ class Servo(object):
         try:
             with self._wrap_socket_errors('get_base_board()'):
                 return self._server.get_base_board()
-        except  xmlrpclib.Fault as e:
+        except  xmlrpc.client.Fault as e:
             # TODO(waihong): Remove the following compatibility check when
             # the new versions of hdctools are deployed.
             if 'not supported' in str(e):
@@ -1059,7 +1059,7 @@ class Servo(object):
             with self._wrap_socket_errors('has_control->doc(%s)' % ctrl_name):
                 self._server.doc(ctrl_name)
             return True
-        except xmlrpclib.Fault as e:
+        except xmlrpc.client.Fault as e:
             if re.search('No control %s' % ctrl_name,
                          self._get_xmlrpclib_exception(e)):
                 return False
@@ -1136,7 +1136,7 @@ class Servo(object):
         try:
             with self._wrap_socket_errors('Getting %s' % ctrl_name):
                 return self._server.get(ctrl_name)
-        except xmlrpclib.Fault as e:
+        except xmlrpc.client.Fault as e:
             self._inspect_control_failure(e, ctrl_name)
 
     def set(self, ctrl_name, ctrl_value, prefix=''):
@@ -1181,7 +1181,7 @@ class Servo(object):
         try:
             with self._wrap_socket_errors(description):
                 self._server.set(ctrl_name, ctrl_value)
-        except xmlrpclib.Fault as e:
+        except xmlrpc.client.Fault as e:
             self._inspect_control_failure(e, ctrl_name, ctrl_value=ctrl_value)
 
     def set_get_all(self, controls):
@@ -1197,7 +1197,7 @@ class Servo(object):
         try:
             with self._wrap_socket_errors(description):
                 rv = self._server.set_get_all(controls)
-        except xmlrpclib.Fault as e:
+        except xmlrpc.client.Fault as e:
             # TODO(waihong): Remove the following backward compatibility when
             # the new versions of hdctools are deployed.
             if 'not supported' in str(e):

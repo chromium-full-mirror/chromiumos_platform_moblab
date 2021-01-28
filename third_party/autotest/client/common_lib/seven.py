@@ -9,7 +9,7 @@ to Python 3, but aren't present in the six library.
 """
 
 import six
-import six.moves.configparser
+import configparser
 import socket
 import sys
 import types
@@ -27,10 +27,10 @@ if six.PY3:
     MAXSIZE = sys.maxsize
 else:
     SOCKET_ERRORS = (socket.error, )
-    string_types = (basestring,)
-    integer_types = (int, long)
-    class_types = (type, types.ClassType)
-    text_type = unicode
+    string_types = (str,)
+    integer_types = (int, int)
+    class_types = (type, type)
+    text_type = str
     binary_type = str
 
     MAXSIZE = float("inf")
@@ -70,9 +70,7 @@ def config_parser():
     Unfortunately, in six configparser is not same between 2/3. For our .ini's
     we do not want it to be strict (ie, error upon duplicates).
     """
-    if six.PY3:
-        return six.moves.configparser.ConfigParser(strict=False)
-    return six.moves.configparser.ConfigParser()
+    return configparser.RawConfigParser(strict=False)
 
 
 def ensure_text(s, encoding='utf-8', errors='strict'):
@@ -96,5 +94,5 @@ def ensure_text(s, encoding='utf-8', errors='strict'):
 def ensure_long(n):
     """ensure_long returns a long if py2, or int if py3."""
     if six.PY2:
-        return long(n)
+        return int(n)
     return int(n)

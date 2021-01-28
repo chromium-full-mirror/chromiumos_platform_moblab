@@ -12,9 +12,6 @@ This is the core infrastructure. Derived from the client side job.py
 Copyright Martin J. Bligh, Andy Whitcroft 2007
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import errno
 import fcntl
@@ -36,7 +33,7 @@ import warnings
 
 from datetime import datetime
 
-from client.bin import sysinfo
+from autotest_lib.client.bin import sysinfo
 from client.common_lib import base_job
 from client.common_lib import control_data
 from client.common_lib import error
@@ -71,26 +68,27 @@ def _control_segment_path(name):
     return os.path.join(server_dir, "control_segments", name)
 
 
-CLIENT_CONTROL_FILENAME = 'control'
-SERVER_CONTROL_FILENAME = 'control.srv'
-MACHINES_FILENAME = '.machines'
+CLIENT_CONTROL_FILENAME = "control"
+SERVER_CONTROL_FILENAME = "control.srv"
+MACHINES_FILENAME = ".machines"
 DUT_STATEFUL_PATH = "/usr/local"
 
-CLIENT_WRAPPER_CONTROL_FILE = _control_segment_path('client_wrapper')
-CLIENT_TRAMPOLINE_CONTROL_FILE = _control_segment_path('client_trampoline')
-CRASHDUMPS_CONTROL_FILE = _control_segment_path('crashdumps')
-CRASHINFO_CONTROL_FILE = _control_segment_path('crashinfo')
-CLEANUP_CONTROL_FILE = _control_segment_path('cleanup')
-VERIFY_CONTROL_FILE = _control_segment_path('verify')
-REPAIR_CONTROL_FILE = _control_segment_path('repair')
-PROVISION_CONTROL_FILE = _control_segment_path('provision')
-VERIFY_JOB_REPO_URL_CONTROL_FILE = _control_segment_path('verify_job_repo_url')
-RESET_CONTROL_FILE = _control_segment_path('reset')
-GET_NETWORK_STATS_CONTROL_FILE = _control_segment_path('get_network_stats')
+CLIENT_WRAPPER_CONTROL_FILE = _control_segment_path("client_wrapper")
+CLIENT_TRAMPOLINE_CONTROL_FILE = _control_segment_path("client_trampoline")
+CRASHDUMPS_CONTROL_FILE = _control_segment_path("crashdumps")
+CRASHINFO_CONTROL_FILE = _control_segment_path("crashinfo")
+CLEANUP_CONTROL_FILE = _control_segment_path("cleanup")
+VERIFY_CONTROL_FILE = _control_segment_path("verify")
+REPAIR_CONTROL_FILE = _control_segment_path("repair")
+PROVISION_CONTROL_FILE = _control_segment_path("provision")
+VERIFY_JOB_REPO_URL_CONTROL_FILE = _control_segment_path("verify_job_repo_url")
+RESET_CONTROL_FILE = _control_segment_path("reset")
+GET_NETWORK_STATS_CONTROL_FILE = _control_segment_path("get_network_stats")
 
 
-def get_machine_dicts(machine_names, store_dir, in_lab, use_shadow_store,
-                      host_attributes=None):
+def get_machine_dicts(
+    machine_names, store_dir, in_lab, use_shadow_store, host_attributes=None
+):
     """Converts a list of machine names to list of dicts.
 
     TODO(crbug.com/678430): This function temporarily has a side effect of
@@ -120,7 +118,8 @@ def get_machine_dicts(machine_names, store_dir, in_lab, use_shadow_store,
     # be provided.
     if in_lab and host_attributes:
         raise error.AutoservError(
-                'in_lab and host_attribute are mutually exclusive.')
+            "in_lab and host_attribute are mutually exclusive."
+        )
 
     machine_dict_list = []
     for machine in machine_names:
@@ -133,50 +132,54 @@ def get_machine_dicts(machine_names, store_dir, in_lab, use_shadow_store,
                 host_info_store.commit(info)
         elif use_shadow_store:
             afe_host = _create_afe_host(machine)
-            host_info_store = _create_afe_backed_host_info_store(store_dir,
-                                                                 machine)
+            host_info_store = _create_afe_backed_host_info_store(
+                store_dir, machine
+            )
         else:
             afe_host = server_utils.EmptyAFEHost()
-            host_info_store = _create_file_backed_host_info_store(store_dir,
-                                                                  machine)
+            host_info_store = _create_file_backed_host_info_store(
+                store_dir, machine
+            )
 
-        machine_dict_list.append({
-                'hostname' : machine,
-                'afe_host' : afe_host,
-                'host_info_store': host_info_store,
-                'connection_pool': None,
-        })
+        machine_dict_list.append(
+            {
+                "hostname": machine,
+                "afe_host": afe_host,
+                "host_info_store": host_info_store,
+                "connection_pool": None,
+            }
+        )
 
     return machine_dict_list
 
 
 class status_indenter(base_job.status_indenter):
     """Provide a simple integer-backed status indenter."""
+
     def __init__(self):
         self._indent = 0
-
 
     @property
     def indent(self):
         return self._indent
 
-
     def increment(self):
         self._indent += 1
-
 
     def decrement(self):
         self._indent -= 1
 
-
     def get_context(self):
         """Returns a context object for use by job.get_record_context."""
+
         class context(object):
             def __init__(self, indenter, indent):
                 self._indenter = indenter
                 self._indent = indent
+
             def restore(self):
                 self._indenter._indent = self._indent
+
         return context(self, self._indent)
 
 
@@ -189,10 +192,10 @@ class server_job_record_hook(object):
 
     Depends on job._read_warnings and job._logger.
     """
+
     def __init__(self, job):
         self._job = job
         self._being_called = False
-
 
     def __call__(self, entry):
         """A wrapper around the 'real' record hook, the _hook method, which
@@ -207,7 +210,6 @@ class server_job_record_hook(object):
         finally:
             self._being_called = False
 
-
     @staticmethod
     def _hook(job, entry):
         """The core hook, which can safely call job.record."""
@@ -215,7 +217,8 @@ class server_job_record_hook(object):
         # poll all our warning loggers for new warnings
         for timestamp, msg in job._read_warnings():
             warning_entry = base_job.status_log_entry(
-                'WARN', None, None, msg, {}, timestamp=timestamp)
+                "WARN", None, None, msg, {}, timestamp=timestamp
+            )
             entries.append(warning_entry)
             job.record_entry(warning_entry)
         # echo rendered versions of all the status logs to info
@@ -238,20 +241,30 @@ class server_job(base_job.base_job):
     _STATUS_VERSION = 1
 
     # TODO crbug.com/285395 eliminate ssh_verbosity_flag
-    def __init__(self, control, args, resultdir, label, user, machines,
-                 machine_dict_list,
-                 client=False,
-                 ssh_user=host_factory.DEFAULT_SSH_USER,
-                 ssh_port=host_factory.DEFAULT_SSH_PORT,
-                 ssh_pass=host_factory.DEFAULT_SSH_PASS,
-                 ssh_verbosity_flag=host_factory.DEFAULT_SSH_VERBOSITY,
-                 ssh_options=host_factory.DEFAULT_SSH_OPTIONS,
-                 group_name='',
-                 tag='', disable_sysinfo=False,
-                 control_filename=SERVER_CONTROL_FILENAME,
-                 parent_job_id=None, in_lab=False,
-                 use_client_trampoline=False,
-                 sync_offload_dir=''):
+    def __init__(
+        self,
+        control,
+        args,
+        resultdir,
+        label,
+        user,
+        machines,
+        machine_dict_list,
+        client=False,
+        ssh_user=host_factory.DEFAULT_SSH_USER,
+        ssh_port=host_factory.DEFAULT_SSH_PORT,
+        ssh_pass=host_factory.DEFAULT_SSH_PASS,
+        ssh_verbosity_flag=host_factory.DEFAULT_SSH_VERBOSITY,
+        ssh_options=host_factory.DEFAULT_SSH_OPTIONS,
+        group_name="",
+        tag="",
+        disable_sysinfo=False,
+        control_filename=SERVER_CONTROL_FILENAME,
+        parent_job_id=None,
+        in_lab=False,
+        use_client_trampoline=False,
+        sync_offload_dir="",
+    ):
         """
         Create a server side job object.
 
@@ -294,9 +307,10 @@ class server_job(base_job.base_job):
         """
         super(server_job, self).__init__(resultdir=resultdir)
         self.control = control
-        self._uncollected_log_file = os.path.join(self.resultdir,
-                                                  'uncollected_logs')
-        debugdir = os.path.join(self.resultdir, 'debug')
+        self._uncollected_log_file = os.path.join(
+            self.resultdir, "uncollected_logs"
+        )
+        debugdir = os.path.join(self.resultdir, "debug")
         if not os.path.exists(debugdir):
             os.mkdir(debugdir)
 
@@ -325,32 +339,37 @@ class server_job(base_job.base_job):
         self._use_client_trampoline = use_client_trampoline
 
         self.logging = logging_manager.get_logging_manager(
-                manage_stdout_and_stderr=True, redirect_fds=True)
+            manage_stdout_and_stderr=True, redirect_fds=True
+        )
         subcommand.logging_manager_object = self.logging
 
         self.sysinfo = sysinfo.sysinfo(self.resultdir)
         self.profilers = profilers.profilers(self)
         self._sync_offload_dir = sync_offload_dir
 
-        job_data = {'label' : label, 'user' : user,
-                    'hostname' : ','.join(machines),
-                    'drone' : platform.node(),
-                    'status_version' : str(self._STATUS_VERSION),
-                    'job_started' : str(int(time.time()))}
+        job_data = {
+            "label": label,
+            "user": user,
+            "hostname": ",".join(machines),
+            "drone": platform.node(),
+            "status_version": str(self._STATUS_VERSION),
+            "job_started": str(int(time.time())),
+        }
         # Save parent job id to keyvals, so parser can retrieve the info and
         # write to tko_jobs record.
         if parent_job_id:
-            job_data['parent_job_id'] = parent_job_id
+            job_data["parent_job_id"] = parent_job_id
         if group_name:
-            job_data['host_group_name'] = group_name
+            job_data["host_group_name"] = group_name
 
         # only write these keyvals out on the first job in a resultdir
-        if 'job_started' not in utils.read_keyval(self.resultdir):
+        if "job_started" not in utils.read_keyval(self.resultdir):
             job_data.update(self._get_job_data())
             utils.write_keyval(self.resultdir, job_data)
 
         self.pkgmgr = packages.PackageManager(
-            self.autodir, run_function_dargs={'timeout':600})
+            self.autodir, run_function_dargs={"timeout": 600}
+        )
 
         self._register_subcommand_hooks()
 
@@ -362,8 +381,12 @@ class server_job(base_job.base_job):
         # set up the status logger
         self._indenter = status_indenter()
         self._logger = base_job.status_logger(
-            self, self._indenter, 'status.log', 'status.log',
-            record_hook=server_job_record_hook(self))
+            self,
+            self._indenter,
+            "status.log",
+            "status.log",
+            record_hook=server_job_record_hook(self),
+        )
 
         # Initialize a flag to indicate DUT failure during the test, e.g.,
         # unexpected reboot.
@@ -378,7 +401,7 @@ class server_job(base_job.base_job):
         self.in_lab = in_lab
         self.machine_dict_list = machine_dict_list
         for machine_dict in self.machine_dict_list:
-            machine_dict['connection_pool'] = self._connection_pool
+            machine_dict["connection_pool"] = self._connection_pool
 
         # TODO(jrbarnette) The harness attribute is only relevant to
         # client jobs, but it's required to be present, or we will fail
@@ -392,7 +415,8 @@ class server_job(base_job.base_job):
         # client_trampoline jobs.
         if control and not use_client_trampoline:
             parsed_control = control_data.parse_control(
-                    control, raise_warnings=False)
+                control, raise_warnings=False
+            )
             self.fast = parsed_control.fast
             self.max_result_size_KB = parsed_control.max_result_size_KB
         else:
@@ -400,7 +424,6 @@ class server_job(base_job.base_job):
             # Set the maximum result size to be the default specified in
             # global config, if the job has no control file associated.
             self.max_result_size_KB = control_data.DEFAULT_MAX_RESULT_SIZE_KB
-
 
     @classmethod
     def _find_base_directories(cls):
@@ -410,10 +433,9 @@ class server_job(base_job.base_job):
         with relative paths to resolve the location.
         """
         serverdir = os.path.abspath(os.path.dirname(__file__))
-        autodir = os.path.normpath(os.path.join(serverdir, '..'))
-        clientdir = os.path.join(autodir, 'client')
+        autodir = os.path.normpath(os.path.join(serverdir, ".."))
+        clientdir = os.path.join(autodir, "client")
         return autodir, clientdir, serverdir
-
 
     def _find_resultdir(self, resultdir, *args, **dargs):
         """
@@ -425,11 +447,9 @@ class server_job(base_job.base_job):
         else:
             return None
 
-
     def _get_status_logger(self):
         """Return a reference to the status logger."""
         return self._logger
-
 
     @staticmethod
     def _load_control_file(path):
@@ -438,23 +458,24 @@ class server_job(base_job.base_job):
             control_file = f.read()
         finally:
             f.close()
-        return re.sub('\r', '', control_file)
-
+        return re.sub("\r", "", control_file)
 
     def _register_subcommand_hooks(self):
         """
         Register some hooks into the subcommand modules that allow us
         to properly clean up self.hosts created in forked subprocesses.
         """
+
         def on_fork(cmd):
             self._existing_hosts_on_fork = set(self.hosts)
+
         def on_join(cmd):
             new_hosts = self.hosts - self._existing_hosts_on_fork
             for host in new_hosts:
                 host.close()
+
         subcommand.subcommand.register_fork_hook(on_fork)
         subcommand.subcommand.register_join_hook(on_join)
-
 
     # TODO crbug.com/285395 add a kwargs parameter.
     def _make_namespace(self):
@@ -464,15 +485,16 @@ class server_job(base_job.base_job):
         machines, job, ssh_user, ssh_port, ssh_pass, ssh_verbosity_flag,
         and ssh_options.
         """
-        namespace = {'machines' : self.machine_dict_list,
-                     'job' : self,
-                     'ssh_user' : self._ssh_user,
-                     'ssh_port' : self._ssh_port,
-                     'ssh_pass' : self._ssh_pass,
-                     'ssh_verbosity_flag' : self._ssh_verbosity_flag,
-                     'ssh_options' : self._ssh_options}
+        namespace = {
+            "machines": self.machine_dict_list,
+            "job": self,
+            "ssh_user": self._ssh_user,
+            "ssh_port": self._ssh_port,
+            "ssh_pass": self._ssh_pass,
+            "ssh_verbosity_flag": self._ssh_verbosity_flag,
+            "ssh_options": self._ssh_options,
+        }
         return namespace
-
 
     def cleanup(self, labels):
         """Cleanup machines.
@@ -481,14 +503,13 @@ class server_job(base_job.base_job):
                        determine special task actions.
         """
         if not self.machines:
-            raise error.AutoservError('No machines specified to cleanup')
+            raise error.AutoservError("No machines specified to cleanup")
         if self.resultdir:
             os.chdir(self.resultdir)
 
         namespace = self._make_namespace()
-        namespace.update({'job_labels': labels, 'args': ''})
+        namespace.update({"job_labels": labels, "args": ""})
         self._execute_code(CLEANUP_CONTROL_FILE, namespace, protect=False)
-
 
     def verify(self, labels):
         """Verify machines are all ssh-able.
@@ -497,14 +518,13 @@ class server_job(base_job.base_job):
                        determine special task actions.
         """
         if not self.machines:
-            raise error.AutoservError('No machines specified to verify')
+            raise error.AutoservError("No machines specified to verify")
         if self.resultdir:
             os.chdir(self.resultdir)
 
         namespace = self._make_namespace()
-        namespace.update({'job_labels': labels, 'args': ''})
+        namespace.update({"job_labels": labels, "args": ""})
         self._execute_code(VERIFY_CONTROL_FILE, namespace, protect=False)
-
 
     def reset(self, labels):
         """Reset machines by first cleanup then verify each machine.
@@ -513,14 +533,13 @@ class server_job(base_job.base_job):
                        determine special task actions.
         """
         if not self.machines:
-            raise error.AutoservError('No machines specified to reset.')
+            raise error.AutoservError("No machines specified to reset.")
         if self.resultdir:
             os.chdir(self.resultdir)
 
         namespace = self._make_namespace()
-        namespace.update({'job_labels': labels, 'args': ''})
+        namespace.update({"job_labels": labels, "args": ""})
         self._execute_code(RESET_CONTROL_FILE, namespace, protect=False)
-
 
     def repair(self, labels):
         """Repair machines.
@@ -529,14 +548,13 @@ class server_job(base_job.base_job):
                        determine special task actions.
         """
         if not self.machines:
-            raise error.AutoservError('No machines specified to repair')
+            raise error.AutoservError("No machines specified to repair")
         if self.resultdir:
             os.chdir(self.resultdir)
 
         namespace = self._make_namespace()
-        namespace.update({'job_labels': labels, 'args': ''})
+        namespace.update({"job_labels": labels, "args": ""})
         self._execute_code(REPAIR_CONTROL_FILE, namespace, protect=False)
-
 
     def provision(self, labels):
         """
@@ -549,13 +567,11 @@ class server_job(base_job.base_job):
         control = self._load_control_file(PROVISION_CONTROL_FILE)
         self.run(control=control, job_labels=labels)
 
-
     def precheck(self):
         """
         perform any additional checks in derived classes.
         """
         pass
-
 
     def enable_external_logging(self):
         """
@@ -563,20 +579,17 @@ class server_job(base_job.base_job):
         """
         pass
 
-
     def disable_external_logging(self):
         """
         Pause or stop external logging mechanism.
         """
         pass
 
-
     def use_external_logging(self):
         """
         Return True if external logging should be used.
         """
         return False
-
 
     def _make_parallel_wrapper(self, function, machines, log):
         """Wrap function as appropriate for calling by parallel_simple."""
@@ -587,26 +600,33 @@ class server_job(base_job.base_job):
         # server_job._make_namespace.
         # To compare the machinese to self.machines, which is a list of machine
         # hostname, we need to convert machines back to a list of hostnames.
-        if (machines and isinstance(machines, list)
-            and isinstance(machines[0], dict)):
-            machines = [m['hostname'] for m in machines]
+        if (
+            machines
+            and isinstance(machines, list)
+            and isinstance(machines[0], dict)
+        ):
+            machines = [m["hostname"] for m in machines]
         if len(machines) > 1 and log:
+
             def wrapper(machine):
                 hostname = server_utils.get_hostname_from_machine(machine)
                 self.push_execution_context(hostname)
                 os.chdir(self.resultdir)
-                machine_data = {'hostname' : hostname,
-                                'status_version' : str(self._STATUS_VERSION)}
+                machine_data = {
+                    "hostname": hostname,
+                    "status_version": str(self._STATUS_VERSION),
+                }
                 utils.write_keyval(self.resultdir, machine_data)
                 result = function(machine)
                 return result
+
         else:
             wrapper = function
         return wrapper
 
-
-    def parallel_simple(self, function, machines, log=True, timeout=None,
-                        return_results=False):
+    def parallel_simple(
+        self, function, machines, log=True, timeout=None, return_results=False
+    ):
         """
         Run 'function' using parallel_simple, with an extra wrapper to handle
         the necessary setup for continuous parsing, if possible. If continuous
@@ -626,10 +646,13 @@ class server_job(base_job.base_job):
         """
         wrapper = self._make_parallel_wrapper(function, machines, log)
         return subcommand.parallel_simple(
-                wrapper, machines,
-                subdir_name_constructor=server_utils.get_hostname_from_machine,
-                log=log, timeout=timeout, return_results=return_results)
-
+            wrapper,
+            machines,
+            subdir_name_constructor=server_utils.get_hostname_from_machine,
+            log=log,
+            timeout=timeout,
+            return_results=return_results,
+        )
 
     def parallel_on_machines(self, function, machines, timeout=None):
         """
@@ -640,25 +663,24 @@ class server_job(base_job.base_job):
         @returns A list of machines on which function(machine) returned
                 without raising an exception.
         """
-        results = self.parallel_simple(function, machines, timeout=timeout,
-                                       return_results=True)
+        results = self.parallel_simple(
+            function, machines, timeout=timeout, return_results=True
+        )
         success_machines = []
         for result, machine in zip(results, machines):
             if not isinstance(result, Exception):
                 success_machines.append(machine)
         return success_machines
 
-
     def record_skipped_test(self, skipped_test, message=None):
         """Insert a failure record into status.log for this test."""
         msg = message
         if msg is None:
-            msg = 'No valid machines found for test %s.' % skipped_test
+            msg = "No valid machines found for test %s." % skipped_test
         logging.info(msg)
-        self.record('START', None, skipped_test.test_name)
-        self.record('INFO', None, skipped_test.test_name, msg)
-        self.record('END TEST_NA', None, skipped_test.test_name, msg)
-
+        self.record("START", None, skipped_test.test_name)
+        self.record("INFO", None, skipped_test.test_name, msg)
+        self.record("END TEST_NA", None, skipped_test.test_name, msg)
 
     def _has_failed_tests(self):
         """Parse status log for failed tests.
@@ -704,10 +726,10 @@ class server_job(base_job.base_job):
             # The current job is still running and shouldn't count as failed.
             # The parser will fail to parse the exit status of the job since it
             # hasn't exited yet (this running right now is the job).
-            failed = failed or (test.status != 'GOOD'
-                                and not _is_current_server_job(test))
+            failed = failed or (
+                test.status != "GOOD" and not _is_current_server_job(test)
+            )
         return failed
-
 
     def _collect_crashes(self, namespace, collect_crashinfo):
         """Collect crashes.
@@ -723,12 +745,20 @@ class server_job(base_job.base_job):
             crash_control_file = CRASHDUMPS_CONTROL_FILE
         self._execute_code(crash_control_file, namespace)
 
-
     _USE_TEMP_DIR = object()
-    def run(self, collect_crashdumps=True, namespace={}, control=None,
-            control_file_dir=None, verify_job_repo_url=False,
-            only_collect_crashinfo=False, skip_crash_collection=False,
-            job_labels='', use_packaging=True):
+
+    def run(
+        self,
+        collect_crashdumps=True,
+        namespace={},
+        control=None,
+        control_file_dir=None,
+        verify_job_repo_url=False,
+        only_collect_crashinfo=False,
+        skip_crash_collection=False,
+        job_labels="",
+        use_packaging=True,
+    ):
         # for a normal job, make sure the uncollected logs file exists
         # for a crashinfo-only run it should already exist, bail out otherwise
         created_uncollected_logs = False
@@ -737,8 +767,10 @@ class server_job(base_job.base_job):
             if only_collect_crashinfo:
                 # if this is a crashinfo-only run, and there were no existing
                 # uncollected logs, just bail out early
-                logging.info("No existing uncollected logs, "
-                             "skipping crashinfo collection")
+                logging.info(
+                    "No existing uncollected logs, "
+                    "skipping crashinfo collection"
+                )
                 return
             else:
                 log_file = open(self._uncollected_log_file, "wb")
@@ -751,15 +783,17 @@ class server_job(base_job.base_job):
         machines = self.machines
         if control is None:
             if self.control is None:
-                control = ''
+                control = ""
             elif self._use_client_trampoline:
                 # Some tests must be loaded and staged before they can be run,
                 # see crbug.com/883403#c42 and #c46 for details.
                 control = self._load_control_file(
-                        CLIENT_TRAMPOLINE_CONTROL_FILE)
+                    CLIENT_TRAMPOLINE_CONTROL_FILE
+                )
                 # repr of a string is safe for eval.
-                control = (('trampoline_testname = %r\n' % str(self.control))
-                           + control)
+                control = (
+                    "trampoline_testname = %r\n" % str(self.control)
+                ) + control
             else:
                 control = self._load_control_file(self.control)
         if control_file_dir is None:
@@ -767,17 +801,19 @@ class server_job(base_job.base_job):
 
         self.aborted = False
         namespace.update(self._make_namespace())
-        namespace.update({
-                'args': self.args,
-                'job_labels': job_labels,
-                'gtest_runner': site_gtest_runner.gtest_runner(),
-        })
+        namespace.update(
+            {
+                "args": self.args,
+                "job_labels": job_labels,
+                "gtest_runner": site_gtest_runner.gtest_runner(),
+            }
+        )
         test_start_time = int(time.time())
 
         if self.resultdir:
             os.chdir(self.resultdir)
             # touch status.log so that the parser knows a job is running here
-            open(self.get_status_log_path(), 'a').close()
+            open(self.get_status_log_path(), "a").close()
             self.enable_external_logging()
 
         collect_crashinfo = True
@@ -786,11 +822,13 @@ class server_job(base_job.base_job):
             try:
                 if not self.fast:
                     with metrics.SecondsTimer(
-                            'chromeos/autotest/job/get_network_stats',
-                            fields = {'stage': 'start'}):
-                        namespace['network_stats_label'] = 'at-start'
-                        self._execute_code(GET_NETWORK_STATS_CONTROL_FILE,
-                                           namespace)
+                        "chromeos/autotest/job/get_network_stats",
+                        fields={"stage": "start"},
+                    ):
+                        namespace["network_stats_label"] = "at-start"
+                        self._execute_code(
+                            GET_NETWORK_STATS_CONTROL_FILE, namespace
+                        )
 
                 if only_collect_crashinfo:
                     return
@@ -799,30 +837,40 @@ class server_job(base_job.base_job):
                 # to actually verify that the job_repo_url contains the autotest
                 # package, this job will fail.
                 if verify_job_repo_url:
-                    self._execute_code(VERIFY_JOB_REPO_URL_CONTROL_FILE,
-                                       namespace)
+                    self._execute_code(
+                        VERIFY_JOB_REPO_URL_CONTROL_FILE, namespace
+                    )
                 else:
-                    logging.warning('Not checking if job_repo_url contains '
-                                    'autotest packages on %s', machines)
+                    logging.warning(
+                        "Not checking if job_repo_url contains "
+                        "autotest packages on %s",
+                        machines,
+                    )
 
                 # determine the dir to write the control files to
-                cfd_specified = (control_file_dir
-                                 and control_file_dir is not self._USE_TEMP_DIR)
+                cfd_specified = (
+                    control_file_dir
+                    and control_file_dir is not self._USE_TEMP_DIR
+                )
                 if cfd_specified:
                     temp_control_file_dir = None
                 else:
                     temp_control_file_dir = tempfile.mkdtemp(
-                        suffix='temp_control_file_dir')
+                        suffix="temp_control_file_dir"
+                    )
                     control_file_dir = temp_control_file_dir
-                server_control_file = os.path.join(control_file_dir,
-                                                   self._control_filename)
-                client_control_file = os.path.join(control_file_dir,
-                                                   CLIENT_CONTROL_FILENAME)
+                server_control_file = os.path.join(
+                    control_file_dir, self._control_filename
+                )
+                client_control_file = os.path.join(
+                    control_file_dir, CLIENT_CONTROL_FILENAME
+                )
                 if self._client:
-                    namespace['control'] = control
+                    namespace["control"] = control
                     utils.open_write_close(client_control_file, control)
-                    shutil.copyfile(CLIENT_WRAPPER_CONTROL_FILE,
-                                    server_control_file)
+                    shutil.copyfile(
+                        CLIENT_WRAPPER_CONTROL_FILE, server_control_file
+                    )
                 else:
                     utils.open_write_close(server_control_file, control)
 
@@ -834,8 +882,8 @@ class server_job(base_job.base_job):
                     logging.debug("Results dir is %s", self.resultdir)
                     logging.debug("Synchronous offload dir is %s", sync_dir)
                 logging.info("Processing control file")
-                namespace['use_packaging'] = use_packaging
-                namespace['synchronous_offload_dir'] = sync_dir
+                namespace["use_packaging"] = use_packaging
+                namespace["synchronous_offload_dir"] = sync_dir
                 os.environ[OFFLOAD_ENVVAR] = sync_dir
                 self._execute_code(server_control_file, namespace)
                 logging.info("Finished processing control file")
@@ -845,13 +893,20 @@ class server_job(base_job.base_job):
             except Exception as e:
                 try:
                     logging.exception(
-                            'Exception escaped control file, job aborting:')
-                    reason = re.sub(base_job.status_log_entry.BAD_CHAR_REGEX,
-                                    ' ', str(e))
-                    self.record('INFO', None, None, str(e),
-                                {'job_abort_reason': reason})
+                        "Exception escaped control file, job aborting:"
+                    )
+                    reason = re.sub(
+                        base_job.status_log_entry.BAD_CHAR_REGEX, " ", str(e)
+                    )
+                    self.record(
+                        "INFO",
+                        None,
+                        None,
+                        str(e),
+                        {"job_abort_reason": reason},
+                    )
                 except:
-                    pass # don't let logging exceptions here interfere
+                    pass  # don't let logging exceptions here interfere
                 raise
         finally:
             if temp_control_file_dir:
@@ -859,21 +914,28 @@ class server_job(base_job.base_job):
                 try:
                     shutil.rmtree(temp_control_file_dir)
                 except Exception as e:
-                    logging.warning('Could not remove temp directory %s: %s',
-                                 temp_control_file_dir, e)
+                    logging.warning(
+                        "Could not remove temp directory %s: %s",
+                        temp_control_file_dir,
+                        e,
+                    )
 
             if machines and (collect_crashdumps or collect_crashinfo):
                 if skip_crash_collection or self.fast:
-                    logging.info('Skipping crash dump/info collection '
-                                 'as requested.')
+                    logging.info(
+                        "Skipping crash dump/info collection " "as requested."
+                    )
                 else:
                     with metrics.SecondsTimer(
-                            'chromeos/autotest/job/collect_crashinfo'):
-                        namespace['test_start_time'] = test_start_time
+                        "chromeos/autotest/job/collect_crashinfo"
+                    ):
+                        namespace["test_start_time"] = test_start_time
                         # Remove crash files for passing tests.
                         # TODO(ayatane): Tests that create crash files should be
                         # reported.
-                        namespace['has_failed_tests'] = self._has_failed_tests()
+                        namespace[
+                            "has_failed_tests"
+                        ] = self._has_failed_tests()
                         self._collect_crashes(namespace, collect_crashinfo)
             self.disable_external_logging()
             if self._uncollected_log_file and created_uncollected_logs:
@@ -881,38 +943,42 @@ class server_job(base_job.base_job):
 
             if not self.fast:
                 with metrics.SecondsTimer(
-                        'chromeos/autotest/job/get_network_stats',
-                        fields = {'stage': 'end'}):
-                    namespace['network_stats_label'] = 'at-end'
-                    self._execute_code(GET_NETWORK_STATS_CONTROL_FILE,
-                                       namespace)
+                    "chromeos/autotest/job/get_network_stats",
+                    fields={"stage": "end"},
+                ):
+                    namespace["network_stats_label"] = "at-end"
+                    self._execute_code(
+                        GET_NETWORK_STATS_CONTROL_FILE, namespace
+                    )
 
     def _server_offload_dir_path(self):
         return os.path.join(self.resultdir, self._sync_offload_dir)
 
     def _offload_dir_target_path(self):
         if not self._sync_offload_dir:
-            return ''
+            return ""
         if self._client:
-          return os.path.join(DUT_STATEFUL_PATH, self._sync_offload_dir)
+            return os.path.join(DUT_STATEFUL_PATH, self._sync_offload_dir)
         return os.path.join(self.resultdir, self._sync_offload_dir)
 
     def _maybe_retrieve_client_offload_dirs(self):
-        if not(self._sync_offload_dir and self._client):
+        if not (self._sync_offload_dir and self._client):
             logging.info("No client dir to retrieve.")
-            return ''
+            return ""
         logging.info("Retrieving synchronous offload dir from client")
         server_path = self._server_offload_dir_path()
         client_path = self._offload_dir_target_path()
+
         def serial(machine):
             host = hosts.create_host(machine)
             server_subpath = os.path.join(server_path, host.hostname)
             # Empty final piece ensures that get_file gets a trailing slash,
             #  which makes it copy dir contents rather than the dir itself.
-            client_subpath = os.path.join(client_path, '')
+            client_subpath = os.path.join(client_path, "")
             logging.debug("Client dir to retrieve is %s", client_subpath)
             os.makedirs(server_subpath)
             host.get_file(client_subpath, server_subpath)
+
         self.parallel_simple(serial, self.machines)
         logging.debug("Synchronous offload dir retrieved to %s", server_path)
         return server_path
@@ -920,10 +986,11 @@ class server_job(base_job.base_job):
     def _create_client_offload_dirs(self):
         marker_string = "client %s%s" % (
             "in SSP " if utils.is_in_container() else "",
-            str(datetime.utcnow())
+            str(datetime.utcnow()),
         )
         offload_path = self._offload_dir_target_path()
         _, file_path = tempfile.mkstemp()
+
         def serial(machine):
             host = hosts.create_host(machine)
             marker_path = os.path.join(offload_path, "sync_offloads_marker")
@@ -935,7 +1002,6 @@ class server_job(base_job.base_job):
             self.parallel_simple(serial, self.machines)
         finally:
             os.remove(file_path)
-
 
     def create_marker_file(self):
         """Create a marker file in the leaf task's synchronous offload dir.
@@ -949,20 +1015,20 @@ class server_job(base_job.base_job):
         """
         # Make the server-side directory regardless
         try:
-          # 2.7 makedirs doesn't have an option for pre-existing directories
-          os.makedirs(self._server_offload_dir_path())
+            # 2.7 makedirs doesn't have an option for pre-existing directories
+            os.makedirs(self._server_offload_dir_path())
         except OSError as e:
-          if e.errno != errno.EEXIST:
-            raise
+            if e.errno != errno.EEXIST:
+                raise
         if not self._client:
             offload_path = self._offload_dir_target_path()
             marker_string = "server %s%s" % (
                 "in SSP " if utils.is_in_container() else "",
-                str(datetime.utcnow())
+                str(datetime.utcnow()),
             )
             utils.open_write_close(
                 os.path.join(offload_path, "sync_offloads_marker"),
-                marker_string
+                marker_string,
             )
             return offload_path
         return self._create_client_offload_dirs()
@@ -977,9 +1043,9 @@ class server_job(base_job.base_job):
                 url of the test to run
         """
         if self._disable_sysinfo:
-            dargs['disable_sysinfo'] = True
+            dargs["disable_sysinfo"] = True
 
-        group, testname = self.pkgmgr.get_package_name(url, 'test')
+        group, testname = self.pkgmgr.get_package_name(url, "test")
         testname, subdir, tag = self._build_tagged_test_name(testname, dargs)
         outputdir = self._make_test_outputdir(subdir)
 
@@ -991,10 +1057,10 @@ class server_job(base_job.base_job):
                 raise
             except Exception as e:
                 info = str(e) + "\n" + traceback.format_exc()
-                self.record('FAIL', subdir, testname, info)
+                self.record("FAIL", subdir, testname, info)
                 raise
             else:
-                self.record('GOOD', subdir, testname, 'completed successfully')
+                self.record("GOOD", subdir, testname, "completed successfully")
 
         try:
             result = self._run_group(testname, subdir, group_func)
@@ -1003,29 +1069,27 @@ class server_job(base_job.base_job):
         else:
             return True
 
-
     def _run_group(self, name, subdir, function, *args, **dargs):
         """Underlying method for running something inside of a group."""
         result, exc_info = None, None
         try:
-            self.record('START', subdir, name)
+            self.record("START", subdir, name)
             result = function(*args, **dargs)
         except error.TestBaseException as e:
             self.record("END %s" % e.exit_status, subdir, name)
             raise
         except Exception as e:
-            err_msg = str(e) + '\n'
+            err_msg = str(e) + "\n"
             err_msg += traceback.format_exc()
-            self.record('END ABORT', subdir, name, err_msg)
-            raise error.JobError(name + ' failed\n' + traceback.format_exc())
+            self.record("END ABORT", subdir, name, err_msg)
+            raise error.JobError(name + " failed\n" + traceback.format_exc())
         else:
-            self.record('END GOOD', subdir, name)
+            self.record("END GOOD", subdir, name)
         finally:
             for hook in self._post_run_hooks:
                 hook()
 
         return result
-
 
     def run_group(self, function, *args, **dargs):
         """\
@@ -1038,7 +1102,7 @@ class server_job(base_job.base_job):
 
         name = function.__name__
         # Allow the tag for the group to be specified.
-        tag = dargs.pop('tag', None)
+        tag = dargs.pop("tag", None)
         if tag:
             name = tag
 
@@ -1047,7 +1111,6 @@ class server_job(base_job.base_job):
         except error.TestBaseException:
             return None, sys.exc_info()
         return result, None
-
 
     def run_op(self, op, op_func, get_kernel_func):
         """\
@@ -1062,17 +1125,17 @@ class server_job(base_job.base_job):
                             representing the kernel version.
         """
         try:
-            self.record('START', None, op)
+            self.record("START", None, op)
             op_func()
         except Exception as e:
-            err_msg = str(e) + '\n' + traceback.format_exc()
-            self.record('END FAIL', None, op, err_msg)
+            err_msg = str(e) + "\n" + traceback.format_exc()
+            self.record("END FAIL", None, op, err_msg)
             raise
         else:
             kernel = get_kernel_func()
-            self.record('END GOOD', None, op,
-                        optional_fields={"kernel": kernel})
-
+            self.record(
+                "END GOOD", None, op, optional_fields={"kernel": kernel}
+            )
 
     def run_control(self, path):
         """Execute a control file found at path (relative to the autotest
@@ -1082,22 +1145,19 @@ class server_job(base_job.base_job):
         control_file = self._load_control_file(path)
         self.run(control=control_file, control_file_dir=self._USE_TEMP_DIR)
 
-
     def add_sysinfo_command(self, command, logfile=None, on_every_test=False):
-        self._add_sysinfo_loggable(sysinfo.command(command, logf=logfile),
-                                   on_every_test)
-
+        self._add_sysinfo_loggable(
+            sysinfo.command(command, logf=logfile), on_every_test
+        )
 
     def add_sysinfo_logfile(self, file, on_every_test=False):
         self._add_sysinfo_loggable(sysinfo.logfile(file), on_every_test)
-
 
     def _add_sysinfo_loggable(self, loggable, on_every_test):
         if on_every_test:
             self.sysinfo.test_loggables.add(loggable)
         else:
             self.sysinfo.boot_loggables.add(loggable)
-
 
     def _read_warnings(self):
         """Poll all the warning loggers and extract any new warnings that have
@@ -1120,7 +1180,7 @@ class server_job(base_job.base_job):
                     closed_loggers.add(logger)
                     continue
                 # parse out the warning
-                timestamp, msgtype, msg = line.split('\t', 2)
+                timestamp, msgtype, msg = line.split("\t", 2)
                 timestamp = int(timestamp)
                 # if the warning is valid, add it to the results
                 if self.warning_manager.is_valid(timestamp, msgtype):
@@ -1137,7 +1197,6 @@ class server_job(base_job.base_job):
         warnings.sort()
         return warnings
 
-
     def _unique_subdirectory(self, base_subdirectory_name):
         """Compute a unique results subdirectory based on the given name.
 
@@ -1147,10 +1206,9 @@ class server_job(base_job.base_job):
         subdirectory = base_subdirectory_name
         counter = 1
         while os.path.exists(os.path.join(self.resultdir, subdirectory)):
-            subdirectory = base_subdirectory_name + '.' + str(counter)
+            subdirectory = base_subdirectory_name + "." + str(counter)
             counter += 1
         return subdirectory
-
 
     def get_record_context(self):
         """Returns an object representing the current job.record context.
@@ -1165,9 +1223,15 @@ class server_job(base_job.base_job):
         @return: A context object with a 0-arg restore() method."""
         return self._indenter.get_context()
 
-
-    def record_summary(self, status_code, test_name, reason='', attributes=None,
-                       distinguishing_attributes=(), child_test_ids=None):
+    def record_summary(
+        self,
+        status_code,
+        test_name,
+        reason="",
+        attributes=None,
+        distinguishing_attributes=(),
+        child_test_ids=None,
+    ):
         """Record a summary test result.
 
         @param status_code: status code string, see
@@ -1188,27 +1252,34 @@ class server_job(base_job.base_job):
         subdirectory_name_parts = [test_name]
         for attribute in distinguishing_attributes:
             assert attributes
-            assert attribute in attributes, '%s not in %s' % (attribute,
-                                                              attributes)
+            assert attribute in attributes, "%s not in %s" % (
+                attribute,
+                attributes,
+            )
             subdirectory_name_parts.append(attributes[attribute])
-        base_subdirectory_name = '.'.join(subdirectory_name_parts)
+        base_subdirectory_name = ".".join(subdirectory_name_parts)
 
         subdirectory = self._unique_subdirectory(base_subdirectory_name)
         subdirectory_path = os.path.join(self.resultdir, subdirectory)
         os.mkdir(subdirectory_path)
 
-        self.record(status_code, subdirectory, test_name,
-                    status=reason, optional_fields={'is_summary': True})
+        self.record(
+            status_code,
+            subdirectory,
+            test_name,
+            status=reason,
+            optional_fields={"is_summary": True},
+        )
 
         if attributes:
             utils.write_keyval(subdirectory_path, attributes)
 
         if child_test_ids:
-            ids_string = ','.join(str(test_id) for test_id in child_test_ids)
-            summary_data = {'child_test_ids': ids_string}
-            utils.write_keyval(os.path.join(subdirectory_path, 'summary_data'),
-                               summary_data)
-
+            ids_string = ",".join(str(test_id) for test_id in child_test_ids)
+            summary_data = {"child_test_ids": ids_string}
+            utils.write_keyval(
+                os.path.join(subdirectory_path, "summary_data"), summary_data
+            )
 
     def add_post_run_hook(self, hook):
         """
@@ -1223,20 +1294,25 @@ class server_job(base_job.base_job):
         """
         self._post_run_hooks.append(hook)
 
-
     def disable_warnings(self, warning_type):
         self.warning_manager.disable_warnings(warning_type)
-        self.record("INFO", None, None,
-                    "disabling %s warnings" % warning_type,
-                    {"warnings.disable": warning_type})
-
+        self.record(
+            "INFO",
+            None,
+            None,
+            "disabling %s warnings" % warning_type,
+            {"warnings.disable": warning_type},
+        )
 
     def enable_warnings(self, warning_type):
         self.warning_manager.enable_warnings(warning_type)
-        self.record("INFO", None, None,
-                    "enabling %s warnings" % warning_type,
-                    {"warnings.enable": warning_type})
-
+        self.record(
+            "INFO",
+            None,
+            None,
+            "enabling %s warnings" % warning_type,
+            {"warnings.enable": warning_type},
+        )
 
     def get_status_log_path(self, subdir=None):
         """Return the path to the job status log.
@@ -1254,7 +1330,6 @@ class server_job(base_job.base_job):
         else:
             return None
 
-
     def _update_uncollected_logs_list(self, update_func):
         """Updates the uncollected logs list in a multi-process safe manner.
 
@@ -1262,8 +1337,10 @@ class server_job(base_job.base_job):
             logs. Should take one parameter, the list to be updated.
         """
         # Skip log collection if file _uncollected_log_file does not exist.
-        if not (self._uncollected_log_file and
-                os.path.exists(self._uncollected_log_file)):
+        if not (
+            self._uncollected_log_file
+            and os.path.exists(self._uncollected_log_file)
+        ):
             return
         if self._uncollected_log_file:
             log_file = open(self._uncollected_log_file, "rb+")
@@ -1279,7 +1356,6 @@ class server_job(base_job.base_job):
             fcntl.flock(log_file, fcntl.LOCK_UN)
             log_file.close()
 
-
     def add_client_log(self, hostname, remote_path, local_path):
         """Adds a new set of client logs to the list of uncollected logs,
         to allow for future log recovery.
@@ -1288,10 +1364,11 @@ class server_job(base_job.base_job):
         @param remote_path - the directory on the remote machine holding logs
         @param local_path - the local directory to copy the logs into
         """
+
         def update_func(logs_list):
             logs_list.append((hostname, remote_path, local_path))
-        self._update_uncollected_logs_list(update_func)
 
+        self._update_uncollected_logs_list(update_func)
 
     def remove_client_log(self, hostname, remote_path, local_path):
         """Removes a set of client logs from the list of uncollected logs,
@@ -1301,10 +1378,11 @@ class server_job(base_job.base_job):
         @param remote_path - the directory on the remote machine holding logs
         @param local_path - the local directory to copy the logs into
         """
+
         def update_func(logs_list):
             logs_list.remove((hostname, remote_path, local_path))
-        self._update_uncollected_logs_list(update_func)
 
+        self._update_uncollected_logs_list(update_func)
 
     def get_client_logs(self):
         """Retrieves the list of uncollected logs, if it exists.
@@ -1312,13 +1390,13 @@ class server_job(base_job.base_job):
         @returns A list of (host, remote_path, local_path) tuples. Returns
                  an empty list if no uncollected logs file exists.
         """
-        log_exists = (self._uncollected_log_file and
-                      os.path.exists(self._uncollected_log_file))
+        log_exists = self._uncollected_log_file and os.path.exists(
+            self._uncollected_log_file
+        )
         if log_exists:
             return pickle.load(open(self._uncollected_log_file))
         else:
             return []
-
 
     def _fill_server_control_namespace(self, namespace, protect=True):
         """
@@ -1336,6 +1414,7 @@ class server_job(base_job.base_job):
         Raises:
           error.AutoservError: When a name would be clobbered by import.
         """
+
         def _import_names(module_name, names=()):
             """
             Import a module and assign named attributes into namespace.
@@ -1354,10 +1433,10 @@ class server_job(base_job.base_job):
             # No names supplied?  Import * from the lowest level module.
             # (Ugh, why do I have to implement this part myself?)
             if not names:
-                for submodule_name in module_name.split('.')[1:]:
+                for submodule_name in module_name.split(".")[1:]:
                     module = getattr(module, submodule_name)
-                if hasattr(module, '__all__'):
-                    names = getattr(module, '__all__')
+                if hasattr(module, "__all__"):
+                    names = getattr(module, "__all__")
                 else:
                     names = dir(module)
 
@@ -1367,47 +1446,56 @@ class server_job(base_job.base_job):
                 # Check for conflicts to help prevent future problems.
                 if name in namespace and protect:
                     if namespace[name] is not getattr(module, name):
-                        raise error.AutoservError('importing name '
-                                '%s from %s %r would override %r' %
-                                (name, module_name, getattr(module, name),
-                                 namespace[name]))
+                        raise error.AutoservError(
+                            "importing name "
+                            "%s from %s %r would override %r"
+                            % (
+                                name,
+                                module_name,
+                                getattr(module, name),
+                                namespace[name],
+                            )
+                        )
                     else:
                         # Encourage cleanliness and the use of __all__ for a
                         # more concrete API with less surprises on '*' imports.
-                        warnings.warn('%s (%r) being imported from %s for use '
-                                      'in server control files is not the '
-                                      'first occurrence of that import.' %
-                                      (name, namespace[name], module_name))
+                        warnings.warn(
+                            "%s (%r) being imported from %s for use "
+                            "in server control files is not the "
+                            "first occurrence of that import."
+                            % (name, namespace[name], module_name)
+                        )
 
                 namespace[name] = getattr(module, name)
-
 
         # This is the equivalent of prepending a bunch of import statements to
         # the front of the control script.
         namespace.update(os=os, sys=sys, logging=logging)
-        _import_names('server',
-                ('hosts', 'autotest', 'standalone_profiler'))
-        _import_names('server.subcommand',
-                      ('parallel', 'parallel_simple', 'subcommand'))
-        _import_names('server.utils',
-                      ('run', 'get_tmp_dir', 'sh_escape', 'parse_machine'))
-        _import_names('client.common_lib.error')
-        _import_names('client.common_lib.barrier', ('barrier',))
+        _import_names("server", ("hosts", "autotest", "standalone_profiler"))
+        _import_names(
+            "server.subcommand", ("parallel", "parallel_simple", "subcommand")
+        )
+        _import_names(
+            "server.utils",
+            ("run", "get_tmp_dir", "sh_escape", "parse_machine"),
+        )
+        _import_names("client.common_lib.error")
+        _import_names("client.common_lib.barrier", ("barrier",))
 
         # Inject ourself as the job object into other classes within the API.
         # (Yuck, this injection is a gross thing be part of a public API. -gps)
         #
         # XXX Autotest does not appear to use .job.  Who does?
-        namespace['autotest'].Autotest.job = self
+        namespace["autotest"].Autotest.job = self
         # server.hosts.base_classes.Host uses .job.
-        namespace['hosts'].Host.job = self
-        namespace['hosts'].factory.ssh_user = self._ssh_user
-        namespace['hosts'].factory.ssh_port = self._ssh_port
-        namespace['hosts'].factory.ssh_pass = self._ssh_pass
-        namespace['hosts'].factory.ssh_verbosity_flag = (
-                self._ssh_verbosity_flag)
-        namespace['hosts'].factory.ssh_options = self._ssh_options
-
+        namespace["hosts"].Host.job = self
+        namespace["hosts"].factory.ssh_user = self._ssh_user
+        namespace["hosts"].factory.ssh_port = self._ssh_port
+        namespace["hosts"].factory.ssh_pass = self._ssh_pass
+        namespace[
+            "hosts"
+        ].factory.ssh_verbosity_flag = self._ssh_verbosity_flag
+        namespace["hosts"].factory.ssh_options = self._ssh_options
 
     def _execute_code(self, code_file, namespace, protect=True):
         """
@@ -1429,18 +1517,21 @@ class server_job(base_job.base_job):
         self._fill_server_control_namespace(namespace, protect=protect)
         # TODO: Simplify and get rid of the special cases for only 1 machine.
         if len(self.machines) > 1:
-            machines_text = '\n'.join(self.machines) + '\n'
+            machines_text = "\n".join(self.machines) + "\n"
             # Only rewrite the file if it does not match our machine list.
             try:
-                machines_f = open(MACHINES_FILENAME, 'r')
+                machines_f = open(MACHINES_FILENAME, "r")
                 existing_machines_text = machines_f.read()
                 machines_f.close()
             except EnvironmentError:
                 existing_machines_text = None
             if machines_text != existing_machines_text:
                 utils.open_write_close(MACHINES_FILENAME, machines_text)
-        exec(compile(open(code_file, "rb").read(), code_file, 'exec'), namespace, namespace)
-
+        exec(
+            compile(open(code_file, "rb").read(), code_file, "exec"),
+            namespace,
+            namespace,
+        )
 
     def preprocess_client_state(self):
         """
@@ -1452,7 +1543,7 @@ class server_job(base_job.base_job):
         @returns The path of the file the state was written into.
         """
         # initialize the sysinfo state
-        self._state.set('client', 'sysinfo', self.sysinfo.serialize())
+        self._state.set("client", "sysinfo", self.sysinfo.serialize())
 
         # dump the state out to a tempfile
         fd, file_path = tempfile.mkstemp(dir=self.tmpdir)
@@ -1461,7 +1552,6 @@ class server_job(base_job.base_job):
         # write_to_file doesn't need locking, we exclusively own file_path
         self._state.write_to_file(file_path)
         return file_path
-
 
     def postprocess_client_state(self, state_path):
         """
@@ -1483,22 +1573,20 @@ class server_job(base_job.base_job):
             if e.errno != errno.ENOENT:
                 raise
             else:
-                logging.debug('Client state file %s not found', state_path)
+                logging.debug("Client state file %s not found", state_path)
 
         # update the sysinfo state
-        if self._state.has('client', 'sysinfo'):
-            self.sysinfo.deserialize(self._state.get('client', 'sysinfo'))
+        if self._state.has("client", "sysinfo"):
+            self.sysinfo.deserialize(self._state.get("client", "sysinfo"))
 
         # drop all the client-specific state
-        self._state.discard_namespace('client')
-
+        self._state.discard_namespace("client")
 
     def clear_all_known_hosts(self):
         """Clears known hosts files for all AbstractSSHHosts."""
         for host in self.hosts:
             if isinstance(host, abstract_ssh.AbstractSSHHost):
                 host.clear_known_hosts()
-
 
     def close(self):
         """Closes this job's operation."""
@@ -1508,7 +1596,6 @@ class server_job(base_job.base_job):
             host.close()
         assert not self.hosts
         self._connection_pool.shutdown()
-
 
     def _get_job_data(self):
         """Add custom data to the job keyval info.
@@ -1527,12 +1614,14 @@ class server_job(base_job.base_job):
         if len(self.machines) > 1:
             # Search through machines for first machine with a platform.
             for host in self.machines:
-                keyval_path = os.path.join(self.resultdir, 'host_keyvals', host)
+                keyval_path = os.path.join(
+                    self.resultdir, "host_keyvals", host
+                )
                 keyvals = utils.read_keyval(keyval_path)
-                host_plat = keyvals.get('platform', None)
+                host_plat = keyvals.get("platform", None)
                 if not host_plat:
                     continue
-                job_data['hostname'] = host_plat
+                job_data["hostname"] = host_plat
                 break
         return job_data
 
@@ -1540,10 +1629,10 @@ class server_job(base_job.base_job):
 class warning_manager(object):
     """Class for controlling warning logs. Manages the enabling and disabling
     of warnings."""
+
     def __init__(self):
         # a map of warning types to a list of disabled time intervals
         self.disabled_warnings = {}
-
 
     def is_valid(self, timestamp, warning_type):
         """Indicates if a warning (based on the time it occured and its type)
@@ -1555,13 +1644,11 @@ class warning_manager(object):
                 return False
         return True
 
-
     def disable_warnings(self, warning_type, current_time_func=time.time):
         """As of now, disables all further warnings of this type."""
         intervals = self.disabled_warnings.setdefault(warning_type, [])
         if not intervals or intervals[-1][1] is not None:
             intervals.append((int(current_time_func()), None))
-
 
     def enable_warnings(self, warning_type, current_time_func=time.time):
         """As of now, enables all further warnings of this type."""
@@ -1575,7 +1662,7 @@ def _is_current_server_job(test):
 
     @param test: test instance from tko parser.
     """
-    return test.testname == 'SERVER_JOB'
+    return test.testname == "SERVER_JOB"
 
 
 def _create_afe_host(hostname):
@@ -1587,7 +1674,7 @@ def _create_afe_host(hostname):
     afe = frontend_wrappers.RetryingAFE(timeout_min=5, delay_sec=10)
     hosts = afe.get_hosts(hostname=hostname)
     if not hosts:
-        raise error.AutoservError('No hosts named %s found' % hostname)
+        raise error.AutoservError("No hosts named %s found" % hostname)
 
     return hosts[0]
 
@@ -1600,11 +1687,10 @@ def _create_file_backed_host_info_store(store_dir, hostname):
 
     @returns: An object of type CachingHostInfoStore.
     """
-    backing_file_path = os.path.join(store_dir, '%s.store' % hostname)
+    backing_file_path = os.path.join(store_dir, "%s.store" % hostname)
     if not os.path.isfile(backing_file_path):
         raise error.AutoservError(
-                'Requested FileStore but no backing file at %s'
-                % backing_file_path
+            "Requested FileStore but no backing file at %s" % backing_file_path
         )
     return file_store.FileStore(backing_file_path)
 
@@ -1622,22 +1708,24 @@ def _create_afe_backed_host_info_store(store_dir, hostname):
         primary_store.get(force_refresh=True)
     except host_info.StoreError:
         raise error.AutoservError(
-                'Could not obtain HostInfo for hostname %s' % hostname)
+            "Could not obtain HostInfo for hostname %s" % hostname
+        )
     # Since the store wasn't initialized external to autoserv, we must
     # ensure that the store we create is unique within store_dir.
     backing_file_path = os.path.join(
-            _make_unique_subdir(store_dir),
-            '%s.store' % hostname,
+        _make_unique_subdir(store_dir),
+        "%s.store" % hostname,
     )
-    logging.info('Shadowing AFE store with a FileStore at %s',
-                 backing_file_path)
+    logging.info(
+        "Shadowing AFE store with a FileStore at %s", backing_file_path
+    )
     shadow_store = file_store.FileStore(backing_file_path)
     return shadowing_store.ShadowingStore(primary_store, shadow_store)
 
 
 def _make_unique_subdir(workdir):
     """Creates a new subdir within workdir and returns the path to it."""
-    store_dir = os.path.join(workdir, 'dir_%s' % uuid.uuid4())
+    store_dir = os.path.join(workdir, "dir_%s" % uuid.uuid4())
     _make_dirs_if_needed(store_dir)
     return store_dir
 

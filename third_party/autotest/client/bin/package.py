@@ -5,9 +5,9 @@ generic, with implementations that deal with different package managers, such
 as dpkg and rpm.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 __author__ = 'lucasmr@br.ibm.com (Lucas Meneghel Rodrigues)'
 

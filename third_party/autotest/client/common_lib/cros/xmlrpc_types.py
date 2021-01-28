@@ -50,8 +50,7 @@ def deserialize(serialized, module=None):
             return None
 
         args.append(serialized[arg])
-    kwargs = dict(filter(lambda (k, v): k in optional_args,
-                         serialized.iteritems()))
+    kwargs = dict([k_v for k_v in iter(serialized.items()) if k_v[0] in optional_args])
     logging.debug('Constructing %s object with args=%r, kwargs=%r',
                   serialized[TYPE_KEY], args, kwargs)
     return klass(*args, **kwargs)

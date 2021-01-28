@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """A simple heartbeat server.
 
@@ -34,9 +34,9 @@ Usage:
 import argparse
 import sys
 import time
-import urlparse
-from BaseHTTPServer import BaseHTTPRequestHandler
-from BaseHTTPServer import HTTPServer
+import urllib.parse
+from http.server import BaseHTTPRequestHandler
+from http.server import HTTPServer
 
 import common
 from client.common_lib.global_config import global_config as config
@@ -105,7 +105,7 @@ class BoardHandler(BaseHTTPRequestHandler):
         Handles urls like: http://localhost:8080/lumpy?raw&host_limit=5
         and writes the appropriate http response containing the heartbeat.
         """
-        parsed_path = urlparse.urlparse(self.path, allow_fragments=True)
+        parsed_path = urllib.parse.urlparse(self.path, allow_fragments=True)
         board = '%s%s' % (self.board_prefix, parsed_path.path.rsplit('/')[-1])
 
         raw = False
@@ -176,8 +176,8 @@ def _parse_args(args):
 if __name__ == '__main__':
     args = _parse_args(sys.argv[1:])
     server = HTTPServer(('localhost', args.port), BoardHandler)
-    print ('Starting heartbeat server, query eg: http://localhost:%s/lumpy' %
-           args.port)
+    print(('Starting heartbeat server, query eg: http://localhost:%s/lumpy' %
+           args.port))
 
     # We need these lazy imports to allow command line specification of
     # database credentials.

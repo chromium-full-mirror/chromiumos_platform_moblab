@@ -5,9 +5,9 @@
 """This throttler tries to reduce result size by compress files to tgz file.
 """
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+
+
+
 
 import re
 import os

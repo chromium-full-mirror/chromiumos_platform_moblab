@@ -136,7 +136,7 @@ class GenericTesterMainLoop(ExceptionForwardingMainLoop):
       action(property, *args, **kwargs)
 
   def assert_(self, arg):
-    self.test.assert_(self, arg)
+    self.test.assertTrue(self, arg)
 
   def run(self, *args, **kwargs):
     self.test_args = args

@@ -67,7 +67,7 @@ class CommonClient(object):
             params.setdefault('key', self.api_key)
 
         params_list = []
-        for kw, arg in params.items():
+        for kw, arg in list(params.items()):
             params_list.append('='.join([urllib.parse.quote(kw),
                                          urllib.parse.quote(arg)]))
 

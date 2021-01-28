@@ -51,6 +51,6 @@ def cleanup_if_fail():
                     logging.error(e)
 
                 # Raise the cached exception with original backtrace.
-                raise exc_info[0], exc_info[1], exc_info[2]
+                raise exc_info[0](exc_info[1]).with_traceback(exc_info[2])
         return func_cleanup_if_fail
     return deco_cleanup_if_fail

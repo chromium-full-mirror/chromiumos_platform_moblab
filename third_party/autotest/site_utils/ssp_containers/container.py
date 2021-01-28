@@ -138,7 +138,7 @@ class Container(object):
         self._rootfs = None
         self.name = name
         self._id = self.name
-        for attribute, value in attribute_values.iteritems():
+        for attribute, value in attribute_values.items():
             setattr(self, attribute, value)
         exists = ssp_containers.get_container_info(container_path, name=name)
         # Clone the source container to initialize this one.
@@ -209,7 +209,7 @@ class Container(object):
                     'No container found in directory %s with name of %s.' %
                     (self.container_path, self.name))
         attribute_values = containers[0]
-        for attribute, value in attribute_values.iteritems():
+        for attribute, value in attribute_values.items():
             setattr(self, attribute, value)
 
     def attach_run(self, command, bash=True, user='moblab'):
@@ -312,16 +312,16 @@ class Container(object):
         """Swap the python import order of lib and local/lib.
 
         In Moblab, the host's python modules located in
-        /usr/lib64/python2.7/site-packages is mounted to following folder inside
-        container: /usr/local/lib/python2.7/dist-packages/. The modules include
+        /usr/lib64/python3.7/site-packages is mounted to following folder inside
+        container: /usr/local/lib/python3.7/dist-packages/. The modules include
         an old version of requests module, which is used in autotest
         site-packages. For test, the module is only used in
         dev_server/symbolicate_dump for requests.call and requests.codes.OK.
         When pip is installed inside the container, it installs requests module
-        with version of 2.2.1 in /usr/lib/python2.7/dist-packages/. The version
+        with version of 2.2.1 in /usr/lib/python3.7/dist-packages/. The version
         is newer than the one used in autotest site-packages, but not the latest
         either.
-        According to /usr/lib/python2.7/site.py, modules in /usr/local/lib are
+        According to /usr/lib/python3.7/site.py, modules in /usr/local/lib are
         imported before the ones in /usr/lib. That leads to pip to use the older
         version of requests (0.11.2), and it will fail. On the other hand,
         requests module 2.2.1 can't be installed in CrOS (refer to CL:265759),

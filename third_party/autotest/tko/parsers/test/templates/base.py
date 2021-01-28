@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 """
 This is not meant to be executed unless copied into a
 scenario package and renamed with a _unittest suffix.
@@ -27,7 +27,7 @@ class ParserScenerioTestCase(scenario_base.BaseScenarioTestCase):
         fresh_parser_result = self.harness.execute()
         fresh_copy = scenario_base.copy_parser_result(
             fresh_parser_result)
-        self.assertEquals(golden, fresh_copy)
+        self.assertEqual(golden, fresh_copy)
 
 
 if __name__ == '__main__':

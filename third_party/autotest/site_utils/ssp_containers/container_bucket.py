@@ -107,7 +107,7 @@ class ContainerBucket(object):
     def destroy_all(self):
         """Destroy all containers, base must be destroyed at the last.
         """
-        containers = self.get_all().values()
+        containers = list(self.get_all().values())
         for container in sorted(
                 containers, key=lambda n: 1 if n.name == constants.BASE else 0):
             key = container.id

@@ -40,8 +40,8 @@ class Attenuator(object):
         if config_str.startswith("MN="):
             config_str = config_str[len("MN="):]
 
-        self.properties = dict(zip(['model', 'max_freq', 'max_atten'],
-                                   config_str.split("-", 2)))
+        self.properties = dict(list(zip(['model', 'max_freq', 'max_atten'],
+                                   config_str.split("-", 2))))
         self.max_atten = float(self.properties['max_atten'])
         self.min_atten = 0
 

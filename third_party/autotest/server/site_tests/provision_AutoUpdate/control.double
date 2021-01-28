@@ -41,7 +41,7 @@ We are taking the risk because
 """
 
 
-from client.bin import sysinfo
+from autotest_lib.client.bin import sysinfo
 from client.common_lib import error
 from client.cros import constants
 from server import afe_utils

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3.7
 
 #pylint: disable=C0111
 
@@ -44,7 +44,7 @@ PID_FILE_PREFIX = 'monitor_db'
 RESULTS_DIR = '.'
 AUTOTEST_PATH = os.path.join(os.path.dirname(__file__), '..')
 
-if os.environ.has_key('AUTOTEST_DIR'):
+if 'AUTOTEST_DIR' in os.environ:
     AUTOTEST_PATH = os.environ['AUTOTEST_DIR']
 AUTOTEST_SERVER_DIR = os.path.join(AUTOTEST_PATH, 'server')
 AUTOTEST_TKO_DIR = os.path.join(AUTOTEST_PATH, 'tko')

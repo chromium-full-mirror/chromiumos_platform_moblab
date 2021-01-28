@@ -228,7 +228,7 @@ class DhcpHandlingRule(object):
         would have a pool of configuration settings to hand out to DHCP clients
         upon request.
         """
-        for option, value in self.options.items():
+        for option, value in list(self.options.items()):
             if (option.number in requested_parameters or
                 option in self.force_reply_options):
                 packet.set_option(option, value)
@@ -244,7 +244,7 @@ class DhcpHandlingRule(object):
         would have a pool of configuration settings to hand out to DHCP clients
         upon request.
         """
-        for field, value in self.fields.items():
+        for field, value in list(self.fields.items()):
             packet.set_field(field, value)
 
     def is_our_message_type(self, packet):

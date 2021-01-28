@@ -5,7 +5,7 @@
 import abc
 import datetime
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from client.bin import test, utils
 from client.common_lib import error, file_utils, lsbrelease_utils
@@ -14,7 +14,7 @@ from client.cros.image_comparison import image_comparison_factory
 from PIL import Image
 from PIL import ImageDraw
 
-class ui_TestBase(test.test):
+class ui_TestBase(test.test, metaclass=abc.ABCMeta):
     """ Encapsulates steps needed to collect screenshots for ui pieces.
 
     Each child class must implement:
@@ -52,8 +52,6 @@ class ui_TestBase(test.test):
      execute remainder steps.
 
     """
-
-    __metaclass__ = abc.ABCMeta
 
     WORKING_DIR = '/tmp/test'
     REMOTE_DIR = 'http://storage.googleapis.com/chromiumos-test-assets-public'
@@ -103,7 +101,7 @@ class ui_TestBase(test.test):
         try:
             file_utils.download_file(golden_image_remote_path,
                                      golden_image_local_path)
-        except urllib2.HTTPError as e:
+        except urllib.error.HTTPError as e:
             warn = "No screenshot found for {0} on milestone {1}. ".format(
                 self.tagged_testname, lsbrelease_utils.get_chrome_milestone())
             warn += e.msg

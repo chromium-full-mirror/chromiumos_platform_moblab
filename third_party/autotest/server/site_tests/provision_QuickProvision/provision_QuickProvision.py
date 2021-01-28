@@ -140,7 +140,7 @@ class provision_QuickProvision(test.test):
         try:
             ds = dev_server.ImageServer.resolve(image, host.hostname)
         except dev_server.DevServerException as e:
-            raise error.TestFail, str(e), sys.exc_info()[2]
+            raise error.TestFail(str(e)).with_traceback(sys.exc_info()[2])
 
         url = _IMAGE_URL_PATTERN % (ds.url(), image)
 

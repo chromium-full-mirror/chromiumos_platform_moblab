@@ -60,7 +60,7 @@ def format_options(options, separator):
     @return formated string.
 
     """
-    return separator.join(['%s=%s' % (k, v) for (k, v) in options.iteritems()])
+    return separator.join(['%s=%s' % (k, v) for (k, v) in options.items()])
 
 
 def naive_restart(host=None):

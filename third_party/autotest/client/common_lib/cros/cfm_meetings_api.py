@@ -4,7 +4,7 @@
 
 import logging
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from client.bin import utils
 from client.common_lib import error

@@ -77,7 +77,7 @@ class CrosP2PDaemon(object):
     def _update_records(self, announce):
         # Build the TXT records:
         txts = ['num_connections=%d' % self._num_connections]
-        for file_id, file_size in self._files.iteritems():
+        for file_id, file_size in self._files.items():
             txts.append('id_%s=%d' % (file_id, file_size))
         self._zeroconf.register_TXT(
             self._zeroconf.hostname + '.' + self._p2p_domain, txts, announce)

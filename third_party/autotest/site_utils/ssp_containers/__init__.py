@@ -10,9 +10,9 @@
   5. Cleanup, e.g., destroy the container.
 """
 
-from constants import *
-from container import Container
-from container import ContainerId
-from container_bucket import ContainerBucket
-from container_factory import ContainerFactory
-from shared_host_dir import SharedHostDir
+from site_utils.ssp_containers.constants import *
+from site_utils.ssp_containers.container import Container
+from site_utils.ssp_containers.container import ContainerId
+from site_utils.ssp_containers.container_bucket import ContainerBucket
+from site_utils.ssp_containers.container_factory import ContainerFactory
+from site_utils.ssp_containers.shared_host_dir import SharedHostDir

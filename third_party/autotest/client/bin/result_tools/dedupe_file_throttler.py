@@ -8,9 +8,9 @@ does not compare the file content, instead, it sorts the files with the same
 prefix and remove files in the middle part.
 """
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+
+
+
 
 import os
 import re
@@ -103,7 +103,7 @@ def throttle(summary, max_result_size_KB):
         # Group files for each parent directory
         grouped_infos = _group_by(throttable_files, ['parent_dir', 'prefix'])
 
-        for infos in grouped_infos.values():
+        for infos in list(grouped_infos.values()):
             if (len(infos) <=
                 OLDEST_FILES_TO_KEEP_COUNT + NEWEST_FILES_TO_KEEP_COUNT):
                 # No need to dedupe if the count of file is too few.

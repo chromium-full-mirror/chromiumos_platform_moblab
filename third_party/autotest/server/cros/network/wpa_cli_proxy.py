@@ -244,7 +244,7 @@ class WpaCliProxy(object):
                                  (network_id, 'scan_ssid', '1'))
 
         sec_config = assoc_params.security_config
-        for field, value in sec_config.get_wpa_cli_properties().iteritems():
+        for field, value in sec_config.get_wpa_cli_properties().items():
             self.run_wpa_cli_cmd('set_network %d %s %s' %
                                  (network_id, field, value))
         self.run_wpa_cli_cmd('select_network %d' % network_id)

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 import cgi, os, socket, sys, urllib2
 import common

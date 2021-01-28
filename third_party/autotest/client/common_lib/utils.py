@@ -11,7 +11,7 @@ inheritance with, just a collection of static methods.
 
 # pylint: disable=missing-docstring
 
-import StringIO
+import io
 import collections
 import datetime
 import errno
@@ -20,7 +20,7 @@ import itertools
 import logging
 import os
 import pickle
-import Queue
+import queue
 import random
 import re
 import resource
@@ -34,8 +34,8 @@ import subprocess
 import textwrap
 import threading
 import time
-import urllib2
-import urlparse
+import urllib.request, urllib.error, urllib.parse
+import urllib.parse
 import uuid
 import warnings
 
@@ -207,11 +207,15 @@ class BgJob(object):
 
         # allow for easy stdin input by string, we'll let subprocess create
         # a pipe for stdin input and we'll write to it in the wait loop
-        if isinstance(stdin, basestring):
+        #
+        if isinstance(stdin, str):
             self.string_stdin = stdin
             stdin = subprocess.PIPE
         else:
             self.string_stdin = None
+
+        if isinstance(stdin, bytes):
+            raise Exception("stdin in is bytes not string, probably py2 -> py3 bug")
 
         # Prepend extra_paths to env['PATH'] if necessary.
         if extra_paths:
@@ -242,9 +246,9 @@ class BgJob(object):
 
         self._cleanup_called = False
         self._stdout_file = (
-            None if stdout_tee == DEVNULL else StringIO.StringIO())
+            None if stdout_tee == DEVNULL else io.BytesIO())
         self._stderr_file = (
-            None if stderr_tee == DEVNULL else StringIO.StringIO())
+            None if stderr_tee == DEVNULL else io.BytesIO())
 
     def process_output(self, stdout=True, final_read=False):
         """Read from process's output stream, and write data to destinations.
@@ -284,11 +288,13 @@ class BgJob(object):
                 data.append(os.read(pipe.fileno(), 1024))
                 if len(data[-1]) == 0:
                     break
-            data = "".join(data)
+            data = b"".join(data)
         else:
-            # perform a single read
+            # perform a single read            raise Exception("Single Read")
             data = os.read(pipe.fileno(), 1024)
         buf.write(data)
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')
         tee.write(data)
 
     def cleanup(self):
@@ -311,11 +317,14 @@ class BgJob(object):
                 self._stdout_tee.flush()
                 self.sp.stdout.close()
                 self.result.stdout = self._stdout_file.getvalue()
+                self.result.stdout = self.result.stdout.decode('utf-8')
 
             if self.sp.stderr:
                 self._stderr_tee.flush()
                 self.sp.stderr.close()
                 self.result.stderr = self._stderr_file.getvalue()
+                self.result.stderr = self.result.stderr.decode('utf-8')
+
         finally:
             self._cleanup_called = True
 
@@ -395,7 +404,7 @@ def get_field(data, param, linestart="", sep=" "):
     if find != None:
         return re.split("%s" % sep, find.group(1))[param]
     else:
-        print "There is no line which starts with %s in data." % linestart
+        print("There is no line which starts with %s in data." % linestart)
         return None
 
 
@@ -453,7 +462,7 @@ def matrix_to_string(matrix, header=None):
             lengths.append(len(column))
     for row in matrix:
         for i, column in enumerate(row):
-            column = unicode(column).encode("utf-8")
+            column = str(column).encode("utf-8")
             cl = len(column)
             try:
                 ml = lengths[i]
@@ -556,7 +565,7 @@ def write_keyval(path, dictionary, type_tag=None):
 def is_url(path):
     """Return true if path looks like a URL"""
     # for now, just handle http and ftp
-    url_parts = urlparse.urlparse(path)
+    url_parts = urllib.parse.urlparse(path)
     return (url_parts[0] in ('http', 'ftp'))
 
 
@@ -567,7 +576,7 @@ def urlopen(url, data=None, timeout=5):
     old_timeout = socket.getdefaulttimeout()
     socket.setdefaulttimeout(timeout)
     try:
-        return urllib2.urlopen(url, data=data)
+        return urllib.request.urlopen(url, data=data)
     finally:
         socket.setdefaulttimeout(old_timeout)
 
@@ -645,7 +654,7 @@ def unmap_url(srcdir, src, destdir='.'):
                             (after retrieving it)
     """
     if is_url(src):
-        url_parts = urlparse.urlparse(src)
+        url_parts = urllib.parse.urlparse(src)
         filename = os.path.basename(url_parts[2])
         dest = os.path.join(destdir, filename)
         return get_file(src, dest)
@@ -730,7 +739,7 @@ def run(command, timeout=None, ignore_status=False, stdout_tee=None,
     @raise CmdError: the exit code of the command execution was not 0
     @raise CmdTimeoutError: the command timed out and ignore_timeout is False.
     """
-    if isinstance(args, basestring):
+    if isinstance(args, str):
         raise TypeError('Got a string for the "args" keyword argument, '
                         'need a sequence.')
 
@@ -738,7 +747,7 @@ def run(command, timeout=None, ignore_status=False, stdout_tee=None,
     # (For example, see get_user_hash in client/cros/cryptohome.py.)
     # So, to cover that case, detect if it's a string or not and convert it
     # into one if necessary.
-    if not isinstance(command, basestring):
+    if not isinstance(command, str):
         command = ' '.join([sh_quote_word(arg) for arg in command])
 
     command = ' '.join([command] + [sh_quote_word(arg) for arg in args])
@@ -764,7 +773,6 @@ def run(command, timeout=None, ignore_status=False, stdout_tee=None,
     if not ignore_status and bg_job.result.exit_status:
         raise error.CmdError(command, bg_job.result,
                              "Command returned non-zero exit status")
-
     return bg_job.result
 
 
@@ -783,7 +791,7 @@ def run_parallel(commands, timeout=None, ignore_status=False,
     bg_jobs = []
     if nicknames is None:
         nicknames = []
-    for (command, nickname) in itertools.izip_longest(commands, nicknames):
+    for (command, nickname) in itertools.zip_longest(commands, nicknames):
         bg_jobs.append(BgJob(command, stdout_tee, stderr_tee,
                              stderr_level=get_stderr_level(ignore_status),
                              nickname=nickname))
@@ -904,7 +912,7 @@ def _wait_for_commands(bg_jobs, start_time, timeout):
             # we can write PIPE_BUF bytes without blocking
             # POSIX requires PIPE_BUF is >= 512
             bg_job = reverse_dict[file_obj]
-            file_obj.write(bg_job.string_stdin[:512])
+            file_obj.write(bg_job.string_stdin[:512].encode('utf-8'))
             bg_job.string_stdin = bg_job.string_stdin[512:]
             # no more input data, close stdin, remove it from the select set
             if not bg_job.string_stdin:
@@ -1100,10 +1108,10 @@ def strip_unicode(input_obj):
         return [strip_unicode(i) for i in input_obj]
     elif type(input_obj) == dict:
         output = {}
-        for key in input_obj.keys():
+        for key in list(input_obj.keys()):
             output[str(key)] = strip_unicode(input_obj[key])
         return output
-    elif type(input_obj) == unicode:
+    elif type(input_obj) == str:
         return str(input_obj)
     else:
         return input_obj
@@ -1164,7 +1172,7 @@ def get_arch_userspace(run_function=run):
 
     cmd = 'file --brief --dereference /bin/sh'
     filestr = run_function(cmd).stdout.rstrip()
-    for a, regex in archs.iteritems():
+    for a, regex in archs.items():
         if re.match(regex, filestr):
             return a
 
@@ -1593,7 +1601,7 @@ def get_relative_path(path, reference):
     ref_list = reference.split(os.path.sep)[1:]
 
     # find the longest leading common path
-    for i in xrange(min(len(path_list), len(ref_list))):
+    for i in range(min(len(path_list), len(ref_list))):
         if path_list[i] != ref_list[i]:
             # decrement i so when exiting this loop either by no match or by
             # end of range we are one step behind
@@ -1790,7 +1798,7 @@ def ask(question, auto=False):
     if auto:
         logging.info("%s (y/n) y", question)
         return "y"
-    return raw_input("%s INFO | %s (y/n) " %
+    return input("%s INFO | %s (y/n) " %
                      (time.strftime("%H:%M:%S", time.localtime()), question))
 
 
@@ -2078,7 +2086,7 @@ def get_chrome_version(job_views):
 
     for view in job_views:
         if (view.get('attributes')
-            and constants.CHROME_VERSION in view['attributes'].keys()):
+            and constants.CHROME_VERSION in list(view['attributes'].keys())):
 
             return view['attributes'].get(constants.CHROME_VERSION)
 
@@ -2223,7 +2231,7 @@ def nuke_pids(pid_list, signal_queue=None):
         signal_queue = [signal.SIGTERM, signal.SIGKILL]
     sig_count = {}
     # Though this is slightly hacky it beats hardcoding names anyday.
-    sig_names = dict((k, v) for v, k in signal.__dict__.iteritems()
+    sig_names = dict((k, v) for v, k in signal.__dict__.items()
                      if v.startswith('SIG'))
     for sig in signal_queue:
         logging.debug('Sending signal %s to the following pids:', sig)
@@ -2287,8 +2295,8 @@ def urlopen_socket_timeout(url, data=None, timeout=5):
     old_timeout = socket.getdefaulttimeout()
     socket.setdefaulttimeout(timeout)
     try:
-        return urllib2.urlopen(url, data=data)
-    except urllib2.URLError as e:
+        return urllib.request.urlopen(url, data=data)
+    except urllib.error.URLError as e:
         if type(e.reason) is socket.timeout:
             raise error.TimeoutException(str(e))
         raise
@@ -2543,7 +2551,7 @@ def is_in_same_subnet(ip_1, ip_2, mask_bits=24):
     @return: True if the two IP addresses are in the same subnet.
 
     """
-    mask = ((2L<<mask_bits-1) -1)<<(32-mask_bits)
+    mask = ((2<<mask_bits-1) -1)<<(32-mask_bits)
     ip_1_num = struct.unpack('!I', socket.inet_aton(ip_1))[0]
     ip_2_num = struct.unpack('!I', socket.inet_aton(ip_2))[0]
     return ip_1_num & mask == ip_2_num & mask
@@ -2591,7 +2599,7 @@ def get_servers_in_same_subnet(host_ip, mask_bits, servers=None,
     if not servers and not server_ip_map:
         raise ValueError('Either `servers` or `server_ip_map` must be given.')
     if not servers:
-        servers = server_ip_map.keys()
+        servers = list(server_ip_map.keys())
     # Make sure server_ip_map is an empty dict if it's not set.
     if not server_ip_map:
         server_ip_map = {}
@@ -2646,7 +2654,7 @@ def get_wireless_ssid(hostname):
     # match, i.e., the one with highest maskbit.
     matched_ssid = default_ssid
     matched_maskbit = -1
-    for key, value in ssids.items():
+    for key, value in list(ssids.items()):
         # The config key filtered by regex WIRELESS_SSID_PATTERN has a format of
         # wireless_ssid_[subnet_ip]/[maskbit], for example:
         # wireless_ssid_192.168.0.1/24
@@ -3021,7 +3029,7 @@ def threaded_return(function):
         Creates the queue and starts the thread, then assigns extra attributes
         to the thread to give it result-storing capability.
         """
-        q = Queue.Queue()
+        q = queue.Queue()
         t = threading.Thread(target=wrapped_t, args=(q,) + args, kwargs=kwargs)
         t.start()
         t.result_queue = q
@@ -3149,14 +3157,14 @@ def cherry_pick_args(func, args, dargs):
       A tuple of: (args tuple, keyword arguments dictionary)
     """
     # Cherry pick args:
-    if func.func_code.co_flags & 0x04:
+    if func.__code__.co_flags & 0x04:
         # func accepts *args, so return the entire args.
         p_args = args
     else:
         p_args = ()
 
     # Cherry pick dargs:
-    if func.func_code.co_flags & 0x08:
+    if func.__code__.co_flags & 0x08:
         # func accepts **dargs, so return the entire dargs.
         p_dargs = dargs
     else:
@@ -3186,7 +3194,7 @@ def get_nonstar_args(func):
 
     @return: A tuple of parameters accepted by the function.
     """
-    return func.func_code.co_varnames[:func.func_code.co_argcount]
+    return func.__code__.co_varnames[:func.__code__.co_argcount]
 
 def crc8(buf):
     """Calculate CRC8 for a given int list.

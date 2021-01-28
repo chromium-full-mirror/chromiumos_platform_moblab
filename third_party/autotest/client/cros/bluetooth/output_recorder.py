@@ -6,9 +6,9 @@
 """This module provides an object to record the output of command-line program.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 import fcntl
 import logging
 import os

@@ -7,7 +7,7 @@ import logging
 import os
 import requests
 import subprocess
-import urlparse
+import urllib.parse
 
 from client.bin import utils
 from client.common_lib import autotemp
@@ -167,13 +167,13 @@ class NebraskaWrapper(object):
                 nebraska.py::ResponseProperties for examples key/values.
         """
 
-        query = '&'.join('%s=%s' % (k, v) for k, v in kwargs.items())
-        url = urlparse.SplitResult(scheme='http',
+        query = '&'.join('%s=%s' % (k, v) for k, v in list(kwargs.items()))
+        url = urllib.parse.SplitResult(scheme='http',
                                    netloc='127.0.0.1:%d' % self._port,
                                    path='/update',
                                    query=query,
                                    fragment='')
-        return urlparse.urlunsplit(url)
+        return urllib.parse.urlunsplit(url)
 
     def get_payload_properties_file(self, payload_url, target_dir, **kwargs):
         """
@@ -190,7 +190,7 @@ class NebraskaWrapper(object):
         try:
             response = json.loads(requests.get(payload_props_url).text)
             # Override existing keys if any.
-            for k, v in kwargs.iteritems():
+            for k, v in kwargs.items():
                 # Don't set default None values. We don't want to override good
                 # values to None.
                 if v is not None:

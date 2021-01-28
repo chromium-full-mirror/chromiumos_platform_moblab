@@ -91,7 +91,7 @@ class Config(object):
         self._add_cfg_to_precedence('DEFAULTS', default_config)
 
         # Set attributes
-        all_attributes = self._precedence_list[-1].keys()
+        all_attributes = list(self._precedence_list[-1].keys())
         self.attributes = {}
         self.attributes['platform'] = self.platform
         for attribute in all_attributes:

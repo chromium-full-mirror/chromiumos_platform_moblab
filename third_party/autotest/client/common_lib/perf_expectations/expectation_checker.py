@@ -62,7 +62,7 @@ class perf_expectation_checker(object):
         """Load perf expectation file."""
         try:
             expectation_file = open(self._expectation_file_path)
-        except IOError, e:
+        except IOError as e:
             logging.error('I/O Error reading expectations %s(%s): %s',
                           self._expectation_file_path, e.errno, e.strerror)
             raise e
@@ -70,7 +70,7 @@ class perf_expectation_checker(object):
         import json
         try:
             self._expectations = json.load(expectation_file)
-        except ValueError, e:
+        except ValueError as e:
             logging.error('ValueError parsing expectations %s(%s): %s',
                           self._expectation_file_path, e.errno, e.strerror)
             raise e

@@ -10,8 +10,8 @@ import operator
 import os
 import re
 import time
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 from client.bin import utils
 from client.common_lib import error
@@ -118,7 +118,7 @@ class BaseDashboard(object):
             'format_version': 5,
             'timestamp': self._start_ts,
             'test': self._testname,
-            'dut': self._create_dut_info_dict(raw_measurement['data'].keys()),
+            'dut': self._create_dut_info_dict(list(raw_measurement['data'].keys())),
             'power': raw_measurement,
         }
 
@@ -179,7 +179,7 @@ class BaseDashboard(object):
 
         # Create dict from type to sorted list of rail names.
         rail_type = collections.defaultdict(list)
-        for r, t in powerlog_dict['power']['type'].iteritems():
+        for r, t in powerlog_dict['power']['type'].items():
             rail_type[t].append(r)
         for t in rail_type:
             rail_type[t] = sorted(rail_type[t])
@@ -220,13 +220,13 @@ class BaseDashboard(object):
         """
         json_str = json.dumps(powerlog_dict, ensure_ascii=False)
         data_obj = {'data': utils.strip_non_printable(json_str)}
-        encoded = urllib.urlencode(data_obj)
-        req = urllib2.Request(uploadurl, encoded)
+        encoded = urllib.parse.urlencode(data_obj)
+        req = urllib.request.Request(uploadurl, encoded)
 
-        @retry.retry(urllib2.URLError, raiselist=[urllib2.HTTPError],
+        @retry.retry(urllib.error.URLError, raiselist=[urllib.error.HTTPError],
                      timeout_min=5.0, delay_sec=1, backoff=2)
         def _do_upload():
-            urllib2.urlopen(req)
+            urllib.request.urlopen(req)
 
         _do_upload()
 
@@ -257,7 +257,7 @@ class BaseDashboard(object):
         # Create list of check point event tuple.
         # Tuple format: (checkpoint_name:str, event_time:float, is_start:bool)
         checkpoint_event_list = []
-        for name, intervals in checkpoint_dict.iteritems():
+        for name, intervals in checkpoint_dict.items():
             for start, finish in intervals:
                 checkpoint_event_list.append((name, start, True))
                 checkpoint_event_list.append((name, finish, False))
@@ -546,11 +546,11 @@ class KeyvalLoggerDashboard(MeasurementLoggerDashboard):
             # 2 samples to show flat value spanning across duration of the test.
             'sample_count': 2,
             'sample_duration': self._logger._duration_secs,
-            'average': dict(zip(self._logger.keys, self._logger.values)),
-            'data': dict(zip(self._logger.keys,
-                             ([v, v] for v in self._logger.values))),
-            'unit': dict(zip(self._logger.keys, self._logger.units)),
-            'type': dict(zip(self._logger.keys, self._logger.types)),
+            'average': dict(list(zip(self._logger.keys, self._logger.values))),
+            'data': dict(list(zip(self._logger.keys,
+                             ([v, v] for v in self._logger.values)))),
+            'unit': dict(list(zip(self._logger.keys, self._logger.units))),
+            'type': dict(list(zip(self._logger.keys, self._logger.types))),
             'checkpoint': [[self._testname], [self._testname]],
         }
         return power_dict

@@ -1,4 +1,4 @@
-import cStringIO
+import io
 
 from client.bin import utils
 from client.common_lib.cros import textfsm
@@ -66,9 +66,9 @@ class UsbDeviceCollector(object):
       """
       usbdata = []
       rawdata += '\n'
-      re_table = textfsm.TextFSM(cStringIO.StringIO(self.USB_DEVICES_TEMPLATE))
+      re_table = textfsm.TextFSM(io.StringIO(self.USB_DEVICES_TEMPLATE))
       fsm_results = re_table.ParseText(rawdata)
-      usbdata = [dict(zip(re_table.header, row)) for row in fsm_results]
+      usbdata = [dict(list(zip(re_table.header, row))) for row in fsm_results]
       return usbdata
 
     def _collect_usb_device_data(self):

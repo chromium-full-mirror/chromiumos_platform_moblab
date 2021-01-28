@@ -1,6 +1,6 @@
 # pylint: disable=missing-docstring
 
-import cPickle as pickle
+import pickle as pickle
 import copy
 import errno
 import fcntl
@@ -96,7 +96,7 @@ class job_directory(object):
         if is_writable:
             try:
                 os.makedirs(self.path)
-            except OSError, e:
+            except OSError as e:
                 if e.errno != errno.EEXIST or not os.path.isdir(self.path):
                     raise self.UncreatableDirectoryException(self.path, e)
         elif not os.path.isdir(self.path):
@@ -244,9 +244,9 @@ class job_state(object):
                     on_disk_state = pickle.load(rf)
         if merge:
             # merge the on-disk state with the in-memory state
-            for namespace, namespace_dict in on_disk_state.iteritems():
+            for namespace, namespace_dict in on_disk_state.items():
                 in_memory_namespace = self._state.setdefault(namespace, {})
-                for name, value in namespace_dict.iteritems():
+                for name, value in namespace_dict.items():
                     if name in in_memory_namespace:
                         if in_memory_namespace[name] != value:
                             logging.info('Persistent value of %s.%s from %s '
@@ -499,7 +499,7 @@ class status_log_entry(object):
             self.fields = {}
         else:
             self.fields = fields.copy()
-        for key, value in self.fields.iteritems():
+        for key, value in self.fields.items():
             if type(value) is int:
                 value = str(value)
             if self.BAD_CHAR_REGEX.search(key + value):
@@ -538,7 +538,7 @@ class status_log_entry(object):
         # combine all the log line data into a tab-delimited string
         subdir = self.subdir or self.RENDERED_NONE_VALUE
         operation = self.operation or self.RENDERED_NONE_VALUE
-        extra_fields = ['%s=%s' % field for field in self.fields.iteritems()]
+        extra_fields = ['%s=%s' % field for field in self.fields.items()]
         line_items = [self.status_code, subdir, operation]
         line_items += extra_fields + [self.message]
         first_line = '\t'.join(line_items)
@@ -677,7 +677,7 @@ class status_logger(object):
         for log_file in log_files:
             fileobj = open(log_file, 'a')
             try:
-                print >> fileobj, log_text
+                print(log_text, file=fileobj)
             finally:
                 fileobj.close()
 
@@ -993,7 +993,7 @@ class base_job(object):
         try:
             outputdir = self._job_directory(path, True)
             return outputdir
-        except self._job_directory.JobDirectoryException, e:
+        except self._job_directory.JobDirectoryException as e:
             logging.exception('%s directory creation failed with %s',
                               subdir, e)
             raise error.TestError('%s directory creation failed' % subdir)

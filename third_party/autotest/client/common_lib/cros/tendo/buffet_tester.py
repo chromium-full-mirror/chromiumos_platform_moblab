@@ -172,7 +172,7 @@ class BuffetTester(object):
             objects = dbus_util.dbus2primitive(
                     buffet.object_manager.GetManagedObjects())
             cmds = [interfaces[buffet_dbus_helper.COMMAND_INTERFACE]
-                    for path, interfaces in objects.iteritems()
+                    for path, interfaces in objects.items()
                     if buffet_dbus_helper.COMMAND_INTERFACE in interfaces]
             messages = [cmd['Parameters'][TEST_COMMAND_PARAM] for cmd in cmds
                         if (cmd['Name'] == '%s.%s' % (TEST_COMMAND_CATEGORY,

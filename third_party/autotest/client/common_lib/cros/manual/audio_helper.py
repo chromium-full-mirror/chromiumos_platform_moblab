@@ -6,7 +6,7 @@
    atrus.log.
 """
 
-from __future__ import print_function
+
 
 import logging
 import re

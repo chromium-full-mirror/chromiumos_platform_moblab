@@ -36,7 +36,7 @@ def StartU2fd(client):
       attempts += 1
       try:
         return '/dev/' + client.run('ls ' + path).stdout.strip()
-      except error.AutoservRunError, e:
+      except error.AutoservRunError as e:
         logging.info('Could not find U2F device on attempt ' +
                      str(attempts))
       time.sleep(QUERY_U2F_RETRY_DELAY_SEC)

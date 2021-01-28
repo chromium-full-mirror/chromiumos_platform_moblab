@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -460,28 +460,28 @@ def verify_and_clean_options(options):
         return False
     else:
         if not options.build:
-            print 'Need to specify which build to use'
+            print('Need to specify which build to use')
             return False
         if not options.board:
-            print 'Need to specify board'
+            print('Need to specify board')
             return False
         if not options.name:
-            print 'Need to specify suite name'
+            print('Need to specify suite name')
             return False
     if options.num is not None:
         warnings.warn('-u/--num option is deprecated; it does nothing.')
     del options.num
     if not options.retry and options.max_retries is not None:
-        print 'max_retries can only be used with --retry=True'
+        print('max_retries can only be used with --retry=True')
         return False
     if options.use_suite_attr and options.suite_args is not None:
-        print ('The new suite control file cannot parse the suite_args: %s.'
-               'Please not specify any suite_args here.' % options.suite_args)
+        print(('The new suite control file cannot parse the suite_args: %s.'
+               'Please not specify any suite_args here.' % options.suite_args))
         return False
     if options.no_wait and options.retry:
-        print 'Test retry is not available when using --no_wait=True'
+        print('Test retry is not available when using --no_wait=True')
     if options.json_dump and options.json_dump_postfix:
-        print '--json_dump and --json_dump_postfix are mutually exclusive'
+        print('--json_dump and --json_dump_postfix are mutually exclusive')
         return False
     # Default to use the test code in CrOS build.
     if not options.test_source_build and options.build:

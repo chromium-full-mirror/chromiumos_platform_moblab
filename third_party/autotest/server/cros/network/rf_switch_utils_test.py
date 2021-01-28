@@ -36,8 +36,8 @@ class RfSwitchUtilsTest(unittest.TestCase):
         # Locking the first available RF Switch Host.
         afe_instance.lock_host.return_value = True
         rf_switch = rf_switch_utils.allocate_rf_switch()
-        self.assertEquals(rf_switch, mock_host_instance)
-        self.assertEquals(rf_switch.hostname, 'chromeos9-rfswitch1')
+        self.assertEqual(rf_switch, mock_host_instance)
+        self.assertEqual(rf_switch.hostname, 'chromeos9-rfswitch1')
 
 
     def testRfSwitchCannotBeLocked(self):
@@ -69,7 +69,7 @@ class RfSwitchUtilsTest(unittest.TestCase):
         mock_host_instance = self.mock_host()
         mock_host_instance.locked = False
         afe_instance.get_hosts.return_value = [mock_host_instance]
-        self.assertEquals(
+        self.assertEqual(
                 rf_switch_utils.deallocate_rf_switch(mock_host_instance), True)
 
 
@@ -79,7 +79,7 @@ class RfSwitchUtilsTest(unittest.TestCase):
         mock_host_instance = self.mock_host()
         mock_host_instance.locked = True
         afe_instance.get_hosts.return_value = [mock_host_instance]
-        self.assertEquals(
+        self.assertEqual(
                 rf_switch_utils.deallocate_rf_switch(mock_host_instance), False)
 
 

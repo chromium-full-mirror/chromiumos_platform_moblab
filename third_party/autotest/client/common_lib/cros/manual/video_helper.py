@@ -4,7 +4,7 @@
 
 """Get v4l2 interface, and chrome processes which access the video interface"""
 
-from __future__ import print_function
+
 
 import logging
 

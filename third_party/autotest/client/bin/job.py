@@ -28,7 +28,7 @@ from client.bin import local_host
 from client.bin import parallel
 from client.bin import partition as partition_lib
 from client.bin import profilers
-from client.bin import sysinfo
+from autotest_lib.client.bin import sysinfo
 from client.bin import test
 from client.bin import utils
 from client.common_lib import barrier
@@ -130,7 +130,7 @@ class base_client_job(base_job.base_job):
         self._pre_record_init(control, options)
         try:
             self._post_record_init(control, options, drop_caches)
-        except Exception, err:
+        except Exception as err:
             self.record(
                     'ABORT', None, None,'client.bin.job.__init__ failed: %s' %
                     str(err))
@@ -479,7 +479,7 @@ class base_client_job(base_job.base_job):
                 raise error.TestError("Dependency %s does not exist" % dep)
 
             os.chdir(dep_dir)
-            if execfile('%s.py' % dep, {}) is None:
+            if exec(compile(open('%s.py' % dep, "rb").read(), '%s.py' % dep, 'exec'), {}) is None:
                 logging.info('Dependency %s successfuly built', dep)
 
 
@@ -495,7 +495,7 @@ class base_client_job(base_job.base_job):
             raise
         except error.JobError:
             raise  # Caught further up and turned into an ABORT.
-        except Exception, e:
+        except Exception as e:
             # Converts all other exceptions thrown by the test regardless
             # of phase into a TestError(TestBaseException) subclass that
             # reports them with their full stack trace.
@@ -545,7 +545,7 @@ class base_client_job(base_job.base_job):
         def group_func():
             try:
                 self._runtest(url, tag, timeout, args, dargs)
-            except error.TestBaseException, detail:
+            except error.TestBaseException as detail:
                 # The error is already classified, record it properly.
                 self.record(detail.exit_status, subdir, testname, str(detail))
                 raise
@@ -623,7 +623,7 @@ class base_client_job(base_job.base_job):
         try:
             self._rungroup(subdir, testname, group_func, timeout)
             return 'GOOD'
-        except error.TestBaseException, detail:
+        except error.TestBaseException as detail:
             return detail.exit_status
 
 
@@ -654,13 +654,13 @@ class base_client_job(base_job.base_job):
                 result = function(*args, **dargs)
                 self.record('END GOOD', subdir, testname)
                 return result
-            except error.TestBaseException, e:
+            except error.TestBaseException as e:
                 self.record('END %s' % e.exit_status, subdir, testname)
                 raise
-            except error.JobError, e:
+            except error.JobError as e:
                 self.record('END ABORT', subdir, testname)
                 raise
-            except Exception, e:
+            except Exception as e:
                 # This should only ever happen due to a bug in the given
                 # function's code.  The common case of being called by
                 # run_test() will never reach this.  If a control file called
@@ -697,7 +697,7 @@ class base_client_job(base_job.base_job):
             raise
         # If there was a different exception, turn it into a TestError.
         # It will be caught by step_engine or _run_step_fn.
-        except Exception, e:
+        except Exception as e:
             raise error.UnhandledTestError(e)
 
 
@@ -847,7 +847,7 @@ class base_client_job(base_job.base_job):
             # wait for the task to finish
             try:
                 self._forkwait(pid, kwargs.get('timeout'))
-            except Exception, e:
+            except Exception as e:
                 logging.info('pid %d completed with error', pid)
                 exceptions.append(e)
             # copy the logs from the subtask into the main log
@@ -940,7 +940,7 @@ class base_client_job(base_job.base_job):
         # defined globally can be used as a next step.
         if callable(fn):
             fn = fn.__name__
-        if not isinstance(fn, types.StringTypes):
+        if not isinstance(fn, (str,)):
             raise StepError("Next steps must be functions or "
                             "strings containing the function name")
         ancestry = copy.copy(self._current_step_ancestry)
@@ -984,9 +984,9 @@ class base_client_job(base_job.base_job):
             return local_vars['__ret']
         except SystemExit:
             raise  # Send error.JobContinue and JobComplete on up to runjob.
-        except error.TestNAError, detail:
+        except error.TestNAError as detail:
             self.record(detail.exit_status, None, fn, str(detail))
-        except Exception, detail:
+        except Exception as detail:
             raise error.UnhandledJobError(detail)
 
 
@@ -1056,12 +1056,12 @@ class base_client_job(base_job.base_job):
                                'args': self.args}
         exec(JOB_PREAMBLE, global_control_vars, global_control_vars)
         try:
-            execfile(self.control, global_control_vars, global_control_vars)
-        except error.TestNAError, detail:
+            exec(compile(open(self.control, "rb").read(), self.control, 'exec'), global_control_vars, global_control_vars)
+        except error.TestNAError as detail:
             self.record(detail.exit_status, None, self.control, str(detail))
         except SystemExit:
             raise  # Send error.JobContinue and JobComplete on up to runjob.
-        except Exception, detail:
+        except Exception as detail:
             # Syntax errors or other general Python exceptions coming out of
             # the top level of the control file itself go through here.
             raise error.UnhandledJobError(detail)
@@ -1217,7 +1217,7 @@ def runjob(control, drop_caches, options):
     except error.JobComplete:
         sys.exit(1)
 
-    except error.JobError, instance:
+    except error.JobError as instance:
         logging.error("JOB ERROR: " + str(instance))
         if myjob:
             command = None
@@ -1230,7 +1230,7 @@ def runjob(control, drop_caches, options):
         else:
             sys.exit(1)
 
-    except Exception, e:
+    except Exception as e:
         # NOTE: job._run_step_fn and job.step_engine will turn things into
         # a JobError for us.  If we get here, its likely an autotest bug.
         msg = str(e) + '\n' + traceback.format_exc()

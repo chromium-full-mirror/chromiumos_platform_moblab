@@ -86,7 +86,7 @@ def _get_swarming_run_id(path):
     return None
 
 
-class _JobDirectory(object):
+class _JobDirectory(object, metaclass=abc.ABCMeta):
     """State associated with a job to be offloaded.
 
   The full life-cycle of a job (including failure events that
@@ -110,8 +110,6 @@ class _JobDirectory(object):
   the actual offload process.
 
   """
-
-    __metaclass__ = abc.ABCMeta
 
     GLOB_PATTERN = None  # must be redefined in subclass
 

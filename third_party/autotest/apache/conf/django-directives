@@ -36,17 +36,9 @@ RewriteRule ^/afe/server/admin - [R=404]
     RewriteCond /usr/local/autotest/frontend/frontend.wsgi -f
     RewriteRule ^/(afe|new_tko)/server(.*) /usr/local/autotest/frontend/frontend.wsgi [H=wsgi-script]
 
-    RewriteCond /usr/lib/python2.7/site-packages/autotest/frontend/frontend.wsgi -f
-    RewriteRule ^/(afe|new_tko)/server(.*) /usr/lib/python2.7/site-packages/autotest/frontend/frontend.wsgi [H=wsgi-script]
+    RewriteCond /usr/lib/python3.7/site-packages/autotest/frontend/frontend.wsgi -f
+    RewriteRule ^/(afe|new_tko)/server(.*) /usr/lib/python3.7/site-packages/autotest/frontend/frontend.wsgi [H=wsgi-script]
 
-    RewriteCond /usr/lib/python2.6/site-packages/autotest/frontend/frontend.wsgi -f
-    RewriteRule ^/(afe|new_tko)/server(.*) /usr/lib/python2.6/site-packages/autotest/frontend/frontend.wsgi [H=wsgi-script]
-
-    RewriteCond /usr/lib/python2.5/site-packages/autotest/frontend/frontend.wsgi -f
-    RewriteRule ^/(afe|new_tko)/server(.*) /usr/lib/python2.5/site-packages/autotest/frontend/frontend.wsgi [H=wsgi-script]
-
-    RewriteCond /usr/lib/python2.4/site-packages/autotest/frontend/frontend.wsgi -f
-    RewriteRule ^/(afe|new_tko)/server(.*) /usr/lib/python2.4/site-packages/autotest/frontend/frontend.wsgi [H=wsgi-script]
 
     <LocationMatch "/(afe|new_tko)/server(.*)">
        Options +ExecCGI
@@ -70,6 +62,6 @@ RewriteRule ^/afe/server/admin - [R=404]
         # mod_python's system python site-packages directory.
         # This way our code can depend on library versions other than
         # those available as packages on various OS distributions.
-        PythonPath "['/usr/local/autotest/site-packages', '/usr/local/autotest', '/usr/lib/python2.7/site-packages/autotest', '/usr/lib/python2.6/site-packages/autotest', '/usr/lib/python2.5/site-packages/autotest', '/usr/lib/python2.4/site-packages/autotest'] + sys.path"
+        PythonPath "['/usr/local/autotest/site-packages', '/usr/local/autotest', '/usr/lib/python3.7/site-packages/autotest'] + sys.path"
     </Location>
 </IfModule>

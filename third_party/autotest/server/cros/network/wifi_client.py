@@ -132,8 +132,7 @@ class WiFiClient(site_linux_system.LinuxSystem):
         if not uname_result.exit_status and uname_result.stdout.find(' ') < 0:
             kernel_arch = uname_result.stdout.strip()
         cpu_info = self.host.run('cat /proc/cpuinfo').stdout.splitlines()
-        cpu_count = len(filter(lambda x: x.lower().startswith('bogomips'),
-                               cpu_info))
+        cpu_count = len([x for x in cpu_info if x.lower().startswith('bogomips')])
         cpu_count_str = ''
         if cpu_count:
             cpu_count_str = 'x%d' % cpu_count
@@ -625,7 +624,7 @@ class WiFiClient(site_linux_system.LinuxSystem):
             """
             is_requested_bss = lambda iw_bss: iw_bss.bss == bssid
             scan_results = self.iw_runner.scan(self.wifi_if)
-            return scan_results and filter(is_requested_bss, scan_results)
+            return scan_results and list(filter(is_requested_bss, scan_results))
         try:
             utils.poll_for_condition(
                 condition=dut_sees_bss,

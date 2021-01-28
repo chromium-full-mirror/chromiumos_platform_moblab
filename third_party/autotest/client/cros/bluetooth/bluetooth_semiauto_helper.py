@@ -60,7 +60,7 @@ class BluetoothSemiAutoHelper(semiauto_framework.semiauto_test):
     def _get_adapter_info(self):
         """Return the adapter interface objects, or None if not found."""
         objects = self._get_objects()
-        for path, interfaces in objects.items():
+        for path, interfaces in list(objects.items()):
             if _ADAPTER_INTERFACE in interfaces:
                 self._adapter_path = path
                 return interfaces[_ADAPTER_INTERFACE]
@@ -69,7 +69,7 @@ class BluetoothSemiAutoHelper(semiauto_framework.semiauto_test):
     def _get_device_info(self, addr):
         """Return the device interface objects, or None if not found."""
         objects = self._get_objects()
-        for _, interfaces in objects.items():
+        for _, interfaces in list(objects.items()):
             if _DEVICE_INTERFACE in interfaces:
                 if interfaces[_DEVICE_INTERFACE]['Address'] == addr:
                     return interfaces[_DEVICE_INTERFACE]

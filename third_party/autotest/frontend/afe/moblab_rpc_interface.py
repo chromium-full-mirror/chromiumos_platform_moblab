@@ -7,7 +7,7 @@ This module includes all moblab-related RPCs. These RPCs can only be run
 on moblab.
 """
 
-import ConfigParser
+import configparser
 import ctypes
 import logging
 import multiprocessing
@@ -16,7 +16,7 @@ import re
 import requests
 import shutil
 import socket
-import StringIO
+import io
 import subprocess
 import sys
 import time
@@ -133,7 +133,7 @@ def _read_raw_config(config_file):
 
     @return: A ConfigParser object.
     """
-    shadow_config = ConfigParser.RawConfigParser()
+    shadow_config = configparser.RawConfigParser()
     shadow_config.read(config_file)
     return shadow_config
 
@@ -152,7 +152,7 @@ def _get_shadow_config_from_partial_update(config_values):
     """
     original_config = _read_original_config()
     existing_shadow = _read_raw_config(_CONFIG.shadow_file)
-    for section, config_value_list in config_values.iteritems():
+    for section, config_value_list in config_values.items():
         for key, value in config_value_list:
             if original_config.get_config_value(section, key,
                                                 default='',
@@ -181,8 +181,8 @@ def update_config_handler(config_values):
     @param config_values: See get_moblab_settings().
     """
     original_config = _read_original_config()
-    new_shadow = ConfigParser.RawConfigParser()
-    for section, config_value_list in config_values.iteritems():
+    new_shadow = configparser.RawConfigParser()
+    for section, config_value_list in config_values.items():
         for key, value in config_value_list:
             if original_config.get_config_value(section, key,
                                                 default='',
@@ -312,7 +312,7 @@ def _get_boto_config():
 
     @return: Boto configuration as ConfigParser object.
     """
-    boto_config = ConfigParser.ConfigParser()
+    boto_config = configparser.ConfigParser()
     boto_config.read(MOBLAB_BOTO_LOCATION)
     return boto_config
 
@@ -432,7 +432,7 @@ def submit_wizard_config_info(
     _update_partial_config(config_update)
 
     if cloud_storage_info and not cloud_storage_info[_USE_EXISTING_BOTO_FILE]:
-        boto_config = ConfigParser.RawConfigParser()
+        boto_config = configparser.RawConfigParser()
         boto_config.add_section('Credentials')
         boto_config.set('Credentials', _GS_ACCESS_KEY_ID,
                         cloud_storage_info[_GS_ACCESS_KEY_ID])
@@ -927,7 +927,7 @@ def _get_builds_for_in_directory(directory_name, milestone_limit=3,
              items, containing the most recent <build_limit> builds from the
              last milestone_limit milestones.
     """
-    output = StringIO.StringIO()
+    output = io.StringIO()
     gs_image_location =_CONFIG.get_config_value('CROS', _IMAGE_STORAGE_SERVER)
     try:
         utils.run(GsUtil.get_gsutil_cmd(),
@@ -952,7 +952,7 @@ def _get_builds_for_in_directory(directory_name, milestone_limit=3,
             if milestone not in build_map:
                 build_map[milestone] = []
             build_map[milestone].append(build)
-    milestones = build_map.keys()
+    milestones = list(build_map.keys())
     milestones.sort()
     milestones.reverse()
     build_list = []
@@ -1069,7 +1069,7 @@ def run_suite(board, build, suite, model=None, ro_firmware=None,
             pool=pool, run_prod_code=False, test_source_build=build,
             wait_for_results=True, suite_args=processed_suite_args,
             test_args=processed_test_args, job_retry=True,
-            max_retries=sys.maxint, model=model,
+            max_retries=sys.maxsize, model=model,
             timeout_mins=suite_timeout_mins,
             max_runtime_mins=suite_timeout_mins)
 

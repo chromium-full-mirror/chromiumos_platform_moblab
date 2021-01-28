@@ -101,15 +101,15 @@ class NetperfResult(object):
 
     @staticmethod
     def _get_stats(samples, field_name):
-        if any(map(lambda x: getattr(x, field_name) is None, samples)):
+        if any([getattr(x, field_name) is None for x in samples]):
             return (None, None)
 
-        values = map(lambda x: getattr(x, field_name), samples)
+        values = [getattr(x, field_name) for x in samples]
         N = len(samples)
         mean = math.fsum(values) / N
         deviation = None
         if N > 1:
-            differences = map(lambda x: math.pow(mean - x, 2), values)
+            differences = [math.pow(mean - x, 2) for x in values]
             deviation = math.sqrt(math.fsum(differences) / (N - 1))
         return mean, deviation
 
@@ -185,7 +185,7 @@ class NetperfResult(object):
     def __repr__(self):
         fields = ['test_type=%s' % self.test_type]
         fields += ['%s=%0.2f' % item
-                   for item in vars(self).iteritems()
+                   for item in vars(self).items()
                    if item[1] is not None
                    and isinstance(item[1], numbers.Number)]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(fields))
@@ -320,7 +320,7 @@ class NetperfAssertion(object):
                   'transaction_rate_max': self.transaction_rate_bounds.upper}
         return '%s(%s)' % (self.__class__.__name__,
                            ', '.join(['%s=%r' % item
-                                      for item in fields.iteritems()
+                                      for item in fields.items()
                                       if item[1] is not None]))
 
 

@@ -119,7 +119,7 @@ class ServerRole(dbmodels.Model, model_logic.ModelExtensions):
                                      ROLE.HOST_SCHEDULER,
                                      ROLE.DATABASE]
 
-    server = dbmodels.ForeignKey(Server, related_name='roles')
+    server = dbmodels.ForeignKey(Server, related_name='roles', on_delete=dbmodels.CASCADE)
     role = dbmodels.CharField(max_length=128, choices=ROLE.choices())
 
     objects = model_logic.ExtendedManager()
@@ -132,7 +132,7 @@ class ServerRole(dbmodels.Model, model_logic.ModelExtensions):
 
 class ServerAttribute(dbmodels.Model, model_logic.ModelExtensions):
     """Attribute associated with hosts."""
-    server = dbmodels.ForeignKey(Server, related_name='attributes')
+    server = dbmodels.ForeignKey(Server, related_name='attributes', on_delete=dbmodels.CASCADE)
     attribute = dbmodels.CharField(max_length=128)
     value = dbmodels.TextField(null=True, blank=True)
     date_modified = dbmodels.DateTimeField(null=True, blank=True)
@@ -163,7 +163,7 @@ def validate(**kwargs):
     @param kwargs: command line arguments, e.g., `status='primary'`
     @raise InvalidDataError: If any argument value is invalid.
     """
-    for key, value in kwargs.items():
+    for key, value in list(kwargs.items()):
         # Ignore any None value, so callers won't need to filter out None
         # value as it won't be used in queries.
         if not value:

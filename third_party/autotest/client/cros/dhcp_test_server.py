@@ -49,9 +49,9 @@ Note that if you make changes, make sure that the tests in dhcp_unittest.py
 still pass.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 from six.moves import range

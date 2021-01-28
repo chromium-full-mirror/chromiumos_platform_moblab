@@ -14,11 +14,8 @@ For docs, see:
     http://docs.djangoproject.com/en/dev/ref/models/querysets/#queryset-api
 """
 
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import getpass
 import os
@@ -44,7 +41,7 @@ except:
 form_ntuples_from_machines = server_utils.form_ntuples_from_machines
 
 GLOBAL_CONFIG = global_config.global_config
-DEFAULT_SERVER = 'autotest'
+DEFAULT_SERVER = "autotest"
 
 
 def dump_object(header, obj):
@@ -52,11 +49,11 @@ def dump_object(header, obj):
     Standard way to print out the frontend objects (eg job, host, acl, label)
     in a human-readable fashion for debugging
     """
-    result = header + '\n'
+    result = header + "\n"
     for key in obj.hash:
-        if key == 'afe' or key == 'hash':
+        if key == "afe" or key == "hash":
             continue
-        result += '%20s: %s\n' % (key, obj.hash[key])
+        result += "%20s: %s\n" % (key, obj.hash[key])
     return result
 
 
@@ -68,6 +65,7 @@ class RpcClient(object):
     All the constructors go in the afe / tko class.
     Manipulating methods go in the object classes themselves
     """
+
     def __init__(self, path, user, server, print_log, debug, reply_debug):
         """
         Create a cached instance of a connection to the frontend
@@ -78,27 +76,27 @@ class RpcClient(object):
             debug: print out all RPC traffic
         """
         if not user and utils.is_in_container():
-            user = GLOBAL_CONFIG.get_config_value('SSP', 'user', default=None)
+            user = GLOBAL_CONFIG.get_config_value("SSP", "user", default=None)
         if not user:
             user = getpass.getuser()
         if not server:
-            if 'AUTOTEST_WEB' in os.environ:
-                server = os.environ['AUTOTEST_WEB']
+            if "AUTOTEST_WEB" in os.environ:
+                server = os.environ["AUTOTEST_WEB"]
             else:
-                server = GLOBAL_CONFIG.get_config_value('SERVER', 'hostname',
-                                                        default=DEFAULT_SERVER)
+                server = GLOBAL_CONFIG.get_config_value(
+                    "SERVER", "hostname", default=DEFAULT_SERVER
+                )
         self.server = server
         self.user = user
         self.print_log = print_log
         self.debug = debug
         self.reply_debug = reply_debug
-        headers = {'AUTHORIZATION': self.user}
+        headers = {"AUTHORIZATION": self.user}
         rpc_server = rpc_client_lib.add_protocol(server) + path
         if debug:
-            print('SERVER: %s' % rpc_server)
-            print('HEADERS: %s' % headers)
+            print("SERVER: %s" % rpc_server)
+            print("HEADERS: %s" % headers)
         self.proxy = rpc_client_lib.get_proxy(rpc_server, headers=headers)
-
 
     def run(self, call, **dargs):
         """
@@ -106,7 +104,7 @@ class RpcClient(object):
         """
         rpc_call = getattr(self.proxy, call)
         if self.debug:
-            print('DEBUG: %s %s' % (call, dargs))
+            print("DEBUG: %s %s" % (call, dargs))
         try:
             result = utils.strip_unicode(rpc_call(**dargs))
             if self.reply_debug:
@@ -115,26 +113,33 @@ class RpcClient(object):
         except Exception:
             raise
 
-
     def log(self, message):
         if self.print_log:
             print(message)
 
 
 class TKO(RpcClient):
-    def __init__(self, user=None, server=None, print_log=True, debug=False,
-                 reply_debug=False):
-        super(TKO, self).__init__(path='/new_tko/server/noauth/rpc/',
-                                  user=user,
-                                  server=server,
-                                  print_log=print_log,
-                                  debug=debug,
-                                  reply_debug=reply_debug)
+    def __init__(
+        self,
+        user=None,
+        server=None,
+        print_log=True,
+        debug=False,
+        reply_debug=False,
+    ):
+        super(TKO, self).__init__(
+            path="/new_tko/server/noauth/rpc/",
+            user=user,
+            server=server,
+            print_log=print_log,
+            debug=debug,
+            reply_debug=reply_debug,
+        )
         self._db = None
 
-
     @metrics.SecondsTimerDecorator(
-            'chromeos/autotest/tko/get_job_status_duration')
+        "chromeos/autotest/tko/get_job_status_duration"
+    )
     def get_job_test_statuses_from_db(self, job_id):
         """Get job test statuses from the database.
 
@@ -148,34 +153,48 @@ class TKO(RpcClient):
         """
         if self._db is None:
             self._db = db.db()
-        fields = ['status', 'test_name', 'subdir', 'reason',
-                  'test_started_time', 'test_finished_time', 'afe_job_id',
-                  'job_owner', 'hostname', 'job_tag']
-        table = 'tko_test_view_2'
+        fields = [
+            "status",
+            "test_name",
+            "subdir",
+            "reason",
+            "test_started_time",
+            "test_finished_time",
+            "afe_job_id",
+            "job_owner",
+            "hostname",
+            "job_tag",
+        ]
+        table = "tko_test_view_2"
         where = 'job_tag like "%s-%%"' % job_id
         test_status = []
         # Run commit before we query to ensure that we are pulling the latest
         # results.
         self._db.commit()
-        for entry in self._db.select(','.join(fields), table, (where, None)):
+        for entry in self._db.select(",".join(fields), table, (where, None)):
             status_dict = {}
-            for key,value in zip(fields, entry):
+            for key, value in zip(fields, entry):
                 # All callers expect values to be a str object.
                 status_dict[key] = str(value)
             # id is used by TestStatus to uniquely identify each Test Status
             # obj.
-            status_dict['id'] = [status_dict['reason'], status_dict['hostname'],
-                                 status_dict['test_name']]
+            status_dict["id"] = [
+                status_dict["reason"],
+                status_dict["hostname"],
+                status_dict["test_name"],
+            ]
             test_status.append(status_dict)
 
         return [TestStatus(self, e) for e in test_status]
 
-
     def get_status_counts(self, job, **data):
-        entries = self.run('get_status_counts',
-                           group_by=['hostname', 'test_name', 'reason'],
-                           job_tag__startswith='%s-' % job, **data)
-        return [TestStatus(self, e) for e in entries['groups']]
+        entries = self.run(
+            "get_status_counts",
+            group_by=["hostname", "test_name", "reason"],
+            job_tag__startswith="%s-" % job,
+            **data
+        )
+        return [TestStatus(self, e) for e in entries["groups"]]
 
 
 class _StableVersionMap(object):
@@ -206,7 +225,6 @@ class _StableVersionMap(object):
     def __init__(self, afe):
         self._afe = afe
 
-
     def get_all_versions(self):
         """
         Get all mappings in the stable versions table.
@@ -217,8 +235,7 @@ class _StableVersionMap(object):
 
         @return A dictionary mapping board names to version strings.
         """
-        return self._afe.run('get_all_stable_versions')
-
+        return self._afe.run("get_all_stable_versions")
 
     def get_version(self, board):
         """
@@ -231,8 +248,7 @@ class _StableVersionMap(object):
 
         @return The version mapped for the given board.
         """
-        return self._afe.run('get_stable_version', board=board)
-
+        return self._afe.run("get_stable_version", board=board)
 
     def set_version(self, board, version):
         """
@@ -244,8 +260,9 @@ class _StableVersionMap(object):
         @param board    The board to be updated.
         @param version  The new version to be assigned to the board.
         """
-        raise RuntimeError("server.frontend._StableVersionMap::set_version is intentionally deleted")
-
+        raise RuntimeError(
+            "server.frontend._StableVersionMap::set_version is intentionally deleted"
+        )
 
     def delete_version(self, board):
         """
@@ -256,7 +273,9 @@ class _StableVersionMap(object):
 
         @param board    The board to be updated.
         """
-        raise RuntimeError("server.frontend._StableVersionMap::delete_version is intentionally deleted")
+        raise RuntimeError(
+            "server.frontend._StableVersionMap::delete_version is intentionally deleted"
+        )
 
 
 class _OSVersionMap(_StableVersionMap):
@@ -269,9 +288,8 @@ class _OSVersionMap(_StableVersionMap):
 
     def get_all_versions(self):
         versions = super(_OSVersionMap, self).get_all_versions()
-        for board in versions.keys():
-            if ('/' in board
-                    or not self._version_is_valid(versions[board])):
+        for board in list(versions.keys()):
+            if "/" in board or not self._version_is_valid(versions[board]):
                 del versions[board]
         return versions
 
@@ -292,7 +310,8 @@ def format_cros_image_name(board, version):
     "falco-release/R55-8872.44.0".
     """
     build_pattern = GLOBAL_CONFIG.get_config_value(
-            'CROS', 'stable_build_pattern')
+        "CROS", "stable_build_pattern"
+    )
     return build_pattern % (board, version)
 
 
@@ -307,7 +326,7 @@ class _CrosVersionMap(_OSVersionMap):
     """
 
     def _version_is_valid(self, version):
-        return version is not None and '/' not in version
+        return version is not None and "/" not in version
 
     def get_image_name(self, board):
         """
@@ -344,24 +363,20 @@ class _SuffixHackVersionMap(_StableVersionMap):
         # with our suffix, and replace the pseudo-board name keys with
         # the real board names.
         #
-        all_versions = super(
-                _SuffixHackVersionMap, self).get_all_versions()
+        all_versions = super(_SuffixHackVersionMap, self).get_all_versions()
         return {
             board[0 : -len(self._SUFFIX)]: all_versions[board]
-                for board in all_versions.keys()
-                    if board.endswith(self._SUFFIX)
+            for board in list(all_versions.keys())
+            if board.endswith(self._SUFFIX)
         }
-
 
     def get_version(self, board):
         board += self._SUFFIX
         return super(_SuffixHackVersionMap, self).get_version(board)
 
-
     def set_version(self, board, version):
         board += self._SUFFIX
         super(_SuffixHackVersionMap, self).set_version(board, version)
-
 
     def delete_version(self, board):
         board += self._SUFFIX
@@ -377,7 +392,7 @@ class _FAFTVersionMap(_SuffixHackVersionMap):
     mapping finds the appropriate tarball for a given board.
     """
 
-    _SUFFIX = '/firmware'
+    _SUFFIX = "/firmware"
 
     def get_version(self, board):
         # If there's no mapping for `board`, the lookup will return the
@@ -389,7 +404,7 @@ class _FAFTVersionMap(_SuffixHackVersionMap):
         # the right fix is to move handling to the RPC server side.
         #
         version = super(_FAFTVersionMap, self).get_version(board)
-        return version if '/' in version else None
+        return version if "/" in version else None
 
 
 class _FirmwareVersionMap(_SuffixHackVersionMap):
@@ -406,7 +421,7 @@ class _FirmwareVersionMap(_SuffixHackVersionMap):
     the DUT is out-of-date.
     """
 
-    _SUFFIX = '/rwfw'
+    _SUFFIX = "/rwfw"
 
     def get_version(self, board):
         # If there's no mapping for `board`, the lookup will return the
@@ -418,7 +433,7 @@ class _FirmwareVersionMap(_SuffixHackVersionMap):
         # the right fix is to move handling to the RPC server side.
         #
         version = super(_FirmwareVersionMap, self).get_version(board)
-        return version if version.startswith('Google_') else None
+        return version if version.startswith("Google_") else None
 
 
 class AFE(RpcClient):
@@ -428,9 +443,9 @@ class AFE(RpcClient):
     # FAFT_IMAGE_TYPE - Mappings for Firmware images for FAFT repair.
     # FIRMWARE_IMAGE_TYPE - Mappings for released RW Firmware images.
     #
-    CROS_IMAGE_TYPE = 'cros'
-    FAFT_IMAGE_TYPE = 'faft'
-    FIRMWARE_IMAGE_TYPE = 'firmware'
+    CROS_IMAGE_TYPE = "cros"
+    FAFT_IMAGE_TYPE = "faft"
+    FIRMWARE_IMAGE_TYPE = "firmware"
 
     _IMAGE_MAPPING_CLASSES = {
         CROS_IMAGE_TYPE: _CrosVersionMap,
@@ -438,17 +453,24 @@ class AFE(RpcClient):
         FIRMWARE_IMAGE_TYPE: _FirmwareVersionMap,
     }
 
-
-    def __init__(self, user=None, server=None, print_log=True, debug=False,
-                 reply_debug=False, job=None):
+    def __init__(
+        self,
+        user=None,
+        server=None,
+        print_log=True,
+        debug=False,
+        reply_debug=False,
+        job=None,
+    ):
         self.job = job
-        super(AFE, self).__init__(path='/afe/server/noauth/rpc/',
-                                  user=user,
-                                  server=server,
-                                  print_log=print_log,
-                                  debug=debug,
-                                  reply_debug=reply_debug)
-
+        super(AFE, self).__init__(
+            path="/afe/server/noauth/rpc/",
+            user=user,
+            server=server,
+            print_log=print_log,
+            debug=debug,
+            reply_debug=reply_debug,
+        )
 
     def get_stable_version_map(self, image_type):
         """
@@ -459,10 +481,9 @@ class AFE(RpcClient):
         """
         return self._IMAGE_MAPPING_CLASSES[image_type](self)
 
-
     def host_statuses(self, live=None):
-        dead_statuses = ['Repair Failed', 'Repairing']
-        statuses = self.run('get_static_data')['host_statuses']
+        dead_statuses = ["Repair Failed", "Repairing"]
+        statuses = self.run("get_static_data")["host_statuses"]
         if live == True:
             return list(set(statuses) - set(dead_statuses))
         if live == False:
@@ -470,113 +491,107 @@ class AFE(RpcClient):
         else:
             return statuses
 
-
     @staticmethod
     def _dict_for_host_query(hostnames=(), status=None, label=None):
         query_args = {}
         if hostnames:
-            query_args['hostname__in'] = hostnames
+            query_args["hostname__in"] = hostnames
         if status:
-            query_args['status'] = status
+            query_args["status"] = status
         if label:
-            query_args['labels__name'] = label
+            query_args["labels__name"] = label
         return query_args
-
 
     def get_hosts(self, hostnames=(), status=None, label=None, **dargs):
         query_args = dict(dargs)
-        query_args.update(self._dict_for_host_query(hostnames=hostnames,
-                                                    status=status,
-                                                    label=label))
-        hosts = self.run('get_hosts', **query_args)
+        query_args.update(
+            self._dict_for_host_query(
+                hostnames=hostnames, status=status, label=label
+            )
+        )
+        hosts = self.run("get_hosts", **query_args)
         return [Host(self, h) for h in hosts]
-
 
     def get_hostnames(self, status=None, label=None, **dargs):
         """Like get_hosts() but returns hostnames instead of Host objects."""
         # This implementation can be replaced with a more efficient one
         # that does not query for entire host objects in the future.
-        return [host_obj.hostname for host_obj in
-                self.get_hosts(status=status, label=label, **dargs)]
-
+        return [
+            host_obj.hostname
+            for host_obj in self.get_hosts(status=status, label=label, **dargs)
+        ]
 
     def reverify_hosts(self, hostnames=(), status=None, label=None):
         query_args = dict(locked=False)
-        query_args.update(self._dict_for_host_query(hostnames=hostnames,
-                                                    status=status,
-                                                    label=label))
-        return self.run('reverify_hosts', **query_args)
-
+        query_args.update(
+            self._dict_for_host_query(
+                hostnames=hostnames, status=status, label=label
+            )
+        )
+        return self.run("reverify_hosts", **query_args)
 
     def repair_hosts(self, hostnames=(), status=None, label=None):
         query_args = dict(locked=False)
-        query_args.update(self._dict_for_host_query(hostnames=hostnames,
-                                                    status=status,
-                                                    label=label))
-        return self.run('repair_hosts', **query_args)
-
+        query_args.update(
+            self._dict_for_host_query(
+                hostnames=hostnames, status=status, label=label
+            )
+        )
+        return self.run("repair_hosts", **query_args)
 
     def create_host(self, hostname, **dargs):
-        id = self.run('add_host', hostname=hostname, **dargs)
+        id = self.run("add_host", hostname=hostname, **dargs)
         return self.get_hosts(id=id)[0]
 
-
     def get_host_attribute(self, attr, **dargs):
-        host_attrs = self.run('get_host_attribute', attribute=attr, **dargs)
+        host_attrs = self.run("get_host_attribute", attribute=attr, **dargs)
         return [HostAttribute(self, a) for a in host_attrs]
 
-
     def set_host_attribute(self, attr, val, **dargs):
-        self.run('set_host_attribute', attribute=attr, value=val, **dargs)
-
+        self.run("set_host_attribute", attribute=attr, value=val, **dargs)
 
     def get_labels(self, **dargs):
-        labels = self.run('get_labels', **dargs)
+        labels = self.run("get_labels", **dargs)
         return [Label(self, l) for l in labels]
 
-
     def create_label(self, name, **dargs):
-        id = self.run('add_label', name=name, **dargs)
+        id = self.run("add_label", name=name, **dargs)
         return self.get_labels(id=id)[0]
 
     def generate_control_file(self, tests, **dargs):
-        ret = self.run('generate_control_file', tests=tests, **dargs)
+        ret = self.run("generate_control_file", tests=tests, **dargs)
         return ControlFile(self, ret)
-
 
     def get_jobs(self, summary=False, **dargs):
         if summary:
-            jobs_data = self.run('get_jobs_summary', **dargs)
+            jobs_data = self.run("get_jobs_summary", **dargs)
         else:
-            jobs_data = self.run('get_jobs', **dargs)
+            jobs_data = self.run("get_jobs", **dargs)
         jobs = []
         for j in jobs_data:
             job = Job(self, j)
             # Set up some extra information defaults
-            job.testname = re.sub('\s.*', '', job.name) # arbitrary default
+            job.testname = re.sub("\s.*", "", job.name)  # arbitrary default
             job.platform_results = {}
             job.platform_reasons = {}
             jobs.append(job)
         return jobs
-
 
     def get_host_queue_entries(self, **kwargs):
         """Find JobStatus objects matching some constraints.
 
         @param **kwargs: Arguments to pass to the RPC
         """
-        entries = self.run('get_host_queue_entries', **kwargs)
+        entries = self.run("get_host_queue_entries", **kwargs)
         return self._entries_to_statuses(entries)
-
 
     def get_host_queue_entries_by_insert_time(self, **kwargs):
         """Like get_host_queue_entries, but using the insert index table.
 
         @param **kwargs: Arguments to pass to the RPC
         """
-        entries = self.run('get_host_queue_entries_by_insert_time', **kwargs)
+        entries = self.run("get_host_queue_entries_by_insert_time", **kwargs)
         return self._entries_to_statuses(entries)
-
 
     def _entries_to_statuses(self, entries):
         """Converts HQEs to JobStatuses
@@ -597,41 +612,51 @@ class AFE(RpcClient):
             if status.host:
                 status.host = hosts.get(status.host.hostname)
         # filter job statuses that have either host or meta_host
-        return [status for status in job_statuses if (status.host or
-                                                      status.meta_host)]
-
+        return [
+            status
+            for status in job_statuses
+            if (status.host or status.meta_host)
+        ]
 
     def get_special_tasks(self, **data):
-        tasks = self.run('get_special_tasks', **data)
+        tasks = self.run("get_special_tasks", **data)
         return [SpecialTask(self, t) for t in tasks]
-
 
     def get_host_special_tasks(self, host_id, **data):
-        tasks = self.run('get_host_special_tasks',
-                         host_id=host_id, **data)
+        tasks = self.run("get_host_special_tasks", host_id=host_id, **data)
         return [SpecialTask(self, t) for t in tasks]
 
-
     def get_host_status_task(self, host_id, end_time):
-        task = self.run('get_host_status_task',
-                        host_id=host_id, end_time=end_time)
+        task = self.run(
+            "get_host_status_task", host_id=host_id, end_time=end_time
+        )
         return SpecialTask(self, task) if task else None
 
-
     def get_host_diagnosis_interval(self, host_id, end_time, success):
-        return self.run('get_host_diagnosis_interval',
-                        host_id=host_id, end_time=end_time,
-                        success=success)
+        return self.run(
+            "get_host_diagnosis_interval",
+            host_id=host_id,
+            end_time=end_time,
+            success=success,
+        )
 
-
-    def create_job(self, control_file, name=' ',
-                   priority=priorities.Priority.DEFAULT,
-                   control_type=control_data.CONTROL_TYPE_NAMES.CLIENT,
-                   **dargs):
-        id = self.run('create_job', name=name, priority=priority,
-                 control_file=control_file, control_type=control_type, **dargs)
+    def create_job(
+        self,
+        control_file,
+        name=" ",
+        priority=priorities.Priority.DEFAULT,
+        control_type=control_data.CONTROL_TYPE_NAMES.CLIENT,
+        **dargs
+    ):
+        id = self.run(
+            "create_job",
+            name=name,
+            priority=priority,
+            control_file=control_file,
+            control_type=control_type,
+            **dargs
+        )
         return self.get_jobs(id=id)[0]
-
 
     def abort_jobs(self, jobs):
         """Abort a list of jobs.
@@ -641,8 +666,7 @@ class AFE(RpcClient):
         @param jobs: List of job ids to abort.
         """
         for job in jobs:
-            self.run('abort_host_queue_entries', job_id=job)
-
+            self.run("abort_host_queue_entries", job_id=job)
 
     def get_hosts_by_attribute(self, attribute, value):
         """
@@ -654,9 +678,9 @@ class AFE(RpcClient):
         @returns List of hostnames that all have the same host attribute and
                  value.
         """
-        return self.run('get_hosts_by_attribute',
-                        attribute=attribute, value=value)
-
+        return self.run(
+            "get_hosts_by_attribute", attribute=attribute, value=value
+        )
 
     def lock_host(self, host, lock_reason, fail_if_locked=False):
         """
@@ -674,14 +698,14 @@ class AFE(RpcClient):
         @returns Boolean, True if lock was successful, False otherwise.
         """
         try:
-            self.run('modify_hosts',
-                     host_filter_data={'hostname': host},
-                     update_data={'locked': True,
-                                  'lock_reason': lock_reason})
+            self.run(
+                "modify_hosts",
+                host_filter_data={"hostname": host},
+                update_data={"locked": True, "lock_reason": lock_reason},
+            )
         except Exception:
             return not fail_if_locked
         return True
-
 
     def unlock_hosts(self, locked_hosts):
         """
@@ -692,21 +716,22 @@ class AFE(RpcClient):
 
         @param locked_hosts: List of hostnames of hosts to unlock.
         """
-        self.run('modify_hosts',
-                 host_filter_data={'hostname__in': locked_hosts},
-                 update_data={'locked': False,
-                              'lock_reason': ''})
+        self.run(
+            "modify_hosts",
+            host_filter_data={"hostname__in": locked_hosts},
+            update_data={"locked": False, "lock_reason": ""},
+        )
 
 
 class TestResults(object):
     """
     Container class used to hold the results of the tests for a job
     """
+
     def __init__(self):
         self.good = []
         self.fail = []
         self.pending = []
-
 
     def add(self, result):
         if result.complete_count > result.pass_count:
@@ -721,11 +746,11 @@ class RpcObject(object):
     """
     Generic object used to construct python objects from rpc calls
     """
+
     def __init__(self, afe, hash):
         self.afe = afe
         self.hash = hash
         self.__dict__.update(hash)
-
 
     def __str__(self):
         return dump_object(self.__repr__(), self)
@@ -737,8 +762,9 @@ class ControlFile(RpcObject):
 
     Fields: synch_count, dependencies, control_file, is_server
     """
+
     def __repr__(self):
-        return 'CONTROL FILE: %s' % self.control_file
+        return "CONTROL FILE: %s" % self.control_file
 
 
 class Label(RpcObject):
@@ -748,20 +774,19 @@ class Label(RpcObject):
     Fields:
         name, invalid, platform, kernel_config, id, only_if_needed
     """
-    def __repr__(self):
-        return 'LABEL: %s' % self.name
 
+    def __repr__(self):
+        return "LABEL: %s" % self.name
 
     def add_hosts(self, hosts):
         # We must use the label's name instead of the id because label ids are
         # not consistent across main-shard.
-        return self.afe.run('label_add_hosts', id=self.name, hosts=hosts)
-
+        return self.afe.run("label_add_hosts", id=self.name, hosts=hosts)
 
     def remove_hosts(self, hosts):
         # We must use the label's name instead of the id because label ids are
         # not consistent across main-shard.
-        return self.afe.run('label_remove_hosts', id=self.name, hosts=hosts)
+        return self.afe.run("label_remove_hosts", id=self.name, hosts=hosts)
 
 
 class Acl(RpcObject):
@@ -771,23 +796,21 @@ class Acl(RpcObject):
     Fields:
         users, hosts, description, name, id
     """
-    def __repr__(self):
-        return 'ACL: %s' % self.name
 
+    def __repr__(self):
+        return "ACL: %s" % self.name
 
     def add_hosts(self, hosts):
-        self.afe.log('Adding hosts %s to ACL %s' % (hosts, self.name))
-        return self.afe.run('acl_group_add_hosts', self.id, hosts)
-
+        self.afe.log("Adding hosts %s to ACL %s" % (hosts, self.name))
+        return self.afe.run("acl_group_add_hosts", self.id, hosts)
 
     def remove_hosts(self, hosts):
-        self.afe.log('Removing hosts %s from ACL %s' % (hosts, self.name))
-        return self.afe.run('acl_group_remove_hosts', self.id, hosts)
-
+        self.afe.log("Removing hosts %s from ACL %s" % (hosts, self.name))
+        return self.afe.run("acl_group_remove_hosts", self.id, hosts)
 
     def add_users(self, users):
-        self.afe.log('Adding users %s to ACL %s' % (users, self.name))
-        return self.afe.run('acl_group_add_users', id=self.name, users=users)
+        self.afe.log("Adding users %s to ACL %s" % (users, self.name))
+        return self.afe.run("acl_group_add_users", id=self.name, users=users)
 
 
 class Job(RpcObject):
@@ -799,8 +822,9 @@ class Job(RpcObject):
         run_verify, priority, email_list, created_on, dependencies,
         timeout, owner, reboot_after, id
     """
+
     def __repr__(self):
-        return 'JOB: %s' % self.id
+        return "JOB: %s" % self.id
 
 
 class JobStatus(RpcObject):
@@ -810,32 +834,32 @@ class JobStatus(RpcObject):
     Fields:
         status, complete, deleted, meta_host, host, active, execution_subdir, id
     """
+
     def __init__(self, afe, hash):
         super(JobStatus, self).__init__(afe, hash)
         self.job = Job(afe, self.job)
-        if getattr(self, 'host'):
+        if getattr(self, "host"):
             self.host = Host(afe, self.host)
-
 
     def __repr__(self):
         if self.host and self.host.hostname:
             hostname = self.host.hostname
         else:
-            hostname = 'None'
-        return 'JOB STATUS: %s-%s' % (self.job.id, hostname)
+            hostname = "None"
+        return "JOB STATUS: %s-%s" % (self.job.id, hostname)
 
 
 class SpecialTask(RpcObject):
     """
     AFE special task object
     """
+
     def __init__(self, afe, hash):
         super(SpecialTask, self).__init__(afe, hash)
         self.host = Host(afe, self.host)
 
-
     def __repr__(self):
-        return 'SPECIAL TASK: %s' % self.id
+        return "SPECIAL TASK: %s" % self.id
 
 
 class Host(RpcObject):
@@ -846,67 +870,72 @@ class Host(RpcObject):
         status, lock_time, locked_by, locked, hostname, invalid,
         labels, platform, protection, dirty, id
     """
-    def __repr__(self):
-        return 'HOST OBJECT: %s' % self.hostname
 
+    def __repr__(self):
+        return "HOST OBJECT: %s" % self.hostname
 
     def show(self):
         labels = list(set(self.labels) - set([self.platform]))
-        print('%-6s %-7s %-7s %-16s %s' % (self.hostname, self.status,
-                                           self.locked, self.platform,
-                                           ', '.join(labels)))
-
+        print(
+            "%-6s %-7s %-7s %-16s %s"
+            % (
+                self.hostname,
+                self.status,
+                self.locked,
+                self.platform,
+                ", ".join(labels),
+            )
+        )
 
     def delete(self):
-        return self.afe.run('delete_host', id=self.id)
-
+        return self.afe.run("delete_host", id=self.id)
 
     def modify(self, **dargs):
-        return self.afe.run('modify_host', id=self.id, **dargs)
-
+        return self.afe.run("modify_host", id=self.id, **dargs)
 
     def get_acls(self):
         return self.afe.get_acls(hosts__hostname=self.hostname)
 
-
     def add_acl(self, acl_name):
-        self.afe.log('Adding ACL %s to host %s' % (acl_name, self.hostname))
-        return self.afe.run('acl_group_add_hosts', id=acl_name,
-                            hosts=[self.hostname])
-
+        self.afe.log("Adding ACL %s to host %s" % (acl_name, self.hostname))
+        return self.afe.run(
+            "acl_group_add_hosts", id=acl_name, hosts=[self.hostname]
+        )
 
     def remove_acl(self, acl_name):
-        self.afe.log('Removing ACL %s from host %s' % (acl_name, self.hostname))
-        return self.afe.run('acl_group_remove_hosts', id=acl_name,
-                            hosts=[self.hostname])
-
+        self.afe.log(
+            "Removing ACL %s from host %s" % (acl_name, self.hostname)
+        )
+        return self.afe.run(
+            "acl_group_remove_hosts", id=acl_name, hosts=[self.hostname]
+        )
 
     def get_labels(self):
         return self.afe.get_labels(host__hostname__in=[self.hostname])
 
-
     def add_labels(self, labels):
-        self.afe.log('Adding labels %s to host %s' % (labels, self.hostname))
-        return self.afe.run('host_add_labels', id=self.id, labels=labels)
-
+        self.afe.log("Adding labels %s to host %s" % (labels, self.hostname))
+        return self.afe.run("host_add_labels", id=self.id, labels=labels)
 
     def remove_labels(self, labels):
-        self.afe.log('Removing labels %s from host %s' % (labels,self.hostname))
-        return self.afe.run('host_remove_labels', id=self.id, labels=labels)
-
+        self.afe.log(
+            "Removing labels %s from host %s" % (labels, self.hostname)
+        )
+        return self.afe.run("host_remove_labels", id=self.id, labels=labels)
 
     def is_available(self):
         """Check whether DUT host is available.
 
         @return: bool
         """
-        return not (self.locked
-                    or self.status in host_states.UNAVAILABLE_STATES)
+        return not (
+            self.locked or self.status in host_states.UNAVAILABLE_STATES
+        )
 
 
 class User(RpcObject):
     def __repr__(self):
-        return 'USER: %s' % self.login
+        return "USER: %s" % self.login
 
 
 class TestStatus(RpcObject):
@@ -917,8 +946,9 @@ class TestStatus(RpcObject):
         test_idx, hostname, testname, id
         complete_count, incomplete_count, group_count, pass_count
     """
+
     def __repr__(self):
-        return 'TEST STATUS: %s' % self.id
+        return "TEST STATUS: %s" % self.id
 
 
 class HostAttribute(RpcObject):
@@ -928,5 +958,6 @@ class HostAttribute(RpcObject):
     Fields:
         id, host, attribute, value
     """
+
     def __repr__(self):
-        return 'HOST ATTRIBUTE %d' % self.id
+        return "HOST ATTRIBUTE %d" % self.id

@@ -128,7 +128,7 @@ class BaseHostRequestHandler(object):
         @raises RDBException: If the same host is assigned to multiple requests.
         """
         unique_hosts = set([])
-        for request, response in self.response_map.iteritems():
+        for request, response in self.response_map.items():
             # Each value in the response map can only either be a list of
             # RDBHosts or a list of RDBExceptions, not a mix of both.
             if isinstance(response[0], rdb_hosts.RDBHost):
@@ -159,7 +159,7 @@ class BaseHostRequestHandler(object):
         @raises RDBException: If the same host is assigned to multiple requests.
         """
         self._check_response_map()
-        for request, response in self.response_map.iteritems():
+        for request, response in self.response_map.items():
             self.response_map[request] = [reply.wire_format()
                                           for reply in response]
         return self.response_map
@@ -181,13 +181,13 @@ class BaseHostRequestHandler(object):
 
         # Batch similar payloads so we can do them in one table scan.
         similar_requests = {}
-        for host_id, payload in unique_host_requests.iteritems():
+        for host_id, payload in unique_host_requests.items():
             similar_requests.setdefault(payload, []).append(host_id)
 
         # If fields of the update don't match columns in the database,
         # record the exception in the response map. This also means later
         # updates will get applied even if previous updates fail.
-        for payload, hosts in similar_requests.iteritems():
+        for payload, hosts in similar_requests.items():
             try:
                 response = self.host_query_manager.update_hosts(hosts, **payload)
             except (django_exceptions.FieldError,
@@ -432,7 +432,7 @@ class AvailableHostRequestHandler(BaseHostRequestHandler):
         #    contain: {r: h}, regardless of the number of r's. If this is not
         #    a valid host assignment it will get dropped from the response.
         self.batch_get_hosts(set(requests))
-        for request in sorted(self.response_map.keys(),
+        for request in sorted(list(self.response_map.keys()),
                 key=lambda request: request.priority, reverse=True):
             hosts = self.response_map[request]
             if len(hosts) > 1:

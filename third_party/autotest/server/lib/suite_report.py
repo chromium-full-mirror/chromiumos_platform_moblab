@@ -4,7 +4,7 @@
 
 """Services relating to generating a suite timeline and report."""
 
-from __future__ import print_function
+
 
 import common
 import datetime

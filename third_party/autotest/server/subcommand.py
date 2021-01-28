@@ -1,7 +1,7 @@
 # Lint as: python2, python3
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 __author__ = """Copyright Andy Whitcroft, Martin J. Bligh - 2006, 2007"""
 

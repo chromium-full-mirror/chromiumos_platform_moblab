@@ -266,7 +266,7 @@ def parallel(partitions, method_name, *args, **dargs):
 
     for p in partitions:
         print_args = list(args)
-        print_args += ['%s=%s' % (key, dargs[key]) for key in dargs.keys()]
+        print_args += ['%s=%s' % (key, dargs[key]) for key in list(dargs.keys())]
         logging.debug('%s.%s(%s)', str(p), method_name,
                                      ', '.join(print_args))
         sys.stdout.flush()

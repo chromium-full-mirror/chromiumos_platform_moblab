@@ -4,9 +4,9 @@
 
 """Event handlers."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import datetime
 import logging
@@ -272,7 +272,7 @@ def _retry_db_errors(func):
     MySQLdb = autotest.deps_load('MySQLdb')
     max_retries = 10
     # n ... 0 means n + 1 tries, or 1 try plus n retries
-    for i in xrange(max_retries, -1, -1):
+    for i in range(max_retries, -1, -1):
         try:
             func()
         except (django.db.utils.DatabaseError, MySQLdb.OperationalError) as e:

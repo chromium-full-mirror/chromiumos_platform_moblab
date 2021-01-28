@@ -10,9 +10,9 @@
 """This file provides core logic for servo verify/repair process."""
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 import os

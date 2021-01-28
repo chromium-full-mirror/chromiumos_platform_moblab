@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2015 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -158,7 +158,7 @@ def main(options):
     logging.info('Cleaning container bucket %s', bucket.container_path)
     success_count = 0
     failure_count = 0
-    for container in bucket.get_all().values():
+    for container in list(bucket.get_all().values()):
         if is_container_orphaned(container):
             if cleanup(container, options):
                 success_count += 1

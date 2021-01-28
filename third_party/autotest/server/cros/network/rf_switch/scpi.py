@@ -13,7 +13,7 @@ WiFi Clients RF enclosures for interoperability testing.
 
 """
 
-from __future__ import print_function
+
 
 import logging
 import six
@@ -113,9 +113,9 @@ class Scpi(object):
         # Returns a comma separated text as below converted to dict.
         # 'VTI Instruments Corporation,EX7200-S-11539,138454,3.13.8\n'
         return dict(
-            zip(('Manufacturer', 'Model', 'Serial', 'Version'),
+            list(zip(('Manufacturer', 'Model', 'Serial', 'Version'),
                 self.query('%s\n' % self.CMD_IDENTITY)
-                .strip().split(',', 3)))
+                .strip().split(',', 3))))
 
     def reset(self):
         """Reset the chassis.

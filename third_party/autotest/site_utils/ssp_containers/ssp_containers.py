@@ -34,7 +34,7 @@ def get_container_info(container_path, **filters):
     if filters:
         logging.info("filters %s", filters)
         filtered_collection = []
-        for key, value in filters.iteritems():
+        for key, value in filters.items():
             for info in info_collection:
                 logging.info("key %s info %s value %s", key, info, value)
                 if key in info and info[key] == value:
@@ -56,7 +56,7 @@ def download_extract(url, target, extract_dir, name):
     client = docker.from_env(timeout=300)
     container = client.containers.get(name)
     result = container.exec_run('mktemp -d', user='moblab')
-    tempfile = os.path.join(result.output.strip(), os.path.basename(target).strip())
+    tempfile = os.path.join(result.output.decode('utf-8').strip(), os.path.basename(target).strip())
     logging.info('curl %s -o %s' % (url, tempfile))
     result = container.exec_run('curl %s -o %s' % (url, tempfile))
     logging.info("Result %d %s", result.exit_code, result.output)

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import ConfigParser
+import configparser
 
 from client.cros.image_comparison import pdiff_image_comparer
 from client.cros.image_comparison import publisher
@@ -32,7 +32,7 @@ class ImageComparisonFactory(object):
         Loads values from configuration file.
 
         """
-        parser = ConfigParser.SafeConfigParser()
+        parser = configparser.SafeConfigParser()
         parser.read(self.conf_filepath)
 
         self.pixel_thres = parser.getint('rgb', 'rgb_pixel_threshold')

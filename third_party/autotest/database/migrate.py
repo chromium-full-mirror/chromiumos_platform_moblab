@@ -1,4 +1,4 @@
-#!/usr/bin/python2 -u
+#!/usr/bin/python3 -u
 
 import os, sys, re, tempfile
 from optparse import OptionParser
@@ -59,7 +59,7 @@ class Migration(object):
             method(manager)
         else:
             sql = getattr(self.module, sql_name)
-            assert isinstance(sql, basestring)
+            assert isinstance(sql, str)
             manager.execute_script(sql)
 
 
@@ -146,7 +146,7 @@ class MigrationManager(object):
         try:
             self.execute("SELECT * FROM %s" % MIGRATE_TABLE)
             return True
-        except self._database.DatabaseError, exc:
+        except self._database.DatabaseError as exc:
             # we can't check for more specifics due to differences between DB
             # backends (we can't even check for a subclass of DatabaseError)
             return False
@@ -221,14 +221,14 @@ class MigrationManager(object):
         @param migrate_up: Whether to migrate up (if not, then migrates down).
 
         """
-        print 'Applying migration %s' % migration.name, # no newline
+        print('Applying migration %s' % migration.name, end=' ') # no newline
         if migrate_up:
-            print 'up'
+            print('up')
             assert self.get_db_version() == migration.version - 1
             migration.migrate_up(self)
             new_version = migration.version
         else:
-            print 'down'
+            print('down')
             assert self.get_db_version() == migration.version
             migration.migrate_down(self)
             new_version = migration.version - 1
@@ -260,7 +260,7 @@ class MigrationManager(object):
             self.do_migration(migration, migrate_up)
 
         assert self.get_db_version() == version
-        print 'At version', version
+        print('At version', version)
 
 
     def _migrate_from_base(self):
@@ -285,7 +285,7 @@ class MigrationManager(object):
 
         """
         if not self.force:
-            response = raw_input(
+            response = input(
                 'Your %s database does not appear to be initialized.  Do you '
                 'want to recreate it (this will result in loss of any existing '
                 'data) (yes/No)? ' % self.get_db_name())
@@ -311,7 +311,7 @@ class MigrationManager(object):
         test_db_name = 'test_' + db_name
         # first, connect to no DB so we can create a test DB
         self._database.connect(db_name='')
-        print 'Creating test DB', test_db_name
+        print('Creating test DB', test_db_name)
         self.execute('CREATE DATABASE ' + test_db_name)
         self._database.disconnect()
         # now connect to the test DB
@@ -320,7 +320,7 @@ class MigrationManager(object):
 
     def remove_test_db(self):
         """Removes a test database."""
-        print 'Removing test DB'
+        print('Removing test DB')
         self.execute('DROP DATABASE ' + self.get_db_name())
         # reset connection back to real DB
         self._database.disconnect()
@@ -352,9 +352,9 @@ class MigrationManager(object):
         @param version: The version to which to migrate the database.
 
         """
-        print 'Migration starting for database', self.get_db_name()
+        print('Migration starting for database', self.get_db_name())
         self.migrate_to_version_or_latest(version)
-        print 'Migration complete'
+        print('Migration complete')
 
 
     def test_sync_db(self, version=None):
@@ -365,7 +365,7 @@ class MigrationManager(object):
         """
         self.initialize_test_db()
         try:
-            print 'Starting migration test on DB', self.get_db_name()
+            print('Starting migration test on DB', self.get_db_name())
             self.migrate_to_version_or_latest(version)
             # show schema to the user
             os.system('mysqldump %s --no-data=true '
@@ -373,7 +373,7 @@ class MigrationManager(object):
                       self.get_mysql_args())
         finally:
             self.remove_test_db()
-        print 'Test finished successfully'
+        print('Test finished successfully')
 
 
     def simulate_sync_db(self, version=None):
@@ -385,27 +385,27 @@ class MigrationManager(object):
         db_version = self.get_db_version()
         # don't do anything if we're already at the latest version
         if db_version == self.get_latest_version():
-            print 'Skipping simulation, already at latest version'
+            print('Skipping simulation, already at latest version')
             return
         # get existing data
         self.initialize_and_fill_test_db()
         try:
-            print 'Starting migration test on DB', self.get_db_name()
+            print('Starting migration test on DB', self.get_db_name())
             self.migrate_to_version_or_latest(version)
         finally:
             self.remove_test_db()
-        print 'Test finished successfully'
+        print('Test finished successfully')
 
 
     def initialize_and_fill_test_db(self):
         """Initializes and fills up a test database."""
-        print 'Dumping existing data'
+        print('Dumping existing data')
         dump_fd, dump_file = tempfile.mkstemp('.migrate_dump')
         os.system('mysqldump %s >%s' %
                   (self.get_mysql_args(), dump_file))
         # fill in test DB
         self.initialize_test_db()
-        print 'Filling in test DB'
+        print('Filling in test DB')
         os.system('mysql %s <%s' % (self.get_mysql_args(), dump_file))
         os.close(dump_fd)
         os.remove(dump_file)
@@ -449,17 +449,17 @@ def main():
             manager.simulate=True
             manager.simulate_sync_db(version)
         elif args[0] == 'safesync':
-            print 'Simluating migration'
+            print('Simluating migration')
             manager.simulate=True
             manager.simulate_sync_db(version)
-            print 'Performing real migration'
+            print('Performing real migration')
             manager.simulate=False
             manager.do_sync_db(version)
         else:
-            print USAGE
+            print(USAGE)
         return
 
-    print USAGE
+    print(USAGE)
 
 
 def get_migration_manager(db_name, debug, force):

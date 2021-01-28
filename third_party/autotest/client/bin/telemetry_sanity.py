@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -10,7 +10,7 @@ This script runs a number of sanity tests to ensure that Chrome browser on
 Chrome OS is functional.
 '''
 
-from __future__ import print_function
+
 
 import argparse
 import datetime

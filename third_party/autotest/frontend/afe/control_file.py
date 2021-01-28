@@ -107,7 +107,7 @@ def _get_tests_stanza(tests, is_server, prepend=None, append=None,
         step_template = CLIENT_STEP_TEMPLATE
         footer = ''
 
-    header = ''.join(step_template % i for i in xrange(len(steps)))
+    header = ''.join(step_template % i for i in range(len(steps)))
     return header + '\n' + '\n\n'.join(steps) + footer
 
 

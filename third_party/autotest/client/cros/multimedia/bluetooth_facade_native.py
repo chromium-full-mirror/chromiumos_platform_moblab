@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 """Facade to access the bluetooth-related functionality."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import base64
 import collections
@@ -1274,7 +1274,7 @@ class BluetoothFacadeNative(object):
         else:
             props = {}
         logging.debug('get_adapter_properties')
-        for i in props.items():
+        for i in list(props.items()):
             logging.debug(i)
         return props
 
@@ -1282,7 +1282,7 @@ class BluetoothFacadeNative(object):
         return json.dumps(self._get_adapter_properties())
 
     def _is_powered_on(self):
-        return bool(self._get_adapter_properties().get(u'Powered'))
+        return bool(self._get_adapter_properties().get('Powered'))
 
     def _get_wake_enabled_path(self):
         # Walk up the parents from hci0 sysfs path and find the first one with
@@ -2865,7 +2865,7 @@ class BluetoothFacadeNative(object):
         servs = dict()
         attribute_map['services'] = servs
 
-        for uuid, path in service_map.items():
+        for uuid, path in list(service_map.items()):
 
             servs[uuid] = dict()
             serv = servs[uuid]
@@ -2875,7 +2875,7 @@ class BluetoothFacadeNative(object):
             chrcs = serv['characteristics']
 
             chrcs_map = self._get_characteristic_map(path, objects)
-            for uuid, path in chrcs_map.items():
+            for uuid, path in list(chrcs_map.items()):
                 chrcs[uuid] = dict()
                 chrc = chrcs[uuid]
 
@@ -2885,7 +2885,7 @@ class BluetoothFacadeNative(object):
 
                 descs_map = self._get_descriptor_map(path, objects)
 
-                for uuid, path in descs_map.items():
+                for uuid, path in list(descs_map.items()):
                     descs[uuid] = dict()
                     desc = descs[uuid]
 
@@ -3499,7 +3499,7 @@ class BluetoothFacadeNative(object):
 
                 if all([x is not None for x in [start_time, end_time, ret]]):
                     # Return dates in string format due to inconsistency between
-                    # python2/3 usage on host and dut
+                    # python3/3 usage on host and dut
                     return (start_time.strftime(out_date_format),
                             end_time.strftime(out_date_format), ret)
                 else:

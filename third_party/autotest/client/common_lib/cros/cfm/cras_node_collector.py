@@ -48,7 +48,7 @@ class CrasNodeCollector(object):
         lines = lines[2:-1]
         rows = [self._construct_columns(line, self.DEVICE_COLUMN_COUNT)
                 for line in lines]
-        return [dict(zip(self.DEVICE_HEADERS, row)) for row in rows]
+        return [dict(list(zip(self.DEVICE_HEADERS, row))) for row in rows]
 
     def _collect_output_device_data(self):
         cmd = ("cras_test_client --dump_server_info "
@@ -59,7 +59,7 @@ class CrasNodeCollector(object):
         lines = lines[2:-1]
         rows = [self._construct_columns(line, self.DEVICE_COLUMN_COUNT)
                 for line in lines]
-        return [dict(zip(self.DEVICE_HEADERS, row)) for row in rows]
+        return [dict(list(zip(self.DEVICE_HEADERS, row))) for row in rows]
 
     def _collect_output_node_cras_data(self):
         """
@@ -77,7 +77,7 @@ class CrasNodeCollector(object):
         lines = lines[2:-1]
         rows = [self._construct_columns(line, self.NODE_COLUMN_COUNT)
                 for line in lines]
-        return [dict(zip(self.OUTPUT_NODE_HEADERS, row)) for row in rows]
+        return [dict(list(zip(self.OUTPUT_NODE_HEADERS, row))) for row in rows]
 
     def _collect_input_node_cras_data(self):
         """
@@ -93,7 +93,7 @@ class CrasNodeCollector(object):
         lines = lines[2:-1]
         rows = [self._construct_columns(line, self.NODE_COLUMN_COUNT)
                 for line in lines]
-        return [dict(zip(self.INPUT_NODE_HEADERS, row)) for row in rows]
+        return [dict(list(zip(self.INPUT_NODE_HEADERS, row))) for row in rows]
 
     def _get_device_name(self, device_data, device_id):
         for device in device_data:

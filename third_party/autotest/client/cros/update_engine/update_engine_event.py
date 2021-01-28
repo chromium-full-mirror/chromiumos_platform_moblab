@@ -66,7 +66,7 @@ class UpdateEngineEvent(object):
     def __str__(self):
         """Returns a comma separated list of the event data."""
         return '{%s}' % ', '.join(['%s:%s' % (k, v) for k, v in
-                                   self._expected_attrs.iteritems()])
+                                   self._expected_attrs.items()])
 
     def equals(self, actual_event):
         """
@@ -81,7 +81,7 @@ class UpdateEngineEvent(object):
 
         """
         mismatched_attrs = []
-        for expected_name, expected_val in self._expected_attrs.iteritems():
+        for expected_name, expected_val in self._expected_attrs.items():
             actual_val = actual_event.get(expected_name)
             if (expected_val and (actual_val is None or
                                   expected_val != actual_val)):
