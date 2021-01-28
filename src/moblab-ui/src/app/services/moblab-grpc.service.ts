@@ -94,7 +94,7 @@ export class MoblabGrpcService {
   moblabRpcService: MoblabRpcServiceClient = null;
 
   constructor() {
-    const url = new URL("http://localhost/");//window.location.href);
+    const url = new URL(window.location.href);
     let service_url = new String(url.protocol);
     service_url = service_url.concat('//', url.hostname, ':', url.port, '/rpc');
     console.log(service_url);
