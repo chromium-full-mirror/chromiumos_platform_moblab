@@ -49,7 +49,7 @@ RUN echo \
     add - && apt-get update -y && apt-get install google-cloud-sdk -y
 
 # Install the official pip
-RUN wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+RUN wget https://bootstrap.pypa.io/2.7/get-pip.py -O /tmp/get-pip.py
 RUN python2.7 /tmp/get-pip.py --target /usr/lib/python2.7/dist-packages
 COPY requirements.txt .
 RUN python2.7 -m pip install --upgrade --no-cache-dir -r requirements.txt \
