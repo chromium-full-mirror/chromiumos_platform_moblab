@@ -9,6 +9,7 @@ service RemoteLoggingAgent {
   // determined).
 }
 
+// NEXT TAG: 12
 enum DutStatus {
   // TODO(chromium:1106420): share DutStatus with the moblab-rpcserver
   // code base.
@@ -23,13 +24,16 @@ enum DutStatus {
   DUT_STATUS_PROVISIONING = 8;
   DUT_STATUS_VERIFYING = 9;
   DUT_STATUS_DISCONNECTED = 10;
+  DUT_STATUS_NOT_ENROLLED = 11;
 }
 
+// NEXT TAG: 3
 message DiskStats {
   uint64 total_disk_size_bytes = 1;
   uint64 free_disk_size_bytes = 2;
 }
 
+// NEXT TAG: 5
 message NetworkStats {
   uint64 upload_bits_per_second = 1;
   uint64 download_bits_per_second = 2;
@@ -39,6 +43,7 @@ message NetworkStats {
   optional uint32 broken_connections = 4;
 }
 
+// NEXT TAG: 12
 message MoblabHost {
   string moblab_host_id = 1;
   string moblab_install_id = 2;
@@ -53,6 +58,7 @@ message MoblabHost {
   optional uint64 last_update_time = 11; // in millisecond
 }
 
+// NEXT TAG: 13
 message MoblabDut {
   string moblab_host_id = 1;
   string moblab_install_id = 2;
