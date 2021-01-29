@@ -64,8 +64,6 @@ HARDWARE_AVL_PART_NO = "part_id"
 STORAGE_QUAL_DISK_SIZE_GB = "tast_disk_size_gb"
 STORAGE_QUAL_DUAL_NAMESPACE = "tast_storage_slc_qual"
 
-MAX_BUILD_RESULTS_PAGE = 1000
-
 MOBLAB_DOCKER_REGISTRY = "gcr.io/chromeos-partner-moblab/"
 
 MAX_BUILD_STAGING_SECONDS = 300  # 5 minutes
@@ -669,7 +667,8 @@ class MoblabService(object):
         )
         return BuildResults(
             results=milestone_results,
-            is_incomplete=(len(remote_milestones) == MAX_BUILD_RESULTS_PAGE),
+            is_incomplete=(len(remote_milestones) == \
+                           moblab_build_connector.DEFAULT_PAGE_SIZE),
         )
 
     def list_usable_build_versions(self, build_target, milestone, model):
@@ -730,7 +729,7 @@ class MoblabService(object):
         return BuildResults(
             results=build_version_results,
             is_incomplete=(
-                len(remote_build_versions) == MAX_BUILD_RESULTS_PAGE
+                len(remote_build_versions) == moblab_build_connector.DEFAULT_PAGE_SIZE
             ),
         )
 

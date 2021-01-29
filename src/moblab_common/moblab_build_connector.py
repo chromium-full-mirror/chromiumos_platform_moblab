@@ -20,10 +20,10 @@ from google.chromeos.moblab_v1beta1.services.build_service.client import (
 from google.chromeos.moblab_v1beta1.types import build_service
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
+DEFAULT_PAGE_SIZE = 500
 
 class MoblabBuildConnectorException(Exception):
     """Generic exception for this module."""
-
     pass
 
 
@@ -85,7 +85,7 @@ class MoblabBuildConnector(object):
             ) from e
 
     def list_available_milestones(
-        self, build_target, model, page_size=50, page_token=None
+        self, build_target, model, page_size=DEFAULT_PAGE_SIZE, page_token=None
     ):
         """Lists the available milestones for the given build target and model.
 
@@ -94,7 +94,7 @@ class MoblabBuildConnector(object):
             model (str): Model name. For non-unibuilds, set the model name as
                 the same as build target name.
             page_size (int): The number of milestones to return in the response.
-                The default size is 50.
+                The default size is DEFAULT_PAGE_SIZE.
             page_token (str): A page token, received from a previous
                 ``ListBuilds`` call. Provide this to retrieve the subsequent
                 page.
@@ -116,7 +116,7 @@ class MoblabBuildConnector(object):
         ]
 
     def list_builds_for_milestone(
-        self, build_target, model, milestone, page_size=50, page_token=None
+        self, build_target, model, milestone, page_size=DEFAULT_PAGE_SIZE, page_token=None
     ):
         """Lists the builds for the given build target, model and milestone.
 
@@ -126,7 +126,7 @@ class MoblabBuildConnector(object):
                 the same as build target name.
             milestone (int): The milestone number.
             page_size (int): The number of milestones to return in the response.
-                The default size is 50.
+                The default size is DEFAULT_PAGE_SIZE.
             page_token (str): The page token, received from a previous
                 ``ListBuilds`` call. Provide this to retrieve the subsequent
                 page.
