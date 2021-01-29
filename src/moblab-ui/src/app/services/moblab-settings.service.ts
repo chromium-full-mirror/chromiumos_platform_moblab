@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, Observable, merge} from 'rxjs';
+import {share} from 'rxjs/operators';
 import {MoblabConfigurationGrpcService} from 'app/services/moblab-configuration-grpc.service';
 
 // The service provides live updates to test runner status.
@@ -8,13 +9,14 @@ import {MoblabConfigurationGrpcService} from 'app/services/moblab-configuration-
 @Injectable({providedIn: 'root'})
 export class MoblabSettingsService {
   private pauseRequestorsSubject = new BehaviorSubject<string[]>([]);
-  public pauseRequestors = this.pauseRequestorsSubject.asObservable();
+  public pauseRequestorsObservable: Observable<String[]>;
 
   // Starting a background process to check on system pause state
   constructor(private grpcService: MoblabConfigurationGrpcService) {
-    this.grpcService.subscribeToPauseStatusUpdates((pauseRequesters: string[]) =>
-      this.updateHostSchedulingStatus(pauseRequesters)
-    );
+    this.pauseRequestorsObservable = merge(
+      this.pauseRequestorsSubject.asObservable(),
+      this.grpcService.pauseStateObservable,
+    ).pipe(share());
   }
 
   public updateHostSchedulingStatus(pauseRequesters: string[]): void {

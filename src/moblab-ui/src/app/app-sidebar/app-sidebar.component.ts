@@ -115,7 +115,7 @@ export class AppSidebarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.settingsService.pauseRequestors.subscribe(requestors => {
+    this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
       this.pauseRequestors = requestors;
     });
   }

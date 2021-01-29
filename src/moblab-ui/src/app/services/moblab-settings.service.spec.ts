@@ -27,7 +27,7 @@ describe('MoblabSettingsService', () => {
   it('should update pause state when changed', () => {
     service.updateHostSchedulingStatus(['S']);
     var received = [''];
-    service.pauseRequestors.subscribe(r => received = r);
+    service.pauseRequestorsObservable.subscribe(r => received = r);
     expect(received).toEqual(['S']);
   });
 });
