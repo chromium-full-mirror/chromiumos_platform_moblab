@@ -485,15 +485,15 @@ class CollectService(Constants):
         # duts. For example:
         #   connected_moblab_dut_ids = [('192.168.231.19', '0QSK91'),
         #                               ('192.168.231.11', '0QSK91')]
-        #   connected_devices =
+        #   enrolled_duts =
         #   [{'hostname': '192.168.231.11', 'labels': [], 'status': 'Running'},
         #     {'hostname': '192.168.231.19', 'labels': [], 'status': 'Ready'}]
         connected_moblab_dut_ids = self.dut_connector.get_connected_dut_serialno()
-        connected_devices = self.afe_connector.get_connected_devices()
+        enrolled_duts = self.afe_connector.get_connected_devices()
         _LOGGER.info("Found connected DUT serial numbers: %s",
                      connected_moblab_dut_ids)
-        _LOGGER.info("Found connected DUT device information: %s",
-                     connected_devices)
+        _LOGGER.info("Found enrolled DUT device information: %s",
+                     enrolled_duts)
 
         message_attributes = {
             "DUT_BASIC": self.create_dut_basic_message,
@@ -508,14 +508,20 @@ class CollectService(Constants):
 
         create_msg_func = message_attributes[attribute_type]
 
+        # Collects connected unenrolled DUTs.
+        connected_unenrolled_duts = set()
+
         # Generates pubsub messages for connected DUTs.
         moblab_duts_ids_map = {}
         for dut in connected_moblab_dut_ids:
             # dut[0] is the dut ip, dut[1] is the dut id
-            if dut[1]:
-                moblab_duts_ids_map[dut[0]] = dut[1]
+            dut_ip = dut[0]
+            dut_id = dut[1]
+            if dut_id:
+                moblab_duts_ids_map[dut_ip] = dut_id
+                connected_unenrolled_duts.add(dut_ip)
         if moblab_duts_ids_map:
-            for dut_info_dict in connected_devices:
+            for dut_info_dict in enrolled_duts:
                 dut_ip = dut_info_dict["hostname"]
                 if dut_ip in moblab_duts_ids_map:
                     dut = create_msg_func(dut_info_dict, dut_ip)
@@ -525,6 +531,22 @@ class CollectService(Constants):
                             time.time() * 1000
                         )  # in millisecond
                         duts.append(dut)
+
+                    # Removes enrolled DUTs.
+                    if dut_ip in connected_unenrolled_duts:
+                        connected_unenrolled_duts.remove(dut_ip)
+
+        # Generates pubsub messages for connected unenrolled DUTs.
+        if connected_unenrolled_duts:
+            _LOGGER.info("Found connected unenrolled DUT IPs: %s",
+                         connected_unenrolled_duts)
+            for dut_ip in connected_unenrolled_duts:
+                dut = self._initiate_dut_message(dut_ip)
+                dut.status = \
+                    remoteagentrpc_pb2.DutStatus.DUT_STATUS_NOT_ENROLLED
+                dut.last_update_time = \
+                    round(time.time() * 1000)  # in millisecond
+                duts.append(dut)
 
         # Generates pubsub messages for disconnected DUTs.
         disconnected_moblab_dut_ips = \
