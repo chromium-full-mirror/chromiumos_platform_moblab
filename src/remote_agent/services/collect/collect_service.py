@@ -508,10 +508,11 @@ class CollectService(Constants):
 
         create_msg_func = message_attributes[attribute_type]
 
-        # Collects connected unenrolled DUTs.
-        connected_unenrolled_duts = set()
+        enrolled_dut_ips = set()
+        connected_unenrolled_dut_ips = set()
+        disconnected_dut_ip_status_map = {}
 
-        # Generates pubsub messages for connected DUTs.
+        # Generates pubsub messages for connected enrolled DUTs.
         moblab_duts_ids_map = {}
         for dut in connected_moblab_dut_ids:
             # dut[0] is the dut ip, dut[1] is the dut id
@@ -519,11 +520,14 @@ class CollectService(Constants):
             dut_id = dut[1]
             if dut_id:
                 moblab_duts_ids_map[dut_ip] = dut_id
-                connected_unenrolled_duts.add(dut_ip)
+                connected_unenrolled_dut_ips.add(dut_ip)
         if moblab_duts_ids_map:
             for dut_info_dict in enrolled_duts:
                 dut_ip = dut_info_dict["hostname"]
+                dut_status = dut_info_dict['status']
+                enrolled_dut_ips.add(dut_ip)
                 if dut_ip in moblab_duts_ids_map:
+                    # Collects connected enrolled DUTs
                     dut = create_msg_func(dut_info_dict, dut_ip)
                     if dut:
                         dut.moblab_dut_id = moblab_duts_ids_map[dut_ip]
@@ -532,15 +536,20 @@ class CollectService(Constants):
                         )  # in millisecond
                         duts.append(dut)
 
-                    # Removes enrolled DUTs.
-                    if dut_ip in connected_unenrolled_duts:
-                        connected_unenrolled_duts.remove(dut_ip)
+                    # Removes enrolled DUTs from the unenrolled DUT list.
+                    if dut_ip in connected_unenrolled_dut_ips:
+                        connected_unenrolled_dut_ips.remove(dut_ip)
+                else:
+                    # Only collects disconnected enrolled DUTs with Ready or
+                    # Repair Failed status.
+                    if dut_status == 'Ready' or dut_status == 'Repair Failed':
+                        disconnected_dut_ip_status_map[dut_ip] = dut_status
 
         # Generates pubsub messages for connected unenrolled DUTs.
-        if connected_unenrolled_duts:
+        if connected_unenrolled_dut_ips:
             _LOGGER.info("Found connected unenrolled DUT IPs: %s",
-                         connected_unenrolled_duts)
-            for dut_ip in connected_unenrolled_duts:
+                         connected_unenrolled_dut_ips)
+            for dut_ip in connected_unenrolled_dut_ips:
                 dut = self._initiate_dut_message(dut_ip)
                 dut.status = \
                     remoteagentrpc_pb2.DutStatus.DUT_STATUS_NOT_ENROLLED
@@ -548,16 +557,23 @@ class CollectService(Constants):
                     round(time.time() * 1000)  # in millisecond
                 duts.append(dut)
 
-        # Generates pubsub messages for disconnected DUTs.
-        disconnected_moblab_dut_ips = \
+        # Generates pubsub messages for disconnected enrolled DUTs.
+        dhcp_disconnected_dut_ips = \
             self.dut_connector.get_disconnected_dut_ips()
-        _LOGGER.warning("Found disconnected DUT IPs: %s",
-                        disconnected_moblab_dut_ips)
-        for dut_ip in disconnected_moblab_dut_ips:
-            dut = self._initiate_dut_message(dut_ip)
-            dut.status = remoteagentrpc_pb2.DutStatus.DUT_STATUS_DISCONNECTED
-            dut.last_update_time = round(time.time() * 1000)  # in millisecond
-            duts.append(dut)
+        for dut_ip in dhcp_disconnected_dut_ips:
+            if dut_ip not in enrolled_dut_ips:
+                disconnected_dut_ip_status_map[dut_ip] = 'DHCP Disconnected'
+        if disconnected_dut_ip_status_map:
+            _LOGGER.info("Found disconnected DUT IPs with Ready status, Repair "
+                         "Failed status or unenrolled state: %s",
+                         disconnected_dut_ip_status_map)
+            for dut_ip in disconnected_dut_ip_status_map:
+                dut = self._initiate_dut_message(dut_ip)
+                dut.status = \
+                    remoteagentrpc_pb2.DutStatus.DUT_STATUS_DISCONNECTED
+                dut.last_update_time = \
+                    round(time.time() * 1000)  # in millisecond
+                duts.append(dut)
 
         _LOGGER.info("Successfully collected DUT information for the "
                      "attribute: %s", attribute_type)
