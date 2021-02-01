@@ -18,6 +18,8 @@ import {
 } from './moblab_configuration_rpc_pb';
 
 import {MoblabSettingsConstains} from '../constants';
+import {Observable, timer} from 'rxjs';
+import {retryWhen, delayWhen} from 'rxjs/operators';
 
 export class StableCrOSVersion {
   public DefaultVersion: string = "";
@@ -27,6 +29,7 @@ export class StableCrOSVersion {
 @Injectable({providedIn: 'root'})
 export class MoblabConfigurationGrpcService {
   configurationRpcClient: MoblabConfigurationServicePromiseClient = null;
+  pauseStateObservable: Observable<string[]>;
 
   constructor() {
     const url = new URL(window.location.href);
@@ -37,6 +40,8 @@ export class MoblabConfigurationGrpcService {
     this.configurationRpcClient = new MoblabConfigurationServicePromiseClient(
       service_url.toString()
     );
+
+    this.configurePauseStateObservable();
   }
 
   /**
@@ -50,34 +55,36 @@ export class MoblabConfigurationGrpcService {
       );
   }
 
-  subscribeToPauseStatusUpdates(onDataCallback: (pauseRequesters: string[]) => void) {
-    var stream = this.configurationRpcClient.stream_host_scheduler_pause_status(new Empty());
-    this.configureStream(stream, onDataCallback);
-  }
+  private configurePauseStateObservable() {
+    this.pauseStateObservable = new Observable<string[]>((observer) => {
 
-  private configureStream(
-    stream: grpcWeb.ClientReadableStream<GetHostSchedulerPauseStatusResponse>,
-    onDataCallback: (pauseRequesters: string[]) => void) {
-
-    stream.on('data', (response: GetHostSchedulerPauseStatusResponse) => {
-      const pauseRequestors = response.getPauserequestorsList().map(this.mapRequestors)
-      console.log(pauseRequestors);
-      onDataCallback(pauseRequestors);
-    });
-    stream.on('status', (status: grpcWeb.Status) => {
-      console.log(
-        "Status: Code: " + status.code +
-        "Details: " + status.details +
-        "Metadata: " + status.metadata);
-    });
-    stream.on('end', () => {
-      console.log("stream_host_scheduler_pause_status stream is closed!");
-      this.subscribeToPauseStatusUpdates(onDataCallback)
-    });
-    stream.on('error', (er) => {
-      console.log("Error in stream_host_scheduler_pause_status:", er);
-      this.subscribeToPauseStatusUpdates(onDataCallback)
-    });
+      let stream = this.configurationRpcClient.stream_host_scheduler_pause_status(new Empty());
+      stream
+        .on('data', (response: GetHostSchedulerPauseStatusResponse) => {
+          const pauseRequestors = response.getPauserequestorsList().map(this.mapRequestors)
+          console.log(pauseRequestors);
+          observer.next(pauseRequestors);
+        })
+        .on('status', (status: grpcWeb.Status) => {
+          console.log(
+            "Status: Code: " + status.code +
+            "Details: " + status.details +
+            "Metadata: " + status.metadata);
+        })
+        .on('end', () => {
+          console.log("stream_host_scheduler_pause_status stream is closed!");
+          observer.error('Stream ended');
+        })
+        .on('error', (er) => {
+          console.log("Error in stream_host_scheduler_pause_status:", er);
+          observer.error(er);
+        });
+    }).pipe(
+      retryWhen(errors => {
+        console.log("Retrying in 60s ... ");
+        return errors.pipe(delayWhen(_ => timer(60000)))
+      })
+    );
   }
 
   /**

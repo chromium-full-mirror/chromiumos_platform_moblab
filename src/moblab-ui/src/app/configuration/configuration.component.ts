@@ -97,7 +97,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.bucketURLForm.valueChanges.subscribe(value => {
       this.formatBucketLink();
     });
-    this.settingsService.pauseRequestors.subscribe(requestors => {
+    this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
       this.isHostSchedulerPauseRequested =
         requestors &&
         requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
