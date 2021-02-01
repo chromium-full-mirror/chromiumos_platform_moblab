@@ -1,0 +1,31 @@
+# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+
+######################################################################
+FROM ${BASE_REGISTRY_URI}/python:3.8-buster as python3
+
+ARG USER
+ARG USERID
+
+RUN apt-get update && apt-get install --no-install-recommends -yq \
+    mariadb-client
+
+COPY dockerfiles/moblab_common/requirements.txt ./
+RUN pip3 install --upgrade pip && pip3 install --no-cache-dir -r requirements.txt
+
+RUN mkdir -p /workdir/moblab_common/database_models
+WORKDIR /workdir/moblab_common/database_models
+
+RUN adduser --gecos "" --disabled-password --uid ${USERID} ${USER}
+RUN echo "$USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+ENV DISPLAY=:0
+USER $USER
+
+ENV PYTHONPATH='/workdir'
+
+ENTRYPOINT ["alembic", "revision", "--autogenerate", "-m"]

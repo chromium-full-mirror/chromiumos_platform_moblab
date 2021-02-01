@@ -17,16 +17,20 @@ COPY dockerfiles/moblab_common/requirements.txt ./
 RUN pip3 install --upgrade pip && pip3 install --no-cache-dir -r requirements.txt
 
 RUN mkdir /workdir
-COPY moblab_common/ /workdir
-COPY dockerfiles/moblab_common/db_setup.sh /workdir/database_models/
+COPY moblab_common/ /workdir/moblab_common/
+
+COPY dockerfiles/moblab_common/moblab_db_migrate.sh /workdir/moblab_common/database_models/
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
 RUN chown -R moblab:moblab /workdir
-RUN chmod uog+rx /workdir/database_models/db_setup.sh
+RUN chmod uog+rx /workdir/moblab_common/database_models/moblab_db_migrate.sh
 
 USER moblab:moblab
 
-WORKDIR /workdir/database_models
-CMD ["/workdir/database_models/db_setup.sh"]
+WORKDIR /workdir/moblab_common/database_models
+
+ENV PYTHONPATH='/workdir'
+
+CMD ["/workdir/moblab_common/database_models/moblab_db_migrate.sh"]

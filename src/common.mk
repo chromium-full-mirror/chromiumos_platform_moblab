@@ -230,6 +230,15 @@ misc:	dhcp \
 		ssp \
 		watchtower
 
+# Run moblab db revision autogen
+moblab-db-revision: REVISION_NAME="$(shell read -p "Revision name: " rev_name; echo $$rev_name)"
+moblab-db-revision:
+	docker build ${EXTRA_ARGS} --build-arg USER=${USER} --build-arg USERID=$(shell id -u) -t moblab-db-revision:${LABEL} \
+		-f dockerfiles/moblab_common/Dockerfile.dbrevision .
+	docker run -it -v `pwd`/moblab_common:/workdir/moblab_common \
+		--network default_moblab moblab-db-revision:${LABEL} $(REVISION_NAME)
+
+
 # Build & run, but don't push
 rpcserver-test: export DOCKER_BUILDKIT=1
 rpcserver-test: rpcserver
