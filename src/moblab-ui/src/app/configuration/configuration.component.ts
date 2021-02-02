@@ -297,6 +297,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         this.isRemoteConsoleEnabled,
         this.isRemoteCommandEnabled
       );
+    } else {
+      this.isRemoteConsoleEnabled = true;
     }
     this.toggleCloudConfigDisabledMessage();
   }
