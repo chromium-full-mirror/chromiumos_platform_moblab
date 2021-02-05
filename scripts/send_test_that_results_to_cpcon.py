@@ -34,7 +34,6 @@ os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS",
 
 CURRENT_TIMESTAMP = int(time.time())
 FAKE_JOB_ID = CURRENT_TIMESTAMP
-FAKE_PARENT_ID = CURRENT_TIMESTAMP
 CONTROL_FILE = "control"
 JOB_SERIALIZE_FILE = "job.serialize"
 STATUS_FILE = "status"
@@ -150,8 +149,10 @@ def parse_test_job(test_dir, job_keyval, job_id, suite):
 
     # The job id and suite name are necessary for CPCon pipeline. Since
     # non-moblab test results don't have these fields, the values here are fake.
+    # Set a different afe_paren_job_id so that the test won't be regarded as a
+    # suite test.
     job.afe_job_id = job_id
-    job.afe_parent_job_id = job_id
+    job.afe_parent_job_id = job_id + "1"
     job.suite = suite
 
     job.build_version = _get_build_version(job.tests)
