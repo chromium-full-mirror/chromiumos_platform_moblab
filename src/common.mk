@@ -240,11 +240,15 @@ moblab-db-revision:
 
 
 # Build & run, but don't push
-rpcserver-test: export DOCKER_BUILDKIT=1
-rpcserver-test: rpcserver
+test-rpcserver: export DOCKER_BUILDKIT=1
+test-rpcserver: rpcserver
 	install -d -m 0777 moblab_rpcserver/coverage
 	docker run -w /etc/moblab/moblab_rpcserver -v "${PWD}/moblab_rpcserver/coverage":/etc/moblab/moblab_rpcserver/coverage --rm ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
 		bash -c 'coverage run -m unittest discover -p "*_unittest.py" && coverage html -d coverage --omit "*_unittest.py"'
+
+# Change to run in a container
+test-moblab-ui: export DOCKER_BUILDKIT=1
+test-moblab-ui: moblab-ui
 
 test-common: export DOCKER_BUILDKIT=1
 test-common:
@@ -255,5 +259,5 @@ test-common:
 	docker run -it moblab_common_test_py3:${LABEL} \
 		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v /test/'
 
-test:	rpcserver-test \
+test:	test-rpcserver \
 		test-common

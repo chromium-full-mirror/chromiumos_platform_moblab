@@ -9,6 +9,7 @@ import unittest
 from collections import namedtuple
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock
+from moblab_common.result_upload_status_connector import UploadResultState
 
 
 class MockNotFoundError(Exception):
@@ -490,6 +491,37 @@ class MoblabRPCServiceTest(unittest.TestCase):
         )
 
         mock_build_connector.return_value.get_builds_for_milestone.assert_called_once()
+
+    @mock.patch.object(
+        MoblabService, "afe_connector", new_callable=PropertyMock
+    )
+    @mock.patch.object(
+        MoblabService, "upload_status_connector", new_callable=PropertyMock
+    )
+    def test_get_jobs(self, mock_upload_status_connector, mock_afe_connctor):
+        mock_afe_connctor.return_value.get_jobs.return_value = [
+            {"id": 1, "key1": "value1"},
+            {"id": 3, "key3": "value3"},
+        ]
+        mock_upload_status_connector.return_value.get_jobs_upload_status.return_value = {
+            2: UploadResultState(status="ABC", attempt_number=2),
+            3: UploadResultState(status="DEF", attempt_number=5),
+        }
+
+        result = self.service.get_jobs(0, 100)
+
+        expected_result1 = {"id": 1, "key1": "value1"}
+        expected_result2 = {
+            "id": 3,
+            "key3": "value3",
+            "status": "DEF",
+            "last_falure_reason": "",
+            "attempt_number": 5,
+        }
+
+        self.assertEqual(len(result), 2)
+        self.assertDictEqual(result[0], expected_result1)
+        self.assertDictEqual(result[1], expected_result2)
 
 
 if __name__ == "__main__":

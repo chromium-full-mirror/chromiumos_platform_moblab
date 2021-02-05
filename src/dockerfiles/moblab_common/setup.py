@@ -18,6 +18,8 @@ setuptools.setup(
         "parallel-ssh",
         "python-nmap",
         "protobuf",
+        "sqlalchemy",
+        "pymysql",
     ],
     scripts=[
         "/src/tools/create-moblab-id.py",

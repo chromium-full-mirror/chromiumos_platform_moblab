@@ -27,7 +27,10 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.pardir))
 
-from database_models.moblab_settings import Base
+from moblab_common.database_models.declarative_base import Base
+
+from database_models.moblab_settings import MoblabSettings
+from database_models.job_uploading_status import JobUploadingStatus
 
 target_metadata = Base.metadata
 
