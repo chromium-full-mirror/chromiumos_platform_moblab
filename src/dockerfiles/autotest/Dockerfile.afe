@@ -16,7 +16,7 @@ ARG REGISTRY_URI
 
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
-COPY --from=gwt /www/ /moblab/third_party/autotest/frontend/client/www/
+COPY --from=gwt /www/ /usr/local/autotest/frontend/client/www/
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
     apache2 \
@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     curl \
     gnupg \
     iputils-ping  \
-    libapache2-mod-wsgi \
+    libapache2-mod-wsgi-py3 \
     libcap2-bin \
     mariadb-client \
     pbzip2 \
@@ -37,7 +37,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     unzip \
     xz-utils
 
-RUN python2.7 -m pip install docker
+RUN pip install docker
 
 # Install the google cloud sdk
 RUN echo \
@@ -82,7 +82,7 @@ RUN echo "moblab   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN apt autoremove -yq
 RUN apt-get clean
 
-RUN ln -s /usr/local/lib/python2.7/site-packages/* /moblab/third_party/autotest/site-packages
+RUN ln -s /usr/local/lib/python3.7/site-packages/* /usr/local/autotest/site-packages
 
 COPY afe_startup.sh /
 RUN chmod uog+rx /afe_startup.sh
@@ -100,7 +100,7 @@ COPY ssh_config /home/moblab/.ssh/config
 RUN touch /home/moblab/.boto
 RUN sudo usermod -aG docker $USER
 
-ENV PYTHONPATH=/moblab/third_party/autotest:/moblab/third_party/autotest/site-packages
+ENV PYTHONPATH=/usr/local/autotest:/usr/local/autotest/site-packages
 
 EXPOSE 8888
 CMD ["/afe_startup.sh"]

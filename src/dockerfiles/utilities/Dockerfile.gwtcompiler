@@ -6,10 +6,10 @@
 
 ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 
-FROM ${BASE_REGISTRY_URI}/debian:buster as build
+FROM ${BASE_REGISTRY_URI}/python:3.7-buster as build
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
-	unzip wget ca-certificates python2 default-jdk apt-utils
+	unzip wget ca-certificates default-jdk apt-utils
 
 WORKDIR /
 RUN wget https://storage.googleapis.com/gwt-releases/gwt-2.9.0.zip

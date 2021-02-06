@@ -11,8 +11,8 @@ FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
 COPY db_setup.sh /
 RUN chmod uog+rx /db_setup.sh
-RUN ln -s /usr/local/lib/python2.7/site-packages/* \
-    /moblab/third_party/autotest/site-packages
+RUN ln -s /usr/local/lib/python3.7/site-packages/* \
+    /usr/local/autotest/site-packages
 
 RUN ln -sf /usr/local/bin/py* /usr/bin
 

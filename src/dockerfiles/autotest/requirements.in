@@ -2,7 +2,6 @@ crcmod
 django==1.11.29
 dnspython
 docker
-faulthandler
 gdata
 google-api-python-client
 grpcio

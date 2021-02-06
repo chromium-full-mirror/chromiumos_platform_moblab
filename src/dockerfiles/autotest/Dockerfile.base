@@ -31,25 +31,25 @@ FROM ${BASE_REGISTRY_URI}/debian:buster-slim as protobuild
 
 COPY --from=protoc /protoc/* /usr/local/bin/
 
-COPY ./third_party/autotest/tko/ /moblab/third_party/autotest/tko/
+COPY ./third_party/autotest/tko/ /usr/local/autotest/tko/
 
-RUN protoc --proto_path /moblab/third_party/autotest/tko \
-    --python_out=/moblab/third_party/autotest/tko \
-    /moblab/third_party/autotest/tko/tko.proto
+RUN protoc --proto_path /usr/local/autotest/tko \
+    --python_out=/usr/local/autotest/tko \
+    /usr/local/autotest/tko/tko.proto
 
 ######################################################################
 
 
-FROM ${BASE_REGISTRY_URI}/python:2.7-slim-buster
+FROM ${BASE_REGISTRY_URI}/python:3.7-slim-buster
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
     --uid 246 --disabled-password --gecos "" moblab
 
-COPY --chown=moblab ./third_party/autotest /moblab/third_party/autotest
-COPY --chown=moblab --from=protobuild /moblab/third_party/autotest/tko/*pb2* /moblab/third_party/autotest/tko/
+COPY --chown=moblab ./third_party/autotest /usr/local/autotest
+COPY --chown=moblab --from=protobuild /usr/local/autotest/tko/*pb2* /usr/local/autotest/tko/
 
-RUN rm -rf /moblab/third_party/autotest/site-packages
-RUN mkdir -p /moblab/third_party/autotest/site-packages
+RUN rm -rf /usr/local/autotest/site-packages
+RUN mkdir -p /usr/local/autotest/site-packages
 
 RUN ln -sf /usr/local/bin/py* /usr/bin
 
@@ -60,41 +60,43 @@ RUN apt-get update && apt-get install --no-install-recommends -yq  \
     libssl-dev \
     mariadb-client \
     python-pip \
-    zlib1g-dev
+    zlib1g-dev \
+    python3.7-distutils
 
 COPY src/dockerfiles/autotest/requirements.txt ./
 
-RUN python2.7 -m pip install --upgrade pip
-RUN python2.7 -m pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
 WORKDIR /
 
 COPY --chown=moblab --from=source /chromite /chromite
 COPY src/dockerfiles/autotest/setup_chromite.py /
-RUN python2.7 /setup_chromite.py install
+RUN python3 /setup_chromite.py install
 
 RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev
 RUN apt autoremove -yq
 RUN apt-get clean
 
 WORKDIR /wheels
-COPY --from=common /wheel/*py2* .
+COPY --from=common /wheel/*py3* .
 RUN pip install *.whl
 RUN rm -rf /wheels
 
 WORKDIR /shadow_config
 COPY --chown=moblab src/dockerfiles/autotest/shadow_config.ini .
 RUN chmod uog+rw ./shadow_config.ini
-RUN ln -s /shadow_config/shadow_config.ini /moblab/third_party/autotest/shadow_config.ini
+RUN ln -s /shadow_config/shadow_config.ini /usr/local/autotest/shadow_config.ini
 
-RUN ln -s /moblab/third_party/autotest /usr/local/autotest
+#RUN ln -s /usr/local/autotest /usr/local/autotest
+
 RUN ln -s /chromite /usr/local/autotest/site-packages/chromite
 
-RUN mkdir -p /moblab/third_party/autotest/logs
-RUN mkdir -p /moblab/third_party/autotest/results
-RUN mkdir -p /moblab/third_party/autotest/leases
-RUN mkdir -p /moblab/third_party/autotest/containers
+RUN mkdir -p /usr/local/autotest/logs
+RUN mkdir -p /usr/local/autotest/results
+RUN mkdir -p /usr/local/autotest/leases
+RUN mkdir -p /usr/local/autotest/containers
 
-RUN chown -R moblab:moblab /moblab/third_party/autotest
+RUN chown -R moblab:moblab /usr/local/autotest
 
-ENV PYTHONPATH=/moblab/third_party/autotest
+ENV PYTHONPATH=/usr/local/autotest:/usr/local/autotest/site-packages

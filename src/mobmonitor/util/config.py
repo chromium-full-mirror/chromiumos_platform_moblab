@@ -16,7 +16,7 @@ class Config:
     SHADOW_CONFIG = "/usr/local/autotest/shadow_config.ini"
 
     def __init__(self):
-        self.config = configparser.ConfigParser()
+        self.config = configparser.RawConfigParser()
         self.config.read(
             [self.GLOBAL_CONFIG, self.MOBLAB_CONFIG, self.SHADOW_CONFIG]
         )

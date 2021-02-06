@@ -10,8 +10,8 @@ ARG LABEL=release
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
 
-RUN ln -s /usr/local/lib/python2.7/site-packages/* \
-    /moblab/third_party/autotest/site-packages
+RUN ln -s /usr/local/lib/python3.7/site-packages/* \
+    /usr/local/autotest/site-packages
 
 COPY host_scheduler.sh /
 RUN chmod uog+rx /host_scheduler.sh

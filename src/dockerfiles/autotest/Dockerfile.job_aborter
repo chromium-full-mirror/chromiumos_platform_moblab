@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq  \
 COPY job_aborter.sh /
 RUN chmod uog+rx /job_aborter.sh
 
-RUN ln -s /usr/local/lib/python2.7/site-packages/* /moblab/third_party/autotest/site-packages
+RUN ln -s /usr/local/lib/python3.7/site-packages/* /usr/local/autotest/site-packages
 
 RUN apt purge -yq python-pip
 RUN apt autoremove -yq
@@ -26,6 +26,6 @@ RUN apt-get clean
 
 RUN ln -sf /usr/local/bin/py* /usr/bin
 
-ENV PYTHONPATH=/moblab/third_party/autotest:/usr/local/autotest/venv:/moblab/third_party/autotest/site-packages
+ENV PYTHONPATH=/usr/local/autotest:/usr/local/autotest/venv:/usr/local/autotest/site-packages
 
 CMD ["/job_aborter.sh"]

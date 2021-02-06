@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     unzip \
     wget \
     iputils-ping \
+    libusb-1.0-0 \
     psmisc
 
 # Install the google cloud sdk

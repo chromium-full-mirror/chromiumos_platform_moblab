@@ -28,10 +28,10 @@ RUN setcap cap_net_raw+ep /bin/ping
 COPY monitor_db.sh /
 RUN chmod uog+rx /monitor_db.sh
 
-RUN ln -s /usr/local/lib/python2.7/site-packages/* /moblab/third_party/autotest/site-packages
+RUN ln -s /usr/local/lib/python3.7/site-packages/* /usr/local/autotest/site-packages
 
 COPY --from=lucifer /usr/bin/lucifer /usr/bin/lucifer
-COPY --chown=moblab --from=lucifer /*_pb* /moblab/third_party/autotest/utils/side_effects/proto/
+COPY --chown=moblab --from=lucifer /*_pb*  /usr/local/autotest/utils/side_effects/proto/
 
 # Need to be in docker group to use docker API
 RUN addgroup --gid 412 docker
@@ -44,5 +44,15 @@ RUN apt-get clean
 RUN ln -sf /usr/local/bin/py* /usr/bin
 
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+ENV PYTHONPATH=/usr/local/autotest/venv:/usr/local/autotest:/usr/local/autotest/site-packages
+
+# Some python files (control files) out of our control still have autotest_lib
+# link it back to the /usr/local/autotest directory to effectivly remove
+# autotest_lib.
+# Some other file under our control stil have autotest_lib but because they
+# are pickled and sent to the DUT where the code expects autotest_lib they
+# autotest_lib has to remain in those files although it is a noop in our code.
+RUN ln -s /usr/local/autotest /usr/local/autotest/autotest_lib
 
 CMD ["/monitor_db.sh"]
