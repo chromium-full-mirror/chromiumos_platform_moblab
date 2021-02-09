@@ -213,7 +213,7 @@ class UserCleanup(PeriodicCleanup):
         max_at_once = scheduler_config.config.reverify_max_hosts_at_once
         if (max_at_once > 0 and len(hosts) > max_at_once):
             return random.sample(hosts, max_at_once)
-        return sorted(hosts)
+        return hosts
 
 
     def _reverify_dead_hosts(self):
