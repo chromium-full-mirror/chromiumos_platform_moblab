@@ -7,6 +7,7 @@
 
 import logging
 import grpc
+import grpc.aio
 
 from moblab_common.proto import hostservice_pb2
 from moblab_common.proto import hostservice_pb2_grpc
@@ -253,8 +254,51 @@ class HostServicesConnector(object):
             logging.exception("Error getting version number")
             raise HostServicesException("Error getting version number")
 
+
+class AsyncHostServicesConnector(object):
+    """Abstract away the server connect/disconnect/host/port details."""
+
+    async_stub = None
+    async_channel = None
+
     @classmethod
-    def get_disk_stats(cls):
+    def connect(cls):
+        """Establish a connection to the grpc server.
+
+        The connection is cached in the class variables channel and stub.
+
+        Raises:
+            HostServicesException: If there are issues connecting to the
+                server.
+        """
+        if not cls.async_channel or not cls.async_stub:
+            cls.async_channel = grpc.aio.insecure_channel(DEFAULT_SERVER)
+            if cls.async_channel:
+                cls.async_stub = hostservice_pb2_grpc.MoblabHostServiceStub(
+                    cls.async_channel
+                )
+                if not cls.async_stub:
+                    raise HostServicesException(
+                        "Unable to connect to server %s" % DEFAULT_SERVER
+                    )
+            else:
+                raise HostServicesException(
+                    "No server found %s" % DEFAULT_SERVER
+                )
+
+    @classmethod
+    def disconnect(cls):
+        """Clean up the cached connection, typically done on failure.
+
+        If there cached variables are set to None then the connect function
+        will attempt to re-establish the connection with the server.
+        """
+        # Invalidate the cached connection.
+        cls.async_channel = None
+        cls.async_stub = None
+
+    @classmethod
+    async def get_disk_stats(cls):
         """Get the disk usage information.
 
         Raises:
@@ -267,7 +311,7 @@ class HostServicesConnector(object):
         """
         cls.connect()
         try:
-            return cls.stub.get_disk_usage_stats(empty_pb2.Empty())
+            return cls.async_stub.get_disk_usage_stats(empty_pb2.Empty())
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error getting disk usage statistics")

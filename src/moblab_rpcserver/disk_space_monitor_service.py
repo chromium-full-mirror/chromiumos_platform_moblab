@@ -5,7 +5,7 @@
 import logging
 import asyncio
 
-from moblab_common.host_connector import HostServicesConnector
+from moblab_common.host_connector import AsyncHostServicesConnector
 from moblab_common.host_connector import HostServicesException
 
 from host_scheduler_pause_service import HostSchedulerPauseService
@@ -36,13 +36,13 @@ class DiskSpaceMonitorService:
             await asyncio.sleep(30)
             self._check_disk_space_threshold()
 
-    def _check_disk_space_threshold(self):
+    async def _check_disk_space_threshold(self):
         """Pauses host scheduler if min available space requirement
         is not met, otherwise resumes the scheduler.
         """
         disk_usage = None
         try:
-            disk_usage = HostServicesConnector.get_disk_stats()
+            disk_usage = await AsyncHostServicesConnector.get_disk_stats()
             logging.debug("Disk usage: %s", disk_usage)
 
         except HostServicesException:
