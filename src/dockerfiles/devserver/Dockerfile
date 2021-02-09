@@ -21,7 +21,7 @@ WORKDIR /devserver-src
 RUN ls /devserver-src/dev-util
 ######################################################################
 
-FROM ${BASE_REGISTRY_URI}/debian:buster-slim as run
+FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster as run
 
 COPY --from=source /devserver-src /devserver-src
 COPY --from=source /chromite /chromite
@@ -34,7 +34,6 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
         gcc-multilib \
         openssh-server \
         python-dev procps \
-        python3 \
         python3-dev \
         python3-distutils \
         sudo \
@@ -45,20 +44,17 @@ RUN mkdir -p /config/.ssh/
 COPY authorized_keys /config/.ssh/
 RUN echo "AuthorizedKeysFile      /config/.ssh/authorized_keys" >> /etc/ssh/sshd_config
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
-
 COPY requirements.txt ./
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
-RUN python -m pip install --upgrade pip
-RUN python -m pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 ENV DESTDIR="/"
 
 WORKDIR /
 COPY setup_chromite.py /
-RUN python -m pip install setuptools
+RUN pip install setuptools
 RUN python /setup_chromite.py install
 
 RUN apt purge -yq gcc-multilib

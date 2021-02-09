@@ -13,20 +13,20 @@ FROM ${REGISTRY_URI}/gwtcompiler:${LABEL} as build
 RUN apt-get update && apt-get install --no-install-recommends -yq  \
     python-pip
 
-RUN python2.7 -m pip install --upgrade pip
-RUN python2.7 -m pip install six
+RUN pip install --upgrade pip
+RUN pip install six
 
-COPY ./third_party/autotest/ /moblab/third_party/autotest/
-RUN mkdir -p /usr/local/autotest
-RUN ln -s /moblab/third_party/autotest/* /usr/local/autotest
+COPY ./third_party/autotest/ /usr/local/autotest/
+#RUN mkdir -p /usr/local/autotest
+#RUN ln -s /usr/local/autotest/* /usr/local/autotest
 
-ENV PYTHONPATH=/moblab/third_party/autotest:/usr/local/lib/python2.7/site-packages
+ENV PYTHONPATH=/usr/local/autotest:/usr/local/lib/python3.7/site-packages
 
 RUN /usr/local/autotest/utils/compile_gwt_clients.py -a -e"-Djava.util.prefs.userRoot=/tmp"
 
-RUN rm -rf /moblab/third_party/autotest/frontend/client/www/*.old
+RUN rm -rf /usr/local/autotest/frontend/client/www/*.old
 
 ######################################################################
 FROM ${BASE_REGISTRY_URI}/debian:buster-slim
 
-COPY --from=build /moblab/third_party/autotest/frontend/client/www/ /www/
+COPY --from=build /usr/local/autotest/frontend/client/www/ /www/

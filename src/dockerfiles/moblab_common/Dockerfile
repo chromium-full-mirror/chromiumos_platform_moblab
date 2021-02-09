@@ -28,26 +28,6 @@ RUN python3 /setup.py bdist_wheel
 WORKDIR /wheel
 RUN cp /src/moblab_common/dist/* .
 
-######################################################################
-# Python 2 build stage
-
-FROM ${BASE_REGISTRY_URI}/python:2-buster as python2-build
-
-WORKDIR /src/tools/
-COPY src/tools/create-moblab-id.py .
-
-WORKDIR /src/moblab_common
-COPY src/moblab_common/ .
-
-
-COPY src/dockerfiles/moblab_common/setup.py /
-RUN python2 -m pip install --upgrade pip
-RUN python2 -m pip install --upgrade setuptools wheel
-RUN python2 /setup.py bdist_wheel
-
-WORKDIR /wheel
-RUN ls /src/moblab_common/
-RUN cp /src/moblab_common/dist/* .
 
 ######################################################################
 # Unit testing stage
@@ -74,4 +54,3 @@ FROM ${BASE_REGISTRY_URI}/debian:buster-slim
 WORKDIR /wheel
 
 COPY --from=python3-build /wheel/* .
-COPY --from=python2-build /wheel/* .

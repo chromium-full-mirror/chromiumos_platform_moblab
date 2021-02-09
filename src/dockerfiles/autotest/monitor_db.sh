@@ -22,6 +22,4 @@ while [ -z "${ACL_GROUP_AVAILABLE}" ]; do
     -e "select count(*) from afe_acl_groups")
 done
 
-export PYTHONPATH=/usr/local/autotest/venv:/usr/local/autotest
-
 /usr/local/autotest/scheduler/monitor_db.py --production /usr/local/autotest/results

@@ -163,14 +163,14 @@ services:
 
     volumes:
       - logs:/var/log/moblab
-      - logs:/moblab/third_party/autotest/logs
+      - logs:/usr/local/autotest/logs
       - /etc/lsb-release:/etc/lsb-release:ro
       - results:/usr/local/autotest/results
       - lucifer_leases:/usr/local/autotest/leases
       - shadowconfig:/shadow_config
       - moblab_home:/home/moblab
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      - containers:/moblab/third_party/autotest/containers
+      - containers:/usr/local/autotest/containers
 
     networks:
       - moblab
@@ -207,7 +207,7 @@ services:
 
     volumes:
       - logs:/var/log/moblab
-      - logs:/moblab/third_party/autotest/logs
+      - logs:/usr/local/autotest/logs
       - /etc/lsb-release:/etc/lsb-release:ro
 
     networks:
@@ -224,7 +224,7 @@ services:
 
     volumes:
       - logs:/var/log/moblab
-      - logs:/moblab/third_party/autotest/logs
+      - logs:/usr/local/autotest/logs
       - /etc/lsb-release:/etc/lsb-release:ro
       - lucifer_leases:/usr/local/autotest/leases
 

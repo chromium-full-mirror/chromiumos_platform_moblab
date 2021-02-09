@@ -25,11 +25,11 @@ CONTAINERS=(
     nginx:alpine
     node:15-buster
     node:15
-    python:2-buster
-    python:2.7-slim-buster
+    python:3.7-buster
+    python:3.7-slim-buster
     python:3.8-buster
     python:3.8-slim-buster
-v2tec/watchtower:latest)
+    v2tec/watchtower:latest)
 
 for container in ${CONTAINERS[@]}
 do
