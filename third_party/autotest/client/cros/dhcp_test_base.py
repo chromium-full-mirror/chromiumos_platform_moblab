@@ -11,9 +11,9 @@ ethernet interface to shill.  Child classes should override test_body() with the
 logic of their test.  The plumbing of DhcpTestBase is accessible via properties.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 from six.moves import filter

@@ -155,7 +155,7 @@ def _dbus2string(raw_arg):
         else:
             return 'boolean:false'
 
-    for prim_type, prefix in int_map.iteritems():
+    for prim_type, prefix in int_map.items():
         if isinstance(raw_arg, prim_type):
             return prefix + str(raw_arg)
 

@@ -3,17 +3,17 @@
 # found in the LICENSE file.
 
 from distutils import version
-import cStringIO
-import HTMLParser
-import httplib
+import io
+import html.parser
+import http.client
 import json
 import logging
 import multiprocessing
 import os
 import re
 import time
-import urllib2
-import urlparse
+import urllib.request, urllib.error, urllib.parse
+import urllib.parse
 
 from client.bin import utils as bin_utils
 from client.common_lib import android_utils
@@ -136,13 +136,14 @@ class DevServerFailToLocateException(Exception):
     pass
 
 
-class MarkupStripper(HTMLParser.HTMLParser):
+class MarkupStripper(html.parser.HTMLParser):
     """HTML parser that strips HTML tags, coded characters like &amp;
 
     Works by, basically, not doing anything for any tags, and only recording
     the content of text nodes in an internal data structure.
     """
     def __init__(self):
+        super().__init__()
         self.reset()
         self.fed = []
 
@@ -168,7 +169,7 @@ def _strip_http_message(message):
     try:
         strip.feed(message.decode('utf_32'))
     except UnicodeDecodeError:
-        strip.feed(message)
+        strip.feed(message.decode('utf-8'))
     return strip.get_data()
 
 
@@ -229,7 +230,7 @@ def _reverse_lookup_from_config(address):
     @param address: IP address string
     @returns: hostname string, or original input if not found
     """
-    for hostname, addr in _get_hostname_addr_map().iteritems():
+    for hostname, addr in _get_hostname_addr_map().items():
         if addr == address:
             return hostname
     return address
@@ -265,7 +266,7 @@ def remote_devserver_call(timeout_min=DEVSERVER_IS_STAGING_RETRY_MIN,
     def inner_decorator(method):
         label = method.__name__ if hasattr(method, '__name__') else None
         def metrics_wrapper(*args, **kwargs):
-            @retry.retry((urllib2.URLError, error.CmdError,
+            @retry.retry((urllib.error.URLError, error.CmdError,
                           DevServerOverloadException),
                          timeout_min=timeout_min,
                          exception_to_raise=exception_to_raise,
@@ -274,7 +275,7 @@ def remote_devserver_call(timeout_min=DEVSERVER_IS_STAGING_RETRY_MIN,
                 """This wrapper actually catches the HTTPError."""
                 try:
                     return method(*args, **kwargs)
-                except urllib2.HTTPError as e:
+                except urllib.error.HTTPError as e:
                     error_markup = e.read()
                     raise DevServerException(_strip_http_message(error_markup))
 
@@ -310,7 +311,7 @@ def get_hostname(url):
     @param url: a Url string
     @return: a hostname string
     """
-    return urlparse.urlparse(url).hostname
+    return urllib.parse.urlparse(url).hostname
 
 
 def get_resolved_hostname(url):
@@ -392,7 +393,7 @@ class DevServer(object):
 
         @return A devserver url, e.g., http://127.0.0.10:8080
         """
-        res = urlparse.urlparse(url)
+        res = urllib.parse.urlparse(url)
         if res.netloc:
             return res.scheme + '://' + res.netloc
 
@@ -431,7 +432,7 @@ class DevServer(object):
             return cls.run_call(call, timeout=timeout_min*60)
 
         try:
-            return json.load(cStringIO.StringIO(get_load(devserver=devserver)))
+            return json.load(io.StringIO(get_load(devserver=devserver)))
         except Exception as e:
             logging.error('Devserver call failed: "%s", timeout: %s seconds,'
                           ' Error: %s', call, timeout_min * 60, e)
@@ -551,7 +552,7 @@ class DevServer(object):
                 kwargs.pop('archive_url', None))
         kwargs.update(archive_url_args)
 
-        argstr = '&'.join(map(lambda x: "%s=%s" % x, kwargs.iteritems()))
+        argstr = '&'.join(["%s=%s" % x for x in iter(kwargs.items())])
         return "%(host)s/%(method)s?%(argstr)s" % dict(
                 host=host, method=method, argstr=argstr)
 
@@ -600,12 +601,12 @@ class DevServer(object):
         """
         if timeout is not None:
             return utils.urlopen_socket_timeout(
-                    call, timeout=timeout).read()
+                    call, timeout=timeout).read().decode("utf-8")
         elif readline:
-            response = urllib2.urlopen(call)
-            return [line.rstrip() for line in response]
+            response = urllib.request.urlopen(call)
+            return [line.decode("utf-8").rstrip() for line in response]
         else:
-            return urllib2.urlopen(call).read()
+            return urllib.request.urlopen(call).read().decode("utf-8")
 
 
     @staticmethod
@@ -846,8 +847,8 @@ class CrashServer(DevServer):
             if request.status_code == requests.codes.OK:
                 return request.text
 
-        error_fd = cStringIO.StringIO(request.text)
-        raise urllib2.HTTPError(
+        error_fd = io.StringIO(request.text)
+        raise urllib.error.HTTPError(
                 call, request.status_code, request.text, request.headers,
                 error_fd)
 
@@ -1053,10 +1054,10 @@ class ImageServerBase(DevServer):
                 result = self.run_call(call)
                 logging.debug('whether artifact is staged: %r', result)
                 return result == 'True'
-            except urllib2.HTTPError as e:
+            except urllib.error.HTTPError as e:
                 error_markup = e.read()
                 raise DevServerException(_strip_http_message(error_markup))
-            except urllib2.URLError as e:
+            except urllib.error.URLError as e:
                 # Could be connection issue, retry it.
                 # For example: <urlopen error [Errno 111] Connection refused>
                 logging.error('URLError happens in is_stage: %r', e)
@@ -1092,7 +1093,7 @@ class ImageServerBase(DevServer):
         @raise DevServerException upon any return code that's expected_response.
 
         """
-        call = self.build_call(call_name, async=True, **kwargs)
+        call = self.build_call(call_name, **kwargs)
         try:
             response = self.run_call(call)
             logging.debug('response for RPC: %r', response)
@@ -1101,7 +1102,7 @@ class ImageServerBase(DevServer):
                               'will retry in 30 seconds')
                 time.sleep(30)
                 raise DevServerOverloadException()
-        except httplib.BadStatusLine as e:
+        except http.client.BadStatusLine as e:
             logging.error(e)
             raise DevServerException('Received Bad Status line, Devserver %s '
                                      'might have gone down while handling '
@@ -1313,11 +1314,11 @@ class ImageServerBase(DevServer):
         else:
             build_path = build
             kwargs['build'] = build
-        call = self.build_call('locate_file', async=False, **kwargs)
+        call = self.build_call('locate_file', **kwargs)
         try:
             file_path = self.run_call(call)
             return os.path.join(self.url(), 'static', build_path, file_path)
-        except httplib.BadStatusLine as e:
+        except http.client.BadStatusLine as e:
             logging.error(e)
             raise DevServerException('Received Bad Status line, Devserver %s '
                                      'might have gone down while handling '
@@ -1375,7 +1376,7 @@ class ImageServerBase(DevServer):
         build = self.translate(build)
         call = self.build_call('list_suite_controls', build=build,
                                suite_name=suite_name)
-        return json.load(cStringIO.StringIO(self.run_call(call)))
+        return json.load(io.StringIO(self.run_call(call)))
 
 
 class ImageServer(ImageServerBase):
@@ -1535,7 +1536,7 @@ class ImageServer(ImageServerBase):
         call = self.build_call('setup_telemetry', archive_url=archive_url)
         try:
             response = self.run_call(call)
-        except httplib.BadStatusLine as e:
+        except http.client.BadStatusLine as e:
             logging.error(e)
             raise DevServerException('Received Bad Status line, Devserver %s '
                                      'might have gone down while handling '

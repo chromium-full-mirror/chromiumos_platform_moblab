@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import argparse
 
@@ -36,7 +36,7 @@ def print_temperature(temperature_type):
     print(TEMPERATURE_TYPE.get(temperature_type)())
 
 if args.temperature_type == 'all':
-    for temperature_type in TEMPERATURE_TYPE.keys():
+    for temperature_type in list(TEMPERATURE_TYPE.keys()):
         print_temperature(temperature_type)
 else:
     print_temperature(args.temperature_type)

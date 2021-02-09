@@ -8,7 +8,7 @@ import logging
 import os
 import re
 import shutil
-import urlparse
+import urllib.parse
 
 from datetime import datetime, timedelta
 from xml.etree import ElementTree
@@ -219,7 +219,7 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
 
         """
         archive_url, _, filename = payload_uri.rpartition('/')
-        build_name = urlparse.urlsplit(archive_url).path.strip('/')
+        build_name = urllib.parse.urlsplit(archive_url).path.strip('/')
         filenames = [filename]
         if properties_file:
             filenames.append(filename + '.json')
@@ -245,7 +245,7 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         """
         autotest_devserver = dev_server.ImageServer.resolve(
             test_conf['target_payload_uri'], self._host.hostname)
-        devserver_hostname = urlparse.urlparse(
+        devserver_hostname = urllib.parse.urlparse(
             autotest_devserver.url()).hostname
         logging.info('Devserver chosen for this run: %s', devserver_hostname)
         return autotest_devserver
@@ -638,7 +638,7 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         # build_name = dev-channel/samus/9334.0.0
         # payload_file = payloads/blah.bin
         build_name = payload_uri[:payload_uri.index('payloads/')]
-        build_name = urlparse.urlsplit(build_name).path.strip('/')
+        build_name = urllib.parse.urlsplit(build_name).path.strip('/')
         payload_file = payload_uri[payload_uri.index('payloads/'):]
 
         logging.debug('Extracted build_name: %s, payload_file: %s from %s.',
@@ -716,7 +716,7 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         except Exception as e:
             raise error.TestFail('Error reading the hostlog file: %s' % e)
 
-        for expected, actual in itertools.izip_longest(expected_events,
+        for expected, actual in itertools.zip_longest(expected_events,
                                                        hostlog_events):
             err_msg = self._verify_event_with_timeout(expected, actual)
             if err_msg is not None:

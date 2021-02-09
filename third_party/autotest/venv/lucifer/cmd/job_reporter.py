@@ -12,9 +12,9 @@ job_reporter is a thin wrapper around lucifer and only updates the
 Autotest database according to status events.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import atexit
 import argparse

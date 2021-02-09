@@ -15,9 +15,9 @@ Decoding class can be invoked independently.
 
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import json
 import logging
@@ -266,7 +266,7 @@ def fio_parse_dict(d, prefix):
         return {}
 
     results = {}
-    for k, v in d.items():
+    for k, v in list(d.items()):
 
         # remove >, >=, <, <=
         for c in '>=<':

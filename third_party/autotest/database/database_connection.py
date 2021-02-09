@@ -233,7 +233,7 @@ class DatabaseConnection(object):
     def _get_backend(self, db_type):
         if db_type not in _BACKEND_MAP:
             raise ValueError('Invalid database type: %s, should be one of %s' %
-                             (db_type, ', '.join(_BACKEND_MAP.keys())))
+                             (db_type, ', '.join(list(_BACKEND_MAP.keys()))))
         backend_class = _BACKEND_MAP[db_type]
         return backend_class()
 
@@ -264,8 +264,8 @@ class DatabaseConnection(object):
                 if self._reached_max_attempts(num_attempts):
                     raise
                 traceback.print_exc()
-                print ("Can't connect to database; reconnecting in %s sec" %
-                       self.reconnect_delay_sec)
+                print(("Can't connect to database; reconnecting in %s sec" %
+                       self.reconnect_delay_sec))
                 time.sleep(self.reconnect_delay_sec)
                 self.disconnect()
 
@@ -296,7 +296,7 @@ class DatabaseConnection(object):
         passed, will override self.reconnect_enabled.
         """
         if self.debug:
-            print 'Executing %s, %s' % (query, parameters)
+            print('Executing %s, %s' % (query, parameters))
         # _connect_backend() contains a retry loop, so don't loop here
         try:
             results = self._backend.execute(query, parameters)

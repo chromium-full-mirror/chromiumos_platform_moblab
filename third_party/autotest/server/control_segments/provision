@@ -5,7 +5,7 @@
 import datetime
 import re
 
-from client.bin import sysinfo
+from autotest_lib.client.bin import sysinfo
 from client.cros import constants
 from server import utils
 from server.cros import provision

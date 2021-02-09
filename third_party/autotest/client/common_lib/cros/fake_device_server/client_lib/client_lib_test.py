@@ -24,7 +24,7 @@ import logging
 import sys
 from six.moves import urllib
 
-import commands
+import subprocess
 import devices
 import oauth_helpers
 import registration
@@ -55,7 +55,7 @@ def main(args):
 
     parsed_args = parse_args(args)
     if parsed_args.auth_code == 'URL':
-        print(oauth_helpers.get_oauth2_auth_url(CLIENT_ID))
+        print((oauth_helpers.get_oauth2_auth_url(CLIENT_ID)))
         return 0
     elif parsed_args.auth_code:
         server_url, api_key = SERVER_URL, API_KEY
@@ -71,7 +71,7 @@ def main(args):
             'test_device', 'xmpp', oauth_client_id=CLIENT_ID,
             base=base_reboot_command)
     new_device_id = finalized_ticket['deviceDraft']['id']
-    print('Registered new device', finalized_ticket)
+    print(('Registered new device', finalized_ticket))
 
     # TODO(sosa): Do better. Change this to use fake auth server when it exists.
     if not parsed_args.auth_code:
@@ -95,7 +95,7 @@ def main(args):
 
 
     # TODO(sosa): Figure out why I can't send commands.
-    c_client = commands.CommandsClient(server_url=server_url,
+    c_client = subprocess.CommandsClient(server_url=server_url,
                                        api_key=api_key,
                                        access_token=robot_token)
     command_dict = {'base': {'reboot': {}}}
@@ -129,5 +129,5 @@ if __name__ == '__main__':
     except urllib.error.HTTPError as e:
         print('Received an HTTPError exception!!!')
         print(e)
-        print(e.read())
+        print((e.read()))
         sys.exit(1)

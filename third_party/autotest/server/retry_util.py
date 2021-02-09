@@ -5,7 +5,7 @@
 
 """Basic infrastructure for implementing retries."""
 
-from __future__ import print_function
+
 
 import functools
 import random
@@ -649,7 +649,7 @@ def _run(cmd, print_cmd=True, stdout=None, stderr=None,
       wrapper += chroot_args
 
     if extra_env:
-      wrapper.extend('%s=%s' % (k, v) for k, v in extra_env.items())
+      wrapper.extend('%s=%s' % (k, v) for k, v in list(extra_env.items()))
 
     cmd = wrapper + ['--'] + cmd
 
@@ -813,7 +813,7 @@ class CalledProcessError(subprocess.CalledProcessError):
       A summary string for this result.
     """
     items = [
-        u'return code: %s; command: %s' % (
+        'return code: %s; command: %s' % (
             self.returncode, self.cmdstr),
     ]
     if stderr and self.stderr:
@@ -831,7 +831,7 @@ class CalledProcessError(subprocess.CalledProcessError):
       if isinstance(msg, six.binary_type):
         msg = msg.decode('utf-8', 'replace')
       items.append(msg)
-    return u'\n'.join(items)
+    return '\n'.join(items)
 
   def __str__(self):
     if sys.version_info.major < 3:

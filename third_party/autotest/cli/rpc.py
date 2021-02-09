@@ -2,7 +2,7 @@
 # Copyright 2008 Google Inc. All Rights Reserved.
 #
 
-from __future__ import print_function
+
 
 import os
 from frontend.afe import rpc_client_lib

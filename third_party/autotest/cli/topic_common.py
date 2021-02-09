@@ -55,7 +55,7 @@ High Level Algorithm:
    atest.print_*() methods.
 """
 
-from __future__ import print_function
+
 
 import logging
 import optparse
@@ -64,7 +64,7 @@ import re
 import sys
 import textwrap
 import traceback
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 import common
 
@@ -359,7 +359,7 @@ class atest(object):
         # even if they contain the 'item'
         if item and item in errmsg:
             errmsg = errmsg.replace(item, FAIL_TAG)
-        if self.failed.has_key(what_failed):
+        if what_failed in self.failed:
             self.failed[what_failed].setdefault(errmsg, set()).add(item)
         else:
             self.failed[what_failed] = {errmsg: set([item])}
@@ -370,9 +370,9 @@ class atest(object):
         """
         if not self.failed:
             return 0
-        for what_failed in self.failed.keys():
+        for what_failed in list(self.failed.keys()):
             print(what_failed + ':', file=sys.stderr)
-            for (errmsg, items) in self.failed[what_failed].iteritems():
+            for (errmsg, items) in self.failed[what_failed].items():
                 if len(items) == 0:
                     print(errmsg, file=sys.stderr)
                 elif items == set(['']):
@@ -436,8 +436,8 @@ class atest(object):
         self.parser.add_option('--log-level',
                                help=('Set the logging level. Must be one of %s.'
                                      ' Default to ERROR' %
-                                     LOGGING_LEVEL_MAP.keys()),
-                               choices=LOGGING_LEVEL_MAP.keys(),
+                                     list(LOGGING_LEVEL_MAP.keys())),
+                               choices=list(LOGGING_LEVEL_MAP.keys()),
                                default='ERROR',
                                dest='log_level')
 
@@ -558,7 +558,7 @@ class atest(object):
         while retry:
             try:
                 return self.afe.run(op, **data)
-            except urllib2.URLError as err:
+            except urllib.error.URLError as err:
                 if hasattr(err, 'reason'):
                     if 'timed out' not in err.reason:
                         self.invalid_syntax('Invalid server name %s: %s' %
@@ -589,6 +589,7 @@ class atest(object):
                 # urllib & httplib, so catch them all.
                 self.failure(full_error, item=item,
                              what_failed='Operation %s failed' % op)
+                logging.exception(op)
                 raise CliError(str(full_error))
 
 
@@ -698,7 +699,7 @@ class atest(object):
         if line_before:
             print()
         print(title)
-        for key, value in items.items():
+        for key, value in list(items.items()):
             print('%s : %s' % (key, value))
 
 
@@ -830,7 +831,7 @@ class atest(object):
         if message:
             print(message)
         sys.stdout.write('Continue? [y/N] ')
-        read = raw_input().lower()
+        read = input().lower()
         if read == 'y':
             return True
         else:

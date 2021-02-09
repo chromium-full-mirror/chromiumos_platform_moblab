@@ -4,9 +4,9 @@
 tune2fs or xfs_growfs is called according to the filesystem. The results,
 filesystem tunables, are parsed and mapped to corresponding mkfs options.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import os, re, tempfile
 

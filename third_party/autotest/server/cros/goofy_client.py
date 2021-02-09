@@ -381,7 +381,7 @@ class GoofyProxy(object):
                                         'error in your test_list.')
 
 
-        for current_suite in test_map.keys():
+        for current_suite in list(test_map.keys()):
             logging.info('Processing suite %s', current_suite)
 
             result = self._synchronous_run_suite(current_suite)

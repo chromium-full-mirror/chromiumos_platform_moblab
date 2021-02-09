@@ -20,7 +20,7 @@ See topic_common.py for a High Level Design and Algorithm.
 
 """
 
-from __future__ import print_function
+
 
 import common
 import json
@@ -537,7 +537,7 @@ class BaseHostModCreate(host):
         @param host: hostname
         @param attributes: attribute dictionary
         """
-        for attr, value in self.attributes.iteritems():
+        for attr, value in self.attributes.items():
             self.execute_rpc('set_host_attribute', attribute=attr,
                              value=value, hostname=host)
 
@@ -559,7 +559,7 @@ class host_mod(BaseHostModCreate):
                                help=('Unlock the lock with the lock-id. %s'),
                                default=None)
         self.parser.add_option('-f', '--force_modify_locking',
-                               help='Forcefully lock\unlock a host',
+                               help='Forcefully lock\\unlock a host',
                                action='store_true')
         self.parser.add_option('--remove_acls',
                                help=('Remove all active acls. %s'),

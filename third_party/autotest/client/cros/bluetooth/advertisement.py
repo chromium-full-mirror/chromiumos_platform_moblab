@@ -10,9 +10,9 @@ Much of this module refers to the code of test/example-advertisement in
 bluez project.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 import dbus
 import dbus.mainloop.glib
 import dbus.service
@@ -66,13 +66,13 @@ class Advertisement(dbus.service.Object):
         #     https://dbus.freedesktop.org/doc/dbus-specification.html
         self.manufacturer_data = dbus.Dictionary({}, signature='qv')
         manufacturer_data = advertisement_data.get('ManufacturerData', {})
-        for key, value in manufacturer_data.items():
+        for key, value in list(manufacturer_data.items()):
             self.manufacturer_data[int(key, 16)] = dbus.Array(value,
                                                               signature='y')
 
         self.service_data = dbus.Dictionary({}, signature='sv')
         service_data = advertisement_data.get('ServiceData', {})
-        for uuid, data in service_data.items():
+        for uuid, data in list(service_data.items()):
             self.service_data[uuid] = dbus.Array(data, signature='y')
 
         self.include_tx_power = advertisement_data.get('IncludeTxPower')
@@ -126,7 +126,7 @@ class Advertisement(dbus.service.Object):
         # re-mapped here before the advertisement is registered.
         if self.scan_response is not None:
             scan_rsp = dbus.Dictionary({}, signature='yv')
-            for key, value in self.scan_response.items():
+            for key, value in list(self.scan_response.items()):
                 scan_rsp[int(key, 16)] = dbus.Array(value, signature='y')
 
             properties['ScanResponseData'] = scan_rsp

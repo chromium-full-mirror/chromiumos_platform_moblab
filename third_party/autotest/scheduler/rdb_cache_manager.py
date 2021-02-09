@@ -84,6 +84,7 @@ import common
 from client.common_lib import utils
 from client.common_lib.global_config import global_config
 from scheduler import rdb_utils
+from functools import reduce
 
 
 MEMOIZE_KEY = 'memoized_hosts'
@@ -117,9 +118,8 @@ def memoize_hosts(func):
     return cache
 
 
-class CacheBackend(object):
+class CacheBackend(object, metaclass=abc.ABCMeta):
     """Base class for a cache backend."""
-    __metaclass__ = abc.ABCMeta
 
     def set(self, key, value):
         """Set a key.
@@ -296,7 +296,7 @@ class RDBHostCacheManager(object):
                     not key.acls.intersection(h_key.acls)):
                 raise rdb_utils.RDBException('Given key: %s does not match key '
                         'computed from hosts in line: %s' % (key, h_keys))
-        if self._cache_backend.has_key(key):
+        if key in self._cache_backend:
             raise rdb_utils.RDBException('Cannot override a cache line. It '
                     'must be cleared before setting. Key: %s, hosts %s' %
                     (key, line))

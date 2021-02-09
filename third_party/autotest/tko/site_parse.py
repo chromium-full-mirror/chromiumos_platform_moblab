@@ -1,4 +1,4 @@
-#!/usr/bin/python2 -u
+#!/usr/bin/python3 -u
 #
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -97,7 +97,7 @@ class StackTrace(object):
         if not os.path.exists(cache_dir):
             try:
                 os.makedirs(cache_dir)
-            except OSError, e:
+            except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise
         return cache_dir
@@ -215,7 +215,7 @@ def main():
             continue
 
         # Parse failure reason for this test.
-        for t, r in parse_reason(test_dict['testdir']).iteritems():
+        for t, r in parse_reason(test_dict['testdir']).items():
             # Server tests may have subtests which will each have their own
             # reason, so display the test name for the subtest in that case.
             if t != test_name:

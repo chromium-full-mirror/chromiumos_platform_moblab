@@ -150,7 +150,7 @@ class PDTester(chrome_ec.ChromeEC):
             # htctools and servov4 is not updated, fallback to the old path.
             logging.warn('hdctools or servov4 firmware too old, fallback to '
                          'fixed charging voltages.')
-            return self.USBC_CHARGING_VOLTAGES_LEGACY.keys()
+            return list(self.USBC_CHARGING_VOLTAGES_LEGACY.keys())
 
         # insert 0 voltage for sink
         vols = [0]

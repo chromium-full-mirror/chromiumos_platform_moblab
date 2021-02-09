@@ -85,7 +85,7 @@ class ModelValidators(object):
         """
         new_data = dict(data)
         field_dict = cls.get_field_dict()
-        for name, obj in field_dict.iteritems():
+        for name, obj in field_dict.items():
             if data.get(name) is not None:
                 continue
             if obj.default is not dbmodels.fields.NOT_PROVIDED:

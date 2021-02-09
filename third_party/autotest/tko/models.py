@@ -99,7 +99,7 @@ class kernel(object):
 
         """
         key_string = ','.join([base] + hashes)
-        return utils.hash('md5', key_string).hexdigest()
+        return utils.hash('md5', key_string.encode()).hexdigest()
 
 
 class test(object):
@@ -191,7 +191,7 @@ class test(object):
         # Grab test+host attributes from the host keyval.
         host_keyval = cls.parse_host_keyval(job.dir, job.machine)
         attributes.update(dict(('host-%s' % k, v)
-                               for k, v in host_keyval.iteritems()))
+                               for k, v in host_keyval.items()))
 
         if existing_instance:
             def constructor(*args, **dargs):

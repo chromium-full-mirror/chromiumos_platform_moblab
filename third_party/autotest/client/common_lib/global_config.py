@@ -17,7 +17,7 @@ provides access to global configuration file
 import collections
 import os
 import re
-import six.moves.configparser as ConfigParser
+import configparser as ConfigParser
 import sys
 
 from client.common_lib import error

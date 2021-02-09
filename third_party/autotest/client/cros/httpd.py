@@ -66,7 +66,7 @@ class FormHandler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
         # python dicts; you'd be wrong. It raises TypeError if called when it
         # has no keys.
         if form:
-            for field in form.keys():
+            for field in list(form.keys()):
                 field_item = form[field]
                 self.server._form_entries[field] = field_item.value
         path = six.moves.urllib.parse.urlparse(self.path)[2]
@@ -93,7 +93,7 @@ class FormHandler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         # See the note in do_POST about form.keys().
         if form:
-            for field in form.keys():
+            for field in list(form.keys()):
                 field_item = form[field]
                 if field_item.filename:
                     # The field contains an uploaded file

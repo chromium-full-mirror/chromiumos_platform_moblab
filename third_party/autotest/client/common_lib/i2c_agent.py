@@ -64,7 +64,7 @@ class I2cAgent(object):
         logging.info('Attempt to load shared library %s', self.load_lib)
         try:
             return ctypes.cdll.LoadLibrary(self.load_lib)
-        except OSError, e:
+        except OSError as e:
             raise I2cError('Error loading C library %s: %s' %
                             (self.load_lib, e))
         logging.info('Successfully loaded shared library %s', self.load_lib)

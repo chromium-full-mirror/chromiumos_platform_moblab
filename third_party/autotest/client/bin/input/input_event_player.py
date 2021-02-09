@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,8 +12,8 @@
 
 """ Playback input events on a linux input device. """
 
-from __future__ import division
-from __future__ import print_function
+
+
 
 import glob
 import os.path

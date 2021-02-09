@@ -38,7 +38,7 @@ def _log_error(msg):
 
     @param msg: Message string
     """
-    print >> sys.stderr, msg
+    print(msg, file=sys.stderr)
     sys.stderr.flush()  # we want these msgs to show up immediately
 
 
@@ -205,7 +205,7 @@ class db_sql(object):
         while not success:
             try:
                 result = function(*args, **dargs)
-            except driver.OperationalError, e:
+            except driver.OperationalError as e:
                 _log_error("%s; retrying, don't panic yet"
                            % _format_operational_error(e))
                 stop_time = time.time()
@@ -216,7 +216,7 @@ class db_sql(object):
                     try:
                         self._random_delay()
                         self._init_db()
-                    except driver.OperationalError, e:
+                    except driver.OperationalError as e:
                         _log_error('%s; panic now'
                                    % _format_operational_error(e))
             else:
@@ -272,7 +272,7 @@ class db_sql(object):
         if isinstance(where, dict):
             # key/value pairs (which should be equal, or None for null)
             keys, values = [], []
-            for field, value in where.iteritems():
+            for field, value in where.items():
                 quoted_field = self._quote(field)
                 if value is None:
                     keys.append(quoted_field + ' is null')
@@ -280,7 +280,7 @@ class db_sql(object):
                     keys.append(quoted_field + '=%s')
                     values.append(value)
             where_clause = ' and '.join(keys)
-        elif isinstance(where, basestring):
+        elif isinstance(where, str):
             # the exact string
             where_clause = where
             values = []
@@ -399,7 +399,7 @@ class db_sql(object):
         @param data: The insert data.
         @param commit: If commit the transaction .
         """
-        fields = data.keys()
+        fields = list(data.keys())
         refs = ['%s' for field in fields]
         values = [data[field] for field in fields]
         cmd = ('insert into %s (%s) values (%s)' %
@@ -443,7 +443,7 @@ class db_sql(object):
         if commit is None:
             commit = self.autocommit
         cmd = 'update %s ' % table
-        fields = data.keys()
+        fields = list(data.keys())
         data_refs = [self._quote(field) + '=%s' for field in fields]
         data_values = [data[field] for field in fields]
         cmd += ' set ' + ', '.join(data_refs)
@@ -554,7 +554,7 @@ class db_sql(object):
         @param job: The job object.
         @param commit: If commit the transaction .
         """
-        for key, value in job.keyval_dict.iteritems():
+        for key, value in job.keyval_dict.items():
             where = {'job_id': job.job_idx, 'key': key}
             data = dict(where, value=value)
             exists = self.select('id', 'tko_job_keyvals', where=where)
@@ -597,12 +597,12 @@ class db_sql(object):
 
         for i in test.iterations:
             data['iteration'] = i.index
-            for key, value in i.attr_keyval.iteritems():
+            for key, value in i.attr_keyval.items():
                 data['attribute'] = key
                 data['value'] = value
                 self.insert('tko_iteration_attributes', data,
                             commit=commit)
-            for key, value in i.perf_keyval.iteritems():
+            for key, value in i.perf_keyval.items():
                 data['attribute'] = key
                 if math.isnan(value) or math.isinf(value):
                     data['value'] = None
@@ -613,7 +613,7 @@ class db_sql(object):
 
         data = {'test_idx': test_idx}
 
-        for key, value in test.attributes.iteritems():
+        for key, value in test.attributes.items():
             data = {'test_idx': test_idx, 'attribute': key,
                     'value': value}
             try:
@@ -785,7 +785,7 @@ class db_sql(object):
         @param patch: The kernel patch object.
         @param commit: If commit the transaction .
         """
-        print patch.reference
+        print(patch.reference)
         name = os.path.basename(patch.reference)[:80]
         self.insert('tko_patches',
                     {'kernel_idx': kver,

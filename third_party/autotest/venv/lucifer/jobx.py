@@ -15,13 +15,13 @@ they are specialized and the Job class already suffers from method
 bloat.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import os
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from lucifer import autotest
 from lucifer import results
@@ -168,7 +168,7 @@ def _host_keyvals(host):
             platform = label.name
     return {
             'platform': platform,
-            'labels': ','.join(urllib.quote(label.name) for label in labels),
+            'labels': ','.join(urllib.parse.quote(label.name) for label in labels),
     }
 
 

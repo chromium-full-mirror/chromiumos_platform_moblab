@@ -12,9 +12,9 @@ If a lease file is older than a few seconds and is not locked, then its
 owning process should be considered crashed.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import contextlib
 import errno

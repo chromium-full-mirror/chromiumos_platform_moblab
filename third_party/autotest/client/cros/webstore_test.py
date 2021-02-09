@@ -9,9 +9,9 @@ using ChromeDriver. They should inherit from the webstore_test class,
 and should override the run() method.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 import six
@@ -44,7 +44,7 @@ def enum(*enumNames):
 
     @param enumNames: The strings representing the values of the enum
     """
-    enums = dict(zip(enumNames, list(range(len(enumNames)))))
+    enums = dict(list(zip(enumNames, list(range(len(enumNames))))))
     reverse = dict((value, key) for key, value in six.iteritems(enums))
     enums['from_string'] = enums
     enums['to_string'] = reverse

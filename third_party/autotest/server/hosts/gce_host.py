@@ -23,7 +23,7 @@ def extract_arguments(args_dict):
     @param args_dict: dictionary of all arguments supplied to the test.
     """
 
-    return {k: v for k, v in args_dict.items()
+    return {k: v for k, v in list(args_dict.items())
             if k in ('gce_project', 'gce_instance',
                      'gce_zone', 'gce_key_file')}
 

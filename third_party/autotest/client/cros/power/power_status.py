@@ -56,7 +56,7 @@ class DevStat(object):
         """
         Reset all class fields to None to mark their status as unknown.
         """
-        for field in self.fields.iterkeys():
+        for field in self.fields.keys():
             setattr(self, field, None)
 
 
@@ -79,7 +79,7 @@ class DevStat(object):
     def read_all_vals(self):
         """Read all values.
         """
-        for field, prop in self.fields.iteritems():
+        for field, prop in self.fields.items():
             if prop[0]:
                 val = self.read_val(prop[0], prop[1])
                 setattr(self, field, val)
@@ -290,13 +290,13 @@ class BatteryStat(DevStat):
 
 
     def update(self):
-        for _ in xrange(BATTERY_RETRY_COUNT):
+        for _ in range(BATTERY_RETRY_COUNT):
             try:
                 self._read_battery()
                 return
             except error.TestError as e:
                 logging.warn(e)
-                for field, prop in self.battery_fields.iteritems():
+                for field, prop in self.battery_fields.items():
                     logging.warn(field + ': ' + repr(getattr(self, field)))
                 continue
         raise error.TestError('Failed to read battery state')
@@ -680,10 +680,10 @@ class AbstractStats(object):
         """
         Turns a dict with absolute time values into a dict with percentages.
         """
-        total = sum(stats.itervalues())
+        total = sum(stats.values())
         if total == 0:
             return {k: 0 for k in stats}
-        return dict((k, v * 100.0 / total) for (k, v) in stats.iteritems())
+        return dict((k, v * 100.0 / total) for (k, v) in stats.items())
 
 
     @staticmethod
@@ -691,7 +691,7 @@ class AbstractStats(object):
         """
         Returns a dict with value deltas from two dicts with matching keys.
         """
-        return dict((k, new[k] - old.get(k, 0)) for k in new.iterkeys())
+        return dict((k, new[k] - old.get(k, 0)) for k in new.keys())
 
 
     @staticmethod
@@ -735,11 +735,11 @@ class AbstractStats(object):
         Turns a dict with absolute times (or percentages) into a weighted
         average value.
         """
-        total = sum(self._stats.itervalues())
+        total = sum(self._stats.values())
         if total == 0:
             return None
 
-        return sum((float(k)*v) / total for (k, v) in self._stats.iteritems())
+        return sum((float(k)*v) / total for (k, v) in self._stats.items())
 
 
     def _supports_automatic_weighted_average(self):
@@ -932,10 +932,10 @@ class CPUCStateStats(AbstractStats):
         Turns a dict with absolute time values into a dict with percentages.
         Ignore the |non_c0_stat_name| which is aggegate stat in the total count.
         """
-        total = sum(v for k, v in stats.iteritems() if k != self._non_c0_stat)
+        total = sum(v for k, v in stats.items() if k != self._non_c0_stat)
         if total == 0:
             return {k: 0 for k in stats}
-        return {k: v * 100.0 / total for k, v in stats.iteritems()}
+        return {k: v * 100.0 / total for k, v in stats.items()}
 
 
 class CPUIdleStats(CPUCStateStats):
@@ -1064,7 +1064,7 @@ class CPUPackageStats(CPUCStateStats):
             packages.add(package)
 
             stats['C0_C1'] += utils.rdmsr(0x10, cpu) # TSC
-            for (state, msr) in self._platform_states.iteritems():
+            for (state, msr) in self._platform_states.items():
                 ticks = utils.rdmsr(msr, cpu)
                 stats[state] += ticks
                 stats['non-C0_C1'] += ticks
@@ -1241,7 +1241,7 @@ class GPUFreqStats(AbstractStats):
                         max_mhz = result[0]
                         continue
                 if min_mhz and max_mhz:
-                    for i in xrange(int(min_mhz), int(max_mhz) + 1):
+                    for i in range(int(min_mhz), int(max_mhz) + 1):
                         if i % 100 in self._I915_FREQ_STEPS:
                             self._freqs.append(str(i))
 
@@ -1481,7 +1481,7 @@ class StatoMatic(object):
             if stat_obj.name is 'gpu':
                 # TODO(tbroch) remove this once GPU freq stats have proved
                 # reliable
-                stats_secs = sum(stat_obj._stats.itervalues())
+                stats_secs = sum(stat_obj._stats.values())
                 if stats_secs < (tot_secs * 0.9) or \
                         stats_secs > (tot_secs * 1.1):
                     logging.warning('%s stats dont look right.  Not publishing.',
@@ -1698,7 +1698,7 @@ class CheckpointLogger(object):
             start_time = self._start_time
 
         checkpoint_dict = {}
-        for tname, tlist in self.checkpoint_data.iteritems():
+        for tname, tlist in self.checkpoint_data.items():
             checkpoint_dict[tname] = [(tstart - start_time, tend - start_time)
                     for tstart, tend in tlist]
 
@@ -1731,7 +1731,7 @@ class CheckpointLogger(object):
                 # Set start time to the earliest start timestamp in file.
                 self._start_time = min(
                         ts_pair[0] for ts_pair in itertools.chain.from_iterable(
-                                self.checkpoint_data.itervalues()))
+                                iter(self.checkpoint_data.values())))
         except Exception as exc:
             logging.warning('Failed to load checkpoint data from json file %s, '
                             'see exception: %s', fname, exc)
@@ -1760,7 +1760,7 @@ def to_checkpoint_data(json_dict):
         a defaultdict in CheckpointLogger data format
     """
     checkpoint_data = collections.defaultdict(list)
-    for tname, tlist in json_dict.iteritems():
+    for tname, tlist in json_dict.items():
         checkpoint_data[tname].extend([tuple(ts_pair) for ts_pair in tlist])
     return checkpoint_data
 
@@ -1969,7 +1969,7 @@ class MeasurementLogger(threading.Thread):
                               ', '.join(self.domains))
                 raise
 
-            for tname, tlist in self._checkpoint_logger.checkpoint_data.iteritems():
+            for tname, tlist in self._checkpoint_logger.checkpoint_data.items():
                 if tname:
                     prefix = '%s_%s' % (tname, domain)
                 else:
@@ -1985,7 +1985,7 @@ class MeasurementLogger(threading.Thread):
                     # is not fixed.
                     try:
                         masks.append(numpy.logical_and(tstart < t, t < tend))
-                    except ValueError, e:
+                    except ValueError as e:
                         logging.debug('Error logging measurements: %s', str(e))
                         logging.debug('timestamps %d %s', t.len, t)
                         logging.debug('timestamp start, end %f %f', tstart, tend)
@@ -2083,7 +2083,7 @@ class CPUStatsLogger(MeasurementLogger):
         count = self._refresh_count
         ret = []
         for stat in self._stats:
-            ret.extend(stat.refresh().values())
+            ret.extend(list(stat.refresh().values()))
             wavg = stat.weighted_average()
             if wavg:
                 if stat.incremental:
@@ -2518,7 +2518,7 @@ class DiskStateLogger(threading.Thread):
         try:
             with open(self._device_path, 'r') as dev:
                 result = fcntl.ioctl(dev, 0x2285, sgio_header)
-        except IOError, e:
+        except IOError as e:
             raise error.TestError('ioctl(SG_IO) error: %s' % str(e))
         _, _, _, _, status, host_status, driver_status = \
             struct.unpack("4x4xxx2x4xPPP4x4x4xPBxxxHH4x4x4x", result)
@@ -2563,7 +2563,7 @@ class DiskStateLogger(threading.Thread):
                 else:
                     self._stats[state] = new_time - self._time
                 self._time = new_time
-        except error.TestError, e:
+        except error.TestError as e:
             self._error = e
             self._running = False
 
@@ -2690,8 +2690,8 @@ def get_s2idle_residency_total_usecs():
     total_usecs = 0
 
     all_stats = get_s2idle_stats()
-    for stats in all_stats.itervalues():
-        for st in stats.itervalues():
+    for stats in all_stats.values():
+        for st in stats.values():
             total_usecs += st.time
 
     return total_usecs

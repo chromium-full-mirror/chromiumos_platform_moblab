@@ -9,7 +9,7 @@ import inspect
 import pydoc
 import re
 import traceback
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from client.common_lib import error
 from frontend.afe import models, rpc_utils
@@ -70,7 +70,7 @@ class RpcValidator(object):
             attribute = getattr(module, name)
             if not inspect.isfunction(attribute):
                 continue
-            rpc_methods.append(attribute.func_name)
+            rpc_methods.append(attribute.__name__)
 
         return rpc_methods
 
@@ -152,8 +152,8 @@ class RpcHandler(object):
         @param request: the request to get raw data from.
         """
         if request.method == 'POST':
-            return request.body
-        return urllib.unquote(request.META['QUERY_STRING'])
+            return request.body.decode("utf-8")
+        return urllib.parse.unquote(request.META['QUERY_STRING']).decode("utf-8")
 
 
     def execute_request(self, json_request):
@@ -268,7 +268,7 @@ class RpcHandler(object):
             keyword_args = args[-1]
             args = args[:-1]
             return f(*args, **keyword_args)
-        new_fn.func_name = f.func_name
+        new_fn.__name__ = f.__name__
         return new_fn
 
 

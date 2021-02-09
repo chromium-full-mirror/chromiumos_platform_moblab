@@ -84,7 +84,7 @@ class gtest_parser(object):
         Returns:
             List of tests with the status.
         """
-        test_list = [x[0] for x in self._test_status.items()
+        test_list = [x[0] for x in list(self._test_status.items())
                      if self._StatusOfTest(x[0]) == status]
 
         if not include_fails:

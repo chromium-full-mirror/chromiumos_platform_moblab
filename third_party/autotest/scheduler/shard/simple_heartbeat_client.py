@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """A simple heartbeat client.
 
@@ -26,7 +26,7 @@ Usage:
 from json import decoder
 import argparse
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 import common
 
@@ -72,8 +72,8 @@ class HeartbeatHandler(frontend_test_utils.FrontendTestMixin):
             url = '%s&job_limit=%s' % (url, job_limit)
         if host_limit:
             url = '%s&host_limit=%s' % (url, host_limit)
-        print 'Performing heartbeat against %s' % url
-        return urllib2.urlopen(url).read()
+        print('Performing heartbeat against %s' % url)
+        return urllib.request.urlopen(url).read()
 
 
     @staticmethod
@@ -101,11 +101,11 @@ class HeartbeatHandler(frontend_test_utils.FrontendTestMixin):
         """
         timing, packet = self.get_heartbeat_packet(
                 self.server, board, host_limit, job_limit)
-        print 'Time to perform heartbeat %s' % timing
+        print('Time to perform heartbeat %s' % timing)
         timing, response = self.deserialize_heartbeat(packet)
-        print 'Time to deserialize hearbeat %s' % timing
-        print ('Jobs: %s, Hosts: %s' %
-                (len(response['jobs']), len(response['hosts'])))
+        print('Time to deserialize hearbeat %s' % timing)
+        print(('Jobs: %s, Hosts: %s' %
+                (len(response['jobs']), len(response['hosts']))))
 
 
 def _parse_args(args):

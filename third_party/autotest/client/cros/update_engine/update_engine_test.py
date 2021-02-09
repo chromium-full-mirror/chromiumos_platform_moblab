@@ -5,7 +5,7 @@
 import logging
 import shutil
 import time
-import urlparse
+import urllib.parse
 
 from client.bin import test, utils
 from client.common_lib import error
@@ -121,7 +121,7 @@ class UpdateEngineTest(test.test, update_engine_util.UpdateEngineUtil):
         if self._is_update_finished_downloading():
             raise error.TestFail('The update has already finished before we '
                                  'can disconnect network.')
-        self._update_server = urlparse.urlparse(update_url).hostname
+        self._update_server = urllib.parse.urlparse(update_url).hostname
         self._disable_internet()
 
         # Check that we are offline.

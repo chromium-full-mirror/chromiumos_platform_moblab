@@ -1,14 +1,14 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 import logging
 
-import common
-import base
-import constants
-import servo_updater
+from site_utils.admin_audit import common
+from site_utils.admin_audit import base
+from site_utils.admin_audit import constants
+from site_utils.admin_audit import servo_updater
 import time
 import os
 import re

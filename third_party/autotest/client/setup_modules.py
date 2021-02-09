@@ -6,9 +6,9 @@ import os, sys
 dirname = os.path.dirname(sys.modules[__name__].__file__)
 common_dir = os.path.abspath(os.path.join(dirname, "common_lib"))
 sys.path.insert(0, common_dir)
-import check_version
+#import check_version
 sys.path.pop(0)
-check_version.check_python_version()
+#check_version.check_python_version()
 
 import glob, traceback, types
 

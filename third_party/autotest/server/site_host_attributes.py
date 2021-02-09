@@ -43,8 +43,8 @@ We also consult the AFE database for its labels which are all treated as host
 attribute strings defined above.  Illegal strings are ignored.
 """
 
-
-import hashlib, logging, os, utils
+from client.common_lib import utils
+import hashlib, logging, os
 import six
 
 
@@ -92,7 +92,7 @@ class HostAttributes(object):
             host_obj = models.Host.valid_objects.get(hostname=host)
             self._add_attributes([label.name for label in
                                   host_obj.labels.all()])
-        for key, value in self.__dict__.items():
+        for key, value in list(self.__dict__.items()):
             logging.info('Host attribute: %s => %s', key, value)
 
     def _add_attributes(self, attributes):
@@ -123,4 +123,4 @@ class HostAttributes(object):
 
     def get_attributes(self):
         """Return a list of non-False attributes for this host."""
-        return [key for key, value in self.__dict__.items() if value]
+        return [key for key, value in list(self.__dict__.items()) if value]

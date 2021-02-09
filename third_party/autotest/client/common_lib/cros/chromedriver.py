@@ -5,8 +5,8 @@
 import atexit
 import logging
 import os
-import urllib2
-import urlparse
+import urllib.request, urllib.error, urllib.parse
+import urllib.parse
 
 try:
     from selenium import webdriver
@@ -91,7 +91,7 @@ class chromedriver(object):
         # Open a new tab using Chrome remote debugging. ChromeDriver expects
         # a tab opened for remote to work. Tabs opened using Telemetry will be
         # owned by Telemetry, and will be inaccessible to ChromeDriver.
-        urllib2.urlopen('http://localhost:%i/json/new' %
+        urllib.request.urlopen('http://localhost:%i/json/new' %
                         utils.get_chrome_remote_debugging_port())
 
         chromeOptions = {'debuggerAddress':
@@ -181,7 +181,7 @@ class chromedriver_server(object):
         self.url = 'http://localhost:%d' % port
         if url_base:
             chromedriver_args.append('--url-base=%s' % url_base)
-            self.url = urlparse.urljoin(self.url, url_base)
+            self.url = urllib.parse.urljoin(self.url, url_base)
 
         if extra_args:
             chromedriver_args.extend(extra_args)
@@ -215,9 +215,9 @@ class chromedriver_server(object):
     def is_running(self):
         """Returns whether the server is up and running."""
         try:
-            urllib2.urlopen(self.url + '/status')
+            urllib.request.urlopen(self.url + '/status')
             return True
-        except urllib2.URLError as e:
+        except urllib.error.URLError as e:
             return False
 
 
@@ -237,7 +237,7 @@ class chromedriver_server(object):
             return
 
         try:
-            urllib2.urlopen(self.url + '/shutdown', timeout=10).close()
+            urllib.request.urlopen(self.url + '/shutdown', timeout=10).close()
         except:
             pass
 

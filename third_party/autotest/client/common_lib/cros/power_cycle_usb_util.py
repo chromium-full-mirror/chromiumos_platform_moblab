@@ -4,7 +4,7 @@
 
 """Power cycle a usb port on DUT(device under test)."""
 
-from __future__ import print_function
+
 
 from client.common_lib.cros.cfm.usb import usb_port_manager
 

@@ -54,12 +54,11 @@ class NoHostIdError(MalformedRecordError):
     """Raised by the scheduler when a non-hostless job's host is None."""
 
 
-class ConnectionManager(object):
+class ConnectionManager(object, metaclass=server_utils.Singleton):
     """Manager for the django database connections.
 
     The connection is used through scheduler_models and monitor_db.
     """
-    __metaclass__ = server_utils.Singleton
 
     def __init__(self, readonly=True, autocommit=True):
         """Set global django database options for correct connection handling.

@@ -16,9 +16,9 @@ run_event_command() starts such a process with a synchronous event
 handler.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging
 
@@ -118,7 +118,7 @@ def _handle_output_line(event_handler, line):
     @param event_handler: callable that takes a StatusChangeEvent.
     @param line: line of output.
     """
-    event_str, _, message = line.rstrip().partition(' ')
+    event_str, _, message = line.decode("utf-8").rstrip().partition(' ')
     try:
         event = Event(event_str)
     except ValueError:

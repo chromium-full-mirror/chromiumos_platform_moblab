@@ -6,9 +6,9 @@ With this library, autotest developers can handle source code checkouts and
 updates on both client as well as server code.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import os, warnings, logging
 import six

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python2 -u
+#!/usr/local/bin/python3 -u
 
 import common
 from tko import parse

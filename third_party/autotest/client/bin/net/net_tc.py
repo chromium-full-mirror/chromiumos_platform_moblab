@@ -37,7 +37,7 @@ Example
 
 """
 
-import commands, os, re
+import subprocess, os, re
 import common
 from client.common_lib import error
 from client.bin.net import net_utils
@@ -199,7 +199,7 @@ class tcfilter(object):
 
 
     def tc_cmd(self, tc_conf):
-        print self._tc_cmd % tc_conf
+        print(self._tc_cmd % tc_conf)
 
 
     def setup(self, netif):
@@ -287,7 +287,7 @@ class qdisc(object):
 
 
     def tc_cmd(self, tc_conf):
-        print self._tc_cmd % tc_conf
+        print(self._tc_cmd % tc_conf)
 
 
     def setup(self, netif):

@@ -99,7 +99,7 @@ class AtomicGroup(model_logic.ModelWithInvalid, dbmodels.Model):
 
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class Label(model_logic.ModelWithInvalid, dbmodels.Model):
@@ -125,7 +125,7 @@ class Label(model_logic.ModelWithInvalid, dbmodels.Model):
     name_field = 'name'
     objects = model_logic.ModelWithInvalidManager()
     valid_objects = model_logic.ValidObjectsManager()
-    atomic_group = dbmodels.ForeignKey(AtomicGroup, null=True, blank=True)
+    atomic_group = dbmodels.ForeignKey(AtomicGroup, null=True, blank=True, on_delete=dbmodels.CASCADE)
 
 
     def clean_object(self):
@@ -151,7 +151,7 @@ class Label(model_logic.ModelWithInvalid, dbmodels.Model):
 
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
     def is_replaced_by_static(self):
@@ -188,7 +188,7 @@ class StaticLabel(model_logic.ModelWithInvalid, dbmodels.Model):
     name_field = 'name'
     objects = model_logic.ModelWithInvalidManager()
     valid_objects = model_logic.ValidObjectsManager()
-    atomic_group = dbmodels.ForeignKey(AtomicGroup, null=True, blank=True)
+    atomic_group = dbmodels.ForeignKey(AtomicGroup, null=True, blank=True, on_delete=dbmodels.CASCADE)
 
     def clean_object(self):
         self.host_set.clear()
@@ -201,12 +201,12 @@ class StaticLabel(model_logic.ModelWithInvalid, dbmodels.Model):
 
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class ReplacedLabel(dbmodels.Model, model_logic.ModelExtensions):
     """The tag to indicate Whether to replace labels with static labels."""
-    label = dbmodels.ForeignKey(Label)
+    label = dbmodels.ForeignKey(Label, on_delete=dbmodels.CASCADE)
     objects = model_logic.ExtendedManager()
 
 
@@ -216,7 +216,7 @@ class ReplacedLabel(dbmodels.Model, model_logic.ModelExtensions):
 
 
     def __unicode__(self):
-        return unicode(self.label)
+        return str(self.label)
 
 
 class Shard(dbmodels.Model, model_logic.ModelExtensions):
@@ -258,7 +258,7 @@ class Drone(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_drones'
 
     def __unicode__(self):
-        return unicode(self.hostname)
+        return str(self.hostname)
 
 
 class DroneSet(dbmodels.Model, model_logic.ModelExtensions):
@@ -346,7 +346,7 @@ class DroneSet(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_drone_sets'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class User(dbmodels.Model, model_logic.ModelExtensions):
@@ -373,7 +373,7 @@ class User(dbmodels.Model, model_logic.ModelExtensions):
     reboot_after = dbmodels.SmallIntegerField(
         choices=model_attributes.RebootAfter.choices(), blank=True,
         default=DEFAULT_REBOOT_AFTER)
-    drone_set = dbmodels.ForeignKey(DroneSet, null=True, blank=True)
+    drone_set = dbmodels.ForeignKey(DroneSet, null=True, blank=True, on_delete=dbmodels.CASCADE)
     show_experimental = dbmodels.BooleanField(default=False)
 
     name_field = 'login'
@@ -438,7 +438,7 @@ class User(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_users'
 
     def __unicode__(self):
-        return unicode(self.login)
+        return str(self.login)
 
 
 class Host(model_logic.ModelWithInvalid, rdb_model_extensions.AbstractHostModel,
@@ -480,13 +480,13 @@ class Host(model_logic.ModelWithInvalid, rdb_model_extensions.AbstractHostModel,
                                       db_table='afe_hosts_labels')
     static_labels = dbmodels.ManyToManyField(
             StaticLabel, blank=True, db_table='afe_static_hosts_labels')
-    locked_by = dbmodels.ForeignKey(User, null=True, blank=True, editable=False)
+    locked_by = dbmodels.ForeignKey(User, null=True, blank=True, editable=False, on_delete=dbmodels.CASCADE)
     name_field = 'hostname'
     objects = model_logic.ModelWithInvalidManager()
     valid_objects = model_logic.ValidObjectsManager()
     leased_objects = model_logic.LeasedHostManager()
 
-    shard = dbmodels.ForeignKey(Shard, blank=True, null=True)
+    shard = dbmodels.ForeignKey(Shard, blank=True, null=True, on_delete=dbmodels.CASCADE)
 
     def __init__(self, *args, **kwargs):
         super(Host, self).__init__(*args, **kwargs)
@@ -877,7 +877,7 @@ class Host(model_logic.ModelWithInvalid, rdb_model_extensions.AbstractHostModel,
 
 
     def __unicode__(self):
-        return unicode(self.hostname)
+        return str(self.hostname)
 
 
 class HostAttribute(dbmodels.Model, model_logic.ModelExtensions):
@@ -885,7 +885,7 @@ class HostAttribute(dbmodels.Model, model_logic.ModelExtensions):
 
     SERIALIZATION_LINKS_TO_KEEP = set(['host'])
     SERIALIZATION_LOCAL_LINKS_TO_UPDATE = set(['value'])
-    host = dbmodels.ForeignKey(Host)
+    host = dbmodels.ForeignKey(Host, on_delete=dbmodels.CASCADE)
     attribute = dbmodels.CharField(max_length=90)
     value = dbmodels.CharField(max_length=300)
 
@@ -931,7 +931,7 @@ class StaticHostAttribute(dbmodels.Model, model_logic.ModelExtensions):
 
     SERIALIZATION_LINKS_TO_KEEP = set(['host'])
     SERIALIZATION_LOCAL_LINKS_TO_UPDATE = set(['value'])
-    host = dbmodels.ForeignKey(Host)
+    host = dbmodels.ForeignKey(Host, on_delete=dbmodels.CASCADE)
     attribute = dbmodels.CharField(max_length=90)
     value = dbmodels.CharField(max_length=300)
 
@@ -1034,14 +1034,14 @@ class Test(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_autotests'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class TestParameter(dbmodels.Model):
     """
     A declared parameter of a test
     """
-    test = dbmodels.ForeignKey(Test)
+    test = dbmodels.ForeignKey(Test, on_delete=dbmodels.CASCADE)
     name = dbmodels.CharField(max_length=255)
 
     class Meta:
@@ -1050,7 +1050,7 @@ class TestParameter(dbmodels.Model):
         unique_together = ('test', 'name')
 
     def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.test.name)
+        return '%s (%s)' % (self.name, self.test.name)
 
 
 class Profiler(dbmodels.Model, model_logic.ModelExtensions):
@@ -1074,7 +1074,7 @@ class Profiler(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_profilers'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class ParameterizedJob(dbmodels.Model):
@@ -1115,7 +1115,7 @@ class ParameterizedJob(dbmodels.Model):
         db_table = 'afe_parameterized_jobs'
 
     def __unicode__(self):
-        return u'%s (parameterized) - %s' % (self.test.name, self.job())
+        return '%s (parameterized) - %s' % (self.test.name, self.job())
 
 
 class JobManager(model_logic.ExtendedManager):
@@ -1329,7 +1329,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
     # completed.
     max_runtime_hrs = dbmodels.IntegerField(default=DEFAULT_MAX_RUNTIME_HRS)
     max_runtime_mins = dbmodels.IntegerField(default=DEFAULT_MAX_RUNTIME_MINS)
-    drone_set = dbmodels.ForeignKey(DroneSet, null=True, blank=True)
+    drone_set = dbmodels.ForeignKey(DroneSet, null=True, blank=True, on_delete=dbmodels.CASCADE)
 
     # TODO(jrbarnette)  We have to keep `parameterized_job` around or it
     # breaks the scheduler_models unit tests (and fixing the unit tests
@@ -1339,9 +1339,9 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
     # at which point, you _must_ delete this.  Until you're ready to do
     # that, DON'T MUCK WITH IT.
     parameterized_job = dbmodels.ForeignKey(ParameterizedJob, null=True,
-                                            blank=True)
+                                            blank=True, on_delete=dbmodels.CASCADE)
 
-    parent_job = dbmodels.ForeignKey('self', blank=True, null=True)
+    parent_job = dbmodels.ForeignKey('self', blank=True, null=True, on_delete=dbmodels.CASCADE)
 
     test_retry = dbmodels.IntegerField(blank=True, default=0)
 
@@ -1351,7 +1351,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
 
     # If this is None on the primary, a secondard should be found.
     # If this is None on a secondary, it should be synced back to the primary
-    shard = dbmodels.ForeignKey(Shard, blank=True, null=True)
+    shard = dbmodels.ForeignKey(Shard, blank=True, null=True, on_delete=dbmodels.CASCADE)
 
     # If this is None, server-side packaging will be used for server side test,
     # unless it's disabled in global config AUTOSERV/enable_ssp_container.
@@ -1424,7 +1424,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
         job.dependency_labels = options['dependencies']
 
         if options.get('keyvals'):
-            for key, value in options['keyvals'].iteritems():
+            for key, value in options['keyvals'].items():
                 # None (or NULL) is not acceptable by DB, so change it to an
                 # empty string in case.
                 JobKeyval.objects.create(job=job, key=key,
@@ -1618,7 +1618,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_jobs'
 
     def __unicode__(self):
-        return u'%s (%s-%s)' % (self.name, self.id, self.owner)
+        return '%s (%s-%s)' % (self.name, self.id, self.owner)
 
 
 class JobHandoff(dbmodels.Model, model_logic.ModelExtensions):
@@ -1647,7 +1647,7 @@ class JobKeyval(dbmodels.Model, model_logic.ModelExtensions):
     SERIALIZATION_LINKS_TO_KEEP = set(['job'])
     SERIALIZATION_LOCAL_LINKS_TO_UPDATE = set(['value'])
 
-    job = dbmodels.ForeignKey(Job)
+    job = dbmodels.ForeignKey(Job, on_delete=dbmodels.CASCADE)
     key = dbmodels.CharField(max_length=90)
     value = dbmodels.CharField(max_length=300)
 
@@ -1690,8 +1690,8 @@ class JobKeyval(dbmodels.Model, model_logic.ModelExtensions):
 
 class IneligibleHostQueue(dbmodels.Model, model_logic.ModelExtensions):
     """Represents an ineligible host queue."""
-    job = dbmodels.ForeignKey(Job)
-    host = dbmodels.ForeignKey(Host)
+    job = dbmodels.ForeignKey(Job, on_delete=dbmodels.CASCADE)
+    host = dbmodels.ForeignKey(Host, on_delete=dbmodels.CASCADE)
 
     objects = model_logic.ExtendedManager()
 
@@ -1727,11 +1727,11 @@ class HostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
     PRE_JOB_STATUSES = host_queue_entry_states.PRE_JOB_STATUSES
     IDLE_PRE_JOB_STATUSES = host_queue_entry_states.IDLE_PRE_JOB_STATUSES
 
-    job = dbmodels.ForeignKey(Job)
-    host = dbmodels.ForeignKey(Host, blank=True, null=True)
+    job = dbmodels.ForeignKey(Job, on_delete=dbmodels.CASCADE)
+    host = dbmodels.ForeignKey(Host, blank=True, null=True, on_delete=dbmodels.CASCADE)
     status = dbmodels.CharField(max_length=255)
     meta_host = dbmodels.ForeignKey(Label, blank=True, null=True,
-                                    db_column='meta_host')
+                                    db_column='meta_host', on_delete=dbmodels.CASCADE)
     active = dbmodels.BooleanField(default=False)
     complete = dbmodels.BooleanField(default=False)
     deleted = dbmodels.BooleanField(default=False)
@@ -1739,7 +1739,7 @@ class HostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
                                           default='')
     # If atomic_group is set, this is a virtual HostQueueEntry that will
     # be expanded into many actual hosts within the group at schedule time.
-    atomic_group = dbmodels.ForeignKey(AtomicGroup, blank=True, null=True)
+    atomic_group = dbmodels.ForeignKey(AtomicGroup, blank=True, null=True, on_delete=dbmodels.CASCADE)
     aborted = dbmodels.BooleanField(default=False)
     started_on = dbmodels.DateTimeField(null=True, blank=True)
     finished_on = dbmodels.DateTimeField(null=True, blank=True)
@@ -1917,7 +1917,7 @@ class HostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
         hostname = None
         if self.host:
             hostname = self.host.hostname
-        return u"%s/%d (%d)" % (hostname, self.job.id, self.id)
+        return "%s/%d (%d)" % (hostname, self.job.id, self.id)
 
 
 class HostQueueEntryStartTimes(dbmodels.Model):
@@ -1932,8 +1932,8 @@ class HostQueueEntryStartTimes(dbmodels.Model):
 
 class AbortedHostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
     """Represents an aborted host queue entry."""
-    queue_entry = dbmodels.OneToOneField(HostQueueEntry, primary_key=True)
-    aborted_by = dbmodels.ForeignKey(User)
+    queue_entry = dbmodels.OneToOneField(HostQueueEntry, primary_key=True, on_delete=dbmodels.CASCADE)
+    aborted_by = dbmodels.ForeignKey(User, on_delete=dbmodels.CASCADE)
     aborted_on = dbmodels.DateTimeField()
 
     objects = model_logic.ExtendedManager()
@@ -1967,17 +1967,17 @@ class SpecialTask(dbmodels.Model, model_logic.ModelExtensions):
     Task = enum.Enum('Verify', 'Cleanup', 'Repair', 'Reset', 'Provision',
                      string_values=True)
 
-    host = dbmodels.ForeignKey(Host, blank=False, null=False)
+    host = dbmodels.ForeignKey(Host, blank=False, null=False, on_delete=dbmodels.CASCADE)
     task = dbmodels.CharField(max_length=64, choices=Task.choices(),
                               blank=False, null=False)
-    requested_by = dbmodels.ForeignKey(User)
+    requested_by = dbmodels.ForeignKey(User, on_delete=dbmodels.CASCADE)
     time_requested = dbmodels.DateTimeField(auto_now_add=True, blank=False,
                                             null=False)
     is_active = dbmodels.BooleanField(default=False, blank=False, null=False)
     is_complete = dbmodels.BooleanField(default=False, blank=False, null=False)
     is_aborted = dbmodels.BooleanField(default=False, blank=False, null=False)
     time_started = dbmodels.DateTimeField(null=True, blank=True)
-    queue_entry = dbmodels.ForeignKey(HostQueueEntry, blank=True, null=True)
+    queue_entry = dbmodels.ForeignKey(HostQueueEntry, blank=True, null=True, on_delete=dbmodels.CASCADE)
     success = dbmodels.BooleanField(default=False, blank=False, null=False)
     time_finished = dbmodels.DateTimeField(null=True, blank=True)
 
@@ -2068,11 +2068,11 @@ class SpecialTask(dbmodels.Model, model_logic.ModelExtensions):
 
 
     def __unicode__(self):
-        result = u'Special Task %s (host %s, task %s, time %s)' % (
+        result = 'Special Task %s (host %s, task %s, time %s)' % (
             self.id, self.host, self.task, self.time_requested)
         if self.is_complete:
-            result += u' (completed)'
+            result += ' (completed)'
         elif self.is_active:
-            result += u' (active)'
+            result += ' (active)'
 
         return result

@@ -170,9 +170,9 @@ def add_label(name, ignore_exception_if_exists=False, **kwargs):
             # If the exception is raised not because of duplicated
             # "name", then raise the original exception.
             if label is None:
-                raise exc_info[0], exc_info[1], exc_info[2]
+                raise exc_info[0](exc_info[1]).with_traceback(exc_info[2])
         else:
-            raise exc_info[0], exc_info[1], exc_info[2]
+            raise exc_info[0](exc_info[1]).with_traceback(exc_info[2])
     return label.id
 
 
@@ -219,7 +219,7 @@ def _create_label_everywhere(id, hosts):
         # This matches the type checks in smart_get, which is a hack
         # in and off itself. The aim here is to create any non-existent
         # label, which we cannot do if the 'id' specified isn't a label name.
-        if isinstance(id, basestring):
+        if isinstance(id, str):
             label = models.Label.smart_get(add_label(id))
         else:
             raise ValueError(
@@ -1186,7 +1186,7 @@ def _forward_special_tasks_on_hosts(task, rpc, **filter_data):
     # create a local SpecialTask for each remaining host.
     if shard_host_map and not utils.is_shard():
         hosts = [h for h in hosts if h.shard is None]
-        for shard, hostnames in shard_host_map.iteritems():
+        for shard, hostnames in shard_host_map.items():
 
             # The main client of this module is the frontend website, and
             # it invokes it with an 'id' or an 'id__in' filter. Regardless,
@@ -1361,7 +1361,7 @@ def get_info_for_clone(id, preserve_metahosts, queue_entry_filter_data=None):
     # convert keys from Label objects to strings (names of labels)
     meta_host_counts = dict(
         (meta_host.name, count)
-        for meta_host, count in job_info["meta_host_counts"].iteritems()
+        for meta_host, count in job_info["meta_host_counts"].items()
     )
 
     info = dict(
@@ -1401,7 +1401,7 @@ def _get_image_for_job(job, hostless):
         builds = None
         if isinstance(value, dict):
             builds = value
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             builds = ast.literal_eval(value)
         if builds:
             image = builds.get("cros-version")
@@ -2066,7 +2066,7 @@ def create_suite_job(
     if run_prod_code:
         # If run_prod_code is True, test_source_build is not set, use the
         # first build in the builds list for the sutie job name.
-        name = "%s-%s" % (builds.values()[0], suite_name)
+        name = "%s-%s" % (list(builds.values())[0], suite_name)
     else:
         name = "%s-%s" % (test_source_build, suite_name)
 
@@ -2459,7 +2459,7 @@ def get_tests_by_build(build, ignore_invalid_tests=True):
     cfile_getter = control_file_lib._initialize_control_file_getter(build)
     if suite_common.ENABLE_CONTROLS_IN_BATCH:
         control_file_info_list = cfile_getter.get_suite_info()
-        control_file_list = control_file_info_list.keys()
+        control_file_list = list(control_file_info_list.keys())
     else:
         control_file_list = cfile_getter.get_control_file_list()
 

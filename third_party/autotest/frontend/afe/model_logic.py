@@ -378,7 +378,7 @@ class ExtendedManager(dbmodels.Manager):
         @returns a pivot iterator - see _get_pivot_iterator()
         """
         filter_data = {foreign_key_field.name + '__pk__in':
-                       base_objects_by_id.keys()}
+                       list(base_objects_by_id.keys())}
         for related_object in related_model.objects.filter(**filter_data):
             # lookup base object in the dict, rather than grabbing it from the
             # related object.  we need to return instances from the dict, not
@@ -410,7 +410,7 @@ class ExtendedManager(dbmodels.Manager):
                    to_field=pivot_to_field,
                    table=pivot_table,
                    id_list=','.join(str(id_) for id_
-                                    in base_objects_by_id.iterkeys()))
+                                    in base_objects_by_id.keys()))
 
         # Chose the connection that's responsible for this type of object
         # The databases for related_model and the current model will always
@@ -460,7 +460,7 @@ class ExtendedManager(dbmodels.Manager):
         # The default maximum value of a host parameter number in SQLite is 999.
         # Exceed this will get a DatabaseError later.
         batch_size = 900
-        for i in xrange(0, len(base_objects), batch_size):
+        for i in range(0, len(base_objects), batch_size):
             base_objects_batch = base_objects[i:i + batch_size]
             base_objects_by_id = dict((base_object._get_pk_val(), base_object)
                                       for base_object in base_objects_batch)
@@ -601,7 +601,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
         cls = type(self)
         field_dict = self.get_field_dict()
         manager = cls.get_valid_manager()
-        for field_name, field_obj in field_dict.iteritems():
+        for field_name, field_obj in field_dict.items():
             if not field_obj.unique:
                 continue
 
@@ -638,7 +638,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
             try:
                 python_value = f.to_python(
                     getattr(self, f.attname, f.get_default()))
-            except django.core.exceptions.ValidationError, e:
+            except django.core.exceptions.ValidationError as e:
                 error_dict[f.name] = str(e)
                 continue
 
@@ -654,7 +654,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
     def do_validate(self):
         errors = self._validate()
         unique_errors = self._validate_unique()
-        for field_name, error in unique_errors.iteritems():
+        for field_name, error in unique_errors.items():
             errors.setdefault(field_name, error)
         if errors:
             raise ValidationError(errors)
@@ -691,7 +691,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
         data.update(kwargs)
         data = self.prepare_data_args(data)
         self.convert_human_readable_values(data)
-        for field_name, value in data.iteritems():
+        for field_name, value in data.items():
             setattr(self, field_name, value)
         self.do_validate()
         self.save()
@@ -820,7 +820,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
         Like query_objects, but return a list of dictionaries.
         """
         query = cls.query_objects(filter_data, initial_query=initial_query)
-        extra_fields = query.query.extra_select.keys()
+        extra_fields = list(query.query.extra_select.keys())
         field_dicts = [model_object.get_object_dict(extra_fields=extra_fields)
                        for model_object in query]
         return field_dicts
@@ -837,9 +837,9 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
         else:
             manager = cls.objects
 
-        if isinstance(id_or_name, (int, long)):
+        if isinstance(id_or_name, int):
             return manager.get(pk=id_or_name)
-        if isinstance(id_or_name, basestring) and hasattr(cls, 'name_field'):
+        if isinstance(id_or_name, str) and hasattr(cls, 'name_field'):
             return manager.get(**{cls.name_field : id_or_name})
         raise ValueError(
             'Invalid positional argument: %s (%s)' % (id_or_name,
@@ -868,7 +868,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
         extra_fields: list of extra attribute names to include, in addition to
         the fields defined on this object.
         """
-        fields = self.get_field_dict().keys()
+        fields = list(self.get_field_dict().keys())
         if extra_fields:
             fields += extra_fields
         object_dict = dict((field_name, getattr(self, field_name))
@@ -892,7 +892,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
         """
         See on_attribute_changed.
         """
-        assert not isinstance(attributes, basestring)
+        assert not isinstance(attributes, str)
         self._recorded_attributes = dict((attribute, getattr(self, attribute))
                                          for attribute in attributes)
 
@@ -901,11 +901,11 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
         """
         See on_attribute_changed.
         """
-        for attribute, original_value in self._recorded_attributes.iteritems():
+        for attribute, original_value in self._recorded_attributes.items():
             new_value = getattr(self, attribute)
             if original_value != new_value:
                 self.on_attribute_changed(attribute, original_value)
-        self._record_attributes(self._recorded_attributes.keys())
+        self._record_attributes(list(self._recorded_attributes.keys()))
 
 
     def on_attribute_changed(self, attribute, old_value):
@@ -986,7 +986,7 @@ class ModelExtensions(rdb_model_extensions.ModelValidators):
                  fields/objects.
         """
         links_to_local_values, links_to_related_values = [], []
-        for link, value in data.iteritems():
+        for link, value in data.items():
             if link in cls.SERIALIZATION_LINKS_TO_FOLLOW:
                 # It's a foreign key
                 links_to_related_values.append((link, value))

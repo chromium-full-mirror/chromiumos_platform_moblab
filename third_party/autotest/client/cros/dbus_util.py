@@ -3,9 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import dbus
 import logging
@@ -49,7 +49,7 @@ def dbus2primitive(value):
         return tuple([dbus2primitive(x) for x in value])
     elif isinstance(value, dict):
         return dict([(dbus2primitive(k), dbus2primitive(v))
-                     for k, v in value.items()])
+                     for k, v in list(value.items())])
     else:
         logging.error('Failed to convert dbus object of class: %r',
                       value.__class__.__name__)

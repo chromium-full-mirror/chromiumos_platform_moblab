@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 """Create new scenario test instance from an existing results directory.
 
 This automates creation of regression tests for the results parsers.
@@ -47,13 +47,13 @@ def main():
 
     results_dirpath = path.normpath(args[0])
     if not path.exists(results_dirpath) or not path.isdir(results_dirpath):
-        print 'Invalid results_dirpath:', results_dirpath
+        print('Invalid results_dirpath:', results_dirpath)
         parser.print_help()
         sys.exit(1)
 
     scenarios_dirpath = path.normpath(args[1])
     if not path.exists(scenarios_dirpath) or not path.isdir(scenarios_dirpath):
-        print 'Invalid scenarios_dirpath:', scenarios_dirpath
+        print('Invalid scenarios_dirpath:', scenarios_dirpath)
         parser.print_help()
         sys.exit(1)
 
@@ -65,9 +65,9 @@ def main():
     scenario_package_dirpath = path.join(
         scenarios_dirpath, package_dirname)
     if path.exists(scenario_package_dirpath):
-        print (
+        print((
             'Scenario package already exists at path: %s' %
-            scenario_package_dirpath)
+            scenario_package_dirpath))
         parser.print_help()
         sys.exit(1)
 
@@ -86,7 +86,7 @@ def main():
     harness = scenario_base.new_parser_harness(copied_dirpath)
     try:
         parser_result = harness.execute()
-    except Exception, e:
+    except Exception as e:
         parser_result = e
 
     scenario_base.store_parser_result(

@@ -12,13 +12,13 @@ NOTE: This module should only be used in the context of a running test. Any
 import common
 import logging
 import traceback
-import urlparse
+import urllib.parse
 
 from client.common_lib import global_config
 from server.cros import autoupdater
 from server.cros import provision
 from server.cros.dynamic_suite import frontend_wrappers
-#from site_utils import stable_version_classify as sv
+from site_utils import stable_version_classify as sv
 from server import site_utils as server_utils
 from server.cros.dynamic_suite import constants as ds_constants
 from server.cros.dynamic_suite import tools

@@ -100,7 +100,7 @@ class LabelsCommaSpacedWidget(forms.Widget):
         else:
             value = ''
         final_attrs['value'] = smart_str(value)
-        return mark_safe(u'<input%s />' % flatatt(final_attrs))
+        return mark_safe('<input%s />' % flatatt(final_attrs))
 
     def value_from_datadict(self, data, files, name):
         """Convert input string to a list of label ids.
@@ -116,8 +116,7 @@ class LabelsCommaSpacedWidget(forms.Widget):
         label_names = data.get(name)
         if label_names:
             label_names = label_names.split(',')
-            label_names = filter(None,
-                                 [name.strip(', ') for name in label_names])
+            label_names = [_f for _f in [name.strip(', ') for name in label_names] if _f]
             label_ids = (models.Label.objects.filter(name__in=label_names)
                          .values_list('id', flat=True))
             return [str(label_id) for label_id in label_ids]

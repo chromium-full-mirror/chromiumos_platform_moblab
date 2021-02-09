@@ -84,10 +84,10 @@ class cli_unittest(unittest.TestCase):
         @raises: AssertionError
         """
         for word in to_find:
-            self.assert_(string.find(word) >= 0,
+            self.assertTrue(string.find(word) >= 0,
                          "Could not find '%s' in: %s" % (word, string))
         for word in not_in:
-            self.assert_(string.find(word) < 0,
+            self.assertTrue(string.find(word) < 0,
                          "Found (and shouldn't have) '%s' in: %s" % (word,
                                                                      string))
 

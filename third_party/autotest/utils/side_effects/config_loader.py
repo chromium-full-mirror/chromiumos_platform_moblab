@@ -86,7 +86,7 @@ def _check_empty_fields(fields):
     @raises: ValueError if at least one of the field values is empty.
     """
     empty_fields = []
-    for description, value in fields.items():
+    for description, value in list(fields.items()):
         if not value:
             empty_fields.append(description)
     if empty_fields:
@@ -101,7 +101,7 @@ def _check_file_existence(files):
     @raises: OSError if at least one of the files is missing.
     """
     missing_files = []
-    for description, path in files.items():
+    for description, path in list(files.items()):
         if not os.path.exists(path):
             missing_files.append(description + ': ' + path)
     if missing_files:

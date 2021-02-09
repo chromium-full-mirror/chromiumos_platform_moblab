@@ -5,9 +5,9 @@ This adds methods for login, logout, and expecting the shell prompt.
 $Id: pxssh.py 487 2007-08-29 22:33:29Z noah $
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 from six.moves import range
 import time

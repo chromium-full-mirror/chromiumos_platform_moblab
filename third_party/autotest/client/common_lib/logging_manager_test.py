@@ -1,8 +1,8 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 import logging, os, select, six, subprocess, sys, unittest
 import common
 from client.common_lib import logging_manager, logging_config
@@ -209,16 +209,16 @@ class LoggingManagerTest(unittest.TestCase):
             # interleaving.  so compare sets of lines rather than ordered lines.
             actual_lines = set(actual_lines)
             expected_lines = set(expected_lines)
-        self.assertEquals(actual_lines, expected_lines)
+        self.assertEqual(actual_lines, expected_lines)
 
 
     def _check_results(self):
         # ensure our stdout was restored
-        self.assertEquals(self.stdout, self._original_stdout)
+        self.assertEqual(self.stdout, self._original_stdout)
 
         if self._real_system_calls:
             # ensure FDs were left in their original state
-            self.assertEquals(self._grab_fd_info(), self._fd_info)
+            self.assertEqual(self._grab_fd_info(), self._fd_info)
 
         self._compare_logs(self.stdout, _EXPECTED_STDOUT)
         self._compare_logs(self._log1, _EXPECTED_LOG1)
@@ -272,7 +272,7 @@ class MonkeyPatchTestCase(unittest.TestCase):
         finder = logging_manager._logging_manager_aware_logger__find_caller
         filename, lineno, caller_name = finder(logging_manager.logger)
         self.check_filename(filename)
-        self.assertEquals('test_find_caller', caller_name)
+        self.assertEqual('test_find_caller', caller_name)
 
 
     def _1_test_find_caller(self):

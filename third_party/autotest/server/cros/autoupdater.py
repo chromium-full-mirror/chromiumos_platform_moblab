@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from __future__ import print_function
+
 
 import logging
 import os
@@ -445,15 +445,8 @@ class ChromiumOSUpdater(object):
         logging.info('Installing image using quick-provision.')
         provision_command = self._get_remote_script(_QUICK_PROVISION_SCRIPT)
         try:
-            try:
-                self._quick_provision_with_gs_cache(provision_command,
+            self._quick_provision_with_devserver(provision_command,
                                                     server_name, image_name)
-            except Exception as e:
-                logging.error('Failed to quick-provision with gscache with '
-                              'error %s', e)
-                self._quick_provision_with_devserver(provision_command,
-                                                     server_name, image_name)
-
             self._set_target_version()
             return kernel_utils.verify_kernel_state_after_update(self.host)
         except Exception:

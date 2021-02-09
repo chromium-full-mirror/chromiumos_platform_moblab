@@ -281,7 +281,7 @@ class DroneManager(object):
         config = global_config.global_config
         section = scheduler_config.CONFIG_SECTION
         config.parse_config_file()
-        for hostname, drone in self._drones.iteritems():
+        for hostname, drone in self._drones.items():
             if server_manager_utils.use_server_db():
                 server = server_manager_utils.get_servers(hostname=hostname)[0]
                 attributes = dict([(a.attribute, a.value)
@@ -319,13 +319,13 @@ class DroneManager(object):
 
 
     def get_drones(self):
-        return self._drones.itervalues()
+        return iter(self._drones.values())
 
 
     def cleanup_orphaned_containers(self):
         """Queue cleanup_orphaned_containers call at each drone.
         """
-        for drone in self._drones.values():
+        for drone in list(self._drones.values()):
             logging.info('Queue cleanup_orphaned_containers at %s',
                          drone.hostname)
             drone.queue_call('cleanup_orphaned_containers')
@@ -352,7 +352,7 @@ class DroneManager(object):
 
     def _drop_old_pidfiles(self):
         # use items() since the dict is modified in unregister_pidfile()
-        for pidfile_id, info in self._registered_pidfile_info.items():
+        for pidfile_id, info in list(self._registered_pidfile_info.items()):
             if info.age > self._get_max_pidfile_refreshes():
                 logging.warning('dropping leaked pidfile %s', pidfile_id)
                 self.unregister_pidfile(pidfile_id)
@@ -391,14 +391,14 @@ class DroneManager(object):
             if len(lines) == 3:
                 contents.exit_status = int(lines[1])
                 contents.num_tests_failed = int(lines[2])
-        except ValueError, exc:
+        except ValueError as exc:
             return InvalidPidfile('Corrupt pid file: ' + str(exc.args))
 
         return contents
 
 
     def _process_pidfiles(self, drone, pidfiles, store_in_dict):
-        for pidfile_path, contents in pidfiles.iteritems():
+        for pidfile_path, contents in pidfiles.items():
             pidfile_id = PidfileId(pidfile_path)
             contents = self._parse_pidfile(drone, contents)
             store_in_dict[pidfile_id] = contents
@@ -436,7 +436,7 @@ class DroneManager(object):
 
     def _compute_active_processes(self, drone):
         drone.active_processes = 0
-        for pidfile_id, contents in self._pidfiles.iteritems():
+        for pidfile_id, contents in self._pidfiles.items():
             is_running = contents.exit_status is None
             on_this_drone = (contents.process
                              and contents.process.hostname == drone.hostname)
@@ -515,7 +515,7 @@ class DroneManager(object):
         # the agent notices that its process has exited, it unregisters the
         # pidfile from the drone_managers._registered_pidfile_info dict
         # through its epilog.
-        for drone, results_list in all_results.iteritems():
+        for drone, results_list in all_results.items():
             results = results_list[0]
             drone_hostname = drone.hostname.replace('.', '_')
 
@@ -554,9 +554,9 @@ class DroneManager(object):
         if _THREADED_DRONE_MANAGER:
             thread_lib.ThreadedTaskQueue(
                     name='%s.execute_queue' % self._STATS_KEY).execute(
-                            self._drones.values())
+                            list(self._drones.values()))
         else:
-            drone_task_queue.DroneTaskQueue().execute(self._drones.values())
+            drone_task_queue.DroneTaskQueue().execute(list(self._drones.values()))
 
         try:
             self._results_drone.execute_queued_calls()
@@ -904,7 +904,7 @@ class DroneManager(object):
 
     def _write_attached_files(self, results_dir, drone):
         attached_files = self._attached_files.pop(results_dir, {})
-        for file_path, contents in attached_files.iteritems():
+        for file_path, contents in attached_files.items():
             drone.queue_call('write_to_file', self.absolute_path(file_path),
                              contents)
 

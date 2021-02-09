@@ -4,8 +4,8 @@
 
 """Shared functions by dynamic_suite/suite.py & skylab_suite/cros_suite.py."""
 
-from __future__ import division
-from __future__ import print_function
+
+
 
 import datetime
 import logging
@@ -210,7 +210,7 @@ def _get_cf_texts_for_suite_batched(cf_getter, suite_name):
     See get_cf_texts_for_suite for params & returns.
     """
     suite_info = cf_getter.get_suite_info(suite_name=suite_name)
-    files = suite_info.keys()
+    files = list(suite_info.keys())
     filtered_files = _filter_cf_paths(files)
     for path in filtered_files:
         yield path, suite_info[path]
@@ -402,7 +402,7 @@ def filter_tests(tests, predicate=lambda t: True):
     @returns a list of ControlData objects as tests.
     """
     logging.info('Parsed %s child test control files.', len(tests))
-    tests = [test for test in tests.itervalues() if predicate(test)]
+    tests = [test for test in tests.values() if predicate(test)]
     tests.sort(key=lambda t:
                control_data.ControlData.get_test_time_index(t.time),
                reverse=True)

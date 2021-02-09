@@ -20,9 +20,9 @@ Notes:
    expects to check for error code per API definition
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import logging, re
 from client.common_lib import i2c_node

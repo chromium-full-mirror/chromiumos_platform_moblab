@@ -6,7 +6,7 @@ server.
 __author__ = 'showard@google.com (Steve Howard)'
 
 import getpass, os
-from json_rpc import proxy
+from frontend.afe.json_rpc import proxy
 from client.common_lib import utils
 
 

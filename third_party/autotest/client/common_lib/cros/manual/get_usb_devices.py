@@ -10,7 +10,7 @@
 # 5. Check usb devices's interface.
 # 6. Retrieve usb device based on product and manufacture.
 #
-import cStringIO
+import io
 from client.common_lib.cros import textfsm
 
 USB_DEVICES_TPLT = (
@@ -91,9 +91,9 @@ def extract_usb_data(rawdata):
     """
     usbdata = []
     rawdata += '\n'
-    re_table = textfsm.TextFSM(cStringIO.StringIO(USB_DEVICES_TPLT))
+    re_table = textfsm.TextFSM(io.StringIO(USB_DEVICES_TPLT))
     fsm_results = re_table.ParseText(rawdata)
-    usbdata = [dict(zip(re_table.header, row)) for row in fsm_results]
+    usbdata = [dict(list(zip(re_table.header, row))) for row in fsm_results]
     return usbdata
 
 
@@ -224,7 +224,7 @@ def get_dual_speaker(usbdata):
     """
     dual_speaker = None
     speaker_dict = get_speakers(usbdata)
-    for _key in speaker_dict.keys():
+    for _key in list(speaker_dict.keys()):
         if speaker_dict[_key] == 2:
             dual_speaker = _key
             break
@@ -306,16 +306,16 @@ def get_device_prod(vid_pid):
     @param vid_pid: vid and pid combo for device
     @returns: product
     """
-    for _key in SPEAKER_MAP.keys():
+    for _key in list(SPEAKER_MAP.keys()):
         if _key == vid_pid:
             return SPEAKER_MAP[_key]
-    for _key in CAMERA_MAP.keys():
+    for _key in list(CAMERA_MAP.keys()):
         if _key == vid_pid:
             return CAMERA_MAP[_key]
-    for _key in DISPLAY_PANEL_MAP.keys():
+    for _key in list(DISPLAY_PANEL_MAP.keys()):
         if _key == vid_pid:
             return DISPLAY_PANEL_MAP[_key]
-    for _key in TOUCH_PANEL_MAP.keys():
+    for _key in list(TOUCH_PANEL_MAP.keys()):
         if _key == vid_pid:
             return TOUCH_PANEL_MAP[_key]
     return None

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import common
 import sys, os, shutil, optparse, logging
 from client.common_lib import error, utils
@@ -76,7 +76,7 @@ def install_completed_client(compiled_dir, project_client):
         try:
             os.rename(tmp_client_dir, install_dir)
             return True
-        except Exception, err:
+        except Exception as err:
             # If we can't rename the client raise an exception
             # and put the old client back
             shutil.rmtree(install_dir)
@@ -126,7 +126,7 @@ def compile_all_projects(extra_args=''):
        @returns list of failed client installations
     """
     failed_clients = []
-    for project,clients in enumerate_projects().iteritems():
+    for project,clients in enumerate_projects().items():
         for client in clients:
             project_client = '%s.%s' % (project, client)
             if not compile_and_install_client(project_client, extra_args):
@@ -137,7 +137,7 @@ def compile_all_projects(extra_args=''):
 
 def print_projects():
     logging.info('Projects that can be compiled:')
-    for project,clients in enumerate_projects().iteritems():
+    for project,clients in enumerate_projects().items():
         for client in clients:
             logging.info('%s.%s', project, client)
 

@@ -59,12 +59,11 @@ class LocalHost(hosts.Host):
             # CmdTimeoutError is a subclass of CmdError, so must be caught first
             new_error = error.AutotestHostRunTimeoutError(
                     e.command, e.result_obj, additional_text=e.additional_text)
-            raise error.AutotestHostRunTimeoutError, new_error, \
-                    sys.exc_info()[2]
+            raise error.AutotestHostRunTimeoutError(new_error).with_traceback(sys.exc_info()[2])
         except error.CmdError as e:
             new_error = error.AutotestHostRunCmdError(
                     e.command, e.result_obj, additional_text=e.additional_text)
-            raise error.AutotestHostRunCmdError, new_error, sys.exc_info()[2]
+            raise error.AutotestHostRunCmdError(new_error).with_traceback(sys.exc_info()[2])
 
 
     def list_files_glob(self, path_glob):

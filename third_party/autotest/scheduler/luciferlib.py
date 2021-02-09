@@ -442,7 +442,7 @@ def _spawn(path, argv, output_file):
     stderr opened to output_file.
     """
     logger.info('Spawning %r, %r, %r', path, argv, output_file)
-    assert all(isinstance(arg, basestring) for arg in argv)
+    assert all(isinstance(arg, str) for arg in argv)
     pid = os.fork()
     if pid:
         os.waitpid(pid, 0)

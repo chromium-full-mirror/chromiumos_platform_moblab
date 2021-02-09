@@ -430,12 +430,12 @@ def get_android_file_stats(filename):
         '%u': 'uid',
     }
     output = _android_shell(
-        'stat -c "%s" %s' % (' '.join(mapping.keys()), pipes.quote(filename)),
+        'stat -c "%s" %s' % (' '.join(list(mapping.keys())), pipes.quote(filename)),
         ignore_status=True)
     stats = output.split(' ')
     if len(stats) != len(mapping):
       raise error.TestError('Unexpected output from stat: %s' % output)
-    _Stats = collections.namedtuple('_Stats', mapping.values())
+    _Stats = collections.namedtuple('_Stats', list(mapping.values()))
     return _Stats(*stats)
 
 
@@ -483,7 +483,7 @@ def is_android_container_alive():
     """Check if android container is alive."""
     try:
         container_pid = get_container_pid()
-    except Exception, e:
+    except Exception as e:
         logging.error('is_android_container_alive failed: %r', e)
         return False
     return utils.pid_is_alive(int(container_pid))
@@ -561,7 +561,7 @@ def _after_iteration_hook(obj):
                           adb_shell('dumpsys activity recents',
                                     ignore_status=True))
         if not os.path.exists(_SCREENSHOT_DIR_PATH):
-            os.mkdir(_SCREENSHOT_DIR_PATH, 0755)
+            os.mkdir(_SCREENSHOT_DIR_PATH, 0o755)
         obj.num_screenshots += 1
         if obj.num_screenshots <= _MAX_SCREENSHOT_NUM:
             logging.warning('Iteration %d failed, taking a screenshot.',
@@ -862,7 +862,7 @@ class ArcTest(test.test):
 
         # Install apks based on dep_packages/apks/full_pkg_names tuples
         if dep_packages:
-            for i in xrange(len(dep_packages)):
+            for i in range(len(dep_packages)):
                 self._install_apks(dep_packages[i], apks[i], full_pkg_names[i])
 
         if self.uiautomator:

@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 """Extra functions for working with files in the Autotest results directory.
 
@@ -64,4 +64,4 @@ def _keyvals_file(results_dir):
 
 def _format_keyvals(keyvals):
     """Format a dict of keyvals as a string."""
-    return ''.join('%s=%s\n' % (k, v) for k, v in keyvals.iteritems())
+    return ''.join('%s=%s\n' % (k, v) for k, v in keyvals.items())

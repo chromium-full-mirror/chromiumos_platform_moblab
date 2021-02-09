@@ -345,7 +345,7 @@ class AFEHostQueryManager(object):
         id_to_label.update([(label.id, label) for label in host_labels])
         # and pull all the labels on jobs we might look at.
         job_label_set = set()
-        for job_deps in job_dependencies.values():
+        for job_deps in list(job_dependencies.values()):
             job_label_set.update(job_deps)
         # On the rare/impossible chance that no jobs have any labels, we
         # can skip this.
@@ -373,5 +373,5 @@ class AFEHostQueryManager(object):
         self._job_acls = self._get_job_acl_groups(relevant_jobs)
         self._ineligible_hosts = (self._get_job_ineligible_hosts(relevant_jobs))
         self._job_dependencies = (self._get_job_dependencies(relevant_jobs))
-        host_ids = self._hosts_available.keys()
+        host_ids = list(self._hosts_available.keys())
         self._labels = self._get_labels(self._job_dependencies)

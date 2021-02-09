@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -26,9 +26,9 @@ for each input entity.
 
 Import it to ~/file/client/common_lib/cros/.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 __version__ = '0.3.2'
 

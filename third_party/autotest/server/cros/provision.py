@@ -10,6 +10,9 @@ import warnings
 
 import common
 from server.cros import provision_actionables as actionables
+
+import os
+
 from utils import labellib
 from utils.labellib import Key
 
@@ -23,21 +26,21 @@ FW_CR50_RW_VERSION_PREFIX = Key.FIRMWARE_CR50_RW_VERSION
 
 # So far the word cheets is only way to distinguish between ARC and Android
 # build.
-_CROS_ANDROID_BUILD_REGEX = r'.+/cheets.*/P?([0-9]+|LATEST)'
+_CROS_ANDROID_BUILD_REGEX = r".+/cheets.*/P?([0-9]+|LATEST)"
 
 # Special label to skip provision and run reset instead.
-SKIP_PROVISION = 'skip_provision'
+SKIP_PROVISION = "skip_provision"
 
 # Postfix -cheetsth to distinguish ChromeOS build during Cheets provisioning.
-CHEETS_SUFFIX = '-cheetsth'
+CHEETS_SUFFIX = "-cheetsth"
 
 # ChromeOS image archive server address
-CROS_IMAGE_ARCHIVE = 'gs://chromeos-image-archive'
+CROS_IMAGE_ARCHIVE = "gs://chromeos-image-archive"
 
 # ChromeOS firmware branch directory name. %s is for a (base)board name.
-FW_BRANCH_GLOB = 'firmware-%s-[0-9]*.B-firmwarebranch'
+FW_BRANCH_GLOB = "firmware-%s-[0-9]*.B-firmwarebranch"
 
-_Action = collections.namedtuple('_Action', 'name, value')
+_Action = collections.namedtuple("_Action", "name, value")
 
 
 def _get_label_action(str_label):
@@ -94,7 +97,7 @@ def image_version_to_label(image):
     @returns: A string that is the appropriate label name.
 
     """
-    return get_version_label_prefix(image) + ':' + image
+    return get_version_label_prefix(image) + ":" + image
 
 
 def fwro_version_to_label(image):
@@ -105,7 +108,7 @@ def fwro_version_to_label(image):
     @returns: A string that is the appropriate label name.
 
     """
-    warnings.warn('fwro_version_to_label is deprecated', stacklevel=2)
+    warnings.warn("fwro_version_to_label is deprecated", stacklevel=2)
     keyval_label = labellib.KeyvalLabel(Key.FIRMWARE_RO_VERSION, image)
     return labellib.format_keyval_label(keyval_label)
 
@@ -118,7 +121,7 @@ def fwrw_version_to_label(image):
     @returns: A string that is the appropriate label name.
 
     """
-    warnings.warn('fwrw_version_to_label is deprecated', stacklevel=2)
+    warnings.warn("fwrw_version_to_label is deprecated", stacklevel=2)
     keyval_label = labellib.KeyvalLabel(Key.FIRMWARE_RW_VERSION, image)
     return labellib.format_keyval_label(keyval_label)
 
@@ -132,7 +135,7 @@ class _SpecialTaskAction(object):
     _actions = {}
 
     # The name of this special task to be used in output.
-    name = None;
+    name = None
 
     # Some special tasks require to run before others, e.g., ChromeOS image
     # needs to be updated before firmware provision. List `_priorities` defines
@@ -141,7 +144,6 @@ class _SpecialTaskAction(object):
     # This property should be overriden in subclass to define its own priorities
     # across available label prefixes.
     _priorities = []
-
 
     @classmethod
     def acts_on(cls, label):
@@ -154,7 +156,6 @@ class _SpecialTaskAction(object):
         """
         action = _get_label_action(label)
         return action.name in cls._actions
-
 
     @classmethod
     def run_task_actions(cls, job, host, labels):
@@ -171,14 +172,17 @@ class _SpecialTaskAction(object):
         """
         unactionable = cls._filter_unactionable_labels(labels)
         for label in unactionable:
-            job.record('INFO', None, cls.name,
-                       "Can't %s label '%s'." % (cls.name, label))
+            job.record(
+                "INFO",
+                None,
+                cls.name,
+                "Can't %s label '%s'." % (cls.name, label),
+            )
 
         for action_item, value in cls._actions_and_values_iter(labels):
             success = action_item.execute(job=job, host=host, value=value)
             if not success:
                 raise SpecialTaskActionException()
-
 
     @classmethod
     def _actions_and_values_iter(cls, labels):
@@ -195,7 +199,6 @@ class _SpecialTaskAction(object):
             value = keyval_mapping[name]
             yield action_item, value
 
-
     @classmethod
     def _filter_unactionable_labels(cls, labels):
         """
@@ -204,9 +207,11 @@ class _SpecialTaskAction(object):
         @param labels: A list of strings of labels.
         @returns: A set of unactionable labels
         """
-        return {label for label in labels
-                if not (label == SKIP_PROVISION or cls.acts_on(label))}
-
+        return {
+            label
+            for label in labels
+            if not (label == SKIP_PROVISION or cls.acts_on(label))
+        }
 
     @classmethod
     def _filter_actionable_labels(cls, labels):
@@ -217,7 +222,6 @@ class _SpecialTaskAction(object):
         @returns: A set of actionable labels
         """
         return {label for label in labels if cls.acts_on(label)}
-
 
     @classmethod
     def partition(cls, labels):
@@ -245,7 +249,6 @@ class _SpecialTaskAction(object):
 
         return unactionable, actionable
 
-
     @classmethod
     def _get_action_priority(cls, name):
         """Return priority for the action with the given name."""
@@ -262,7 +265,9 @@ class Verify(_SpecialTaskAction):
     """
 
     _actions = {
-        'modem_repair': actionables.TestActionable('cellular_StaleModemReboot'),
+        "modem_repair": actionables.TestActionable(
+            "cellular_StaleModemReboot"
+        ),
         # TODO(crbug.com/404421): set rpm action to power_RPMTest after the RPM
         # is stable in lab (destiny). The power_RPMTest failure led to reset job
         # failure and that left dut in Repair Failed. Since the test will fail
@@ -272,10 +277,10 @@ class Verify(_SpecialTaskAction):
         # Another way to do this is to remove rpm dependency from tests' control
         # file. That will involve changes on multiple control files. This one
         # line change here is a simple temporary fix.
-        'rpm': actionables.TestActionable('dummy_PassServer'),
+        "rpm": actionables.TestActionable("dummy_PassServer"),
     }
 
-    name = 'verify'
+    name = "verify"
 
 
 class Provision(_SpecialTaskAction):
@@ -288,41 +293,44 @@ class Provision(_SpecialTaskAction):
     # correct ChromeOS version label when firmware install occurs. The ChromeOS
     # version label is used for firmware update to stage desired ChromeOS image
     # on to the servo USB stick.
-    _priorities = [CROS_VERSION_PREFIX,
-                   CROS_ANDROID_VERSION_PREFIX,
-                   FW_RO_VERSION_PREFIX,
-                   FW_RW_VERSION_PREFIX,
-                   FW_CR50_RW_VERSION_PREFIX]
+    _priorities = [
+        CROS_VERSION_PREFIX,
+        CROS_ANDROID_VERSION_PREFIX,
+        FW_RO_VERSION_PREFIX,
+        FW_RW_VERSION_PREFIX,
+        FW_CR50_RW_VERSION_PREFIX,
+    ]
 
     # TODO(milleral): http://crbug.com/249555
     # Create some way to discover and register provisioning tests so that we
     # don't need to hand-maintain a list of all of them.
     _actions = {
-            CROS_VERSION_PREFIX:
-            actionables.TestActionable(
-                    'provision_QuickProvision',
-                    extra_kwargs={
-                            'disable_sysinfo': False,
-                            'disable_before_test_sysinfo': False,
-                            'disable_before_iteration_sysinfo': True,
-                            'disable_after_test_sysinfo': True,
-                            'disable_after_iteration_sysinfo': True
-                    }),
-            CROS_ANDROID_VERSION_PREFIX:
-            actionables.TestActionable('provision_CheetsUpdate'),
-            FW_RO_VERSION_PREFIX:
-            actionables.TestActionable('provision_FirmwareUpdate'),
-            FW_RW_VERSION_PREFIX:
-            actionables.TestActionable('provision_FirmwareUpdate',
-                                       extra_kwargs={
-                                               'rw_only': True,
-                                               'tag': 'rw_only'
-                                       }),
-            FW_CR50_RW_VERSION_PREFIX:
-            actionables.TestActionable('provision_Cr50TOT')
+        CROS_VERSION_PREFIX: actionables.TestActionable(
+            "provision_QuickProvision",
+            extra_kwargs={
+                "disable_sysinfo": False,
+                "disable_before_test_sysinfo": False,
+                "disable_before_iteration_sysinfo": True,
+                "disable_after_test_sysinfo": True,
+                "disable_after_iteration_sysinfo": True,
+            },
+        ),
+        CROS_ANDROID_VERSION_PREFIX: actionables.TestActionable(
+            "provision_CheetsUpdate"
+        ),
+        FW_RO_VERSION_PREFIX: actionables.TestActionable(
+            "provision_FirmwareUpdate"
+        ),
+        FW_RW_VERSION_PREFIX: actionables.TestActionable(
+            "provision_FirmwareUpdate",
+            extra_kwargs={"rw_only": True, "tag": "rw_only"},
+        ),
+        FW_CR50_RW_VERSION_PREFIX: actionables.TestActionable(
+            "provision_Cr50TOT"
+        ),
     }
 
-    name = 'provision'
+    name = "provision"
 
 
 class Cleanup(_SpecialTaskAction):
@@ -332,10 +340,10 @@ class Cleanup(_SpecialTaskAction):
     """
 
     _actions = {
-        'cleanup-reboot': actionables.RebootActionable(),
+        "cleanup-reboot": actionables.RebootActionable(),
     }
 
-    name = 'cleanup'
+    name = "cleanup"
 
 
 # TODO(ayatane): This class doesn't do anything.  It's safe to remove
@@ -348,10 +356,9 @@ class Repair(_SpecialTaskAction):
     a good state.
     """
 
-    _actions = {
-    }
+    _actions = {}
 
-    name = 'repair'
+    name = "repair"
 
 
 # TODO(milleral): crbug.com/364273
@@ -368,11 +375,13 @@ def is_for_special_action(label):
     @return True if any special task handles this label specially,
             False if no special task handles this label.
     """
-    return (Verify.acts_on(label) or
-            Provision.acts_on(label) or
-            Cleanup.acts_on(label) or
-            Repair.acts_on(label) or
-            label == SKIP_PROVISION)
+    return (
+        Verify.acts_on(label)
+        or Provision.acts_on(label)
+        or Cleanup.acts_on(label)
+        or Repair.acts_on(label)
+        or label == SKIP_PROVISION
+    )
 
 
 def join(provision_type, provision_value):
@@ -387,7 +396,7 @@ def join(provision_type, provision_value):
     'cros-version:lumpy-release/R27-3773.0.0'
 
     """
-    return '%s:%s' % (provision_type, provision_value)
+    return "%s:%s" % (provision_type, provision_value)
 
 
 class SpecialTaskActionException(Exception):

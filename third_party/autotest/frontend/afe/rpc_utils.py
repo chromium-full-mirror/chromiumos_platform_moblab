@@ -25,6 +25,7 @@ from client.common_lib.cros import dev_server
 from server import utils as server_utils
 from server.cros import provision
 from server.cros.dynamic_suite import frontend_wrappers
+from functools import reduce
 
 NULL_DATETIME = datetime.datetime.max
 NULL_DATE = datetime.date.max
@@ -74,7 +75,7 @@ def _prepare_data(data):
     """
     if isinstance(data, dict):
         new_data = {}
-        for key, value in data.iteritems():
+        for key, value in data.items():
             new_data[key] = _prepare_data(value)
         return new_data
     elif (isinstance(data, list) or isinstance(data, tuple) or
@@ -96,7 +97,7 @@ def fetchall_as_list_of_dicts(cursor):
     @returns: A list of each row in the cursor as a dictionary.
     """
     desc = cursor.description
-    return [ dict(zip([col[0] for col in desc], row))
+    return [ dict(list(zip([col[0] for col in desc], row)))
              for row in cursor.fetchall() ]
 
 
@@ -113,7 +114,7 @@ def _gather_unique_dicts(dict_iterable):
     objects = collections.OrderedDict()
     for obj in dict_iterable:
         objects.setdefault(obj['id'], obj)
-    return objects.values()
+    return list(objects.values())
 
 
 def extra_job_status_filters(not_yet_run=False, running=False, finished=False):
@@ -225,7 +226,7 @@ def afe_test_dict_to_test_object(test_dict):
         return test_dict
 
     numerized_dict = {}
-    for key, value in test_dict.iteritems():
+    for key, value in test_dict.items():
         try:
             numerized_dict[key] = int(value)
         except (ValueError, TypeError):
@@ -242,7 +243,7 @@ def _check_is_server_test(test_type):
     @returns A boolean to identify if the test type is server test.
     """
     if test_type is not None:
-        if isinstance(test_type, basestring):
+        if isinstance(test_type, str):
             try:
                 test_type = control_data.CONTROL_TYPE.get_value(test_type)
             except AttributeError:
@@ -262,7 +263,7 @@ def prepare_generate_control_file(tests, profilers, db_tests=True):
     # ensure tests are all the same type
     try:
         test_type = get_consistent_value(test_objects, 'test_type')
-    except InconsistencyException, exc:
+    except InconsistencyException as exc:
         test1, test2 = exc.args
         raise model_logic.ValidationError(
             {'tests' : 'You cannot run both test_suites and server-side '
@@ -482,7 +483,7 @@ def get_job_info(job, preserve_metahosts=False, queue_entry_filter_data=None):
 def check_for_duplicate_hosts(host_objects):
     host_counts = collections.Counter(host_objects)
     duplicate_hostnames = {host.hostname
-                           for host, count in host_counts.iteritems()
+                           for host, count in host_counts.items()
                            if count > 1}
     if duplicate_hostnames:
         raise model_logic.ValidationError(
@@ -854,7 +855,7 @@ def _allowed_hosts_for_primary_job(host_objects):
     if num_shards > 1:
         return False
     if num_shards == 1:
-        hosts_on_shard = shard_host_map.values()[0]
+        hosts_on_shard = list(shard_host_map.values())[0]
         assert len(hosts_on_shard) <= len(host_objects)
         return len(hosts_on_shard) == len(host_objects)
     else:
@@ -1056,7 +1057,7 @@ def forward_single_host_rpc_to_shard(func):
             shard_hostname = host.shard.hostname
         ret = func(**kwargs)
         if shard_hostname and not server_utils.is_shard():
-            run_rpc_on_multiple_hostnames(func.func_name,
+            run_rpc_on_multiple_hostnames(func.__name__,
                                           [shard_hostname],
                                           **kwargs)
         return ret
@@ -1079,7 +1080,7 @@ def fanout_rpc(host_objs, rpc_name, include_hostnames=True, **kwargs):
     shard_host_map = bucket_hosts_by_shard(host_objs)
 
     # Execute the rpc against the appropriate shards.
-    for shard, hostnames in shard_host_map.iteritems():
+    for shard, hostnames in shard_host_map.items():
         if include_hostnames:
             kwargs['hosts'] = hostnames
         try:
@@ -1088,7 +1089,7 @@ def fanout_rpc(host_objs, rpc_name, include_hostnames=True, **kwargs):
             ei = sys.exc_info()
             new_exc = error.RPCException('RPC %s failed on shard %s due to '
                     '%s: %s' % (rpc_name, shard, ei[0].__name__, ei[1]))
-            raise new_exc.__class__, new_exc, ei[2]
+            raise new_exc.__class__(new_exc).with_traceback(ei[2])
 
 
 def run_rpc_on_multiple_hostnames(rpc_call, shard_hostnames, **kwargs):

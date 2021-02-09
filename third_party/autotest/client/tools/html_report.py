@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 """
 Module used to parse the autotest job results and generate an HTML report.
 
@@ -7,9 +7,9 @@ Module used to parse the autotest job results and generate an HTML report.
 @author: Dror Russo (drusso@redhat.com)
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 import os, sys, re, getopt, time, datetime, subprocess
 import common
 
@@ -1349,7 +1349,7 @@ function processList(ul) {
         }
       }
       var s= document.createElement("SPAN");
-      var t= '\u00A0'; // &nbsp;
+      var t= '\\u00A0'; // &nbsp;
       s.className = nodeLinkClass;
       if (subLists) {
         // This LI has UL's in it, so it's a +/- node

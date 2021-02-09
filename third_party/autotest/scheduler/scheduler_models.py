@@ -131,7 +131,7 @@ class DBObject(object):
             instance = cls._instances_by_type_and_id.get((cls, id))
             if instance:
                 return instance
-        return super(DBObject, cls).__new__(cls, id=id, **kwargs)
+        return super().__new__(cls)
 
 
     def __init__(self, id=None, row=None, new_record=False, always_query=True):
@@ -202,7 +202,7 @@ class DBObject(object):
         """
         self._assert_row_length(row)
         differences = {}
-        for field, row_value in itertools.izip(self._fields, row):
+        for field, row_value in zip(self._fields, row):
             current_value = getattr(self, field)
             if (isinstance(current_value, datetime.datetime)
                 and isinstance(row_value, datetime.datetime)):
@@ -223,7 +223,7 @@ class DBObject(object):
         self._assert_row_length(row)
 
         self._valid_fields = set()
-        for field, value in itertools.izip(self._fields, row):
+        for field, value in zip(self._fields, row):
             setattr(self, field, value)
             self._valid_fields.add(field)
 
@@ -749,7 +749,7 @@ class HostQueueEntry(DBObject):
         status_counts = models.Job.objects.get_status_counts(
                 [self.job.id])[self.job.id]
         status = ', '.join('%d %s' % (count, status) for status, count
-                    in status_counts.iteritems())
+                    in status_counts.items())
 
         subject, body = self._get_status_email_contents(status, summary, None)
 

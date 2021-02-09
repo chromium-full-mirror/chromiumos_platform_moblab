@@ -2,16 +2,12 @@
 # pylint: disable-msg=C0111
 # Copyright 2008 Google Inc. Released under the GPL v2
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
+
+
+import ast
 import warnings
-with warnings.catch_warnings():
-    # The 'compiler' module is gone in Python 3.0.  Let's not say
-    # so in every log file.
-    warnings.simplefilter("ignore", DeprecationWarning)
-    import compiler
+
 import logging
 import textwrap
 import re
@@ -323,16 +319,16 @@ class ControlData(object):
 
 
 def _extract_const(expr):
-    assert(expr.__class__ == compiler.ast.Const)
-    assert(expr.value.__class__ in (str, int, float, six.text_type))
-    return str(expr.value).strip()
+    assert(expr.__class__ == ast.Str)
+    return str(expr.s).strip()
 
 
 def _extract_dict(expr):
-    assert(expr.__class__ == compiler.ast.Dict)
-    assert(expr.items.__class__ == list)
+    assert(expr.__class__ == ast.Dict)
+    assert(expr.keys.__class__ == list)
+    assert(expr.values.__class__ == list)
     cf_dict = {}
-    for key, value in expr.items:
+    for key, value in zip(expr.keys, expr.values):
         try:
             key = _extract_const(key)
             val = _extract_expression(value)
@@ -344,9 +340,9 @@ def _extract_dict(expr):
 
 
 def _extract_list(expr):
-    assert(expr.__class__ == compiler.ast.List)
+    assert(expr.__class__ == ast.List)
     list_values = []
-    for value in expr.nodes:
+    for value in expr.elts:
         try:
             list_values.append(_extract_expression(value))
         except (AssertionError, ValueError):
@@ -355,33 +351,33 @@ def _extract_list(expr):
 
 
 def _extract_name(expr):
-    assert(expr.__class__ == compiler.ast.Name)
+    assert(expr.__class__ == ast.Name)
     assert(expr.name in ('False', 'True', 'None'))
     return str(expr.name)
 
 
 def _extract_expression(expr):
-    if expr.__class__ == compiler.ast.Const:
+    if expr.__class__ == ast.Str:
         return _extract_const(expr)
-    if expr.__class__ == compiler.ast.Name:
+    if expr.__class__ == ast.Name:
         return _extract_name(expr)
-    if expr.__class__ == compiler.ast.Dict:
+    if expr.__class__ == ast.Dict:
         return _extract_dict(expr)
-    if expr.__class__ == compiler.ast.List:
+    if expr.__class__ == ast.List:
         return _extract_list(expr)
     raise ValueError('Unknown rval %s' % expr)
 
 
 def _extract_assignment(n):
-    assert(n.__class__ == compiler.ast.Assign)
-    assert(n.nodes.__class__ == list)
-    assert(len(n.nodes) == 1)
-    assert(n.nodes[0].__class__ == compiler.ast.AssName)
-    assert(n.nodes[0].flags.__class__ == str)
-    assert(n.nodes[0].name.__class__ == str)
+    assert(n.__class__ == ast.Assign)
+    assert(n.targets.__class__ == list)
+    assert(len(n.targets) == 1)
+    assert(n.targets[0].__class__ == ast.Name)
+    #assert(n.targets[0].flags.__class__ == str)
+    assert(n.targets[0].id.__class__ == str)
 
-    val = _extract_expression(n.expr)
-    key = n.nodes[0].name.lower()
+    val = _extract_expression(n.value)
+    key = n.targets[0].id.lower()
 
     return (key, val)
 
@@ -396,7 +392,7 @@ def parse_control_string(control, raise_warnings=False, path=''):
 
     """
     try:
-        mod = compiler.parse(control)
+        mod = ast.parse(control)
     except SyntaxError as e:
         logging.error('Syntax error (%s) while parsing control string:', e)
         lines = control.split('\n')
@@ -408,7 +404,8 @@ def parse_control_string(control, raise_warnings=False, path=''):
 
 def parse_control(path, raise_warnings=False):
     try:
-        mod = compiler.parseFile(path)
+        control = open(path).read()
+        mod = ast.parse(control)
     except SyntaxError as e:
         raise ControlVariableException("Error parsing %s because %s" %
                                        (path, e))
@@ -429,14 +426,14 @@ def _try_extract_assignment(node, variables):
 
 
 def finish_parse(mod, path, raise_warnings):
-    assert(mod.__class__ == compiler.ast.Module)
-    assert(mod.node.__class__ == compiler.ast.Stmt)
-    assert(mod.node.nodes.__class__ == list)
+    assert(mod.__class__ == ast.Module)
+    #assert(mod.node.__class__ == ast.Stmt)
+    assert(mod.body.__class__ == list)
 
     variables = {}
     injection_variables = {}
-    for n in mod.node.nodes:
-        if (n.__class__ == compiler.ast.Function and
+    for n in mod.body:
+        if (n.__class__ == ast.FunctionDef and
             re.match('step\d+', n.name)):
             vars_in_step = {}
             for sub_node in n.code.nodes:

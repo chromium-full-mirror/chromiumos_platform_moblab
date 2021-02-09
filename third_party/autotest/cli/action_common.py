@@ -41,7 +41,7 @@ For 'atest label add':
 
 """
 
-from __future__ import print_function
+
 
 import types
 from cli import topic_common
@@ -80,13 +80,13 @@ class atest_list(topic_common.atest):
     def check_for_wildcard(self, filters, check_results):
         """Check if there is a wilcard (only * for the moment)
         and replace the request appropriately"""
-        for (key, values) in filters.iteritems():
-            if isinstance(values, types.StringTypes):
+        for (key, values) in filters.items():
+            if isinstance(values, (str,)):
                 self._convert_name_wildcard(key, values,
                                             filters, check_results)
                 continue
 
-            if isinstance(values, types.ListType):
+            if isinstance(values, list):
                 if len(values) == 1:
                     self._convert_in_wildcard(key, values[0],
                                               filters, check_results)
@@ -109,7 +109,7 @@ class atest_list(topic_common.atest):
 
         results = self.execute_rpc(op, **filters)
 
-        for dbkey in filters.keys():
+        for dbkey in list(filters.keys()):
             if not check_results.get(dbkey, None):
                 # Don't want to check the results
                 # for this key
@@ -261,14 +261,14 @@ class atest_add_or_remove(topic_common.atest):
 
         results = {}
         for thing in self.add_remove_things:
-            things_ok = [item for item, what in oks.items() if thing in what]
+            things_ok = [item for item, what in list(oks.items()) if thing in what]
             results[thing] = things_ok
 
         return results
 
 
     def output(self, results):
-        for thing, single_thing in self.add_remove_things.iteritems():
+        for thing, single_thing in self.add_remove_things.items():
             # Enclose each of the elements in a single quote.
             things_ok = ["'%s'" % t for t in results[thing]]
             if things_ok:

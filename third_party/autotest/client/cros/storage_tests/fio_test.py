@@ -186,7 +186,7 @@ class FioTest(test.test):
                 fd = os.open(self.__filename, os.O_RDWR)
                 fcntl.ioctl(fd, self.IOCTL_TRIM_CMD,
                             struct.pack('QQ', 0, self.__filesize))
-            except IOError, err:
+            except IOError as err:
                 logging.info("blkdiscard failed %s", err)
                 pass
             finally:
@@ -220,7 +220,7 @@ class FioTest(test.test):
                                 'device': self.__description})
         logging.info('Device Description: %s', self.__description)
         self.write_perf_keyval(results)
-        for k, v in results.iteritems():
+        for k, v in results.items():
             if k.endswith('_error'):
                 self._error_code = int(v)
                 if self._error_code != 0 and self._fail_count == 0:

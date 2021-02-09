@@ -51,7 +51,7 @@ class ResourceDelegate(object):
 
     def get_data_vals(self):
         """Returns a list of all data values."""
-        return self._data.values()
+        return list(self._data.values())
 
 
     def del_data_val(self, id, api_key):

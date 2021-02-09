@@ -101,20 +101,19 @@ class RDBRequestMeta(type):
         return type.__new__(cls, name, bases, dctn)
 
 
-class RDBRequest(object):
+class RDBRequest(object, metaclass=RDBRequestMeta):
     """Base class for an rdb request.
 
     All classes inheriting from RDBRequest will need to specify a list of
     request_args necessary to create the request, and will in turn get a
     request that the rdb understands.
     """
-    __metaclass__ = RDBRequestMeta
-    __slots__ = set(['_request_args', '_request'])
+    #__slots__ = set(['_request_args', '_request'])
     _request_args = set([])
 
 
     def __init__(self, **kwargs):
-        for key,value in kwargs.iteritems():
+        for key,value in kwargs.items():
             try:
                 hash(value)
             except TypeError as e:
@@ -125,7 +124,7 @@ class RDBRequest(object):
             self._request = self.template(**kwargs)
         except TypeError:
             raise rdb_utils.RDBException('Creating %s requires args %s got %s' %
-                    (self.__class__, self.template._fields, kwargs.keys()))
+                    (self.__class__, self.template._fields, list(kwargs.keys())))
 
 
     def get_request(self):
@@ -173,7 +172,7 @@ class UpdateHostRequest(HostRequest):
             kwargs['payload'] = HashableDict(kwargs['payload'])
         except (KeyError, TypeError) as e:
             raise rdb_utils.RDBException('Creating %s requires args %s got %s' %
-                    (self.__class__, self.template._fields, kwargs.keys()))
+                    (self.__class__, self.template._fields, list(kwargs.keys())))
         super(UpdateHostRequest, self).__init__(**kwargs)
 
 
@@ -208,7 +207,7 @@ class AcquireHostRequest(HostRequest):
                 kwargs['parent_job_id'] = 0
         except (KeyError, TypeError) as e:
             raise rdb_utils.RDBException('Creating %s requires args %s got %s' %
-                    (self.__class__, self.template._fields, kwargs.keys()))
+                    (self.__class__, self.template._fields, list(kwargs.keys())))
         super(AcquireHostRequest, self).__init__(**kwargs)
 
 

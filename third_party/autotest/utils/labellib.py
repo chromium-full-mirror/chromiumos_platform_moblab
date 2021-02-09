@@ -86,7 +86,7 @@ class LabelsMapping(collections.MutableMapping):
         """Return labels as a list of strings."""
         str_labels = self._plain_labels[:]
         keyval_labels = (KeyvalLabel(key, value)
-                         for key, value in self.iteritems())
+                         for key, value in self.items())
         str_labels.extend(format_keyval_label(label)
                           for label in keyval_labels)
         return str_labels

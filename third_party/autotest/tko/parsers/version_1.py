@@ -173,7 +173,7 @@ class perf_value_iteration(models.perf_value_iteration):
         value = perf_dict['value']
         perf_dict['stddev'] = 0.0
         if isinstance(value, list):
-            value, stddev = mean_and_standard_deviation(map(float, value))
+            value, stddev = mean_and_standard_deviation(list(map(float, value)))
             perf_dict['value'] = value
             perf_dict['stddev'] = stddev
 
@@ -370,7 +370,7 @@ class parser(base.parser):
                     reason = 'Job aborted unexpectedly'
 
                 timestamp = line.optional_fields.get('timestamp')
-                for i in reversed(xrange(stack.size())):
+                for i in reversed(range(stack.size())):
                     if abort_subdir_stack:
                         subdir = abort_subdir_stack.pop()
                     else:

@@ -28,6 +28,7 @@ import subprocess
 import tempfile
 import time
 import uuid
+import io
 
 from client.common_lib import error
 from client.common_lib import magic
@@ -542,7 +543,7 @@ def get_meminfo():
                 else:
                     name = m.group(1)
                 info[name] = int(m.group(3))
-    return collections.namedtuple('MemInfo', info.keys())(**info)
+    return collections.namedtuple('MemInfo', list(info.keys()))(**info)
 
 
 def sysctl(key, value=None):
@@ -608,8 +609,8 @@ def dump_object(object):
 
     kind of like dir()
     """
-    for item in object.__dict__.iteritems():
-        print item
+    for item in object.__dict__.items():
+        print(item)
         try:
             (key, value) = item
             dump_object(value)
@@ -619,7 +620,7 @@ def dump_object(object):
 
 def environ(env_key):
     """return the requested environment variable, or '' if unset"""
-    if (os.environ.has_key(env_key)):
+    if (env_key in os.environ):
         return os.environ[env_key]
     else:
         return ''
@@ -1033,7 +1034,7 @@ def get_storage_statistics(device=None):
     match = _IOSTAT_RE.search(output)
     if not match:
         raise ValueError('Unable to get iostat for %s' % device)
-    return dict(zip(_IOSTAT_FIELDS, map(float, match.groups())))
+    return dict(list(zip(_IOSTAT_FIELDS, list(map(float, match.groups())))))
 
 
 def load_module(module_name, params=None):
@@ -1239,18 +1240,16 @@ class Crossystem(object):
 
     def init(self):
         self.cros_system_data = {}
-        (_, fname) = tempfile.mkstemp()
-        f = open(fname, 'w')
+        f = io.BytesIO()
         self._client.run('crossystem', stdout_tee=f)
-        f.close()
-        text = utils.read_file(fname)
+        f.seek(0)
+        text = f.read().encode('utf-8')
         for line in text.splitlines():
             assignment_string = line.split('#')[0]
             if not assignment_string.count('='):
                 continue
             (name, value) = assignment_string.split('=', 1)
             self.cros_system_data[name.strip()] = value.strip()
-        os.remove(fname)
 
     def __getattr__(self, name):
         """
@@ -1701,9 +1700,9 @@ def compute_active_cpu_time(cpu_usage_start, cpu_usage_end):
     to calculate usage given two /proc/stat snapshots.
     """
     idle_cols = ('idle', 'iowait')  # All other cols are calculated as active.
-    time_active_start = sum([x[1] for x in cpu_usage_start.iteritems()
+    time_active_start = sum([x[1] for x in cpu_usage_start.items()
                              if x[0] not in idle_cols])
-    time_active_end = sum([x[1] for x in cpu_usage_end.iteritems()
+    time_active_end = sum([x[1] for x in cpu_usage_end.items()
                            if x[0] not in idle_cols])
     total_time_start = sum(cpu_usage_start.values())
     total_time_end = sum(cpu_usage_end.values())
@@ -2590,7 +2589,7 @@ def recursive_func(obj, func, types, sequence_types=(list, tuple, set),
         result_lst = [
                 (recursive_func(key, func, types, fix_num_key=fix_num_key),
                  recursive_func(value, func, types, fix_num_key=fix_num_key))
-                for (key, value) in obj.items()]
+                for (key, value) in list(obj.items())]
         # Convert the result list to the object's original dict type.
         return type(obj)(result_lst)
     # Here are the basic types.
@@ -2673,7 +2672,7 @@ def base64_recursive_encode(obj):
 
     @return: the base64 encoded object.
     """
-    encode_types = (basestring, bytearray)
+    encode_types = (str, bytearray)
     return recursive_func(obj, base64.standard_b64encode, encode_types)
 
 
@@ -2684,6 +2683,6 @@ def base64_recursive_decode(obj):
 
     @return: the base64 decoded object.
     """
-    decode_types = (basestring,)
+    decode_types = (str,)
     return recursive_func(obj, base64.standard_b64decode, decode_types,
                           fix_num_key=True)

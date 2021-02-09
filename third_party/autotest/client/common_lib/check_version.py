@@ -31,7 +31,7 @@ class check_python_version:
                 self.restart()
 
 
-    PYTHON_BIN_GLOB_STRINGS = ['/usr/bin/python2*', '/usr/local/bin/python2*']
+    PYTHON_BIN_GLOB_STRINGS = ['/usr/bin/python3*', '/usr/local/bin/python3*']
 
 
     def find_desired_python(self):

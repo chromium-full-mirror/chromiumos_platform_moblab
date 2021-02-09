@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import utils
+from client.common_lib import utils
 
 
 class base_host_attributes(object):

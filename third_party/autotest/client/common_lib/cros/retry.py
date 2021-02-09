@@ -253,7 +253,7 @@ def retry(ExceptionToCheck, timeout_min=1.0, delay_sec=3, raiselist=None,
             # Raise the cached exception with original backtrace.
             if exception_to_raise:
                 raise exception_to_raise('%s: %s' % (exc_info[0], exc_info[1]))
-            raise exc_info[0], exc_info[1], exc_info[2]
+            raise exc_info[0](exc_info[1]).with_traceback(exc_info[2])
 
 
         return func_retry  # true decorator

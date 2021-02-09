@@ -133,7 +133,7 @@ class shard_delete(action_common.atest_delete, shard):
 
 
     def execute(self, *args, **kwargs):
-        print 'Please ensure the shard host is powered off.'
+        print('Please ensure the shard host is powered off.')
         print ('Otherwise DUTs might be used by multiple shards at the same '
                'time, which will lead to serious correctness problems.')
         return super(shard_delete, self).execute(*args, **kwargs)
@@ -179,4 +179,4 @@ class shard_remove_board(shard):
 
         @param results: Results of rpc execution.
         """
-        print results
+        print(results)

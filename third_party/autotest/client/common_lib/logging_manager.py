@@ -129,11 +129,6 @@ def _logging_manager_aware_logger__find_caller(unused):
     return rv
 
 
-if sys.version_info[:2] > (2, 7):
-    warnings.warn('This module has not been reviewed for Python %s' %
-                  sys.version)
-
-
 # Monkey patch our way around logging's design...
 _original_logger__find_caller = logging.Logger.findCaller
 # Do not overwrite in Python 3 and on. It breaks the "<module>:<line num>|"
@@ -171,6 +166,8 @@ class LoggingFile(object):
         store it in a buffer and wait until we have a complete line.
         @param data - Raw data (a string) that will be processed.
         """
+        if isinstance(data, bytes):
+            data = data.decode("utf-8")
         # splitlines() discards a trailing blank line, so use split() instead
         data_lines = data.split('\n')
         if len(data_lines) > 1:

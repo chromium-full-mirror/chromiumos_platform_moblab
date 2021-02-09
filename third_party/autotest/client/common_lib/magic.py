@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 """
 Library used to determine a file MIME type by its magic number, it doesn't have
 any external dependencies. Based on work of Jason Petrone (jp_py@jsnp.net),
@@ -18,9 +18,9 @@ API Usage:
 @see: http://www.jsnp.net/code/magic.py
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 from six.moves import range
 import logging, optparse, os, re, sys, string, struct

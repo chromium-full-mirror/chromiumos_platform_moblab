@@ -13,12 +13,12 @@ must be logged in with an @google.com account to view chromeOS perf data there.
 
 """
 
-import httplib
+import http.client
 import json
 import os
 import re
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 import common
 from tko import utils as tko_utils
@@ -263,18 +263,18 @@ def _send_to_dashboard(data_obj):
     @raises PerfUploadingError if an exception was raised when uploading.
 
     """
-    encoded = urllib.urlencode(data_obj)
-    req = urllib2.Request(_DASHBOARD_UPLOAD_URL, encoded)
+    encoded = urllib.parse.urlencode(data_obj)
+    req = urllib.request.Request(_DASHBOARD_UPLOAD_URL, encoded)
     try:
-        urllib2.urlopen(req)
-    except urllib2.HTTPError as e:
+        urllib.request.urlopen(req)
+    except urllib.error.HTTPError as e:
         raise PerfUploadingError('HTTPError: %d %s for JSON %s\n' % (
                 e.code, e.msg, data_obj['data']))
-    except urllib2.URLError as e:
+    except urllib.error.URLError as e:
         raise PerfUploadingError(
                 'URLError: %s for JSON %s\n' %
                 (str(e.reason), data_obj['data']))
-    except httplib.HTTPException:
+    except http.client.HTTPException:
         raise PerfUploadingError(
                 'HTTPException for JSON %s\n' % data_obj['data'])
 

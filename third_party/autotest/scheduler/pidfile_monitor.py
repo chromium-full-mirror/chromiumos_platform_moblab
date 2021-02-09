@@ -144,7 +144,7 @@ class PidfileRunMonitor(object):
         """
         try:
             self._get_pidfile_info_helper()
-        except self._PidfileException, exc:
+        except self._PidfileException as exc:
             self._handle_pidfile_error('Pidfile error', traceback.format_exc())
 
 

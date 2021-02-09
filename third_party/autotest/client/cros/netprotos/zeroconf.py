@@ -28,7 +28,7 @@ DEFAULT_WEIGHT = 500
 def _RR_equals(rra, rrb):
     """Returns whether the two dpkt.dns.DNS.RR objects are equal."""
     # Compare all the members present in either object and on any RR object.
-    keys = set(rra.__dict__.keys() + rrb.__dict__.keys() +
+    keys = set(list(rra.__dict__.keys()) + list(rrb.__dict__.keys()) +
                dpkt.dns.DNS.RR.__slots__)
     # On RR objects, rdata is packed based on the other members and the final
     # packed string depends on other RR and Q elements on the same DNS/mDNS
@@ -149,7 +149,7 @@ class ZeroconfDaemon(object):
                     answers += QUERY_HANDLERS[q.type](q)
                 elif q.type == dpkt.dns.DNS_ANY:
                     # Special type matching any known type.
-                    for _, handler in QUERY_HANDLERS.iteritems():
+                    for _, handler in QUERY_HANDLERS.items():
                         answers += handler(q)
             # Remove all the already known answers from the list.
             answers = [ans for ans in answers if not any(True
@@ -436,7 +436,7 @@ class ZeroconfDaemon(object):
         if not rrtype in self._peer_records[rrname]:
             return []
         res = []
-        for data, data_ts in self._peer_records[rrname][rrtype].iteritems():
+        for data, data_ts in self._peer_records[rrname][rrtype].items():
             if data_ts >= timestamp:
                 res.append(DnsRecord(rrname, rrtype, data, data_ts))
         return res

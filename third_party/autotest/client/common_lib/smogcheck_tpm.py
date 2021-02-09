@@ -170,7 +170,7 @@ class TpmController(object):
         logging.info('Attempt to load shared library %s', TSPI_C_LIB)
         try:
             self.tspi_lib = cdll.LoadLibrary(TSPI_C_LIB)
-        except OSError, e:
+        except OSError as e:
             raise SmogcheckError('Error loading C library %s: %r' %
                                  (TSPI_C_LIB, e))
         logging.info('Successfully loaded shared library %s', TSPI_C_LIB)

@@ -44,7 +44,7 @@ def color_keys_row():
     ### This function does not require maintenance in case of
     ### color_map augmenting - as long as
     ### color keys for box shading have names that end with 'pct'
-    keys = filter(lambda key: key.endswith('pct'), color_map.keys())
+    keys = [key for key in list(color_map.keys()) if key.endswith('pct')]
     def num_pct(key):
         return int(key.replace('pct',''))
     keys.sort(key=num_pct)
@@ -53,7 +53,7 @@ def color_keys_row():
         html+= "\t\t\t<td bgcolor =%s>&nbsp;&nbsp;&nbsp;</td>\n"\
                         % color_map[key]
         hint = key.replace('pct',' %')
-        if hint[0]<>'0': ## anything but 0 %
+        if hint[0]!='0': ## anything but 0 %
             hint = 'to ' + hint
         html+= "\t\t\t<td> %s </td>\n" % hint
 
@@ -114,7 +114,7 @@ class box:
             self.data = calculate_html(link, data, tooltip,
                                        row_label, column_label)
 
-        if color_map.has_key(color_key):
+        if color_key in color_map:
             self.color = color_map[color_key]
         elif header:
             self.color = color_map['header']
@@ -156,7 +156,7 @@ def grade_from_status(status_idx, status):
 def average_grade_from_status_count(status_idx, status_count):
     average_grade = 0
     total_count = 0
-    for key in status_count.keys():
+    for key in list(status_count.keys()):
         if key not in (status_idx['TEST_NA'], status_idx['RUNNING']):
             average_grade += (grade_from_status(status_idx, key)
                                     * status_count[key])
@@ -210,9 +210,9 @@ def status_html(db, box_data, shade):
     status_count_subset[running] = 0  # Don't count RUNNING
     html = "%d&nbsp;/&nbsp;%d " % (status_count_subset.get(good, 0),
                                    sum(status_count_subset.values()))
-    if test_na in box_data.status_count.keys():
+    if test_na in list(box_data.status_count.keys()):
         html += ' (%d&nbsp;N/A)' % box_data.status_count[test_na]
-    if running in box_data.status_count.keys():
+    if running in list(box_data.status_count.keys()):
         html += ' (%d&nbsp;running)' % box_data.status_count[running]
 
     if box_data.reasons_list:
@@ -230,7 +230,7 @@ def status_html(db, box_data, shade):
             html += '<br>' + reason
 
     tooltip = ""
-    for status in sorted(box_data.status_count.keys(), reverse = True):
+    for status in sorted(list(box_data.status_count.keys()), reverse = True):
         status_word = db.status_word[status]
         tooltip += "%d %s " % (box_data.status_count[status], status_word)
     return (html,tooltip)
@@ -278,15 +278,15 @@ def print_table(matrix):
     Display the given matrix of data as a table.
     """
 
-    print ('<table bgcolor="%s" cellspacing="1" cellpadding="5" '
+    print(('<table bgcolor="%s" cellspacing="1" cellpadding="5" '
            'style="margin-right: 200px;">') % (
-           color_map['borders'])
+           color_map['borders']))
     for row in matrix:
-        print '<tr>'
+        print('<tr>')
         for element in row:
-            print element.html()
-        print '</tr>'
-    print '</table>'
+            print(element.html())
+        print('</tr>')
+    print('</table>')
 
 
 def print_main_header():
@@ -312,13 +312,13 @@ background-color:#fff; color:#000;
 text-align: left
 }
 """
-    print '<head><style type="text/css">'
-    print 'a { text-decoration: none }'
-    print hover_css
-    print '</style></head>'
-    print '<h2>'
-    print '<a href="compose_query.cgi">Functional</a>'
-    print '&nbsp&nbsp&nbsp'
+    print('<head><style type="text/css">')
+    print('a { text-decoration: none }')
+    print(hover_css)
+    print('</style></head>')
+    print('<h2>')
+    print('<a href="compose_query.cgi">Functional</a>')
+    print('&nbsp&nbsp&nbsp')
 
 
 def group_name(group):

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -141,14 +141,13 @@ def main(argv):
     # - Ignore non-provisions.
     # - Filter via the specified FILTER_ARGS arguments.
     # - Filter via explicit filter request.
-    entries = filter(lambda x: x['name'] != 'Runner', all_entries)
+    entries = [x for x in all_entries if x['name'] != 'Runner']
     for arg in FILTER_ARGS:
         if options.__dict__.get(arg):
-            entries = filter(lambda x: x[arg] in
-                                       options.__dict__[arg].split(','),
-                             entries)
+            entries = [x for x in entries if x[arg] in
+                                       options.__dict__[arg].split(',')]
     if options.filter:
-        entries = filter(lambda x: eval(options.filter, {'re': re}, x), entries)
+        entries = [x for x in entries if eval(options.filter, {'re': re}, x)]
 
     # Group the entries based on specified keys.
     groups = group_entries(options.group.split(',') if options.group else None,
@@ -160,19 +159,19 @@ def main(argv):
         # Dump all entries, tracking needed parents.
         parents = []
         for entry in dump_entries:
-            print(json.dumps(entry))
+            print((json.dumps(entry)))
             if 'parent' in entry and entry['parent'] not in parents:
                 parents.append(entry['parent'])
         # Dump all parents.
         for entry in all_entries:
             if entry['id'] in parents:
-                print(json.dumps(entry))
+                print((json.dumps(entry)))
 
     # Summarize the entries, group by group.
     if options.summary:
         skip = options.skip.split(',') if options.skip else set()
         summaries = [summarize_entries(group, skip) for group in groups]
-        print(json.dumps(summaries, indent=2))
+        print((json.dumps(summaries, indent=2)))
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))

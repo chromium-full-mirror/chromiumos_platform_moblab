@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 from client.common_lib.cros.cfm.metrics import (
         media_info_metrics_extractor)

@@ -613,7 +613,7 @@ class BluetoothAdapterAdvMonitorTests(
         self.peer_keybd = None
         self.peer_mouse = None
 
-        for device_type, device_list in self.devices.items():
+        for device_type, device_list in list(self.devices.items()):
             for device in device_list:
                 if device_type is 'BLE_KEYBOARD':
                     self.peer_keybd = device
@@ -679,7 +679,7 @@ class BluetoothAdapterAdvMonitorTests(
 
         """
 
-        actual_cycle = len(records) / len(durations.keys())
+        actual_cycle = len(records) / len(list(durations.keys()))
         offset = self.INTERLEAVE_SCAN_CYCLE_NUM_TOLERANCE
         expect_cycle_lowerbound = max(1, expect_cycles - offset)
         expect_cycle_upperbound = expect_cycles + offset
@@ -791,7 +791,7 @@ class BluetoothAdapterAdvMonitorTests(
         durations = {'allowlist': 300, 'no filter': 500}
 
         # Change the unit from msec to second for future convenience.
-        durations = {key: value * 0.001 for key, value in durations.items()}
+        durations = {key: value * 0.001 for key, value in list(durations.items())}
         return durations
 
     @test_retry_and_log(False)

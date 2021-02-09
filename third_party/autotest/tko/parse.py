@@ -1,4 +1,4 @@
-#!/usr/bin/python2 -u
+#!/usr/bin/python3 -u
 
 import collections
 import errno
@@ -11,6 +11,8 @@ import subprocess
 import sys
 import time
 import traceback
+
+sys.path.pop(0)
 
 import common
 from client.bin.result_tools import utils as result_utils
@@ -388,7 +390,7 @@ def parse_one(db, pid_file_manager, jobname, path, parse_options):
             path, log=tko_utils.dprint)
     tko_utils.dprint('Finished collecting result sizes after %s seconds' %
                      (time.time()-start_time))
-    job.keyval_dict.update(result_size_info.__dict__)
+    job.keyval_dict.update(result_size_info._asdict().__dict__)
 
     # TODO(dshi): Update sizes with sponge_invocation.xml and throttle it.
 
@@ -581,7 +583,7 @@ def _match_existing_tests(db, job):
 
 
 def _delete_tests_from_db(db, tests):
-    for test_idx in tests.itervalues():
+    for test_idx in tests.values():
         where = {'test_idx' : test_idx}
         db.delete('tko_iteration_result', where)
         db.delete('tko_iteration_perf_value', where)
@@ -743,7 +745,7 @@ def _main_with_options(options, args):
                 flags |= fcntl.LOCK_NB
             try:
                 fcntl.flock(lockfile, flags)
-            except IOError, e:
+            except IOError as e:
                 # lock is not available and nonblock has been requested
                 if e.errno == errno.EWOULDBLOCK:
                     lockfile.close()

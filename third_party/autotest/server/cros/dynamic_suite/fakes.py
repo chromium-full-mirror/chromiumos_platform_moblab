@@ -6,9 +6,9 @@
 
 """Fakes for dynamic_suite-related unit tests."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 import common
 from client.common_lib import control_data
 from six.moves import map

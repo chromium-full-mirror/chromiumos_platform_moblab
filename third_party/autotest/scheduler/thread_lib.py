@@ -21,7 +21,7 @@ queue is as follows:
 """
 
 import collections
-import Queue
+import queue
 import threading
 import logging
 
@@ -36,7 +36,8 @@ class ExceptionRememberingThread(threading.Thread):
         """Wrapper around the thread's run method."""
         try:
             super(ExceptionRememberingThread, self).run()
-        except Exception as self.err:
+        except Exception as e:
+            self.err = e
             logging.error('%s raised an exception that will be re-raised by '
                           'the thread pool manager.', self.getName())
         else:
@@ -49,7 +50,7 @@ class ThreadedTaskQueue(drone_task_queue.DroneTaskQueue):
     result = collections.namedtuple('task', ['drone', 'results'])
 
     def __init__(self, name='thread_queue'):
-        self.results_queue = Queue.Queue()
+        self.results_queue = queue.Queue()
         self.drone_threads = {}
         self.name = name
 
@@ -86,7 +87,7 @@ class ThreadedTaskQueue(drone_task_queue.DroneTaskQueue):
         # For now, it is compliant with the single threaded drone manager which
         # will raise all drone_utility, ssh and drone_manager exceptions.
         drone_exceptions = []
-        for drone, thread in self.drone_threads.iteritems():
+        for drone, thread in self.drone_threads.items():
             tname = thread.getName()
             logging.info('(Task Queue) Waiting for %s', tname)
             thread.join()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -320,7 +320,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
             vid_pid = _get_lspci_vid_pid(output)
             logging.debug("got vid_pid %s", vid_pid)
             if vid_pid is not None:
-                if vid_pid in vid_pid_dict.values():
+                if vid_pid in list(vid_pid_dict.values()):
                     return True
         except Exception as e:
             logging.error('is_intel_adapter  failed with %s', cmd, str(e))
@@ -735,8 +735,8 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
         """
         objects = self._bluez.GetManagedObjects(
                 dbus_interface=self.BLUEZ_MANAGER_IFACE)
-        for path, ifaces in objects.iteritems():
-            logging.debug('%s -> %r', path, ifaces.keys())
+        for path, ifaces in objects.items():
+            logging.debug('%s -> %r', path, list(ifaces.keys()))
             if self.BLUEZ_ADAPTER_IFACE in ifaces:
                 logging.debug('using adapter %s', path)
                 adapter = self._system_bus.get_object(
@@ -875,7 +875,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
                 dbus_interface=self.BLUEZ_MANAGER_IFACE, byte_arrays=True)
 
         devices = []
-        for path, ifaces in objects.iteritems():
+        for path, ifaces in objects.items():
             if self.BLUEZ_DEVICE_IFACE in ifaces:
                 devices.append(objects[path][self.BLUEZ_DEVICE_IFACE])
 
@@ -1043,7 +1043,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
         else:
             props = {}
         logging.debug('get_adapter_properties')
-        for i in props.items():
+        for i in list(props.items()):
             logging.debug(i)
         return props
 
@@ -1053,7 +1053,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
 
 
     def _is_powered_on(self):
-        return bool(self._get_adapter_properties().get(u'Powered'))
+        return bool(self._get_adapter_properties().get('Powered'))
 
     def _get_wake_enabled_path(self):
         # Walk up the parents from hci0 sysfs path and find the first one with
@@ -1067,7 +1067,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
             return None
 
         # Walk up parents and try to find one with 'power/wakeup'
-        for _ in xrange(search_at.count('/') - 1):
+        for _ in range(search_at.count('/') - 1):
             search_at = os.path.normpath(os.path.join(search_at, '..'))
             try:
                 path = os.path.join(search_at, 'power', 'wakeup')
@@ -1213,7 +1213,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
         objects = self._bluez.GetManagedObjects(
                 dbus_interface=self.BLUEZ_MANAGER_IFACE, byte_arrays=True)
         devices = []
-        for path, ifaces in objects.iteritems():
+        for path, ifaces in objects.items():
             if self.BLUEZ_DEVICE_IFACE in ifaces:
                 devices.append(objects[path][self.BLUEZ_DEVICE_IFACE])
         return devices
@@ -1508,7 +1508,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
                 logging.info('Device found at {}'.format(device_path))
                 return device_path
 
-        except dbus.exceptions.DBusException, e:
+        except dbus.exceptions.DBusException as e:
             log_msg = 'Couldn\'t reach device: {}'.format(str(e))
             logging.debug(log_msg)
 
@@ -1539,7 +1539,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
                             self.AGENT_PATH)
             agent_manager.RegisterAgent(agent_obj,
                                         dbus.String(self._capability))
-        except dbus.exceptions.DBusException, e:
+        except dbus.exceptions.DBusException as e:
             if e.get_dbus_name() == self.BLUEZ_ERROR_ALREADY_EXISTS:
                 logging.info('Unregistering old agent and registering the new')
                 agent_manager.UnregisterAgent(agent_obj)
@@ -2408,7 +2408,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
         servs = dict()
         attribute_map['services'] = servs
 
-        for uuid, path in service_map.items():
+        for uuid, path in list(service_map.items()):
 
             servs[uuid] = dict()
             serv = servs[uuid]
@@ -2418,7 +2418,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
             chrcs = serv['characteristics']
 
             chrcs_map = self._get_characteristic_map(path, objects)
-            for uuid, path in chrcs_map.items():
+            for uuid, path in list(chrcs_map.items()):
                 chrcs[uuid] = dict()
                 chrc = chrcs[uuid]
 
@@ -2428,7 +2428,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
 
                 descs_map = self._get_descriptor_map(path, objects)
 
-                for uuid, path in descs_map.items():
+                for uuid, path in list(descs_map.items()):
                     descs[uuid] = dict()
                     desc = descs[uuid]
 
@@ -2565,7 +2565,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
         attr_map = {}
 
         if object_path:
-            for path, ifaces in objects.iteritems():
+            for path, ifaces in objects.items():
                 if (dbus_interface in ifaces and
                   path.startswith(object_path)):
                     uuid = ifaces[dbus_interface]['UUID'].lower()
@@ -2644,7 +2644,7 @@ class BluetoothDeviceXmlRpcDelegate(xmlrpc_server.XmlRpcDelegate):
             objects = self._bluez.GetManagedObjects(
                 dbus_interface=self.BLUEZ_MANAGER_IFACE, byte_arrays=False)
 
-            for path, ifaces in objects.iteritems():
+            for path, ifaces in objects.items():
                 if (self.BLUEZ_GATT_CHAR_IFACE in ifaces and
                     path.startswith(device_path)):
                     uuid = ifaces[self.BLUEZ_GATT_CHAR_IFACE]['UUID'].lower()

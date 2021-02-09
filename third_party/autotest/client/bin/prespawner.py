@@ -25,7 +25,7 @@ if len(sys.argv) == 2 and sys.argv[1] == '--prespawn_autotest':
 
     if os.environ.get('CROS_DISABLE_SITE_SYSINFO'):
         from client.bin import sysinfo, base_sysinfo
-        sysinfo.sysinfo = client.bin.base_sysinfo.base_sysinfo
+        sysinfo.sysinfo = autotest_lib.client.bin.base_sysinfo.base_sysinfo
 
     # Wait for environment and autotest arguments.
     env, sys.argv = pickle.load(sys.stdin)

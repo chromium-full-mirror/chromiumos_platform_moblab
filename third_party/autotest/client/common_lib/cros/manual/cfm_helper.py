@@ -4,7 +4,7 @@
 
 """Check USB device by running linux command on CfM"""
 
-from __future__ import print_function
+
 
 import logging
 import re
@@ -110,11 +110,11 @@ def extract_peripherals_for_cfm(usb_data):
             get_usb_devices.get_controller_mimo)
     for get_devices in get_devices_funcs:
         device_list = get_devices(usb_data)
-        for pid_vid, device_count in device_list.iteritems():
+        for pid_vid, device_count in device_list.items():
             if device_count > 0:
                 peripheral_map[pid_vid] = device_count
 
-    for pid_vid, device_count in peripheral_map.iteritems():
+    for pid_vid, device_count in peripheral_map.items():
         logging.info('---device: %s (%s), count: %d',
                      pid_vid, get_usb_devices.get_device_prod(pid_vid),
                      device_count)
@@ -131,7 +131,7 @@ def check_peripherals_for_cfm(peripheral_map):
     @returns: True if check passes,
               False if check fails.
     """
-    peripherals = peripheral_map.keys()
+    peripherals = list(peripheral_map.keys())
 
     type_camera = set(peripherals).intersection(get_usb_devices.CAMERA_LIST)
     type_speaker = set(peripherals).intersection(get_usb_devices.SPEAKER_LIST)
@@ -175,7 +175,7 @@ def check_peripherals_for_cfm(peripheral_map):
         return False
 
     # check CfM have only one camera, huddly and mimo
-    for pid_vid, device_count in peripheral_map.iteritems():
+    for pid_vid, device_count in peripheral_map.items():
         if device_count > 1:
             logging.info('Number of device %s connected to CfM : %d',
                          get_usb_devices.get_device_prod(pid_vid),
@@ -204,7 +204,7 @@ def check_usb_enumeration(dut, puts):
             logging.info('Detect device fails for usb enumeration')
             logging.info('Expect enumerated devices: %s', puts)
             logging.info('Actual enumerated devices: %s',
-                         usb_device_list.keys())
+                         list(usb_device_list.keys()))
             return False, 'Some usb devices are not found.'
         return True, None
 
@@ -326,7 +326,7 @@ def find_last_log(dut, speaker):
             last_lines['atrus'] = dut.run_output(cmd).strip().split()[0]
     except Exception as e:
         logging.exception('Fail to get the last line from log files.')
-    for item, timestamp in last_lines.iteritems():
+    for item, timestamp in last_lines.items():
         logging.debug('---%s: %s', item, timestamp)
     return last_lines
 

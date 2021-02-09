@@ -1,6 +1,6 @@
 #pylint: disable-msg=C0111
 
-import cPickle
+import pickle
 import logging
 import os
 import time
@@ -90,12 +90,13 @@ class SiteDrone(object):
                     drone_utility_cmd, time.time())
         logging.info("Running drone_utility on %s", self.hostname)
         result = self._host.run('python %s' % drone_utility_cmd,
-                                stdin=cPickle.dumps(calls), stdout_tee=None,
-                                connect_timeout=300)
+                                stdin=pickle.dumps(calls, 0).decode(),
+                                stdout_tee=None, connect_timeout=300)
         try:
-            return cPickle.loads(result.stdout)
+            byte_stdout = result.stdout.strip().encode()
+            return pickle.loads(byte_stdout)
         except Exception: # cPickle.loads can throw all kinds of exceptions
-            logging.critical('Invalid response:\n---\n%s\n---', result.stdout)
+            logging.critical('Invalid response:\n---\n%s\n---\n%s', byte_stdout, type(byte_stdout))
             raise
 
 
