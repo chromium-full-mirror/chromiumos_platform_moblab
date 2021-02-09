@@ -22,9 +22,13 @@ steps:
     name: "docker:19.03.8"
     args: ["pull", "${_BASE_REGISTRY_URI}/debian:buster"]
     waitFor: ['-']
-  - id: python-2.7-slim
+  - id: python-3.7-slim
     name: "docker:19.03.8"
-    args: ["pull", "${_BASE_REGISTRY_URI}/python:2.7-slim-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/python:3.7-slim-buster"]
+    waitFor: ['-']
+  - id: python-3.7
+    name: "docker:19.03.8"
+    args: ["pull", "${_BASE_REGISTRY_URI}/python:3.7-buster"]
     waitFor: ['-']
   - id: mariadb
     name: "docker:19.03.8"
@@ -193,7 +197,7 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
     waitFor:
-      - "buster"
+      - "python-3.7"
 
   - id: autotest-gwt
     name: "docker:19.03.8"
@@ -235,7 +239,7 @@ steps:
       - "protoc"
       - "alpine-git"
       - "buster-slim"
-      - "python-2.7-slim"
+      - "python-3.7-slim"
       - "moblab_common"
     env:
       - "DOCKER_BUILDKIT=1"
@@ -403,7 +407,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor:
       - "alpine-git"
-      - "buster-slim"
+      - "python-3.8-slim"
 
   - id: ui
     name: "docker:19.03.8"
