@@ -410,7 +410,9 @@ class iteration(object):
         iterations = []
         index = 1
         attr, perf = {}, {}
-        for line in file(keyval_path):
+        with open(keyval_path, 'r') as kp:
+            lines = kp.readlines()
+        for line in lines:
             line = line.strip()
             if line:
                 cls.parse_line_into_dicts(line, attr, perf)
