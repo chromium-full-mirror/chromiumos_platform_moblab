@@ -6,7 +6,16 @@ PROTO = "hostservice.proto"
 WORKDIR="/tmp"
 PROTO_OUT_DIR = ${WORKDIR}/host_service
 
-all:
+.PHONY: all
+
+all: reset_usb proto
+
+reset_usb:
+	$(CC) $(CFLAGS) $(INCLUDES) -c r_usb.c -o $(TMPDIR)/r_usb.o
+	$(CC) $(CFLAGS) $(LFLAGS) -lusb $(TMPDIR)/r_usb.o -o $(TMPDIR)/reset_usb
+
+
+proto:
 	mkdir -p ${PROTO_OUT_DIR}
 	rm -f ${WORKDIR}/host_service/*pb2*
 	python -m grpc_tools.protoc \
@@ -16,6 +25,8 @@ all:
 	        ${PROTO}
 
 install:
+	@mkdir -p $(DESTDIR)usr/bin
+	install $(TMPDIR)/reset_usb ${DESTDIR}usr/bin
 	install -t ${DESTDIR}etc/moblab/host_server -D ${PROTO_OUT_DIR}/*
 	install -D host_server_chromeos.py ${DESTDIR}etc/moblab/host_server
 	install -D ../common/host*.py ${DESTDIR}etc/moblab/host_server
