@@ -26,7 +26,7 @@ that match the key. The following limitations are placed on cache lines:
 3. Every 'get' deletes the entire line.
 
 Consider the following examples:
-Normal case: 3 grouped requests, all with the same deps/acls, but different
+Normal case: 3 grouped requests, all with the same deps, but different
 priorities/parent_job_ids. The requests (X+Y+Z) > matching hosts (K):
  (request1, count=X)- hits the database, takes X hosts, caches (K-X)
  (request2, count=Y) - hits the cache and is fully satisfied, caches (K-(X+Y))
@@ -35,7 +35,7 @@ priorities/parent_job_ids. The requests (X+Y+Z) > matching hosts (K):
  Host Count |  RDB                         | Cache
 ------------------------------------------------------------------
 X:          | request1                     | {}
-K:          | find_hosts(deps, acls)       |
+K:          | find_hosts(deps)       |
 X:          | leased_hosts                 |
 K-X:        | ---------------------------> | {key: [K-X hosts]}
 Y<K-X:      | request2 <---[K-X hosts]---- | {}
@@ -48,7 +48,7 @@ Since hosts are only released by the scheduler there is no way the
 third request could have been satisfied completely even if we had checked
 the database real-time.
 
-Stale cache entries: 3 grouped requests that don't have the same deps/acls.
+Stale cache entries: 3 grouped requests that don't have the same deps.
 P(1,2,3) are priorities, with P3 being the highest:
  (request1(deps=[a,b], P3), Count=X) - Caches hosts
  (request2(deps=[a], P2), Count=Y) - hits the database
@@ -107,7 +107,7 @@ def memoize_hosts(func):
             the key MEMOIZED_KEY, as this is reserved for the passing of
             the cached/memoized hosts to the function itself.
         """
-        cache_key = self.cache.get_key(request.deps, request.acls)
+        cache_key = self.cache.get_key(request.deps)
         try:
             kwargs[MEMOIZE_KEY] = self.cache.get_line(cache_key)
         except rdb_utils.CacheMiss:
@@ -189,14 +189,14 @@ class InMemoryCacheBackend(CacheBackend):
         return key in self._cache
 
 # TODO: Implement a MemecacheBackend, invalidate when unleasing a host, refactor
-# the AcquireHostRequest to contain a core of (deps, acls) that we can use as
+# the AcquireHostRequest to contain a core of (deps) that we can use as
 # the key for population and invalidation. The caching manager is still valid,
 # regardless of the backend.
 
 class RDBHostCacheManager(object):
     """RDB Cache manager."""
 
-    key = collections.namedtuple('key', ['deps', 'acls'])
+    key = collections.namedtuple('key', ['deps'])
     use_cache = global_config.get_config_value(
             'RDB', 'use_cache', type=bool, default=True)
 
@@ -237,16 +237,13 @@ class RDBHostCacheManager(object):
 
 
     @classmethod
-    def get_key(cls, deps, acls):
-        """Return a key for the given deps, acls.
+    def get_key(cls, deps):
+        """Return a key for the given deps.
 
         @param deps: A list of deps, as taken by the AcquireHostRequest.
-        @param acls: A list of acls, as taken by the AcquireHostRequest.
-        @return: A cache key for the given deps/acls.
+        @return: A cache key for the given deps.
         """
-        # All requests with the same deps, acls should hit the same cache line.
-        # TODO: Do something smarter with acls, only one needs to match.
-        return cls.key(deps=frozenset(deps), acls=frozenset(acls))
+        return cls.key(deps=frozenset(deps))
 
 
     def get_line(self, key):
@@ -272,9 +269,9 @@ class RDBHostCacheManager(object):
 
         This method assumes that a cache line is made up of RDBHost objects,
         and checks to see if they all match each other/the key passed in.
-        Checking is done in terms of host labels and acls, note that the hosts
-        in the line can have different deps/acls, as long as they all have the
-        deps required by the key, and at least one matching acl of the key.
+        Checking is done in terms of host labels, note that the hosts
+        in the line can have different deps, as long as they all have the
+        deps required by the key.
 
         @param line: The cache line value.
         @param key: The key the line will be stored under.
@@ -288,12 +285,10 @@ class RDBHostCacheManager(object):
             raise rdb_utils.RDBException('Cannot cache leased hosts %s' % line)
 
         # Confirm that the given line can be used to service the key by checking
-        # that all hosts have the deps mentioned in the key, and at least one
-        # matching acl.
-        h_keys = set([self.get_key(host.labels, host.acls) for host in line])
+        # that all hosts have the deps mentioned in the key.
+        h_keys = set([self.get_key(host.labels) for host in line])
         for h_key in h_keys:
-            if (not h_key.deps.issuperset(key.deps) or
-                    not key.acls.intersection(h_key.acls)):
+            if (not h_key.deps.issuperset(key.deps)):
                 raise rdb_utils.RDBException('Given key: %s does not match key '
                         'computed from hosts in line: %s' % (key, h_keys))
         if key in self._cache_backend:
@@ -307,11 +302,11 @@ class RDBHostCacheManager(object):
 
         set_line will no-op if:
             The hosts aren't all unleased.
-            The hosts don't have deps/acls matching the key.
+            The hosts don't have deps matching the key.
             A cache line under the same key already exists.
         The first 2 cases will lead to a cache miss in the corresponding get.
 
-        @param hosts: A list of unleased hosts with the same deps/acls.
+        @param hosts: A list of unleased hosts with the same deps.
         @raises RDBException: If hosts is None, since None is reserved for
             key expiration.
         """
