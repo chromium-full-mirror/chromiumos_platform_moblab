@@ -3,11 +3,7 @@
 # Copyright 2008 Google Inc. Released under the GPL v2
 
 
-
-
 import ast
-import warnings
-
 import logging
 import textwrap
 import re
@@ -319,14 +315,14 @@ class ControlData(object):
 
 
 def _extract_const(expr):
-    assert(expr.__class__ == ast.Str)
+    assert (expr.__class__ == ast.Str)
+    assert (expr.s.__class__ in (str, int, float))
     return str(expr.s).strip()
 
 
 def _extract_dict(expr):
-    assert(expr.__class__ == ast.Dict)
-    assert(expr.keys.__class__ == list)
-    assert(expr.values.__class__ == list)
+    assert (expr.__class__ == ast.Dict)
+    assert (expr.keys.__class__ == list)
     cf_dict = {}
     for key, value in zip(expr.keys, expr.values):
         try:
@@ -340,7 +336,7 @@ def _extract_dict(expr):
 
 
 def _extract_list(expr):
-    assert(expr.__class__ == ast.List)
+    assert (expr.__class__ == ast.List)
     list_values = []
     for value in expr.elts:
         try:
@@ -351,9 +347,9 @@ def _extract_list(expr):
 
 
 def _extract_name(expr):
-    assert(expr.__class__ == ast.Name)
-    assert(expr.name in ('False', 'True', 'None'))
-    return str(expr.name)
+    assert (expr.__class__ == ast.Name)
+    assert (expr.id in ('False', 'True', 'None'))
+    return str(expr.id)
 
 
 def _extract_expression(expr):
@@ -365,20 +361,24 @@ def _extract_expression(expr):
         return _extract_dict(expr)
     if expr.__class__ == ast.List:
         return _extract_list(expr)
+    if expr.__class__ == ast.Num:
+        return expr.n
+    if expr.__class__ == ast.NameConstant:
+        return expr.value
+    if expr.__class__ == ast.Constant:
+        try:
+            return expr.value.strip()
+        except Exception:
+            return expr.value
     raise ValueError('Unknown rval %s' % expr)
 
 
 def _extract_assignment(n):
-    assert(n.__class__ == ast.Assign)
-    assert(n.targets.__class__ == list)
-    assert(len(n.targets) == 1)
-    assert(n.targets[0].__class__ == ast.Name)
-    #assert(n.targets[0].flags.__class__ == str)
-    assert(n.targets[0].id.__class__ == str)
-
+    assert (n.__class__ == ast.Assign)
+    assert (len(n.targets) == 1)
+    assert (n.targets[0].__class__ == ast.Name)
     val = _extract_expression(n.value)
     key = n.targets[0].id.lower()
-
     return (key, val)
 
 
@@ -404,8 +404,8 @@ def parse_control_string(control, raise_warnings=False, path=''):
 
 def parse_control(path, raise_warnings=False):
     try:
-        control = open(path).read()
-        mod = ast.parse(control)
+        with open(path, 'r') as r:
+            mod = ast.parse(r.read())
     except SyntaxError as e:
         raise ControlVariableException("Error parsing %s because %s" %
                                        (path, e))
@@ -426,17 +426,15 @@ def _try_extract_assignment(node, variables):
 
 
 def finish_parse(mod, path, raise_warnings):
-    assert(mod.__class__ == ast.Module)
-    #assert(mod.node.__class__ == ast.Stmt)
-    assert(mod.body.__class__ == list)
+    assert (mod.__class__ == ast.Module)
+    assert (mod.body.__class__ == list)
 
     variables = {}
     injection_variables = {}
     for n in mod.body:
-        if (n.__class__ == ast.FunctionDef and
-            re.match('step\d+', n.name)):
+        if (n.__class__ == ast.FunctionDef and re.match('step\d+', n.name)):
             vars_in_step = {}
-            for sub_node in n.code.nodes:
+            for sub_node in n.body:
                 _try_extract_assignment(sub_node, vars_in_step)
             if vars_in_step:
                 # Empty the vars collection so assignments from multiple steps
