@@ -384,9 +384,7 @@ class _SuiteChildJobCreator(object):
         # For a system running multiple suites which share tests, the priority
         # overridden may lead to unexpected scheduling order that adds extra
         # provision jobs.
-        test_priority = self._priority
-        if utils.is_moblab():
-            test_priority = max(self._priority, test.priority)
+        test_priority = max(self._priority, test.priority)
 
         reboot_before = (model_attributes.RebootBefore.NEVER if test.fast
                          else None)
