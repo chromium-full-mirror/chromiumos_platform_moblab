@@ -129,6 +129,7 @@ class RpcHandler(object):
         self._rpc_methods = RpcMethodHolder()
         self._dispatcher = serviceHandler.ServiceHandler(self._rpc_methods)
         self._rpc_validator = RpcValidator(rpc_interface_modules)
+        self._user = None
 
         # store all methods from interface modules
         for module in rpc_interface_modules:
@@ -214,7 +215,8 @@ class RpcHandler(object):
         @param request: the rpc request to be processed.
         """
         remote_ip = self._get_remote_ip(request)
-        user = models.User.current_user()
+        if not self._user:
+            self._user = models.User.current_user()
         json_request = self.raw_request_data(request)
         decoded_request = self.decode_request(json_request)
 
@@ -233,7 +235,7 @@ class RpcHandler(object):
         decoded_result = self.dispatch_request(decoded_request)
         result = self.encode_result(decoded_result)
         if rpcserver_logging.LOGGING_ENABLED:
-            self.log_request(user, decoded_request, decoded_result,
+            self.log_request(self._user, decoded_request, decoded_result,
                              remote_ip)
         return rpc_utils.raw_http_response(result)
 
