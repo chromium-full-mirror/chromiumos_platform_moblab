@@ -146,7 +146,7 @@ class DroneUtility(object):
                     ['/bin/ps', '-p', str(process.pid), '-o', 'args'])
             # For test running with server-side packaging, SIGTERM needs to be
             # sent for autoserv process to destroy container used by the test.
-            if '--require-ssp' in ps_output:
+            if b'--require-ssp' in ps_output:
                 logging.debug('PID %d requires SIGTERM to abort to cleanup '
                               'container.', process.pid)
                 return signal_queue_with_sigterm
