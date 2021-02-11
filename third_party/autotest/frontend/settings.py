@@ -43,7 +43,7 @@ DATABASES = {'default': AUTOTEST_DEFAULT,
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {'debug': True,
+        'OPTIONS': {'debug': False,
                     'loaders': ['django.template.loaders.filesystem.Loader',
                                 'django.template.loaders.app_directories.Loader'
                                ]
