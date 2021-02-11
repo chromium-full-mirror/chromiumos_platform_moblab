@@ -104,7 +104,7 @@ async def serve():
         )
 
     finally:
-        server.stop(0)
+        await server.stop(0)
 
 
 if __name__ == "__main__":

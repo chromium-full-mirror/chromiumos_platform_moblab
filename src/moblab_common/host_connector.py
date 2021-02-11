@@ -311,7 +311,7 @@ class AsyncHostServicesConnector(object):
         """
         cls.connect()
         try:
-            return cls.async_stub.get_disk_usage_stats(empty_pb2.Empty())
+            return await cls.async_stub.get_disk_usage_stats(empty_pb2.Empty())
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error getting disk usage statistics")
