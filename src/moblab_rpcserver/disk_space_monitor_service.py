@@ -34,7 +34,7 @@ class DiskSpaceMonitorService:
         logging.info("Available disk space monitor is running.")
         while True:
             await asyncio.sleep(30)
-            self._check_disk_space_threshold()
+            await self._check_disk_space_threshold()
 
     async def _check_disk_space_threshold(self):
         """Pauses host scheduler if min available space requirement
