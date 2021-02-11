@@ -7,7 +7,6 @@
 from __future__ import print_function
 
 import asyncio
-import collections
 import logging  # pylint: disable=cros-logging-import
 import os
 
@@ -15,6 +14,10 @@ from concurrent import futures
 
 from moblab_common import moblab_info
 from moblab_common import pubsub_client
+
+from moblab_common import (
+    result_upload_status_connector as upload_status_connector,
+)
 
 import processing_step
 import result_dir_status
@@ -58,6 +61,9 @@ class Uploader(processing_step.ProcessStep):
         self._uploading_context = None
         self.uploading_queue = asyncio.Queue(maxsize=0)
         self._notify_uploaded = notify_uploaded
+        self.result_upload_status_store = (
+            upload_status_connector.ResultUploadStatusConnector()
+        )
 
     def uploading_context(self, ctx):
         self._uploading_context = ctx
@@ -88,6 +94,11 @@ class Uploader(processing_step.ProcessStep):
         # The GS path of uploaded test result.
         test_result_gs_path = ""
         try:
+            self.result_upload_status_store.set_job_upload_status(
+                test_result.id,
+                upload_status_connector.Status.UPLOADING,
+            )
+
             await self._next_step(test_result)
             await asyncio.wait_for(
                 self.uploading_queue.join(), self._timeout.total_seconds()
@@ -96,9 +107,25 @@ class Uploader(processing_step.ProcessStep):
                 test_result_gs_path = os.path.join(
                     self._gs_path_prefix, test_result.name
                 )
+                self.result_upload_status_store.set_job_upload_status(
+                    test_result.id,
+                    upload_status_connector.Status.UPLOADED,
+                )
+            else:
+                self.result_upload_status_store.set_job_upload_status(
+                    test_result.id,
+                    upload_status_connector.Status.UPLOAD_FAILED,
+                    self._uploading_context.error,
+                )
+
         except (asyncio.TimeoutError, KeyboardInterrupt) as err:
             _LOGGER.error(
                 "Error occurs when uploading %s: %s", test_result, type(err)
+            )
+            self.result_upload_status_store.set_job_upload_status(
+                test_result.id,
+                upload_status_connector.Status.UPLOAD_FAILED,
+                str(err),
             )
             if err is KeyboardInterrupt:
                 raise err
@@ -146,7 +173,7 @@ class Uploader(processing_step.ProcessStep):
                         # If we got an error uploading a single file give up.
                         if result:
                             # One file returned error mark the upload as bad
-                            self._uploading_context.error = True
+                            self._uploading_context.error = result
                             result_filenames.clear()
                             # The only way to end the queue join is to empty
                             # the queue.
@@ -205,7 +232,7 @@ class UploadingContext(object):
         self.gs_path = None
         self._dry_run = dry_run
         self._resume_aborted = resume_aborted
-        self.error = False
+        self.error = None
 
     def __call__(self, test_result):
         self._test_result = test_result
@@ -216,7 +243,7 @@ class UploadingContext(object):
         return bool(self.gs_path)
 
     async def __aenter__(self):
-        self.error = False
+        self.error = None
 
         if self._resume_aborted:
             return self
@@ -234,12 +261,12 @@ class UploadingContext(object):
 
     async def __aexit__(self, exc_type, exc, tb):
         if not self.uploaded or self.error:
-            # TODO(guocb) Report failures.
             _LOGGER.debug(
-                "%s Directory upload timed out, or failed uploaded=%s error=%s",
+                "%s Directory upload timed out,"
+                " or failed uploaded=%s error=%s",
                 self._test_result,
                 self.uploaded,
-                self.error,
+                self.error is not None,
             )
             return await result_dir_status.mark_uploading_result(
                 self._test_result, succeeded=False

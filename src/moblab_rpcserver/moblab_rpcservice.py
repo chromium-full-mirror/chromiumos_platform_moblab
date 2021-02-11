@@ -28,6 +28,7 @@ from moblab_common.proto import moblabrpc_pb2_grpc
 
 # pylint: disable=import-error
 from moblab_common.utils.constants import Constants as MoblabConstants
+from moblab_common.result_upload_status_connector import Status as UploadStatus
 
 from google.protobuf import empty_pb2
 
@@ -504,9 +505,39 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     ),
                     parent_job_id=job.get("parent_job", -1),
                     status=self._extract_status(job),
+                    upload_state=moblabrpc_pb2.Job.UploadState(
+                        status=self._map_upload_status(
+                            job.get("upload_status", "")
+                        ),
+                        attempts_number=job.get("attempt_number", 0),
+                        last_error=job.get("last_falure_reason", None),
+                    ),
                 )
                 response.jobs.extend([job_proto])
         return response
+
+    def _map_upload_status(self, internal_status):
+        result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UNKNOWN
+        if internal_status == UploadStatus.NOT_READY.name:
+            result = (
+                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_NOT_READY.name
+            )
+        if internal_status == UploadStatus.QUEUED.name:
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_QUEUED.name
+        if internal_status == UploadStatus.UPLOADING.name:
+            result = (
+                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADING.name
+            )
+        if internal_status == UploadStatus.UPLOADED.name:
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADED.name
+        if internal_status == UploadStatus.UPLOAD_FAILED.name:
+            result = (
+                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED.name
+            )
+        if internal_status == UploadStatus.DELETED.name:
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_DELETED.name
+
+        return moblabrpc_pb2.Job.UploadStatus.Name(result)
 
     def get_job_ids(self, request, _context):
         """Returns the job ID's that match the request filters.

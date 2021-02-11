@@ -308,7 +308,7 @@ message Execution {
   string dut_status = 8;
 }
 
-// NEXT_TAG = 16
+// NEXT_TAG = 17
 message Job {
   // NEXT_TAG = 90
   enum Priority {
@@ -353,6 +353,24 @@ message Job {
     TEMPLATE = 18;
   }
 
+  // NEXT_TAG = 6
+  enum UploadStatus {
+    UPLOAD_STATUS_UNKNOWN = 0;
+    UPLOAD_STATUS_NOT_READY = 1;
+    UPLOAD_STATUS_QUEUED = 2;     // hourglass_empty
+    UPLOAD_STATUS_UPLOADING = 3;
+    UPLOAD_STATUS_UPLOADED = 4;   // done
+    UPLOAD_STATUS_UPLOAD_FAILED = 5;
+    UPLOAD_STATUS_DELETED = 6;
+  }
+
+  // NEXT_TAG = 4
+  message UploadState {
+    UploadStatus status = 1;
+    string last_error = 2;
+    int32 attempts_number = 3;
+  }
+
   // NEXT_TAG = 4
   enum QueueStatus {
     QUEUE_STATUS_NOT_SET = 0;
@@ -378,6 +396,8 @@ message Job {
   int32 test_retries = 13;
   repeated Execution execution_history = 14;
   repeated Execution associated_duts = 15;
+
+  UploadState upload_state = 16;
 }
 
 // NEXT_TAG = 11

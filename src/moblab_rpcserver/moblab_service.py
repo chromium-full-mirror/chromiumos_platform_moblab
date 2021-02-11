@@ -25,6 +25,8 @@ from moblab_common import moblab_build_connector
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
+from moblab_common import result_upload_status_connector
+
 from host_scheduler_pause_service import HostSchedulerPauseService
 
 MilestonePair = namedtuple("MilestonePair", ["milestone", "is_staged"])
@@ -80,6 +82,7 @@ class MoblabService(object):
 
     afe_connector = None
     config_connector = None
+    upload_status_connector = None
 
     _last_config_update = None
     _last_build_connector_update = None
@@ -93,6 +96,9 @@ class MoblabService(object):
         self.setup_devserver_connector()
         self.dut_connector = dut_connector.MoblabDUTConnector()
         self.pause_service = HostSchedulerPauseService()
+        self.upload_status_connector = (
+            result_upload_status_connector.ResultUploadStatusConnector()
+        )
 
     def _find_dut_id_given_ip(self, dut_hostname):
         """Given an ip address, will return the id given to the DUT by AFE.
@@ -667,8 +673,10 @@ class MoblabService(object):
         )
         return BuildResults(
             results=milestone_results,
-            is_incomplete=(len(remote_milestones) == \
-                           moblab_build_connector.DEFAULT_PAGE_SIZE),
+            is_incomplete=(
+                len(remote_milestones)
+                == moblab_build_connector.DEFAULT_PAGE_SIZE
+            ),
         )
 
     def list_usable_build_versions(self, build_target, milestone, model):
@@ -729,7 +737,8 @@ class MoblabService(object):
         return BuildResults(
             results=build_version_results,
             is_incomplete=(
-                len(remote_build_versions) == moblab_build_connector.DEFAULT_PAGE_SIZE
+                len(remote_build_versions)
+                == moblab_build_connector.DEFAULT_PAGE_SIZE
             ),
         )
 
@@ -802,6 +811,8 @@ class MoblabService(object):
         # on calls to get_host_queue_entries, not get_jobs. Even though,
         # in both cases, the results are packaged and returned as jobs. This
         # may change when Autotest RPC itself is refactored.
+        jobs = []
+
         if dut_hostname_filter:
             try:
                 dut_id = self.afe_connector.get_connected_devices(
@@ -820,15 +831,14 @@ class MoblabService(object):
                 query_limit=query_limit,
             )
 
-            jobs = []
             # Extracting jobs information from HQE entries.
             for hqe in hqes:
                 job = hqe["job"]
                 job["status"] = hqe.get("status")
                 jobs.append(job)
-            return jobs
+
         else:
-            return self.afe_connector.get_jobs(
+            jobs = self.afe_connector.get_jobs(
                 query_start,
                 query_limit,
                 id_filter,
@@ -842,6 +852,19 @@ class MoblabService(object):
                 finished,
                 parent_id_filter,
             )
+        job_ids = [job["id"] for job in jobs]
+
+        jobs_upload_status = (
+            self.upload_status_connector.get_jobs_upload_status(job_ids)
+        )
+        for job in jobs:
+            if job["id"] in jobs_upload_status:
+                state = jobs_upload_status[job["id"]]
+                job["status"] = state.status
+                job["attempt_number"] = state.attempt_number
+                job["last_falure_reason"] = state.last_falure_reason
+
+        return jobs
 
     def get_job_ids(
         self,
