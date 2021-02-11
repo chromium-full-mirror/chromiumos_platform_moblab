@@ -52,6 +52,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   setDutDetails(dutInfo: ConnectedDutInfo) {
     this.dutInfoTableRef.loadRows([
       ['DUT', dutInfo.getIp()],
+      ['MAC', dutInfo.getMacAddr()],
       ['Name', dutInfo.getName()],
       ['Status', dutInfo.getStatus()],
       ['Labels', dutInfo.getLabelsList().toString()],

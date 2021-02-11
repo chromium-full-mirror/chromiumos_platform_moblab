@@ -23,6 +23,7 @@ export class ViewDutsComponent implements OnInit {
   displayedColumns: string[] = [
     'select',
     'name',
+    'mac',
     'buildtarget',
     'model',
     'status',
@@ -45,6 +46,8 @@ export class ViewDutsComponent implements OnInit {
     switch (property) {
       case 'name':
         return item.getName();
+      case 'mac':
+        return item.getMacAddr();
       case 'buildtarget':
         return item.getBuildTarget();
       case 'model':

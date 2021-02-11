@@ -41,7 +41,6 @@ class MoblabDUTConnector(object):
     def __init__(self):
         self.connected_ip_addresses = []
         self.disconnected_ip_addresses = []
-        self.connected_duts = cachetools.TTLCache(25, 30 * 60)
 
     def find_duts(self):
         active_hosts = self._get_active_network_devices()
@@ -70,10 +69,6 @@ class MoblabDUTConnector(object):
             items = lease.strip().split(" ")
             leases[items[2]] = items[1]
         return leases
-
-    def reload_cache(self):
-        for (ip, mac_address) in self.get_all_connected_mac():
-            self.connected_duts[ip] = DUTInfo(ip, mac_address)
 
     def run_command_on_connected_duts(self, command, timeout=300):
         self.find_duts()
@@ -114,21 +109,25 @@ class MoblabDUTConnector(object):
                 # error message.
                 try:
                     if host_output.exception:
-                        logging.info("Found a host output exception: %s",
-                                     host_output.exception)
+                        logging.info(
+                            "Found a host output exception: %s",
+                            host_output.exception,
+                        )
                         exception_msg = host_output.exception.args[0]
                         exception_args = host_output.exception.args[1:]
                         stderr += exception_msg % exception_args
                 except IndexError:
                     logging.exception(
-                        "Failed to extract information from " +
-                        "host_output.exception: %s",
-                        host_output.exception)
+                        "Failed to extract information from "
+                        + "host_output.exception: %s",
+                        host_output.exception,
+                    )
                 except TypeError:
                     logging.exception(
-                        "Failed to construct the stderr from " +
-                        "host_output.exception: %s",
-                        host_output.exception)
+                        "Failed to construct the stderr from "
+                        + "host_output.exception: %s",
+                        host_output.exception,
+                    )
 
                 command_results.append(
                     (host_output.host, stdout, stderr, host_output.exit_code)
@@ -143,14 +142,8 @@ class MoblabDUTConnector(object):
             logging.exception("Command failed to run %s", command)
         return command_results
 
-    def get_all_connected_mac(self):
-        leases = self._get_dhcp_dut_leases()
-        active_hosts = self._get_active_network_devices()
-        return [
-            (host, output)
-            for (host, output) in leases.items()
-            if host in active_hosts
-        ]
+    def get_all_known_mac_addresses(self):
+        return self._get_dhcp_dut_leases()
 
     def _get_active_network_devices(self):
         """Use the tool nmap to find devices currently alive on the network.
@@ -181,14 +174,11 @@ class MoblabDUTConnector(object):
 
         def is_dut_connected(output):
             if output:
-                return output != None
+                return output is not None
             return False
 
-        def extract_model(output):
-            return output[0] if output else "Unknown"
-
         results = []
-        for (host, stdout, stderr, exit_code) in command_results:
+        for (host, stdout, stderr, _) in command_results:
             results.append((host, is_dut_connected(stdout), stderr))
         return results
 
@@ -262,8 +252,8 @@ class MoblabDUTConnector(object):
                     (host, "Failed to parse s/n for {}".format(host))
                 )
                 logging.error(
-                    "Attempted to discover serial numbers of {} exited with error: {}".format(
-                        host, stderr)
+                    "Attempted to discover serial numbers "
+                    "of {} exited with error: {}".format(host, stderr)
                 )
             else:
                 results.append((host, stdout))

@@ -239,6 +239,7 @@ class MoblabService(object):
         return afe_formatted_duts
 
     def list_duts(self):
+        """Returns the merge of enrolled and connected DUTs"""
         afe_hosts = self.afe_connector.get_connected_devices()
         potential_hosts = self.get_connected_devices()
         connected_ips = []
@@ -256,6 +257,8 @@ class MoblabService(object):
                 dut["status"] = "Not Enrolled"
                 dut["error"] = dut["error"]
                 connected_duts.append(dut)
+
+        self._hydrate_dut_details_with_mac(connected_duts)
 
         return connected_duts
 
@@ -526,9 +529,23 @@ class MoblabService(object):
         return duts
 
     def get_dut_details(self, dut):
-        return self.afe_connector.get_connected_devices(
+        dut_details = self.afe_connector.get_connected_devices(
             dut, get_current_jobs=True
         )
+        self._hydrate_dut_details_with_mac(dut_details)
+        return dut_details
+
+    def _hydrate_dut_details_with_mac(self, duts_details):
+        dut_ip_to_mac_map = {
+            ip: mac
+            for (
+                ip,
+                mac,
+            ) in self.dut_connector.get_all_known_mac_addresses().items()
+        }
+        for dut in duts_details:
+            if dut["hostname"] in dut_ip_to_mac_map:
+                dut["mac"] = dut_ip_to_mac_map[dut["hostname"]]
 
     def update_duts_firmware(self, ip_addresses):
         return self.dut_connector.update_firmware(ip_addresses)
