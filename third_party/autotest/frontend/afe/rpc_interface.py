@@ -220,7 +220,15 @@ def _create_label_everywhere(id, hosts):
         # in and off itself. The aim here is to create any non-existent
         # label, which we cannot do if the 'id' specified isn't a label name.
         if isinstance(id, str):
-            label = models.Label.smart_get(add_label(id))
+            # There is a race condition, when multiple provision jobs all
+            # try to add the same label at the same time.
+            # Between checking if it exists ( line 217 ) and trying to create
+            # ( line 228 ) another job may have already created the label entry in the db.
+            # Labels are unique in the database, this causes an error non unique Validation Error.
+            try:
+                label = models.Label.smart_get(add_label(id))
+            except frontend.afe.model_logic.ValidationError:
+                label = models.Label.smart_get(id)
         else:
             raise ValueError(
                 "Label id (%s) does not exist. Please specify "
