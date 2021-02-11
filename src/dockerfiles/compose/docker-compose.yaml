@@ -40,8 +40,8 @@ services:
 
     ulimits:
       nofile:
-        soft: 10000
-        hard: 16384
+        soft: 36000
+        hard: 48000
   ##############################################################################
   db-init:
     container_name: db-init
