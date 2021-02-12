@@ -21,10 +21,6 @@
   float: right;
 }
 
-.select-cb {
-  width: 15px;
-}
-
 .loading-spinner-wrapper {
   display: inline-flex;
   margin-bottom: 20px;
@@ -55,4 +51,37 @@
 
 .spinner {
   left: 43%;
+}
+
+.label-mat-chip {
+  margin: 1px !important;
+  padding: 0px 4px !important;
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 22px;
+}
+
+/* make some space around cells */
+.m-column {
+  width: 10%;
+  /* figure out why max-width does not work */
+  max-width: 180px;
+}
+
+.xl-column {
+  min-width: 180px;
+}
+
+/* make some space around cells */
+td.mat-cell {
+  padding: 6px 6px;
+}
+
+th.mat-header-cell {
+  padding: 6px;
+}
+
+/* fix select column size */
+.select-column {
+  width: 30px;
 }

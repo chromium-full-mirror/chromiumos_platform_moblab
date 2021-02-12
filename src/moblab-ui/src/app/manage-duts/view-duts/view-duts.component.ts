@@ -28,6 +28,7 @@ export class ViewDutsComponent implements OnInit {
     'model',
     'status',
     'pools',
+    'labels'
   ];
 
   loading = false;
