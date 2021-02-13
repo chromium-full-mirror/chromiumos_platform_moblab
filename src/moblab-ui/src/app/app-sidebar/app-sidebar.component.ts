@@ -33,7 +33,7 @@ export class AppSidebarComponent implements OnInit {
   ) {
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabs, {
       route: '/manage_dut',
-      label: "Manage DUT's",
+      label: "Manage DUTs",
       icon: 'laptop_chromebook',
     });
     this.addSidebarEntry(Feature.DUT_DETAIL, this.navTabs, {
