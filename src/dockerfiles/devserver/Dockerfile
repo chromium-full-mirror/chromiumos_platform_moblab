@@ -11,14 +11,15 @@ RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 WORKDIR /chromite
 RUN git fetch
 RUN git reset --hard 33550188781dfe03667d50bb9c5447034060de1c
+RUN rm -rf .git
 
 WORKDIR /devserver-src
 RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
 WORKDIR /devserver-src/dev-util
 RUN git reset --hard 624b7aeeab7c2a10f67178272abf6bb05f5cca03
 WORKDIR /devserver-src
+RUN rm -rf .git
 
-RUN ls /devserver-src/dev-util
 ######################################################################
 
 FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster as run

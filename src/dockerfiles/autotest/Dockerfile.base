@@ -24,6 +24,7 @@ RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 WORKDIR /chromite
 RUN git fetch
 RUN git reset --hard 33550188781dfe03667d50bb9c5447034060de1c
+RUN rm -rf .git
 
 ######################################################################
 

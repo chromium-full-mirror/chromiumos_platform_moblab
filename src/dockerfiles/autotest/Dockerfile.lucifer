@@ -15,6 +15,7 @@ FROM ${BASE_REGISTRY_URI}/alpine/git as source
 WORKDIR /
 
 RUN git clone https://chromium.googlesource.com/chromiumos/infra/lucifer
+RUN rm -rf lucifer/.git
 
 ######################################################################
 

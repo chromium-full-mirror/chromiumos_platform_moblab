@@ -36,6 +36,9 @@ RUN echo \
     apt-key --keyring /usr/share/keyrings/cloud.google.gpg  \
     add - && apt-get update -y && apt-get install google-cloud-sdk -y
 
+RUN rm -rf /usr/lib/google-cloud-sdk/bin/anthoscli \
+           /usr/lib/google-cloud-sdk/bin/kuberun
+
 COPY --chown=moblab src/dockerfiles/rpcserver/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
@@ -69,4 +72,4 @@ USER moblab
 
 EXPOSE 6002
 
-CMD ["/etc/moblab/moblab_rpcserver/rpcserver.py"] 
+CMD ["/etc/moblab/moblab_rpcserver/rpcserver.py"]

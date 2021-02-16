@@ -12,6 +12,7 @@ RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 WORKDIR /chromite
 RUN git fetch
 RUN git reset --hard 33550188781dfe03667d50bb9c5447034060de1c
+RUN rm -rf .git
 
 ###############################################################################
 
@@ -48,6 +49,9 @@ RUN echo \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
     apt-key --keyring /usr/share/keyrings/cloud.google.gpg  \
     add - && apt-get update -y && apt-get install google-cloud-sdk -y
+
+RUN rm -rf /usr/lib/google-cloud-sdk/bin/anthoscli \
+           /usr/lib/google-cloud-sdk/bin/kuberun
 
 # Install the official pip
 RUN wget https://bootstrap.pypa.io/2.7/get-pip.py -O /tmp/get-pip.py
