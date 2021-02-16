@@ -5,26 +5,26 @@
 #include <stdio.h>
 #include <usb.h>
 
-void reset_usb_devs_on_bus(struct usb_bus *p_usb_bus) {
+void reset_usb_devices_on_bus(struct usb_bus *p_usb_bus) {
     if (p_usb_bus == NULL) {
         return;
     }
-    struct usb_dev *p_usb_dev;
-    for (p_usb_dev = p_usb_bus->devices;
-         p_usb_dev;
-         p_usb_dev = p_usb_dev->next) {
+    struct usb_device *p_usb_device;
+    for (p_usb_device = p_usb_bus->devices;
+         p_usb_device;
+         p_usb_device = p_usb_device->next) {
         char buf[1024];
         int ret;
-        usb_dev_handle *usb_handler = usb_open(p_usb_dev);
+        usb_dev_handle *usb_handler = usb_open(p_usb_device);
         if (usb_handler) {
             int buf_len = usb_get_string_simple(usb_handler, 2, buf, 1023);
             ret = usb_reset(usb_handler);
             if (buf_len > 0) {
-                printf("resetting %p %d (%s)\n", p_usb_dev, ret, buf);
+                printf("resetting %p %d (%s)\n", p_usb_device, ret, buf);
             }
             usb_close(usb_handler);
         } else {
-            printf("Can't open %p\n", p_usb_dev);
+            printf("Can't open %p\n", p_usb_device);
         }
     }
 }
