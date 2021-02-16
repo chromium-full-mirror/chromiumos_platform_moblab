@@ -43,6 +43,7 @@ py
 pytest
 pytest-catchlog
 pytest-cov
+retry
 scandir
 subprocess32
 six

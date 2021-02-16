@@ -11,10 +11,14 @@ import re
 import traceback
 import urllib.request, urllib.parse, urllib.error
 
+from retry import retry
+
 from client.common_lib import error
 from frontend.afe import models, rpc_utils
 from frontend.afe import rpcserver_logging
 from frontend.afe.json_rpc import serviceHandler
+
+from django.db.utils import OperationalError
 
 LOGGING_REGEXPS = [r'.*add_.*',
                    r'delete_.*',
@@ -157,6 +161,7 @@ class RpcHandler(object):
         return urllib.parse.unquote(request.META['QUERY_STRING']).decode("utf-8")
 
 
+    @retry(OperationalError, delay=1, backoff=2, max_delay=60)
     def execute_request(self, json_request):
         """Execute a json request.
 
