@@ -210,10 +210,10 @@ class HostServicesConnector(object):
         cls.connect()
         try:
             cls.stub.reboot(empty_pb2.Empty())
-        except grpc.RpcError:
+        except grpc.RpcError as e:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error rebooting")
-            raise HostServicesException("Error rebooting")
+            raise HostServicesException("Error rebooting: " + str(e))
 
     @classmethod
     def factory_reset(cls):

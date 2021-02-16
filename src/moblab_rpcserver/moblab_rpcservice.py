@@ -1014,7 +1014,11 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return response
 
     def reboot_moblab(self, request, _context):
-        host_connector.HostServicesConnector.reboot()
+        try:
+            host_connector.HostServicesConnector.reboot()
+        except host_connector.HostServicesException as e:
+            return moblabrpc_pb2.RebootMoblabResponse(error_message=str(e))
+        return moblabrpc_pb2.RebootMoblabResponse()
 
     def get_is_update_available(self, request, _context):
         """
