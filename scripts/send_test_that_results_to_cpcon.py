@@ -1,10 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from __future__ import print_function
 
 import argparse
 import logging
@@ -366,7 +365,7 @@ def _confirm_option(question):
     expected_answers = ['y', 'yes', 'n', 'no']
     answer = ''
     while answer not in expected_answers:
-        answer = raw_input(question + "(y/n): ").lower().strip()
+        answer = input(question + "(y/n): ").lower().strip()
     return answer[0] == "y"
 
 
