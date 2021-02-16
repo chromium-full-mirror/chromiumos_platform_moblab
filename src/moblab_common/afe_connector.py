@@ -306,6 +306,7 @@ class AFEConnector(object):
             Number of tasks that match the given filters ( special_tasks in AFE
             vernacular ).
         """
+        params = {}
         if id_list:
             assert isinstance(id_list, list)
             params = {"id__in": id_list}
