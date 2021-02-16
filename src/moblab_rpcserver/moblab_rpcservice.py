@@ -252,7 +252,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         return moblabrpc_pb2.ConnectedDutInfo(
             name=dut_dict.get("platform", ""),
             ip=dut_dict.get("hostname", ""),
-            mac_addr="",
+            mac_addr=dut_dict.get("mac", ""),
             model=self.service.extract_model_from_labels(
                 dut_dict.get("labels", [])
             ),
