@@ -2,7 +2,7 @@ substitutions:
   _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
   _REGISTRY_URI: gcr.io/chromeos-partner-moblab
   _LABEL: autopush
-  _WATCHTOWER_CMD: "--interval 1"
+  _WATCHTOWER_CMD: "--interval 1 --include-restarting"
   _SSH_PORT: "22"
 
 steps:

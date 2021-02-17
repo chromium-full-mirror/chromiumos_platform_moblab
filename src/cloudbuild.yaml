@@ -2,7 +2,7 @@ substitutions:
   _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
   _REGISTRY_URI: gcr.io/chromeos-partner-moblab
   _LABEL: beta
-  _WATCHTOWER_CMD: "--interval 3600 --monitor-only"
+  _WATCHTOWER_CMD: "--interval 3600 --monitor-only --include-restarting"
   _SSH_PORT: "22"
 
 steps:
