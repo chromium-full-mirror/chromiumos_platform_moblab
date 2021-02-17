@@ -520,22 +520,22 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UNKNOWN
         if internal_status == UploadStatus.NOT_READY.name:
             result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_NOT_READY.name
+                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_NOT_READY
             )
         if internal_status == UploadStatus.QUEUED.name:
-            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_QUEUED.name
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_QUEUED
         if internal_status == UploadStatus.UPLOADING.name:
             result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADING.name
+                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADING
             )
         if internal_status == UploadStatus.UPLOADED.name:
-            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADED.name
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADED
         if internal_status == UploadStatus.UPLOAD_FAILED.name:
             result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED.name
+                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED
             )
         if internal_status == UploadStatus.DELETED.name:
-            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_DELETED.name
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_DELETED
 
         return moblabrpc_pb2.Job.UploadStatus.Name(result)
 

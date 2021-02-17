@@ -514,7 +514,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
         expected_result2 = {
             "id": 3,
             "key3": "value3",
-            "status": "DEF",
+            "upload_status": "DEF",
             "last_falure_reason": "",
             "attempt_number": 5,
         }

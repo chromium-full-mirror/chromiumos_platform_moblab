@@ -877,7 +877,7 @@ class MoblabService(object):
         for job in jobs:
             if job["id"] in jobs_upload_status:
                 state = jobs_upload_status[job["id"]]
-                job["status"] = state.status
+                job["upload_status"] = state.status
                 job["attempt_number"] = state.attempt_number
                 job["last_falure_reason"] = state.last_falure_reason
 
