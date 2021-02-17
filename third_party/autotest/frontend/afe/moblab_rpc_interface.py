@@ -499,7 +499,7 @@ def update_docker():
         volumes=['/var/run/docker.sock:/var/run/docker.sock'],
         name='update',
         detach=True,
-        command='--run-once')
+        command='--run-once --include-restarting')
     try:
         container.wait(timeout=600)
     except requests.exceptions.ReadTimeout:

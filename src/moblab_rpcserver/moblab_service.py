@@ -1386,7 +1386,7 @@ class MoblabService(object):
             volumes=["/var/run/docker.sock:/var/run/docker.sock"],
             name="update",
             detach=True,
-            command="--run-once",
+            command="--run-once --include-restarting",
         )
 
         try:
