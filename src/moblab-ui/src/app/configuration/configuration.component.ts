@@ -24,10 +24,21 @@ function gsURLValidator(control) {
   return forbidden ? {notAGSUrl: {value: control.value}} : null;
 }
 
+class CloudConfiguration {
+  constructor(
+    public isCloudEnabled: boolean = false,
+    public isRemoteConsoleEnabled: boolean = false,
+    public isRemoteCommandEnabled: boolean = false,
+    public botoKeyID: string = '',
+    public botoKeySecret: string = '',
+    public bucketURL: string = ''
+  ) { }
+}
+
 @Component({
   selector: 'app-configuration',
   templateUrl: './configuration.component.html',
-  styleUrls: ['./configuration.component.css'],
+  styleUrls: ['./configuration.component.scss'],
 })
 export class ConfigurationComponent implements OnInit, AfterContentInit {
   @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
@@ -61,12 +72,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   showUncheckWarning = false;
   configurationLoading = false;
 
-  lastFetchedIsCloudEnabled = false;
-  lastFetchedIsRemoteConsoleEnabled = false;
-  lastFetchedIsRemoteCommandEnabled = false;
-  lastFetchedBotoKeyID = '';
-  lastFetchedBotoKeySecret = '';
-  lastFetchedBucketURL = '';
+  lastFetchedCloudConfig = new CloudConfiguration();
 
   dutWifiInfoLoading = false;
   dutWifiNameForm = new FormControl('', {
@@ -167,13 +173,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         is_remote_command_enabled: boolean
       ) => {
         this.updateCloudConfigurationForms(
-          boto_key_id,
-          boto_key_secret,
-          gcs_bucket_url,
-          is_cloud_enabled,
-          is_remote_console_enabled,
-          is_remote_command_enabled
-        );
+          new CloudConfiguration(
+            is_cloud_enabled,
+            is_remote_console_enabled,
+            is_remote_command_enabled,
+            boto_key_id,
+            boto_key_secret,
+            gcs_bucket_url,
+          ));
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
@@ -240,12 +247,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * values.
      */
     return (
-      this.lastFetchedBotoKeyID !== this.botoKeyIDForm.value ||
-      this.lastFetchedBotoKeySecret !== this.botoKeySecretForm.value ||
-      this.lastFetchedBucketURL !== this.bucketURLForm.value ||
-      this.lastFetchedIsCloudEnabled !== this.isCloudEnabled ||
-      this.lastFetchedIsRemoteConsoleEnabled !== this.isRemoteConsoleEnabled ||
-      this.lastFetchedIsRemoteCommandEnabled !== this.isRemoteCommandEnabled
+      this.lastFetchedCloudConfig.botoKeyID !== this.botoKeyIDForm.value ||
+      this.lastFetchedCloudConfig.botoKeySecret !== this.botoKeySecretForm.value ||
+      this.lastFetchedCloudConfig.bucketURL !== this.bucketURLForm.value ||
+      this.lastFetchedCloudConfig.isCloudEnabled !== this.isCloudEnabled ||
+      this.lastFetchedCloudConfig.isRemoteConsoleEnabled !== this.isRemoteConsoleEnabled ||
+      this.lastFetchedCloudConfig.isRemoteCommandEnabled !== this.isRemoteCommandEnabled
     );
   }
 
@@ -337,21 +344,6 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      */
     this.isCloudEnabled = !this.isCloudEnabled;
 
-    if (!this.isCloudEnabled) {
-      this.isRemoteConsoleEnabled = false;
-      this.isRemoteCommandEnabled = false;
-      // clears boto and GCS bucket configurations, leaves cloud and remote console / remote commands enable settings unchanged.
-      this.updateCloudConfigurationForms(
-        '', // boto_key_id
-        '', // boto_key_secret
-        '', // gcs_bucket_url
-        this.isCloudEnabled,
-        this.isRemoteConsoleEnabled,
-        this.isRemoteCommandEnabled
-      );
-    } else {
-      this.isRemoteConsoleEnabled = true;
-    }
     this.toggleCloudConfigDisabledMessage();
   }
 
@@ -387,9 +379,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         this.configurationLoading = false;
         this.setOffPopup(errorMsg);
       },
-      this.botoKeyIDForm.value,
-      this.botoKeySecretForm.value,
-      this.bucketURLForm.value,
+      this.isCloudEnabled ? this.botoKeyIDForm.value : "",
+      this.isCloudEnabled ? this.botoKeySecretForm.value : "",
+      this.isCloudEnabled ? this.bucketURLForm.value : "",
       this.isCloudEnabled,
       this.isRemoteConsoleEnabled,
       this.isRemoteCommandEnabled
@@ -455,34 +447,23 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   }
 
   updateCloudConfigurationForms(
-    boto_key_id: string,
-    boto_key_secret: string,
-    gcs_bucket_url: string,
-    is_cloud_enabled: boolean,
-    is_remote_console_enabled: boolean,
-    is_remote_command_enabled: boolean
+    newCloudConfig: CloudConfiguration
   ) {
     /**
      * Updates the form values of the cloud configurations. Meant to be called
      * with values returned from RPC call to get cloud info.
      */
-    this.botoKeyIDForm.setValue(boto_key_id);
-    this.botoKeySecretForm.setValue(boto_key_secret);
-    this.bucketURLForm.setValue(gcs_bucket_url);
+    this.botoKeyIDForm.setValue(newCloudConfig.botoKeyID);
+    this.botoKeySecretForm.setValue(newCloudConfig.botoKeySecret);
+    this.bucketURLForm.setValue(newCloudConfig.bucketURL);
 
-    this.lastFetchedBotoKeyID = boto_key_id;
-    this.lastFetchedBotoKeySecret = boto_key_secret;
-    this.lastFetchedBucketURL = gcs_bucket_url;
-
-    this.isCloudEnabled = is_cloud_enabled;
-    this.isRemoteConsoleEnabled = is_remote_console_enabled;
-    this.isRemoteCommandEnabled = is_remote_command_enabled;
+    this.isCloudEnabled = newCloudConfig.isCloudEnabled;
+    this.isRemoteConsoleEnabled = newCloudConfig.isRemoteConsoleEnabled;
+    this.isRemoteCommandEnabled = newCloudConfig.isRemoteCommandEnabled;
 
     this.toggleCloudConfigDisabledMessage();
 
-    this.lastFetchedIsCloudEnabled = this.isCloudEnabled;
-    this.lastFetchedIsRemoteConsoleEnabled = this.isRemoteConsoleEnabled;
-    this.lastFetchedIsRemoteCommandEnabled = this.isRemoteCommandEnabled;
+    this.lastFetchedCloudConfig = newCloudConfig;
 
     this.configurationLoading = false;
   }

@@ -11,20 +11,15 @@ mat-card {
   box-shadow: none !important;
   max-width: 650px;
   margin: 16px;
-  padding: 8px;
+  padding: 16px;
 }
 
 mat-card-header {
-  text-decoration: underline;
   font-family: Roboto, sans-serif;
   color:rgba(0, 0, 0, 0.87);
   font-size: 18px;
   font-weight: 500;
-  margin-bottom: 10px;
-}
-
-mat-list-item {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 ::ng-deep .readonly input.mat-input-element {
@@ -64,11 +59,6 @@ mat-list-item {
   margin-bottom: 10px;
 }
 
-.list-row {
-  margin-top:15px;
-  margin-bottom:15px;
-}
-
 .loading-overlay {
   background-color: #fafafa;
   height: 100%;
@@ -88,7 +78,7 @@ mat-list-item {
   position: absolute;
   top:25%;
   /*min-height: 300px;*/
-  margin-left:180px;
+  margin-left: 180px;
   z-index: 101;
 }
 
@@ -97,7 +87,7 @@ mat-list-item {
 }
 
 .mat-list-item {
-  padding-bottom: 18px;
+  padding-bottom: 16px;
 }
 
 .reboot-button-wrapper {
@@ -130,19 +120,8 @@ mat-list-item {
   padding-left: 10px;
 }
 
-#configuration-forms-wrapper {
-  border: 0px;
-}
-
-#console-checkbox-wrapper {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding-left: 20px;
-  padding-right: 130px;
-}
-
 #gcs-link {
-  margin-left:10px;
+  margin-left: 10px;
   font-family: Roboto, sans-serif;
 }
 
@@ -151,11 +130,10 @@ mat-list-item {
   padding-bottom: 5px;
 }
 
-#submit-button {
-  margin-top: 25px;
-  margin-bottom: 20px;
-}
-
 #test-runner-config {
   padding: 2px
+}
+
+.card-table-content {
+  margin: 16px;
 }
