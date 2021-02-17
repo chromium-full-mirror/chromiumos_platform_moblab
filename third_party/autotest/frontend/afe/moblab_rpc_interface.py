@@ -322,7 +322,7 @@ def get_cloud_storage_info():
     """RPC handler to get the cloud storage access information.
     """
     cloud_storage_info = {key : value for key, value in [
-        (_IMAGE_STORAGE_SERVER, _CONFIG.get_config_value('CROS', _IMAGE_STORAGE_SERVER)),
+        (_IMAGE_STORAGE_SERVER, _CONFIG.get_config_value('CROS', _IMAGE_STORAGE_SERVER, default=None)),
         (_RESULT_STORAGE_SERVER, _CONFIG.get_config_value('CROS', _RESULT_STORAGE_SERVER, default=None)),
         (_IS_CLOUD_ENABLED, _CONFIG.get_config_value('CROS', _IS_CLOUD_ENABLED, default=None))
     ] if value}
@@ -441,7 +441,7 @@ def submit_wizard_config_info(
         _write_config_file(MOBLAB_BOTO_LOCATION, boto_config, True)
 
     _CONFIG.parse_config_file()
-    _enable_notification_using_credentials_in_bucket()
+    _update_cloud_notification_setting()
 
     return _create_operation_status_response(True, None)
 
@@ -1074,24 +1074,61 @@ def run_suite(board, build, suite, model=None, ro_firmware=None,
             max_runtime_mins=suite_timeout_mins)
 
 
-def _enable_notification_using_credentials_in_bucket():
-    """ Check and enable cloud notification if a credentials file exits.
+def _update_cloud_notification_setting():
+    """Enable or disable cloud notification.
     @return: None
     """
-    gs_image_location =_CONFIG.get_config_value('CROS', _IMAGE_STORAGE_SERVER)
+    gs_image_location = _CONFIG.get_config_value(
+        "CROS", _IMAGE_STORAGE_SERVER, default=None
+    )
+    if gs_image_location is None:
+        _disable_cloud_notification()
+    else:
+        _enable_notification_using_credentials_in_bucket(gs_image_location)
+
+
+def _enable_notification_using_credentials_in_bucket(gs_image_location):
+    """Check and enable cloud notification if a credentials file exits.
+    @return: None
+    """
     try:
-        utils.run(GsUtil.get_gsutil_cmd(), args=(
-            'cp', gs_image_location + 'pubsub-key-do-not-delete.json', '/tmp'))
+        utils.run(
+            GsUtil.get_gsutil_cmd(),
+            args=(
+                "cp",
+                gs_image_location + "pubsub-key-do-not-delete.json",
+                "/tmp",
+            ),
+        )
         # This runs the copy as moblab user
-        shutil.copyfile('/tmp/pubsub-key-do-not-delete.json',
-                        moblab_host.MOBLAB_SERVICE_ACCOUNT_LOCATION)
+        shutil.copyfile(
+            "/tmp/pubsub-key-do-not-delete.json",
+            moblab_host.MOBLAB_SERVICE_ACCOUNT_LOCATION,
+        )
 
     except error.CmdError as e:
         logging.error(e)
     else:
-        logging.info('Enabling cloud notifications')
+        logging.info("Enabling cloud notifications")
         config_update = {}
-        config_update['CROS'] = [(_CLOUD_NOTIFICATION_ENABLED, True)]
+        config_update["CROS"] = [(_CLOUD_NOTIFICATION_ENABLED, True)]
+        _update_partial_config(config_update)
+
+
+def _disable_cloud_notification():
+    """Disable cloud notification.
+    @return: None
+    """
+    try:
+        # Delete old moblab service account location
+        os.remove(moblab_host.MOBLAB_SERVICE_ACCOUNT_LOCATION)
+
+    except error.CmdError as e:
+        logging.error(e)
+    else:
+        logging.info("Disabling cloud notifications")
+        config_update = {}
+        config_update["CROS"] = [(_CLOUD_NOTIFICATION_ENABLED, False)]
         _update_partial_config(config_update)
 
 

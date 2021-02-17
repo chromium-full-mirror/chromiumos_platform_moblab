@@ -8,28 +8,31 @@
 </div>
 
 <mat-card id="configuration-information-card">
-  <mat-card-header>Cloud Configuration</mat-card-header>
-  <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
-    <div id="cloud-checkbox-form" class="form-text">
-      <mat-checkbox id="cloud-checkbox" (mouseenter)="cloudCheckboxHoverStart()" (mouseleave)="cloudCheckboxHoverStop()"
-        (change)="isCloudEnabledCheckboxChange()" [checked]="this.isCloudEnabled">
-      </mat-checkbox>
-      <span id="cloud-checkbox-label" class="checkbox-label"> Enable Moblab cloud integration </span>
-      <br>
-      <div class="checkbox-description">
-        Cloud integration is necessary for Moblab to fetch Chrome OS test images as well as upload test results for
-        CPCon ingestion. ( The boto and GCS bucket forms below are cloud configurations )
+  <mat-card-header>
+    <mat-card-title>Cloud Configuration</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
+      <div id="cloud-checkbox-form" class="form-text">
+        <mat-checkbox id="cloud-checkbox" (mouseenter)="cloudCheckboxHoverStart()"
+          (mouseleave)="cloudCheckboxHoverStop()" (change)="isCloudEnabledCheckboxChange()"
+          [checked]="this.isCloudEnabled">
+        </mat-checkbox>
+        <span id="cloud-checkbox-label" class="checkbox-label"> Enable Moblab cloud integration </span>
+        <br>
+        <div class="checkbox-description">
+          Cloud integration is necessary for Moblab to fetch Chrome OS test images as well as upload test results for
+          CPCon ingestion. ( The boto and GCS bucket forms below are cloud configurations )
+        </div>
       </div>
-    </div>
-    <hr>
-    <div class="loading-overlay" *ngIf="configurationLoading">
-      <div class="loading-spinner-wrapper">
-        <mat-spinner></mat-spinner>
+      <hr>
+      <div class="loading-overlay" *ngIf="configurationLoading">
+        <div class="loading-spinner-wrapper">
+          <mat-spinner></mat-spinner>
+        </div>
       </div>
-    </div>
-    <mat-card id="configurations-forms-wrapper">
-      <mat-card-content layout-padding>
-        <mat-list>
+      <mat-list>
+        <div [hidden]="!this.isCloudEnabled">
           <div class="listrow" flex-direction="row">
             <mat-list-item>
               <mat-form-field class="configuration-input" appearance="legacy" [class.readonly]="!this.isCloudEnabled"
@@ -40,7 +43,7 @@
                   Boto key ID not set.
                 </mat-error>
                 <mat-error *ngIf="this.botoKeyIDForm.hasError('clearWarning')">
-                  Unchecking cloud enable will result in boto key value being cleared.
+                  Unchecking Enable Moblab cloud integration will result in boto key value being cleared.
                 </mat-error>
               </mat-form-field>
             </mat-list-item>
@@ -84,8 +87,8 @@
           <hr style="margin-top:0px; margin-bottom: 30px;">
           <mat-list-item>
             <div id="console-checkbox-wrapper" class="form-text">
-              <mat-checkbox id="console-checkbox" [disabled]="!this.isCloudEnabled"
-                (change)="isRemoteConsoleEnabledCheckboxChange()" [checked]="this.isRemoteConsoleEnabled"
+              <mat-checkbox id="console-checkbox" (change)="isRemoteConsoleEnabledCheckboxChange()"
+                [checked]="this.isRemoteConsoleEnabled"
                 [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="below">
               </mat-checkbox>
               <span id="cloud-checkbox-description" class="checkbox-label" [class.disabled]="!this.isCloudEnabled">
@@ -101,56 +104,66 @@
           </mat-list-item>
           <mat-list-item>
             <div id="command-checkbox-wrapper" class="form-text">
-              <mat-checkbox id="command-checkbox" [disabled]="!this.isCloudEnabled"
-                (change)="isRemoteCommandEnabledCheckboxChange()" [checked]="this.isRemoteCommandEnabled"
+              <mat-checkbox id="command-checkbox" (change)="isRemoteCommandEnabledCheckboxChange()"
+                [checked]="this.isRemoteCommandEnabled"
                 [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="below">
               </mat-checkbox>
               <span id="command-checkbox-description" class="checkbox-label" [class.disabled]="!this.isCloudEnabled">
                 Enable remote commands </span>
             </div>
           </mat-list-item>
-        </mat-list>
-      </mat-card-content>
-    </mat-card>
-    <mat-list-item>
-      <button id="cloud-config-submit-button" mat-raised-button color="primary"
-        [disabled]="disableCloudConfigSubmissionButton()" type="submit">Submit Changes
-      </button>
-    </mat-list-item>
-  </form>
+        </div>
+        <mat-list-item>
+          <button id="cloud-config-submit-button" mat-raised-button color="primary"
+            [disabled]="disableCloudConfigSubmissionButton()" type="submit">Submit Changes
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </form>
+  </mat-card-content>
 </mat-card>
 <mat-card id="network-information-card">
-  <mat-card-header>Network Information</mat-card-header>
+  <mat-card-header>
+    <mat-card-title>Network Information</mat-card-title>
+  </mat-card-header>
   <mat-card-content>
-    <table>
-      <tr>
-        <td>Moblab Hostname:</td>
-        <td>{{moblabHostname}}</td>
-      </tr>
-      <tr>
-        <td>Connected to Internet:</td>
-        <td>{{isConnectedToInternet}}</td>
-      </tr>
-    </table>
+    <div class="card-table-content">
+      <table>
+        <tr>
+          <td>Moblab Hostname:</td>
+          <td>{{moblabHostname}}</td>
+        </tr>
+        <tr>
+          <td>Connected to Internet:</td>
+          <td>{{isConnectedToInternet}}</td>
+        </tr>
+      </table>
+    </div>
   </mat-card-content>
 </mat-card>
 <mat-card id="test-runner">
-  <mat-card-header>Test Runner Configuration</mat-card-header>
+  <mat-card-header>
+    <mat-card-title>Test Runner Configuration</mat-card-title>
+  </mat-card-header>
   <mat-card-content>
-    <div id="test-runner-config" fxLayout="row" fxLayoutAlign="space-between center">
-      <span>Job Scheduler status:</span>
-      <span><b>{{isHostSchedulerPauseRequested ? 'Paused' : "Active"}}</b></span>
-      <app-button-with-progress #pauseButton *ngIf="!isHostSchedulerPauseRequested" caption="Pause"
-        (buttonClick)="pauseClick()">
-      </app-button-with-progress>
-      <app-button-with-progress #resumeButton *ngIf="isHostSchedulerPauseRequested" caption="Resume"
-        (buttonClick)="resumeClick()">
-      </app-button-with-progress>
+    <div class="card-table-content">
+      <div id="test-runner-config" fxLayout="row" fxLayoutAlign="space-between center">
+        <span>Job Scheduler status:</span>
+        <span><b>{{isHostSchedulerPauseRequested ? 'Paused' : "Active"}}</b></span>
+        <app-button-with-progress #pauseButton *ngIf="!isHostSchedulerPauseRequested" caption="Pause"
+          (buttonClick)="pauseClick()">
+        </app-button-with-progress>
+        <app-button-with-progress #resumeButton *ngIf="isHostSchedulerPauseRequested" caption="Resume"
+          (buttonClick)="resumeClick()">
+        </app-button-with-progress>
+      </div>
     </div>
   </mat-card-content>
 </mat-card>
 <mat-card>
-  <mat-card-header>Stable Chrome OS Version Configuration</mat-card-header>
+  <mat-card-header>
+    <mat-card-title>Stable Chrome OS Version Configuration</mat-card-title>
+  </mat-card-header>
   <mat-card-content>
     <form #formRef="ngForm" (ngSubmit)="setStableCrOSVersion(userCrOSVersionForm.value)">
       <mat-list>
@@ -175,30 +188,34 @@
   </mat-card-content>
 </mat-card>
 <mat-card id="moblab-information-card">
-  <mat-card-header>Moblab Information</mat-card-header>
+  <mat-card-header>
+    <mat-card-title>Moblab Information</mat-card-title>
+  </mat-card-header>
   <mat-card-content>
-    <table>
-      <tr>
-        <td>Version:</td>
-        <td>{{chromeosReleaseVersion}}</td>
-      </tr>
-      <tr>
-        <td>Track:</td>
-        <td>{{chromeosReleaseTrack}}</td>
-      </tr>
-      <tr>
-        <td>Description:</td>
-        <td>{{chromeosReleaseDescription}}</td>
-      </tr>
-      <tr>
-        <td>Moblab Install Id:</td>
-        <td>{{moblabInstallId}}</td>
-      </tr>
-      <tr>
-        <td>Moblab Serial Number:</td>
-        <td>{{moblabSerialNumber}}</td>
-      </tr>
-    </table>
+    <div class="card-table-content">
+      <table>
+        <tr>
+          <td>Version:</td>
+          <td>{{chromeosReleaseVersion}}</td>
+        </tr>
+        <tr>
+          <td>Track:</td>
+          <td>{{chromeosReleaseTrack}}</td>
+        </tr>
+        <tr>
+          <td>Description:</td>
+          <td>{{chromeosReleaseDescription}}</td>
+        </tr>
+        <tr>
+          <td>Moblab Install Id:</td>
+          <td>{{moblabInstallId}}</td>
+        </tr>
+        <tr>
+          <td>Moblab Serial Number:</td>
+          <td>{{moblabSerialNumber}}</td>
+        </tr>
+      </table>
+    </div>
   </mat-card-content>
 </mat-card>
 <mat-card id="dut-wifi-card">
@@ -207,7 +224,9 @@
       <mat-spinner></mat-spinner>
     </div>
   </div>
-  <mat-card-header>DUT Wi-Fi Configuration</mat-card-header>
+  <mat-card-header>
+    <mat-card-title>DUT Wi-Fi Configuration</mat-card-title>
+  </mat-card-header>
   <mat-card-content layout-padding>
     <form #formRef="ngForm" (ngSubmit)="onDutWifiInfoSubmit(formRef.value)">
       <mat-list>
