@@ -14,10 +14,8 @@ export class AppSidebarComponent implements OnInit {
 
   // TODO(crbug.com/1111126) Reference actual Dockerfile var for these port numbers
   // (so we don't hardcode these numbers in multiple places)
-  afe_port = '6010';
   mobmonitor_port = '9991';
 
-  afe_link = this._format_afe_link(window.location.hostname, this.afe_port);
   mobmonitor_link = this._format_mobmonitor_link(
     window.location.hostname,
     this.mobmonitor_port

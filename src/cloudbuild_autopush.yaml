@@ -179,47 +179,6 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
 
-  - id: gwt-compiler
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--build-arg",
-        "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg",
-        "LABEL=${_LABEL}",
-        "-f",
-        "/workspace/src/dockerfiles/utilities/Dockerfile.gwtcompiler",
-        "-t",
-        "${_REGISTRY_URI}/gwtcompiler:${_LABEL}",
-        "/workspace/src/dockerfiles/utilities",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "python-3.7"
-
-  - id: autotest-gwt
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--build-arg",
-        "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg",
-        "LABEL=${_LABEL}",
-        "-f",
-        "/workspace/src/dockerfiles/autotest/Dockerfile.gwt",
-        "-t",
-        "${_REGISTRY_URI}/moblab-autotest-gwt:${_LABEL}",
-        "/workspace/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "buster-slim"
-      - "gwt-compiler"
-
   - id: autotest-base
     name: "docker:19.03.8"
     args:
@@ -261,7 +220,6 @@ steps:
       ]
     waitFor:
       - "autotest-base"
-      - "autotest-gwt"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -669,7 +627,6 @@ images:
   [
     "${_REGISTRY_URI}/protoc:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-lucifer:${_LABEL}",
-    "${_REGISTRY_URI}/moblab-autotest-gwt:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-base:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-dbsetup:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-monitor_db:${_LABEL}",
@@ -690,7 +647,6 @@ images:
     "${_REGISTRY_URI}/moblab-autotest-afe:${_LABEL}",
     "${_REGISTRY_URI}/moblab-ssp:${_LABEL}",
     "${_REGISTRY_URI}/mobmonitor:${_LABEL}",
-    "${_REGISTRY_URI}/gwtcompiler:${_LABEL}",
     "${_REGISTRY_URI}/moblab-dns:${_LABEL}",
     "${_REGISTRY_URI}/moblab_common:${_LABEL}",
     "${_REGISTRY_URI}/logrotate:${_LABEL}",

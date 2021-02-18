@@ -44,7 +44,7 @@ compose:
 		-f dockerfiles/compose/Dockerfile dockerfiles/compose
 	docker push ${REGISTRY_URI}/moblab-compose:${LABEL}
 
-autotest: autotest-afe autotest-dbsetup autotest-monitor autotest-gwt \
+autotest: autotest-afe autotest-dbsetup autotest-monitor \
 	autotest-host autotest-lucifer autotest-abort
 
 autotest-base: export DOCKER_BUILDKIT=1
@@ -54,7 +54,7 @@ autotest-base: protoc common
 	docker push ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
 autotest-afe: export DOCKER_BUILDKIT=1
-autotest-afe: autotest-base autotest-gwt
+autotest-afe: autotest-base
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-afe:${LABEL} \
 		-f dockerfiles/autotest/Dockerfile.afe dockerfiles/autotest
 	docker push ${REGISTRY_URI}/moblab-autotest-afe:${LABEL}
@@ -76,12 +76,6 @@ autotest-lucifer: protoc
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-lucifer:${LABEL} \
 		-f dockerfiles/autotest/Dockerfile.lucifer dockerfiles/autotest
 	docker push ${REGISTRY_URI}/moblab-autotest-lucifer:${LABEL}
-
-autotest-gwt: export DOCKER_BUILDKIT=1
-autotest-gwt: gwtcompiler
-	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL} \
-		-f dockerfiles/autotest/Dockerfile.gwt ..
-	docker push ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL}
 
 autotest-monitor: export DOCKER_BUILDKIT=1
 autotest-monitor: autotest-base autotest-lucifer
@@ -164,12 +158,6 @@ remote-scheduler: common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL} -f \
 		dockerfiles/remote-scheduler/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-remote-scheduler:${LABEL}
-
-gwtcompiler: export DOCKER_BUILDKIT=1
-gwtcompiler:
-	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/gwtcompiler:${LABEL} \
-		-f dockerfiles/utilities/Dockerfile.gwtcompiler dockerfiles/utilities
-	docker push ${REGISTRY_URI}/gwtcompiler:${LABEL}
 
 mobmonitor: export DOCKER_BUILDKIT=1
 mobmonitor: common

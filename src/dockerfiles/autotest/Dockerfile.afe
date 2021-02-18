@@ -7,16 +7,10 @@ ARG LABEL=release
 
 ######################################################################
 
-FROM ${REGISTRY_URI}/moblab-autotest-gwt:${LABEL} as gwt
-
-######################################################################
-
 ARG LABEL
 ARG REGISTRY_URI
 
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
-
-COPY --from=gwt /www/ /usr/local/autotest/frontend/client/www/
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
     apache2 \
@@ -50,7 +44,7 @@ RUN echo \
 
 RUN rm -rf /usr/lib/google-cloud-sdk/bin/anthoscli \
            /usr/lib/google-cloud-sdk/bin/kuberun
-           
+
 # Ping is used to check DUT's are around needs this capability added to run
 # as non root user.
 RUN setcap cap_net_raw+ep /bin/ping
