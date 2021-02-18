@@ -142,7 +142,7 @@ def parse_test_job(test_dir, job_keyval, job_id, suite):
         suite: A suite name.
 
     Returns:
-        The job object.
+        The job object or None if build version not found.
     """
     logging.info("Start to parse the test job for: %s", test_dir)
 
@@ -463,12 +463,13 @@ def main(args):
         fake_job_id = str(int(time.time() * 1000))
         job_keyval = models.job.read_keyval(test_dir)
         job = parse_test_job(test_dir, job_keyval, fake_job_id, fake_suite)
-        generate_job_serialize(test_dir, job, job_keyval)
 
         if not job:
             logging.warning("Failed to generate job.serialize file and skipped "
                             "the test directory: %s", test_dir)
             continue
+
+        generate_job_serialize(test_dir, job, job_keyval)
 
         if not is_uploaded(test_dir) and not parsed_args.dry_run:
             try:
