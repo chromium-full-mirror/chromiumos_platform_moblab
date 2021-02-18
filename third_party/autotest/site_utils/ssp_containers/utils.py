@@ -98,7 +98,6 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
         detach=True,
         volumes=['default_results:/results',
                  'default_results:/usr/local/autotest/results',
-                 'tradefed_cache:/tmp/autotest-tradefed-cache',
                  'default_shadowconfig:/shadow_config']
     )
 
