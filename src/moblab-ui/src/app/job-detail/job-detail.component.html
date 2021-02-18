@@ -146,12 +146,14 @@
           </th>
           <td mat-cell *matCellDef="let associatedDutsRow">
             {{this.getStatusFromInt(associatedDutsRow.getStatus())}}
-            <div *ngIf="this.showLogLinks(associatedDutsRow.getStatus())" class="links-wrapper">
-            <a href="{{this.getAllLogsLink(associatedDutsRow)}}" target="_blank">
-              All Logs</a>
-            <a href="{{this.getDebugLogLinks(associatedDutsRow)}}" target="_blank">
-              Debug Logs</a>
-            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="logs">
+          <th mat-header-cell *matHeaderCellDef>
+            <div>Logs</div>
+          </th>
+          <td mat-cell *matCellDef="let associatedDutsRow" (click)="$event.stopPropagation()">
+            <span><a class="logbutton" mat-button target="_blank" href="{{this.getLogsLink(associatedDutsRow)}}">logs</a></span>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="associatedDutsTableColumns"></tr>
