@@ -69,11 +69,7 @@ class Router(object):
         @returns: 'server' for all server models. 'global' for all tko models,
                   None otherwise. None means the router doesn't have an opinion.
         """
-        if self._should_be_in_server_db(model):
-            return 'server'
-        if self._should_be_in_global(model):
-            return 'global'
-        return None
+        return 'default'
 
 
     def db_for_write(self, model, **hints):
@@ -85,11 +81,7 @@ class Router(object):
         @returns: 'server' for all server models. 'global' for all tko models,
                   None otherwise. None means the router doesn't have an opinion.
         """
-        if self._should_be_in_server_db(model):
-            return 'server'
-        if self._should_be_in_global(model):
-            return 'global'
-        return None
+        return 'default'
 
 
     def allow_relation(self, obj1, obj2, **hints):

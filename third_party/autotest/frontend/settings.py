@@ -10,45 +10,33 @@ global database.
 This is implemented using a Django database router.
 For more details on how the routing works, see db_router.py.
 """
-
-import common
-from client.common_lib import global_config
-from frontend import database_settings_helper
-
-c = global_config.global_config
-_section = 'AUTOTEST_WEB'
-
 DEBUG = False
 
 FULL_ADMIN = False
 
-ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
-)
+ADMINS = ()
 
 MANAGERS = ADMINS
 
-AUTOTEST_DEFAULT = database_settings_helper.get_default_db_config()
-AUTOTEST_GLOBAL = database_settings_helper.get_global_db_config()
-AUTOTEST_READONLY = database_settings_helper.get_readonly_db_config()
-AUTOTEST_SERVER = database_settings_helper.get_server_db_config()
-
 ALLOWED_HOSTS = '*'
 
-DATABASES = {'default': AUTOTEST_DEFAULT,
-             'global': AUTOTEST_GLOBAL,
-             'readonly': AUTOTEST_READONLY,
-             'server': AUTOTEST_SERVER,}
+DATABASES = {
+    'default': {
+        'ENGINE': 'frontend.db.backends.afe',
+        'PORT': '',
+        'HOST': 'db',
+        'NAME': 'chromeos_autotest_db',
+        'USER': 'chromeosqa-admin',
+        'PASSWORD': 'moblab_db_passwd',
+        'OPTIONS': {'init_command':
+                    "SET sql_mode='STRICT_TRANS_TABLES',innodb_strict_mode=1;SET default_storage_engine=INNODB",
+                    'isolation_level': 'read committed'
+                   },
+        'CONN_MAX_AGE': 3600
+    }
+}
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {'debug': False,
-                    'loaders': ['django.template.loaders.filesystem.Loader',
-                                'django.template.loaders.app_directories.Loader'
-                               ]
-                   }
-    }
 ]
 
 # Have to set SECRET_KEY before importing connections because of this bug:
@@ -85,22 +73,6 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = ''
-
-# URL that handles the media served from MEDIA_ROOT.
-# Example: "http://media.lawrence.com"
-MEDIA_URL = ''
-
-# URL prefix of static file. Only used by the admin interface.
-STATIC_URL = '/' + URL_PREFIX + 'admin/'
-
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
 )
@@ -110,7 +82,4 @@ ROOT_URLCONF = 'frontend.urls'
 INSTALLED_APPS = (
     'frontend.afe',
     'frontend.tko',
-    'django.contrib.admin',
-    'django.contrib.contenttypes',
-    'django.contrib.sites',
 )

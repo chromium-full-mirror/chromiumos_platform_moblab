@@ -23,11 +23,9 @@ import re
 import sys
 import time
 
-import common
 from client.common_lib import global_config
 from client.common_lib import utils
 from client.common_lib.cros import retry
-from frontend import database_settings_helper
 
 
 metrics = utils.metrics_mock
@@ -111,27 +109,23 @@ class db_sql(object):
         @param password: If set, this password will be used, if not, the
                          password will be retrieved from global_config.
         """
-        database_settings = database_settings_helper.get_global_db_config()
 
         # grab the host, database
-        self.host = host or database_settings['HOST']
-        self.database = database or database_settings['NAME']
+        self.host = 'db'
+        self.database = 'chromeos_autotest_db'
 
         # grab the user and password
-        self.user = user or database_settings['USER']
-        self.password = password or database_settings['PASSWORD']
+        self.user = 'chromeosqa-admin'
+        self.password = 'moblab_db_passwd'
 
         # grab the timeout configuration
-        self.query_timeout =(
-                database_settings.get('OPTIONS', {}).get('timeout', 3600))
+        self.query_timeout = 3600
 
         # Using fallback to non-global in order to work without configuration
         # overhead on non-shard instances.
         get_value = global_config.global_config.get_config_value_with_fallback
-        self.min_delay = get_value("AUTOTEST_WEB", "global_db_min_retry_delay",
-                                   "min_retry_delay", type=int, default=20)
-        self.max_delay = get_value("AUTOTEST_WEB", "global_db_max_retry_delay",
-                                   "max_retry_delay", type=int, default=60)
+        self.min_delay = 20
+        self.max_delay = 60
 
         # TODO(beeps): Move this to django settings once we have routers.
         # On test instances mysql connects through a different port. No point
@@ -146,8 +140,7 @@ class db_sql(object):
         # and empty string will fallback to not even specifying the port
         # to the backend in tko/db.py. Unfortunately this means retries
         # won't work on the test cluster till we've migrated to routers.
-        self.port = global_config.global_config.get_config_value(
-                "AUTOTEST_WEB", "global_db_port", type=str, default='')
+        self.port = ''
 
 
     def _init_db(self):

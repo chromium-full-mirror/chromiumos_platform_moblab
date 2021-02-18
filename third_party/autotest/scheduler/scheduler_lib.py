@@ -8,15 +8,11 @@
 import logging
 import os
 
-import common
-
 from client.common_lib import global_config
 from client.common_lib import logging_config
 from client.common_lib import logging_manager
 from client.common_lib import utils
 from database import database_connection
-from frontend import setup_django_environment
-from frontend.afe import readonly_connection
 from server import utils as server_utils
 
 
@@ -67,12 +63,6 @@ class ConnectionManager(object, metaclass=server_utils.Singleton):
         @param autocommit: Initialize django autocommit options.
         """
         self.db_connection = None
-        # bypass the readonly connection
-        readonly_connection.set_globally_disabled(readonly)
-        if autocommit:
-            # ensure Django connection is in autocommit
-            setup_django_environment.enable_autocommit()
-
 
     @classmethod
     def open_connection(cls):
