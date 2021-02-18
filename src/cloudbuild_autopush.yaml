@@ -100,6 +100,22 @@ steps:
     waitFor:
       - "buster-slim"
 
+  - id: chromite
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.chromite",
+        "-t",
+        "${_REGISTRY_URI}/chromite:${_LABEL}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "alpine-git"
+
   - id: protogen
     name: "${_REGISTRY_URI}/protoc:${_LABEL}"
     entrypoint: "bash"
@@ -241,6 +257,7 @@ steps:
       - "buster-slim"
       - "python-3.7-slim"
       - "moblab_common"
+      - "chromite"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -408,6 +425,7 @@ steps:
     waitFor:
       - "alpine-git"
       - "python-3.8-slim"
+      - "chromite"
 
   - id: ui
     name: "docker:19.03.8"
@@ -451,7 +469,8 @@ steps:
     waitFor:
       - "buster-slim"
       - "alpine-git"
-
+      - "chromite"
+      
   - id: offloader
     name: "docker:19.03.8"
     args:
@@ -694,6 +713,7 @@ images:
     "${_REGISTRY_URI}/moblab-dns:${_LABEL}",
     "${_REGISTRY_URI}/moblab_common:${_LABEL}",
     "${_REGISTRY_URI}/logrotate:${_LABEL}",
+    "${_REGISTRY_URI}/chromite:${_LABEL}",
   ]
 
 options:
