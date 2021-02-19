@@ -24,7 +24,7 @@ class test(common_test.base_test):
 
 _sysinfo_before_test_script = """\
 import pickle
-from client.bin import test
+from autotest_lib.client.bin import test
 mytest = test.test(job, '', %r)
 job.sysinfo.log_before_each_test(mytest)
 sysinfo_pickle = os.path.join(mytest.outputdir, 'sysinfo.pickle')
@@ -34,7 +34,7 @@ job.record('GOOD', '', 'sysinfo.before')
 
 _sysinfo_after_test_script = """\
 import pickle
-from client.bin import test
+from autotest_lib.client.bin import test
 mytest = test.test(job, '', %r)
 # success is passed in so diffable_logdir can decide if or not to collect
 # full log content.
@@ -53,7 +53,7 @@ job.record('GOOD', '', 'sysinfo.after')
 # _sysinfo_after_test_script to pick it up later
 _sysinfo_iteration_script = """\
 import pickle
-from client.bin import test
+from autotest_lib.client.bin import test
 mytest = test.test(job, '', %r)
 sysinfo_pickle = os.path.join(mytest.outputdir, 'sysinfo.pickle')
 if os.path.exists(sysinfo_pickle):
