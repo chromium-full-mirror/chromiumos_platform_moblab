@@ -55,14 +55,14 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
     'time_used',
     'status',
   ];
-  associatedDutsTableColumns: string[] = ['dut', 'dut_status', 'status'];
+  associatedDutsTableColumns: string[] = ['dut', 'dut_status', 'status', 'logs',];
 
   constructor(
     private cd: ChangeDetectorRef,
     private readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -127,24 +127,9 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
     this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
   }
 
-  getLogsLink(execution: Execution, isDebugLink: boolean) {
-    let link = `http://localhost/tko/retrieve_logs.cgi?job=/results/${execution.getJobId()}-moblab/${execution.getDut()}/`;
-    if (isDebugLink) {
-      link += 'debug';
-    }
+  getLogsLink(execution: Execution) {
+    let link = `/results/${execution.getJobId()}-moblab/${execution.getDut()}/`;
     return link;
-  }
-
-  getAllLogsLink(execution: Execution) {
-    return this.getLogsLink(execution, false);
-  }
-
-  getDebugLogLinks(execution: Execution) {
-    return this.getLogsLink(execution, true);
-  }
-
-  showLogLinks(status: JobStatus) {
-    return status === Job.JobStatus.SUCCESS || status === Job.JobStatus.FAILED;
   }
 
   reportError(dialogue) {
