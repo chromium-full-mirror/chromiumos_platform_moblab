@@ -3,16 +3,12 @@
 # found in the LICENSE file.
 
 ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
 
-FROM ${BASE_REGISTRY_URI}/alpine/git as source
+######################################################################
 
-WORKDIR /
-
-RUN git clone https://chromium.googlesource.com/chromiumos/chromite
-WORKDIR /chromite
-RUN git fetch
-RUN git reset --hard 33550188781dfe03667d50bb9c5447034060de1c
-RUN rm -rf .git
+FROM ${REGISTRY_URI}/chromite:${LABEL} as chromite
 
 ###############################################################################
 
@@ -23,7 +19,7 @@ WORKDIR /
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-COPY --from=source --chown=moblab /chromite /chromite
+COPY --from=chromite --chown=moblab /chromite /chromite
 
 RUN apt-get update && apt-get install --no-install-recommends -yq \
     bzip2 \

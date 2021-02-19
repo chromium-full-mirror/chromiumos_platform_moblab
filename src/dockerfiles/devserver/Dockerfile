@@ -3,15 +3,16 @@
 # found in the LICENSE file.
 
 ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=release
+
+######################################################################
+
+FROM ${REGISTRY_URI}/chromite:${LABEL} as chromite
+
+######################################################################
 
 FROM ${BASE_REGISTRY_URI}/alpine/git as source
-
-WORKDIR /
-RUN git clone https://chromium.googlesource.com/chromiumos/chromite
-WORKDIR /chromite
-RUN git fetch
-RUN git reset --hard 33550188781dfe03667d50bb9c5447034060de1c
-RUN rm -rf .git
 
 WORKDIR /devserver-src
 RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
@@ -25,7 +26,7 @@ RUN rm -rf .git
 FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster as run
 
 COPY --from=source /devserver-src /devserver-src
-COPY --from=source /chromite /chromite
+COPY --from=chromite /chromite /chromite
 
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends -yq \

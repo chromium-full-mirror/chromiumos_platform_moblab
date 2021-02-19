@@ -16,15 +16,7 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 ######################################################################
 
-FROM ${BASE_REGISTRY_URI}/alpine/git as source
-
-WORKDIR /
-
-RUN git clone https://chromium.googlesource.com/chromiumos/chromite
-WORKDIR /chromite
-RUN git fetch
-RUN git reset --hard 33550188781dfe03667d50bb9c5447034060de1c
-RUN rm -rf .git
+FROM ${REGISTRY_URI}/chromite:${LABEL} as chromite
 
 ######################################################################
 
@@ -71,7 +63,7 @@ RUN pip install -r requirements.txt
 
 WORKDIR /
 
-COPY --chown=moblab --from=source /chromite /chromite
+COPY --chown=moblab --from=chromite /chromite /chromite
 COPY src/dockerfiles/autotest/setup_chromite.py /
 RUN python3 /setup_chromite.py install
 

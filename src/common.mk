@@ -48,7 +48,7 @@ autotest: autotest-afe autotest-dbsetup autotest-monitor \
 	autotest-host autotest-lucifer autotest-abort
 
 autotest-base: export DOCKER_BUILDKIT=1
-autotest-base: protoc common
+autotest-base: protoc common chromite
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-autotest-base:${LABEL} \
 		-f dockerfiles/autotest/Dockerfile.base ..
 	docker push ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
@@ -105,7 +105,7 @@ db:
 	docker push ${REGISTRY_URI}/moblab-db-init:${LABEL}
 
 devserver: export DOCKER_BUILDKIT=1
-devserver:
+devserver: chromite
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/devserver:${LABEL} \
 		-f dockerfiles/devserver/Dockerfile dockerfiles/devserver
 	docker push ${REGISTRY_URI}/devserver:${LABEL}
@@ -118,7 +118,7 @@ ui: protoc
 	docker push ${REGISTRY_URI}/moblab-ui:${LABEL}
 
 ssp: export DOCKER_BUILDKIT=1
-ssp:
+ssp: chromite
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-ssp:${LABEL} \
 		-f dockerfiles/ssp/Dockerfile dockerfiles/ssp
 	docker push ${REGISTRY_URI}/moblab-ssp:${LABEL}
@@ -195,6 +195,12 @@ logrotate:
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/logrotate:${LABEL} \
 		-f dockerfiles/utilities/Dockerfile.logrotate dockerfiles/utilities
 	docker push ${REGISTRY_URI}/logrotate:${LABEL}
+
+chromite: export DOCKER_BUILDKIT=1
+chromite:
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/chromite:${LABEL} \
+		-f dockerfiles/utilities/Dockerfile.chromite dockerfiles/utilities
+	docker push ${REGISTRY_URI}/chromite:${LABEL}
 
 moblab:	autotest \
 		common \
