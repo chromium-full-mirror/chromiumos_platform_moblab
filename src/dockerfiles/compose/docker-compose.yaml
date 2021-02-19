@@ -9,7 +9,7 @@ services:
     container_name: db
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-db:${DB:-release}
     hostname: db
-    restart: on-failure
+    restart: unless-stopped
     user: moblab
 
     volumes:
@@ -67,7 +67,7 @@ services:
     container_name: devserver
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/devserver:${DEVSERVER:-release}
     hostname: devserver
-    restart: on-failure
+    restart: unless-stopped
     user: moblab
 
     volumes:
@@ -97,7 +97,7 @@ services:
     container_name: autotest-afe
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-afe:${AUTOTEST_AFE:-release}
     hostname: autotest
-    restart: on-failure
+    restart: unless-stopped
     user: moblab
     ports:
       - 6010:8888
@@ -159,7 +159,7 @@ services:
     container_name: autotest-monitor-db
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-monitor_db:${AT_MONITORDB:-release}
     user: moblab
-    restart: on-failure
+    restart: unless-stopped
 
     volumes:
       - logs:/var/log/moblab
@@ -203,7 +203,7 @@ services:
     container_name: autotest-hostscheduler
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-host:${AT_HOSTSCHEDULER:-release}
     user: moblab
-    restart: on-failure
+    restart: unless-stopped
 
     volumes:
       - logs:/var/log/moblab
@@ -220,7 +220,7 @@ services:
     container_name: autotest-job-aborter
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-autotest-aborter:${AT_JOBABORTER:-release}
     user: moblab
-    restart: on-failure
+    restart: unless-stopped
 
     volumes:
       - logs:/var/log/moblab
@@ -243,7 +243,7 @@ services:
     container_name: envoy-proxy
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/envoy-proxy:${ENVOYPROXY:-release}
     user: moblab
-    restart: on-failure
+    restart: unless-stopped
     environment:
       ENVOY_UID: 0
 
@@ -262,7 +262,7 @@ services:
     container_name: moblab-ui
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-ui:${MOBLAB_UI:-release}
     hostname: moblab-ui
-    restart: on-failure
+    restart: unless-stopped
 
     networks:
       - moblab
@@ -286,7 +286,7 @@ services:
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-rpcserver:${MOBLAB_RPCSERVER:-release}
     user: moblab
     hostname: moblab-rpcserver
-    restart: on-failure
+    restart: unless-stopped
 
     volumes:
       - logs:/var/log/moblab
@@ -324,7 +324,7 @@ services:
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-remote-agent:${REMOTE_AGENT:-release}
     user: moblab
     hostname: moblab-remote-agent
-    restart: on-failure
+    restart: unless-stopped
 
     volumes:
       - logs:/var/log/moblab
@@ -352,7 +352,7 @@ services:
   watchtower:
     container_name: watchtower
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/watchtower:${WATCHTOWER:-release}
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -375,7 +375,7 @@ services:
   offloader:
     container_name: offloader
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-offloader:${OFFLOADER:-release}
-    restart: on-failure
+    restart: unless-stopped
 
     user: moblab
 
@@ -409,7 +409,7 @@ services:
   dns:
     container_name: dns
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-dns:${DNS:-release}
-    restart: on-failure
+    restart: unless-stopped
 
     volumes:
         - logs:/var/log/
@@ -422,7 +422,7 @@ services:
   log-rotate:
     container_name: log-rotate
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/logrotate:${LOGROTATE:-release}
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - /var/log/bootup:/bootup
       - logs:/logs
@@ -439,7 +439,7 @@ services:
   remote_access:
     container_name: remote_access
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/remote_access:${REMOTE_ACCESS:-release}
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - logs:/var/log/moblab
       - usr_local_moblab:/usr/local/moblab
@@ -481,7 +481,7 @@ services:
   remote-scheduler:
     container_name: remote-scheduler
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/moblab-remote-scheduler:${REMOTE_SCHEDULER:-release}
-    restart: always
+    restart: unless-stopped
     volumes:
       - logs:/var/log/moblab
       - usr_local_moblab:/usr/local/moblab
@@ -502,7 +502,7 @@ services:
     container_name: mobmonitor
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/mobmonitor:${MOBMONITOR:-release}
     user:  moblab
-
+    restart: unless-stopped
     volumes:
       - logs:/var/log/moblab
       - apache_logs:/var/log/apache:ro
