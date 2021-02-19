@@ -5,6 +5,7 @@
 import logging
 import enum
 from datetime import datetime
+from datetime import timezone
 
 from moblab_common.database_models.job_uploading_status import (
     JobUploadingStatus,
@@ -98,7 +99,7 @@ class ResultUploadStatusConnector:
                         job_id=job_id,
                         status=status,
                         upload_attempt_number=1,
-                        updated_on=datetime.now(datetime.timezone.utc),
+                        updated_on=datetime.now(timezone.utc),
                     )
                 )
             else:
@@ -114,9 +115,7 @@ class ResultUploadStatusConnector:
                 )
                 if status == Status.UPLOAD_FAILED.name:
                     upload_status.last_attempt_failure_reason = failure_reason
-                    upload_status.updated_on = datetime.now(
-                        datetime.timezone.utc
-                    )
+                    upload_status.updated_on = datetime.now(timezone.utc)
 
             session.commit()
         finally:
