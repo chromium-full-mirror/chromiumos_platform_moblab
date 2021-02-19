@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL=release
+ARG LABEL=autopush
 
 FROM ${REGISTRY_URI}/moblab-autotest-lucifer:${LABEL} as lucifer
 
@@ -15,13 +15,13 @@ ARG LABEL
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
 RUN apt-get update && apt-get install --no-install-recommends -yq    \
- iputils-ping \
- libcap2-bin \
- procps \
- python-pip \
- rsync \
- ssh \
- sudo
+    iputils-ping \
+    libcap2-bin \
+    procps \
+    python-pip \
+    rsync \
+    ssh \
+    sudo
 
 RUN setcap cap_net_raw+ep /bin/ping
 

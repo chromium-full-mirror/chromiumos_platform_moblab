@@ -4,7 +4,7 @@
 
 ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL=release
+ARG LABEL=autopush
 
 ######################################################################
 
@@ -47,7 +47,7 @@ RUN echo \
     add - && apt-get update -y && apt-get install google-cloud-sdk -y
 
 RUN rm -rf /usr/lib/google-cloud-sdk/bin/anthoscli \
-           /usr/lib/google-cloud-sdk/bin/kuberun
+    /usr/lib/google-cloud-sdk/bin/kuberun
 
 # Install the official pip
 RUN wget https://bootstrap.pypa.io/2.7/get-pip.py -O /tmp/get-pip.py

@@ -7,7 +7,7 @@ ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 FROM ${BASE_REGISTRY_URI}/docker/compose:alpine-1.27.4
 
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL=release
+ARG LABEL=autopush
 ARG WATCHTOWER_CMD="--interval 3600 --monitor-only"
 ARG SSH_PORT
 

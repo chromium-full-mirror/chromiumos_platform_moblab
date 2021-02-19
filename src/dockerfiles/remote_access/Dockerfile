@@ -4,7 +4,7 @@
 
 ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
-ARG LABEL=release
+ARG LABEL=autopush
 
 ###########################################################
 
