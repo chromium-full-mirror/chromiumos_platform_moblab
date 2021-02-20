@@ -5,10 +5,11 @@
 set -x
 
 /etc/moblab/moblab_results_uploader/moblab_results_uploader \
-      -l /var/log/moblab/offloader.log \
-      run \
-      --credentials-file /home/moblab/.service_account.json \
-      --min-age-to-upload 0 \
-      --timeout-days 3 \
-      --min-age-to-prune 3 \
-      --jobs 30
+-l /var/log/moblab/offloader.log \
+--uploading-filter-config-file /etc/moblab/moblab_results_uploader/test_results_uploading_filter.yaml \
+run \
+--credentials-file /home/moblab/.service_account.json \
+--min-age-to-upload 0 \
+--timeout-days 3 \
+--min-age-to-prune 3 \
+--jobs 30
