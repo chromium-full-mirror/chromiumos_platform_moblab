@@ -14,17 +14,14 @@ from moblab_common.database_models.job_uploading_status import (
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-Status = enum.Enum(
-    "Status",
-    [
-        "NOT_READY",
-        "QUEUED",
-        "UPLOADING",
-        "UPLOADED",
-        "UPLOAD_FAILED",
-        "DELETED",
-    ],
-)
+
+class Status(enum.Enum):
+    NOT_READY = 1
+    QUEUED = 2
+    UPLOADING = 3
+    UPLOADED = 4
+    UPLOAD_FAILED = 5
+    DELETED = 6
 
 
 # ToDo(ivanbrovkovich): decide on DB access location
@@ -41,7 +38,7 @@ class MoblabDb:
 
 
 class UploadResultState:
-    """Represents the known info about upload status"""
+    """Represents the known info about job upload status"""
 
     def __init__(
         self,
@@ -80,7 +77,12 @@ class ResultUploadStatusConnector:
         return upload_status
 
     def set_job_upload_status(self, job_id, status, failure_reason=""):
-        """Updates the upload status for a given job"""
+        """Updates the upload status for a given job
+        Args:
+            job_id: (int) job id value
+            status: (Status) enum value
+            failure_reason: (string) error message in case of failure attempt
+        """
         session = self.db.get_session()
         try:
             upload_status = (
@@ -97,8 +99,10 @@ class ResultUploadStatusConnector:
                 session.add(
                     JobUploadingStatus(
                         job_id=job_id,
-                        status=status,
-                        upload_attempt_number=1,
+                        status=status.name,
+                        upload_attempt_number=(
+                            1 if status == Status.UPLOAD_FAILED else 0
+                        ),
                         updated_on=datetime.now(timezone.utc),
                     )
                 )
@@ -109,11 +113,12 @@ class ResultUploadStatusConnector:
                     upload_status.status,
                     status,
                 )
-                upload_status.status = status
+                upload_status.status = status.name
                 upload_status.upload_attempt_number = (
-                    upload_status.upload_attempt_number + 1
+                    upload_status.upload_attempt_number
+                    + (1 if status == Status.UPLOAD_FAILED else 0)
                 )
-                if status == Status.UPLOAD_FAILED.name:
+                if status == Status.UPLOAD_FAILED:
                     upload_status.last_attempt_failure_reason = failure_reason
                     upload_status.updated_on = datetime.now(timezone.utc)
 
