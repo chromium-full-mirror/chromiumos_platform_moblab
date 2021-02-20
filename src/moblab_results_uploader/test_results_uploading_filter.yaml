@@ -11,14 +11,16 @@
 #           - FILE_OR_DIR_GLOB_PATTERN
 #           - ...
 #
-# For example:
-# ---
-# - suite_name_regex: ^cts|^gts
-#   exclude:
-#     - '*/debug/*'
-#     - '*/sysinfo/*'
-#     - '*/cheets*/debug/*'
-#     - '*/cheets*/dummy_Pass/*'
-#     - '*/cheets*/sysinfo/*'
 
----
+- suite_name_regex: ^cts|^gts
+  exclude:
+    - '*/debug/*'
+    - '*/sysinfo/*'
+    - '*/cheets*/debug/*'
+    - '*/cheets*/dummy_Pass/*'
+    - '*/cheets*/APFE/*'
+    - '*/cheets*/sysinfo/*'
+    - '*/host_info_store/*'
+    - '*/host_keyvals/*'
+    - '*/lucifer/*'
+    - '*/ssp/*'
