@@ -12,6 +12,7 @@ function createInvertedObj(obj) {
   return inverted_mappings;
 }
 
+export const INT_TO_JOBUPLOADSTATUS = createInvertedObj(Job.UploadStatus);
 export const INT_TO_JOBSTATUS = createInvertedObj(Job.JobStatus);
 export const INT_TO_PRIORITY = createInvertedObj(Job.Priority);
 export const INT_TO_DUT_TASK_STATUS = createInvertedObj(DutTask.Status);

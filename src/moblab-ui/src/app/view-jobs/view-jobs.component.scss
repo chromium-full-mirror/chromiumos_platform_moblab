@@ -1,3 +1,5 @@
+@import '../../theme.scss';
+
 #root-container {
   /* Ensures that loading spinner is not clipped, even when table is empty. */
   min-height : 300px;
@@ -5,6 +7,7 @@
 
 .table-checkbox-col {
   padding-right: 25px;
+  width: 10px;
 }
 
 .filter-box {
@@ -21,9 +24,8 @@
 }
 
 .time-filter-form-wrapper {
-  margin-left: 3%;
-  margin-right: 3%;
-  width:94%;
+  margin-left: 16px;
+  margin-right: 16px;
 }
 
 .job-refresh-button {
@@ -32,8 +34,8 @@
 }
 
 .jobs-table {
-  box-shadow:none;
-  margin-bottom:20px;
+  box-shadow: none;
+  margin-bottom: 20px;
   float: right;
   margin-right: 18px;
   display: contents;
@@ -147,4 +149,38 @@ a.logbutton {
   padding-right: 0px;
   min-width: 0px;
   line-height: 20px;
+}
+
+.select-cb {
+  width: 15px;
+}
+
+.norm-icon, .progress-icon, .error-icon {
+  vertical-align: middle;
+  text-align: center !important;
+}
+
+.error-icon {
+  color: red;
+}
+
+.norm-icon, .progress-icon {
+  color: gray;
+}
+
+.progress-icon {
+  animation: blink 3s ease-in infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 1 }
+  50% { opacity: 0.5 }
+}
+
+table {
+  width: 100%;
+}
+
+.upload-status-td {
+  text-align: center;
 }
