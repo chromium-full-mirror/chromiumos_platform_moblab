@@ -117,3 +117,17 @@ class MoblabRpcConnector(object):
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error getting the service account.")
             raise MoblabRpcConnectorError("Error getting the service account.")
+
+    @classmethod
+    def get_jobs(cls, query_start, query_limit):
+        cls.connect()
+        try:
+            request = moblabrpc_pb2.GetJobsRequest()
+            request.query_start = query_start
+            request.query_limit = query_limit
+
+            return cls.stub.get_jobs(request).jobs
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception("Error getting jobs.")
+            raise MoblabRpcConnectorError("Error getting getting jobs.")

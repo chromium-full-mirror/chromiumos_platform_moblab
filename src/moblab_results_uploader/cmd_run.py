@@ -17,6 +17,10 @@ import yaml
 from moblab_common import afe_connector
 from moblab_common import config_connector
 
+from moblab_common import moblabrpc_connector
+from moblab_common import result_upload_status_connector
+from moblab_common.result_upload_status_connector import Status as UploadStatus
+
 import gs_api_wrapper
 import processing_step
 import result_dir_status
@@ -167,6 +171,69 @@ async def _resume_aborted_uploading(args, registry, status_checker, uploader):
         await status_checker.get_last_status(test_result)
 
 
+async def _run_upload_status_backfill_migration(registry, status_checker):
+    # 0. Get all jobs with status;
+    jobs = moblabrpc_connector.MoblabRpcConnector.get_jobs(
+        query_start=0, query_limit=10000
+    )
+
+    # 1. If exist at least one record skip migration;
+    _LOGGER.info("Checking whether job upload status backfill is needed.")
+    if any(job.upload_state.status != "" for job in jobs):
+        return
+
+    _LOGGER.info("Migrating jobs upload stutuses to moblab db.")
+
+    # 2. Initialize upload status based on completed/not completed job status;
+    jobs_upload_status = {
+        job.job_id: UploadStatus.UPLOADED
+        if _is_job_finished(job.status)
+        else UploadStatus.NOT_READY
+        for job in jobs
+    }
+
+    # 3. Iterate over existing dirs
+    #    - Update jobs based on status;
+    async for test_result in _enumerate_test_results(registry):
+        if (
+            test_result.id in jobs_upload_status
+            and jobs_upload_status[test_result.id] == UploadStatus.UPLOADED
+        ):
+            upload_file_status = await result_dir_status._load_status(
+                test_result
+            )
+            if upload_file_status == result_dir_status.Status.NOT_READY:
+                jobs_upload_status[test_result.id] = UploadStatus.NOT_READY
+
+            elif upload_file_status == result_dir_status.Status.READY:
+                jobs_upload_status[test_result.id] = UploadStatus.QUEUED
+
+            elif upload_file_status == result_dir_status.Status.UPLOADING:
+                jobs_upload_status[test_result.id] = UploadStatus.UPLOADING
+
+            elif upload_file_status == result_dir_status.Status.UPLOADED:
+                jobs_upload_status[test_result.id] = UploadStatus.UPLOADED
+
+            elif upload_file_status == result_dir_status.Status.EXPIRED:
+                jobs_upload_status[test_result.id] = UploadStatus.DELETED
+
+    # 4. Save back all the upload statuses;
+    upload_status_store = (
+        result_upload_status_connector.ResultUploadStatusConnector()
+    )
+    for job_id in jobs_upload_status:
+        upload_status_store.set_job_upload_status(
+            job_id, jobs_upload_status[job_id]
+        )
+
+
+def _is_job_finished(job_status):
+    # SUCCESS = 5
+    # FAILED = 6
+    # ABORTED = 7
+    return job_status in {5, 6, 8}
+
+
 async def _async_upload(args, registry):
     """Scan and upload all 'READY' test results."""
     status_checker = result_dir_status.ResultStatusChecker(
@@ -187,6 +254,8 @@ async def _async_upload(args, registry):
     consumer = asyncio.ensure_future(
         uploader.upload_files(args.jobs, args.dry_run)
     )
+
+    await _run_upload_status_backfill_migration(registry, status_checker)
 
     # Finish unfinished jobs of last run.
     await _resume_aborted_uploading(args, registry, status_checker, uploader)
