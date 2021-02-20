@@ -8,7 +8,7 @@
 
 
 
-
+from collections import defaultdict
 
 import contextlib
 import json
@@ -26,7 +26,7 @@ class ResultInfoError(Exception):
     """Exception to raise when error occurs in ResultInfo collection."""
 
 
-class ResultInfo(dict):
+class ResultInfo(defaultdict):
     """A wrapper class to store result file information.
 
     Details of a result include:
@@ -117,7 +117,7 @@ class ResultInfo(dict):
                 down to 50 bytes. This argument is used when the object is
                 restored from a json string.
         """
-        super(ResultInfo, self).__init__()
+        super(ResultInfo, self).__init__(list)
 
         if name is not None and original_info is not None:
             raise ResultInfoError(
