@@ -29,7 +29,7 @@
           <mat-form-field id="idInputFormField" appearance="outline" class="filter" floatLabel="never">
             <mat-label> ID</mat-label>
             <input id="idInput" matInput [formControl]="filters.getFormControl(jobId)">
-            <mat-error *ngIf="filters.getFormControl(jobId).hasError('notANonnegativenumber')">
+            <mat-error *ngIf="filters.getFormControl(jobId).hasError('notANonnegativeNumber')">
               Not a number.
             </mat-error>
           </mat-form-field>
@@ -69,16 +69,15 @@
       </app-job-action>
     </div>
     <div style="position: relative;">
-      <table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table mat-elevation-z8">
+      <table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table">
         <ng-container *ngIf="!hideSelectors" matColumnDef="job_checkboxes">
           <th mat-header-cell *matHeaderCellDef>
-            <app-table-header-selector class="select-cb table-checkbox-col" [options]="jobSelectOptions"
-              (update)="selectionChanged($event)">
+            <app-table-header-selector [options]="jobSelectOptions" (update)="selectionChanged($event)">
             </app-table-header-selector>
           </th>
-          <td mat-cell *matCellDef="let element" class="table-checkbox-col">
-            <mat-checkbox id="job_{{element.getJobId().toString()}}" (click)="checkboxClick($event)"
-              (change)="jobActionRef.toggleJobSelection(element)" [checked]="jobActionRef.isSelected(element)">
+          <td mat-cell *matCellDef="let element">
+            <mat-checkbox (click)="checkboxClick($event)" (change)="jobActionRef.toggleJobSelection(element)"
+              [checked]="jobActionRef.isSelected(element)">
             </mat-checkbox>
           </td>
         </ng-container>
@@ -151,8 +150,24 @@
             <div>Logs</div>
           </th>
           <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()">
-            <span><a class="logbutton" mat-button target="_blank" href="/results/{{element.getJobId()}}-moblab/">logs
-              </a></span>
+            <span>
+              <a class="logbutton" mat-button target="_blank" href="/results/{{element.getJobId()}}-moblab/">
+                <mat-icon class="norm-icon">text_snippet</mat-icon>
+              </a>
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="job_upload_status" *ngIf="displayColumn('job_upload_status')">
+          <th width=40px; mat-header-cell *matHeaderCellDef>
+            <div>Upload Status</div>
+          </th>
+          <td mat-cell *matCellDef="let element" class="upload-status-td">
+            <mat-icon #tooltip="matTooltip" matTooltip="{{ getUploadStatus(element).tooltip }}"
+              class="{{ getUploadStatus(element).iconStyle }}" matBadge="{{ getUploadStatus(element).attemptNumber }}"
+              matBadgeColor="warn" matBadgeSize="small">
+              {{ getUploadStatus(element).icon }}
+            </mat-icon>
           </td>
         </ng-container>
 

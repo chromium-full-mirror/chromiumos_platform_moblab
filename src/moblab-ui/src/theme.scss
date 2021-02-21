@@ -48,3 +48,8 @@ $theme: mat-light-theme($primary, $accent, $warn);
 }
 
 $moblab-colors-attention: #fbbc04;
+
+
+.mat-tooltip {
+  font-size: 12px!important;
+}

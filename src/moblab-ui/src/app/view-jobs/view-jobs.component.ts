@@ -18,7 +18,7 @@ import {
   forbiddenDateValidator,
   forbiddenIDValidator,
 } from '../utils/validators';
-import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
+import {INT_TO_PRIORITY, INT_TO_JOBSTATUS, INT_TO_JOBUPLOADSTATUS} from '../utils/proto_helpers';
 import {Job} from '../services/moblabrpc_pb';
 import {JobActionComponent} from './job-action/job-action.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
@@ -97,10 +97,19 @@ export class MultiFilterForm {
   }
 }
 
+export class UploadStatus {
+  constructor(
+    public icon = "",
+    public iconStyle = "",
+    public tooltip = "",
+    public attemptNumber = "",
+  ) { }
+}
+
 @Component({
   selector: 'app-view-jobs',
   templateUrl: './view-jobs.component.html',
-  styleUrls: ['./view-jobs.component.css'],
+  styleUrls: ['./view-jobs.component.scss'],
   providers: [DatePipe],
 })
 export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
@@ -125,6 +134,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     // 'start_time_sec_utc',
     // 'finished_time_sec_utc',
     'job_status',
+    'job_upload_status',
     'logs',
   ];
   jobSelectOptions: string[] = ['Visible'];
@@ -299,8 +309,35 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   getPriorityFromNum(priorityNum: string | number) {
     return INT_TO_PRIORITY[priorityNum];
   }
+
   getStatusFromNum(statusNum: string | number) {
     return INT_TO_JOBSTATUS[statusNum];
+  }
+
+  getUploadStatus(job: Job) {
+    const state = job.getUploadState();
+    const status = state.getStatus();
+    const attemptsBadge = state.getAttemptsNumber() > 1 ? state.getAttemptsNumber().toString() : "";
+    const previousErrorMessage = state.getLastError();
+    switch (status) {
+      case Job.UploadStatus.UPLOAD_STATUS_UPLOADED:
+      case Job.UploadStatus.UPLOAD_STATUS_DELETED:
+        return new UploadStatus("cloud_done", "norm-icon", "Uploaded successfully");
+
+      case Job.UploadStatus.UPLOAD_STATUS_QUEUED:
+        return new UploadStatus("cloud_queue", "norm-icon", "Ready to be uploaded");
+
+      case Job.UploadStatus.UPLOAD_STATUS_UPLOADING:
+        return new UploadStatus("cloud_upload", "progress-icon", "Uploading...", attemptsBadge);
+
+      case Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED:
+        return new UploadStatus("cloud_upload", "error-icon", "Upload failed due to: " + previousErrorMessage, attemptsBadge);
+
+      case Job.UploadStatus.UPLOAD_STATUS_UNKNOWN:
+      case Job.UploadStatus.UPLOAD_STATUS_NOT_READY:
+      default:
+        return new UploadStatus();
+    }
   }
 
   assignJobs(jobs: Job[] | undefined) {

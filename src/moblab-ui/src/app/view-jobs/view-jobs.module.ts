@@ -18,6 +18,8 @@ import {MatSortModule} from '@angular/material/sort';
 import {MatTableModule} from '@angular/material/table';
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatBadgeModule} from '@angular/material/badge';
 
 import {JobActionComponent} from './job-action/job-action.component';
 import {ViewJobsComponent} from './view-jobs.component';
@@ -28,6 +30,7 @@ import {WidgetsModule} from '../widgets/widgets.module';
     BrowserAnimationsModule,
     CommonModule,
     FormsModule,
+    MatBadgeModule,
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
@@ -43,11 +46,12 @@ import {WidgetsModule} from '../widgets/widgets.module';
     MatSnackBarModule,
     MatSortModule,
     MatTableModule,
+    MatTooltipModule,
     ReactiveFormsModule,
     RouterModule,
     WidgetsModule,
   ],
   declarations: [JobActionComponent, ViewJobsComponent],
-  exports: [ViewJobsComponent],
+  exports: [MatBadgeModule, ViewJobsComponent],
 })
-export class ViewJobsModule {}
+export class ViewJobsModule { }
