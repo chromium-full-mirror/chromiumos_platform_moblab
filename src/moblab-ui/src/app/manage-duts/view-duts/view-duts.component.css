@@ -53,12 +53,17 @@
   left: 43%;
 }
 
-.label-mat-chip {
+.label-mat-chip, .attribute-mat-chip {
   margin: 1px !important;
   padding: 0px 4px !important;
   font-size: 12px;
   font-weight: 500;
   min-height: 22px;
+}
+
+.attribute-mat-chip {
+  background-color: white;
+  border: 1px solid gray;
 }
 
 /* make some space around cells */

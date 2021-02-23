@@ -266,7 +266,10 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             is_enrolled=dut_dict.get("enrolled", False),
             is_connected=dut_dict.get("isConnected", True),
             labels=dut_dict.get("labels", []),
-            attributes=dut_dict.get("attributes", []),
+            attributes=[
+                "%s: %s" % (key, value)
+                for key, value in dut_dict.get("attributes", {}).items()
+            ],
             error=dut_dict.get("error", ""),
         )
 
@@ -519,21 +522,15 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def _map_upload_status(self, internal_status):
         result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UNKNOWN
         if internal_status == UploadStatus.NOT_READY.name:
-            result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_NOT_READY
-            )
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_NOT_READY
         if internal_status == UploadStatus.QUEUED.name:
             result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_QUEUED
         if internal_status == UploadStatus.UPLOADING.name:
-            result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADING
-            )
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADING
         if internal_status == UploadStatus.UPLOADED.name:
             result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADED
         if internal_status == UploadStatus.UPLOAD_FAILED.name:
-            result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED
-            )
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED
         if internal_status == UploadStatus.DELETED.name:
             result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_DELETED
 
