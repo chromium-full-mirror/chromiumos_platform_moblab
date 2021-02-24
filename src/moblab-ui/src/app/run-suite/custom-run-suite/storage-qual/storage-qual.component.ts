@@ -29,6 +29,10 @@ export class StorageQualComponent
   );
   variationSelection = 0;
 
+  isStorageQualSetupValid = false;
+  storageQualCheckError = "";
+  hasStorQualCheckFailed = () => this.storageQualCheckError;
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
@@ -53,8 +57,8 @@ export class StorageQualComponent
 
   /** Method triggered on change of either bug ID or part number.
    * */
-  avlInputChanged() {
-    if (this.bugIdInput.getInput() && this.partNumberInput.getInput()) {
+  inputChanged() {
+    if (this.bugIdInput.getInput() && this.partNumberInput.getInput() && this.isStorageQualSetupValid) {
       this.runSuiteButton.enable();
     } else {
       this.runSuiteButton.disable();
@@ -100,6 +104,22 @@ export class StorageQualComponent
       this.variationSelection,
       0, // Disk size in GB.
       false // Test dual namespace devices.
+    );
+  }
+
+  validateStorageQualSetup(pool: string) {
+    this.storageQualCheckError = "";
+    this.isStorageQualSetupValid = false;
+    this.moblabGrpcService.validateStorageQualSetup(
+      () => {
+        this.isStorageQualSetupValid = true;
+        this.inputChanged();
+      },
+      (msg: string) => {
+        this.storageQualCheckError = msg;
+        this.inputChanged();
+      },
+      pool
     );
   }
 }

@@ -1,55 +1,23 @@
-<app-basic-autocomplete-selector
-    #modelSelector
-    id="modelSelector"
-    [title]="'Select model:'"
-    [placeholder]="['Pick from available model']"
-    [options]="models"
-    [isShown]="true"
-    (select)="modelChanged($event.value)"
-    (unselect)="unselectModel()"
->
+<app-basic-autocomplete-selector #modelSelector id="modelSelector" [title]="'Select model:'"
+    [placeholder]="['Pick from available model']" [options]="models" [isShown]="true"
+    (select)="modelChanged($event.value)" (unselect)="unselectModel()">
 </app-basic-autocomplete-selector>
 
-<app-basic-autocomplete-selector
-    #boardSelector
-    id="boardSelector"
-    [title]="'Select build target:'"
-    [placeholder]="['Pick from available targets']"
-    [options]="buildTargets"
-    [isShown]="true"
-    (select)="buildTargetChanged($event.value)"
-    (unselect)="unselectBuildTarget()">
+<app-basic-autocomplete-selector #boardSelector id="boardSelector" [title]="'Select build target:'"
+    [placeholder]="['Pick from available targets']" [options]="buildTargets" [isShown]="true"
+    (select)="buildTargetChanged($event.value)" (unselect)="unselectBuildTarget()">
 </app-basic-autocomplete-selector>
 
-<app-basic-autocomplete-selector
-    #milestoneSelector
-    id="milestoneSelector"
-    [title]="'Select milestone:'"
-    [placeholder]="['Pick from milestones']"
-    [options]="milestones"
-    [isShown]="true"
-    (select)="milestoneChanged($event.value)"
-    (unselect)="unselectMilestone()">
+<app-basic-autocomplete-selector #milestoneSelector id="milestoneSelector" [title]="'Select milestone:'"
+    [placeholder]="['Pick from milestones']" [options]="milestones" [isShown]="true"
+    (select)="milestoneChanged($event.value)" (unselect)="unselectMilestone()">
 </app-basic-autocomplete-selector>
 
-<app-basic-autocomplete-selector
-    #buildSelector
-    id="buildSelector"
-    [title]="'Select build:'"
-    [placeholder]="['Pick from available builds']"
-    [options]="buildVersions"
-    [isShown]="true"
-    (select)="buildVersionChanged($event.value)"
-    (unselect)="unselectBuildVersion()">
+<app-basic-autocomplete-selector #buildSelector id="buildSelector" [title]="'Select build:'"
+    [placeholder]="['Pick from available builds']" [options]="buildVersions" [isShown]="true"
+    (select)="buildVersionChanged($event.value)" (unselect)="unselectBuildVersion()">
 </app-basic-autocomplete-selector>
 
-<app-basic-selector
-    #poolSelector
-    id="poolSelector"
-    [title]="'Pool (Optional):'"
-    [placeholder]="['Select a pool']"
-    [options]="pools"
-    [isShown]="true"
-    [autoselect]="false"
-    (select)="poolChanged($event.value)">
-</app-basic-selector>
+<app-basic-autocomplete-selector #poolSelector id="poolSelector" [title]="'Pool (Optional):'"
+    [placeholder]="['Select a pool']" [options]="pools" [isShown]="true" (select)="poolChanged($event.value)">
+</app-basic-autocomplete-selector>

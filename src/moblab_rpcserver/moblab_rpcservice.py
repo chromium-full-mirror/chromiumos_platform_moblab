@@ -12,7 +12,12 @@ import time
 
 # pylint: disable=import-error
 import moblab_service
+from storage_qual_check_service import (
+    StorageQualCheckService,
+    StorageQualCheckError,
+)
 
+# pylint: disable=import-error
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import devserver_connector
@@ -60,6 +65,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         self.service = moblab_service.MoblabService()
         self.setup_devserver_connector()
+        self.storage_qual_check_service = StorageQualCheckService()
 
     def setup_devserver_connector(self):
         self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
@@ -202,7 +208,15 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
           RunSuiteResponse object with a string result message.
         """
-        response = moblabrpc_pb2.RunSuiteResponse(
+
+        try:
+            self.storage_qual_check_service.check_setup(request.pool)
+        except StorageQualCheckError as ex:
+            _context.set_code(grpc.StatusCode.INTERNAL)
+            _context.set_details(str(ex))
+            return moblabrpc_pb2.RunSuiteResponse()
+
+        return moblabrpc_pb2.RunSuiteResponse(
             message=self.service.run_storage_qual_suite(
                 request.build_target,
                 request.model,
@@ -216,7 +230,6 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 request.is_dual_namespace,
             )
         )
-        return response
 
     def run_memory_qualification_suite(self, request, _context):
         """Sets off hardware memory qualification suite run.
@@ -519,21 +532,15 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def _map_upload_status(self, internal_status):
         result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UNKNOWN
         if internal_status == UploadStatus.NOT_READY.name:
-            result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_NOT_READY
-            )
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_NOT_READY
         if internal_status == UploadStatus.QUEUED.name:
             result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_QUEUED
         if internal_status == UploadStatus.UPLOADING.name:
-            result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADING
-            )
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADING
         if internal_status == UploadStatus.UPLOADED.name:
             result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOADED
         if internal_status == UploadStatus.UPLOAD_FAILED.name:
-            result = (
-                moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED
-            )
+            result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED
         if internal_status == UploadStatus.DELETED.name:
             result = moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_DELETED
 
@@ -1087,4 +1094,21 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         to the local drive for use by services.
         """
         self.service.download_service_account()
+        return empty_pb2.Empty()
+
+    def validate_storage_qual_setup(self, request, _context):
+        """Validates the DUTs setup for storage qual run.
+
+        Storage qual requires 3 DUTs with 3 different labels to be configured.
+        This method validates that the given pool is configured correctly.
+        """
+
+        pool_name = request.pool_name
+        if pool_name == "":
+            pool_name = None
+        try:
+            self.storage_qual_check_service.check_setup(pool_name)
+        except StorageQualCheckError as ex:
+            _context.set_code(grpc.StatusCode.INTERNAL)
+            _context.set_details(str(ex))
         return empty_pb2.Empty()

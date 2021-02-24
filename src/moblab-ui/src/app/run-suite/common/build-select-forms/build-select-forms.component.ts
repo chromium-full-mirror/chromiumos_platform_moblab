@@ -3,13 +3,10 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input,
-  OnInit,
   Output,
   ViewChild,
 } from '@angular/core';
 
-import {BuildSettings} from '../base_suite/base-suite.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 
@@ -109,8 +106,11 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   modelChanged(model: string) {
-    this.selectedModel = model;
-    this.getBuildTargets();
+    if (this.selectedModel != model) {
+      this.unselectBuildTarget()
+      this.selectedModel = model;
+      this.getBuildTargets();
+    }
   }
 
   getBuildTargets() {
@@ -141,8 +141,11 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   buildTargetChanged(newBuildTarget: string): void {
-    this.buildTargetName = newBuildTarget;
-    this.getMilestones();
+    if (this.buildTargetName != newBuildTarget) {
+      this.unselectMilestone()
+      this.buildTargetName = newBuildTarget;
+      this.getMilestones();
+    }
   }
 
   getMilestones() {
@@ -174,8 +177,11 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   milestoneChanged(newMilestone: string): void {
-    this.milestone = newMilestone;
-    this.getBuildVersions();
+    if (this.milestone != newMilestone) {
+      this.unselectBuildVersion()
+      this.milestone = newMilestone;
+      this.getBuildVersions();
+    }
   }
 
   getBuildVersions() {
@@ -252,27 +258,27 @@ export class BuildSelectFormsComponent implements AfterViewInit {
 
   unselectModel() {
     this.selectedModel = null;
-    this.boardSelector.clearSelection();
-    this.boardSelector.disable(SELECT_MODEL_PROMPT);
     this.unselectBuildTarget();
   }
 
   unselectBuildTarget() {
     this.buildTargetName = null;
-    this.milestoneSelector.clearSelection();
-    this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
+    this.boardSelector.clearSelection();
+    this.boardSelector.disable(SELECT_MODEL_PROMPT);
     this.unselectMilestone();
   }
 
   unselectMilestone() {
     this.milestone = null;
-    this.buildSelector.clearSelection();
-    this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
+    this.milestoneSelector.clearSelection();
+    this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
     this.unselectBuildVersion();
   }
 
   unselectBuildVersion() {
     this.buildVersionName = null;
+    this.buildSelector.clearSelection();
+    this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
     this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
     this.buildVersionUnselected.emit();
   }

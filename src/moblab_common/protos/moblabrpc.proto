@@ -64,7 +64,9 @@ service MoblabRpcService {
   // Sends screenshot and feedback information to GCS bucket.
   rpc send_moblab_screenshot(SendMoblabScreenshotRequest) returns (SendMoblabScreenshotResponse) {};
 
-  rpc download_service_account(google.protobuf.Empty) returns (google.protobuf.Empty) {} ;
+  rpc download_service_account(google.protobuf.Empty) returns (google.protobuf.Empty) {};
+
+  rpc validate_storage_qual_setup(ValidateStorageQualSetupRequest) returns (google.protobuf.Empty) {};
 }
 
 
@@ -726,4 +728,9 @@ message SetRemoteAgentConfigurationRequest {
 // NEXT_TAG = 2;
 message SetRemoteAgentConfigurationResponse {
   bool is_succeeded = 1;
+}
+
+// NEXT_TAG = 2
+message ValidateStorageQualSetupRequest {
+  string pool_name = 1;
 }

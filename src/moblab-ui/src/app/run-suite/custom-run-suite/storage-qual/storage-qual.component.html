@@ -1,28 +1,22 @@
 <mat-card>
-  <app-build-select-forms
-    (allRequiredFieldsSet)="onBuildSet($event)"
-    (allRequiredFieldsSet)="avlInputChanged()"
-    (buildVersionUnselected)="onBuildVersionUnselected()"
-    (formLoading)="onFormLoading($event.message)"
+  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"
+    (allRequiredFieldsSet)="validateStorageQualSetup(selectedPool)"
+    (buildVersionUnselected)="onBuildVersionUnselected()" (formLoading)="onFormLoading($event.message)"
     (formLoaded)="onFormLoaded()">
   </app-build-select-forms>
 
-  <app-basic-selector
-      #variationInput
-      [title]="'Select suite variation (Optional):'"
-      [options]="variationOptions"
-      [placeholder]="['Select a variation']"
-      [isShown]="true"
-      (select)="variationChanged($event.value)">
+  <div class=storage-check-validatrion>
+    <mat-error *ngIf="hasStorQualCheckFailed()">{{storageQualCheckError}}</mat-error>
+  </div>
+
+  <app-basic-selector #variationInput [title]="'Select suite variation (Optional):'" [options]="variationOptions"
+    [placeholder]="['Select a variation']" [isShown]="true" (select)="variationChanged($event.value)">
   </app-basic-selector>
 
-  <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'"
-                   [isNumeric]="true"
-                   (update)="avlInputChanged()">
+  <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'" [isNumeric]="true" (update)="inputChanged()">
   </app-basic-input>
 
-  <app-basic-input #partNumberInput [name]="'AVL Part Number'"
-                   (update)="avlInputChanged()">
+  <app-basic-input #partNumberInput [name]="'AVL Part Number'" (update)="inputChanged()">
   </app-basic-input>
 
   <app-run-suite-button (click)="onRunSuiteClick()"></app-run-suite-button>

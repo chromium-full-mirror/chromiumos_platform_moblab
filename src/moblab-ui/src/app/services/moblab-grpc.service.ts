@@ -87,6 +87,8 @@ import {
   UpdateMoblabRequest,
   UpdateMoblabResponse,
   FirmwareUpdateCommandOutput,
+  ValidateStorageQualSetupRequest,
+  ValidateStorageQualSetupResponse
 } from './moblabrpc_pb';
 
 @Injectable({providedIn: 'root'})
@@ -1361,6 +1363,32 @@ export class MoblabGrpcService {
           errorHandlingCallback(err.message);
         } else {
           callback(response.getIsSucceeded());
+        }
+      }
+    );
+  }
+
+  /**
+   * Validate storage qual setup
+   */
+  validateStorageQualSetup(
+    callback: () => void,
+    errorHandlingCallback: (errorMsg: string) => void,
+    pool_name: string = null
+  ) {
+    const request = new ValidateStorageQualSetupRequest();
+    request.setPoolName(pool_name);
+
+    this.moblabRpcService.validate_storage_qual_setup(
+      request,
+      {},
+      (err: grpcWeb.Error, response: ValidateStorageQualSetupResponse) => {
+        if (err) {
+          errorHandlingCallback(err.message);
+        } else if (response.getErrorMessage()) {
+          errorHandlingCallback(response.getErrorMessage());
+        } else {
+          callback();
         }
       }
     );
