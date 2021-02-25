@@ -45,8 +45,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
   errors = false;
   isCloudEnabled = false;
-  isRemoteConsoleEnabled = false;
-  isRemoteCommandEnabled = false;
+  isRemoteConsoleEnabled = true;
+  isRemoteCommandEnabled = true;
   isHostSchedulerPauseRequested = false;
 
   botoKeyIDForm = new FormControl('', {
