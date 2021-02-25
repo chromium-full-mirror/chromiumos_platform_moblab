@@ -56,6 +56,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       ['Name', dutInfo.getName()],
       ['Status', dutInfo.getStatus()],
       ['Labels', dutInfo.getLabelsList().toString()],
+      ['Attributes', dutInfo.getAttributesList().toString()],
       [
         'Current Job',
         dutInfo.getCurrentJob() ? dutInfo.getCurrentJob().toString() : '',
