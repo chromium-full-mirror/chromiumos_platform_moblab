@@ -12,7 +12,7 @@ import json
 import logging
 
 from client.common_lib import time_utils
-from server import frontend
+from server import server_frontend
 from server.lib import status_history
 
 
@@ -99,7 +99,7 @@ def make_job_entry(tko, job, parent=None, suite_job=False, job_entries=None):
     """Generate a Suite or HWTest event log entry.
 
     @param tko: TKO database handle.
-    @param job: A frontend.Job to generate an entry for.
+    @param job: A server_frontend.Job to generate an entry for.
     @param parent: A (Kind, id) tuple representing the parent key.
     @param suite_job: A boolean indicating wheret this represents a suite job.
     @param job_entries: A dictionary mapping job id to earlier job entries.
@@ -181,9 +181,9 @@ def generate_suite_report(suite_job_id, afe=None, tko=None,
     @return A list of entries suitable for dumping via JSON.
     """
     if afe is None:
-        afe = frontend.AFE()
+        afe = server_frontend.AFE()
     if tko is None:
-        tko = frontend.TKO()
+        tko = server_frontend.TKO()
 
     # Retrieve the main suite job.
     suite_job = afe.get_jobs(id=suite_job_id)[0]

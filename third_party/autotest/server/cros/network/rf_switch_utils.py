@@ -5,7 +5,7 @@
 import common
 import logging
 
-from server import frontend
+from server import server_frontend
 from server import site_utils
 
 RF_SWITCH_LABEL = 'rf_switch'
@@ -20,7 +20,7 @@ def allocate_rf_switch():
 
     @return an instance of AFE host object or None.
     """
-    afe = frontend.AFE(
+    afe = server_frontend.AFE(
             debug=True, server=site_utils.get_global_afe_hostname())
     # Get a list of hosts with label rf_switch that are not locked.
     rf_switch_hosts = afe.get_hosts(label=RF_SWITCH_LABEL, locked=False)
@@ -42,7 +42,7 @@ def deallocate_rf_switch(rf_switch_host):
 
     @return True if rf_switch is unlocked, False otherwise.
     """
-    afe = frontend.AFE(
+    afe = server_frontend.AFE(
             debug=True, server=site_utils.get_global_afe_hostname())
     afe.unlock_hosts([rf_switch_host.hostname])
     rf_switch = afe.get_hosts(hostnames=(rf_switch_host.hostname,))
