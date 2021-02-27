@@ -8,14 +8,16 @@
 
 """A wrapper of Google Cloud Storage API."""
 
+import asyncio
+import gzip
 import logging  # pylint: disable=cros-logging-import
 import os
-import time
-import requests
-import urllib3
 import random
-
-import asyncio
+import requests
+import shutil
+import tempfile
+import time
+import urllib3
 
 from google.cloud import exceptions as gcp_exceptions
 from google.cloud import storage as gs
@@ -24,6 +26,19 @@ from retry.api import retry_call
 
 ENV_GOOGLE_APP_CREDENTIALS = "GOOGLE_APPLICATION_CREDENTIALS"
 _LOGGER = logging.getLogger("moblab_uploader")
+
+"""
+    Defines what GsApiWrapper will compress before uploading, and what it will not
+    compress before uploading.
+
+    Args:
+        path: a pathlib.Path object representing the file targeted for upload.
+
+    Returns:
+        Boolean that is true if the file will not be gzipped before upload
+"""
+def do_not_gzip(path):
+    return path.suffix.endswith("gz") or path.suffix.endswith("zip")
 
 
 class GsAccessError(Exception):
@@ -49,6 +64,7 @@ def _get_gs_bucket(gs_bucket, credentials_file):
         raise GsAccessError("No credential file specified.")
     os.environ[ENV_GOOGLE_APP_CREDENTIALS] = credentials_file
     client = gs.Client()
+
     try:
         bucket = client.get_bucket(gs_bucket)
     except (gcp_exceptions.Forbidden, gcp_exceptions.NotFound) as err:
@@ -80,6 +96,22 @@ class GsApiWrapper(object):
         )
         self._client = gs.Client()
 
+    def _gzip_file(self, local_name):
+        zipped_file = tempfile.mktemp()
+        with open(local_name, "rb") as f_in:
+            with gzip.open(zipped_file, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        return zipped_file
+
+    """
+        Uploads 'local_name' file to the GCS bucket that GsApiWrapper has been
+        initialized to.
+
+        Args:
+            local_name: a pathlib.Path object representing the file targeted for upload.
+            remote_name: a string representing the intended name of the file once
+            uploaded.
+    """
     def upload_from_filename(self, *, local_name, remote_name):
         """Upload the file `local_name` to GS as a blob named `remote_name`."""
         # We just upload regular files.
@@ -89,31 +121,35 @@ class GsApiWrapper(object):
         if local_name.is_symlink():
             _LOGGER.debug("Not attempting upload - symlink %s", local_name)
             return
-        blob = self._gs_bucket.blob(
-            remote_name, chunk_size=(1024 * 1024 * 100)
-        )
 
-        # dice = random.uniform(0, 1) * 100
-        # if dice > 99.8:
-        #     dice = random.uniform(0, 1) * 100
-        #     if dice > 50:
-        #         _LOGGER.debug("You win!!! Single file exception %s", local_name)
-        #         raise requests.exceptions.ConnectionError("Fail")
-        #     else:
-        #         _LOGGER.debug("You win!!! Long sleep %s", local_name)
-        #         asyncio.sleep(60*60)
-        retry_call(
-            blob.upload_from_filename,
-            fargs=[str(local_name)],
-            fkwargs={"client": self._client},
-            exceptions=(
-                requests.exceptions.ConnectionError,
-                urllib3.exceptions.ProtocolError,
-            ),
-            tries=20,
-            delay=1,
-            backoff=1.25,
-        )
+        blob = self._gs_bucket.blob(remote_name, chunk_size=(1024 * 1024 * 100))
+
+        if do_not_gzip(local_name):
+            target_file_path = local_name
+        else:
+            temp_zipped_file_path = self._gzip_file(local_name)
+            target_file_path = temp_zipped_file_path
+            blob.content_encoding = "gzip"
+
+        try:
+            retry_call(
+                blob.upload_from_filename,
+                fargs=[str(target_file_path)],
+                fkwargs={"client": self._client},
+                exceptions=(
+                    requests.exceptions.ConnectionError,
+                    urllib3.exceptions.ProtocolError,
+                ),
+                tries=20,
+                delay=1,
+                backoff=1.25,
+            )
+        finally:
+            try:
+                os.remove(temp_zipped_file_path)
+            except UnboundLocalError:
+                # If remove operation fails with unbound error, zip file was never created, pass.
+                pass
 
     @property
     def bucket_name(self):
