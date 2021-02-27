@@ -142,6 +142,10 @@ class _AutotestResult(test_result_interface.TestResult):
         return self._id
 
     @property
+    def job_id(self):
+        return None
+
+    @property
     def finished_time(self):
         if not self._finished_time:
             self._finished_time = self._afe_query()
@@ -254,3 +258,8 @@ class AutotestTestJob(_AutotestResult):
         self._afe_query = _query_job_finished_time(
             pattern_match.group("afe_id")
         )
+        self._job_id = pattern_match.group("afe_id")
+
+    @property
+    def job_id(self):
+        return self._job_id
