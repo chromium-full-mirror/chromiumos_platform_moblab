@@ -210,7 +210,10 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
 
         try:
-            self.storage_qual_check_service.check_setup(request.pool)
+            pool_name = request.pool
+            if pool_name == "":
+                pool_name = None
+            self.storage_qual_check_service.check_setup(pool_name)
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)
             _context.set_details(str(ex))
