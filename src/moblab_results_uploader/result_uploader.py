@@ -61,9 +61,6 @@ class Uploader(processing_step.ProcessStep):
         self._uploading_context = None
         self.uploading_queue = asyncio.Queue(maxsize=0)
         self._notify_uploaded = notify_uploaded
-        self.result_upload_status_store = (
-            upload_status_connector.ResultUploadStatusConnector()
-        )
 
     def uploading_context(self, ctx):
         self._uploading_context = ctx
@@ -94,10 +91,6 @@ class Uploader(processing_step.ProcessStep):
         # The GS path of uploaded test result.
         test_result_gs_path = ""
         try:
-            self.result_upload_status_store.set_job_upload_status(
-                test_result.id,
-                upload_status_connector.Status.UPLOADING,
-            )
 
             await self._next_step(test_result)
             await asyncio.wait_for(
@@ -107,26 +100,12 @@ class Uploader(processing_step.ProcessStep):
                 test_result_gs_path = os.path.join(
                     self._gs_path_prefix, test_result.name
                 )
-                self.result_upload_status_store.set_job_upload_status(
-                    test_result.id,
-                    upload_status_connector.Status.UPLOADED,
-                )
-            else:
-                self.result_upload_status_store.set_job_upload_status(
-                    test_result.id,
-                    upload_status_connector.Status.UPLOAD_FAILED,
-                    self._uploading_context.error,
-                )
 
         except (asyncio.TimeoutError, KeyboardInterrupt) as err:
             _LOGGER.error(
                 "Error occurs when uploading %s: %s", test_result, type(err)
             )
-            self.result_upload_status_store.set_job_upload_status(
-                test_result.id,
-                upload_status_connector.Status.UPLOAD_FAILED,
-                str(err),
-            )
+            self._uploading_context.error = str(err)
             if err is KeyboardInterrupt:
                 raise err
 
@@ -233,6 +212,9 @@ class UploadingContext(object):
         self._dry_run = dry_run
         self._resume_aborted = resume_aborted
         self.error = None
+        self._result_upload_status_store = (
+            upload_status_connector.ResultUploadStatusConnector()
+        )
 
     def __call__(self, test_result):
         self._test_result = test_result
@@ -251,12 +233,11 @@ class UploadingContext(object):
         if self._dry_run:
             return self
 
-        if not await result_dir_status.mark_uploading_started(
-            self._test_result
-        ):
+        if not await self._set_upload_status_started():
             raise _TestResultExpiredError(
                 "%s is expired. Skip the uploading.", self._test_result
             )
+
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -268,9 +249,9 @@ class UploadingContext(object):
                 self.uploaded,
                 self.error is not None,
             )
-            return await result_dir_status.mark_uploading_result(
-                self._test_result, succeeded=False
-            )
+            error_message = str(self.error) if self.error else "Unknown error"
+            await self._set_upload_status_complete(error_message)
+            return
 
         if self._dry_run:
             if self._test_result.pubsub_when_uploaded:
@@ -283,9 +264,15 @@ class UploadingContext(object):
         if not self._test_result.pubsub_when_uploaded:
             if self._test_result.is_logged:
                 _LOGGER.debug("%s Pubsub not requested", self._test_result)
-            return await result_dir_status.mark_uploading_result(
-                self._test_result, succeeded=self.uploaded
-            )
+
+            error_message = None
+            if self.error:
+                error_message = str(self.error)
+            elif not self.uploaded:
+                error_message = "Unknown error"
+
+            await self._set_upload_status_complete(error_message)
+            return
 
         loop = asyncio.get_event_loop()
         console_client = pubsub_client.PubSubBasedClient()
@@ -304,6 +291,33 @@ class UploadingContext(object):
             _MOBLAB_ID,
         )
 
-        return await result_dir_status.mark_uploading_result(
-            self._test_result, succeeded=posted
+        await self._set_upload_status_complete(
+            None if posted else "Failed to send message"
         )
+
+    async def _set_upload_status_complete(self, error_message):
+        await result_dir_status.mark_uploading_result(
+            self._test_result, succeeded=error_message is None
+        )
+        status = upload_status_connector.Status.UPLOADED
+        if error_message:
+            status = upload_status_connector.Status.UPLOAD_FAILED
+        if self._test_result.job_id:
+            self._result_upload_status_store.set_job_upload_status(
+                self._test_result.id,
+                status,
+                error_message or "",
+            )
+
+    async def _set_upload_status_started(self):
+
+        if not await result_dir_status.mark_uploading_started(
+            self._test_result
+        ):
+            return False
+
+        if self._test_result.job_id:
+            self._result_upload_status_store.set_job_upload_status(
+                self._test_result.id, upload_status_connector.Status.UPLOADING
+            )
+        return True
