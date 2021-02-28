@@ -33,7 +33,7 @@ import time
 from cli import action_common, rpc, topic_common
 from client.bin import utils as bin_utils
 from client.common_lib import error, host_protections
-from server import frontend, hosts
+from server import server_frontend, hosts
 from server.hosts import host_info
 
 
@@ -295,7 +295,7 @@ class host_get_migration_plan(host_stat):
         return (options, leftover)
 
     def execute(self):
-        afe = frontend.AFE()
+        afe = server_frontend.AFE()
         results = super(host_get_migration_plan, self).execute()
         working = []
         non_working = []
@@ -723,7 +723,7 @@ class host_create(BaseHostModCreate):
         # Mock an afe_host object so that the host is constructed as if the
         # data was already in afe
         data = {'attributes': self.attributes, 'labels': self.labels}
-        afe_host = frontend.Host(None, data)
+        afe_host = server_frontend.Host(None, data)
         store = host_info.InMemoryHostInfoStore(
                 host_info.HostInfo(labels=self.labels,
                                    attributes=self.attributes))

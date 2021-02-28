@@ -11,19 +11,19 @@ hosts have overcome whatever issue caused the failure and are useful again.
 import optparse, os, sys
 
 import common
-from server import frontend
+from server import server_frontend
 
 
 def main():
     parser = optparse.OptionParser(usage='%prog [options]\n\n' +
                                    __doc__.strip())
     parser.add_option('-w', dest='server', default='autotest',
-                      help='Hostname of the autotest frontend RPC server.')
+                      help='Hostname of the autotest server_frontend RPC server.')
     parser.add_option('-b', dest='label', default=None, type=str,
                       help='A label to restrict the set of hosts reverified.')
     options, unused_args = parser.parse_args(sys.argv)
 
-    afe_client = frontend.AFE(debug=False, server=options.server)
+    afe_client = server_frontend.AFE(debug=False, server=options.server)
     hostnames = afe_client.reverify_hosts(status='Repair Failed',
                                           label=options.label)
     # The old RPC interface didn't return anything.

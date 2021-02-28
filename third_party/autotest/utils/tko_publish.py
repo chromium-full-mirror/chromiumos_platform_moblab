@@ -12,7 +12,7 @@ import sys, os, re, optparse
 
 import common
 from client.common_lib import utils
-from server import frontend
+from server import server_frontend
 
 options = optparse.Values()
 
@@ -59,7 +59,7 @@ def publish_job(jobdir):
 def main():
     jobdirs = get_job_dirs(options.resultsdir)
 
-    afe = frontend.AFE()
+    afe = server_frontend.AFE()
     # the way AFE API is right now is to give a whole list of jobs and can't
     # get specific jobs so minimize the queries caching the result
     finished_jobs = afe.get_jobs(finished=True)

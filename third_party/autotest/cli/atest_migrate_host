@@ -2,11 +2,11 @@
 # Copyright Google, Martin J. Bligh <mbligh@google.com>, Jan 2009
 import os, sys
 import common
-from server import frontend
+from server import server_frontend
 
 try:
-    old = frontend.AFE(web_server='http://' + sys.argv[1])
-    new = frontend.AFE(web_server='http://' + sys.argv[2])
+    old = server_frontend.AFE(web_server='http://' + sys.argv[1])
+    new = server_frontend.AFE(web_server='http://' + sys.argv[2])
 
     hostname = sys.argv[3]
     print 'Migrating %s ...' % hostname

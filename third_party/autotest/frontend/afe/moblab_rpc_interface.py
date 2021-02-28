@@ -26,7 +26,7 @@ import docker
 
 from client.common_lib import error, global_config, utils
 from frontend.afe import models, rpc_utils
-from server import frontend
+from server import server_frontend
 from server.hosts import moblab_host
 from moblab_common import host_connector, moblab_info
 
@@ -1064,7 +1064,7 @@ def run_suite(board, build, suite, model=None, ro_firmware=None,
     suite_timeout_mins = _SUITE_TIMEOUT_MAP.get(
             suite, _DEFAULT_SUITE_TIMEOUT_MINS)
 
-    afe = frontend.AFE(user='moblab')
+    afe = server_frontend.AFE(user='moblab')
     afe.run('create_suite_job', board=board, builds=builds, name=suite,
             pool=pool, run_prod_code=False, test_source_build=build,
             wait_for_results=True, suite_args=processed_suite_args,

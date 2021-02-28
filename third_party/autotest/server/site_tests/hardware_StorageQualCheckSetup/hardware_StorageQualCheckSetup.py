@@ -6,7 +6,7 @@ import logging
 
 from client.common_lib import error
 from server import test
-from server import frontend
+from server import server_frontend
 
 class hardware_StorageQualCheckSetup(test.test):
     """
@@ -62,7 +62,7 @@ class hardware_StorageQualCheckSetup(test.test):
         pool_name = self._get_running_host_pool()
         logging.info('Test is running on pool %s', pool_name)
 
-        afe = frontend.AFE(server='autotest-afe:8888', user='moblab')
+        afe = server_frontend.AFE(server='autotest-afe:8888', user='moblab')
 
         # get autotest statuses that indicate a live host
         live_statuses = afe.host_statuses(live=True)

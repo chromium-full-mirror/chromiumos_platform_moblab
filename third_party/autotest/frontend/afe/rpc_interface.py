@@ -58,7 +58,7 @@ from frontend.afe import models
 from frontend.afe import rpc_utils
 from frontend.tko import models as tko_models
 from frontend.tko import rpc_interface as tko_rpc_interface
-from server import frontend
+from server import server_frontend
 from server import utils
 from server.cros import provision
 from server.cros.dynamic_suite import constants
@@ -227,7 +227,7 @@ def _create_label_everywhere(id, hosts):
             # Labels are unique in the database, this causes an error non unique Validation Error.
             try:
                 label = models.Label.smart_get(add_label(id))
-            except frontend.afe.model_logic.ValidationError:
+            except server_frontend.afe.model_logic.ValidationError:
                 label = models.Label.smart_get(id)
         else:
             raise ValueError(
@@ -1180,7 +1180,7 @@ def _forward_special_tasks_on_hosts(task, rpc, **filter_data):
 
     For shard, create special task records in local DB.
 
-    @param task: Enum value of frontend.afe.models.SpecialTask.Task
+    @param task: Enum value of server_frontend.afe.models.SpecialTask.Task
     @param rpc: RPC name to forward.
     @param filter_data: Filter keywords to be used for DB query.
 
@@ -1196,7 +1196,7 @@ def _forward_special_tasks_on_hosts(task, rpc, **filter_data):
         hosts = [h for h in hosts if h.shard is None]
         for shard, hostnames in shard_host_map.items():
 
-            # The main client of this module is the frontend website, and
+            # The main client of this module is the server_frontend website, and
             # it invokes it with an 'id' or an 'id__in' filter. Regardless,
             # the 'hostname' filter should narrow down the list of hosts on
             # each shard even though we supply all the ids in filter_data.
@@ -1564,7 +1564,7 @@ def get_host_special_tasks(host_id, **filter_data):
         # objects that aren't JSON-serializable.  So, we have to
         # call AFE.run() to get the raw, serializable output from
         # the shard.
-        shard_afe = frontend.AFE(server=host.shard.hostname)
+        shard_afe = server_frontend.AFE(server=host.shard.hostname)
         return shard_afe.run(
             "get_special_tasks", host_id=host_id, **filter_data
         )
@@ -1600,7 +1600,7 @@ def get_host_num_special_tasks(host, **kwargs):
     if not host_model.shard:
         return get_num_special_tasks(host=host, **kwargs)
     else:
-        shard_afe = frontend.AFE(server=host_model.shard.hostname)
+        shard_afe = server_frontend.AFE(server=host_model.shard.hostname)
         return shard_afe.run("get_num_special_tasks", host=host, **kwargs)
 
 
@@ -1655,7 +1655,7 @@ def get_host_status_task(host_id, end_time):
         # objects that aren't JSON-serializable.  So, we have to
         # call AFE.run() to get the raw, serializable output from
         # the shard.
-        shard_afe = frontend.AFE(server=host.shard.hostname)
+        shard_afe = server_frontend.AFE(server=host.shard.hostname)
         return shard_afe.run(
             "get_status_task", host_id=host_id, end_time=end_time
         )
@@ -1693,7 +1693,7 @@ def get_host_diagnosis_interval(host_id, end_time, success):
             host_id, end_time, success
         )
     else:
-        shard_afe = frontend.AFE(server=host.shard.hostname)
+        shard_afe = server_frontend.AFE(server=host.shard.hostname)
         return shard_afe.get_host_diagnosis_interval(
             host_id, end_time, success
         )
