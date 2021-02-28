@@ -54,12 +54,13 @@ RUN apt-get update && apt-get install --no-install-recommends -yq  \
     mariadb-client \
     python-pip \
     zlib1g-dev \
-    python3.7-distutils
+    python3.7-distutils \
+    curl
 
 COPY src/dockerfiles/autotest/requirements.txt ./
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt
 
 WORKDIR /
 
@@ -67,28 +68,33 @@ COPY --chown=moblab --from=chromite /chromite /chromite
 COPY src/dockerfiles/autotest/setup_chromite.py /
 RUN python3 /setup_chromite.py install
 
-RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev
-RUN apt autoremove -yq
-RUN apt-get clean
+# Installs Moblab API client library
+WORKDIR /tmp/moblab_api_client_library
+RUN curl https://storage.googleapis.com/moblab-api-distribution/google-chromeos-moblab.tar.gz -o google-chromeos-moblab.tar.gz \
+    && tar -xvzf google-chromeos-moblab.tar.gz \
+    && python3 -m pip install . \
+    && rm -rf /tmp/moblab_api_client_library
+
+RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev curl \
+    && apt autoremove -yq \
+    && apt-get clean
 
 WORKDIR /wheels
 COPY --from=common /wheel/*py3* .
-RUN pip install *.whl
-RUN rm -rf /wheels
+RUN pip install *.whl \
+    && rm -rf /wheels
 
 WORKDIR /shadow_config
 COPY --chown=moblab src/dockerfiles/autotest/shadow_config.ini .
-RUN chmod uog+rw ./shadow_config.ini
-RUN ln -s /shadow_config/shadow_config.ini /usr/local/autotest/shadow_config.ini
-
-#RUN ln -s /usr/local/autotest /usr/local/autotest
+RUN chmod uog+rw ./shadow_config.ini \
+    && ln -s /shadow_config/shadow_config.ini /usr/local/autotest/shadow_config.ini
 
 RUN ln -s /chromite /usr/local/autotest/site-packages/chromite
 
-RUN mkdir -p /usr/local/autotest/logs
-RUN mkdir -p /usr/local/autotest/results
-RUN mkdir -p /usr/local/autotest/leases
-RUN mkdir -p /usr/local/autotest/containers
+RUN mkdir -p /usr/local/autotest/logs \
+    && mkdir -p /usr/local/autotest/results \
+    && mkdir -p /usr/local/autotest/leases \
+    && mkdir -p /usr/local/autotest/containers
 
 RUN chown -R moblab:moblab /usr/local/autotest
 

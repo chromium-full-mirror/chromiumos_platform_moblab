@@ -190,6 +190,7 @@ services:
     environment:
       - LABEL=$AT_MONITORDB
       - REGISTRY_URI=$REGISTRY_URI
+      - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
 
     ulimits:
       nofile:
