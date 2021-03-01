@@ -22,8 +22,10 @@ from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 DEFAULT_PAGE_SIZE = 500
 
+
 class MoblabBuildConnectorException(Exception):
     """Generic exception for this module."""
+
     pass
 
 
@@ -116,7 +118,12 @@ class MoblabBuildConnector(object):
         ]
 
     def list_builds_for_milestone(
-        self, build_target, model, milestone, page_size=DEFAULT_PAGE_SIZE, page_token=None
+        self,
+        build_target,
+        model,
+        milestone,
+        page_size=DEFAULT_PAGE_SIZE,
+        page_token=None,
     ):
         """Lists the builds for the given build target, model and milestone.
 
@@ -152,11 +159,12 @@ class MoblabBuildConnector(object):
         Google Cloud Storage bucket.
 
         Args:
-            build_target (str): The build target name.
-            model (str): The model name. For non-unibuilds, set the model name as
-                the same as build target name.
-            build (str): The build version.
-            bucket_name: The destination bucket name .
+            build_target (str): The build target name. e.g. hatch
+            model (str): The model name. For non-unibuilds, set the model name
+                as the same as build target name.  e.g. kohaku
+            build (str): The build version. e.g. 13816.1.0
+            bucket_name: The destination bucket name.
+                e.g. chromeos-moblab-peng-staging
 
         Returns:
             boolean: True iff build is staged ( recognized by the # of objects in the src build directory
