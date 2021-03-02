@@ -135,7 +135,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         return StableVersion(
             default_version=default_version.value.string_value
             if default_version
-            else "R87-13505.73.0",
+            else "R88-13597.105.0",
             override_version=override_version.value.string_value
             if override_version
             else "",
