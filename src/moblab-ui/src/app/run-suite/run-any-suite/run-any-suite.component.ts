@@ -36,6 +36,8 @@ export class RunAnySuiteComponent
     'wifi_matfunc',
     'wifi_perf',
     'labqual',
+    'hardware_thermalqual_fast',
+    'hardware_thermalqual_full',
   ];
 
   public hideCustomInput = true;
