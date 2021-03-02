@@ -52,6 +52,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
     StorageQualV2Component,
   ],
   exports: [
+    BasicAutocompleteSelectorComponent,
     BvtComponent,
     CtsRunComponent,
     MemoryQualComponent,
@@ -77,7 +78,6 @@ import {WidgetsModule} from './../widgets/widgets.module';
     ReactiveFormsModule,
     RouterModule,
     WidgetsModule,
-    WidgetsModule,
   ],
 })
-export class RunSuiteModule {}
+export class RunSuiteModule { }
