@@ -291,7 +291,7 @@ class RDBHostCacheManager(object):
             if (not h_key.deps.issuperset(key.deps)):
                 raise rdb_utils.RDBException('Given key: %s does not match key '
                         'computed from hosts in line: %s' % (key, h_keys))
-        if key in self._cache_backend:
+        if self._cache_backend.has_key(key):
             raise rdb_utils.RDBException('Cannot override a cache line. It '
                     'must be cleared before setting. Key: %s, hosts %s' %
                     (key, line))
