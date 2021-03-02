@@ -13,6 +13,7 @@ service MoblabRpcService {
     returns (RunSuiteResponse) {}
   rpc run_memory_qualification_suite (RunMemoryQualificationSuiteRequest)
     returns (RunSuiteResponse) {}
+  rpc provision_duts (ProvisionDutsRequest) returns (google.protobuf.Empty) {}
 
   rpc list_connected_duts (ListConnectedDutsRequest) returns (ListConnectedDutsResponse) {}
   rpc list_build_targets (ListBuildTargetsRequest) returns (ListBuildTargetsResponse) {}
@@ -99,6 +100,13 @@ message RunSuiteRequest {
 // NEXT_TAG = 2
 message RunSuiteResponse {
   string message = 1;
+}
+
+// NEXT_TAG = 4
+message ProvisionDutsRequest {
+  string milestone = 1;
+  string build_version = 2;
+  string pool = 3;
 }
 
 // NEXT_TAG = 8

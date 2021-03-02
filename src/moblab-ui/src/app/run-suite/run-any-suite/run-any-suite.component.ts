@@ -108,10 +108,10 @@ export class RunAnySuiteComponent
     }
 
     this.moblabGrpcService.runSuite(
-      response => {
+      _ => {
         this.onSuiteStarted();
       },
-      (err, response) => {
+      (err, _) => {
         this.setOffPopup(err.message);
         this.runSuiteButton.enable();
       },
