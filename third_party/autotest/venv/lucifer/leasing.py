@@ -129,7 +129,7 @@ class Lease(object):
         sock.connect(self._sock_path)
         _LOGGER.debug('Sending abort to %s', self._sock_path)
         # The value sent does not matter.
-        sent = sock.send('abort')
+        sent = sock.send(b'abort')
         # TODO(ayatane): I don't know if it is possible for sent to be 0
         assert sent > 0
 
