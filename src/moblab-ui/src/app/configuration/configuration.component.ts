@@ -45,8 +45,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
   errors = false;
   isCloudEnabled = false;
-  isRemoteConsoleEnabled = true;
-  isRemoteCommandEnabled = true;
+  isRemoteConsoleEnabled = false;
+  isRemoteCommandEnabled = false;
   isHostSchedulerPauseRequested = false;
 
   botoKeyIDForm = new FormControl('', {
@@ -343,6 +343,11 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      * Invoked on change of cloud enabled checkbox.
      */
     this.isCloudEnabled = !this.isCloudEnabled;
+
+    if (this.isCloudEnabled) {
+      this.isRemoteCommandEnabled = true;
+      this.isRemoteConsoleEnabled = true;
+    }
 
     this.toggleCloudConfigDisabledMessage();
   }
