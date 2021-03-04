@@ -16,7 +16,7 @@
       <div id="cloud-checkbox-form" class="form-text">
         <mat-checkbox id="cloud-checkbox" (mouseenter)="cloudCheckboxHoverStart()"
           (mouseleave)="cloudCheckboxHoverStop()" (change)="isCloudEnabledCheckboxChange()"
-          [checked]="this.isCloudEnabled">
+          [checked]="this.isCloudEnabled" [disabled]="this.lastFetchedCloudConfig.isCloudEnabled">
         </mat-checkbox>
         <span id="cloud-checkbox-label" class="checkbox-label"> Enable Moblab cloud integration </span>
         <br>
@@ -33,42 +33,52 @@
       </div>
       <mat-list>
         <div [hidden]="!this.isCloudEnabled">
-          <div class="listrow" flex-direction="row">
-            <mat-list-item>
-              <mat-form-field class="configuration-input" appearance="legacy" [class.readonly]="!this.isCloudEnabled"
-                [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="after">
-                <input id="boto-key-id-input" matInput required placeholder="Boto Key ID" [formControl]="botoKeyIDForm"
-                  [readonly]="!this.isCloudEnabled" name="botoKeyId">
-                <mat-error *ngIf="this.botoKeyIDForm.hasError('required')">
-                  Boto key ID not set.
-                </mat-error>
-                <mat-error *ngIf="this.botoKeyIDForm.hasError('clearWarning')">
-                  Unchecking Enable Moblab cloud integration will result in boto key value being cleared.
-                </mat-error>
-              </mat-form-field>
-            </mat-list-item>
-          </div>
-          <div class="listrow" flex-direction="row">
-            <mat-list-item>
-              <mat-form-field class="configuration-input" appearance="legacy" [class.readonly]="!this.isCloudEnabled"
-                [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="after">
-                <input id="boto-key-secret-input" matInput type="password" required password
-                  placeholder="Boto Key Secret" [formControl]="botoKeySecretForm" [readonly]="!this.isCloudEnabled"
-                  name="botoKeySecret">
-                <mat-error *ngIf="this.botoKeySecretForm.hasError('required')">
-                  Boto key secret not set.
-                </mat-error>
-                <mat-error *ngIf="this.botoKeySecretForm.hasError('clearWarning')">
-                  Unchecking cloud enable will result in boto secret value being cleared.
-                </mat-error>
-              </mat-form-field>
-            </mat-list-item>
-          </div>
+          <mat-card *ngIf="!this.canUpdateCloudConfig">
+            <div fxLayout="row">
+              <div class="align-icon">
+                <mat-icon class="attention-icon">warning_amber</mat-icon>
+              </div>
+              <div>
+                <div>
+                  Changes to the Boto and GCS Bucket configuration are not allowed.
+                  Please powerwash the Moblab to update the account info.
+                </div>
+                <div class="checkbox-description">After tests were ran with a given account
+                  updates to the account configuration are not allowed.
+                </div>
+              </div>
+            </div>
+          </mat-card>
           <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy" [class.readonly]="!this.isCloudEnabled"
+            <mat-form-field class="configuration-input" appearance="legacy" matTooltipPosition="after">
+              <input id="boto-key-id-input" matInput required placeholder="Boto Key ID" [formControl]="botoKeyIDForm"
+                name="botoKeyId">
+              <mat-error *ngIf="this.botoKeyIDForm.hasError('required')">
+                Boto key ID not set.
+              </mat-error>
+              <mat-error *ngIf="this.botoKeyIDForm.hasError('clearWarning')">
+                Unchecking Enable Moblab cloud integration will result in boto key value being cleared.
+              </mat-error>
+            </mat-form-field>
+          </mat-list-item>
+          <mat-list-item>
+            <mat-form-field class="configuration-input" appearance="legacy"
+              [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="after">
+              <input id="boto-key-secret-input" matInput type="password" required password placeholder="Boto Key Secret"
+                [formControl]="botoKeySecretForm" name="botoKeySecret">
+              <mat-error *ngIf="this.botoKeySecretForm.hasError('required')">
+                Boto key secret not set.
+              </mat-error>
+              <mat-error *ngIf="this.botoKeySecretForm.hasError('clearWarning')">
+                Unchecking cloud enable will result in boto secret value being cleared.
+              </mat-error>
+            </mat-form-field>
+          </mat-list-item>
+          <mat-list-item>
+            <mat-form-field class="configuration-input" appearance="legacy"
               [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="after">
               <input id="image-storage-url-input" matInput required placeholder="GCS Bucket Root"
-                [formControl]="bucketURLForm" [readonly]="!this.isCloudEnabled" name="imageStorageUrl">
+                [formControl]="bucketURLForm" name="imageStorageUrl">
               <mat-error *ngIf="this.bucketURLForm.hasError('required')">
                 GCS bucket not set.
               </mat-error>
