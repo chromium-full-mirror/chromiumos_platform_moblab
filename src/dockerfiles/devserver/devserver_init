@@ -5,6 +5,11 @@ sudo /usr/sbin/sshd
 
 cp -f /static_files_to_serve/* /static
 
+while true; do
+    /clean_staged_images.py -v -a 504 -p 168 /static >> /var/log/moblab/devserver_cron.log 2>&1
+    sleep 86400
+done &
+
 /usr/lib/devserver/devserver.py --production \
      --static_dir=/static \
      --logfile /var/log/moblab/devserver_server.log \

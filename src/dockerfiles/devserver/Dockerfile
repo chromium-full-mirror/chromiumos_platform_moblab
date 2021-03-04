@@ -59,6 +59,8 @@ COPY setup_chromite.py /
 RUN pip install setuptools
 RUN python /setup_chromite.py install
 
+COPY clean_staged_images.py /
+
 RUN apt purge -yq gcc-multilib
 RUN apt autoremove -yq
 RUN apt-get clean
@@ -102,6 +104,8 @@ RUN mkdir -p /static/cache
 RUN chown -R moblab:moblab /static
 RUN mkdir -p /var/log/moblab/devserver/
 RUN chown -R moblab:moblab /var/log/moblab
+RUN chown moblab:moblab /clean_staged_images.py
+RUN chmod u+x /clean_staged_images.py
 
 RUN apt-get install --reinstall sudo
 
