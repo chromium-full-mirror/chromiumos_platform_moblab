@@ -227,7 +227,7 @@ def _create_label_everywhere(id, hosts):
             # Labels are unique in the database, this causes an error non unique Validation Error.
             try:
                 label = models.Label.smart_get(add_label(id))
-            except server_frontend.afe.model_logic.ValidationError:
+            except model_logic.ValidationError:
                 label = models.Label.smart_get(id)
         else:
             raise ValueError(
@@ -1180,7 +1180,7 @@ def _forward_special_tasks_on_hosts(task, rpc, **filter_data):
 
     For shard, create special task records in local DB.
 
-    @param task: Enum value of server_frontend.afe.models.SpecialTask.Task
+    @param task: Enum value of frontend.afe.models.SpecialTask.Task
     @param rpc: RPC name to forward.
     @param filter_data: Filter keywords to be used for DB query.
 
