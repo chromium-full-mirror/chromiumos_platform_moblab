@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {Empty} from 'google-protobuf/google/protobuf/empty_pb';
 import * as grpcWeb from 'grpc-web';
 
 import {MoblabRpcServiceClient} from './moblabrpc_grpc_web_pb';
@@ -87,7 +88,8 @@ import {
   UpdateMoblabRequest,
   UpdateMoblabResponse,
   FirmwareUpdateCommandOutput,
-  ValidateStorageQualSetupRequest
+  ValidateStorageQualSetupRequest,
+  ProvisionDutsRequest
 } from './moblabrpc_pb';
 
 @Injectable({providedIn: 'root'})
@@ -155,7 +157,7 @@ export class MoblabGrpcService {
     milestone: string,
     buildtarget: string,
     model: string,
-    pool: string
+    pool: string,
   ) {
     const request = new RunSuiteRequest();
     request.setSuite(suite_name);
@@ -367,6 +369,41 @@ export class MoblabGrpcService {
       }
     );
   }
+
+  /** Starts provision suite run.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param build: String name of build the suite is being run under.
+   *  @param milestone: String identifer of a milestone.
+   *  @param model: Device model.
+   *  @param pool: String identifer of a group of DUTs
+   *    (as configured in the 'Manage DUTs' component )
+   * */
+  provisionDuts(
+    callback: () => void,
+    error_callback: (err: string) => void,
+    build: string,
+    milestone: string,
+    pool: string,
+  ) {
+    const request = new ProvisionDutsRequest();
+    request.setBuildVersion(build);
+    request.setMilestone(milestone);
+    request.setPool(pool);
+
+    this.moblabRpcService.provision_duts(
+      request,
+      {},
+      (err: grpcWeb.Error, _: Empty) => {
+        if (err) {
+          error_callback(err.message);
+        } else {
+          callback();
+        }
+      }
+    );
+  }
+
 
   listConnectedDuts(callback: (x: ConnectedDutInfo[]) => void) {
     const request = new ListConnectedDutsRequest();
