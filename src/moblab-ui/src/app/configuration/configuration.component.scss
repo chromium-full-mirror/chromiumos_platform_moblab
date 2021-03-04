@@ -137,3 +137,15 @@ mat-card-header {
 .card-table-content {
   margin: 16px;
 }
+
+.attention-icon {
+  color: orange;
+  transform: scale(2);
+  margin: 16px;
+}
+
+.align-icon {
+  //vertical-align: middle;  
+  display: flex;
+  align-items: center;
+}

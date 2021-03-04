@@ -5,9 +5,8 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {FormControl, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {Validators} from '@angular/forms';
 
 import {leadingTrailingWhitespaceValidator} from '../utils/validators';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
@@ -44,6 +43,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
   @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
   errors = false;
+
+  canUpdateCloudConfig = false;
+
   isCloudEnabled = false;
   isRemoteConsoleEnabled = false;
   isRemoteCommandEnabled = false;
@@ -113,6 +115,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.getVersionInfo();
     this.getDutWifiInfo();
     this.defaultCrOSVersionForm.disable();
+    this.initCanUpdateCloudConfigFlag();
     await this.getStableCrOSVersion();
   }
 
@@ -367,10 +370,26 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   }
 
   ngAfterContentInit(): void {
-    this.botoKeyIDForm.markAsTouched();
-    this.botoKeySecretForm.markAsTouched();
-    this.bucketURLForm.markAsTouched();
     this.changeDetector.detectChanges();
+  }
+
+  /** Checks if the Moblab has ran some jobs already,
+   * if so user can not change the boto key or gc bucket. */
+  initCanUpdateCloudConfigFlag() {
+    this.botoKeyIDForm.disable();
+    this.botoKeySecretForm.disable();
+    this.bucketURLForm.disable();
+    this.canUpdateCloudConfig = false;
+    this.moblabRpcService.getNumJobs(
+      (count: number) => {
+        this.canUpdateCloudConfig = count === 0;
+
+        if (this.canUpdateCloudConfig) {
+          this.botoKeyIDForm.enable();
+          this.botoKeySecretForm.enable();
+          this.bucketURLForm.enable();
+        }
+      });
   }
 
   onCloudConfigSubmit(formValue) {

@@ -1239,6 +1239,32 @@ class MoblabService(object):
         else:
             return "Failed to apply DUT Wifi info changes."
 
+    def _can_change_cloud_config(self):
+        return self.get_num_jobs() == 0
+
+    def _cloud_config_changing(
+        self,
+        new_is_cloud_enabled,
+        new_boto_key_id,
+        new_boto_key_secret,
+        new_gcs_bucket_url,
+    ):
+        old_config = self.get_cloud_configuration()
+        old_is_cloud_enabled = old_config.get("is_cloud_enabled", False)
+        if old_is_cloud_enabled and not new_is_cloud_enabled:
+            return False
+
+        old_boto_key_id = old_config.get("gs_access_key_id", "")
+        old_boto_key_secret = old_config.get("gs_secret_access_key", "")
+        old_gcs_bucket_url = old_config.get("image_storage_server", "")
+        if (
+            old_boto_key_id != new_boto_key_id
+            or old_boto_key_secret != new_boto_key_secret
+            or old_gcs_bucket_url != new_gcs_bucket_url
+        ):
+            return True
+        return False
+
     def set_cloud_configuration(
         self,
         is_cloud_enabled,
@@ -1258,6 +1284,24 @@ class MoblabService(object):
             A result message string.
         """
         if is_cloud_enabled:
+            if (
+                not self._can_change_cloud_config()
+                and self._cloud_config_changing(
+                    is_cloud_enabled,
+                    boto_key_id,
+                    boto_key_secret,
+                    gcs_bucket_url,
+                )
+            ):
+                logging.warn(
+                    "Attempt to modify Cloud Config after it was used."
+                )
+
+                return (
+                    "Cloud configuration changes are not allowed."
+                    "Please powerwash the Moblab to set new configuration."
+                )
+
             is_valid, details = self.afe_connector.validate_cloud_storage_info(
                 boto_key_id, boto_key_secret, gcs_bucket_url
             )
