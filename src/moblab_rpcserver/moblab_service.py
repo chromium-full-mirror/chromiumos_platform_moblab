@@ -24,7 +24,6 @@ from moblab_common import moblab_build_connector
 
 from moblab_common import afe_connector
 from moblab_common import config_connector
-from moblab_common import devserver_connector
 from moblab_common import result_upload_status_connector
 
 from host_scheduler_pause_service import HostSchedulerPauseService
@@ -80,10 +79,6 @@ class MoblabService(object):
     build_target_re = re.compile(r"^board:(.*)")
     pool_re = re.compile(r"^pool:(.*)")
 
-    afe_connector = None
-    config_connector = None
-    upload_status_connector = None
-
     _last_config_update = None
     _last_build_connector_update = None
     _last_moblab_build_connector_update = None
@@ -117,9 +112,6 @@ class MoblabService(object):
     def setup_devserver_connector(self):
         self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
         logging.info("Using bucket: %s", self.moblab_bucket_name)
-        self.devserver_connector = devserver_connector.DevserverConnector(
-            self.moblab_bucket_name
-        )
         self._init_build_connector(raise_error=False)
 
     def _init_build_connector(self, raise_error=True):
@@ -1309,6 +1301,11 @@ class MoblabService(object):
                         "Successfully applied cloud configuration values. "
                     )
                     self._last_config_update = datetime.utcnow()
+                    self.moblab_bucket_name = (
+                        self.config_connector.get_cloud_bucket(
+                            force_reload=True
+                        )
+                    )
 
                     if self.set_is_remote_agent_enabled(
                         is_remote_agent_enabled

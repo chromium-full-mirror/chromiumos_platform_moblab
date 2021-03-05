@@ -20,7 +20,6 @@ from storage_qual_check_service import (
 # pylint: disable=import-error
 from moblab_common import afe_connector
 from moblab_common import config_connector
-from moblab_common import devserver_connector
 from moblab_common import feedback_connector
 from moblab_common import host_connector
 from moblab_common import moblab_info
@@ -64,31 +63,33 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             self.afe_connector
         )
         self.service = moblab_service.MoblabService()
-        self.setup_devserver_connector()
         self.storage_qual_check_service = StorageQualCheckService()
 
-    def setup_devserver_connector(self):
-        self.moblab_bucket_name = self.config_connector.get_cloud_bucket()
-        logging.info("Using bucket: %s", self.moblab_bucket_name)
-        self.devserver_connector = devserver_connector.DevserverConnector(
-            self.moblab_bucket_name
-        )
-
-    def send_moblab_screenshot(self, request, _context):
+    def send_moblab_screenshot(self, request, context):
         """Uploads image and feedback text to GCS.
 
         Args:
           request: SendMoblabRequest object with a string email, string
           description and a Base64 serialized png image screenshot.
-          _context: grpc.server.Context
+          context: grpc.server.Context
 
         Returns:
           SendMoblabResponse type with string message indicating location of
           uploaded feedback.
         """
-        fc = feedback_connector.MoblabFeedbackConnector(
-            self.moblab_bucket_name
+
+        moblab_bucket_name = self.config_connector.get_cloud_bucket(
+            force_reload=True
         )
+        if not moblab_bucket_name:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(
+                "GCS Bucket is not configured. To send feedback"
+                " please go to Configuration page and set GCS Bucket."
+            )
+            return moblabrpc_pb2.SendMoblabScreenshotResponse()
+
+        fc = feedback_connector.MoblabFeedbackConnector(moblab_bucket_name)
         path, url = fc.upload_feedback(
             request.contact_email,
             request.description,
@@ -98,7 +99,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             message=(
                 "Feedback uploaded to bucket {} under {}. "
                 "URL to screenshot: {}"
-            ).format(self.moblab_bucket_name, path, url)
+            ).format(moblab_bucket_name, path, url)
         )
         return response
 

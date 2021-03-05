@@ -236,7 +236,7 @@ class MoblabTestScheduler(object):
                 if self.obtain_lock(request):
                     _LOGGER.info("Executing request. %s", request.unique_id)
                     # TODO - return an enum SUCCESS/FAIL/RETRY.
-                    result = request.execute(
+                    _ = request.execute(
                         self.devserver_connector, self.afe_connector
                     )
             else:
