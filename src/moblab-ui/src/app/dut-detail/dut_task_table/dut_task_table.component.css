@@ -2,3 +2,16 @@
   width: 100%;
   box-shadow: none !important;
 }
+
+a.logbutton {
+  padding-left: 0px;
+  padding-right: 0px;
+  min-width: 0px;
+  line-height: 20px;
+}
+
+.norm-icon {
+  vertical-align: middle;
+  text-align: center !important;
+  color: gray;
+}

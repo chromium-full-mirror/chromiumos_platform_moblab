@@ -21,6 +21,7 @@ export class DutTaskTableComponent implements AfterViewInit {
     'time_started',
     'time_finished',
     'status',
+    'logs',
   ];
 
   dutIp: string;
