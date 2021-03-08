@@ -45,7 +45,7 @@ class DockerContainerRunning(object):
           i+1 if SERVICE with index i is not running, but moblab is still
             booting.
         """
-        LOGGER.info("Checking docker containers: %s", self.SERVICES.keys())
+        LOGGER.debug("Checking docker containers: %s", self.SERVICES.keys())
         for i, x in enumerate(self.SERVICES.keys()):
             if not ContainerRunning(x):
                 return i + 1
