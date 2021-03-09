@@ -127,6 +127,26 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             )
         )
 
+    def provision_duts(self, request, context):
+        """Starts provision test suite.
+
+        Args:
+          request: ProvisionDutsRequest object with parameters describing the
+          build version to be provisioned on the DUTs within a pool.
+          context: grpc.server.Context
+        Returns:
+          Empty message if started successfully.
+        """
+        message = self.service.provision_duts(
+            request.pool,
+            request.milestone,
+            request.build_version,
+        )
+        if message:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(message)
+        return empty_pb2.Empty()
+
     def run_cts_suite(self, request, _context):
         """Sets off CTS suite run.
 

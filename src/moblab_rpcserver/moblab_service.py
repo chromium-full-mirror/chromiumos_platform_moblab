@@ -509,6 +509,42 @@ class MoblabService(object):
 
         return "Suite started (suite job ID: {})".format(suite_job_id)
 
+    def provision_duts(self, pool, milestone, build_version):
+        ModelBoard = namedtuple("ModelBoard", ["model", "board"])
+
+        boards = {}
+        duts = self.list_duts()
+        for dut in duts:
+            labels = dut.get("labels", [])
+            pools = self.extract_pool_from_labels(labels)
+
+            if pool and pool not in pools:
+                continue
+
+            model = self.extract_model_from_labels(labels)
+            board = self.extract_build_target_from_labels(labels)
+            modelBoardPair = ModelBoard(model=model, board=board)
+            if modelBoardPair in boards:
+                boards[modelBoardPair] += 1
+            else:
+                boards[modelBoardPair] = 1
+
+        messages = []
+        for modelBoardPair, number in boards.items():
+            try:
+                self.run_suite(
+                    modelBoardPair.board,
+                    modelBoardPair.model,
+                    milestone,
+                    build_version,
+                    "provision",
+                    pool=pool,
+                    suite_args={"num_required": number},
+                )
+            except MoblabRpcError as ex:
+                messages.append(str(ex))
+        return ", ".join(messages)
+
     def enroll_duts(self, ip_addresses):
         self.afe_connector.enroll_duts(ip_addresses)
         self.pause_service.ensure_duts_pause_state(list(ip_addresses))
