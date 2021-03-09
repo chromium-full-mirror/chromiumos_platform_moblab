@@ -60,7 +60,7 @@ def parse_arguments(argv):
              "'gs://xxxx'.")
     parser.add_argument(
         "--bug",
-        type=str,
+        type=_valid_bug_id,
         required=False,
         help="Write bug id to the test results. Each test entry can only have "
              "at most 1 bug id. Optional.")
@@ -421,6 +421,27 @@ def _write_bug_id(test_dir, bug_id):
         logging.error('Cannot write bug id to keyval file in %s, skip writing '
                       'the bug id %s: %s', test_dir, bug_id, e)
         return False
+
+
+def _valid_bug_id(v):
+    """Check if user input bug id is in valid format.
+
+    Args:
+        v: User input bug id in string.
+    Returns:
+        An int representing the bug id.
+    Raises:
+        argparse.ArgumentTypeError: if user input bug id has wrong format.
+    """
+    try:
+        bug_id = int(v)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError("Bug id %s is not a positive integer: "
+                                         "%s" % (v, e))
+    if bug_id <= 0:
+        raise argparse.ArgumentTypeError("Bug id %s is not a positive integer"
+                                         % v)
+    return bug_id
 
 
 def main(args):
