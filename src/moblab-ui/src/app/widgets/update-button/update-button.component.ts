@@ -1,8 +1,9 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {MoblabGrpcService} from '../../services/moblab-grpc.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog} from '@angular/material/dialog';
 import {OnInit} from '@angular/core';
+import {ButtonWithProgressComponent} from '../button-with-progress/button-with-progress.component';
 
 import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.component';
 
@@ -12,6 +13,7 @@ import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.com
   styleUrls: ['./update-button.component.css'],
 })
 export class UpdateButtonComponent implements OnInit {
+  @ViewChild('updateBUtton') updateButton: ButtonWithProgressComponent;
   isUpdateAvailable = false;
   getUpdateStatusFailed = false;
 
@@ -19,7 +21,7 @@ export class UpdateButtonComponent implements OnInit {
     private moblabGrpcService: MoblabGrpcService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.moblabGrpcService.get_is_update_available(
@@ -60,11 +62,14 @@ export class UpdateButtonComponent implements OnInit {
   }
 
   updateMoblab() {
+    this.updateButton.setIsLoadingStatus(true);
     this.moblabGrpcService.update_moblab(
       (message: string) => {
+        this.updateButton.setIsLoadingStatus(false);
         this.reportError(message);
       },
       (error_message: string) => {
+        this.updateButton.setIsLoadingStatus(false);
         this.reportError(error_message);
       }
     );

@@ -1,8 +1,6 @@
-<button *ngIf="!isUpdateAvailable" class="update-button" mat-raised-button color="basic" (click)="updateClick()">
-  Force Update
-</button>
-<button *ngIf="!getUpdateStatusFailed && isUpdateAvailable" class="update-button" mat-raised-button color="primary" (click)="updateClick()">
-  Update
-</button>
-
-<p  class="update-status-message"> {{getUpdateStatusMessage()}} </p>
+<div fxLayout="row">
+  <app-button-with-progress #updateBUtton
+    caption="{{!getUpdateStatusFailed && isUpdateAvailable ? 'Update' : 'Force Update'}}" (buttonClick)="updateClick()">
+  </app-button-with-progress>
+  <p class="update-status-message"> {{getUpdateStatusMessage()}} </p>
+</div>

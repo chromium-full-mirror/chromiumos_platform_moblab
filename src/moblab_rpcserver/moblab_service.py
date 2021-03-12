@@ -1425,25 +1425,37 @@ class MoblabService(object):
 
     def get_is_update_available(self):
         """
-            Check to see if there are any containers that have updated images.
+            Check to see if there is a system update or any containers that
+            have updated images.
 
-            Scan the running containers, if the watchtower program has pulled down
-            a newer image then the container to image reference tag is broken.
+            Scan the running containers, if the watchtower program has pulled
+            down a newer image then the container to image reference tag
+            is broken.
 
-            Detect these image tag link breaks and assume that means we have an update.
-            Looking through update tools and forums, it seems this is the way
-            all update tools work.
+            Detect these image tag link breaks and assume that means we have
+            an update. Looking through update tools and forums, it seems this
+            is the way all update tools work.
 
         Returns:
             True iff there is an update available.
         """
+
+        try:
+            response = (
+                host_connector.HostServicesConnector.get_system_update_status()
+            )
+            if response.current_op.find("IDLE") == -1:
+                return True
+        except host_connector.HostServicesException:
+            logging.exception("Get system update status call failed.")
+
         client = docker.from_env(timeout=300)
         for container in client.containers.list():
             if len(container.image.tags) == 0:
                 return True
         return False
 
-    def update_docker(self):
+    def _update_docker(self):
         """
             Sets off an update of all docker containers, using watchtower
 
@@ -1469,10 +1481,40 @@ class MoblabService(object):
         try:
             container.wait(timeout=600)
         except requests.exceptions.ReadTimeout:
+            logging.exception("Watchtower update raised an exception.")
             container.stop()
         finally:
             container.remove()
         return "Update finished."
+
+    def _update_system(self):
+        """
+            Initiates system update if it is available.
+        Returns:
+            An error message.
+        """
+        try:
+            response = (
+                host_connector.HostServicesConnector.install_system_update()
+            )
+            return response.error
+        except host_connector.HostServicesException:
+            logging.exception("Install system update raised an exception.")
+            return "Failed to install update."
+
+    def update_moblab(self):
+        """
+            Initiates a system update if available,
+            otherwise kicks docker images update.
+
+        Returns:
+            Update status string.
+        """
+        return_message = self._update_system()
+        # if a message was returned then reboot was not requested
+        if return_message:
+            return self._update_docker()
+        return "Updating system."
 
     def get_is_remote_agent_enabled(self):
         """
