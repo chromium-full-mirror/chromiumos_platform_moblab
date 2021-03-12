@@ -234,7 +234,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             pool_name = request.pool
             if pool_name == "":
                 pool_name = None
-            self.storage_qual_check_service.check_setup(pool_name, request.variation)
+            self.storage_qual_check_service.check_setup(
+                pool_name, request.variation
+            )
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)
             _context.set_details(str(ex))
@@ -1079,7 +1081,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
             UpdateMoblabResponse ( with a string result message ).
         """
-        message = self.service.update_docker()
+        message = self.service.update_moblab()
         response = moblabrpc_pb2.UpdateMoblabResponse(message=message)
         return response
 
