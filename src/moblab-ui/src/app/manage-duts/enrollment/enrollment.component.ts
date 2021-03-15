@@ -56,11 +56,30 @@ export class EnrollmentComponent {
     );
   }
 
+  reverifySelected() {
+    this.dutsTableRef.startLoadingSpinner();
+    const hostnames: string[] = this.dutsTableRef.getSelectedDutHostnames();
+    this.moblabGrpcService.reverifyDuts(
+      () => {
+        this.dutsTableRef.getConnectedDuts();
+      },
+      (msg: string) => {
+        this.reportError(msg);
+        this.dutsTableRef.stopLoadingSpinner();
+      },
+      hostnames
+    );
+  }
+
   reportError(dialogue: string) {
     this.snackBar.open(dialogue, '', {
       duration: 5000,
       verticalPosition: 'top',
     });
+  }
+
+  hasSelectedDuts(): boolean {
+    return this.dutsTableRef?.selection.selected.length > 0;
   }
 
   provisionDuts() {

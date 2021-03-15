@@ -1,10 +1,17 @@
 #duts-refresh-button {
-  float:right;
+  float: right;
+}
+
+#duts-selected-count {
+  float: left;
+  margin-left: 16px;
+  margin-top: 16px;
+  font-size: 12px;
 }
 
 #duts-refresh-button-wrapper {
-  width:100%;
-  display:inline-block;
+  width: 100%;
+  display: inline-block;
 }
 
 #loading-overlay {
@@ -87,6 +94,10 @@ th.mat-header-cell {
 }
 
 /* fix select column size */
-.select-column {
+.select-column-header {
   width: 30px;
+}
+
+.select-column {
+  padding-left: 0px;
 }

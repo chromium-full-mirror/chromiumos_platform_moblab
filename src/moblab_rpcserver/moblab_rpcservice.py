@@ -893,12 +893,14 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             Sets of reverify job on specified DUT.
         Args:
             request: ReverifyHostRequest with parameter:
-                dut_hostname(string)
+                dut_hostnames(string[])
             _context: grpc.server.Context
         Returns:
             ReverifyHostResponse
         """
-        message = self.service.reverify_host(request.dut_hostname)
+        message = self.service.reverify_host(
+            [hostname for hostname in request.dut_hostnames]
+        )
         response = moblabrpc_pb2.ReverifyHostResponse(message=message)
         return response
 

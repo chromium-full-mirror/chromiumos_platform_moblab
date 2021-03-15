@@ -98,7 +98,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   }
 
   reverifyDut() {
-    this.moblabGrpcService.reverifyDut(
+    this.moblabGrpcService.reverifyDuts(
       (message: string) => {
         this.setOffPopup(
           'Set off reverify task on DUT, please refresh page for status.'
@@ -107,7 +107,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       errorMsg => {
         this.setOffPopup(errorMsg);
       },
-      this.dutQuery.value
+      [this.dutQuery.value]
     );
   }
 
