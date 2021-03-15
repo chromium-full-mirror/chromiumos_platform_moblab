@@ -1,15 +1,21 @@
 <mat-card>
-  <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="25px">
+  <div fxLayout="row" fxLayoutAlign="start stretch" fxLayoutGap="25px">
     <div>
-      <button mat-raised-button color="primary" (click)="enrollSelected()">
+      <button mat-raised-button color="primary" (click)="enrollSelected()" [disabled]="!hasSelectedDuts()">
         Enroll Selected
       </button>
     </div>
     <div>
-      <button mat-raised-button (click)="unenrollSelected()">
+      <button mat-raised-button (click)="unenrollSelected()" [disabled]="!hasSelectedDuts()">
         Unenroll Selected
       </button>
     </div>
+    <div>
+      <button mat-raised-button (click)="reverifySelected()" [disabled]="!hasSelectedDuts()">
+        Reverify Selected
+      </button>
+    </div>
+    <mat-divider [vertical]="true"></mat-divider>
     <div>
       <button mat-raised-button (click)="provisionDuts()">
         Provision DUTs

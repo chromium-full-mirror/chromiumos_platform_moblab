@@ -973,13 +973,13 @@ export class MoblabGrpcService {
     );
   }
 
-  reverifyDut(
+  reverifyDuts(
     callback: (message: string) => void,
     errorHandlingCallback: (errorMsg: string) => void,
-    dut_hostname: string
+    dut_hostnames: string[]
   ) {
     const request = new ReverifyHostRequest();
-    request.setDutHostname(dut_hostname);
+    request.setDutHostnamesList(dut_hostnames);
     this.moblabRpcService.reverify_host(
       request,
       {},

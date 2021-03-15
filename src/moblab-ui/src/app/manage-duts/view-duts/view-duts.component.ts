@@ -33,7 +33,7 @@ export class ViewDutsComponent implements OnInit {
 
   loading = false;
 
-  selectOptions: string[] = ['All Enrolled', 'All Unenrolled'];
+  selectOptions: string[] = ['All Enrolled', 'All Unenrolled', 'Repair Failed'];
 
   filterLabels = true;
 
@@ -72,6 +72,7 @@ export class ViewDutsComponent implements OnInit {
       (connectedDuts: ConnectedDutInfo[]) => {
         this.loading = false;
         this.assignDuts(connectedDuts);
+        this.unselectAll();
       }
     );
   }
@@ -140,6 +141,14 @@ export class ViewDutsComponent implements OnInit {
     } else if (event.selection === this.selectOptions[1]) {
       this.duts.data.filter(row => {
         if (!row.getIsEnrolled()) {
+          this.selection.select(row);
+        } else {
+          this.selection.deselect(row);
+        }
+      });
+    } else if (event.selection === this.selectOptions[2]) {
+      this.duts.data.filter(row => {
+        if (row.getStatus() === 'Repair Failed') {
           this.selection.select(row);
         } else {
           this.selection.deselect(row);

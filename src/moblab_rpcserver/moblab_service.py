@@ -1210,17 +1210,15 @@ class MoblabService(object):
         """
         return self.remove_label_from_duts(dut_hostnames, "pool:" + pool)
 
-    def reverify_host(self, dut_hostname):
-        """Starts repair run on given DUT hostname.
+    def reverify_host(self, dut_hostnames):
+        """Starts repair run on given DUTs hostnames.
 
         Args:
-            dut_hostname(string): String hostname (ex. IP address)
+            dut_hostnames(string[]): A list of strings representing the
+                hostnames of the DUT's to be targeted.
         """
-        dut_id = self._find_dut_id_given_ip(dut_hostname)
-        if dut_id:
-            self.afe_connector.reverify_host(dut_id)
-
-        return "Successfully set off reverify on {}".format(dut_hostname)
+        self.afe_connector.reverify_host(dut_hostnames)
+        return "Successfully set off reverify on {}".format(dut_hostnames)
 
     def repair_host(self, dut_hostname):
         """Starts repair run on given DUT hostname.

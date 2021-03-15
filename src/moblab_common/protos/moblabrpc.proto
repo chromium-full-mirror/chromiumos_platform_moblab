@@ -539,7 +539,7 @@ message GetDutTasksResponse {
 
 // NEXT_TAG = 2
 message ReverifyHostRequest {
-  string dut_hostname = 1;
+  repeated string dut_hostnames = 1;
 }
 
 // NEXT_TAG = 2
