@@ -59,7 +59,7 @@ class ResultUploadStatusConnector:
 
     def get_jobs_upload_status(self, job_id_list):
         """Returns the list of upload statuses for requested jobs"""
-        upload_status = {job_id: UploadResultState() for job_id in job_id_list}
+        upload_status = {}
         if job_id_list:
             session = self.db.get_session()
             results = (
@@ -69,10 +69,11 @@ class ResultUploadStatusConnector:
             )
             session.close()
             for r in results:
-                state = upload_status[r.job_id]
+                state = UploadResultState()
                 state.status = Status[r.status].name
                 state.attempt_number = r.upload_attempt_number
                 state.last_falure_reason = r.last_attempt_failure_reason
+                upload_status[r.job_id] = state
 
         return upload_status
 
