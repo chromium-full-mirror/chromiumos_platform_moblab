@@ -20,6 +20,7 @@ from moblab_common import config_connector
 from moblab_common import moblabrpc_connector
 from moblab_common import result_upload_status_connector
 from moblab_common.result_upload_status_connector import Status as UploadStatus
+from moblab_common.proto import moblabrpc_pb2
 
 import gs_api_wrapper
 import processing_step
@@ -179,7 +180,11 @@ async def _run_upload_status_backfill_migration(registry, status_checker):
 
     # 1. If exist at least one record skip migration;
     _LOGGER.info("Checking whether job upload status backfill is needed.")
-    if any(job.upload_state.status != "" for job in jobs):
+    if not jobs or any(
+        job.upload_state.status
+        != moblabrpc_pb2.Job.UploadStatus.UPLOAD_STATUS_UNKNOWN
+        for job in jobs
+    ):
         return
 
     _LOGGER.info("Migrating jobs upload stutuses to moblab db.")
