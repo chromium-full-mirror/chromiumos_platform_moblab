@@ -1,19 +1,17 @@
 <div fxLayout="column">
-  <mat-toolbar fxFlex="100" color="primary" opened="true" #topToolbar>
-    <div class="toolbar-button">
-      <button mat-button (click)="mainSideNav.toggle()">
+  <mat-toolbar fxLayout="row" color="primary" opened="true" #topToolbar>
+    <div fxFlex fxLayout="row" fxLayoutAlign="start center">
+      <button class="menu-button" mat-button (click)="mainSideNav.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
-    </div>
-    <div fxLayout="row" fxLayoutAlign="start center" fxFlex="80">
-      <div class="toolbar-icon" fxFlex="5">
+      <div class="toolbar-icon">
         <mat-icon class="moblab-logo-icon" svgIcon="moblab"></mat-icon>
       </div>
-      <div class="toolbar-title" fxFlex="8">
+      <div class="toolbar-title">
         Moblab
       </div>
     </div>
-    <div>
+    <div fxFlex="nogrow">
       <div *ngIf="this.isPageInformationEnabled()" class="toolbar-item" fxFlex="40">
         Page Information Here
         <mat-icon class="problem-icon">report_problem</mat-icon>
