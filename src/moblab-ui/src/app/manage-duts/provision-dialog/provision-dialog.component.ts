@@ -69,7 +69,7 @@ export class ProvisionDialogComponent implements AfterViewInit {
       pool = "";
     }
     this.build.pool = pool;
-    const chosenDut = this.data.duts.find(d => !pool || pool in d.getPoolsList());
+    const chosenDut = this.data.duts.find(d => !pool || d.getPoolsList()?.includes(pool));
     this.model = chosenDut.getModel();
     this.board = chosenDut.getBuildTarget();
     this.loadMilestones();
