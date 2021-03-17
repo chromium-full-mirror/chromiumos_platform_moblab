@@ -391,7 +391,7 @@ def _write_bug_id(test_dir, bug_id):
             for line in keyval_raw.readlines():
                 match = re.match(r'bug_id=(\d+)', line)
                 if match:
-                    old_bug_id = match.group(1)
+                    old_bug_id = _valid_bug_id(match.group(1))
                 else:
                     new_keyval.append(line)
     except IOError as e:
@@ -401,7 +401,7 @@ def _write_bug_id(test_dir, bug_id):
 
     if old_bug_id:
         if old_bug_id == bug_id:
-            return False
+            return True
         overwrite_bug_id = _confirm_option('Would you like to overwrite bug id '
                                            '%s with new bug id %s?' %
                                            (old_bug_id, bug_id))
