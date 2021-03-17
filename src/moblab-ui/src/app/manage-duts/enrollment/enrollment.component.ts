@@ -95,7 +95,7 @@ export class EnrollmentComponent {
       if (result) {
         let duts = this.dutsTableRef.duts.data;
         if (result.pool) {
-          duts = duts.filter((value) => {return result.pool in value.getPoolsList();})
+          duts = duts.filter((dut) => dut.getPoolsList()?.includes(result.pool))
         }
         this.moblabGrpcService.provisionDuts(
           () => {
