@@ -35,7 +35,7 @@ class StorageQualCheckService(object):
                 pool.append(dut)
         return pool
 
-    def check_setup(self, pool_name, variation):
+    def check_setup(self, pool_name, variation=0):  # 0-VARIATION_NOT_SET :)
         """Tests the moblab's connected DUTs to see if the current
         configuration is valid for storage qual run.
         """
