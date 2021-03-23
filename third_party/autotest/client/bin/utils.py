@@ -1240,10 +1240,10 @@ class Crossystem(object):
 
     def init(self):
         self.cros_system_data = {}
-        f = io.BytesIO()
+        f = io.StringIO()
         self._client.run('crossystem', stdout_tee=f)
         f.seek(0)
-        text = f.read().encode('utf-8')
+        text = f.read()
         for line in text.splitlines():
             assignment_string = line.split('#')[0]
             if not assignment_string.count('='):
