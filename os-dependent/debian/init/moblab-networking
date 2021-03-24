@@ -42,7 +42,7 @@ case "$1" in
         brctl setfd ${DHCPD_IFACE} 0
         ifconfig ${DHCPD_IFACE} ${SERVER_ADDRESS} netmask ${SERVER_NETMASK} up
 
-        docker run --rm --name dhcp -v leases:/var/lib/misc -d --restart always --cap-add=NET_ADMIN --network host gcr.io/chromeos-partner-moblab/moblab-dhcp:release --interface ${DHCPD_IFACE} --bind-interfaces
+        docker run --name dhcp -v leases:/var/lib/misc -d --restart always --cap-add=NET_ADMIN --network host gcr.io/chromeos-partner-moblab/moblab-dhcp:release --interface ${DHCPD_IFACE} --bind-interfaces
 
         brctl addif ${DHCPD_IFACE} ${INT_IFACE}
         iptables -w -t nat -A POSTROUTING -o ${EXT_IFACE} -j MASQUERADE
