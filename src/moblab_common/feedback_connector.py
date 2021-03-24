@@ -50,7 +50,7 @@ class MoblabFeedbackConnector(object):
           URL is a direct link to the uploaded screenshot.
         """
         bucket = self.storage_client.bucket(self.moblab_bucket_name)
-        timestamp_str = str(datetime.utcnow()).split(".")[0]
+        timestamp_str = str(datetime.utcnow()).split(".")[0].replace(" ", "_")
         feedback_dir_path = "/".join(
             [
                 FeedbackPath.FEEDBACK,
@@ -87,11 +87,11 @@ class MoblabFeedbackConnector(object):
             + self.moblab_bucket_name
             + "/"
             + FeedbackPath.FEEDBACK
-            + "%2F"
+            + "/"
             + moblab_info.get_serial_number()
-            + "%2F"
-            + timestamp_str.replace(" ", "%20")
-            + "%2F"
+            + "/"
+            + timestamp_str
+            + "/"
             + FeedbackPath.SCREENSHOT
         )
 
