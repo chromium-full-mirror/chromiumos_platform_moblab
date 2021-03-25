@@ -114,7 +114,7 @@ export class RunAnySuiteComponent
         this.onSuiteStarted();
       },
       (err, _) => {
-        this.setOffPopup(err.message);
+        this.onRunSuiteFailed(err.message);
         this.runSuiteButton.enable();
       },
       this.suiteName,

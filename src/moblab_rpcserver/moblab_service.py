@@ -503,9 +503,7 @@ class MoblabService(object):
         )
 
         if not suite_job_id:
-            raise MoblabRpcError(
-                "Encountered error starting suite\n{}".format(error)
-            )
+            raise MoblabRpcError("Encountered error starting suite")
 
         return "Suite started (suite job ID: {})".format(suite_job_id)
 

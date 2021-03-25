@@ -103,7 +103,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
-    def run_suite(self, request, _context):
+    def run_suite(self, request, context):
         """Generic run suite method.
 
         Accepts suite as a custom argument, allows for run of any suite but
@@ -116,16 +116,21 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
           RunSuiteResponse object with a string result message.
         """
-        return moblabrpc_pb2.RunSuiteResponse(
-            message=self.service.run_suite(
-                request.build_target,
-                request.model,
-                request.milestone,
-                request.build_version,
-                request.suite,
-                pool=request.pool,
+        try:
+            return moblabrpc_pb2.RunSuiteResponse(
+                message=self.service.run_suite(
+                    request.build_target,
+                    request.model,
+                    request.milestone,
+                    request.build_version,
+                    request.suite,
+                    pool=request.pool,
+                )
             )
-        )
+        except moblab_service.MoblabRpcError as ex:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(ex))
+            return moblabrpc_pb2.RunSuiteResponse()
 
     def provision_duts(self, request, context):
         """Starts provision test suite.
