@@ -68,7 +68,11 @@ def _query_job_finished_time(id_):
                 "Failed to query AFE job {}".format(id_)
             )
         result = result[0]
-        hqes = afe.get_host_queue_entries(id_)
+        hqes, error = afe.get_host_queue_entries(id_)
+        if error or not hqes:
+            _LOGGER.error("Error querying HQEs for job %s: %s", id_, error)
+            return None
+
         running_hqes = [hqe for hqe in hqes if not hqe.get("complete")]
         if running_hqes:  # Test job is still running.
             _LOGGER.debug("Determined the HQE for job %s are running", id_)
@@ -88,10 +92,9 @@ def _query_job_finished_time(id_):
         if hqes_finished_time:
             return max(hqes_finished_time)
         else:
-            # The value of 'finished_on' for failed/aborted HQE is NULL. So use
-            # the job creating time instead.
-            # TODO: figure out why do we get here when job is still running
-            _LOGGER.debug(
+            # The value of 'finished_on' for failed/aborted HQE is NULL.
+            # Thus use the job creating time instead.
+            _LOGGER.info(
                 "Determined that all HQEs (%s) are completed.\n"
                 "No finished_on time, using job created_on time.\n"
                 "Job summary: %s\n"
@@ -100,17 +103,17 @@ def _query_job_finished_time(id_):
                 result,
                 hqes,
             )
-            return None
-
-            # create_on_str = result.get("created_on")
-            # if create_on_str:
-            #    created_time = datetime.datetime.strptime(
-            #        create_on_str, _TIMESTAMP_FORMAT
-            #    )
-            #    return created_time.replace(tzinfo=datetime.timezone.utc)
-            # else:
-            #    _LOGGER.debug("No job finish time job id %s", id_)
-            #    return None
+            create_on_str = result.get("created_on")
+            if create_on_str:
+                created_time = datetime.datetime.strptime(
+                    create_on_str, _TIMESTAMP_FORMAT
+                )
+                return created_time.replace(tzinfo=datetime.timezone.utc)
+            else:
+                _LOGGER.warn(
+                    "No job finish or creation time for job id %s", id_
+                )
+                return None
 
     return func
 

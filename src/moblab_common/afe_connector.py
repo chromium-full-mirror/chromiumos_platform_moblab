@@ -434,7 +434,10 @@ class AFEConnector(object):
             params["host__id"] = host_id
 
         response = self.send_rpc_command("get_host_queue_entries", params)
-        return self.decode_response(response, "result")
+        result = self.decode_response(response, "result")
+        error = self.decode_response(response, "error")
+
+        return result, error
 
     def run_suite(
         self,

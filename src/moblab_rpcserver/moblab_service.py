@@ -868,7 +868,7 @@ class MoblabService(object):
                     )
                 )
                 return
-            hqes = self.afe_connector.get_host_queue_entries(
+            hqes, _ = self.afe_connector.get_host_queue_entries(
                 host_id=dut_id,
                 query_start=query_start,
                 query_limit=query_limit,
@@ -992,7 +992,8 @@ class MoblabService(object):
         return self.afe_connector.get_job_history(job_id)
 
     def get_associated_duts(self, job_id):
-        return self.afe_connector.get_host_queue_entries(job_id=job_id)
+        hqes, _ = self.afe_connector.get_host_queue_entries(job_id=job_id)
+        return hqes
 
     def get_num_dut_tasks(self, ip, start_time_gt, end_time_lt):
         """
