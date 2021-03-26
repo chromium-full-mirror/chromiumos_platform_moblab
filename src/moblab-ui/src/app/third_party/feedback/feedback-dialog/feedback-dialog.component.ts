@@ -39,7 +39,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
   public showToolbar = false;
   public vars: object = {};
   public feedback = new Feedback();
-  public contactEmailForm = new FormControl();
+  public emailFormControl = new FormControl();
   public includeScreenshot = true;
   public showSpinner = true;
   public screenshotEle: HTMLElement;
@@ -119,6 +119,10 @@ export class FeedbackDialogComponent implements AfterViewInit {
       }
     });
     this.feedbackService.showBackDrop();
+  }
+
+  public isInvalid() {
+    return !this.feedback.contactEmail || this.emailFormControl.invalid;
   }
 
   public expandDrawingBoard() {
