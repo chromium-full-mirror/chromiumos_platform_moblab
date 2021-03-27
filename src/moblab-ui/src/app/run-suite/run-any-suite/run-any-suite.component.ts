@@ -38,6 +38,7 @@ export class RunAnySuiteComponent
     'labqual',
     'hardware_thermalqual_fast',
     'hardware_thermalqual_full',
+    'performance_cuj',
   ];
 
   public hideCustomInput = true;
