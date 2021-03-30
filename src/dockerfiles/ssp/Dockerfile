@@ -8,7 +8,15 @@ ARG LABEL=autopush
 
 ######################################################################
 
-FROM ${REGISTRY_URI}/chromite:${LABEL} as chromite
+FROM ${BASE_REGISTRY_URI}/alpine/git as chromite
+
+WORKDIR /
+
+RUN git clone https://chromium.googlesource.com/chromiumos/chromite
+WORKDIR /chromite
+RUN git fetch
+RUN git reset --hard 1b8d31ed6855efd3c47bb55e83db03eefd80715a
+RUN rm -rf .git
 
 ###############################################################################
 
