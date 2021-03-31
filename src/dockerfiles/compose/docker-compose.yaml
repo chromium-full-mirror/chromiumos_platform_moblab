@@ -99,8 +99,6 @@ services:
     hostname: autotest
     restart: unless-stopped
     user: moblab
-    ports:
-      - 6010:8888
 
     volumes:
       - logs:/var/log/moblab

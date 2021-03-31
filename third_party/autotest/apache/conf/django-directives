@@ -37,10 +37,10 @@ RewriteRule ^/afe/server/admin - [R=404]
     RewriteRule ^/(afe|new_tko)/server(.*) /usr/local/autotest/frontend/frontend.wsgi [H=wsgi-script]
 
     RewriteCond /usr/lib/python3.7/site-packages/autotest/frontend/frontend.wsgi -f
-    RewriteRule ^/(afe|new_tko)/server(.*) /usr/lib/python3.7/site-packages/autotest/frontend/frontend.wsgi [H=wsgi-script]
+    RewriteRule ^/(afe)/server(.*) /usr/lib/python3.7/site-packages/autotest/frontend/frontend.wsgi [H=wsgi-script]
 
 
-    <LocationMatch "/(afe|new_tko)/server(.*)">
+    <LocationMatch "/(afe)/server(.*)">
        Options +ExecCGI
     </LocationMatch>
 
