@@ -71,6 +71,7 @@ export class StorageQualComponent
     this.variationSelection = newVariation
       ? Number(RunStorageQualificationSuiteRequest.Variation[newVariation])
       : 0;
+    this.validateStorageQualSetup();
   }
 
   /** Method is triggered when build version form no longer has a valid
@@ -107,9 +108,17 @@ export class StorageQualComponent
     );
   }
 
-  validateStorageQualSetup(pool: string) {
+  validateStorageQualSetup() {
     this.storageQualCheckError = "";
     this.isStorageQualSetupValid = false;
+    this.inputChanged();
+
+    var variationsToCheck = [RunStorageQualificationSuiteRequest.Variation.VARIATION_NOT_SET, RunStorageQualificationSuiteRequest.Variation.QUICK];
+    if (!variationsToCheck.includes(this.variationSelection)) {
+      this.isStorageQualSetupValid = true;
+      this.inputChanged();
+      return;
+    }
     this.moblabGrpcService.validateStorageQualSetup(
       () => {
         this.isStorageQualSetupValid = true;
@@ -119,7 +128,7 @@ export class StorageQualComponent
         this.storageQualCheckError = msg;
         this.inputChanged();
       },
-      pool
+      this.selectedPool
     );
   }
 }

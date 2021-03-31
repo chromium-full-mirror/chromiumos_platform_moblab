@@ -1,8 +1,7 @@
 <mat-card>
   <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"
-    (allRequiredFieldsSet)="validateStorageQualSetup(selectedPool)"
-    (buildVersionUnselected)="onBuildVersionUnselected()" (formLoading)="onFormLoading($event.message)"
-    (formLoaded)="onFormLoaded()">
+    (allRequiredFieldsSet)="validateStorageQualSetup()" (buildVersionUnselected)="onBuildVersionUnselected()"
+    (formLoading)="onFormLoading($event.message)" (formLoaded)="onFormLoaded()">
   </app-build-select-forms>
 
   <div class=storage-check-validatrion>
