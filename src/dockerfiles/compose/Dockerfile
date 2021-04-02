@@ -13,26 +13,26 @@ ARG SSH_PORT
 
 # By convention if specific version is not set use ... hm
 ARG BUILD_VERSION
-ARG DB_VER=${BUILD_VERSION}
-ARG DB_INIT_VER=${BUILD_VERSION}
-ARG DB_SETUP_VER=${BUILD_VERSION}
-ARG DEVSERVER_VER=${BUILD_VERSION}
-ARG AUTOTEST_AFE_VER=${BUILD_VERSION}
-ARG AT_DBSETUP_VER=${BUILD_VERSION}
-ARG AT_MONITORDB_VER=${BUILD_VERSION}
-ARG AT_HOSTSCHEDULER_VER=${BUILD_VERSION}
-ARG AT_JOBABORTER_VER=${BUILD_VERSION}
-ARG MOBLAB_UI_VER=${BUILD_VERSION}
-ARG MOBLAB_RPCSERVER_VER=${BUILD_VERSION}
-ARG REMOTE_AGENT_VER=${BUILD_VERSION}
-ARG OFFLOADER_VER=${BUILD_VERSION}
-ARG REMOTE_SCHEDULER_VER=${BUILD_VERSION}
-ARG REMOTE_ACCESS_VER=${BUILD_VERSION}
-ARG ENVOYPROXY_VER=${BUILD_VERSION}
-ARG WATCHTOWER_VER=${BUILD_VERSION}
-ARG MOBMONITOR_VER=${BUILD_VERSION}
-ARG DNS_VER=${BUILD_VERSION}
-ARG LOGROTATE_VER=${BUILD_VERSION}
+ARG DB_VER
+ARG DB_INIT_VER
+ARG DB_SETUP_VER
+ARG DEVSERVER_VER
+ARG AUTOTEST_AFE_VER
+ARG AT_DBSETUP_VER
+ARG AT_MONITORDB_VER
+ARG AT_HOSTSCHEDULER_VER
+ARG AT_JOBABORTER_VER
+ARG MOBLAB_UI_VER
+ARG MOBLAB_RPCSERVER_VER
+ARG REMOTE_AGENT_VER
+ARG OFFLOADER_VER
+ARG REMOTE_SCHEDULER_VER
+ARG REMOTE_ACCESS_VER
+ARG ENVOYPROXY_VER
+ARG WATCHTOWER_VER
+ARG MOBMONITOR_VER
+ARG DNS_VER
+ARG LOGROTATE_VER
 
 
 ENV LABEL="${LABEL}"
@@ -51,26 +51,26 @@ RUN chmod u+x compose_startup.sh
 COPY override_service_version.sh .
 RUN chmod u+x override_service_version.sh
 
-RUN ./override_service_version.sh DB ${DB_VER}
-RUN ./override_service_version.sh DB_INIT ${DB_INIT_VER}
-RUN ./override_service_version.sh DB_SETUP ${DB_SETUP_VER}
-RUN ./override_service_version.sh DEVSERVER ${DEVSERVER_VER}
-RUN ./override_service_version.sh AUTOTEST_AFE ${AUTOTEST_AFE_VER}
-RUN ./override_service_version.sh AT_DBSETUP ${AT_DBSETUP_VER}
-RUN ./override_service_version.sh AT_MONITORDB ${AT_MONITORDB_VER}
-RUN ./override_service_version.sh AT_HOSTSCHEDULER ${AT_HOSTSCHEDULER_VER}
-RUN ./override_service_version.sh AT_JOBABORTER ${AT_JOBABORTER_VER}
-RUN ./override_service_version.sh MOBLAB_UI ${MOBLAB_UI_VER}
-RUN ./override_service_version.sh MOBLAB_RPCSERVER ${MOBLAB_RPCSERVER_VER}
-RUN ./override_service_version.sh REMOTE_AGENT ${REMOTE_AGENT_VER}
-RUN ./override_service_version.sh OFFLOADER ${OFFLOADER_VER}
-RUN ./override_service_version.sh REMOTE_SCHEDULER ${REMOTE_SCHEDULER_VER}
-RUN ./override_service_version.sh REMOTE_ACCESS ${REMOTE_ACCESS_VER}
-RUN ./override_service_version.sh ENVOYPROXY ${ENVOYPROXY_VER}
-RUN ./override_service_version.sh WATCHTOWER ${WATCHTOWER_VER}
-RUN ./override_service_version.sh MOBMONITOR ${MOBMONITOR_VER}
-RUN ./override_service_version.sh DNS ${DNS_VER}
-RUN ./override_service_version.sh LOGROTATE ${LOGROTATE_VER}
+RUN ./override_service_version.sh DB ${DB_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh DB_INIT ${DB_INIT_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh DB_SETUP ${DB_SETUP_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh DEVSERVER ${DEVSERVER_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh AUTOTEST_AFE ${AUTOTEST_AFE_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh AT_DBSETUP ${AT_DBSETUP_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh AT_MONITORDB ${AT_MONITORDB_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh AT_HOSTSCHEDULER ${AT_HOSTSCHEDULER_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh AT_JOBABORTER ${AT_JOBABORTER_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh MOBLAB_UI ${MOBLAB_UI_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh MOBLAB_RPCSERVER ${MOBLAB_RPCSERVER_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh REMOTE_AGENT ${REMOTE_AGENT_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh OFFLOADER ${OFFLOADER_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh REMOTE_SCHEDULER ${REMOTE_SCHEDULER_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh REMOTE_ACCESS ${REMOTE_ACCESS_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh ENVOYPROXY ${ENVOYPROXY_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh WATCHTOWER ${WATCHTOWER_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh MOBMONITOR ${MOBMONITOR_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh DNS ${DNS_VER:-${BUILD_VERSION}}
+RUN ./override_service_version.sh LOGROTATE ${LOGROTATE_VER:-${BUILD_VERSION}}
 
 
 ENTRYPOINT ["/compose_startup.sh"]
