@@ -1,7 +1,7 @@
 substitutions:
   _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
   _REGISTRY_URI: gcr.io/chromeos-partner-moblab
-  _LABEL: beta
+  __LABEL: beta
   _WATCHTOWER_CMD: "--interval 3600 --monitor-only --include-restarting"
   _SSH_PORT: "22"
   
@@ -115,7 +115,7 @@ steps:
         "-f",
         "/workspace/src/dockerfiles/utilities/Dockerfile.protoc",
         "-t",
-        "${_REGISTRY_URI}/protoc:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/protoc:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/utilities/",
       ]
     env:
@@ -131,7 +131,7 @@ steps:
         "-f",
         "/workspace/src/dockerfiles/utilities/Dockerfile.chromite",
         "-t",
-        "${_REGISTRY_URI}/chromite:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/chromite:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/utilities/",
       ]
     env:
@@ -140,14 +140,14 @@ steps:
       - "alpine-git"
 
   - id: protogen
-    name: "${_REGISTRY_URI}/protoc:${_BUILD_VERSION}"
+    name: "${_REGISTRY_URI}/protoc:${__BUILD_VERSION}"
     entrypoint: "bash"
     args: ["/workspace/src/moblab_common/protos/protogen.sh"]
     waitFor:
       - "protoc"
 
   - id: protogen-ui
-    name: "${_REGISTRY_URI}/protoc:${_BUILD_VERSION}"
+    name: "${_REGISTRY_URI}/protoc:${__BUILD_VERSION}"
     entrypoint: "bash"
     args: ["/workspace/src/moblab-ui/protogen_ui.sh"]
     waitFor:
@@ -161,11 +161,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/moblab_common/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab_common:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab_common:${__BUILD_VERSION}",
         "/workspace/",
       ]
     env:
@@ -184,11 +184,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/moblab_common/Dockerfile.dbsetup",
         "-t",
-        "${_REGISTRY_URI}/moblab-db-setup:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-db-setup:${__BUILD_VERSION}",
         "/workspace/src/",
       ]
     env:
@@ -204,11 +204,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/autotest/Dockerfile.lucifer",
         "-t",
-        "${_REGISTRY_URI}/moblab-autotest-lucifer:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-autotest-lucifer:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/autotest/",
       ]
     waitFor:
@@ -226,11 +226,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/autotest/Dockerfile.base",
         "-t",
-        "${_REGISTRY_URI}/moblab-autotest-base:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-autotest-base:${__BUILD_VERSION}",
         "/workspace/",
       ]
     waitFor:
@@ -251,11 +251,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/autotest/Dockerfile.afe",
         "-t",
-        "${_REGISTRY_URI}/moblab-autotest-afe:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-autotest-afe:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/autotest",
       ]
     waitFor:
@@ -271,11 +271,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/autotest/Dockerfile.dbsetup",
         "-t",
-        "${_REGISTRY_URI}/moblab-autotest-dbsetup:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-autotest-dbsetup:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/autotest",
       ]
     waitFor:
@@ -291,11 +291,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/autotest/Dockerfile.monitor_db",
         "-t",
-        "${_REGISTRY_URI}/moblab-autotest-monitor_db:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-autotest-monitor_db:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/autotest",
       ]
     waitFor:
@@ -313,11 +313,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/autotest/Dockerfile.hostscheduler",
         "-t",
-        "${_REGISTRY_URI}/moblab-autotest-host:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-autotest-host:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/autotest",
       ]
     waitFor:
@@ -333,11 +333,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/autotest/Dockerfile.job_aborter",
         "-t",
-        "${_REGISTRY_URI}/moblab-autotest-aborter:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-autotest-aborter:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/autotest",
       ]
     waitFor:
@@ -354,11 +354,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/db/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-db:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-db:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/db",
       ]
     env:
@@ -374,11 +374,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/db/Dockerfile.db_init",
         "-t",
-        "${_REGISTRY_URI}/moblab-db-init:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-db-init:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/db",
       ]
     env:
@@ -394,11 +394,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/devserver/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/devserver:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/devserver:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/devserver",
       ]
     env:
@@ -416,11 +416,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/ui/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-ui:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-ui:${__BUILD_VERSION}",
         "/workspace/src/",
       ]
     waitFor:
@@ -438,11 +438,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/ssp/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-ssp:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-ssp:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/ssp",
       ]
     env:
@@ -460,11 +460,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/offloader/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-offloader:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-offloader:${__BUILD_VERSION}",
         "/workspace/",
       ]
     waitFor:
@@ -483,11 +483,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/envoy/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/envoy-proxy:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/envoy-proxy:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/envoy",
       ]
     env:
@@ -503,11 +503,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/remote_agent/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-remote-agent:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-remote-agent:${__BUILD_VERSION}",
         "/workspace/",
       ]
     env:
@@ -525,11 +525,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/remote-scheduler/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-remote-scheduler:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-remote-scheduler:${__BUILD_VERSION}",
         "/workspace/",
       ]
     waitFor:
@@ -547,11 +547,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/rpcserver/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-rpcserver:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-rpcserver:${__BUILD_VERSION}",
         "/workspace/",
       ]
     waitFor:
@@ -567,10 +567,10 @@ steps:
       [
         "build",
         "--build-arg", "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg", "LABEL=${_BUILD_VERSION}",
+        "--build-arg", "LABEL=${__BUILD_VERSION}",
         "--build-arg", "SSH_PORT=${_SSH_PORT}",
 
-        "--build-arg", "BUILD_VERSION=${_BUILD_VERSION}",
+        "--build-arg", "BUILD_VERSION=${__BUILD_VERSION}",
         "--build-arg", "DB_VER=${_DB}",
         "--build-arg", "DB_INIT_VER=${_DB_INIT}",
         "--build-arg", "DB_SETUP_VER=${_DB_SETUP}",
@@ -592,11 +592,11 @@ steps:
         "--build-arg", "DNS_VER=${_DNS}",
         "--build-arg", "LOGROTATE_VER=${_LOGROTATE}",
 
-        "--label=version=${_BUILD_VERSION}",
+        "--label=version=${__BUILD_VERSION}",
 
         "-f", "/workspace/src/dockerfiles/compose/Dockerfile",
-        "-t", "${_REGISTRY_URI}/moblab-compose:${_BUILD_VERSION}",
-        "-t", "${_REGISTRY_URI}/moblab-compose:${_LABEL}",
+        "-t", "${_REGISTRY_URI}/moblab-compose:${__BUILD_VERSION}",
+        "-t", "${_REGISTRY_URI}/moblab-compose:${__LABEL}",
 
         "/workspace/src/dockerfiles/compose",
       ]
@@ -614,11 +614,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/mobmonitor/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/mobmonitor:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/mobmonitor:${__BUILD_VERSION}",
         "/workspace/",
       ]
     env:
@@ -636,11 +636,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/dns/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/moblab-dns:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/moblab-dns:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/dns",
       ]
     env:
@@ -656,11 +656,11 @@ steps:
         "--build-arg",
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
-        "LABEL=${_BUILD_VERSION}",
+        "LABEL=${__BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/remote_access/Dockerfile",
         "-t",
-        "${_REGISTRY_URI}/remote_access:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/remote_access:${__BUILD_VERSION}",
         "/workspace/",
       ]
     env:
@@ -679,7 +679,7 @@ steps:
         "-f",
         "/workspace/src/dockerfiles/utilities/Dockerfile.logrotate",
         "-t",
-        "${_REGISTRY_URI}/logrotate:${_BUILD_VERSION}",
+        "${_REGISTRY_URI}/logrotate:${__BUILD_VERSION}",
         "/workspace/src/dockerfiles/utilities/",
       ]
     env:
@@ -689,33 +689,33 @@ steps:
 
 images:
   [
-    "${_REGISTRY_URI}/protoc:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-autotest-lucifer:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-autotest-base:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-autotest-dbsetup:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-autotest-monitor_db:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-autotest-host:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-autotest-aborter:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-compose:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-compose:${_LABEL}",
-    "${_REGISTRY_URI}/moblab-rpcserver:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-remote-scheduler:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-remote-agent:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/remote_access:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/envoy-proxy:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-offloader:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-ui:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/devserver:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-db-init:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-db:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-db-setup:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-autotest-afe:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-ssp:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/mobmonitor:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab-dns:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/moblab_common:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/logrotate:${_BUILD_VERSION}",
-    "${_REGISTRY_URI}/chromite:${_BUILD_VERSION}",
+    "${_REGISTRY_URI}/protoc:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-autotest-lucifer:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-autotest-base:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-autotest-dbsetup:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-autotest-monitor_db:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-autotest-host:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-autotest-aborter:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-compose:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-compose:${__LABEL}",
+    "${_REGISTRY_URI}/moblab-rpcserver:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-remote-scheduler:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-remote-agent:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/remote_access:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/envoy-proxy:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-offloader:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-ui:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/devserver:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-db-init:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-db:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-db-setup:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-autotest-afe:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-ssp:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/mobmonitor:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab-dns:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/moblab_common:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/logrotate:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/chromite:${__BUILD_VERSION}",
   ]
 
 options:
