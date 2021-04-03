@@ -1,0 +1,20 @@
+# Copyright 2021 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+version: "3"
+services:
+
+  watchtower:
+    container_name: watchtower
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/watchtower:${WATCHTOWER:-release}
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    command: ${WATCHTOWER_CMD}
+
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 16384
