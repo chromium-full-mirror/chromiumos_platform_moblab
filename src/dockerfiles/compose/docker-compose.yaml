@@ -347,29 +347,7 @@ services:
 
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
-  ##############################################################################
-  watchtower:
-    container_name: watchtower
-    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/watchtower:${WATCHTOWER:-release}
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
 
-    command: ${WATCHTOWER_CMD}
-
-    networks:
-      - moblab
-
-    depends_on:
-      - dns
-
-    dns:
-      - 192.168.100.51
-
-    ulimits:
-      nofile:
-        soft: 10000
-        hard: 16384
   ##############################################################################
   offloader:
     container_name: offloader

@@ -5,11 +5,22 @@
 
 REGIPADDR=$(hostname -i | awk -F ' ' '{print $1}')
 docker volume create --name=leases
+
+REGISTRY_URI="${REGIPADDR}:5000"
+
+docker run
+    --rm \
+    --name watchtower \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -d \
+    ${REGISTRY_URI}/watchtower:${USER} \
+    --enable-lifecycle-hooks --interval 10 --include-restarting
+
 docker run \
     --rm \
     --name compose \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -e LABEL=${USER} \
-    -e REGISTRY_URI=${REGIPADDR}:5000 \
+    -e REGISTRY_URI=${REGISTRY_URI} \
     -e SSH_PORT=2222 \
-    $(hostname -i | awk -F ' ' '{print $1}'):5000/moblab-compose:${USER} up > /var/log/bootup/moblab-compose-up.log
+    ${REGISTRY_URI}/moblab-compose:${USER} up > /var/log/bootup/moblab-compose-up.log
