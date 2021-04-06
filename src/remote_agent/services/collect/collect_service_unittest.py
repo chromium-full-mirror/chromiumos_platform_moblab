@@ -26,7 +26,7 @@ class CollectServiceTest(TestCase, Constants):
     INSTALL_ID = "test_install_id"
     BUCKET_NAME = "test_bucket"
     MILESTONE = 80
-    BUILD_VERSION = "10000.1.0"
+    BUILD_VERSION = "R" + str(MILESTONE) + "-10000.1.0"
     CHANNEL = "dev-channel"
     DESCRIPTION = "test_description"
 
@@ -165,24 +165,27 @@ class CollectServiceTest(TestCase, Constants):
             log.output[0],
         )
 
-    def test_create_moblab_basic_message_proceeds_with_key_error(self):
+    def test_create_moblab_basic_message_proceeds_without_value(self):
+        self.test_collect_service.host_connector.get_ip.return_value = (
+            self.MOBLAB_IP
+        )
         del self.test_collect_service.moblab_version_info[
             "CHROMEOS_RELEASE_VERSION"
         ]
+        del self.test_collect_service.moblab_version_info[
+            "CHROMEOS_RELEASE_DESCRIPTION"
+        ]
+        del self.test_collect_service.moblab_version_info[
+            "CHROMEOS_RELEASE_TRACK"
+        ]
 
-        with self.assertLogs("collect_service", level="INFO") as log:
-            moblab = self.test_collect_service.create_moblab_basic_message()
+        moblab = self.test_collect_service.create_moblab_basic_message()
 
-        self.assertTrue(moblab.milestone, 84)
-        self.assertFalse(moblab.HasField("build_version"))
-        self.assertFalse(moblab.HasField("ip_address"))
-        self.assertFalse(moblab.HasField("channel"))
-        self.assertFalse(moblab.HasField("description"))
-        self.assertIn(
-            "Failed to get moblab version attributes for missing key: "
-            "'CHROMEOS_RELEASE_VERSION'",
-            log.output[0],
-        )
+        self.assertEqual(moblab.milestone, 0)
+        self.assertEqual(moblab.build_version, "No available OS version")
+        self.assertEqual(moblab.ip_address, self.MOBLAB_IP)
+        self.assertEqual(moblab.channel, "No available channel")
+        self.assertEqual(moblab.description, "No available description")
 
     def test_create_moblab_disk_message_succeeds(self):
         self.test_collect_service.host_connector.get_disk_info.return_value = (
@@ -404,8 +407,10 @@ class CollectServiceTest(TestCase, Constants):
             "hostname": self.DUT_IP_ADDRESS_1,
             "id": 1,
             "labels": ["board:octopus", "model:caroline"],
+            "status": 'Ready',
         }
-        device_two = {"hostname": self.DUT_IP_ADDRESS_2, "id": 2, "labels": []}
+        device_two = {"hostname": self.DUT_IP_ADDRESS_2, "id": 2, "labels": [],
+                      "status": 'Ready', }
         connected_devices = [device_one, device_two]
         dut_ids = [
             (self.DUT_IP_ADDRESS_2, self.DUT_ID_2),
@@ -419,31 +424,27 @@ class CollectServiceTest(TestCase, Constants):
 
         mock_key_attr.assert_called_once()
         calls = [
-            call(device_one, self.DUT_ID_1),
-            call(device_two, self.DUT_ID_2),
+            call(device_one, self.DUT_IP_ADDRESS_1),
+            call(device_two, self.DUT_IP_ADDRESS_2),
         ]
         dut_basic.assert_has_calls(calls, any_order=True)
         self.assertEqual(dut_basic.call_count, 2)
         dut_status.assert_not_called()
         self.assertEqual(len(duts), 2)
+        self.assertEqual(duts[0].moblab_dut_id, self.DUT_ID_2)
 
     @patch("collect_service.CollectService.collect_moblab_key_attributes")
-    def test_collect_attr_for_duts_fails_with_none_dut_ids(
+    def test_collect_attr_for_duts_fails_with_empty_dut_ids(
         self, mock_key_attr
     ):
         self._setup_for_test_collect_attr_for_duts(
             connected_devices=[{"hostname": self.DUT_IP_ADDRESS_1}],
-            dut_ids=None,
+            dut_ids=[],
         )
 
-        with self.assertLogs("collect_service", level="INFO") as log:
-            duts = self.test_collect_service.collect_attr_for_duts("DUT_BASIC")
+        duts = self.test_collect_service.collect_attr_for_duts("DUT_BASIC")
 
         self.assertEqual(duts, [])
-        self.assertIn(
-            "Dut serial numbers or connected devices list is empty/none.",
-            log.output[0],
-        )
 
     @patch("collect_service.CollectService.collect_moblab_key_attributes")
     def test_collect_attr_for_duts_fails_with_unknown_attribute_type(
@@ -454,7 +455,7 @@ class CollectServiceTest(TestCase, Constants):
             dut_ids=[(self.DUT_IP_ADDRESS_1, self.DUT_ID_1)],
         )
 
-        with self.assertLogs("collect_service", level="INFO") as log:
+        with self.assertLogs("collect_service", level="ERROR") as log:
             duts = self.test_collect_service.collect_attr_for_duts(
                 "UNKNOWN_TYPE_DUT"
             )
@@ -469,12 +470,15 @@ class CollectServiceTest(TestCase, Constants):
         self, mock_key_attr
     ):
         self._setup_for_test_collect_attr_for_duts(
-            connected_devices=[{"hostname": self.DUT_IP_ADDRESS_1}],
+            connected_devices=[
+                {"hostname": self.DUT_IP_ADDRESS_1, "status": '', }],
             dut_ids=[(self.DUT_IP_ADDRESS_2, self.DUT_ID_2)],
         )
 
         self.assertEqual(
-            self.test_collect_service.collect_attr_for_duts("DUT_STATUS"), []
+            self.test_collect_service.collect_attr_for_duts("DUT_STATUS")[
+                0].status,
+            collect_service.remoteagentrpc_pb2.DutStatus.DUT_STATUS_NOT_ENROLLED
         )
 
 
