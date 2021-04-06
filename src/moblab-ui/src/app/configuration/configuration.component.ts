@@ -31,7 +31,7 @@ class CloudConfiguration {
     public botoKeyID: string = '',
     public botoKeySecret: string = '',
     public bucketURL: string = ''
-  ) { }
+  ) {}
 }
 
 @Component({
@@ -63,7 +63,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     validators: [Validators.required, gsURLValidator],
   });
 
-  userCrOSVersionForm = new FormControl('');
+  userCrOSVersionForm = new FormControl(
+    '',
+    Validators.pattern(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/)
+  );
   defaultCrOSVersionForm = new FormControl('');
 
   userCrOSVersionValue = 'None';
@@ -100,7 +103,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
     private moblabConfigurationRpcService: MoblabConfigurationGrpcService
-  ) { }
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.bucketURLForm.valueChanges.subscribe(value => {
@@ -138,7 +141,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   public async setStableCrOSVersion(override_value: string) {
     this.userCrOSVersionForm.disable();
     try {
-      const version = await this.moblabConfigurationRpcService.setStableBuildVersion(override_value);
+      const version = await this.moblabConfigurationRpcService.setStableBuildVersion(
+        override_value
+      );
       this.userCrOSVersionValue = version.UserOverrideVersion;
       this.userCrOSVersionForm.setValue(version.UserOverrideVersion);
       this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
@@ -183,8 +188,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
             is_remote_command_enabled,
             boto_key_id,
             boto_key_secret,
-            gcs_bucket_url,
-          ));
+            gcs_bucket_url
+          )
+        );
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
@@ -253,11 +259,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
      */
     return (
       this.lastFetchedCloudConfig.botoKeyID !== this.botoKeyIDForm.value ||
-      this.lastFetchedCloudConfig.botoKeySecret !== this.botoKeySecretForm.value ||
+      this.lastFetchedCloudConfig.botoKeySecret !==
+        this.botoKeySecretForm.value ||
       this.lastFetchedCloudConfig.bucketURL !== this.bucketURLForm.value ||
       this.lastFetchedCloudConfig.isCloudEnabled !== this.isCloudEnabled ||
-      this.lastFetchedCloudConfig.isRemoteConsoleEnabled !== this.isRemoteConsoleEnabled ||
-      this.lastFetchedCloudConfig.isRemoteCommandEnabled !== this.isRemoteCommandEnabled
+      this.lastFetchedCloudConfig.isRemoteConsoleEnabled !==
+        this.isRemoteConsoleEnabled ||
+      this.lastFetchedCloudConfig.isRemoteCommandEnabled !==
+        this.isRemoteCommandEnabled
     );
   }
 
@@ -271,8 +280,11 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     );
   }
 
-  isStableCrOsVersionChanged() {
-    return this.userCrOSVersionForm.value !== this.userCrOSVersionValue;
+  isStableCrOsVersionValidForSubmit() {
+    return (
+      this.userCrOSVersionForm.value !== this.userCrOSVersionValue &&
+      !this.userCrOSVersionForm.errors
+    );
   }
 
   private setDutWifiInfo(dut_wifi_name: string, dut_wifi_password: string) {
@@ -384,16 +396,15 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.botoKeySecretForm.disable();
     this.bucketURLForm.disable();
     this.canUpdateCloudConfig = false;
-    this.moblabRpcService.getNumJobs(
-      (count: number) => {
-        this.canUpdateCloudConfig = count === 0;
+    this.moblabRpcService.getNumJobs((count: number) => {
+      this.canUpdateCloudConfig = count === 0;
 
-        if (this.canUpdateCloudConfig) {
-          this.botoKeyIDForm.enable();
-          this.botoKeySecretForm.enable();
-          this.bucketURLForm.enable();
-        }
-      });
+      if (this.canUpdateCloudConfig) {
+        this.botoKeyIDForm.enable();
+        this.botoKeySecretForm.enable();
+        this.bucketURLForm.enable();
+      }
+    });
   }
 
   onCloudConfigSubmit(formValue) {
@@ -407,9 +418,9 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         this.configurationLoading = false;
         this.setOffPopup(errorMsg);
       },
-      this.isCloudEnabled ? this.botoKeyIDForm.value : "",
-      this.isCloudEnabled ? this.botoKeySecretForm.value : "",
-      this.isCloudEnabled ? this.bucketURLForm.value : "",
+      this.isCloudEnabled ? this.botoKeyIDForm.value : '',
+      this.isCloudEnabled ? this.botoKeySecretForm.value : '',
+      this.isCloudEnabled ? this.bucketURLForm.value : '',
       this.isCloudEnabled,
       this.isRemoteConsoleEnabled,
       this.isRemoteCommandEnabled
@@ -474,9 +485,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     });
   }
 
-  updateCloudConfigurationForms(
-    newCloudConfig: CloudConfiguration
-  ) {
+  updateCloudConfigurationForms(newCloudConfig: CloudConfiguration) {
     /**
      * Updates the form values of the cloud configurations. Meant to be called
      * with values returned from RPC call to get cloud info.
