@@ -35,9 +35,6 @@
         <div [hidden]="!this.isCloudEnabled">
           <mat-card *ngIf="!this.canUpdateCloudConfig">
             <div fxLayout="row">
-              <div class="align-icon">
-                <mat-icon class="attention-icon">warning_amber</mat-icon>
-              </div>
               <div>
                 <div>
                   Changes to the Boto and GCS Bucket configuration are not allowed.
