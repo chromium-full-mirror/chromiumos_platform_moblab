@@ -231,7 +231,11 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
      * calls.
      */
     const job_id_filter = this.filters.getFormValue(JOB_ID);
-    const job_name_filter = this.filters.getFormValue(JOB_NAME);
+    let job_name_filter = this.filters.getFormValue(JOB_NAME);
+    if (job_name_filter !== job_name_filter.trim()) {
+      job_name_filter = job_name_filter.trim();
+      this.filters.setFormValue(JOB_NAME, job_name_filter);
+    }
     const job_start_lt_filter = datestringToSecondsTimestamp(
       this.filters.getFormValue(JOB_START_TIME_TO_FILTER)
     );
