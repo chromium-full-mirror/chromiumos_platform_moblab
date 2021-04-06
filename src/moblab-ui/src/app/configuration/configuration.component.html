@@ -169,7 +169,7 @@
 </mat-card>
 <mat-card>
   <mat-card-header>
-    <mat-card-title>Stable Chrome OS Version Configuration</mat-card-title>
+    <mat-card-title>Known Good DUT OS Version</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <form #formRef="ngForm" (ngSubmit)="setStableCrOSVersion(userCrOSVersionForm.value)">
@@ -184,10 +184,13 @@
           <mat-form-field class="configuration-input" appearance="legacy">
             <mat-label>User Override</mat-label>
             <input matInput placeholder="Rxx-yyyyy.zz.0" [formControl]="userCrOSVersionForm">
+            <mat-error *ngIf="this.userCrOSVersionForm.hasError('pattern')">
+              Must follow the pattern: {{this.userCrOSVersionForm.errors.pattern.requiredPattern}} e.g. R88-13597.105.0
+            </mat-error>
           </mat-form-field>
         </mat-list-item>
         <mat-list-item>
-          <button mat-raised-button color="primary" [disabled]="!isStableCrOsVersionChanged()" type="submit">Save
+          <button mat-raised-button color="primary" [disabled]="!isStableCrOsVersionValidForSubmit()" type="submit">Save
           </button>
         </mat-list-item>
       </mat-list>
