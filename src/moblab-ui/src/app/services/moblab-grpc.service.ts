@@ -1266,6 +1266,7 @@ export class MoblabGrpcService {
 
   get_version_info(
     callback: (
+      moblab_release_version: string,
       chromeos_release_version: string,
       chromeos_release_track: string,
       chromeos_release_description: string,
@@ -1284,6 +1285,7 @@ export class MoblabGrpcService {
           errorHandlingCallback(err.message);
         } else {
           callback(
+            response.getMoblabReleaseVersion(),
             response.getChromeosReleaseVersion(),
             response.getChromeosReleaseTrack(),
             response.getChromeosReleaseDescription(),

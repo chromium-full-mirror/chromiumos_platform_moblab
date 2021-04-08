@@ -1053,6 +1053,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             moblab_serial_number=version_info.get(
                 MoblabConstants.MOBLAB_HOST_ID_NAME, "No Host ID"
             ),
+            moblab_release_version=version_info.get(
+                MoblabConstants.MOBLAB_RELEASE_VERSION, "No version"
+            ),
         )
         return response
 

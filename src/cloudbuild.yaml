@@ -4,6 +4,7 @@ substitutions:
   _LABEL: beta
   _WATCHTOWER_CMD: "--interval 3600 --monitor-only --include-restarting"
   _SSH_PORT: "22"
+  _BUILD_VERSION: ""
 
 steps:
   - id: buster-slim
@@ -525,10 +526,14 @@ steps:
         "REGISTRY_URI=${_REGISTRY_URI}",
         "--build-arg",
         "LABEL=${_LABEL}",
+        "--label",
+        "version=${_BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/rpcserver/Dockerfile",
         "-t",
         "${_REGISTRY_URI}/moblab-rpcserver:${_LABEL}",
+        "-t",
+        "${_REGISTRY_URI}/moblab-rpcserver:${_BUILD_VERSION}",
         "/workspace/",
       ]
     waitFor:
@@ -549,10 +554,14 @@ steps:
         "LABEL=${_LABEL}",
         "--build-arg",
         "SSH_PORT=${_SSH_PORT}",
+        "--label",
+        "version=${_BUILD_VERSION}",
         "-f",
         "/workspace/src/dockerfiles/compose/Dockerfile",
         "-t",
         "${_REGISTRY_URI}/moblab-compose:${_LABEL}",
+        "-t",
+        "${_REGISTRY_URI}/moblab-compose:${_BUILD_VERSION}",
         "/workspace/src/dockerfiles/compose",
       ]
     env:
@@ -652,7 +661,9 @@ images:
     "${_REGISTRY_URI}/moblab-autotest-host:${_LABEL}",
     "${_REGISTRY_URI}/moblab-autotest-aborter:${_LABEL}",
     "${_REGISTRY_URI}/moblab-compose:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-compose:${_BUILD_VERSION}",
     "${_REGISTRY_URI}/moblab-rpcserver:${_LABEL}",
+    "${_REGISTRY_URI}/moblab-rpcserver:${_BUILD_VERSION}",
     "${_REGISTRY_URI}/moblab-remote-scheduler:${_LABEL}",
     "${_REGISTRY_URI}/moblab-remote-agent:${_LABEL}",
     "${_REGISTRY_URI}/remote_access:${_LABEL}",
