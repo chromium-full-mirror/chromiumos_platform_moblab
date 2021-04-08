@@ -185,7 +185,7 @@
             <mat-label>User Override</mat-label>
             <input matInput placeholder="Rxx-yyyyy.zz.0" [formControl]="userCrOSVersionForm">
             <mat-error *ngIf="this.userCrOSVersionForm.hasError('pattern')">
-              Must follow the pattern: {{this.userCrOSVersionForm.errors.pattern.requiredPattern}} e.g. R88-13597.105.0
+              Must follow the correct OS version format e.g. R88-13597.105.0
             </mat-error>
           </mat-form-field>
         </mat-list-item>
