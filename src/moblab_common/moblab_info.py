@@ -6,6 +6,7 @@
 
 import logging
 import uuid
+import docker
 
 from moblab_common import lock_util
 from moblab_common import host_connector
@@ -116,6 +117,8 @@ def get_version_info():
     version_info[MoblabConstants.MOBLAB_INSTALL_ID_NAME] = get_or_create_id()
     version_info[MoblabConstants.MOBLAB_HOST_ID_NAME] = get_serial_number()
 
+    version_info[MoblabConstants.MOBLAB_RELEASE_VERSION] = _get_moblab_version()
+
     host_version_info = None
     try:
         host_version_info = (
@@ -138,3 +141,25 @@ def get_version_info():
 
     _LOGGER.info(version_info)
     return version_info
+
+def _get_moblab_version():
+    """
+        Get the name a version label from compose container.
+
+        At build time a version string is embedded into the image as a label,
+        retrieve those numbers.
+
+    Returns:
+        The value of the version label of compose container.
+    """
+    client = docker.from_env(timeout=300)
+    try:
+        container = client.containers.get(
+            # this has to be compose, but temporarily we look at rpc container
+            MoblabConstants.MOBLAB_RPC_SERVER_CONTAINER_NAME
+        )
+        version = container.labels.get("version", "autopush")
+    except docker.errors.NotFound:
+        _LOGGER.exception("Compose container was not found.")
+        return "no version found"
+    return version

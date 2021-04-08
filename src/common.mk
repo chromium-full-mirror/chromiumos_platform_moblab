@@ -34,13 +34,15 @@ all:	autotest \
 
 rpcserver: export DOCKER_BUILDKIT=1
 rpcserver: common
-	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-rpcserver:${LABEL} -f \
-		dockerfiles/rpcserver/Dockerfile ..
+	docker build ${EXTRA_ARGS} --label "version=${BUILD_VERSION}"  \
+		-t ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
+		-f dockerfiles/rpcserver/Dockerfile ..
 	docker push ${REGISTRY_URI}/moblab-rpcserver:${LABEL}
 
 compose: export DOCKER_BUILDKIT=1
 compose:
-	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-compose:${LABEL} \
+	docker build ${EXTRA_ARGS} --label "version=${BUILD_VERSION}" \
+		-t ${REGISTRY_URI}/moblab-compose:${LABEL} \
 		-f dockerfiles/compose/Dockerfile dockerfiles/compose
 	docker push ${REGISTRY_URI}/moblab-compose:${LABEL}
 
