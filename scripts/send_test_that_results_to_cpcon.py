@@ -112,7 +112,7 @@ def fetch_test_dirs(parent_dir, test_dirs):
 
     Args:
         parent_dir: The parent directory of one or multiple test directories
-        test_dirs: The output list of test directories.
+        test_dirs: The output set of test directories.
     """
     if not os.path.exists(parent_dir) or not os.path.isdir(parent_dir):
         logging.warning('Test directory does not exist: %s' % parent_dir)
@@ -121,7 +121,7 @@ def fetch_test_dirs(parent_dir, test_dirs):
     control_file = os.path.join(parent_dir, CONTROL_FILE)
     status_file = os.path.join(parent_dir, STATUS_FILE)
     if os.path.exists(control_file) and os.path.exists(status_file):
-        test_dirs.append(parent_dir)
+        test_dirs.add(parent_dir)
         return
 
     for dir_name in os.listdir(parent_dir):
@@ -473,8 +473,9 @@ def main(args):
     fake_moblab_id = parsed_args.team_email_address
     fake_suite = parsed_args.suite
 
-    test_dirs = []
-    fetch_test_dirs(parsed_args.directory[0], test_dirs)
+    test_dirs = set()
+    for directory in parsed_args.directory:
+        fetch_test_dirs(directory, test_dirs)
 
     for test_dir in test_dirs:
         # Uses a unique timestamp in milliseconds to fake the afe job id and
