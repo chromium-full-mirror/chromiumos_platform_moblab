@@ -87,6 +87,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   lastFetchedDutWifiName = '';
   lastFetchedDutWifiPassword = '';
 
+  moblabReleaseVersion = '';
   chromeosReleaseVersion = '';
   chromeosReleaseTrack = '';
   chromeosReleaseDescription = '';
@@ -237,6 +238,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         moblab_serial_number: string
       ) => {
         this.refreshShownVersionInfo(
+          'R2-7.0',//moblab_release_version,
           chromeos_release_version,
           chromeos_release_track,
           chromeos_release_description,
@@ -301,6 +303,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   }
 
   refreshShownVersionInfo(
+    moblab_release_version: string,
     chromeos_release_version: string,
     chromeos_release_track: string,
     chromeos_release_description: string,
@@ -309,6 +312,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   ) {
     // local setter of variables that are shown in the config UI ( not to be confused with getter/setters that commit and
     // fetch changes from actual backend. )
+    this.moblabReleaseVersion = moblab_release_version;
     this.chromeosReleaseVersion = chromeos_release_version;
     this.chromeosReleaseTrack = chromeos_release_track;
     this.chromeosReleaseDescription = chromeos_release_description;
