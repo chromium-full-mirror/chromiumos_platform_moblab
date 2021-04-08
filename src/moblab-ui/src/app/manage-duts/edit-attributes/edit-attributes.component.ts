@@ -69,6 +69,7 @@ export class EditAttributesComponent {
     context.moblabGrpcService.addAttributeToDuts(
       message => {
         context.setOffPopup(message);
+        context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
         context.setOffPopup(message);
@@ -90,6 +91,7 @@ export class EditAttributesComponent {
     context.moblabGrpcService.removeAttributeFromDuts(
       message => {
         context.setOffPopup(message);
+        context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
         context.setOffPopup(message);
@@ -110,6 +112,7 @@ export class EditAttributesComponent {
     context.moblabGrpcService.addLabelToDuts(
       message => {
         context.setOffPopup(message);
+        context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
         context.setOffPopup(message);
@@ -128,6 +131,7 @@ export class EditAttributesComponent {
     context.moblabGrpcService.removeLabelFromDuts(
       message => {
         context.setOffPopup(message);
+        context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
         context.setOffPopup(message);
@@ -156,6 +160,7 @@ export class EditAttributesComponent {
     context.moblabGrpcService.addPoolToDuts(
       message => {
         context.setOffPopup(message);
+        context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
         context.setOffPopup(message);
@@ -182,6 +187,7 @@ export class EditAttributesComponent {
     context.moblabGrpcService.removePoolFromDuts(
       message => {
         context.setOffPopup(message);
+        context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
         context.setOffPopup(message);
