@@ -684,13 +684,14 @@ message SetCloudConfigurationResponse {
 // NEXT_TAG = 1;
 message GetVersionInfoRequest {}
 
-// NEXT_TAG = 7;
+// NEXT_TAG = 8;
 message GetVersionInfoResponse {
   string chromeos_release_version = 1;
   string chromeos_release_track = 2;
   string chromeos_release_description = 3;
   string moblab_install_id = 6;
   string moblab_serial_number = 5;
+  string moblab_release_version = 7;
 }
 
 // NEXT_TAG = 1;

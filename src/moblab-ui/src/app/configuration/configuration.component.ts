@@ -31,7 +31,7 @@ class CloudConfiguration {
     public botoKeyID: string = '',
     public botoKeySecret: string = '',
     public bucketURL: string = ''
-  ) {}
+  ) { }
 }
 
 @Component({
@@ -103,7 +103,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
     private moblabConfigurationRpcService: MoblabConfigurationGrpcService
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     this.bucketURLForm.valueChanges.subscribe(value => {
@@ -231,6 +231,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   getVersionInfo() {
     this.moblabRpcService.get_version_info(
       (
+        moblab_release_version: string,
         chromeos_release_version: string,
         chromeos_release_track: string,
         chromeos_release_description: string,
@@ -238,7 +239,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         moblab_serial_number: string
       ) => {
         this.refreshShownVersionInfo(
-          'R2-7.0',//moblab_release_version,
+          moblab_release_version,
           chromeos_release_version,
           chromeos_release_track,
           chromeos_release_description,
@@ -260,13 +261,13 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     return (
       this.lastFetchedCloudConfig.botoKeyID !== this.botoKeyIDForm.value ||
       this.lastFetchedCloudConfig.botoKeySecret !==
-        this.botoKeySecretForm.value ||
+      this.botoKeySecretForm.value ||
       this.lastFetchedCloudConfig.bucketURL !== this.bucketURLForm.value ||
       this.lastFetchedCloudConfig.isCloudEnabled !== this.isCloudEnabled ||
       this.lastFetchedCloudConfig.isRemoteConsoleEnabled !==
-        this.isRemoteConsoleEnabled ||
+      this.isRemoteConsoleEnabled ||
       this.lastFetchedCloudConfig.isRemoteCommandEnabled !==
-        this.isRemoteCommandEnabled
+      this.isRemoteCommandEnabled
     );
   }
 
