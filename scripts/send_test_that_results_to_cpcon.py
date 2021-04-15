@@ -74,8 +74,8 @@ def parse_arguments(argv):
     parser.add_argument(
         "--dry_run",
         action='store_true',
-        help="Generate job.serialize locally but do not upload "
-             "test directories and not send pubsub messages.")
+        help="Generate job.serialize locally but do not upload test "
+             "directories and not send pubsub messages.")
     def_logfile = "/tmp/" + os.path.basename(sys.argv[0].split(".")[0]) + ".log"
     parser.add_argument(
         "-l",
@@ -219,8 +219,8 @@ def is_uploaded(test_dir):
                          "been set to UPLOADED.", test_dir)
             return True
         else:
-            logging.debug("The upload status file exists but "
-                          "upload was not completed.")
+            logging.debug("The upload status file exists but upload was not "
+                          "completed.")
     return False
 
 
