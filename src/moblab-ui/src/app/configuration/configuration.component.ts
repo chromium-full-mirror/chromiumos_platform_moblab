@@ -12,6 +12,7 @@ import {leadingTrailingWhitespaceValidator} from '../utils/validators';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {MoblabConfigurationGrpcService} from '../services/moblab-configuration-grpc.service';
 import {MoblabSettingsService} from '../services/moblab-settings.service';
+import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
 import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
 import {MoblabSettingsConstains} from '../constants';
 
@@ -102,7 +103,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private moblabRpcService: MoblabGrpcService,
     private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
-    private moblabConfigurationRpcService: MoblabConfigurationGrpcService
+    private moblabConfigurationRpcService: MoblabConfigurationGrpcService,
+    private configSetupService: ConfigSetupService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -191,6 +193,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
             gcs_bucket_url
           )
         );
+        this.configSetupService.setIsCloudConfigEnabled(is_cloud_enabled);
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
