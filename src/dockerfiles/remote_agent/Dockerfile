@@ -61,6 +61,10 @@ RUN apt purge -yq cmake libssl-dev zlib1g-dev gcc-multilib
 RUN apt autoremove -yq
 RUN apt-get clean
 
+# Need to be in docker group to use docker API
+RUN addgroup --gid 412 docker
+RUN usermod -aG docker moblab
+
 RUN mkdir /moblab
 RUN mkdir /var/log/moblab
 RUN chown -R moblab /moblab
