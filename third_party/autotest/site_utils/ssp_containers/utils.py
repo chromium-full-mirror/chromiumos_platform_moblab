@@ -84,7 +84,16 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
     client = docker.from_env(timeout=300)
     image = "%s/moblab-ssp:%s" % (registry, label)
     logging.info("Image %s", image)
-    client.images.pull(image)
+    # At the start of every SSP container start we try to pull a new image
+    # in case there is an update.
+    # If there is a network outage in the middle of a suite run then the SSP
+    # setup will fail, ignore failed pulls - if there is no image in the
+    # local cache the run command will fail, otherwise just keep going with
+    # the local version.
+    try:
+        client.images.pull(image)
+    except docker.errors.APIError:
+        logging.exception('Failed to pull image')
 
     client.containers.run(
         image,
