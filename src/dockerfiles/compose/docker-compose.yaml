@@ -330,6 +330,7 @@ services:
       - moblab_home:/home/moblab
       - leases:/leases:ro
       - /etc/lsb-release:/etc/lsb-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
 
     networks:
       - moblab
