@@ -8,85 +8,85 @@ substitutions:
 
 steps:
   - id: buster-slim
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/debian:buster-slim"]
     waitFor: ['-']
   - id: alpine-git
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/alpine/git"]
     waitFor: ['-']
   - id: dockerfile-copy
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/docker/dockerfile-copy:v0.1.9"]
     waitFor: ['-']
   - id: buster
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/debian:buster"]
     waitFor: ['-']
   - id: python-3.7-slim
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/python:3.7-slim-buster"]
     waitFor: ['-']
   - id: python-3.7
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/python:3.7-buster"]
     waitFor: ['-']
   - id: mariadb
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/mariadb:10.5"]
     waitFor: ['-']
   - id: python-3.8-slim
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/python:3.8-slim-buster"]
     waitFor: ['-']
   - id: python-3.8
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/python:3.8-buster"]
     waitFor: ['-']
   - id: envoyproxy
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/envoyproxy/envoy:v1.15.2"]
     waitFor: ['-']
   - id: openssh-server
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/linuxserver/openssh-server"]
     waitFor: ['-']
   - id: watchtower
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/v2tec/watchtower:latest"]
     waitFor: ['-']
   - id: docker-compose
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/docker/compose:alpine-1.27.4"]
     waitFor: ['-']
   - id: node-buster
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/node:15-buster"]
     waitFor: ['-']
   - id: node15
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/node:15"]
     waitFor: ['-']
   - id: alpine-edge
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/alpine:edge"]
     waitFor: ['-']
   - id: nginx-alpine
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/nginx:alpine"]
     waitFor: ['-']
   - id: python-2
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/python:2-buster"]
     waitFor: ['-']
   - id: blacklabelops_logrotate
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args: ["pull", "${_BASE_REGISTRY_URI}/blacklabelops/logrotate:latest"]
     waitFor: ['-']
 
 
   - id: protoc
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -102,7 +102,7 @@ steps:
       - "buster-slim"
 
   - id: chromite
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -132,7 +132,7 @@ steps:
       - "protoc"
 
   - id: moblab_common
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -155,7 +155,7 @@ steps:
       - "python-3.8"
 
   - id: moblab_db_setup
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -175,7 +175,7 @@ steps:
       - "python-3.8"
 
   - id: autotest-lucifer
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -197,7 +197,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: autotest-base
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -222,7 +222,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: autotest-afe
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -242,7 +242,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: autotest-dbsetup
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -262,7 +262,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: autotest-monitor
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -284,7 +284,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: autotest-host
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -304,7 +304,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: autotest-abort
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -325,7 +325,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: db
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -345,7 +345,7 @@ steps:
       - "mariadb"
 
   - id: db-init
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -365,7 +365,7 @@ steps:
       - "buster-slim"
 
   - id: devserver
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -387,7 +387,7 @@ steps:
       - "chromite"
 
   - id: ui
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -409,7 +409,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: ssp
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -429,9 +429,9 @@ steps:
       - "buster-slim"
       - "alpine-git"
       - "chromite"
-      
+
   - id: offloader
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -454,7 +454,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: envoy
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -474,7 +474,7 @@ steps:
       - "envoyproxy"
 
   - id: remote-agent
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -496,7 +496,7 @@ steps:
       - "moblab_common"
 
   - id: remote-scheduler
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -518,7 +518,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: rpcserver
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -544,7 +544,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   - id: compose
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -571,7 +571,7 @@ steps:
       - "docker-compose"
 
   - id: mobmonitor
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -593,7 +593,7 @@ steps:
       - "moblab_common"
 
   - id: dns
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -613,7 +613,7 @@ steps:
       - "alpine-edge"
 
   - id: remote_access
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
@@ -636,7 +636,7 @@ steps:
       - "moblab_common"
 
   - id: logrotate
-    name: "docker:19.03.8"
+    name: "docker:20.10.3"
     args:
       [
         "build",
