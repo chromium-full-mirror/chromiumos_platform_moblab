@@ -1,0 +1,43 @@
+.header {
+  font-family: Roboto, sans-serif;
+  color:rgba(0, 0, 0, 0.87);
+  font-size: 18px;
+  font-weight: 400;
+  padding: 0px 16px 0px 16px;
+}
+.service-name {
+  margin-left: 10px;
+}
+
+.container-name {
+  padding-left: 4px;
+}
+
+.card-content {
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0px 16px 0px 16px;
+}
+
+.card-content-error {
+  font-size: 16px;
+  font-weight: 400;
+  padding: 0px 16px 0px 16px;
+}
+
+.card-content-side-padding {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.icon-warning {
+  color: gold;
+}
+
+.icon-error {
+  color: red;
+}
+
+.mat-icon {
+  vertical-align: middle;
+}

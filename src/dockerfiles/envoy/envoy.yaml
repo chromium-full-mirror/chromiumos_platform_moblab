@@ -42,6 +42,11 @@ static_resources:
                   max_grpc_timeout: 0s
                   prefix_rewrite: "/"
               - match:
+                  prefix: "/api/mobmonitor/"
+                route:
+                  cluster: backend_mobmonitor_service
+                  prefix_rewrite: "/"
+              - match:
                   prefix: "/"
                 route:
                   cluster: backend_ui_service
@@ -86,4 +91,16 @@ static_resources:
               socket_address:
                 address: moblab-ui
                 port_value: 6010
-
+  - name: backend_mobmonitor_service
+    connect_timeout: 1s
+    type: STRICT_DNS
+    lb_policy: round_robin
+    load_assignment:
+      cluster_name: backend_mobmonitor_service
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: mobmonitor
+                port_value: 9991

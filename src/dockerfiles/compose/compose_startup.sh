@@ -38,8 +38,14 @@ else
     docker-compose down -t 1
     docker-compose -f ./docker-compose.watchtower.yaml down -t 1
 
-    docker-compose pull remote_access moblab-ui
-    docker-compose up -d remote_access moblab-ui
+    docker-compose pull moblab-ui
+    docker-compose up -d moblab-ui
+
+    docker-compose pull mobmonitor
+    docker-compose up -d mobmonitor
+    
+    docker-compose pull remote_access
+    docker-compose up -d remote_access
 
     docker-compose -f ./docker-compose.watchtower.yaml pull
     docker-compose -f ./docker-compose.watchtower.yaml up -d

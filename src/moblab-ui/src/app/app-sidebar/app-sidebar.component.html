@@ -1,7 +1,7 @@
 <div fxLayout="column">
   <mat-toolbar fxLayout="row" color="primary" opened="true" #topToolbar>
     <div fxFlex fxLayout="row" fxLayoutAlign="start center">
-      <button class="menu-button" mat-button (click)="mainSideNav.toggle()">
+      <button class="menu-button" mat-button (click)="enableNavBar && mainSideNav.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
       <div class="toolbar-icon">
@@ -46,7 +46,7 @@
 
   <mat-sidenav-container fxFlex="95" class="sidenav-container">
     <mat-sidenav #mainSideNav mode="side" opened="true">
-      <mat-nav-list>
+      <mat-nav-list *ngIf="enableNavBar">
         <a *ngFor="let tab of navTabs" mat-list-item class="sidebar-items" routerLink="{{ tab.route }}"
           routerLinkActive="active-route" #routerLinkActiveInstance="routerLinkActive"
           [class.list-item-active]="routerLinkActiveInstance.isActive" [routerLinkActiveOptions]="{ exact: true }">

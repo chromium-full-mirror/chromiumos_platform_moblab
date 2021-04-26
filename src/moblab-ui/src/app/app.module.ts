@@ -27,6 +27,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 
 import {AdvancedSettingsComponent} from './advanced-settings/advanced-settings.component';
 import {AppComponent} from './app.component';
@@ -43,6 +44,7 @@ import {RunSuiteModule} from './run-suite/run-suite.module';
 import {ServicesModule} from './services/services.module';
 import {ViewJobsModule} from './view-jobs/view-jobs.module';
 import {WidgetsModule} from './widgets/widgets.module';
+import {HealthCheckComponent} from './health-check/health-check.component';
 
 @NgModule({
   declarations: [
@@ -52,6 +54,7 @@ import {WidgetsModule} from './widgets/widgets.module';
     ConfigurationComponent,
     MobmonitorComponent,
     MobmonitorPipe,
+    HealthCheckComponent,
   ],
   imports: [
     AppRoutingModule,
@@ -78,6 +81,7 @@ import {WidgetsModule} from './widgets/widgets.module';
     MatMenuModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MatSelectModule,
     MatSidenavModule,
     MatSnackBarModule,
@@ -104,4 +108,4 @@ import {WidgetsModule} from './widgets/widgets.module';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

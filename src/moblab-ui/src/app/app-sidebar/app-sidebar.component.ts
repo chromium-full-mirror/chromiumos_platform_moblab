@@ -21,7 +21,7 @@ export class AppSidebarComponent implements OnInit {
     window.location.hostname,
     this.mobmonitor_port
   );
-
+  enableNavBar: boolean;
   navTabs = [];
   navTestRunMenuOptions = [];
   pauseRequestors = [];
@@ -30,7 +30,7 @@ export class AppSidebarComponent implements OnInit {
   constructor(
     private globalInfo: GlobalInfoService,
     private settingsService: MoblabSettingsService,
-    private configSetupService: ConfigSetupService,
+    private configSetupService: ConfigSetupService
   ) {
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabs, {
       route: '/manage_dut',
@@ -121,6 +121,9 @@ export class AppSidebarComponent implements OnInit {
     });
     this.configSetupService.cloudConfigObservable.subscribe(enabled => {
       this.showCloudConfigWarning = !enabled;
+    });
+    this.globalInfo.enableNavBarObservable.subscribe(enabled => {
+      this.enableNavBar = enabled;
     });
   }
 

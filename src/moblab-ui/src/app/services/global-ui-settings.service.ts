@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {BehaviorSubject, Observable} from 'rxjs';
 
 enum UIState {
   NEEDS_SETUP = 1,
@@ -38,6 +39,17 @@ export class GlobalInfoService {
     Feature.DUT_DETAIL,
     Feature.SYSTEM_CONFIGURATION,
   ];
+  enableNavBarObservable: Observable<boolean>;
+  private enableNavBarSubject: BehaviorSubject<boolean>;
+
+  constructor() {
+    this.enableNavBarSubject = new BehaviorSubject<boolean>(true);
+    this.enableNavBarObservable = this.enableNavBarSubject.asObservable();
+  }
+
+  setEnableNavBar(enableNavBar: boolean): void {
+    this.enableNavBarSubject.next(enableNavBar);
+  }
 
   getUIState() {
     return UIState.NEEDS_SETUP;
