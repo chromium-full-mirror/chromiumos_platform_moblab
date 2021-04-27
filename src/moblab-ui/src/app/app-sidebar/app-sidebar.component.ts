@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {GlobalInfoService} from 'app/services/services.module';
 import {MoblabSettingsService} from 'app/services/moblab-settings.service';
+import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
 import {Feature} from 'app/services/services.module';
 import {MoblabSettingsConstains} from '../constants';
 
@@ -24,10 +25,12 @@ export class AppSidebarComponent implements OnInit {
   navTabs = [];
   navTestRunMenuOptions = [];
   pauseRequestors = [];
+  showCloudConfigWarning = false;
 
   constructor(
     private globalInfo: GlobalInfoService,
-    private settingsService: MoblabSettingsService
+    private settingsService: MoblabSettingsService,
+    private configSetupService: ConfigSetupService,
   ) {
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabs, {
       route: '/manage_dut',
@@ -115,6 +118,9 @@ export class AppSidebarComponent implements OnInit {
   ngOnInit(): void {
     this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
       this.pauseRequestors = requestors;
+    });
+    this.configSetupService.cloudConfigObservable.subscribe(enabled => {
+      this.showCloudConfigWarning = !enabled;
     });
   }
 
