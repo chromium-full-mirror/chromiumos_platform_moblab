@@ -483,10 +483,10 @@ class MoblabService(object):
         if not suite_timeout_mins:
             suite_timeout_mins = self._default_suite_timeout_mins(suite)
 
-        (
-            ap_name,
-            ap_pass,
-        ) = self.config_connector.get_test_wifi_ap_and_password()
+        dut_wifi_info = self.get_dut_wifi_info()
+        ap_name=dut_wifi_info.get("wifi_dut_ap_name", None)
+        ap_pass=dut_wifi_info.get("wifi_dut_ap_pass", "")
+
         test_args["ssid"] = ap_name
         test_args["wifipass"] = ap_pass
 
@@ -1323,7 +1323,7 @@ class MoblabService(object):
                 )
 
                 return (
-                    "Cloud configuration changes are not allowed."
+                    "Cloud configuration changes are not allowed. "
                     "Please powerwash the Moblab to set new configuration."
                 )
 
