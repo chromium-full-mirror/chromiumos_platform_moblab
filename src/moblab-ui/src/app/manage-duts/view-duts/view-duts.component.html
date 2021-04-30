@@ -45,7 +45,7 @@
 
     <ng-container matColumnDef="status">
       <th class="m-column" mat-header-cell mat-sort-header *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let element">{{element.getStatus()}}</td>
+      <td mat-cell *matCellDef="let element">{{intToDutStatus[element.getStatus()]}}</td>
     </ng-container>
 
     <ng-container matColumnDef="pools">

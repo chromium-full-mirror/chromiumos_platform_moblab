@@ -1,4 +1,5 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {INT_TO_DUT_STATUS} from '../../utils/proto_helpers';
 import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MatSort, Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
@@ -32,6 +33,9 @@ export class ViewDutsComponent implements OnInit {
   ];
 
   loading = false;
+
+  // Create a local copy as we need to use it in view-duts.component.html.
+  intToDutStatus = INT_TO_DUT_STATUS;
 
   selectOptions: string[] = ['All Enrolled', 'All Unenrolled', 'Repair Failed'];
 
@@ -148,7 +152,7 @@ export class ViewDutsComponent implements OnInit {
       });
     } else if (event.selection === this.selectOptions[2]) {
       this.duts.data.filter(row => {
-        if (row.getStatus() === 'Repair Failed') {
+        if (row.getStatus() === ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED) {
           this.selection.select(row);
         } else {
           this.selection.deselect(row);

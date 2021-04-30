@@ -54,12 +54,28 @@ AFE_TO_MOBLAB_STATUS_MAPPINGS = {
     "Template": moblabrpc_pb2.Job.TEMPLATE,
 }
 
+AFE_TO_DUT_STATUS_MAPPINGS = {
+    "Verifying": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_VERIFYING,
+    "Running": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_RUNNING,
+    "Ready": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_READY,
+    "Repairing": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_REPAIRING,
+    "Repair Failed": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_REPAIR_FAILED,
+    "Cleaning": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_CLEANING,
+    "Pending": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_PENDING,
+    "Resetting": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_RESETTING,
+    "Provisioning": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_PROVISIONING,
+    "Unknown": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_UNKNOWN,
+    "Disconnected": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_DISCONNECTED,
+    "Not Enrolled": moblabrpc_pb2.ConnectedDutInfo.DUT_STATUS_NOT_ENROLLED,
+}
+
 API_TO_GRPC_BUILD_STATUS_MAP = {
     "pass": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_PASS,
     "fail": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_FAIL,
     "running": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_RUNNING,
     "aborted": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_ABORTED,
 }
+
 
 class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def __init__(self):
@@ -312,7 +328,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             pools=self.service.extract_pool_from_labels(
                 dut_dict.get("labels", [])
             ),
-            status=dut_dict["status"],
+            status=AFE_TO_DUT_STATUS_MAPPINGS[dut_dict["status"]],
             is_enrolled=dut_dict.get("enrolled", False),
             is_connected=dut_dict.get("isConnected", True),
             labels=dut_dict.get("labels", []),

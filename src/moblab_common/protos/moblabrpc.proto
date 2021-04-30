@@ -173,11 +173,29 @@ message RunMemoryQualificationSuiteRequest {
 
 // NEXT_TAG = 17
 message ConnectedDutInfo {
+
+  // NEXT_TAG = 12
+  enum DutStatus {
+    // TODO(chromium:1106420): share DutStatus with the remote-agent
+    // code base.
+    DUT_STATUS_UNKNOWN = 0;
+    DUT_STATUS_READY = 1;
+    DUT_STATUS_RUNNING = 2;
+    DUT_STATUS_REPAIRING = 3;
+    DUT_STATUS_REPAIR_FAILED = 4;
+    DUT_STATUS_CLEANING = 5;
+    DUT_STATUS_PENDING = 6;
+    DUT_STATUS_RESETTING = 7;
+    DUT_STATUS_PROVISIONING = 8;
+    DUT_STATUS_VERIFYING = 9;
+    DUT_STATUS_DISCONNECTED = 10;
+    DUT_STATUS_NOT_ENROLLED = 11;
+  }
+
   string name = 1;
   string ip = 2;
   string mac_addr = 3;
-  // TODO (chromium:1168372): Change the DUT status type from String to Enum.
-  string status = 4;
+  DutStatus status = 4;
   string build_target = 5;
   string model  = 6;
   bool is_enrolled = 7;

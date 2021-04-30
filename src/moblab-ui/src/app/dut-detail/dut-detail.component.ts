@@ -10,6 +10,7 @@ import {FormControl, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
 import {ConnectedDutInfo} from '../services/moblabrpc_pb';
+import {INT_TO_DUT_STATUS} from '../utils/proto_helpers';
 import {DutTaskTableComponent} from './dut_task_table/dut_task_table.component';
 import {KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
@@ -54,7 +55,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       ['DUT', dutInfo.getIp()],
       ['MAC', dutInfo.getMacAddr()],
       ['Name', dutInfo.getName()],
-      ['Status', dutInfo.getStatus()],
+      ['Status', INT_TO_DUT_STATUS[dutInfo.getStatus()]],
       ['Labels', dutInfo.getLabelsList().toString()],
       ['Attributes', dutInfo.getAttributesList().toString()],
       [
