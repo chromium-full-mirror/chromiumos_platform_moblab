@@ -89,7 +89,8 @@ import {
   UpdateMoblabResponse,
   FirmwareUpdateCommandOutput,
   ValidateStorageQualSetupRequest,
-  ProvisionDutsRequest
+  ProvisionDutsRequest,
+  BuildItem
 } from './moblabrpc_pb';
 
 @Injectable({providedIn: 'root'})
@@ -742,7 +743,7 @@ export class MoblabGrpcService {
     buildtarget: string,
     model: string,
     milestone: string,
-    callback: (buildVersions: string[], isIncomplete: boolean) => void,
+    callback: (buildVersions: {version: string, isGood: boolean}[], isIncomplete: boolean) => void,
     errorHandlingCallback: (err_msg: string) => void
   ) {
     const request = new ListBuildVersionsRequest();
@@ -758,7 +759,10 @@ export class MoblabGrpcService {
         } else {
           const buildVersionNames = [];
           for (const item of response.getBuildVersionsList()) {
-            buildVersionNames.push(item.getValue());
+            buildVersionNames.push({
+              version: item.getValue(),
+              isGood: item.getStatus() === BuildItem.BuildStatus.BUILD_STATUS_PASS,
+            });
           }
           callback(buildVersionNames, response.getIsIncomplete());
         }

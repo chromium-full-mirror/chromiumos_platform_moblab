@@ -1,29 +1,18 @@
-<div [class.enabled]="!isDisabled()"
-     [class.error]="hasError()"
-     [class.next-up]="isNextUp()"
-     class="autocomplete-selector dropdown"
-     id="autocomplete-wrapper"
->
+<div [class.enabled]="!isDisabled()" [class.error]="hasError()" [class.next-up]="isNextUp()"
+  class="autocomplete-selector dropdown" id="autocomplete-wrapper">
   <form matTooltip="{{this.getDisabledReason()}}">
-    <mat-form-field class="autocomplete-form" >
+    <mat-form-field class="autocomplete-form">
       <span (click)="onClick()" id="input-wrapper">
-        <input
-          (blur)="onBlur()"
-          (click)="onClick()"
-          (keyup)="_keyUp($event)"
-          [formControl]="selectFormControl"
-          [matAutocomplete]="auto"
-          aria-label="Number"
-          id="autocompleteInput"
-          matInput
-          placeholder="{{title}}"
+        <input (blur)="onBlur()" (click)="onClick()" (keyup)="_keyUp($event)" [formControl]="selectFormControl"
+          [matAutocomplete]="auto" aria-label="Number" id="autocompleteInput" matInput placeholder="{{title}}"
           type="text">
       </span>
       <mat-hint *ngIf="this.hasError()"><span class="mat-error">{{errorMsg}}</span></mat-hint>
       <mat-hint *ngIf="this.isDisabled()"><span class="mat-error">{{disabledReasonMessage}}</span></mat-hint>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelect($event)">
-        <mat-option #options *ngFor="let option of filteredOptions | async" [value]="option">
-          {{option}}
+        <mat-option #options *ngFor="let option of filteredOptions | async" [value]="option"
+          [disabled]="!option.enabled">
+          {{option.text}}
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>

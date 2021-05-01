@@ -216,10 +216,18 @@ message ListMilestonesRequest {
   string model = 2;
 }
 
-// NEXT_TAG = 3
+// NEXT_TAG = 4
 message BuildItem {
+  // NEXT_TAG = 4
+  enum BuildStatus {
+    BUILD_STATUS_PASS = 0;
+    BUILD_STATUS_FAIL = 1;
+    BUILD_STATUS_RUNNING = 2;
+    BUILD_STATUS_ABORTED = 3;
+  }
   string value = 1;
   bool is_staged = 2;
+  BuildStatus status = 3;
 }
 
 // NEXT_TAG = 3

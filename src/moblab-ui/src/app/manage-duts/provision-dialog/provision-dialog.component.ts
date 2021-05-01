@@ -3,6 +3,7 @@ import {MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {LoadingOverlayComponent, LoadingOverlayStyle} from 'app/widgets/loading-overlay/loading-overlay.component';
 import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
+import {SelectableItem} from 'app/run-suite/common/basic-autocomplete-selector/basic-autocomplete-selector.component';
 
 export interface DialogData {
   milestone: string;
@@ -21,9 +22,9 @@ export class ProvisionDialogComponent implements AfterViewInit {
   @ViewChild('poolSelector') poolSelector;
   @ViewChild(LoadingOverlayComponent) loadingOverlay: LoadingOverlayComponent;
 
-  milestones: string[] = [];
-  buildVersions: string[] = [];
-  pools: string[] = [];
+  milestones: SelectableItem[] = [];
+  buildVersions: SelectableItem[] = [];
+  pools: SelectableItem[] = [];
 
   build: DialogData = {milestone: "", buildVersion: "", pool: ""};
 
@@ -60,7 +61,7 @@ export class ProvisionDialogComponent implements AfterViewInit {
   }
 
   updatePools(pools: string[]) {
-    this.pools = pools;
+    this.pools = pools.map(p => new SelectableItem(p));
     this.poolSelector.enable();
   }
 
@@ -97,7 +98,7 @@ export class ProvisionDialogComponent implements AfterViewInit {
   }
 
   updateMilestones(newMilestones: string[]) {
-    this.milestones = newMilestones;
+    this.milestones = newMilestones.map(m => new SelectableItem(m));
     if (this.milestones.length === 0) {
       this.milestoneSelector.disable(
         'No milestones found for the model.'
@@ -119,7 +120,7 @@ export class ProvisionDialogComponent implements AfterViewInit {
       this.board,
       this.model,
       this.build.milestone,
-      (buildVersions, _) => {
+      (buildVersions: {version: string, isGood: boolean}[], _) => {
         this.updateBuildVersions(buildVersions);
         this.loadingOverlay.hide();
       },
@@ -134,8 +135,8 @@ export class ProvisionDialogComponent implements AfterViewInit {
     this.canStart = false;
   }
 
-  updateBuildVersions(newBuildVersions: string[]) {
-    this.buildVersions = newBuildVersions;
+  updateBuildVersions(newBuildVersions: {version: string, isGood: boolean}[]) {
+    this.buildVersions = newBuildVersions.map(v => new SelectableItem(v.version, v.isGood));
 
     if (this.buildVersions.length === 0) {
       this.buildSelector.disable('No builds found for the milestone.');

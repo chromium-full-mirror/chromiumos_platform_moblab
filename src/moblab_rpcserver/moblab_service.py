@@ -30,7 +30,7 @@ from host_scheduler_pause_service import HostSchedulerPauseService
 
 MilestonePair = namedtuple("MilestonePair", ["milestone", "is_staged"])
 BuildVersionPair = namedtuple(
-    "BuildVersionPair", ["build_version", "is_staged"]
+    "BuildVersionPair", ["build_version", "status", "is_staged"]
 )
 BuildResults = namedtuple("BuildResults", ["results", "is_incomplete"])
 
@@ -746,7 +746,11 @@ class MoblabService(object):
         )
 
         build_version_results = [
-            BuildVersionPair(build_version=build_version, is_staged=True)
+            BuildVersionPair(
+                build_version=build_version,
+                status="pass",
+                is_staged=True
+            )
             for build_version in bucket_build_versions
         ]
 
@@ -763,16 +767,16 @@ class MoblabService(object):
                     "Encountered error trying to fetch remote build versions."
                 )
 
-        build_version_results.extend(
-            [
-                BuildVersionPair(build_version=build_version, is_staged=False)
-                for build_version in list(
-                    set(remote_build_versions).difference(
-                        set(bucket_build_versions)
+        staged_builds_set = set(bucket_build_versions)
+        for build_version in remote_build_versions:
+            if build_version.version not in staged_builds_set:
+                build_version_results.append(
+                    BuildVersionPair(
+                        build_version=build_version.version,
+                        status=build_version.status,
+                        is_staged=False
                     )
                 )
-            ]
-        )
 
         build_version_results.sort(
             key=lambda x: distutils.version.LooseVersion(x[0]), reverse=True

@@ -13,6 +13,12 @@ import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 
+export class SelectableItem {
+  constructor(
+    public text: string,
+    public enabled: boolean = true) { }
+}
+
 /**
  * Autocomplete selector to be used in run suite forms.
  */
@@ -26,7 +32,7 @@ export class BasicAutocompleteSelectorComponent
   implements OnChanges {
   // i.e., if only one option is available, select it.
   @Input() autoselect = true;
-  @Input() options: string[];
+  @Input() options: SelectableItem[];
   @Input() placeholder: string;
   @Input() title: string;
 
@@ -35,10 +41,10 @@ export class BasicAutocompleteSelectorComponent
 
   private errorMsg = '';
   private optionSelected = false;
-  selectFormControl = new FormControl('');
+  selectFormControl = new FormControl();
   private selectValueOnUnlock = '';
 
-  filteredOptions: Observable<string[]>;
+  filteredOptions: Observable<SelectableItem[]>;
 
   // Sets up the subscription to the input form control which generates the
   // filtered options dropdown.
@@ -49,7 +55,7 @@ export class BasicAutocompleteSelectorComponent
     );
   }
 
-  private getFilteredOptions(value: string): string[] {
+  private getFilteredOptions(value: string): SelectableItem[] {
     const filterResults = this.options;
     // if (value) {
     //   value = value.toLowerCase();
@@ -67,8 +73,8 @@ export class BasicAutocompleteSelectorComponent
 
   // If only one option is available, it is automatically selected.
   autoSelectedSingleOption() {
-    if (this.autoselect && this.options.length === 1) {
-      this.selectFormControl.setValue(this.options[0]);
+    if (this.autoselect && this.options.filter(o => o.enabled).length === 1) {
+      this.selectFormControl.setValue(this.options.filter(o => o.enabled)[0].text);
       this.lock();
       this.select.emit({value: this.selectFormControl.value});
     }
@@ -85,7 +91,7 @@ export class BasicAutocompleteSelectorComponent
   }
 
   onOptionSelect(event: MatAutocompleteSelectedEvent) {
-    this.selectFormControl.setValue(event.option.value);
+    this.selectFormControl.setValue(event.option.value.text);
     this.lock();
   }
 
@@ -103,7 +109,7 @@ export class BasicAutocompleteSelectorComponent
   }
 
   isExactMatchToOption() {
-    return this.options.indexOf(this.selectFormControl.value) !== -1;
+    return this.options.findIndex(e => e.text === this.selectFormControl.value) !== -1;
   }
 
   isNextUp() {
