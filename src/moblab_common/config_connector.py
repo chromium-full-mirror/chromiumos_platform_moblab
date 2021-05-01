@@ -79,19 +79,6 @@ class MoblabConfigConnector(object):
         )
         return True if is_enable == "True" else False
 
-    def get_test_wifi_ap_and_password(self):
-        """Get the AP name and password configured for use in tests.
-
-        Returns:
-            (string, string): Tuple of strings containing the values stored
-            in the configuration for wifi access point and password to use
-            in testing.  The AP string may be None if no configuration is
-            saved.
-        """
-        ap_name = self.get("MOBLAB", "wifi_dut_ap_name", default=None)
-        ap_pass = self.get("MOBLAB", "wifi_dut_ap_pass", default="")
-        return (ap_name, ap_pass)
-
     def get_is_remote_agent_enabled(self):
         """Return if the remote agent is enabled otherwise false."""
         is_enable = self.get(

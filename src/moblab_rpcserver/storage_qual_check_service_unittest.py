@@ -23,7 +23,7 @@ class StorageQualCheckServiceTest(unittest.TestCase):
         ]
 
         service = StorageQualCheckService()
-        service.check_setup(None, None)
+        service.check_setup(None)
 
     def test_check_case_insensitive(self, mock_service):
         mock_service.return_value.list_duts.return_value = [
@@ -33,7 +33,7 @@ class StorageQualCheckServiceTest(unittest.TestCase):
         ]
 
         service = StorageQualCheckService()
-        service.check_setup(None, None)
+        service.check_setup(None)
 
     def test_check_duplicated_labels(self, mock_service):
         mock_service.return_value.list_duts.return_value = [
@@ -44,7 +44,7 @@ class StorageQualCheckServiceTest(unittest.TestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            service.check_setup(None, None)
+            service.check_setup(None)
 
     def test_check_multiple_labels_on_one_dut(self, mock_service):
         mock_service.return_value.list_duts.return_value = [
@@ -54,7 +54,7 @@ class StorageQualCheckServiceTest(unittest.TestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            service.check_setup(None, None)
+            service.check_setup(None)
 
     def test_check_missing_label(self, mock_service):
         mock_service.return_value.list_duts.return_value = [
@@ -86,7 +86,7 @@ class StorageQualCheckServiceTest(unittest.TestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            service.check_setup("1", None)
+            service.check_setup("1")
 
     def test_check_duplicated_labels_across_pool_and_no_pool(
         self, mock_service
@@ -100,7 +100,7 @@ class StorageQualCheckServiceTest(unittest.TestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            service.check_setup(None, None)
+            service.check_setup(None)
 
     def test_check_new_storage_qual(self, mock_service):
         mock_service.return_value.list_duts.return_value = [

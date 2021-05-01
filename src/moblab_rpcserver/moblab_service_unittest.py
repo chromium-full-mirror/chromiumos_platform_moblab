@@ -40,35 +40,21 @@ class MoblabRPCServiceTest(unittest.TestCase):
     """Testing the MoblabService code."""
 
     def setUp(self):
+        self.mock_afe_connector = MagicMock()
         self.service = MoblabService()
+        self.service.afe_connector = self.mock_afe_connector
 
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
-    def test_get_dut_wifi_info(self, mock_afe_connector):
-        afe_get_dut_wifi_mock = MagicMock()
-        mock_afe_connector.return_value.get_dut_wifi_info = (
-            afe_get_dut_wifi_mock
-        )
-
+    def test_get_dut_wifi_info(self):
         self.service.get_dut_wifi_info()
 
-        afe_get_dut_wifi_mock.assert_called_once()
+        self.mock_afe_connector.get_dut_wifi_info.assert_called_once()
 
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
-    def test_set_dut_wifi_info(self, mock_afe_connector):
-        afe_set_configuration_info_mock = MagicMock()
-        mock_afe_connector.return_value.set_configuration_info = (
-            afe_set_configuration_info_mock
-        )
-
+    def test_set_dut_wifi_info(self):
         result_msg = self.service.set_dut_wifi_info(
             "Fake Wifi Name", "Fake Wifi Pass"
         )
 
-        afe_set_configuration_info_mock.assert_called_once()
+        self.mock_afe_connector.set_configuration_info.assert_called_once()
         assert isinstance(result_msg, str)
 
     def _create_mock_container(self, tags=[]):
@@ -79,11 +65,8 @@ class MoblabRPCServiceTest(unittest.TestCase):
         mock_container.image.tags = tags
         return mock_container
 
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
-    def test_get_usable_build_targets(self, mock_afe_connector):
-        mock_afe_connector.return_value.get_connected_devices.return_value = [
+    def test_get_usable_build_targets(self):
+        self.mock_afe_connector.get_connected_devices.return_value = [
             {
                 "labels": [
                     "hostname:mock_dut_1",
@@ -140,11 +123,11 @@ class MoblabRPCServiceTest(unittest.TestCase):
         mock_docker_client.containers.run = mock_container_run
         mock_docker_from_env.return_value = mock_docker_client
 
-        result_msg = self.service.update_docker()
+        result_msg = self.service._update_docker()
 
         mock_container_run.assert_called_once_with(
             "gcr.io/chromeos-partner-moblab/watchtower:release",
-            command="--run-once",
+            command="--run-once --include-restarting",
             detach=True,
             name="update",
             volumes=["/var/run/docker.sock:/var/run/docker.sock"],
@@ -157,7 +140,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
         mock_docker_from_env.return_value = MagicMock()
 
         with self.assertRaises(MoblabRpcError):
-            _ = self.service.update_docker()
+            _ = self.service._update_docker()
 
     def _mock_afe_connector_methods(
         self,
@@ -167,27 +150,24 @@ class MoblabRPCServiceTest(unittest.TestCase):
         succeed_remote_agent_config_commit,
     ):
         if succeed_validate:
-            mock_afe_connector.return_value.validate_cloud_storage_info.return_value = (
+            mock_afe_connector.validate_cloud_storage_info.return_value = (
                 True,
                 "Cloud values validated.",
             )
         else:
-            mock_afe_connector.return_value.validate_cloud_storage_info.return_value = (
+            mock_afe_connector.validate_cloud_storage_info.return_value = (
                 False,
                 "Cloud validation failed.",
             )
 
-        mock_afe_connector.return_value.set_configuration_info.return_value = (
+        mock_afe_connector.set_configuration_info.return_value = (
             succeed_cloud_configuration_set
         )
-        mock_afe_connector.return_value.set_is_remote_agent_enabled.return_value = (
+        mock_afe_connector.set_is_remote_agent_enabled.return_value = (
             succeed_remote_agent_config_commit
         )
 
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
-    def test_set_cloud_configuration(self, mock_afe_connector):
+    def test_set_cloud_configuration(self):
         SetCloudConfigurationTestParams = namedtuple(
             "SetCloudConfigurationTestParams",
             [
@@ -281,11 +261,12 @@ class MoblabRPCServiceTest(unittest.TestCase):
         for params in parameterized_set_cloud_configuration_tests:
             with self.subTest():
                 self._mock_afe_connector_methods(
-                    mock_afe_connector,
+                    self.mock_afe_connector,
                     params.succeed_validate,
                     params.succeed_cloud_configuration_set,
                     params.succeed_remote_agent_config_commit,
                 )
+                self.mock_afe_connector.get_num_jobs.return_value = 0
 
                 message = self.service.set_cloud_configuration(
                     params.is_cloud_enabled,
@@ -295,33 +276,21 @@ class MoblabRPCServiceTest(unittest.TestCase):
                     params.is_remote_agent_enabled,
                     params.is_remote_command_enabled,
                 )
-                assert message == params.expected_message_output
+                self.assertEqual(message, params.expected_message_output)
 
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
     @mock.patch("moblab_service.build_connector")
     @mock.patch("moblab_service.moblab_build_connector")
     def test_set_cloud_configuration_updates_build_connectors(
         self,
         mock_moblab_build_connector,
         mock_build_connector,
-        mock_afe_connector,
     ):
         # Mocking setup.
-        self._mock_afe_connector_methods(mock_afe_connector, True, True, True)
+        self._mock_afe_connector_methods(self.mock_afe_connector, True, True, True)
         # Mock and track call-throughs to re-initialize connectors.
-        MockMoblabBuildConnector = MagicMock()
-        mock_moblab_build_connector.MoblabBuildConnector = (
-            MockMoblabBuildConnector
-        )
-        MockBuildConnector = MagicMock()
-        mock_build_connector.MoblabBuildConnector = MockBuildConnector
-
-        pre_build_connector_call_count = MockBuildConnector.call_count
-        pre_moblab_build_connector_call_count = (
-            MockMoblabBuildConnector.call_count
-        )
+        MockMoblabBuildConnector = mock_moblab_build_connector.MoblabBuildConnector
+        MockBuildConnector = mock_build_connector.MoblabBuildConnector
+        self.mock_afe_connector.get_num_jobs.return_value = 0
 
         _ = self.service.set_cloud_configuration(
             True,
@@ -334,64 +303,38 @@ class MoblabRPCServiceTest(unittest.TestCase):
         self.service.moblab_build_connector
         self.service.build_connector
 
-        # Verifies that, after an invokation of set_cloud_configuration,
+        # Verifies that, after an invocation of set_cloud_configuration,
         # references to the two build connectors results in
         # a reinitialization of each. This ensures that changes in target
         # bucket or service_account creds gets ingested.
-        assert (
-            MockMoblabBuildConnector.call_count
-            == pre_moblab_build_connector_call_count + 1
-        )
-        assert (
-            MockBuildConnector.call_count == pre_build_connector_call_count + 1
-        )
+        self.assertEqual(MockMoblabBuildConnector.call_count, 1)
+        self.assertEqual(MockBuildConnector.call_count, 1)
 
-    @mock.patch.object(
-        MoblabService, "config_connector", new_callable=PropertyMock
-    )
-    def test_get_is_remote_agent_enabled(self, mock_config_connector):
-        config_get_is_remote_agent_enabled_mock = MagicMock()
-        mock_config_connector.return_value.get_is_remote_agent_enabled = (
-            config_get_is_remote_agent_enabled_mock
-        )
+    def test_get_is_remote_agent_enabled(self):
+        mock_config_connector = MagicMock()
+        self.service.config_connector = mock_config_connector
 
         self.service.get_is_remote_agent_enabled()
 
-        config_get_is_remote_agent_enabled_mock.assert_called_once()
+        mock_config_connector.get_is_remote_agent_enabled.assert_called_once()
 
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
-    def test_set_is_remote_agent_enabled(self, mock_afe_connector):
-        afe_set_is_remote_agent_enabled_mock = MagicMock()
-        mock_afe_connector.return_value.set_is_remote_agent_enabled = (
-            afe_set_is_remote_agent_enabled_mock
-        )
-
+    def test_set_is_remote_agent_enabled(self):
         self.service.set_is_remote_agent_enabled(True)
-
-        afe_set_is_remote_agent_enabled_mock.assert_called_once()
+        self.mock_afe_connector.set_is_remote_agent_enabled.assert_called_once()
 
     @mock.patch.object(
         MoblabService, "moblab_build_connector", new_callable=PropertyMock
     )
-    @mock.patch.object(
-        MoblabService, "config_connector", new_callable=PropertyMock
-    )
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
     def test_run_suite(
         self,
-        mock_afe_connector,
-        mock_config_connector,
         mock_moblab_build_connector,
     ):
-        mock_config_connector.return_value.get_test_wifi_ap_and_password.return_value = (
-            "mock_ssid",
-            "mock_wifi_pass",
-        )
-        mock_afe_connector.return_value.run_suite.return_value = (
+        self.mock_afe_connector.get_dut_wifi_info.return_value = {
+            "wifi_dut_ap_name": "mock_ssid",
+            "wifi_dut_ap_pass": "mock_wifi_pass",
+        }
+
+        self.mock_afe_connector.run_suite.return_value = (
             1,
             None,
         )  # (job_id, error_msg)
@@ -403,7 +346,7 @@ class MoblabRPCServiceTest(unittest.TestCase):
         self.service.run_suite(
             "mock_build_target", "mock_model", "99", "00000.00.0", "mock_suite"
         )
-        mock_afe_connector.return_value.run_suite.assert_called_with(
+        self.mock_afe_connector.run_suite.assert_called_with(
             "mock_build_target",
             "mock_build_target-release/R99-00000.00.0",
             {"cros-version": "mock_build_target-release/R99-00000.00.0"},
@@ -419,23 +362,15 @@ class MoblabRPCServiceTest(unittest.TestCase):
     @mock.patch.object(
         MoblabService, "moblab_build_connector", new_callable=PropertyMock
     )
-    @mock.patch.object(
-        MoblabService, "config_connector", new_callable=PropertyMock
-    )
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
     def test_run_suite_afe_failure(
         self,
-        mock_afe_connector,
-        mock_config_connector,
         mock_moblab_build_connector,
     ):
-        mock_config_connector.return_value.get_test_wifi_ap_and_password.return_value = (
-            "mock_ssid",
-            "mock_wifi_pass",
-        )
-        mock_afe_connector.return_value.run_suite.return_value = (
+        self.mock_afe_connector.get_dut_wifi_info.return_value = {
+            "wifi_dut_ap_name": "mock_ssid",
+            "wifi_dut_ap_pass": "mock_wifi_pass",
+        }
+        self.mock_afe_connector.run_suite.return_value = (
             None,
             "Create suite job attempt failed, blah blah blah.",
         )  # (job_id, error_msg)
@@ -458,24 +393,16 @@ class MoblabRPCServiceTest(unittest.TestCase):
     @mock.patch.object(
         MoblabService, "moblab_build_connector", new_callable=PropertyMock
     )
-    @mock.patch.object(
-        MoblabService, "config_connector", new_callable=PropertyMock
-    )
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
     def test_run_suite_api_failure(
         self,
-        mock_afe_connector,
-        mock_config_connector,
         mock_moblab_build_connector,
         mock_build_connector,
     ):
-        mock_config_connector.return_value.get_test_wifi_ap_and_password.return_value = (
-            "mock_ssid",
-            "mock_wifi_pass",
-        )
-        mock_afe_connector.return_value.run_suite.return_value = (
+        self.mock_afe_connector.get_dut_wifi_info.return_value = {
+            "wifi_dut_ap_name": "mock_ssid",
+            "wifi_dut_ap_pass": "mock_wifi_pass",
+        }
+        self.mock_afe_connector.run_suite.return_value = (
             1,
             None,
         )  # (job_id, error_msg)
@@ -492,18 +419,14 @@ class MoblabRPCServiceTest(unittest.TestCase):
 
         mock_build_connector.return_value.get_builds_for_milestone.assert_called_once()
 
-    @mock.patch.object(
-        MoblabService, "afe_connector", new_callable=PropertyMock
-    )
-    @mock.patch.object(
-        MoblabService, "upload_status_connector", new_callable=PropertyMock
-    )
-    def test_get_jobs(self, mock_upload_status_connector, mock_afe_connctor):
-        mock_afe_connctor.return_value.get_jobs.return_value = [
+    def test_get_jobs(self):
+        mock_upload_status_connector = MagicMock()
+        self.service.upload_status_connector = mock_upload_status_connector
+        self.mock_afe_connector.get_jobs.return_value = [
             {"id": 1, "key1": "value1"},
             {"id": 3, "key3": "value3"},
         ]
-        mock_upload_status_connector.return_value.get_jobs_upload_status.return_value = {
+        mock_upload_status_connector.get_jobs_upload_status.return_value = {
             2: UploadResultState(status="ABC", attempt_number=2),
             3: UploadResultState(status="DEF", attempt_number=5),
         }
