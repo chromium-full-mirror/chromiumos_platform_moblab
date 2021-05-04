@@ -9,6 +9,7 @@ import {
 
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
+import {SelectableItem} from '../basic-autocomplete-selector/basic-autocomplete-selector.component';
 
 const SELECT_MODEL_PROMPT = 'Please select model.';
 const SELECT_BUILD_TARGET_PROMPT = 'Please select build target.';
@@ -39,11 +40,11 @@ export class BuildSelectFormsComponent implements AfterViewInit {
 
   // TODO(haddowk) Allow tryjobs and other build types.
   buildType = 'release';
-  buildTargets: string[] = [];
-  milestones: string[] = [];
-  buildVersions: string[] = [];
-  models: string[] = [];
-  pools: string[] = [];
+  buildTargets: SelectableItem[] = [];
+  milestones: SelectableItem[] = [];
+  buildVersions: SelectableItem[] = [];
+  models: SelectableItem[] = [];
+  pools: SelectableItem[] = [];
 
   private selectedModel: string;
   private selectedBuild: string;
@@ -96,7 +97,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   updateModels(newModels: string[]) {
-    this.models = newModels;
+    this.models = newModels.map(m => new SelectableItem(m));
 
     if (newModels.length === 0) {
       this.modelSelector.disable("No working DUT's detected.");
@@ -129,7 +130,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   updateBuildTargets(newBuildTargets: string[]) {
-    this.buildTargets = newBuildTargets;
+    this.buildTargets = newBuildTargets.map(bt => new SelectableItem(bt));
 
     if (this.buildTargets.length === 0) {
       this.boardSelector.disable(
@@ -165,7 +166,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   updateMilestones(newMilestones: string[]) {
-    this.milestones = newMilestones;
+    this.milestones = newMilestones.map(m => new SelectableItem(m));
 
     if (this.milestones.length === 0) {
       this.milestoneSelector.disable(
@@ -190,7 +191,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
       this.buildTargetName,
       this.selectedModel,
       this.milestone,
-      (builds: string[]) => {
+      (builds: {version: string, isGood: boolean}[]) => {
         this.updateBuildVersions(builds);
         this.formLoaded.emit();
       },
@@ -201,8 +202,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     );
   }
 
-  updateBuildVersions(newBuildVersions: string[]) {
-    this.buildVersions = newBuildVersions;
+  updateBuildVersions(newBuildVersions: {version: string, isGood: boolean}[]) {
+    this.buildVersions = newBuildVersions.map(v => new SelectableItem(v.version, v.isGood));
 
     if (this.buildVersions.length === 0) {
       this.buildSelector.disable('No builds found in configured bucket.');
@@ -233,7 +234,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   updatePools(newPools: string[]) {
-    this.pools = [''].concat(newPools);
+    this.pools = [''].concat(newPools).map(pool => new SelectableItem(pool));
   }
 
   poolChanged(pool: string) {

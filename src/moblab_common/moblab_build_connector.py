@@ -7,6 +7,7 @@ Interface for the Moblab RPC server to access build resources by using Moblab
 API.
 """
 
+import collections
 import logging
 import re
 
@@ -27,6 +28,8 @@ class MoblabBuildConnectorException(Exception):
     """Generic exception for this module."""
 
     pass
+
+BuildVersion = collections.namedtuple('BuildVersion', ['version', 'status'])
 
 
 class MoblabBuildConnector(object):
@@ -150,7 +153,7 @@ class MoblabBuildConnector(object):
             filter=milestone_filter,
         )
         build_results = self._list_builds(request)
-        return [build.build_version for build in build_results]
+        return [BuildVersion(version=build.build_version, status=build.status) for build in build_results]
 
     def check_build_stage_status(
         self, build_target, model, build, bucket_name

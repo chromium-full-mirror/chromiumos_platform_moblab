@@ -54,6 +54,12 @@ AFE_TO_MOBLAB_STATUS_MAPPINGS = {
     "Template": moblabrpc_pb2.Job.TEMPLATE,
 }
 
+API_TO_GRPC_BUILD_STATUS_MAP = {
+    "pass": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_PASS,
+    "fail": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_FAIL,
+    "running": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_RUNNING,
+    "aborted": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_ABORTED,
+}
 
 class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
     def __init__(self):
@@ -382,6 +388,11 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
+    def _convert_build_version_to_grpc(self, status):
+        if status in API_TO_GRPC_BUILD_STATUS_MAP:
+            return API_TO_GRPC_BUILD_STATUS_MAP[status]
+        return moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_PASS
+
     def list_build_versions(self, request, _context):
         build_versions = self.service.list_usable_build_versions(
             request.build_target, request.milestone, request.model
@@ -390,7 +401,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response = moblabrpc_pb2.ListBuildVersionsResponse(
             build_versions=[
                 moblabrpc_pb2.BuildItem(
-                    value=i.build_version, is_staged=i.is_staged
+                    value=i.build_version,
+                    is_staged=i.is_staged,
+                    status=self._convert_build_version_to_grpc(i.status),
                 )
                 for i in build_versions.results
             ],
