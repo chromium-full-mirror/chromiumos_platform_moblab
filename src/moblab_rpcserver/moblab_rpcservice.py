@@ -23,6 +23,7 @@ from moblab_common import config_connector
 from moblab_common import feedback_connector
 from moblab_common import host_connector
 from moblab_common import moblab_info
+from moblab_common import moblab_build_connector
 
 # pylint: disable=import-error
 from moblab_common.proto import moblabrpc_pb2
@@ -70,10 +71,10 @@ AFE_TO_DUT_STATUS_MAPPINGS = {
 }
 
 API_TO_GRPC_BUILD_STATUS_MAP = {
-    "pass": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_PASS,
-    "fail": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_FAIL,
-    "running": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_RUNNING,
-    "aborted": moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_ABORTED,
+    moblab_build_connector.BuildStatus.AVAILABLE: moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_PASS,
+    moblab_build_connector.BuildStatus.FAILED: moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_FAIL,
+    moblab_build_connector.BuildStatus.RUNNING: moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_RUNNING,
+    moblab_build_connector.BuildStatus.ABORTED: moblabrpc_pb2.BuildItem.BuildStatus.BUILD_STATUS_ABORTED,
 }
 
 
@@ -396,7 +397,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response = moblabrpc_pb2.ListMilestonesResponse(
             milestones=[
                 moblabrpc_pb2.BuildItem(
-                    value=i.milestone, is_staged=i.is_staged
+                    value=i.milestone,
+                    is_staged=i.is_staged,
                 )
                 for i in milestones.results
             ],
@@ -414,6 +416,13 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.build_target, request.milestone, request.model
         )
 
+        logging.debug(
+            "Build versions for %s target, %s milestone, %s model: %s",
+            request.build_target,
+            request.milestone,
+            request.model,
+            build_versions,
+        )
         response = moblabrpc_pb2.ListBuildVersionsResponse(
             build_versions=[
                 moblabrpc_pb2.BuildItem(

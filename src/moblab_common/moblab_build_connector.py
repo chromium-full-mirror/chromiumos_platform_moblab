@@ -8,6 +8,7 @@ API.
 """
 
 import collections
+import enum
 import logging
 import re
 
@@ -18,7 +19,10 @@ from google.auth import exceptions as auth_exceptions
 from google.chromeos.moblab_v1beta1.services.build_service.client import (
     BuildServiceClient,
 )
-from google.chromeos.moblab_v1beta1.types import build_service
+from google.chromeos.moblab_v1beta1.types import (
+    build_service,
+    resources
+)
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 DEFAULT_PAGE_SIZE = 500
@@ -26,12 +30,20 @@ DEFAULT_PAGE_SIZE = 500
 
 class MoblabBuildConnectorException(Exception):
     """Generic exception for this module."""
-
     pass
+
+BuildStatus = enum.Enum(
+    "BuildStatus", ["AVAILABLE", "FAILED", "RUNNING", "ABORTED"]
+)
 
 BuildVersion = collections.namedtuple('BuildVersion', ['version', 'status'])
 
-
+API_TO_INTERNAL_BUILD_STATUS_MAP = {
+    resources.Build.BuildStatus.PASS: BuildStatus.AVAILABLE,
+    resources.Build.BuildStatus.FAIL: BuildStatus.FAILED,
+    resources.Build.BuildStatus.RUNNING: BuildStatus.RUNNING,
+    resources.Build.BuildStatus.ABORTED: BuildStatus.ABORTED,
+}
 class MoblabBuildConnector(object):
     """
     Class that provides RPC server an interface to access build resources by
@@ -120,6 +132,11 @@ class MoblabBuildConnector(object):
             self._parse_milestone(build.milestone) for build in build_results
         ]
 
+    def _convert_to_internal_build_status(self, status):
+        if status in API_TO_INTERNAL_BUILD_STATUS_MAP:
+            return API_TO_INTERNAL_BUILD_STATUS_MAP[status]
+        return BuildStatus.AVAILABLE
+
     def list_builds_for_milestone(
         self,
         build_target,
@@ -153,7 +170,13 @@ class MoblabBuildConnector(object):
             filter=milestone_filter,
         )
         build_results = self._list_builds(request)
-        return [BuildVersion(version=build.build_version, status=build.status) for build in build_results]
+        return [
+            BuildVersion(
+                version=build.build_version,
+                status=self._convert_to_internal_build_status(build.status)
+            )
+            for build in build_results
+        ]
 
     def check_build_stage_status(
         self, build_target, model, build, bucket_name
