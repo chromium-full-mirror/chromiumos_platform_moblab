@@ -1,7 +1,7 @@
 <div fxLayout="column">
   <mat-toolbar fxLayout="row" color="primary" opened="true" #topToolbar>
     <div fxFlex fxLayout="row" fxLayoutAlign="start center">
-      <button class="menu-button" mat-button (click)="enableNavBar && mainSideNav.toggle()">
+      <button class="menu-button" mat-button (click)="enableNavBar && cloudConfigEnabled && mainSideNav.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
       <div class="toolbar-icon">
@@ -46,14 +46,14 @@
 
   <mat-sidenav-container fxFlex="95" class="sidenav-container">
     <mat-sidenav #mainSideNav mode="side" opened="true">
-      <mat-nav-list *ngIf="enableNavBar">
+      <mat-nav-list *ngIf="enableNavBar && cloudConfigEnabled">
         <a *ngFor="let tab of navTabs" mat-list-item class="sidebar-items" routerLink="{{ tab.route }}"
           routerLinkActive="active-route" #routerLinkActiveInstance="routerLinkActive"
           [class.list-item-active]="routerLinkActiveInstance.isActive" [routerLinkActiveOptions]="{ exact: true }">
           <mat-icon class="moblab-sidebar-icon">{{ tab.icon }} </mat-icon>
           {{ tab.label }}
-          <mat-icon color="warn" matTooltip="Cloud configuration not enabled"
-            *ngIf="showCloudConfigWarning && (tab.label === 'Configuration')">
+          <mat-icon color="warn" matTooltip="Could not verify if cloud integration has been enabled."
+            *ngIf="cloudConfigError && (tab.label === 'Configuration')">
             warning
           </mat-icon>
         </a>

@@ -25,7 +25,8 @@ export class AppSidebarComponent implements OnInit {
   navTabs = [];
   navTestRunMenuOptions = [];
   pauseRequestors = [];
-  showCloudConfigWarning = false;
+  cloudConfigEnabled: boolean;
+  cloudConfigError: boolean;
 
   constructor(
     private globalInfo: GlobalInfoService,
@@ -119,8 +120,15 @@ export class AppSidebarComponent implements OnInit {
     this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
       this.pauseRequestors = requestors;
     });
-    this.configSetupService.cloudConfigObservable.subscribe(enabled => {
-      this.showCloudConfigWarning = !enabled;
+    this.configSetupService.cloudConfigObservable.subscribe(data => {
+      this.cloudConfigError = data["error"]
+      if (this.cloudConfigError) {
+        // Let user navigate through the UI when unable to retrieve cloud
+        // configuration.
+        this.cloudConfigEnabled = true;
+      } else {
+        this.cloudConfigEnabled = data["enabled"];
+      }
     });
     this.globalInfo.enableNavBarObservable.subscribe(enabled => {
       this.enableNavBar = enabled;

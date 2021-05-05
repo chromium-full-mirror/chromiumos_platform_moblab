@@ -104,7 +104,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
     private moblabConfigurationRpcService: MoblabConfigurationGrpcService,
-    private configSetupService: ConfigSetupService
+    private configSetupService: ConfigSetupService,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -168,10 +168,13 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     );
   }
 
-  getCloudConfiguration() {
+  getCloudConfiguration(calledOnSubmit: boolean = false) {
     /**
      * Method sends RPC command to fetch cloud configuration information and
      * apply fetched values to the UI forms.
+     *
+     * Parameter calledOnSubmit is set to true when this method is called from
+     * the onCloudConfigSubmit method.
      */
     this.configurationLoading = true;
     this.moblabRpcService.get_cloud_configuration(
@@ -193,7 +196,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
             gcs_bucket_url
           )
         );
-        this.configSetupService.setIsCloudConfigEnabled(is_cloud_enabled);
+        // If called from the onCloudConfigSubmit method, suppress the popup.
+        if (!this.configSetupService.getIsCloudConfigEnabled() && !calledOnSubmit) {
+          this.setOffPopup(`Please enable the Cloud integration to 
+              allow system to fetch Chrome OS test images and upload test 
+              results for CPCon ingestion.`);
+        }
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
@@ -416,7 +424,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.moblabRpcService.set_cloud_configuration(
       (message: string) => {
         this.setOffPopup(message);
-        this.getCloudConfiguration();
+        this.getCloudConfiguration(true);
       },
       (errorMsg: string) => {
         this.configurationLoading = false;

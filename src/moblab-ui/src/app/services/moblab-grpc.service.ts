@@ -3,6 +3,7 @@ import {Empty} from 'google-protobuf/google/protobuf/empty_pb';
 import * as grpcWeb from 'grpc-web';
 
 import {MoblabRpcServiceClient} from './moblabrpc_grpc_web_pb';
+import {ConfigSetupService} from './moblab-configuration-alerting.service';
 
 import {
   AbortJobsRequest,
@@ -97,7 +98,9 @@ import {
 export class MoblabGrpcService {
   moblabRpcService: MoblabRpcServiceClient = null;
 
-  constructor() {
+  constructor(
+    private configSetupService: ConfigSetupService
+  ) {
     const url = new URL(window.location.href);
     let service_url = new String(url.protocol);
     service_url = service_url.concat('//', url.hostname, ':', url.port, '/rpc');
@@ -1180,8 +1183,13 @@ export class MoblabGrpcService {
       {},
       (err: grpcWeb.Error, response: GetCloudConfigurationResponse) => {
         if (err) {
+          // Set Configuration alerting state before calling error handling
+          // callback.
+          this.configSetupService.setState(false, true);
           errorHandlingCallback(err.message);
         } else {
+          // Set Configuration alerting state before calling success callback.
+          this.configSetupService.setState(response.getIsCloudEnabled(), false);
           callback(
             response.getBotoKeyId(),
             response.getBotoKeySecret(),
