@@ -44,6 +44,8 @@ export class RunAnySuiteComponent
   public hideCustomInput = true;
 
   public suiteName = '';
+  private buildSelected = false;
+  private suiteSelected = false;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -64,11 +66,9 @@ export class RunAnySuiteComponent
   /** Method triggered on change of suite input form.
    * */
   suiteChanged() {
-    if (this.suiteInput.getInput()) {
-      this.runSuiteButton.enable();
-    } else {
-      this.runSuiteButton.disable();
-    }
+    this.suiteName = this.suiteInput.getInput();
+    this.suiteSelected = this.suiteName ? true : false;
+    this.isReadyToRun();
   }
 
   /** Method triggered on change of suite input form.
@@ -76,13 +76,21 @@ export class RunAnySuiteComponent
   suiteDropdownChanged(suiteName: string) {
     if (suiteName !== this.MANUAL_SUITE_ENTRY_DESC) {
       this.hideCustomInput = true;
-      this.suiteName = suiteName;
       this.suiteInput.disable('Please select build.');
-      this.runSuiteButton.enable();
+      this.suiteName = suiteName;
     } else {
       this.hideCustomInput = false;
       this.suiteInput.enable();
-      this.suiteName = '';
+      this.suiteName = this.suiteInput.getInput();
+    }
+    this.suiteSelected = this.suiteName ? true : false;
+    this.isReadyToRun();
+  }
+
+  isReadyToRun() {
+    if (this.suiteSelected && this.buildSelected) {
+      this.runSuiteButton.enable();
+    } else {
       this.runSuiteButton.disable();
     }
   }
@@ -91,14 +99,17 @@ export class RunAnySuiteComponent
    * ( model, build-target, milestone, build-version ).
    * */
   onBuildSetCustom(event) {
+    this.buildSelected = true;
     this.suiteInput.enable();
+    this.isReadyToRun();
   }
 
   /** Method is triggered when build version form no longer has a valid
    * build version selected.
    * */
   onBuildVersionUnselected() {
-    this.runSuiteButton.disable();
+    this.buildSelected = false;
+    this.isReadyToRun();
   }
 
   /** Method triggered on run-suite button press. Invokes runSuite RPC call.
@@ -106,17 +117,13 @@ export class RunAnySuiteComponent
   onRunSuiteClick() {
     super.onRunSuiteClick('Starting suite run.');
 
-    if (!this.suiteName) {
-      this.suiteName = this.suiteInput.getInput();
-    }
-
     this.moblabGrpcService.runSuite(
       _ => {
         this.onSuiteStarted();
       },
       (err, _) => {
         this.onRunSuiteFailed(err.message);
-        this.runSuiteButton.enable();
+        this.isReadyToRun();
       },
       this.suiteName,
       this.selectedBuild,
