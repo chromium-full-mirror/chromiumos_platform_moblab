@@ -1,12 +1,10 @@
 <mat-card>
-  <app-build-select-forms
-    (allRequiredFieldsSet)="onBuildSet($event)"
-    (buildVersionUnselected)="onBuildVersionUnselected()"
-    (formLoading)="onFormLoading($event.message)"
+  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)"
+    (buildVersionUnselected)="onBuildVersionUnselected()" (formLoading)="onFormLoading($event.message)"
     (formLoaded)="onFormLoaded()">
   </app-build-select-forms>
 
   <app-basic-text-form></app-basic-text-form>
 
-  <app-run-suite-button (click)="onRunSuiteClick()"></app-run-suite-button>
+  <app-run-suite-button (onClick)="onRunSuiteClick()"></app-run-suite-button>
 </mat-card>
