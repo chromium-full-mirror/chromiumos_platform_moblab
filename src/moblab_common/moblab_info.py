@@ -83,7 +83,7 @@ def _get_public_ip_address():
         return host_connector.HostServicesConnector.get_ip()
     except host_connector.HostServicesException:
         _LOGGER.exception("Failed to get ip address from host.")
-        raise
+        return None
 
 
 def get_network_info():
@@ -97,9 +97,8 @@ def get_network_info():
         A dict of network information ( specifically, a 'server_ip' and
         'is_connected' which is true iff Moblab is connected to internet.
     """
-    try:
-        ip = _get_public_ip_address()
-    except host_connector.HostServicesException:
+    ip = _get_public_ip_address()
+    if ip is None or ip == "localhost":
         return {"server_ip": None, "is_connected": False}
     else:
         _LOGGER.info("Established TCP connection with well known server.")

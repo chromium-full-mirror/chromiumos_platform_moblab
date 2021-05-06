@@ -1396,34 +1396,6 @@ class MoblabService(object):
             else:
                 return "Failed to commit disable cloud change."
 
-    def _get_public_ip_address(self):
-        """Gets the public IP address.
-
-        @return: public ip address as string.
-        """
-        try:
-            return host_connector.HostServicesConnector.get_ip()
-        except host_connector.HostServicesException:
-            logging.exception("Failed to get ip address from host.")
-        return "No IP Address"
-
-    def get_network_info(self):
-        """
-            Gets network info of Moblab.
-
-            TCP socket is used to test the connectivity. If there is no connectivity,
-            try to get the public IP with UDP socket.
-
-        Returns:
-            A dict of network information ( specifically, a 'server_ip' and
-            'is_connected' which is true iff Moblab is connected to internet.
-        """
-        ip = self._get_public_ip_address()
-        if ip is not None:
-            logging.info("Established TCP connection with well known server.")
-            return {"server_ip": ip, "is_connected": True}
-        return {"server_ip": None, "is_connected": False}
-
     def get_is_update_available(self):
         """
             Check to see if there is a system update or any containers that
