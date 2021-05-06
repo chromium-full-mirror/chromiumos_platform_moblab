@@ -154,7 +154,6 @@ def _get_moblab_version():
     client = docker.from_env(timeout=300)
     try:
         container = client.containers.get(
-            # this has to be compose, but temporarily we look at rpc container
             MoblabConstants.MOBLAB_COMPOSE_CONTAINER_NAME
         )
         version = container.labels.get("version", "autopush")
