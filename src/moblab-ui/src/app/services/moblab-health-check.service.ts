@@ -42,13 +42,8 @@ export class MoblabHealthCheckService {
       service => service.service === 'moblab'
     )[0];
 
-    // TODO(b/186429559): Remove the ignore list when the containers no longer crash loop.
     const loadingContainers = moblabService.healthchecks.filter(
-      container =>
-        container.health === true &&
-        !MoblabHealthCheckConstants.CONTAINER_IGNORE_LIST.includes(
-          container.name
-        )
+      container => container.health === true
     );
     return loadingContainers.length === 0;
   }
