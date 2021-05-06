@@ -748,7 +748,7 @@ class MoblabService(object):
         build_version_results = [
             BuildVersionPair(
                 build_version=build_version,
-                status="pass",
+                status=moblab_build_connector.BuildStatus.AVAILABLE,
                 is_staged=True
             )
             for build_version in bucket_build_versions
