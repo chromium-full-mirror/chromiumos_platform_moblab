@@ -4,5 +4,4 @@ export class MoblabSettingsConstains {
 }
 export class MoblabHealthCheckConstants {
   static readonly MOBLAB_CONTAINERS_COUNT = 13;
-  static readonly CONTAINER_IGNORE_LIST = ['RemoteAgent', 'ResultsOffloader'];
 }
