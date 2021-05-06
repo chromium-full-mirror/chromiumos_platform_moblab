@@ -248,7 +248,7 @@ class AFEConnector(object):
         if id_filter:
             params["id__iexact"] = id_filter
         if name_filter:
-            params["name__iexact"] = name_filter
+            params["name__icontains"] = name_filter
         if created_time_lt:
             params["created_on__lte"] = str(
                 datetime.fromtimestamp(created_time_lt).strftime(
