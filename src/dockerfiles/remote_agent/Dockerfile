@@ -70,9 +70,12 @@ RUN mkdir /var/log/moblab
 RUN chown -R moblab /moblab
 RUN chown -R moblab /var/log/moblab
 
+COPY --chown=moblab src/dockerfiles/remote_agent/start_remote_agent.sh /
+RUN chmod uog+rx /start_remote_agent.sh
+
 WORKDIR /moblab
 USER moblab
 
 EXPOSE 6050
 
-CMD ["/etc/moblab/remote_agent/server.py", "-v"]
+CMD ["/start_remote_agent.sh"]
