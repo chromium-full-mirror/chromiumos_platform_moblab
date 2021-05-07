@@ -14,6 +14,7 @@ RUN apk update \
 RUN mkdir -p /etc/default/
 RUN echo -e "ENABLED=1\nIGNORE_RESOLVCONF=yes" > /etc/default/dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf
+COPY dnsmasq-dev.conf /etc/dnsmasq-dev.conf
 
 #run!
 ENTRYPOINT ["/usr/sbin/dnsmasq","--no-daemon"]
