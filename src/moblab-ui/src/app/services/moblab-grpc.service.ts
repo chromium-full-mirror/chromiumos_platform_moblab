@@ -4,7 +4,7 @@ import * as grpcWeb from 'grpc-web';
 
 import {MoblabRpcServiceClient} from './moblabrpc_grpc_web_pb';
 import {ConfigSetupService} from './moblab-configuration-alerting.service';
-
+import {environment} from '../../environments/environment';
 import {
   AbortJobsRequest,
   AbortJobsResponse,
@@ -91,19 +91,19 @@ import {
   FirmwareUpdateCommandOutput,
   ValidateStorageQualSetupRequest,
   ProvisionDutsRequest,
-  BuildItem
+  BuildItem,
 } from './moblabrpc_pb';
 
 @Injectable({providedIn: 'root'})
 export class MoblabGrpcService {
   moblabRpcService: MoblabRpcServiceClient = null;
 
-  constructor(
-    private configSetupService: ConfigSetupService
-  ) {
+  constructor(private configSetupService: ConfigSetupService) {
     const url = new URL(window.location.href);
+    const port =
+      environment.defaultApiPort === '' ? url.port : environment.defaultApiPort;
     let service_url = new String(url.protocol);
-    service_url = service_url.concat('//', url.hostname, ':', url.port, '/rpc');
+    service_url = service_url.concat('//', url.hostname, ':', port, '/rpc');
     console.log(service_url);
 
     this.moblabRpcService = new MoblabRpcServiceClient(service_url.toString());
@@ -161,7 +161,7 @@ export class MoblabGrpcService {
     milestone: string,
     buildtarget: string,
     model: string,
-    pool: string,
+    pool: string
   ) {
     const request = new RunSuiteRequest();
     request.setSuite(suite_name);
@@ -388,7 +388,7 @@ export class MoblabGrpcService {
     error_callback: (err: string) => void,
     build: string,
     milestone: string,
-    pool: string,
+    pool: string
   ) {
     const request = new ProvisionDutsRequest();
     request.setBuildVersion(build);
@@ -407,7 +407,6 @@ export class MoblabGrpcService {
       }
     );
   }
-
 
   listConnectedDuts(callback: (x: ConnectedDutInfo[]) => void) {
     const request = new ListConnectedDutsRequest();
@@ -746,7 +745,10 @@ export class MoblabGrpcService {
     buildtarget: string,
     model: string,
     milestone: string,
-    callback: (buildVersions: {version: string, isGood: boolean}[], isIncomplete: boolean) => void,
+    callback: (
+      buildVersions: {version: string; isGood: boolean}[],
+      isIncomplete: boolean
+    ) => void,
     errorHandlingCallback: (err_msg: string) => void
   ) {
     const request = new ListBuildVersionsRequest();
@@ -764,7 +766,8 @@ export class MoblabGrpcService {
           for (const item of response.getBuildVersionsList()) {
             buildVersionNames.push({
               version: item.getValue(),
-              isGood: item.getStatus() === BuildItem.BuildStatus.BUILD_STATUS_PASS,
+              isGood:
+                item.getStatus() === BuildItem.BuildStatus.BUILD_STATUS_PASS,
             });
           }
           callback(buildVersionNames, response.getIsIncomplete());

@@ -54,6 +54,20 @@
                 }
               ]
             },
+            "local": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
+            },
             "production": {
               "budgets": [
                 {
@@ -89,6 +103,9 @@
             },
             "dev": {
               "browserTarget": "moblab-partner-ui:build:dev"
+            },
+            "local": {
+              "browserTarget": "moblab-partner-ui:build:local"
             },
             "production": {
               "browserTarget": "moblab-partner-ui:build:production"
