@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {MoblabHealthCheckConstants} from '../constants';
+import {environment} from './../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -11,11 +12,13 @@ export class MoblabHealthCheckService {
 
   constructor(private http: HttpClient) {
     const url = new URL(window.location.href);
+    const port =
+      environment.defaultApiPort === '' ? url.port : environment.defaultApiPort;
     this.mobmonitorUrl = new String(url.protocol).concat(
       '//',
       url.hostname,
       ':',
-      url.port,
+      port,
       '/api/mobmonitor'
     );
   }

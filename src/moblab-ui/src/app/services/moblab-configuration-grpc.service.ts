@@ -18,6 +18,7 @@ import {
 } from './moblab_configuration_rpc_pb';
 
 import {MoblabSettingsConstains} from '../constants';
+import {environment} from './../../environments/environment';
 import {Observable, timer} from 'rxjs';
 import {retryWhen, delayWhen} from 'rxjs/operators';
 
@@ -33,8 +34,10 @@ export class MoblabConfigurationGrpcService {
 
   constructor() {
     const url = new URL(window.location.href);
+    const port =
+      environment.defaultApiPort === '' ? url.port : environment.defaultApiPort;
     let service_url = new String(url.protocol);
-    service_url = service_url.concat('//', url.hostname, ':', url.port, '/rpc');
+    service_url = service_url.concat('//', url.hostname, ':', port, '/rpc');
     console.log(service_url);
 
     this.configurationRpcClient = new MoblabConfigurationServicePromiseClient(
