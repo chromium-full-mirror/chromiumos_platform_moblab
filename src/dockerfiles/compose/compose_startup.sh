@@ -41,11 +41,12 @@ else
     docker-compose pull moblab-ui
     docker-compose up -d moblab-ui
 
-    docker-compose pull mobmonitor
-    docker-compose up -d mobmonitor
-    
+    #!! remote_access is initializing moblab_home volume so it has to go first
     docker-compose pull remote_access
     docker-compose up -d remote_access
+
+    docker-compose pull mobmonitor
+    docker-compose up -d mobmonitor
 
     docker-compose -f ./docker-compose.watchtower.yaml pull
     docker-compose -f ./docker-compose.watchtower.yaml up -d
