@@ -100,10 +100,10 @@ export class MoblabGrpcService {
 
   constructor(private configSetupService: ConfigSetupService) {
     const url = new URL(window.location.href);
-    const port =
-      environment.defaultApiPort === '' ? url.port : environment.defaultApiPort;
+    const hostname = environment.defaultHostName || url.hostname;
+    const port = environment.defaultApiPort || url.port;
     let service_url = new String(url.protocol);
-    service_url = service_url.concat('//', url.hostname, ':', port, '/rpc');
+    service_url = service_url.concat('//', hostname, ':', port, '/rpc');
     console.log(service_url);
 
     this.moblabRpcService = new MoblabRpcServiceClient(service_url.toString());

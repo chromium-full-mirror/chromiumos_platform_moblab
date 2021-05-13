@@ -1,10 +1,6 @@
 import {Injectable} from '@angular/core';
-import {
-  CanActivate,
-  Router,
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot,
-} from '@angular/router';
+import {CanActivate, Router} from '@angular/router';
+import {environment} from 'environments/environment';
 import {MoblabHealthCheckService} from '../services/moblab-health-check.service';
 
 @Injectable({
@@ -16,10 +12,11 @@ export class MoblabHealthCheckGuard implements CanActivate {
     private healthCheckService: MoblabHealthCheckService
   ) {}
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Promise<boolean> {
+  canActivate(): Promise<boolean> | boolean {
+    if (environment.disableHealthCheckGuard) {
+      return true;
+    }
+
     return new Promise(resolve => {
       this.healthCheckService
         .isMoblabServiceHealthy()

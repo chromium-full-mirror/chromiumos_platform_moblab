@@ -7,4 +7,7 @@
 export const environment = {
   production: false,
   defaultApiPort: '',
+  defaultHostName: '',
+  disableConfigGuard: false,
+  disableHealthCheckGuard: false,
 };
