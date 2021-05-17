@@ -1,0 +1,128 @@
+/* Theme variables. */
+$color-dark-primary: #1976d2;
+$color-dark-secondary: dimgray;
+$color-light-primary: #ffffff;
+$color-light-secondary: #e0e0e0;
+$backdrop-color: rgba(0, 0, 0, .288);
+$font-family: "Open Sans", "Arimo", sans-serif;
+
+/*
+Overall app styles go here.
+
+The prefix "m-" is an App level identifier and should not be used for
+component level styles.
+
+For component level styles, append prefix "c-".
+*/
+
+body {
+  margin: 0px;
+  font-family: $font-family;
+}
+
+/* Background. */
+
+.m-background-dark {
+  background-color: $color-dark-primary;
+  color: $color-light-primary;
+}
+
+.m-background-light {
+  background-color: $color-light-primary;
+  color: $color-dark-primary;
+}
+
+/* Buttons. */
+
+.m-button-base {
+  font-family: $font-family;
+  font-size: 14px;
+  font-stretch: normal;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 500;
+  height: 35px;
+  line-height: normal;
+  margin: 10px 0;
+  min-width: 75px;
+  padding: 0 8px 0 8px;
+  position: relative;
+}
+
+.m-button-dark {
+  color: $color-dark-primary;
+  background-color: $color-light-primary;
+}
+
+.m-button-light {
+  background-color: $color-dark-primary;
+  color: $color-light-primary;
+}
+
+.m-button-action-dark {
+  @extend .m-button-base, .m-button-dark;
+}
+
+.m-button-action-light {
+  @extend .m-button-base, .m-button-light;
+}
+
+/* Headings. */
+
+.m-title-base {
+  font-family: $font-family;
+  font-style: normal;
+  font-variant: normal;
+  font-stretch: normal;
+}
+
+.m-title-light {
+  color: $color-light-primary;
+}
+
+.m-title-dark {
+  color: $color-dark-primary;
+}
+
+.m-title-2 {
+  font-size: 20px;
+  line-height: 56px;
+  font-weight: 500;
+}
+
+.m-title-2-light {
+  @extend .m-title-base, .m-title-2, .m-title-light;
+}
+
+.m-title-2-dark {
+  @extend .m-title-base, .m-title-2, .m-title-dark;
+}
+
+/* Content. */
+
+.m-content-base {
+  font-family: $font-family;
+  display: block;
+  position: absolute;
+}
+
+.m-content-dark {
+  color: $color-dark-secondary;
+}
+
+.m-content-light {
+  color: $color-light-secondary;
+}
+
+.m-content-normal {
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-size: 16px;
+  line-height: normal;
+}
+
+.m-content-normal-dark {
+  @extend .m-content-base, .m-content-dark, .m-content-normal;
+}

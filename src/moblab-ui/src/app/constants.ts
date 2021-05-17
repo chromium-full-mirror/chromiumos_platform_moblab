@@ -5,3 +5,10 @@ export class MoblabSettingsConstains {
 export class MoblabHealthCheckConstants {
   static readonly MOBLAB_CONTAINERS_COUNT = 13;
 }
+
+export enum NewUpdateStatus {
+  UNKNOWN,
+  NO_UPDATE,
+  UPDATE_AVAILABLE,
+  UPDATE_AVAILABLE_WITH_JOBS_RUNNING,
+}

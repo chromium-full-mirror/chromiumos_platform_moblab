@@ -14,6 +14,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTableModule} from '@angular/material/table';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import {NgModule} from '@angular/core';
 
 import {KeyValTableComponent} from './keyval-table/keyval-table.component';
@@ -27,8 +28,10 @@ import {
   SubmissionResultDialog,
 } from './feedback/feedback.component';
 import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedback/feedback.module';
+import {NewUpdateModule} from '../directives/new-update/new-update.module';
 import {ButtonWithProgressComponent} from './button-with-progress/button-with-progress.component';
 import {NotificationBannerComponent} from './notification-banner/notification-banner.component';
+import {NewUpdateComponent} from './new-update/new-update.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +45,7 @@ import {NotificationBannerComponent} from './notification-banner/notification-ba
     UpdateButtonComponent,
     ButtonWithProgressComponent,
     NotificationBannerComponent,
+    NewUpdateComponent,
   ],
   exports: [
     FeedbackComponent,
@@ -52,6 +56,7 @@ import {NotificationBannerComponent} from './notification-banner/notification-ba
     UpdateButtonComponent,
     ButtonWithProgressComponent,
     NotificationBannerComponent,
+    NewUpdateComponent,
   ],
   imports: [
     BrowserAnimationsModule,
@@ -60,6 +65,7 @@ import {NotificationBannerComponent} from './notification-banner/notification-ba
     FlexLayoutModule,
     FormsModule,
     MatButtonModule,
+    MatTooltipModule,
     MatCardModule,
     MatCardModule,
     MatCheckboxModule,
@@ -73,6 +79,7 @@ import {NotificationBannerComponent} from './notification-banner/notification-ba
     MatTableModule,
     ReactiveFormsModule,
     ScreenshotFeedbackModule,
+    NewUpdateModule,
   ],
   providers: [NotificationBannerComponent]
 })

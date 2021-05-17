@@ -1,0 +1,33 @@
+<div class="m-background-light c-dialog" *ngIf="!showToolbar">
+  <div class="c-dialog-title m-font m-background-dark">
+    <div class="m-title-2-light c-title">
+      {{title}}
+    </div>
+  </div>
+  <div class="c-dialog-content">
+    <div class="m-content-normal-dark c-description">
+      <div *ngFor="let line of blurb">
+        <div>{{ line }}</div>
+        <br>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showCancelLabelOnly; then showOnlyCancelButton; else showAllButtons"></div>
+
+  <ng-template #showAllButtons>
+    <mat-dialog-actions class="c-dialog-actions" align="end">
+      <button mat-button (click)="dialogRef.close()" class="m-button-action-dark">{{ cancelLabel }}</button>
+      <a href="#/config"><button mat-button class="m-button-action-light c-action-button">{{
+          sendLabel
+          }}</button></a>
+    </mat-dialog-actions>
+  </ng-template>
+  <ng-template #showOnlyCancelButton>
+    <mat-dialog-actions class="dialog-actions" align="end">
+      <button mat-button (click)="dialogRef.close()" class="m-button-action-light c-action-button">{{
+        cancelLabel }}</button>
+    </mat-dialog-actions>
+  </ng-template>
+
+</div>

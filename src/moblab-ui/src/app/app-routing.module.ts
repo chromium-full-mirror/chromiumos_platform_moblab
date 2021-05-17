@@ -1,5 +1,5 @@
 import {APP_BASE_HREF} from '@angular/common';
-import {NgModule} from '@angular/core';
+import {NgModule, APP_INITIALIZER} from '@angular/core';
 import {RouterModule, Routes, CanActivate} from '@angular/router';
 
 import {ConfigurationComponent} from './configuration/configuration.component';
@@ -14,6 +14,7 @@ import {ViewJobsComponent} from './view-jobs/view-jobs.component';
 import {ConfigGuard} from './guards/moblab-configuration-guard';
 import {HealthCheckComponent} from './health-check/health-check.component';
 import {MoblabHealthCheckGuard} from './guards/moblab-health-check.guard';
+import {NewUpdateService} from './services/new-update.service';
 
 const routes: Routes = [
   {path: 'health_check', component: HealthCheckComponent},
@@ -58,6 +59,16 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes, {enableTracing: true, useHash: true})],
   exports: [RouterModule],
-  providers: [{provide: APP_BASE_HREF, useValue: ''}, ConfigGuard],
+  providers: [
+    {provide: APP_BASE_HREF, useValue: ''},
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (newUpdateService: NewUpdateService) =>
+        () => newUpdateService.pollForUpdates(),
+      deps: [NewUpdateService],
+      multi: true
+    },
+    ConfigGuard
+  ],
 })
 export class AppRoutingModule { }
