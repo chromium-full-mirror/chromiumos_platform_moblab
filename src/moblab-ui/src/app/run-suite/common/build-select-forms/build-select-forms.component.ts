@@ -7,9 +7,11 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectableItem} from '../basic-autocomplete-selector/basic-autocomplete-selector.component';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 
 const SELECT_MODEL_PROMPT = 'Please select model.';
 const SELECT_BUILD_TARGET_PROMPT = 'Please select build target.';
@@ -56,7 +58,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   constructor(
     private changeDetector: ChangeDetectorRef,
     public moblabGrpcService: MoblabGrpcService,
-    private snackBar: MatSnackBar
+    private notificationBanner: NotificationBannerComponent,
   ) { }
 
   ngAfterViewInit() {
@@ -69,17 +71,10 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     this.changeDetector.detectChanges();
   }
 
-  setOffError(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
-      verticalPosition: 'top',
-      panelClass: ['snack-error'],
-    });
-  }
-
   setErrorReason(selector, msg: string) {
     msg = 'Failed to fetch items: ' + msg;
     selector.disable(msg);
-    this.setOffError(msg);
+    this.notificationBanner.error(msg);
   }
 
   getModels() {

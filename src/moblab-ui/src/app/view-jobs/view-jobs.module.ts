@@ -13,7 +13,6 @@ import {MatListModule} from '@angular/material/list';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatSortModule} from '@angular/material/sort';
 import {MatTableModule} from '@angular/material/table';
 import {NgModule} from '@angular/core';
@@ -43,7 +42,6 @@ import {WidgetsModule} from '../widgets/widgets.module';
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatSnackBarModule,
     MatSortModule,
     MatTableModule,
     MatTooltipModule,

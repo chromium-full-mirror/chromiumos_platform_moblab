@@ -7,12 +7,14 @@ import {
   ViewChild,
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
 
 import {ConnectedDutInfo} from '../services/moblabrpc_pb';
 import {INT_TO_DUT_STATUS} from '../utils/proto_helpers';
 import {DutTaskTableComponent} from './dut_task_table/dut_task_table.component';
 import {KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
 
@@ -34,7 +36,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
     private cd: ChangeDetectorRef,
     readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private notificationBanner: NotificationBannerComponent,
   ) { }
 
   ngOnInit() {
@@ -78,7 +80,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
         this.setDutDetails(dutInfo);
       },
       errorMsg => {
-        this.setOffPopup(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       this.dutQuery.value
     );
@@ -87,12 +89,12 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   repairDut() {
     this.moblabGrpcService.repairDut(
       (message: string) => {
-        this.setOffPopup(
+        this.notificationBanner.notify(
           'Set off repair task on DUT, please refresh page for status.'
         );
       },
       errorMsg => {
-        this.setOffPopup(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       this.dutQuery.value
     );
@@ -101,22 +103,15 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   reverifyDut() {
     this.moblabGrpcService.reverifyDuts(
       (message: string) => {
-        this.setOffPopup(
+        this.notificationBanner.notify(
           'Set off reverify task on DUT, please refresh page for status.'
         );
       },
       errorMsg => {
-        this.setOffPopup(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       [this.dutQuery.value]
     );
-  }
-
-  setOffPopup(dialogue) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-    });
   }
 
   isDutInfoTableEmpty() {

@@ -6,7 +6,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
 
 import {leadingTrailingWhitespaceValidator} from '../utils/validators';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
@@ -15,6 +14,7 @@ import {MoblabSettingsService} from '../services/moblab-settings.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
 import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
 import {MoblabSettingsConstains} from '../constants';
+import {NotificationBannerComponent} from '../widgets/notification-banner/notification-banner.component';
 
 function gsURLValidator(control) {
   if (!control.value) {
@@ -101,10 +101,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private moblabRpcService: MoblabGrpcService,
-    private snackBar: MatSnackBar,
     private settingsService: MoblabSettingsService,
     private moblabConfigurationRpcService: MoblabConfigurationGrpcService,
     private configSetupService: ConfigSetupService,
+    private notificationBanner: NotificationBannerComponent,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -134,7 +134,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
     } catch (error) {
       console.log('getStableBuildVersion call failed with:' + error);
-      this.setOffError('Failed to fetch stable Chrome OS version: ' + error);
+      this.notificationBanner.error('Failed to fetch stable Chrome OS version: ' + error.message);
     } finally {
       this.userCrOSVersionForm.enable();
     }
@@ -151,7 +151,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
     } catch (error) {
       console.log('setStableBuildVersion call failed with:' + error);
-      this.setOffError('Failed to fetch stable Chrome OS version: ' + error);
+      this.notificationBanner.error('Failed to set stable Chrome OS version: ' + error.message);
     } finally {
       this.userCrOSVersionForm.enable();
     }
@@ -198,14 +198,14 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
         );
         // If called from the onCloudConfigSubmit method, suppress the popup.
         if (!this.configSetupService.getIsCloudConfigEnabled() && !calledOnSubmit) {
-          this.setOffPopup(`Please enable the Cloud integration to 
+          this.notificationBanner.notify(`Please enable the Cloud integration to 
               allow system to fetch Chrome OS test images and upload test 
               results for CPCon ingestion.`);
         }
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
-        this.setOffPopup('Failed to get cloud configuration: ' + errorMsg);
+        this.notificationBanner.error('Failed to get cloud configuration: ' + errorMsg);
       }
     );
   }
@@ -218,7 +218,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       },
       (errorMsg: string) => {
         this.dutWifiInfoLoading = false;
-        this.setOffPopup('Failed to get DUT wifi info: ' + errorMsg);
+        this.notificationBanner.error('Failed to get DUT wifi info: ' + errorMsg);
       }
     );
   }
@@ -227,12 +227,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.dutWifiInfoLoading = true;
     this.moblabRpcService.set_dut_wifi_info(
       (message: string) => {
-        this.setOffPopup(message);
+        this.notificationBanner.notify(message);
         this.getDutWifiInfo();
       },
       (errorMsg: string) => {
         this.dutWifiInfoLoading = false;
-        this.setOffPopup(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       this.dutWifiNameForm.value,
       this.dutWifiPasswordForm.value
@@ -423,12 +423,12 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.configurationLoading = true;
     this.moblabRpcService.set_cloud_configuration(
       (message: string) => {
-        this.setOffPopup(message);
+        this.notificationBanner.notify(message);
         this.getCloudConfiguration(true);
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
-        this.setOffPopup(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       this.isCloudEnabled ? this.botoKeyIDForm.value : '',
       this.isCloudEnabled ? this.botoKeySecretForm.value : '',
@@ -482,21 +482,6 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     }
   }
 
-  setOffPopup(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-    });
-  }
-
-  // ToDo: consolidate dialogs into sharable directory
-  setOffError(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
-      verticalPosition: 'top',
-      panelClass: ['snack-error'],
-    });
-  }
-
   updateCloudConfigurationForms(newCloudConfig: CloudConfiguration) {
     /**
      * Updates the form values of the cloud configurations. Meant to be called
@@ -524,7 +509,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
       console.log('pauseHostScheduling call failed with:' + error);
-      this.setOffError('Failed to pause host scheduling: ' + error);
+      this.notificationBanner.error('Failed to pause host scheduling: ' + error);
     } finally {
       this.pauseButton.setIsLoadingStatus(false);
     }
@@ -537,7 +522,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
       console.log('resumeHostScheduler call failed with:' + error);
-      this.setOffError('Failed to resume host scheduling: ' + error);
+      this.notificationBanner.error('Failed to resume host scheduling: ' + error);
     } finally {
       this.resumeButton.setIsLoadingStatus(false);
     }

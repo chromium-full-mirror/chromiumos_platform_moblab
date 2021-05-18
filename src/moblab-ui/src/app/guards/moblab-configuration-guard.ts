@@ -1,22 +1,25 @@
 import {Injectable} from '@angular/core';
 import {CanActivate, Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
 
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
+import {
+  NotificationBannerComponent
+} from '../widgets/notification-banner/notification-banner.component';
 import {environment} from 'environments/environment';
 
 @Injectable()
 export class ConfigGuard implements CanActivate {
   constructor(
     private router: Router,
-    private snackBar: MatSnackBar,
     private moblabRpcService: MoblabGrpcService,
-    private configSetupService: ConfigSetupService
-  ) {}
+    private configSetupService: ConfigSetupService,
+    private notificationBanner: NotificationBannerComponent,
+  ) { }
 
   canActivate(): boolean {
     if (environment.disableConfigGuard) {
+      this.configSetupService.setIsCloudConfigEnabled(true);
       return true;
     }
 
@@ -34,16 +37,9 @@ export class ConfigGuard implements CanActivate {
         }
       },
       (errorMsg: string) => {
-        this.setOffError('Failed to get cloud configuration: ' + errorMsg);
+        this.notificationBanner.error('Failed to get cloud configuration: ' + errorMsg);
       }
     );
     return true;
-  }
-
-  setOffError(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, 'Dismiss', {
-      verticalPosition: 'top',
-      panelClass: ['snack-error'],
-    });
   }
 }

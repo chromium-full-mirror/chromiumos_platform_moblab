@@ -1,12 +1,12 @@
 import {AfterViewInit, Component, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 
 import {DutTask} from '../../services/moblabrpc_pb';
 import {INT_TO_DUT_TASK_STATUS} from '../../utils/proto_helpers';
 import {MoblabGrpcService} from '../../services/moblab-grpc.service';
 import {normalizeTimestamp} from '../../utils/date';
+import {NotificationBannerComponent} from 'app/widgets/notification-banner/notification-banner.component';
 
 @Component({
   selector: 'app-dut-task-table',
@@ -32,7 +32,7 @@ export class DutTaskTableComponent implements AfterViewInit {
 
   constructor(
     readonly moblabGrpcService: MoblabGrpcService,
-    private snackBar: MatSnackBar
+    private notificationBanner: NotificationBannerComponent
   ) { }
 
   ngAfterViewInit() {
@@ -54,7 +54,7 @@ export class DutTaskTableComponent implements AfterViewInit {
         this.setDutTasks(dutTasks);
       },
       errorMsg => {
-        this.setOffPopup(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       this.dutIp,
       this.paginator.pageIndex * this.paginator.pageSize
@@ -68,7 +68,7 @@ export class DutTaskTableComponent implements AfterViewInit {
         this.numDutTasks = numDutTasks;
       },
       errorMsg => {
-        this.setOffPopup(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       this.dutIp
     );
@@ -76,12 +76,5 @@ export class DutTaskTableComponent implements AfterViewInit {
 
   getStatusFromNum(statusNum) {
     return INT_TO_DUT_TASK_STATUS[statusNum];
-  }
-
-  setOffPopup(message) {
-    const snackBarRef = this.snackBar.open(message, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-    });
   }
 }

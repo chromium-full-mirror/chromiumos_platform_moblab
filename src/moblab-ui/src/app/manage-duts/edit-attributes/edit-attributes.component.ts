@@ -1,9 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
 
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 
 @Component({
   selector: 'app-edit-attributes',
@@ -20,7 +22,7 @@ export class EditAttributesComponent {
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
-    private snackBar: MatSnackBar
+    public notificationBanner: NotificationBannerComponent,
   ) { }
 
   get_confirmation_message_suffix(dut_hostnames: string[]) {
@@ -35,7 +37,7 @@ export class EditAttributesComponent {
     return confirmation_message_suffix;
   }
 
-  doEdit(editFunc: (dut_hostnames: string[], context) => void) {
+  doEdit(editFunc: (dut_hostnames: string[], context: EditAttributesComponent) => void) {
     /**
      * This method is the point of entry for all of the edit functionality that
      * is provided in this component. There is some logic common to all of the
@@ -44,7 +46,7 @@ export class EditAttributesComponent {
      */
     const dut_hostnames = this.dutsTableRef.getSelectedDutHostnames();
     if (dut_hostnames.length === 0) {
-      this.setOffPopup('No DUTs selected.');
+      this.notificationBanner.notify('No DUTs selected.');
       return;
     }
 
@@ -56,7 +58,7 @@ export class EditAttributesComponent {
     this.label.setValue('');
   }
 
-  addAttribute(dut_hostnames: string[], context) {
+  addAttribute(dut_hostnames: string[], context: EditAttributesComponent) {
     const confirmation_message =
       'Adding attribute ' +
       context.attribute_key.value +
@@ -64,15 +66,15 @@ export class EditAttributesComponent {
       context.attribute_value.value +
       ' to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.setOffPopup(confirmation_message);
+    context.notificationBanner.notify(confirmation_message);
 
     context.moblabGrpcService.addAttributeToDuts(
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.attribute_key.value,
@@ -80,49 +82,49 @@ export class EditAttributesComponent {
     );
   }
 
-  removeAttribute(dut_hostnames: string[], context) {
+  removeAttribute(dut_hostnames: string[], context: EditAttributesComponent) {
     const confirmation_message =
       'Removing attribute ' +
       context.attribute_key.value +
       ' from ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.setOffPopup(confirmation_message);
+    context.notificationBanner.notify(confirmation_message);
 
     context.moblabGrpcService.removeAttributeFromDuts(
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.attribute_key.value
     );
   }
 
-  addLabel(dut_hostnames: string[], context) {
+  addLabel(dut_hostnames: string[], context: EditAttributesComponent) {
     const confirmation_message =
       'Adding label ' +
       context.label.value +
       'to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.setOffPopup(confirmation_message);
+    context.notificationBanner.notify(confirmation_message);
 
     context.moblabGrpcService.addLabelToDuts(
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.label.value
     );
   }
 
-  removeLabel(dut_hostnames: string[], context) {
+  removeLabel(dut_hostnames: string[], context: EditAttributesComponent) {
     const confirmation_message =
       'Removing label ' +
       context.label.value +
@@ -130,11 +132,11 @@ export class EditAttributesComponent {
       context.get_confirmation_message_suffix(dut_hostnames);
     context.moblabGrpcService.removeLabelFromDuts(
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.label.value
@@ -143,7 +145,7 @@ export class EditAttributesComponent {
 
   addPool(
     dut_hostnames: string[],
-    context
+    context: EditAttributesComponent
     /** Initiates Moblab RPC request to add pool label to given DUTs.
      *  Will trigger popup on either success or failure.
      *  @param dut_hostnames: List of DUT hostnames.
@@ -155,15 +157,15 @@ export class EditAttributesComponent {
       context.pool.value +
       'to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.setOffPopup(confirmation_message);
+    context.notificationBanner.notify(confirmation_message);
 
     context.moblabGrpcService.addPoolToDuts(
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.pool.value
@@ -172,7 +174,7 @@ export class EditAttributesComponent {
 
   removePool(
     dut_hostnames: string[],
-    context
+    context: EditAttributesComponent
     /** Initiates Moblab RPC request to remove pool label to given DUTs.
      *  Will trigger popup on either success or failure.
      *  @param dut_hostnames: List of DUT hostnames.
@@ -186,22 +188,14 @@ export class EditAttributesComponent {
       context.get_confirmation_message_suffix(dut_hostnames);
     context.moblabGrpcService.removePoolFromDuts(
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.setOffPopup(message);
+        context.notificationBanner.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.pool.value
     );
-  }
-
-  setOffPopup(dialogue) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-      panelClass: ['action-submission-popup'],
-    });
   }
 }

@@ -1,5 +1,4 @@
 import {Component, ViewChild} from '@angular/core';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatDialog} from '@angular/material/dialog';
 import {Router} from '@angular/router';
@@ -9,6 +8,9 @@ import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
 import {ProvisionDialogComponent} from '../provision-dialog/provision-dialog.component'
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 
 @Component({
   selector: 'app-enrollment',
@@ -21,9 +23,9 @@ export class EnrollmentComponent {
 
   constructor(
     private moblabGrpcService: MoblabGrpcService,
-    private snackBar: MatSnackBar,
     private router: Router,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private notificationBanner: NotificationBannerComponent,
   ) { }
 
   enrollSelected() {
@@ -35,7 +37,7 @@ export class EnrollmentComponent {
         this.dutsTableRef.getConnectedDuts();
       },
       (msg: string) => {
-        this.reportError(msg);
+        this.notificationBanner.error(msg);
         this.dutsTableRef.stopLoadingSpinner();
       }
     );
@@ -50,7 +52,7 @@ export class EnrollmentComponent {
         this.dutsTableRef.getConnectedDuts();
       },
       (msg: string) => {
-        this.reportError(msg);
+        this.notificationBanner.error(msg);
         this.dutsTableRef.stopLoadingSpinner();
       }
     );
@@ -64,18 +66,11 @@ export class EnrollmentComponent {
         this.dutsTableRef.getConnectedDuts();
       },
       (msg: string) => {
-        this.reportError(msg);
+        this.notificationBanner.error(msg);
         this.dutsTableRef.stopLoadingSpinner();
       },
       hostnames
     );
-  }
-
-  reportError(dialogue: string) {
-    this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-    });
   }
 
   hasSelectedDuts(): boolean {
@@ -84,7 +79,7 @@ export class EnrollmentComponent {
 
   provisionDuts() {
     if (!this.dutsTableRef.duts.data) {
-      this.reportError("You need to have at least one enrolled DUT")
+      this.notificationBanner.notify("You need to have at least one enrolled DUT")
       return;
     }
 
@@ -104,7 +99,7 @@ export class EnrollmentComponent {
           },
           (errorMessage: string) => {
             this.dutsTableRef.stopLoadingSpinner();
-            this.reportError(errorMessage);
+            this.notificationBanner.error(errorMessage);
           },
           result.buildVersion,
           result.milestone,

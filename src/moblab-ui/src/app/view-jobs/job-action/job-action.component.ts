@@ -8,7 +8,9 @@ import {
 import {Job} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectionModel} from '@angular/cdk/collections';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 
 @Component({
   selector: 'app-job-action',
@@ -25,8 +27,8 @@ export class JobActionComponent {
 
   constructor(
     private moblabGrpcService: MoblabGrpcService,
-    private snackBar: MatSnackBar
-  ) {}
+    private notificationBanner: NotificationBannerComponent,
+  ) { }
 
   toggleJobSelection(element) {
     this.jobSelections.toggle(element.getJobId());
@@ -63,10 +65,10 @@ export class JobActionComponent {
     if (this.selectedAction) {
       this.moblabGrpcService.abortJobs(
         resultMsg => {
-          this.setOffPopup(resultMsg);
+          this.notificationBanner.notify(resultMsg);
         },
         errorMsg => {
-          this.setOffPopup(errorMsg);
+          this.notificationBanner.error(errorMsg);
         },
         jobIds
       );
@@ -78,13 +80,5 @@ export class JobActionComponent {
 
   refresh() {
     this.clearSelectedJobs();
-  }
-
-  setOffPopup(message) {
-    const snackBarRef = this.snackBar.open(message, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-      panelClass: ['action-submission-popup'],
-    });
   }
 }

@@ -13,6 +13,7 @@ import {MatListModule} from '@angular/material/list';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTableModule} from '@angular/material/table';
 import {NgModule} from '@angular/core';
 
@@ -28,6 +29,7 @@ import {
 } from './feedback/feedback.component';
 import {FeedbackModule as ScreenshotFeedbackModule} from '../third_party/feedback/feedback.module';
 import {ButtonWithProgressComponent} from './button-with-progress/button-with-progress.component';
+import {NotificationBannerComponent} from './notification-banner/notification-banner.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +42,7 @@ import {ButtonWithProgressComponent} from './button-with-progress/button-with-pr
     TableHeaderSelectorComponent,
     UpdateButtonComponent,
     ButtonWithProgressComponent,
+    NotificationBannerComponent,
   ],
   exports: [
     FeedbackComponent,
@@ -49,6 +52,7 @@ import {ButtonWithProgressComponent} from './button-with-progress/button-with-pr
     TableHeaderSelectorComponent,
     UpdateButtonComponent,
     ButtonWithProgressComponent,
+    NotificationBannerComponent,
   ],
   imports: [
     BrowserAnimationsModule,
@@ -67,9 +71,11 @@ import {ButtonWithProgressComponent} from './button-with-progress/button-with-pr
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatSnackBarModule,
     MatTableModule,
     ReactiveFormsModule,
     ScreenshotFeedbackModule,
   ],
+  providers: [NotificationBannerComponent]
 })
-export class WidgetsModule {}
+export class WidgetsModule { }

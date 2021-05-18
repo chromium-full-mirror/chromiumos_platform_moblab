@@ -20,7 +20,6 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -84,7 +83,6 @@ import {HealthCheckComponent} from './health-check/health-check.component';
     MatProgressBarModule,
     MatSelectModule,
     MatSidenavModule,
-    MatSnackBarModule,
     MatTableModule,
     MatTabsModule,
     MatToolbarModule,

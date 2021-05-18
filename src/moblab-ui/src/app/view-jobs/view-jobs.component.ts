@@ -11,7 +11,6 @@ import {ActivatedRoute} from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 
 import {
@@ -24,6 +23,9 @@ import {JobActionComponent} from './job-action/job-action.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
 import {TableHeaderSelectorComponent} from '../widgets/table-header-selector/table-header-selector.component';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 
 export const JOB_NAME = 'name';
 export const JOB_ID = 'id';
@@ -168,7 +170,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     private changeDetectorRefs: ChangeDetectorRef,
     private datePipe: DatePipe,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private notificationBanner: NotificationBannerComponent,
   ) { }
 
   ngOnInit() {
@@ -443,7 +445,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   errorHandling(message: string) {
     this.loading = false;
-    this.setOffPopup(message);
+    this.notificationBanner.error(message);
   }
 
   isAllJobsSelected() {
@@ -456,13 +458,5 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   setDutFilter(dut: string) {
     this.filters.setFormValue(DUT_RUN_ON, dut);
-  }
-
-  setOffPopup(dialogue: string) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-      panelClass: ['action-submission-popup'],
-    });
   }
 }

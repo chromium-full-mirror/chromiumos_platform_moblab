@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import {ChangeDetectorRef} from '@angular/core';
 import {MatExpansionPanel} from '@angular/material/expansion';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 import {FormControl, Validators} from '@angular/forms';
 
@@ -22,6 +21,10 @@ import {
   KeyVal,
   KeyValTableComponent,
 } from '../widgets/keyval-table/keyval-table.component';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
+
 import JobStatus = Job.JobStatus;
 
 @Component({
@@ -61,7 +64,7 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
     private cd: ChangeDetectorRef,
     private readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private notificationBanner: NotificationBannerComponent,
   ) { }
 
   ngOnInit() {
@@ -94,7 +97,7 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
         this.unpackJobInfoToTable(jobInfo);
       },
       errorMsg => {
-        this.reportError(errorMsg);
+        this.notificationBanner.error(errorMsg);
       },
       this.jobQuery.value
     );
@@ -130,14 +133,6 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
   getLogsLink(execution: Execution) {
     let link = `/results/${execution.getJobId()}-moblab/${execution.getDut()}/`;
     return link;
-  }
-
-  reportError(dialogue) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-    });
-    this.resetQuery();
   }
 
   resetJob() {

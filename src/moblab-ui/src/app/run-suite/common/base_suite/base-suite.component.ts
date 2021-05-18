@@ -1,11 +1,13 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 
 import {JOB_START_TIME_FROM_FILTER} from '../../../view-jobs/view-jobs.component';
 import {MoblabGrpcService} from '../../../services/moblab-grpc.service';
 import {normalizeTimestamp} from '../../../utils/date';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 
 export interface BuildSettings {
   build: string;
@@ -42,8 +44,8 @@ export abstract class BaseSuite {
   constructor(
     public moblabGrpcService: MoblabGrpcService,
     public router: Router,
-    public snackBar: MatSnackBar
-  ) {}
+    private notificationBanner: NotificationBannerComponent,
+  ) { }
 
   onBuildSet(event: BuildSettings) {
     this.selectedModel = event.model;
@@ -73,7 +75,7 @@ export abstract class BaseSuite {
 
   onRunSuiteClick(message = '') {
     if (message !== '') {
-      this.setOffPopup(message);
+      this.notificationBanner.notify(message);
     }
 
     this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteStart});
@@ -81,7 +83,7 @@ export abstract class BaseSuite {
 
   onRunSuiteFailed(message = '') {
     if (message !== '') {
-      this.setOffError(message);
+      this.notificationBanner.error(message);
     }
     this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteFailed});
   }
@@ -96,21 +98,5 @@ export abstract class BaseSuite {
       new Date().setTime(new Date().getTime() - 1000 /* 1 second */)
     );
     this.router.navigate(['/view_jobs'], {queryParams: params});
-  }
-
-  // sets off a persistent, error-themed popup.
-  setOffError(dialogue: string) {
-    this.snackBar.open(dialogue, 'Dismiss', {
-      verticalPosition: 'top',
-      panelClass: ['snack-error'],
-    });
-  }
-
-  // sets off a neutral-themed popup that fades after 'duration' miliseconds
-  setOffPopup(dialogue: string, duration = 5000) {
-    this.snackBar.open(dialogue, 'Dismiss', {
-      duration: duration,
-      verticalPosition: 'top',
-    });
   }
 }

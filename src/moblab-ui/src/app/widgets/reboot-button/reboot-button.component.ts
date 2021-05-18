@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Inject, Output} from '@angular/core';
 import {MoblabGrpcService} from '../../services/moblab-grpc.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -8,6 +7,9 @@ import {
 } from '@angular/material/dialog';
 
 import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.component';
+import {
+  NotificationBannerComponent
+} from 'app/widgets/notification-banner/notification-banner.component';
 
 @Component({
   selector: 'app-reboot-button',
@@ -16,9 +18,9 @@ import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.com
 export class RebootButtonComponent {
   constructor(
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private moblabGrpcService: MoblabGrpcService
-  ) {}
+    private moblabGrpcService: MoblabGrpcService,
+    private notificationBanner: NotificationBannerComponent,
+  ) { }
 
   rebootClick(): void {
     const dialogRef = this.dialog.open(ConfirmationDialog, {
@@ -36,14 +38,7 @@ export class RebootButtonComponent {
 
   rebootMoblab(): void {
     this.moblabGrpcService.reboot_moblab((error_message: string) => {
-      this.reportError(error_message);
-    });
-  }
-
-  reportError(dialogue) {
-    const snackBarRef = this.snackBar.open(dialogue, '', {
-      duration: 5000,
-      verticalPosition: 'top',
+      this.notificationBanner.error(error_message);
     });
   }
 }
