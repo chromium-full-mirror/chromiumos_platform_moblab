@@ -12,20 +12,19 @@ import {DatePipe} from '@angular/common';
 import {FormControl} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
+import {Sort} from '@angular/material/sort';
 
 import {
   forbiddenDateValidator,
   forbiddenIDValidator,
 } from '../utils/validators';
-import {INT_TO_PRIORITY, INT_TO_JOBSTATUS, INT_TO_JOBUPLOADSTATUS} from '../utils/proto_helpers';
+import {INT_TO_PRIORITY, INT_TO_JOBSTATUS} from '../utils/proto_helpers';
 import {Job} from '../services/moblabrpc_pb';
 import {JobActionComponent} from './job-action/job-action.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
 import {TableHeaderSelectorComponent} from '../widgets/table-header-selector/table-header-selector.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationBannerComponent} from 'app/widgets/notification-banner/notification-banner.component';
 
 export const JOB_NAME = 'name';
 export const JOB_ID = 'id';
@@ -101,10 +100,10 @@ export class MultiFilterForm {
 
 export class UploadStatus {
   constructor(
-    public icon = "",
-    public iconStyle = "",
-    public tooltip = "",
-    public attemptNumber = "",
+    public icon = '',
+    public iconStyle = '',
+    public tooltip = '',
+    public attemptNumber = ''
   ) { }
 }
 
@@ -141,6 +140,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   ];
   jobSelectOptions: string[] = ['Visible'];
   jobs = new MatTableDataSource<Job>();
+  sortBy = '';
 
   loading = false;
   numJobs = 0;
@@ -170,7 +170,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     private changeDetectorRefs: ChangeDetectorRef,
     private datePipe: DatePipe,
     private route: ActivatedRoute,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationBanner: NotificationBannerComponent
   ) { }
 
   ngOnInit() {
@@ -312,6 +312,33 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     );
   }
 
+  sortData(sort: Sort) {
+    if (!sort.active || sort.direction === '') {
+      this.sortBy = '';
+      return;
+    }
+
+    const direction = sort.direction === 'desc' ? '-' : '';
+    switch (sort.active) {
+      case 'job_id':
+        this.sortBy = direction + JOB_ID;
+        break;
+      case 'name':
+        this.sortBy = direction + JOB_NAME;
+        break;
+      case 'priority':
+        this.sortBy = direction + JOB_PRIORITY;
+        break;
+      case 'created_time_sec_utc':
+        this.sortBy = direction + 'created_on';
+        break;
+      default:
+        this.sortBy = '';
+    }
+    this.resetPagination();
+    this.getNextPageJobs();
+  }
+
   getPriorityFromNum(priorityNum: string | number) {
     return INT_TO_PRIORITY[priorityNum];
   }
@@ -323,21 +350,40 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   getUploadStatus(job: Job) {
     const state = job.getUploadState();
     const status = state.getStatus();
-    const attemptsBadge = state.getAttemptsNumber() > 1 ? state.getAttemptsNumber().toString() : "";
+    const attemptsBadge =
+      state.getAttemptsNumber() > 1 ? state.getAttemptsNumber().toString() : '';
     const previousErrorMessage = state.getLastError();
     switch (status) {
       case Job.UploadStatus.UPLOAD_STATUS_UPLOADED:
       case Job.UploadStatus.UPLOAD_STATUS_DELETED:
-        return new UploadStatus("cloud_done", "norm-icon", "Uploaded successfully");
+        return new UploadStatus(
+          'cloud_done',
+          'norm-icon',
+          'Uploaded successfully'
+        );
 
       case Job.UploadStatus.UPLOAD_STATUS_QUEUED:
-        return new UploadStatus("cloud_queue", "norm-icon", "Ready to be uploaded");
+        return new UploadStatus(
+          'cloud_queue',
+          'norm-icon',
+          'Ready to be uploaded'
+        );
 
       case Job.UploadStatus.UPLOAD_STATUS_UPLOADING:
-        return new UploadStatus("cloud_upload", "progress-icon", "Uploading...", attemptsBadge);
+        return new UploadStatus(
+          'cloud_upload',
+          'progress-icon',
+          'Uploading...',
+          attemptsBadge
+        );
 
       case Job.UploadStatus.UPLOAD_STATUS_UPLOAD_FAILED:
-        return new UploadStatus("cloud_upload", "error-icon", "Upload failed due to: " + previousErrorMessage, attemptsBadge);
+        return new UploadStatus(
+          'cloud_upload',
+          'error-icon',
+          'Upload failed due to: ' + previousErrorMessage,
+          attemptsBadge
+        );
 
       case Job.UploadStatus.UPLOAD_STATUS_UNKNOWN:
       case Job.UploadStatus.UPLOAD_STATUS_NOT_READY:
@@ -405,7 +451,8 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       job_queue_status_filter,
       job_relationship_filter,
       parent_id_filter,
-      dut_filter
+      dut_filter,
+      this.sortBy
     );
 
     this.moblabGrpcService.getNumJobs(

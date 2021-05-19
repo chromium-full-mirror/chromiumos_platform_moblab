@@ -69,7 +69,8 @@
       </app-job-action>
     </div>
     <div style="position: relative;">
-      <table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table">
+      <table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table" matSort
+        (matSortChange)="sortData($event)">
         <ng-container *ngIf="!hideSelectors" matColumnDef="job_checkboxes">
           <th mat-header-cell *matHeaderCellDef>
             <app-table-header-selector [options]="jobSelectOptions" (update)="selectionChanged($event)">
@@ -83,7 +84,7 @@
         </ng-container>
 
         <ng-container matColumnDef="job_id" *ngIf="displayColumn('job_id')">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             <div>Job ID</div>
           </th>
           <td mat-cell *matCellDef="let element">
@@ -92,7 +93,7 @@
         </ng-container>
 
         <ng-container matColumnDef="name" *ngIf="displayColumn('name')">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             <div>Name</div>
           </th>
           <td mat-cell *matCellDef="let element">
@@ -101,7 +102,7 @@
         </ng-container>
 
         <ng-container matColumnDef="priority" *ngIf="displayColumn('priority')">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             <div>Priority</div>
           </th>
           <td mat-cell *matCellDef="let element">
@@ -110,7 +111,7 @@
         </ng-container>
 
         <ng-container matColumnDef="created_time_sec_utc" *ngIf="displayColumn('created_time_sec_utc')">
-          <th mat-header-cell *matHeaderCellDef>Created Time</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created Time</th>
           <td mat-cell *matCellDef="let element">
             <span>
               {{normalizeTimestamp(element.getCreatedTimeSecUtc())}}

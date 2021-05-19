@@ -455,12 +455,13 @@ message GetNumJobsResponse {
   int32 num_jobs = 1;
 }
 
-// NEXT_TAG = 11
+// NEXT_TAG = 12
 message GetJobsRequest {
   int32 query_start = 1;
   int32 query_limit = 2;
   string id_filter = 3;
   string name_filter = 4;
+  string sort_by = 11;
   // Timestamp int's are in second granularity.
   int64 created_time_lt = 5;
   int64 created_time_gt = 6;

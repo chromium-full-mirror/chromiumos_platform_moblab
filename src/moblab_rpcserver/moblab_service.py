@@ -484,8 +484,8 @@ class MoblabService(object):
             suite_timeout_mins = self._default_suite_timeout_mins(suite)
 
         dut_wifi_info = self.get_dut_wifi_info()
-        ap_name=dut_wifi_info.get("wifi_dut_ap_name", None)
-        ap_pass=dut_wifi_info.get("wifi_dut_ap_pass", "")
+        ap_name = dut_wifi_info.get("wifi_dut_ap_name", None)
+        ap_pass = dut_wifi_info.get("wifi_dut_ap_pass", "")
 
         test_args["ssid"] = ap_name
         test_args["wifipass"] = ap_pass
@@ -749,7 +749,7 @@ class MoblabService(object):
             BuildVersionPair(
                 build_version=build_version,
                 status=moblab_build_connector.BuildStatus.AVAILABLE,
-                is_staged=True
+                is_staged=True,
             )
             for build_version in bucket_build_versions
         ]
@@ -774,7 +774,7 @@ class MoblabService(object):
                     BuildVersionPair(
                         build_version=build_version.version,
                         status=build_version.status,
-                        is_staged=False
+                        is_staged=False,
                     )
                 )
 
@@ -852,6 +852,7 @@ class MoblabService(object):
         finished=False,
         parent_id_filter=None,
         dut_hostname_filter=None,
+        sort_by=None,
     ):
         # TO_DO(wangmichael): bifurcating on dut_filter is necessary because
         # the Autotest backend that we currently invoke only accepts dut_filter
@@ -898,6 +899,7 @@ class MoblabService(object):
                 running,
                 finished,
                 parent_id_filter,
+                sort_by,
             )
         job_ids = [job["id"] for job in jobs]
 

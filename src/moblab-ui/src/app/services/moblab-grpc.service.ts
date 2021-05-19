@@ -518,7 +518,8 @@ export class MoblabGrpcService {
     status_filter?: Job.QueueStatus,
     rel_filter?: Job.Relationship,
     parent_id_filter?: string,
-    dut_hostname_filter?: string
+    dut_hostname_filter?: string,
+    sort_by?: string
   ) {
     const request = new GetJobsRequest();
     request.setQueryStart(queryStart);
@@ -546,6 +547,9 @@ export class MoblabGrpcService {
     }
     if (dut_hostname_filter) {
       request.setDutHostnameFilter(dut_hostname_filter);
+    }
+    if (sort_by) {
+      request.setSortBy(sort_by);
     }
 
     this.moblabRpcService.get_jobs(

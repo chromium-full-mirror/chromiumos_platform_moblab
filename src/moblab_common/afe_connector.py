@@ -218,6 +218,7 @@ class AFEConnector(object):
         running=False,
         finished=False,
         parent_id_filter=None,
+        sort_by=None,
     ):
         """Get attributes of the jobs specified.
         Args:
@@ -239,10 +240,13 @@ class AFEConnector(object):
             A list of dict. The key, value of the dict is the job attribute
             name and the value.
         """
+
+        if not sort_by:
+            sort_by = "-created_on"
         params = {
             "query_start": query_start,
             "query_limit": query_limit,
-            "sort_by": ["-created_on"],
+            "sort_by": [sort_by],
         }
 
         if id_filter:

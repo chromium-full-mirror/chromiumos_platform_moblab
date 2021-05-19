@@ -576,6 +576,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
             request.parent_id_filter,
             request.dut_hostname_filter,
+            request.sort_by,
         )
 
         response = moblabrpc_pb2.GetJobsResponse()
