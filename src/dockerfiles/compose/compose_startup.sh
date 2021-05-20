@@ -38,12 +38,11 @@ else
     docker-compose down -t 1
     docker-compose -f ./docker-compose.watchtower.yaml down -t 1
 
-    docker-compose pull moblab-ui
-    docker-compose up -d moblab-ui
-
-    #!! remote_access is initializing moblab_home volume so it has to go first
-    docker-compose pull remote_access
-    docker-compose up -d remote_access
+    #!! docker-compose creates all the volumes on first docker-compose up
+    #!! remote_access is initializing moblab_home volume with ssh key
+    #!! so it has to be on first docker-compose up
+    docker-compose pull moblab-ui remote_access
+    docker-compose up -d moblab-ui remote_access
 
     docker-compose pull mobmonitor
     docker-compose up -d mobmonitor
