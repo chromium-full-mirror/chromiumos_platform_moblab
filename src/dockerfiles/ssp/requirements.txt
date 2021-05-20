@@ -4,17 +4,38 @@
 #
 #    pip-compile
 #
-crcmod==1.7               # via -r requirements.in
-grpcio==1.35.0            # via -r requirements.in
-lxml==4.6.1               # via -r requirements.in
-mock==3.0.5               # via -r requirements.in
-numpy==1.16.6             # via -r requirements.in
-protobuf==3.14.0          # via -r requirements.in
-pyparsing==2.4.7          # via -r requirements.in
-python-dateutil==2.8.1    # via -r requirements.in
-pyyaml==5.3.1             # via -r requirements.in
-six==1.15.0               # via mock, protobuf, python-dateutil
-wheel==0.35.1             # via -r requirements.in
+crcmod==1.7
+    # via -r requirements.in
+enum34==1.1.10
+    # via grpcio
+funcsigs==1.0.2
+    # via mock
+futures==3.3.0
+    # via grpcio
+grpcio==1.37.1
+    # via -r requirements.in
+lxml==4.6.3
+    # via -r requirements.in
+mock==3.0.5
+    # via -r requirements.in
+numpy==1.16.6
+    # via -r requirements.in
+protobuf==3.17.0
+    # via -r requirements.in
+pyparsing==2.4.7
+    # via -r requirements.in
+python-dateutil==2.8.1
+    # via -r requirements.in
+pyyaml==5.4.1
+    # via -r requirements.in
+six==1.16.0
+    # via
+    #   grpcio
+    #   mock
+    #   protobuf
+    #   python-dateutil
+wheel==0.36.2
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
