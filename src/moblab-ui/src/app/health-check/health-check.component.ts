@@ -36,11 +36,14 @@ export class HealthCheckComponent implements OnInit, OnDestroy {
     },
   ];
 
+  /** List of errors to bypass so the redirect can go through */
+  private failedCheckIgnoreList = ['BotoFile'];
+
   constructor(
     private router: Router,
     private healthCheckService: MoblabHealthCheckService,
     private globalInfoService: GlobalInfoService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.globalInfoService.setEnableNavBar(false);
@@ -101,7 +104,12 @@ export class HealthCheckComponent implements OnInit, OnDestroy {
         this.expectedContainers) *
       100;
 
-    const isMoblabHealhty = this.moblabServiceHealth.healthchecks.length === 0;
+    const criticalFailedChecks = this.failedHealthChecks.filter(
+      failedCheck => !this.failedCheckIgnoreList.includes(failedCheck.name)
+    );
+
+    const isMoblabHealhty =
+      this.loadingContainers.length === 0 && criticalFailedChecks.length === 0;
     if (isMoblabHealhty) {
       this.router.navigate(['/']);
     }
