@@ -19,31 +19,38 @@ const routes: Routes = [
   {path: 'health_check', component: HealthCheckComponent},
   {
     path: '',
-    canActivate: [MoblabHealthCheckGuard, ConfigGuard],
+    canActivate: [MoblabHealthCheckGuard],
     children: [
-      {path: 'view_jobs', component: ViewJobsComponent},
-      {path: 'job_detail', component: JobDetailComponent},
-      {path: 'job_detail/:job_id', component: JobDetailComponent},
-      {path: 'dut_detail', component: DutDetailComponent},
-      {path: 'dut_detail/:dut_hostname', component: DutDetailComponent},
+      {path: 'config', component: ConfigurationComponent},
       {
-        path: 'run_tests',
-        component: RunSuiteComponent,
+        path: '',
+        canActivate: [ConfigGuard],
         children: [
-          {path: 'cts', component: CtsRunComponent},
-          {path: 'storagequal', component: StorageQualComponent},
-          {path: 'memoryqual', component: StorageQualComponent},
-          {path: 'bvtqual', component: StorageQualComponent},
-          {path: 'powerqual', component: StorageQualComponent},
-          {path: 'runsuite', component: StorageQualComponent},
+          {path: 'view_jobs', component: ViewJobsComponent},
+          {path: 'job_detail', component: JobDetailComponent},
+          {path: 'job_detail/:job_id', component: JobDetailComponent},
+          {path: 'dut_detail', component: DutDetailComponent},
+          {path: 'dut_detail/:dut_hostname', component: DutDetailComponent},
+          {
+            path: 'run_tests',
+            component: RunSuiteComponent,
+            children: [
+              {path: 'cts', component: CtsRunComponent},
+              {path: 'storagequal', component: StorageQualComponent},
+              {path: 'memoryqual', component: StorageQualComponent},
+              {path: 'bvtqual', component: StorageQualComponent},
+              {path: 'powerqual', component: StorageQualComponent},
+              {path: 'runsuite', component: StorageQualComponent},
+            ],
+          },
+          {path: 'manage_dut', component: ManageDutsComponent},
+          {path: 'mobmonitor', component: MobmonitorComponent},
+          {path: 'advanced', component: ViewJobsComponent},
+          {path: 'report_problem', component: ViewJobsComponent},
+          {path: '**', component: ViewJobsComponent},
         ],
       },
-      {path: 'manage_dut', component: ManageDutsComponent},
-      {path: 'config', component: ConfigurationComponent},
-      {path: 'mobmonitor', component: MobmonitorComponent},
-      {path: 'advanced', component: ViewJobsComponent},
-      {path: 'report_problem', component: ViewJobsComponent},
-      {path: '**', component: ViewJobsComponent},
+
     ],
   },
 ];
@@ -53,4 +60,4 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [{provide: APP_BASE_HREF, useValue: ''}, ConfigGuard],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }
