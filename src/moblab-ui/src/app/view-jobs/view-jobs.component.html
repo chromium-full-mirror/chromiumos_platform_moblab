@@ -47,7 +47,7 @@
             </mat-select>
           </mat-form-field>
           <mat-form-field id="statusInputFormField" appearance="outline">
-            <mat-label>Queue Status</mat-label>
+            <mat-label>Jobs Status</mat-label>
             <mat-select id="queueStatusSelector" class="filter" [formControl]="filters.getFormControl(queueStatus)">
               <mat-option *ngFor="let queueStatusOption of queueStatusFilterOptions" value="{{ queueStatusOption }}">
                 {{queueStatusOption}}

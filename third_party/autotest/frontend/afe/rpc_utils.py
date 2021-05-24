@@ -117,7 +117,9 @@ def _gather_unique_dicts(dict_iterable):
     return list(objects.values())
 
 
-def extra_job_status_filters(not_yet_run=False, running=False, finished=False):
+def extra_job_status_filters(
+    not_yet_run=False, running=False, finished=False, completed_status=None
+ ):
     """\
     Generate a SQL WHERE clause for job status filtering, and return it in
     a dict of keyword args to pass to query.extra().
@@ -125,13 +127,17 @@ def extra_job_status_filters(not_yet_run=False, running=False, finished=False):
     * finished: all HQEs are complete
     * running: everything else
     """
-    if not (not_yet_run or running or finished):
+    if not (not_yet_run or running or finished or completed_status):
         return {}
     not_queued = ('(SELECT job_id FROM afe_host_queue_entries '
                   'WHERE status != "%s")'
                   % models.HostQueueEntry.Status.QUEUED)
     not_finished = ('(SELECT job_id FROM afe_host_queue_entries '
                     'WHERE not complete)')
+    completed = (
+        "(SELECT job_id FROM afe_host_queue_entries "
+        'WHERE status = "%s")' % completed_status
+    )
 
     where = []
     if not_yet_run:
@@ -140,6 +146,8 @@ def extra_job_status_filters(not_yet_run=False, running=False, finished=False):
         where.append('(id IN %s) AND (id IN %s)' % (not_queued, not_finished))
     if finished:
         where.append('id NOT IN ' + not_finished)
+    if completed_status:
+        where.append('id IN ' + completed)
     return {'where': [' OR '.join(['(%s)' % x for x in where])]}
 
 

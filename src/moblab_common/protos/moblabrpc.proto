@@ -407,12 +407,15 @@ message Job {
     int32 attempts_number = 3;
   }
 
-  // NEXT_TAG = 4
+  // NEXT_TAG = 7
   enum QueueStatus {
     QUEUE_STATUS_NOT_SET = 0;
     QUEUED_JOBS = 1;
     JOBS_RUNNING = 2;
     FINISHED_JOBS = 3;
+    FAILED_JOBS = 4;
+    ABORTED_JOBS = 5;
+    SUCCEEDED_JOBS = 6;
   }
 
   int32 job_id = 1;

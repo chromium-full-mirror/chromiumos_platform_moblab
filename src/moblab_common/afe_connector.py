@@ -142,6 +142,7 @@ class AFEConnector(object):
         not_yet_run=False,
         running=False,
         finished=False,
+        completed_status=None,
         parent_id_filter=None,
     ):
         """
@@ -166,7 +167,9 @@ class AFEConnector(object):
         Returns:
             A dict containing 'result' number.
         """
-        params = {}
+        params = {
+            "completed_status": completed_status,
+        }
 
         if id_filter:
             params["id__icontains"] = id_filter
@@ -217,6 +220,7 @@ class AFEConnector(object):
         not_yet_run=False,
         running=False,
         finished=False,
+        completed_status=None,
         parent_id_filter=None,
         sort_by=None,
     ):
@@ -247,6 +251,7 @@ class AFEConnector(object):
             "query_start": query_start,
             "query_limit": query_limit,
             "sort_by": [sort_by],
+            "completed_status": completed_status,
         }
 
         if id_filter:

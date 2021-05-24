@@ -1250,6 +1250,7 @@ def get_jobs(
     not_yet_run=False,
     running=False,
     finished=False,
+    completed_status=None,
     suite=False,
     sub=False,
     standalone=False,
@@ -1270,7 +1271,7 @@ def get_jobs(
     At most one of these three fields should be specified.
     """
     extra_args = rpc_utils.extra_job_status_filters(
-        not_yet_run, running, finished
+        not_yet_run, running, finished, completed_status
     )
     filter_data["extra_args"] = rpc_utils.extra_job_type_filters(
         extra_args, suite, sub, standalone
@@ -1299,6 +1300,7 @@ def get_num_jobs(
     not_yet_run=False,
     running=False,
     finished=False,
+    completed_status=None,
     suite=False,
     sub=False,
     standalone=False,
@@ -1308,7 +1310,7 @@ def get_num_jobs(
     See get_jobs() for documentation of extra filter parameters.
     """
     extra_args = rpc_utils.extra_job_status_filters(
-        not_yet_run, running, finished
+        not_yet_run, running, finished, completed_status
     )
     filter_data["extra_args"] = rpc_utils.extra_job_type_filters(
         extra_args, suite, sub, standalone
