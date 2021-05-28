@@ -12,9 +12,7 @@ import {ConnectedDutInfo} from '../services/moblabrpc_pb';
 import {INT_TO_DUT_STATUS} from '../utils/proto_helpers';
 import {DutTaskTableComponent} from './dut_task_table/dut_task_table.component';
 import {KeyValTableComponent} from '../widgets/keyval-table/keyval-table.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from '../services/notifications.service';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
 
@@ -36,7 +34,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
     private cd: ChangeDetectorRef,
     readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   ngOnInit() {
@@ -80,7 +78,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
         this.setDutDetails(dutInfo);
       },
       errorMsg => {
-        this.notificationBanner.error(errorMsg);
+        this.notificationsService.error(errorMsg);
       },
       this.dutQuery.value
     );
@@ -89,12 +87,12 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   repairDut() {
     this.moblabGrpcService.repairDut(
       (message: string) => {
-        this.notificationBanner.notify(
+        this.notificationsService.notify(
           'Set off repair task on DUT, please refresh page for status.'
         );
       },
       errorMsg => {
-        this.notificationBanner.error(errorMsg);
+        this.notificationsService.error(errorMsg);
       },
       this.dutQuery.value
     );
@@ -103,12 +101,12 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   reverifyDut() {
     this.moblabGrpcService.reverifyDuts(
       (message: string) => {
-        this.notificationBanner.notify(
+        this.notificationsService.notify(
           'Set off reverify task on DUT, please refresh page for status.'
         );
       },
       errorMsg => {
-        this.notificationBanner.error(errorMsg);
+        this.notificationsService.error(errorMsg);
       },
       [this.dutQuery.value]
     );

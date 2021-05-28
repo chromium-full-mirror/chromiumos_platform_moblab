@@ -8,10 +8,7 @@ import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
 import {ProvisionDialogComponent} from '../provision-dialog/provision-dialog.component'
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
-
+import {NotificationsService} from 'app/services/notifications.service';
 @Component({
   selector: 'app-enrollment',
   templateUrl: './enrollment.component.html',
@@ -25,7 +22,7 @@ export class EnrollmentComponent {
     private moblabGrpcService: MoblabGrpcService,
     private router: Router,
     public dialog: MatDialog,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   enrollSelected() {
@@ -37,7 +34,7 @@ export class EnrollmentComponent {
         this.dutsTableRef.getConnectedDuts();
       },
       (msg: string) => {
-        this.notificationBanner.error(msg);
+        this.notificationsService.error(msg);
         this.dutsTableRef.stopLoadingSpinner();
       }
     );
@@ -52,7 +49,7 @@ export class EnrollmentComponent {
         this.dutsTableRef.getConnectedDuts();
       },
       (msg: string) => {
-        this.notificationBanner.error(msg);
+        this.notificationsService.error(msg);
         this.dutsTableRef.stopLoadingSpinner();
       }
     );
@@ -66,7 +63,7 @@ export class EnrollmentComponent {
         this.dutsTableRef.getConnectedDuts();
       },
       (msg: string) => {
-        this.notificationBanner.error(msg);
+        this.notificationsService.error(msg);
         this.dutsTableRef.stopLoadingSpinner();
       },
       hostnames
@@ -79,7 +76,7 @@ export class EnrollmentComponent {
 
   provisionDuts() {
     if (!this.dutsTableRef.duts.data) {
-      this.notificationBanner.notify("You need to have at least one enrolled DUT")
+      this.notificationsService.notify("You need to have at least one enrolled DUT")
       return;
     }
 
@@ -99,7 +96,7 @@ export class EnrollmentComponent {
           },
           (errorMessage: string) => {
             this.dutsTableRef.stopLoadingSpinner();
-            this.notificationBanner.error(errorMessage);
+            this.notificationsService.error(errorMessage);
           },
           result.buildVersion,
           result.milestone,

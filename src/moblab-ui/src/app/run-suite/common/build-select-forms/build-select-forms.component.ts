@@ -9,10 +9,7 @@ import {
 
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectableItem} from '../basic-autocomplete-selector/basic-autocomplete-selector.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
-
+import {NotificationsService} from 'app/services/notifications.service';
 const SELECT_MODEL_PROMPT = 'Please select model.';
 const SELECT_BUILD_TARGET_PROMPT = 'Please select build target.';
 const SELECT_MILESTONE_PROMPT = 'Please select milestone.';
@@ -58,7 +55,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   constructor(
     private changeDetector: ChangeDetectorRef,
     public moblabGrpcService: MoblabGrpcService,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   ngAfterViewInit() {
@@ -74,7 +71,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   setErrorReason(selector, msg: string) {
     msg = 'Failed to fetch items: ' + msg;
     selector.disable(msg);
-    this.notificationBanner.error(msg);
+    this.notificationsService.error(msg);
   }
 
   getModels() {

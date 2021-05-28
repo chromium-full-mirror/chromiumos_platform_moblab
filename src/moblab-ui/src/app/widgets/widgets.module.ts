@@ -13,7 +13,6 @@ import {MatListModule} from '@angular/material/list';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTableModule} from '@angular/material/table';
 import {NgModule} from '@angular/core';
 
@@ -71,7 +70,6 @@ import {NotificationBannerComponent} from './notification-banner/notification-ba
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatSnackBarModule,
     MatTableModule,
     ReactiveFormsModule,
     ScreenshotFeedbackModule,

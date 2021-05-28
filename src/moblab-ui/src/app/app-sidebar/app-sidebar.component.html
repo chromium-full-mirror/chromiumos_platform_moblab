@@ -60,18 +60,13 @@
       </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content fxFlex="100">
-      <mat-list>
-        <mat-list-item *ngFor="let error of getErrors()">
-          <mat-icon>report_problem</mat-icon>{{ error }}
-          <button mat-raised-button color="primary">See More</button>
-          <button mat-raised-button color="accent">Dismiss</button>
-        </mat-list-item>
-        <mat-list-item *ngFor="let message of getMessages()">
-          <mat-icon>info</mat-icon>{{ message }}
-          <button mat-raised-button color="primary">Dismiss</button>
-        </mat-list-item>
-      </mat-list>
       <router-outlet></router-outlet>
     </mat-sidenav-content>
   </mat-sidenav-container>
+</div>
+<div class="notifications-panel" fxLayout="column">
+  <app-notification-banner *ngFor="let n of notificationsList; trackBy: trackByFn" [notification]="n"
+    (dismissClick)="dismissNotification(n)">
+  </app-notification-banner>
+
 </div>

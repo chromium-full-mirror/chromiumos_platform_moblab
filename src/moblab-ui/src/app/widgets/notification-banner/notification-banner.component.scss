@@ -1,0 +1,23 @@
+.error-notification, .info-notification {
+  margin-top: 8px;
+  width: fit-content;
+  pointer-events: all;
+  padding: 8px;
+  max-width: 800px;
+  color: white;
+}
+
+.error-notification {
+  background-color: #ff5655;
+}
+
+.info-notification {
+  background-color: gray;
+  opacity: 90%;
+}
+
+.notification-text {
+  margin-left: 8px;
+  margin-right: 8px;
+  display: inline-block;
+}

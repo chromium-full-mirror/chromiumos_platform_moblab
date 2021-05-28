@@ -7,9 +7,7 @@ import {
 } from '@angular/material/dialog';
 
 import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from 'app/services/notifications.service';
 
 @Component({
   selector: 'app-reboot-button',
@@ -19,7 +17,7 @@ export class RebootButtonComponent {
   constructor(
     private dialog: MatDialog,
     private moblabGrpcService: MoblabGrpcService,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   rebootClick(): void {
@@ -38,7 +36,7 @@ export class RebootButtonComponent {
 
   rebootMoblab(): void {
     this.moblabGrpcService.reboot_moblab((error_message: string) => {
-      this.notificationBanner.error(error_message);
+      this.notificationsService.error(error_message);
     });
   }
 }

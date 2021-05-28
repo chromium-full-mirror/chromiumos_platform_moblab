@@ -10,9 +10,7 @@ import {BaseSuite} from '../../common/base_suite/base-suite.component';
 import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-form.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from 'app/services/notifications.service';
 
 /** Component owns logic for GTS suite run form.
  * */
@@ -29,9 +27,9 @@ export class GtsRunComponent extends BaseSuite implements AfterContentInit {
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationBanner: NotificationBannerComponent,
+    notificationsService: NotificationsService,
   ) {
-    super(moblabGrpcService, router, notificationBanner);
+    super(moblabGrpcService, router, notificationsService);
   }
 
   /** Sets initial form enable/disable states.

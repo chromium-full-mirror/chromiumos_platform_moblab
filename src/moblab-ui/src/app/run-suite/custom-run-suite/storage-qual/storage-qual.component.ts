@@ -10,9 +10,7 @@ import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
 import {Router} from '@angular/router';
 import {RunStorageQualificationSuiteRequest} from '../../../services/moblabrpc_pb';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from 'app/services/notifications.service';
 
 @Component({
   selector: 'app-storage-qual',
@@ -39,9 +37,9 @@ export class StorageQualComponent
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationBanner: NotificationBannerComponent,
+    notificationsService: NotificationsService,
   ) {
-    super(moblabGrpcService, router, notificationBanner);
+    super(moblabGrpcService, router, notificationsService);
   }
 
   /** Sets initial form enable/disable states.

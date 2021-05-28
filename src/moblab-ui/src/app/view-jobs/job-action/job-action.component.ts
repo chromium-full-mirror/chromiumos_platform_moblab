@@ -8,9 +8,7 @@ import {
 import {Job} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectionModel} from '@angular/cdk/collections';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from 'app/services/notifications.service';
 
 @Component({
   selector: 'app-job-action',
@@ -27,7 +25,7 @@ export class JobActionComponent {
 
   constructor(
     private moblabGrpcService: MoblabGrpcService,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   toggleJobSelection(element) {
@@ -65,10 +63,10 @@ export class JobActionComponent {
     if (this.selectedAction) {
       this.moblabGrpcService.abortJobs(
         resultMsg => {
-          this.notificationBanner.notify(resultMsg);
+          this.notificationsService.notify(resultMsg);
         },
         errorMsg => {
-          this.notificationBanner.error(errorMsg);
+          this.notificationsService.error(errorMsg);
         },
         jobIds
       );

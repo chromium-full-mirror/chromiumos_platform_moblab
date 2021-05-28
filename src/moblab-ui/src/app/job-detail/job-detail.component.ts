@@ -21,9 +21,7 @@ import {
   KeyVal,
   KeyValTableComponent,
 } from '../widgets/keyval-table/keyval-table.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from '../services/notifications.service';
 
 import JobStatus = Job.JobStatus;
 
@@ -64,7 +62,7 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
     private cd: ChangeDetectorRef,
     private readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   ngOnInit() {
@@ -97,7 +95,7 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
         this.unpackJobInfoToTable(jobInfo);
       },
       errorMsg => {
-        this.notificationBanner.error(errorMsg);
+        this.notificationsService.error(errorMsg);
       },
       this.jobQuery.value
     );

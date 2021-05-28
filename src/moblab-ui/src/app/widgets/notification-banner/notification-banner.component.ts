@@ -1,27 +1,29 @@
-import {Component, Injectable, OnInit} from '@angular/core';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Notification, NotificationType} from '../../services/notifications.service';
 
 @Component({
   selector: 'app-notification-banner',
-  template: '',
+  templateUrl: './notification-banner.component.html',
+  styleUrls: ['./notification-banner.component.scss'],
 })
-export class NotificationBannerComponent implements OnInit {
-  //TODO(b/188579413): add support for multiple messages on the screen
-  constructor(public snackBar: MatSnackBar) { }
+export class NotificationBannerComponent {
+  @Input() notification: Notification;
+  @Output() dismissClick = new EventEmitter<Notification>();
 
-  ngOnInit(): void { }
+  constructor() { }
 
-  public notify(message: string) {
-    const snackBarRef = this.snackBar.open(message, '', {
-      duration: 5000,
-      verticalPosition: 'top',
-    });
+  onDismissClicked(): void {
+    this.dismissClick.emit(this.notification);
   }
 
-  public error(message: string) {
-    const snackBarRef = this.snackBar.open(message, 'Dismiss', {
-      verticalPosition: 'top',
-      panelClass: ['snack-error'],
-    });
+  getCssClass() {
+    if (this.notification.type === NotificationType.Error) {
+      return "error-notification";
+    }
+    return "info-notification";
+  }
+
+  isDismissable() {
+    return this.notification.type === NotificationType.Error;
   }
 }

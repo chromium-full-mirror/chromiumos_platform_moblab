@@ -4,6 +4,7 @@ import {MoblabSettingsService} from 'app/services/moblab-settings.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
 import {Feature} from 'app/services/services.module';
 import {MoblabSettingsConstains} from '../constants';
+import {Notification, NotificationsService} from 'app/services/notifications.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,11 +28,13 @@ export class AppSidebarComponent implements OnInit {
   pauseRequestors = [];
   cloudConfigEnabled: boolean;
   cloudConfigError: boolean;
+  notificationsList: Notification[] = [];
 
   constructor(
     private globalInfo: GlobalInfoService,
     private settingsService: MoblabSettingsService,
-    private configSetupService: ConfigSetupService
+    private configSetupService: ConfigSetupService,
+    private notificationsService: NotificationsService,
   ) {
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabs, {
       route: '/manage_dut',
@@ -83,14 +86,6 @@ export class AppSidebarComponent implements OnInit {
     });
   }
 
-  getErrors() {
-    return [];
-  }
-
-  getMessages() {
-    return [];
-  }
-
   isPageInformationEnabled() {
     return this.isFeatureEnabled(Feature.TOOLBAR_PAGE_INFORMATION);
   }
@@ -133,6 +128,9 @@ export class AppSidebarComponent implements OnInit {
     this.globalInfo.enableNavBarObservable.subscribe(enabled => {
       this.enableNavBar = enabled;
     });
+    this.notificationsService.notificationsObservable.subscribe(notifications => {
+      this.notificationsList = notifications;
+    });
   }
 
   getPausedDueToUser(): string[] {
@@ -145,5 +143,16 @@ export class AppSidebarComponent implements OnInit {
     return this.pauseRequestors.filter(
       p => p === MoblabSettingsConstains.LOW_DISK_SPACE_STRING
     );
+  }
+
+  // Prevents unnecessary rerendering of the list,
+  // which was cancelling click event on Dismiss button
+  // on notification banners.
+  trackByFn(_, item) {
+    return item.notification;
+  }
+
+  dismissNotification(notification: Notification) {
+    this.notificationsService.dismiss(notification.id);
   }
 }

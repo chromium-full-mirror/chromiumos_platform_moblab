@@ -5,9 +5,7 @@ import {OnInit} from '@angular/core';
 import {ButtonWithProgressComponent} from '../button-with-progress/button-with-progress.component';
 
 import {ConfirmationDialog} from '../confirmation-dialog/confirmation-dialog.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from 'app/services/notifications.service';
 
 @Component({
   selector: 'app-update-button',
@@ -22,7 +20,7 @@ export class UpdateButtonComponent implements OnInit {
   constructor(
     private moblabGrpcService: MoblabGrpcService,
     private dialog: MatDialog,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   ngOnInit(): void {
@@ -32,7 +30,7 @@ export class UpdateButtonComponent implements OnInit {
       },
       (msg: string) => {
         this.getUpdateStatusFailed = true;
-        this.notificationBanner.error(msg);
+        this.notificationsService.error(msg);
       }
     );
   }
@@ -68,11 +66,11 @@ export class UpdateButtonComponent implements OnInit {
     this.moblabGrpcService.update_moblab(
       (message: string) => {
         this.updateButton.setIsLoadingStatus(false);
-        this.notificationBanner.notify(message);
+        this.notificationsService.notify(message);
       },
       (error_message: string) => {
         this.updateButton.setIsLoadingStatus(false);
-        this.notificationBanner.error(error_message);
+        this.notificationsService.error(error_message);
       }
     );
   }

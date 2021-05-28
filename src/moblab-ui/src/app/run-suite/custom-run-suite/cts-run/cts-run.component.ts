@@ -8,9 +8,7 @@ import {BuildSettings} from '../../common/base_suite/base-suite.component';
 import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
 import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
 import {BasicSelectorComponent} from '../../common/basic-selector/basic-selector.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from '../../../services/notifications.service';
 
 /** Component owns logic for CTS suite run form.
  * */
@@ -30,9 +28,9 @@ export class CtsRunComponent extends BaseSuite implements AfterContentInit {
   constructor(
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationBanner: NotificationBannerComponent,
+    notificationsService: NotificationsService,
   ) {
-    super(moblabGrpcService, router, notificationBanner);
+    super(moblabGrpcService, router, notificationsService);
   }
 
   /** Sets initial form enable/disable states.

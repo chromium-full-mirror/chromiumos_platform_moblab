@@ -1,0 +1,8 @@
+<div fxLayout="column" fxLayoutAlign="none center">
+    <mat-card class="{{ getCssClass() }}">
+        <mat-card-content>
+            <span class="notification-text">{{ notification.message }}</span>
+            <button *ngIf="isDismissable()" mat-button (click)="onDismissClicked()">Dismiss</button>
+        </mat-card-content>
+    </mat-card>
+</div>

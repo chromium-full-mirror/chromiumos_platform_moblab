@@ -3,9 +3,7 @@ import {FormControl} from '@angular/forms';
 
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from 'app/services/notifications.service';
 
 @Component({
   selector: 'app-edit-attributes',
@@ -22,7 +20,7 @@ export class EditAttributesComponent {
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
-    public notificationBanner: NotificationBannerComponent,
+    public notificationsService: NotificationsService,
   ) { }
 
   get_confirmation_message_suffix(dut_hostnames: string[]) {
@@ -46,7 +44,7 @@ export class EditAttributesComponent {
      */
     const dut_hostnames = this.dutsTableRef.getSelectedDutHostnames();
     if (dut_hostnames.length === 0) {
-      this.notificationBanner.notify('No DUTs selected.');
+      this.notificationsService.notify('No DUTs selected.');
       return;
     }
 
@@ -66,15 +64,15 @@ export class EditAttributesComponent {
       context.attribute_value.value +
       ' to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.notificationBanner.notify(confirmation_message);
+    context.notificationsService.notify(confirmation_message);
 
     context.moblabGrpcService.addAttributeToDuts(
       message => {
-        context.notificationBanner.notify(message);
+        context.notificationsService.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.notificationBanner.error(message);
+        context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.attribute_key.value,
@@ -88,15 +86,15 @@ export class EditAttributesComponent {
       context.attribute_key.value +
       ' from ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.notificationBanner.notify(confirmation_message);
+    context.notificationsService.notify(confirmation_message);
 
     context.moblabGrpcService.removeAttributeFromDuts(
       message => {
-        context.notificationBanner.notify(message);
+        context.notificationsService.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.notificationBanner.error(message);
+        context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.attribute_key.value
@@ -109,15 +107,15 @@ export class EditAttributesComponent {
       context.label.value +
       'to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.notificationBanner.notify(confirmation_message);
+    context.notificationsService.notify(confirmation_message);
 
     context.moblabGrpcService.addLabelToDuts(
       message => {
-        context.notificationBanner.notify(message);
+        context.notificationsService.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.notificationBanner.error(message);
+        context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.label.value
@@ -132,11 +130,11 @@ export class EditAttributesComponent {
       context.get_confirmation_message_suffix(dut_hostnames);
     context.moblabGrpcService.removeLabelFromDuts(
       message => {
-        context.notificationBanner.notify(message);
+        context.notificationsService.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.notificationBanner.error(message);
+        context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.label.value
@@ -157,15 +155,15 @@ export class EditAttributesComponent {
       context.pool.value +
       'to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
-    context.notificationBanner.notify(confirmation_message);
+    context.notificationsService.notify(confirmation_message);
 
     context.moblabGrpcService.addPoolToDuts(
       message => {
-        context.notificationBanner.notify(message);
+        context.notificationsService.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.notificationBanner.error(message);
+        context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.pool.value
@@ -188,11 +186,11 @@ export class EditAttributesComponent {
       context.get_confirmation_message_suffix(dut_hostnames);
     context.moblabGrpcService.removePoolFromDuts(
       message => {
-        context.notificationBanner.notify(message);
+        context.notificationsService.notify(message);
         context.dutsTableRef.refreshConnectedDuts();
       },
       message => {
-        context.notificationBanner.error(message);
+        context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
       context.pool.value

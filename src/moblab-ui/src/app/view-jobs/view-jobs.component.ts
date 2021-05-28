@@ -24,7 +24,7 @@ import {JobActionComponent} from './job-action/job-action.component';
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {normalizeTimestamp, datestringToSecondsTimestamp} from '../utils/date';
 import {TableHeaderSelectorComponent} from '../widgets/table-header-selector/table-header-selector.component';
-import {NotificationBannerComponent} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from 'app/services/notifications.service';
 
 export const JOB_NAME = 'name';
 export const JOB_ID = 'id';
@@ -170,7 +170,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     private changeDetectorRefs: ChangeDetectorRef,
     private datePipe: DatePipe,
     private route: ActivatedRoute,
-    private notificationBanner: NotificationBannerComponent
+    private notificationsService: NotificationsService
   ) { }
 
   ngOnInit() {
@@ -492,7 +492,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   errorHandling(message: string) {
     this.loading = false;
-    this.notificationBanner.error(message);
+    this.notificationsService.error(message);
   }
 
   isAllJobsSelected() {

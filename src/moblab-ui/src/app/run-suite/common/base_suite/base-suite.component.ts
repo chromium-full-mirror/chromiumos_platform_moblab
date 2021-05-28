@@ -5,9 +5,7 @@ import {Router} from '@angular/router';
 import {JOB_START_TIME_FROM_FILTER} from '../../../view-jobs/view-jobs.component';
 import {MoblabGrpcService} from '../../../services/moblab-grpc.service';
 import {normalizeTimestamp} from '../../../utils/date';
-import {
-  NotificationBannerComponent
-} from 'app/widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from '../../../services/notifications.service';
 
 export interface BuildSettings {
   build: string;
@@ -44,7 +42,7 @@ export abstract class BaseSuite {
   constructor(
     public moblabGrpcService: MoblabGrpcService,
     public router: Router,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   onBuildSet(event: BuildSettings) {
@@ -75,7 +73,7 @@ export abstract class BaseSuite {
 
   onRunSuiteClick(message = '') {
     if (message !== '') {
-      this.notificationBanner.notify(message);
+      this.notificationsService.notify(message);
     }
 
     this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteStart});
@@ -83,7 +81,7 @@ export abstract class BaseSuite {
 
   onRunSuiteFailed(message = '') {
     if (message !== '') {
-      this.notificationBanner.error(message);
+      this.notificationsService.error(message);
     }
     this.suiteFormChange.emit({changeType: SuiteChangeType.RunSuiteFailed});
   }

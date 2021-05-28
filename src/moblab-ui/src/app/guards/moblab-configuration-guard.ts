@@ -3,9 +3,7 @@ import {CanActivate, Router} from '@angular/router';
 
 import {MoblabGrpcService} from '../services/moblab-grpc.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
-import {
-  NotificationBannerComponent
-} from '../widgets/notification-banner/notification-banner.component';
+import {NotificationsService} from '../services/notifications.service';
 import {environment} from 'environments/environment';
 
 @Injectable()
@@ -14,7 +12,7 @@ export class ConfigGuard implements CanActivate {
     private router: Router,
     private moblabRpcService: MoblabGrpcService,
     private configSetupService: ConfigSetupService,
-    private notificationBanner: NotificationBannerComponent,
+    private notificationsService: NotificationsService,
   ) { }
 
   canActivate(): Promise<boolean> {
@@ -41,7 +39,7 @@ export class ConfigGuard implements CanActivate {
           }
         },
         (errorMsg: string) => {
-          this.notificationBanner.error('Failed to get cloud configuration: ' + errorMsg);
+          this.notificationsService.error('Failed to get cloud configuration: ' + errorMsg);
         }
       );
     });

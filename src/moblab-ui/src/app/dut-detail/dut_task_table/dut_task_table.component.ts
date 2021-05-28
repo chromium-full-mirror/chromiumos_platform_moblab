@@ -6,8 +6,7 @@ import {DutTask} from '../../services/moblabrpc_pb';
 import {INT_TO_DUT_TASK_STATUS} from '../../utils/proto_helpers';
 import {MoblabGrpcService} from '../../services/moblab-grpc.service';
 import {normalizeTimestamp} from '../../utils/date';
-import {NotificationBannerComponent} from 'app/widgets/notification-banner/notification-banner.component';
-
+import {NotificationsService} from '../../services/notifications.service';
 @Component({
   selector: 'app-dut-task-table',
   templateUrl: './dut_task_table.component.html',
@@ -32,7 +31,7 @@ export class DutTaskTableComponent implements AfterViewInit {
 
   constructor(
     readonly moblabGrpcService: MoblabGrpcService,
-    private notificationBanner: NotificationBannerComponent
+    private notificationsService: NotificationsService,
   ) { }
 
   ngAfterViewInit() {
@@ -54,7 +53,7 @@ export class DutTaskTableComponent implements AfterViewInit {
         this.setDutTasks(dutTasks);
       },
       errorMsg => {
-        this.notificationBanner.error(errorMsg);
+        this.notificationsService.error(errorMsg);
       },
       this.dutIp,
       this.paginator.pageIndex * this.paginator.pageSize
@@ -68,7 +67,7 @@ export class DutTaskTableComponent implements AfterViewInit {
         this.numDutTasks = numDutTasks;
       },
       errorMsg => {
-        this.notificationBanner.error(errorMsg);
+        this.notificationsService.error(errorMsg);
       },
       this.dutIp
     );

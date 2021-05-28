@@ -93,3 +93,11 @@ mat-toolbar {
 .toolbar-icon {
   width: 56px;
 }
+
+.notifications-panel {
+  z-index: 1000;
+  position: absolute;
+  pointer-events: none;
+  top: 0px;
+  width: 100%;
+}

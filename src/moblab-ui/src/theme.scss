@@ -37,15 +37,6 @@ $theme: mat-light-theme($primary, $accent, $warn);
 // that you are using.
 @include angular-material-theme($theme);
 
-::ng-deep snack-bar-container.snack-error{
-  font-weight: bold;
-  font-size: 15px;
-  background-color: #ff5655;
-}
-
-::ng-deep snack-bar-container.snack-error .mat-simple-snackbar-action{
-  color: white;
-}
 
 $moblab-colors-attention: #fbbc04;
 
