@@ -29,15 +29,24 @@
 }
 
 .job-refresh-button {
-  float:right;
+  margin-left:16px;
+}
+
+.table-action-header {
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+.auto-refresh-toggle {
+  margin-top: 8px;
   margin-right:18px;
+  float: right;
 }
 
 .jobs-table {
   box-shadow: none;
   margin-bottom: 20px;
   margin-right: 18px;
-  max-width: 1500px;
   overflow: scroll;
 }
 

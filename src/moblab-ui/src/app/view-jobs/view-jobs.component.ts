@@ -13,6 +13,8 @@ import {FormControl} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
 import {Sort} from '@angular/material/sort';
+import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {Subscription, timer} from 'rxjs';
 
 import {
   forbiddenDateValidator,
@@ -141,6 +143,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   jobSelectOptions: string[] = ['Visible'];
   jobs = new MatTableDataSource<Job>();
   sortBy = '';
+  autoRefresh = false;
 
   loading = false;
   numJobs = 0;
@@ -157,6 +160,8 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   jobStartTimeToFilter: string = JOB_START_TIME_TO_FILTER;
 
   normalizeTimestamp = normalizeTimestamp;
+
+  private getJobsSubscription: Subscription;
 
   // Removing the first, default value of each enum ( which represent the 'unset'
   // state.
@@ -435,6 +440,47 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       dut_filter,
     ] = this.getJobFilters();
 
+    this.unsubscribeGetJobs();
+    if (this.autoRefresh) {
+      this.getJobsSubscription = timer(500, 60000).subscribe(() => {
+        this.getJobs(
+          job_id_filter,
+          job_name_filter,
+          job_start_lt_filter,
+          job_start_gt_filter,
+          job_queue_status_filter,
+          job_relationship_filter,
+          parent_id_filter,
+          dut_filter,
+          this.sortBy
+        );
+      });
+    } else {
+      this.getJobs(
+        job_id_filter,
+        job_name_filter,
+        job_start_lt_filter,
+        job_start_gt_filter,
+        job_queue_status_filter,
+        job_relationship_filter,
+        parent_id_filter,
+        dut_filter,
+        this.sortBy
+      );
+    }
+  }
+
+  getJobs(
+    jobIdFilter: string,
+    jobNameFilter: string,
+    jobStartLtFilter: number,
+    jobStartGtFilter: number,
+    jobQueueStatusFilter: Job.QueueStatus,
+    jobRelationshipFilter: Job.Relationship,
+    parentIdFilter: string,
+    dutFilter: string,
+    sortBy: string
+  ) {
     this.moblabGrpcService.getJobs(
       (jobs: Job[]) => this.assignJobs(jobs),
       (message: string) => this.errorHandling(message),
@@ -444,29 +490,29 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       this.paginator && this.paginator.pageSize
         ? this.paginator.pageSize
         : DEFAULT_PAGE_SIZE,
-      job_id_filter,
-      job_name_filter,
-      job_start_lt_filter,
-      job_start_gt_filter,
-      job_queue_status_filter,
-      job_relationship_filter,
-      parent_id_filter,
-      dut_filter,
-      this.sortBy
+      jobIdFilter,
+      jobNameFilter,
+      jobStartLtFilter,
+      jobStartGtFilter,
+      jobQueueStatusFilter,
+      jobRelationshipFilter,
+      parentIdFilter,
+      dutFilter,
+      sortBy
     );
 
     this.moblabGrpcService.getNumJobs(
       (numJobs: number) => {
         this.numJobs = numJobs;
       },
-      job_id_filter,
-      job_name_filter,
-      job_start_lt_filter,
-      job_start_gt_filter,
-      job_queue_status_filter,
-      job_relationship_filter,
-      parent_id_filter,
-      dut_filter
+      jobIdFilter,
+      jobNameFilter,
+      jobStartLtFilter,
+      jobStartGtFilter,
+      jobQueueStatusFilter,
+      jobRelationshipFilter,
+      parentIdFilter,
+      dutFilter
     );
   }
 
@@ -480,6 +526,20 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   displayColumn(columnName: string) {
     return this.displayedColumns.includes(columnName);
+  }
+
+  updateAutoRefresh(toggle: MatSlideToggleChange) {
+    this.unsubscribeGetJobs();
+    this.autoRefresh = toggle.checked;
+    if (toggle.checked) {
+      this.getNextPageJobs();
+    }
+  }
+
+  unsubscribeGetJobs() {
+    if (this.getJobsSubscription && !this.getJobsSubscription.closed) {
+      this.getJobsSubscription.unsubscribe();
+    }
   }
 
   /*
@@ -501,6 +561,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
 
   ngOnDestroy(): void {
     this.paginator.page.unsubscribe();
+    this.unsubscribeGetJobs();
   }
 
   setDutFilter(dut: string) {

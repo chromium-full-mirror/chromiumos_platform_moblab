@@ -1,11 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnInit,
-  Output,
-  ViewChild,
-} from '@angular/core';
-import {Job} from 'app/services/moblabrpc_pb';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectionModel} from '@angular/cdk/collections';
 import {NotificationsService} from 'app/services/notifications.service';
@@ -18,14 +11,12 @@ import {NotificationsService} from 'app/services/notifications.service';
 export class JobActionComponent {
   @Output() actionSubmitted = new EventEmitter();
 
-  actions = ['', 'Abort'];
-  selectedAction = '';
   jobSelections = new SelectionModel<number>(true, []);
   numSelectedJobs = 0;
 
   constructor(
     private moblabGrpcService: MoblabGrpcService,
-    private notificationsService: NotificationsService,
+    private notificationsService: NotificationsService
   ) { }
 
   toggleJobSelection(element) {
@@ -59,19 +50,15 @@ export class JobActionComponent {
 
   doAction() {
     const jobIds = this.jobSelections.selected;
-
-    if (this.selectedAction) {
-      this.moblabGrpcService.abortJobs(
-        resultMsg => {
-          this.notificationsService.notify(resultMsg);
-        },
-        errorMsg => {
-          this.notificationsService.error(errorMsg);
-        },
-        jobIds
-      );
-    }
-    this.selectedAction = '';
+    this.moblabGrpcService.abortJobs(
+      resultMsg => {
+        this.notificationsService.notify(resultMsg);
+      },
+      errorMsg => {
+        this.notificationsService.error(errorMsg);
+      },
+      jobIds
+    );
     this.clearSelectedJobs();
     this.actionSubmitted.emit();
   }

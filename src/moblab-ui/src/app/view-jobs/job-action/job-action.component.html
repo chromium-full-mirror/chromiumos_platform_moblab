@@ -1,14 +1,4 @@
-<mat-card>
-  <mat-form-field>
-    <mat-label>Actions</mat-label>
-    <mat-select [(value)]="selectedAction">
-      <mat-option *ngFor="let action of actions" [value]="action">
-        {{action}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  ({{jobSelections.selected.length}} jobs selected.)
-  <button id="action-button" mat-raised-button color="primary"
-          [disabled]="selectedAction && !getNumSelectedJobs()" (click)="doAction()"> Apply
-  </button>
-</mat-card>
+<button id="action-button" mat-raised-button color="primary"
+          [disabled]="!getNumSelectedJobs()" (click)="doAction()">
+          Abort ({{jobSelections.selected.length}})
+</button>

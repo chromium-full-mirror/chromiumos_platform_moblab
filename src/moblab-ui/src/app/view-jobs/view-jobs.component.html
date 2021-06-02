@@ -59,15 +59,19 @@
           </button>
           <button mat-raised-button id="clear-filters-button" [disabled]="this.loading" (click)="clearFilters()"> Clear
           </button>
-          <button class="job-refresh-button" matTooltip="Refresh" mat-icon-button (click)="refreshJobs()">
-            <mat-icon>refresh</mat-icon>
-          </button>
         </mat-card>
       </div>
       <mat-divider></mat-divider>
-      <app-job-action *ngIf="!hideActionBar" (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
-      </app-job-action>
     </div>
+    <div class="table-action-header">
+        <button class="job-refresh-button" color="primary" matTooltip="Refresh" mat-icon-button (click)="refreshJobs()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <mat-slide-toggle class="auto-refresh-toggle" matTooltip="Auto refresh every minute" [checked]="autoRefresh" (change)="updateAutoRefresh($event)">Auto Refresh</mat-slide-toggle>
+        <app-job-action *ngIf="!hideActionBar" (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
+        </app-job-action>
+    </div>
+    <mat-divider></mat-divider>
     <div style="position: relative;">
       <table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table" matSort
         (matSortChange)="sortData($event)">
@@ -186,7 +190,6 @@
           [showFirstLastButtons]="true">
         </mat-paginator>
       </div>
-
       <div id="loading-overlay" *ngIf="loading">
         <div class="loading-spinner-wrapper">
           <mat-spinner></mat-spinner>
