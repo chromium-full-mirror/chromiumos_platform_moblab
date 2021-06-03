@@ -932,6 +932,7 @@ class MoblabService(object):
         not_yet_run=False,
         running=False,
         finished=False,
+        completed_status=None,
         parent_id_filter=None,
         dut_hostname_filter=None,
     ):
@@ -971,6 +972,7 @@ class MoblabService(object):
                 not_yet_run,
                 running,
                 finished,
+                completed_status,
                 parent_id_filter,
                 dut_hostname_filter,
             )

@@ -660,6 +660,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
             request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            self._extract_afe_jobs_status(request.status_filter),
             request.parent_id_filter,
             request.dut_hostname_filter,
         )
