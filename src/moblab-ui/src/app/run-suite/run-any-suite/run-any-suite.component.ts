@@ -39,6 +39,8 @@ export class RunAnySuiteComponent
     'hardware_thermalqual_fast',
     'hardware_thermalqual_full',
     'performance_cuj',
+    'performance_cuj_quick',
+    'mtbf',
   ];
 
   public hideCustomInput = true;
