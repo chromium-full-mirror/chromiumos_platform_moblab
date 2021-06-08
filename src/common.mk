@@ -206,6 +206,12 @@ chromite:
 		-f dockerfiles/utilities/Dockerfile.chromite dockerfiles/utilities
 	docker push ${REGISTRY_URI}/chromite:${LABEL}
 
+dut-manager: export DOCKER_BUILDKIT=1
+dut-manager: infra-protos
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/dut-manager:${LABEL} \
+		-f dockerfiles/dut_manager/Dockerfile . 
+	docker push ${REGISTRY_URI}/dut-manager:${LABEL}
+
 dut-manager-storage: export DOCKER_BUILDKIT=1
 dut-manager-storage: infra-protos
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/dut-manager-storage:${LABEL} \
