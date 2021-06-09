@@ -1,5 +1,5 @@
 <mat-card>
-  <button mat-raised-button color="primary" (click)="updateFirmware()">
+  <button mat-raised-button color="primary" (click)="updateFirmware()" [disabled]="selection.isEmpty()">
     Update Firmware
   </button>
 </mat-card>
