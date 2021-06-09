@@ -2,6 +2,7 @@ import {
   AfterContentInit,
   ChangeDetectorRef,
   Component,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -15,6 +16,7 @@ import {ConfigSetupService} from '../services/moblab-configuration-alerting.serv
 import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
 import {MoblabSettingsConstains} from '../constants';
 import {NotificationsService} from '../services/notifications.service';
+import {Subscription} from 'rxjs';
 
 function gsURLValidator(control) {
   if (!control.value) {
@@ -40,7 +42,7 @@ class CloudConfiguration {
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.scss'],
 })
-export class ConfigurationComponent implements OnInit, AfterContentInit {
+export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentInit {
   @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
   @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
   errors = false;
@@ -98,6 +100,8 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
   moblabHostname = '';
   isConnectedToInternet = false;
 
+  pauseStatusSubscription: Subscription = null;
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     private moblabRpcService: MoblabGrpcService,
@@ -111,7 +115,7 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.bucketURLForm.valueChanges.subscribe(value => {
       this.formatBucketLink();
     });
-    this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
+    this.pauseStatusSubscription = this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
       this.isHostSchedulerPauseRequested =
         requestors &&
         requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
@@ -123,6 +127,10 @@ export class ConfigurationComponent implements OnInit, AfterContentInit {
     this.defaultCrOSVersionForm.disable();
     this.initCanUpdateCloudConfigFlag();
     await this.getStableCrOSVersion();
+  }
+
+  ngOnDestroy(): void {
+    this.pauseStatusSubscription.unsubscribe();
   }
 
   public async getStableCrOSVersion() {
