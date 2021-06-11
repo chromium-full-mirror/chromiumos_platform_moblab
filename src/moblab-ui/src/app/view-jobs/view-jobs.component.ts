@@ -225,6 +225,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     if (event.selection === 'All') {
       this.selectAllJobs();
     } else if (event.selection === 'Visible') {
+      this.jobActionRef.clearSelectedJobs();
       this.jobs.data.forEach(this.jobActionRef.selectJob, this.jobActionRef);
     } else if (event.selection === 'None') {
       this.jobActionRef.clearSelectedJobs();
