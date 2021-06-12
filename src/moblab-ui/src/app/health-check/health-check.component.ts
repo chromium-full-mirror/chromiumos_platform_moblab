@@ -28,14 +28,6 @@ export class HealthCheckComponent implements OnInit, OnDestroy {
   mobmonitorLink = this.getMobmonitorLink();
   subscription: Subscription;
 
-  /** This list is used to remove failed health checks that have dependencies */
-  private failedCheckDependencies = [
-    {
-      name: 'ServiceAccountFile',
-      dependency: 'BotoFile',
-    },
-  ];
-
   /** List of errors to bypass so the redirect can go through */
   private failedCheckIgnoreList = ['BotoFile'];
 
@@ -80,23 +72,8 @@ export class HealthCheckComponent implements OnInit, OnDestroy {
       container => container.health === true
     );
 
-    const failedHealthChecks = this.moblabServiceHealth.healthchecks.filter(
+    this.failedHealthChecks = this.moblabServiceHealth.healthchecks.filter(
       container => container.health === false
-    );
-
-    // filter the failed health checks with dependencies
-    const failedHealthCheckNames = failedHealthChecks.map(
-      failedCheck => failedCheck.name
-    );
-    const failedChecksToFilter = this.failedCheckDependencies
-      .filter(
-        failedCheck =>
-          failedHealthCheckNames.includes(failedCheck.name) &&
-          failedHealthCheckNames.includes(failedCheck.dependency)
-      )
-      .map(failedCheck => failedCheck.name);
-    this.failedHealthChecks = failedHealthChecks.filter(
-      failedCheck => !failedChecksToFilter.includes(failedCheck.name)
     );
 
     this.loadingPercentage =
