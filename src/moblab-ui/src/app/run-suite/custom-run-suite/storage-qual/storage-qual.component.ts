@@ -31,7 +31,6 @@ export class StorageQualComponent
 
   isStorageQualSetupValid = false;
   storageQualCheckError = "";
-  hasStorQualCheckFailed = () => this.storageQualCheckError;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -119,14 +118,18 @@ export class StorageQualComponent
       this.inputChanged();
       return;
     }
+    this.onFormLoading("validating storage qual setup ...");
     this.moblabGrpcService.validateStorageQualSetup(
       () => {
         this.isStorageQualSetupValid = true;
+        this.storageQualCheckError = "";
         this.inputChanged();
+        this.onFormLoaded();
       },
       (msg: string) => {
         this.storageQualCheckError = msg;
         this.inputChanged();
+        this.onFormLoaded();
       },
       this.selectedPool
     );

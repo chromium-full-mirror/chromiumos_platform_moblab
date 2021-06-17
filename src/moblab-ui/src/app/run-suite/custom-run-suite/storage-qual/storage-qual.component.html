@@ -5,7 +5,7 @@
   </app-build-select-forms>
 
   <div class=storage-check-validatrion>
-    <mat-error *ngIf="hasStorQualCheckFailed()">{{storageQualCheckError}}</mat-error>
+    <mat-error *ngIf="storageQualCheckError">{{storageQualCheckError}}</mat-error>
   </div>
 
   <app-basic-selector #variationInput [title]="'Select suite variation (Optional):'" [options]="variationOptions"

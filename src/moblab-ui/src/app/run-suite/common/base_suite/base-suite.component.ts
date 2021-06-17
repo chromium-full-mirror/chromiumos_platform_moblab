@@ -60,10 +60,10 @@ export abstract class BaseSuite {
    */
   abstract onBuildSetCustom(event: BuildSettings);
 
-  onFormLoading(event: Event) {
+  onFormLoading(message: string) {
     this.suiteFormChange.emit({
       changeType: SuiteChangeType.FormLoadingStart,
-      message: event,
+      message: message,
     });
   }
 
