@@ -83,6 +83,11 @@ mat-toolbar {
   color: mat-color($accent, darker) !important;
 }
 
+.list-item-disabled{
+  opacity: 0.5;
+  text-decoration: none;
+}
+
 .menu-button {
   padding: 0px;
   margin-right: 20px;
