@@ -12,8 +12,8 @@ all: init dependencies host_server
 developer: init dependencies host_server local_registry
 
 dependencies:
-	apt install pip
-	pip install grpcio-tools netifaces
+	apt install python3-pip
+	pip3 install --upgrade grpcio-tools netifaces protobuf
 
 local_registry:
 	service docker stop
@@ -57,7 +57,10 @@ host_server: python
 	systemctl enable moblab-host-server.service
 	systemctl start moblab-host-server.service
 
-networking:
+network-dependencies:
+	apt install bridge-utils net-tools
+
+networking: network-dependencies
 	cp init/moblab-networking /etc/init.d
 	systemctl daemon-reload
 	systemctl enable moblab-networking.service
