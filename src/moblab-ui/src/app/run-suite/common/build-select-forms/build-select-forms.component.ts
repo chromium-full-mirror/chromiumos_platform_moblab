@@ -252,26 +252,26 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   unselectModel() {
     this.selectedModel = null;
     this.unselectBuildTarget();
+    this.boardSelector.disable(SELECT_MODEL_PROMPT);
   }
 
   unselectBuildTarget() {
     this.buildTargetName = null;
     this.boardSelector.clearSelection();
-    this.boardSelector.disable(SELECT_MODEL_PROMPT);
     this.unselectMilestone();
+    this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
   }
 
   unselectMilestone() {
     this.milestone = null;
     this.milestoneSelector.clearSelection();
-    this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
     this.unselectBuildVersion();
+    this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
   }
 
   unselectBuildVersion() {
     this.buildVersionName = null;
     this.buildSelector.clearSelection();
-    this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
     this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
     this.buildVersionUnselected.emit();
   }
