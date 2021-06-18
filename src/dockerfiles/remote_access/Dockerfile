@@ -77,8 +77,10 @@ COPY src/dockerfiles/remote_access/fix_ping.run ./run
 COPY src/tools/reboot /usr/local/bin
 COPY src/tools/factory_reset /usr/local/bin
 COPY src/tools/host_command.py /usr/local/bin
+COPY src/tools/get_host_identifier /usr/local/bin
 RUN chmod uog+x /usr/local/bin/reboot
 RUN chmod uog+x /usr/local/bin/factory_reset
+RUN chmod uog+x /usr/local/bin/get_host_identifier
 
 WORKDIR /var/log
 

@@ -16,6 +16,10 @@ def factory_reset():
     host_connector.HostServicesConnector.factory_reset()
 
 
+def get_host_identifier():
+    print(host_connector.HostServicesConnector.get_host_identifier())
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         f = os.path.basename(sys.argv[1])
