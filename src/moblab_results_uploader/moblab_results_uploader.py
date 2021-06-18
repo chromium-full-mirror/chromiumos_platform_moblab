@@ -8,8 +8,6 @@
 
 import argparse
 import logging
-import os
-import pathlib
 import sys
 
 import yaml
@@ -41,20 +39,22 @@ def _setup_logging(handler):
     Args:
         handler: The logging handler object.
     """
-    logger = logging.getLogger("moblab_uploader")
-    logger.setLevel(logging.DEBUG)
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(
         logging.Formatter(
             "%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s"
         )
     )
-    # Some code runs before this function may have created some handler and we
-    # don't want them.
-    logger.handlers = [handler]
+    _configure_logger("moblab_uploader", logging.DEBUG, handler)
+    _configure_logger("requests", logging.WARNING, handler)
+    _configure_logger("moblab_common", logging.WARNING, handler)
 
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("moblab_common").setLevel(logging.WARNING)
+
+def _configure_logger(logger_name, level, handler):
+    """Helper method to set level and overrides handlers for the logger"""
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(level)
+    logger.handlers = [handler]
 
 
 def _results_filter_type(config_file_path):
