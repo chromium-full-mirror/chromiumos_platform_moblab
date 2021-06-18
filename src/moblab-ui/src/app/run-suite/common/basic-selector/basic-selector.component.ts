@@ -63,10 +63,6 @@ export class BasicSelectorComponent
     this.select.emit(event);
   }
 
-  getSelectedValue(): string {
-    return !this.isShown ? '' : this.selected;
-  }
-
   selectOption(optionIndex) {
     if (optionIndex >= 0 && optionIndex < this.options.length) {
       this.selected = this.options[optionIndex];

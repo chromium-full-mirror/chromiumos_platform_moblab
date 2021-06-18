@@ -160,14 +160,6 @@ export class BasicAutocompleteSelectorComponent
     this.selectFormControl.setValue('');
   }
 
-  getSelectedValue() {
-    if (this.isExactMatchToOption()) {
-      return this.selectFormControl.value;
-    } else {
-      return '';
-    }
-  }
-
   // Tracks changes in options Input
   ngOnChanges(changes: SimpleChanges) {
     if (changes.options) {
