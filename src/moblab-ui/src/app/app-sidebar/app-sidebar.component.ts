@@ -4,7 +4,10 @@ import {MoblabSettingsService} from 'app/services/moblab-settings.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
 import {Feature} from 'app/services/services.module';
 import {MoblabSettingsConstains} from '../constants';
-import {Notification, NotificationsService} from 'app/services/notifications.service';
+import {
+  Notification,
+  NotificationsService,
+} from 'app/services/notifications.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -34,11 +37,11 @@ export class AppSidebarComponent implements OnInit {
     private globalInfo: GlobalInfoService,
     private settingsService: MoblabSettingsService,
     private configSetupService: ConfigSetupService,
-    private notificationsService: NotificationsService,
+    private notificationsService: NotificationsService
   ) {
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabs, {
       route: '/manage_dut',
-      label: "Manage DUTs",
+      label: 'Manage DUTs',
       icon: 'laptop_chromebook',
     });
     this.addSidebarEntry(Feature.DUT_DETAIL, this.navTabs, {
@@ -116,21 +119,37 @@ export class AppSidebarComponent implements OnInit {
       this.pauseRequestors = requestors;
     });
     this.configSetupService.cloudConfigObservable.subscribe(data => {
-      this.cloudConfigError = data["error"]
+      this.cloudConfigError = data['error'];
       if (this.cloudConfigError) {
         // Let user navigate through the UI when unable to retrieve cloud
         // configuration.
         this.cloudConfigEnabled = true;
       } else {
-        this.cloudConfigEnabled = data["enabled"];
+        this.cloudConfigEnabled = data['enabled'];
       }
     });
     this.globalInfo.enableNavBarObservable.subscribe(enabled => {
       this.enableNavBar = enabled;
     });
-    this.notificationsService.notificationsObservable.subscribe(notifications => {
-      this.notificationsList = notifications;
-    });
+    this.notificationsService.notificationsObservable.subscribe(
+      notifications => {
+        this.notificationsList = notifications;
+      }
+    );
+  }
+
+  isSideNavEnabled(): boolean {
+    return this.enableNavBar && this.cloudConfigEnabled;
+  }
+
+  getSideNavTooltip(): string {
+    if (!this.enableNavBar) {
+      return 'Disabled. Application is not ready yet!';
+    }
+    if (!this.cloudConfigEnabled) {
+      return 'Disabled. Please provide a valid cloud configuration!';
+    }
+    return '';
   }
 
   getPausedDueToUser(): string[] {
