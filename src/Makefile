@@ -1,5 +1,5 @@
 export LABEL=${USER}
-export REGISTRY=us-docker.pkg.dev/chromeos-partner-moblab-dev/${USER}
+export REGISTRY=us-docker.pkg.dev/chromeos-partner-moblab-dev/$(subst .,,${USER})
 export BUILD_VERSION=${LABEL}
 export BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab-dev/base-containers
 WATCHTOWER_CMD=--enable-lifecycle-hooks --interval 60 --include-restarting
