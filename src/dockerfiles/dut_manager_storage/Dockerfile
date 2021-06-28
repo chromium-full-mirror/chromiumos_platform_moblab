@@ -30,10 +30,10 @@ WORKDIR /etc/moblab/dut_manager_storage
 COPY --chown=moblab dut_manager_storage/ .
 COPY --from=protos /protos .
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip install *.whl
-RUN rm -rf /wheels
+WORKDIR /install
+COPY --from=common /install/* .
+RUN bash ./install.sh
+RUN rm -rf /install
 
 WORKDIR /etc/moblab/dut_manager_storage
 COPY --chown=moblab dockerfiles/dut_manager_storage/requirements.txt ./

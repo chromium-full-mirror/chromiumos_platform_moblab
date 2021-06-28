@@ -48,10 +48,10 @@ RUN mkdir -p /home/moblab/.ssh
 COPY --from=autotest /chromite/ssh_keys/* /home/moblab/.ssh/
 RUN chmod -R 600 /home/moblab/.ssh/*
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
+WORKDIR /install
+COPY --from=common /install/* .
 RUN pip install *.whl
-RUN rm -rf /wheels
+RUN rm -rf /install
 
 RUN apk del \
     python3-dev \

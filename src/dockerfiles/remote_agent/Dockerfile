@@ -52,10 +52,10 @@ RUN pip install pyyaml
 RUN sudo apt-get -y install gcc python3-dev
 RUN sudo pip3 install psutil
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip install *.whl
-RUN rm -rf /wheels
+WORKDIR /install
+COPY --from=common /install/* .
+RUN bash ./install.sh
+RUN rm -rf /install
 
 RUN apt purge -yq cmake libssl-dev zlib1g-dev gcc-multilib
 RUN apt autoremove -yq

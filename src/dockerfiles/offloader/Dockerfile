@@ -47,10 +47,10 @@ COPY --chown=moblab --from=proto_build /usr/local/autotest /usr/local/autotest
 COPY src/dockerfiles/offloader/requirements.txt ./
 RUN pip3 install --upgrade pip && pip3 install --no-cache-dir -r requirements.txt
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip3 install *.whl
-RUN rm -rf /wheels
+WORKDIR /install
+COPY --from=common /install/* .
+RUN bash ./install.sh
+RUN rm -rf /install
 
 WORKDIR /etc/moblab/moblab_results_uploader
 COPY --chown=moblab src/moblab_results_uploader/ /etc/moblab/moblab_results_uploader
