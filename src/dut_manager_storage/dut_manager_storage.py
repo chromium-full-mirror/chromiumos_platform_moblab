@@ -11,15 +11,17 @@ import time
 
 import grpc
 
-from lab import dut_manager_storage_pb2
-from lab import dut_manager_storage_pb2_grpc
+import dut_manager_storage_rpcservice
+from lab.dut_manager_storage_pb2_grpc import (
+    add_DutManagerStorageServiceServicer_to_server,
+)
 
 _LOGGER = logging.getLogger("dut-manager-storage")
 
 
-class DutManagerStorage(
-    dut_manager_storage_pb2_grpc.DutManagerStorageServiceServicer
-):
+class DutManagerStorage(object):
+    """Class that implements the DUT manager storage RPC server."""
+
     def setup_logging(self, level):
         """Set up the custom file log handler.
 
@@ -78,10 +80,10 @@ class DutManagerStorage(
             concurrent.futures.ThreadPoolExecutor(max_workers=500)
         )
 
+        servicer = dut_manager_storage_rpcservice.DutManagerStorageRpcService()
+
         try:
-            dut_manager_storage_pb2_grpc.add_DutManagerStorageServiceServicer_to_server(
-                self, server
-            )
+            add_DutManagerStorageServiceServicer_to_server(servicer, server)
 
             server.add_insecure_port("[::]:7003")
             logging.info("Starting server on 7003")

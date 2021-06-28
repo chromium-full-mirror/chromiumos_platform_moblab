@@ -12,15 +12,27 @@ FROM gcr.io/chromeos-partner-moblab/infra_protos:haddowk as protos
 
 ######################################################################
 
+######################################################################
+
+FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
+
+######################################################################
+
 FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
 WORKDIR /etc/moblab/dut_manager_storage
-COPY dut_manager_storage/dut_manager_storage.py .
+COPY dut_manager_storage/*.py .
 COPY --from=protos /protos .
 
+WORKDIR /wheels
+COPY --from=common /wheel/*py3* .
+RUN pip install *.whl
+RUN rm -rf /wheels
+
+WORKDIR /etc/moblab/dut_manager_storage
 COPY --chown=moblab dockerfiles/dut_manager_storage/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt

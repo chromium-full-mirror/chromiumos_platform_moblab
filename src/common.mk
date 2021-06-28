@@ -207,7 +207,7 @@ chromite:
 	docker push ${REGISTRY_URI}/chromite:${LABEL}
 
 dut-manager-storage: export DOCKER_BUILDKIT=1
-dut-manager-storage: infra-protos
+dut-manager-storage: infra-protos common
 	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/dut-manager-storage:${LABEL} \
 		-f dockerfiles/dut_manager_storage/Dockerfile . 
 	docker push ${REGISTRY_URI}/dut-manager-storage:${LABEL}
