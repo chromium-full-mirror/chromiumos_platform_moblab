@@ -453,6 +453,9 @@ export class MoblabGrpcService {
 
   getNumJobs(
     callback: (x: number) => void,
+    // TODO(b/189210905): It can be a bit awkward to call this method when only
+    // 1 or 2 arguments need to be passed. Utilize JS object destructuring to
+    // make calling this method more readable.
     id_filter?: string,
     name_filter?: string,
     created_time_lt?: number,

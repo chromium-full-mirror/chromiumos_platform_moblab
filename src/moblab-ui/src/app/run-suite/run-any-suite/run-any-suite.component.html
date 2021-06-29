@@ -12,5 +12,7 @@
   <app-basic-input [hidden]="hideCustomInput" #suiteInput [name]="'Custom Suite Name'" (update)="suiteChanged()">
   </app-basic-input>
 
+  <app-new-update-notifier></app-new-update-notifier>
+
   <app-run-suite-button (onClick)="onRunSuiteClick()"></app-run-suite-button>
 </mat-card>

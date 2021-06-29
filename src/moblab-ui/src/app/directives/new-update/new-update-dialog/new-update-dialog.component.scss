@@ -1,0 +1,54 @@
+@import '../../../app.theme.scss';
+
+.c-dialog {
+  z-index: 1000;
+  position: relative;
+  width: 360px;
+}
+
+.c-dialog-title {
+  height: 56px;
+}
+
+.c-title {
+  float: left;
+  padding: 0px 16px;
+  margin: 0px;
+}
+
+.c-dialog-content {
+  display: -webkit-flex;
+  flex-grow: 1;
+  height: 200px;
+  position: relative;
+}
+
+.c-description {
+  left: 0px;
+  padding: 18px 16px 0px;
+  right: 0px;
+}
+
+.c-dialog-actions {
+  border-top: 1px solid $color-light-secondary;
+}
+
+.c-action-button {
+  margin-right: 8px !important;
+  margin-left: 5px !important;
+}
+
+.c-mat-dialog-actions {
+  padding: 0 !important;
+}
+
+::ng-deep .c-new-update-dialog .mat-dialog-container {
+  padding: 0;
+  overflow: visible;
+  background-color: $color-light-primary;
+  box-shadow: initial;
+}
+
+::ng-deep .c-dialog-backdrop {
+  background-color: $backdrop-color;
+}

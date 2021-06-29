@@ -31,6 +31,8 @@ import {RunSuiteComponent} from './run-suite.component';
 import {StorageQualComponent} from './custom-run-suite/storage-qual/storage-qual.component';
 import {StorageQualV2Component} from './custom-run-suite/storage-qual-v2/storage-qual-v2.component';
 import {WidgetsModule} from './../widgets/widgets.module';
+import {NewUpdateNotifierComponent} from './common/new-update-notifier/new-update-notifier.component';
+import {NewUpdateModule} from '../directives/new-update/new-update.module';
 
 @NgModule({
   declarations: [
@@ -50,6 +52,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
     RunSuiteComponent,
     StorageQualComponent,
     StorageQualV2Component,
+    NewUpdateNotifierComponent,
   ],
   exports: [
     BasicAutocompleteSelectorComponent,
@@ -78,6 +81,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
     ReactiveFormsModule,
     RouterModule,
     WidgetsModule,
+    NewUpdateModule,
   ],
 })
 export class RunSuiteModule { }
