@@ -11,14 +11,14 @@ import time
 
 import grpc
 
-from lab import dut_manager_pb2
+from dut_manager_rpcservice import DutManagerRpcService
 from lab import dut_manager_pb2_grpc
 
 _LOGGER = logging.getLogger("dut-manager")
 
 
-class DutManager(dut_manager_pb2_grpc.DutManagerServicer):
-    def setup_logging(self, level):
+class DutManager:
+    def setup_logging(self, level, log_filename):
         """Set up the custom file log handler.
 
         Logs to bootup as that is mounted in the moblab software debug
@@ -28,7 +28,10 @@ class DutManager(dut_manager_pb2_grpc.DutManagerServicer):
             level (integer): A valid python logging level.
         """
         _LOGGER.setLevel(level)
-        handler = logging.FileHandler("/var/log/moblab/dut_manager.log")
+        if log_filename:
+            handler = logging.FileHandler(log_filename)
+        else:
+            handler = logging.StreamHandler()
         handler.setFormatter(
             logging.Formatter(
                 "%(asctime)s %(filename)s:%(lineno)d %(levelname)s:"
@@ -56,6 +59,14 @@ class DutManager(dut_manager_pb2_grpc.DutManagerServicer):
             action="store_true",
             help="Turn on debug logging.",
         )
+        parser.add_argument(
+            "-l",
+            "--logfile",
+            type=str,
+            required=False,
+            default=None,
+            help="Full path to logfile. By default will log to console.",
+        )
         return parser.parse_args(argv)
 
     def serve(self, args):
@@ -68,20 +79,23 @@ class DutManager(dut_manager_pb2_grpc.DutManagerServicer):
         logging_severity = logging.INFO
         if options.verbose:
             logging_severity = logging.DEBUG
-        self.setup_logging(logging_severity)
+        self.setup_logging(logging_severity, options.logfile)
 
         server = grpc.server(
             concurrent.futures.ThreadPoolExecutor(max_workers=500)
         )
 
+        dut_manager = DutManagerRpcService()
         try:
-            dut_manager_pb2_grpc.add_DutManagerServicer_to_server(self, server)
+            dut_manager_pb2_grpc.add_DutManagerServiceServicer_to_server(
+                dut_manager, server
+            )
 
             server.add_insecure_port("[::]:7002")
-            logging.info("Starting server on 7002")
+            _LOGGER.info("Starting server on 7002")
             server.start()
             while True:
-                logging.info("Server sleeping")
+                _LOGGER.info("Server sleeping")
                 time.sleep(60 * 60 * 24)
         except KeyboardInterrupt:
             server.stop(0)

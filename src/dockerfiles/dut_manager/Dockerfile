@@ -18,7 +18,7 @@ RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
 WORKDIR /etc/moblab/dut_manager
-COPY dut_manager/dut_manager.py .
+COPY --chown=moblab dut_manager/ .
 COPY --from=protos /protos .
 
 COPY --chown=moblab dockerfiles/dut_manager/requirements.txt ./
@@ -29,4 +29,4 @@ RUN mkdir -p /var/log/moblab
 RUN chown moblab:moblab /var/log/moblab
 USER moblab
 
-CMD ["python", "dut_manager.py"]
+CMD ["python", "dut_manager.py", "/var/log/moblab/dut_manager.log"]
