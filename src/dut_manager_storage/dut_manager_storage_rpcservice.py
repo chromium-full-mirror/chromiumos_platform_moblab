@@ -24,25 +24,25 @@ class DutManagerStorageRpcService(DutManagerStorageServiceServicer):
 
     def CreateDut(self, request, context):
         """Create an instance of managed DUT in the db."""
-        self.storage_service.CreateDut(request.dut)
+        self.storage_service.create_managed_dut(request.dut)
         return CreateDutResponse()
 
     def DeleteDut(self, request, context):
         """Delete the given instance of managed DUT from the db."""
-        self.storage_service.DeleteDut(request.name)
+        self.storage_service.delete_managed_dut(request.name)
         return DeleteDutResponse()
 
     def ListDut(self, request, context):
         """List all instances of managed DUT stored in the db."""
-        managed_duts = self.storage_service.ListDut()
+        managed_duts = self.storage_service.list_managed_duts()
         return ListDutResponse(duts=managed_duts)
 
     def GetDut(self, request, context):
         """Get the instance of given managed DUT from the db."""
-        managed_dut = self.storage_service.GetDut(request.name)
+        managed_dut = self.storage_service.get_managed_dut(request.name)
         return GetDutResponse(dut=managed_dut)
 
     def UpdateDut(self, request, context):
         """Update the given fields of a managed DUT in the db."""
-        self.storage_service.UpdateDut(request.dut, request.update_mask)
+        self.storage_service.update_dut(request.dut, request.update_mask)
         return UpdateDutResponse()

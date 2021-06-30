@@ -24,7 +24,7 @@ RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
 WORKDIR /etc/moblab/dut_manager_storage
-COPY dut_manager_storage/*.py .
+COPY --chown=moblab dut_manager_storage/*.py .
 COPY --from=protos /protos .
 
 WORKDIR /wheels
@@ -36,6 +36,10 @@ WORKDIR /etc/moblab/dut_manager_storage
 COPY --chown=moblab dockerfiles/dut_manager_storage/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Need to be in docker group to use docker API
+RUN addgroup --gid 412 docker
+RUN usermod -aG docker moblab
 
 RUN mkdir -p /var/log/moblab
 RUN chown moblab:moblab /var/log/moblab
