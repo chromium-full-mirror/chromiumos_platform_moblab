@@ -8,6 +8,8 @@ ARG LABEL=autopush
 
 ######################################################################
 
+FROM gcr.io/chromeos-partner-moblab/infra_protos:haddowk as protos
+
 FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 ######################################################################
@@ -66,8 +68,10 @@ RUN addgroup --gid 412 docker
 RUN usermod -aG docker moblab
 
 COPY --chown=moblab src/moblab_rpcserver/ /etc/moblab/moblab_rpcserver
+COPY --from=protos /protos /etc/moblab/moblab_rpcserver
 
-WORKDIR /moblab
+
+WORKDIR /etc/moblab/moblab_rpcserver
 USER moblab
 
 EXPOSE 6002
