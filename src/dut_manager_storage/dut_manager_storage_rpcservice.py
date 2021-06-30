@@ -3,6 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import logging
+import grpc
+from google.protobuf.descriptor import Error
+
 from lab.dut_manager_storage_pb2 import (
     CreateDutResponse,
     DeleteDutResponse,
@@ -11,7 +15,12 @@ from lab.dut_manager_storage_pb2 import (
     UpdateDutResponse,
 )
 from lab.dut_manager_storage_pb2_grpc import DutManagerStorageServiceServicer
-from dut_manager_storage_service import DutManagerStorageService
+from dut_manager_storage_service import (
+    DutManagerStorageService,
+    DutManagerStorageServicesException,
+)
+
+_LOGGER = logging.getLogger("dut-manager-storage")
 
 
 class DutManagerStorageRpcService(DutManagerStorageServiceServicer):
@@ -34,13 +43,29 @@ class DutManagerStorageRpcService(DutManagerStorageServiceServicer):
 
     def ListDut(self, request, context):
         """List all instances of managed DUT stored in the db."""
-        managed_duts = self.storage_service.list_managed_duts()
-        return ListDutResponse(duts=managed_duts)
+        try:
+            managed_duts = self.storage_service.list_managed_duts()
+        except DutManagerStorageServicesException as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(e)
+            raise Error("Internal service error!")
+
+        response = ListDutResponse(duts=managed_duts)
+        _LOGGER.debug("ListDut response: %s", response)
+        return response
 
     def GetDut(self, request, context):
         """Get the instance of given managed DUT from the db."""
-        managed_dut = self.storage_service.get_managed_dut(request.name)
-        return GetDutResponse(dut=managed_dut)
+        try:
+            managed_dut = self.storage_service.get_managed_dut(request.name)
+        except DutManagerStorageServicesException as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(e)
+            raise Error("Internal service error!")
+
+        response = GetDutResponse(dut=managed_dut)
+        _LOGGER.debug("GetDut response: %s", response)
+        return response
 
     def UpdateDut(self, request, context):
         """Update the given fields of a managed DUT in the db."""

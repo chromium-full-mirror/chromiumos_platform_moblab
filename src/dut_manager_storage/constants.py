@@ -29,3 +29,7 @@ AFE_SPECIAL_TASK_TO_DUT_STATUS_MAPPINGS = {
     "Provision": ManagedDut.ManagedState.PROVISION,
     "": ManagedDut.ManagedState.UNKNOWN,
 }
+
+PERIPHERALS = [
+    "servo",
+]

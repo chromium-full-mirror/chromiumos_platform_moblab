@@ -23,6 +23,9 @@ FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
+# Needed for dut_connector
+RUN apt-get update && apt-get install -yq nmap
+
 WORKDIR /etc/moblab/dut_manager_storage
 COPY --chown=moblab dut_manager_storage/*.py .
 COPY --from=protos /protos .

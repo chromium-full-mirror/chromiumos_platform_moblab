@@ -12,6 +12,7 @@ from google.protobuf import timestamp_pb2
 from constants import (
     AFE_SPECIAL_TASK_TO_DUT_STATUS_MAPPINGS,
     AFE_TO_DUT_STATUS_MAPPINGS,
+    PERIPHERALS,
 )
 from lab import dut_manager_storage_pb2
 from lab.managed_dut_pb2 import (
@@ -27,7 +28,7 @@ from chromiumos.test.api.dut_attribute_pb2 import (
 )
 from chromiumos.config.api import mfg_config_id_pb2
 from chromiumos.storage_path_pb2 import StoragePath
-from moblab_common import afe_connector
+from moblab_common import afe_connector, dut_connector
 
 
 class DutManagerStorageService(object):
@@ -39,11 +40,11 @@ class DutManagerStorageService(object):
 
     pool_re = re.compile(r"^pool:(.*)")
     storage_path_re = re.compile(r"^cros-version:(.*)")
-    tags_re = re.compile(r"(.*):(.*)")
 
     def __init__(self):
         """Initialize the connector that interacts with autotest afe server."""
         self.afe_connector = afe_connector.AFEConnector()
+        self.dut_connector = dut_connector.MoblabDUTConnector()
 
     def create_managed_dut(self, dut):
         """Enroll the given dut using the dut name through autotest afe."""
@@ -83,9 +84,9 @@ class DutManagerStorageService(object):
             managed_dut = ManagedDut(
                 name=NetworkIdentifier(ip_address=dut["hostname"]),
                 display_name="",
-                tag=self.get_dut_attributes_from_labels(self.tags_re, labels),
+                tag=self.get_dut_tags_from_host_dict(dut),
                 pool=self.get_pools_from_labels(labels),
-                peripheral=None,
+                peripheral=self.get_peripherals_from_labels(labels),
                 mfg_config_id=None,
                 provisioned_build=self.get_provisioned_build_from_labels(
                     labels
@@ -93,7 +94,9 @@ class DutManagerStorageService(object):
                 state=AFE_TO_DUT_STATUS_MAPPINGS[dut["status"]],
                 lock=Lock(reason=dut["lock_reason"]),
                 operator_notes="",
-                provisioned_firmware_version="",
+                provisioned_firmware_version=self.get_current_firmware_version(
+                    dut["hostname"]
+                ),
                 history=self.get_history_record_from_special_tasks(
                     dut["hostname"]
                 ),
@@ -114,15 +117,35 @@ class DutManagerStorageService(object):
         host = StoragePath.HostType.GS
         return StoragePath(path=path, host_type=host)
 
-    def get_dut_attributes_from_labels(self, pattern, labels):
-        tags = [
-            DutAttribute(
-                id=DutAttribute.Id(value=m.group(1)), field_path=m.group(2)
-            )
-            for m in [pattern.match(label) for label in labels]
-            if m
+    def get_dut_tags_from_host_dict(self, dut):
+        # Get the labels, labels only have DutAttribute.id
+        labels = [
+            DutAttribute(id=DutAttribute.Id(value=label))
+            for label in dut.get("labels", [])
         ]
-        return DutAttributeList(dut_attributes=tags)
+
+        # Get the attributes, id and field_path are separated by `:`
+        attributes = [
+            DutAttribute(id=DutAttribute.Id(value=key), field_path=value)
+            for key, value in dut.get("attributes", {}).items()
+        ]
+
+        return DutAttributeList(dut_attributes=labels + attributes)
+
+    def get_peripherals_from_labels(self, labels):
+        peripherals = [
+            DutAttribute(id=DutAttribute.Id(value=peripheral))
+            for peripheral in PERIPHERALS
+            if peripheral in labels
+        ]
+        return DutAttributeList(dut_attributes=peripherals)
+
+    def get_current_firmware_version(self, dut_name):
+        duts_fw_info = self.dut_connector.get_connected_dut_firmware()
+        for dut_fw_info in duts_fw_info:
+            if dut_fw_info[0] == dut_name:
+                return dut_fw_info[1]
+        return None
 
     def get_history_record_from_special_tasks(self, dut_name):
         history_record = []
@@ -141,11 +164,14 @@ class DutManagerStorageService(object):
                         task.get("time_finished", "")
                     ),
                     note="",
-                    lease_owner="",
+                    lease_owner="MOBLAB",
                 )
                 history_record.append(dut_history)
         except (IndexError, KeyError):
             logging.error("Unable to find AFE id for dut: {}".format(dut_id))
+            raise DutManagerStorageServicesException(
+                "Unable to get history record for dut: %s" % dut_name
+            )
 
         return history_record
 
@@ -168,3 +194,9 @@ class DutManagerStorageService(object):
         if task["is_complete"] and not task["success"]:
             return ManagedDut.ManagedState.FAILED
         return AFE_SPECIAL_TASK_TO_DUT_STATUS_MAPPINGS[task.get("task", "")]
+
+
+class DutManagerStorageServicesException(Exception):
+    """Class for all exceptions thrown by dut manager storage services."""
+
+    pass
