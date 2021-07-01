@@ -317,6 +317,7 @@ services:
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
       - WATCHTOWER_TAG=${WATCHTOWER}
+      - DUT_MANAGER_GRPS_SERVICE_ADDRESS=dut-manager:7002
   ##############################################################################
   remote-agent:
     container_name: remote-agent
@@ -509,6 +510,33 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/home/moblab/.service_account.json
 
 ##############################################################################
+  dut-manager:
+    container_name: dut-manager
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/dut-manager:${DUT_MANAGER:-release}
+    user:  moblab
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/moblab
+      - moblab_home:/home/moblab:ro
+
+    networks:
+      - moblab
+
+    ports:
+      - 7002:7002
+
+    depends_on:
+      - dns
+
+    dns:
+      - 192.168.100.51
+
+    environment:
+      - GRPC_SERVER_PORT=7002
+      - DEBUG_LOGS=True
+      - LOGFILE=/var/log/moblab/dut_manager.log
+##############################################################################
+
 volumes:
   db_data: {}
   logs: {}
