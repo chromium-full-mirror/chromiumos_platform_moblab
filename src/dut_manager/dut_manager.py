@@ -8,7 +8,7 @@ import concurrent
 import logging
 import sys
 import time
-
+import os
 import grpc
 
 from dut_manager_rpcservice import DutManagerRpcService
@@ -54,6 +54,11 @@ class DutManager:
         parser = argparse.ArgumentParser(description=__doc__)
 
         parser.add_argument(
+            "-p",
+            "--grpc_port",
+            help="Grpc port to run the server on.",
+        )
+        parser.add_argument(
             "-v",
             "--verbose",
             action="store_true",
@@ -64,7 +69,6 @@ class DutManager:
             "--logfile",
             type=str,
             required=False,
-            default=None,
             help="Full path to logfile. By default will log to console.",
         )
         return parser.parse_args(argv)
@@ -77,13 +81,25 @@ class DutManager:
         """
         options = self.parse_arguments(args)
         logging_severity = logging.INFO
-        if options.verbose:
+
+        # Environment variables take presedence over parameters
+        # so that the values can be overriden in compose file
+
+        verbose_logging = os.getenv("DEBUG_LOGS")
+        if verbose_logging or options.verbose:
             logging_severity = logging.DEBUG
-        self.setup_logging(logging_severity, options.logfile)
+
+        # Logs to console if file is not configured
+        logfile = os.environ.get("LOGFILE") or options.logfile
+        self.setup_logging(logging_severity, logfile)
 
         server = grpc.server(
             concurrent.futures.ThreadPoolExecutor(max_workers=500)
         )
+
+        port = os.getenv("GRPC_SERVER_PORT") or options.grpc_port
+        if not port:
+            raise argparse.ArgumentError("Port is a required argument!")
 
         dut_manager = DutManagerRpcService()
         try:
@@ -91,8 +107,8 @@ class DutManager:
                 dut_manager, server
             )
 
-            server.add_insecure_port("[::]:7002")
-            _LOGGER.info("Starting server on 7002")
+            server.add_insecure_port("[::]:%s" % port)
+            _LOGGER.info("Starting server on %s", port)
             server.start()
             while True:
                 _LOGGER.info("Server sleeping")

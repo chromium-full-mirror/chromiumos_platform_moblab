@@ -29,4 +29,4 @@ RUN mkdir -p /var/log/moblab
 RUN chown moblab:moblab /var/log/moblab
 USER moblab
 
-CMD ["python", "dut_manager.py", "/var/log/moblab/dut_manager.log"]
+CMD ["python", "dut_manager.py"]
