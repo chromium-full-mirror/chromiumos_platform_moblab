@@ -253,7 +253,7 @@ def upload_test_results(args, test_dir, job_keyval, moblab_id, job_id):
         with open(upload_status_file, "w") as upload_status:
             upload_status.write("UPLOADED")
 
-        cmd = "gsutil -m cp -J -r %s %s" % (test_dir, gcs_bucket_path)
+        cmd = "gsutil -m cp -r %s %s" % (test_dir, gcs_bucket_path)
         subprocess.check_output(shlex.split(cmd))
 
         logging.info(
