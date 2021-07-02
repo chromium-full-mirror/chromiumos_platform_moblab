@@ -25,7 +25,7 @@ substitutions:
   _MOBMONITOR: "undef"
   _DNS: "undef"
   _LOGROTATE: "undef"
-
+  _DUT_MANAGER: "undef"
 
 steps:
   - id: buster-slim
@@ -589,6 +589,7 @@ steps:
         "--build-arg", "MOBMONITOR_VER=${_MOBMONITOR}",
         "--build-arg", "DNS_VER=${_DNS}",
         "--build-arg", "LOGROTATE_VER=${_LOGROTATE}",
+        "--build-arg", "DUT_MANAGER_VER=${_DUT_MANAGER}",
 
         "--label=version=${__BUILD_VERSION}",
 
@@ -685,6 +686,26 @@ steps:
     waitFor:
       - "blacklabelops_logrotate"
 
+  - id: dut-manager
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${__BUILD_VERSION}",
+        "-f",
+        "/workspace/src/dockerfiles/dut_manager/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/dut-manager:${__BUILD_VERSION}",
+        "/workspace/src/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "python-3.8-slim"
+
 images:
   [
     "${_REGISTRY_URI}/protoc:${__BUILD_VERSION}",
@@ -714,6 +735,7 @@ images:
     "${_REGISTRY_URI}/moblab_common:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/logrotate:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/chromite:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/dut-manager:${__BUILD_VERSION}",
   ]
 
 options:
