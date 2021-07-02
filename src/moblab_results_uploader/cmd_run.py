@@ -112,6 +112,15 @@ async def _prune_test_result(dry_run, test_result):
         # This will remove 1-moblab and all its subdirs
         shutil.rmtree(test_result.abs_path, onerror=remove_readonly)
         del _TEST_RESULT_CACHE[test_result.abs_path]
+
+        # Update upload-status after result's deletion
+        _result_upload_status_store = (
+            result_upload_status_connector.ResultUploadStatusConnector()
+        )
+        _result_upload_status_store.set_job_upload_status(
+            test_result.id, result_upload_status_connector.Status.DELETED
+        )
+
         _LOGGER.debug("Removed: %s", test_result)
     except Exception as e:
         _LOGGER.exception(e)
