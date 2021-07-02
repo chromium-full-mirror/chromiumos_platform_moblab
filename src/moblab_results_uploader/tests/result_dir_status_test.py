@@ -17,6 +17,7 @@ import pytest
 
 import result_dir_status
 import test_result_interface
+from uploader_configuration import UploaderConfiguration
 
 _MIN_AGE_TO_UPLOAD = datetime.timedelta(days=1)
 _MIN_AGE_TO_PRUNE = datetime.timedelta(days=5)
@@ -26,9 +27,11 @@ _HALF_DAY = datetime.timedelta(hours=12)
 
 @pytest.fixture
 def status_checker(next_step):
+    configuration = UploaderConfiguration()
+    configuration.set_min_age_to_prune(_MIN_AGE_TO_PRUNE)
     return result_dir_status.ResultStatusChecker(
         min_age_to_upload=_MIN_AGE_TO_UPLOAD,
-        min_age_to_prune=_MIN_AGE_TO_PRUNE,
+        configuration=configuration,
         next_step=next_step,
     )
 

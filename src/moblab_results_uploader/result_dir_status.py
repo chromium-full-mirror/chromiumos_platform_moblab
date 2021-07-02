@@ -76,9 +76,9 @@ async def mark_uploading_result(test_result, *, succeeded):
 class ResultStatusChecker(processing_step.ProcessStep):
     """A class to check current test result status for uploading."""
 
-    def __init__(self, *, min_age_to_upload, min_age_to_prune, next_step=None):
+    def __init__(self, *, min_age_to_upload, configuration, next_step=None):
         self._min_age_to_upload = min_age_to_upload
-        self._min_age_to_prune = min_age_to_prune
+        self._configuration = configuration
         self._next_step = next_step
 
     def _check_latest_status(self, test_result, previous_status):
@@ -115,9 +115,10 @@ class ResultStatusChecker(processing_step.ProcessStep):
         if age < self._min_age_to_upload:
             return Status.NOT_READY
 
-        if age > self._min_age_to_prune and previous_status in [
-            Status.UPLOADED
-        ]:
+        if (
+            age > self._configuration.get_min_age_to_prune()
+            and previous_status in [Status.UPLOADED]
+        ):
             if test_result.is_logged:
                 _LOGGER.debug(
                     "%s Job is past the max age - expire", test_result

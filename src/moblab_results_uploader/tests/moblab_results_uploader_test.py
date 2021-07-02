@@ -27,6 +27,7 @@ import gs_api_wrapper
 import moblab_results_uploader
 import result_dir_status
 import test_result_registry
+from uploader_configuration import UploaderConfiguration
 
 _EXPIRED = result_dir_status.Status.EXPIRED
 _UPLOADED = result_dir_status.Status.UPLOADED
@@ -218,13 +219,17 @@ def test_run_once(m_datetime, m_pubsub, m_gs_api, afe, temp_root_dir):
     gs_api = gs_api_wrapper.GsApiWrapper(
         gs_bucket="test_bucket", credentials_file="cred"
     )
+
+    configuration = UploaderConfiguration()
+    configuration.set_min_age_to_prune(datetime.timedelta(days=7))
+
     args = mock.Mock(
         once=True,
         gs_api=gs_api,
         jobs=3,
         dry_run=False,
         min_age_to_upload=datetime.timedelta(days=1),
-        min_age_to_prune=datetime.timedelta(days=7),
+        configuration=configuration,
         upload_timeout=datetime.timedelta(days=3),
         uploading_filter_config=_FILTER_CONFIG,
     )

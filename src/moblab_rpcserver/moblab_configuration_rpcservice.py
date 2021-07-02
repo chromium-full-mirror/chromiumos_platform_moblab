@@ -15,6 +15,7 @@ from moblab_common.proto.moblab_configuration_rpc_pb2 import (
     GetStableBuildVersionResponse,
     SetStableBuildVersionResponse,
     StableVersion,
+    GetLocalResultsRetentionTimeResponse,
 )
 from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
     MoblabConfigurationServiceServicer,
@@ -109,6 +110,28 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         return SetStableBuildVersionResponse(
             stable_version=self._get_stable_build_version()
         )
+
+    def set_local_results_retention_time(self, request):
+        """Set the number of days the results are kept locally"""
+        setting = MoblabSetting(
+            key=MoblabSettingKey.LOCAL_RESULTS_RETENTION_TIME,
+            value=Value(double_value=request.days),
+        )
+        logging.info("Setting %s", setting)
+        self._settings_service.set_setting(setting=setting)
+
+        return empty_pb2.Empty()
+
+    def get_local_results_retention_time(self):
+        """Get the number of days the results are kept locally"""
+        keys = [MoblabSettingKey.LOCAL_RESULTS_RETENTION_TIME]
+        settings = self._settings_service.get_settings(keys=keys)
+        logging.debug("Reading %s = %s", keys, settings)
+        if settings:
+            return GetLocalResultsRetentionTimeResponse(
+                days=int(settings[0].value.double_value)
+            )
+        return GetLocalResultsRetentionTimeResponse()
 
     def _get_stable_build_version(self):
         keys = [
