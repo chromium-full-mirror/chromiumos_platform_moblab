@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 set -x
 
-if [ -f "/var/log/dns.log"]; then
+if [ -f "/var/log/dns.log" ]; then
     chown moblab:moblab /var/log/dns.log
 fi
 /usr/sbin/dnsmasq --no-daemon --user=moblab --group=moblab
