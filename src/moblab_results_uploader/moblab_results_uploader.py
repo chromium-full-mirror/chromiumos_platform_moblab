@@ -46,8 +46,8 @@ def _setup_logging(handler):
         )
     )
     _configure_logger("moblab_uploader", logging.DEBUG, handler)
-    _configure_logger("requests", logging.WARNING, handler)
-    _configure_logger("moblab_common", logging.WARNING, handler)
+    _configure_logger("requests", logging.INFO, handler)
+    _configure_logger("moblab_common", logging.INFO, handler)
 
 
 def _configure_logger(logger_name, level, handler):
