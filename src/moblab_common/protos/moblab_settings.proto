@@ -22,6 +22,8 @@ enum MoblabSettingKey {
   STABLE_CROS_VERSION_DEFAULT = 2;
   // User override of Stable CrOS version setting (string value)
   STABLE_CROS_VERSION_OVERRIDE = 3;
+  // Number of days to keep the results locally after the job is completed (double)
+  LOCAL_RESULTS_RETENTION_TIME = 4;
 }
 
 // Structured value type to unify serialization

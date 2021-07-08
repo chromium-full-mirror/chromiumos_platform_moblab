@@ -14,10 +14,14 @@ import shutil
 import stat
 import yaml
 
+from uploader_configuration import UploaderConfiguration
 from moblab_common import afe_connector
 from moblab_common import config_connector
 
 from moblab_common import moblabrpc_connector
+from moblab_common.moblab_configuration_connector import (
+    MoblabConfigurationRpcConnector,
+)
 from moblab_common import result_upload_status_connector
 from moblab_common.result_upload_status_connector import Status as UploadStatus
 from moblab_common.proto import moblabrpc_pb2
@@ -34,7 +38,6 @@ _LOGGER = logging.getLogger("moblab_uploader")
 
 _DEFAULT_UPLOAD_TIMEOUT = datetime.timedelta(days=3)
 _DEFAULT_MIN_AGE_TO_UPLOAD = datetime.timedelta(days=0)
-_DEFAULT_MIN_AGE_TO_PRUNE = datetime.timedelta(days=7)
 
 _RUN_INTERVAL = datetime.timedelta(minutes=1)
 
@@ -126,11 +129,11 @@ async def _prune_test_result(dry_run, test_result):
         _LOGGER.exception(e)
 
 
-async def _async_prune(args, registry):
+async def _async_prune(args, registry, configuration):
     """Scan and prune all EXPIRED test results."""
     status_checker = result_dir_status.ResultStatusChecker(
         min_age_to_upload=args.min_age_to_upload,
-        min_age_to_prune=args.min_age_to_prune,
+        configuration=configuration,
     )
     status_filter = result_dir_status.StatusFilter(
         result_dir_status.Status.EXPIRED
@@ -248,11 +251,11 @@ def _is_job_finished(job_status):
     return job_status in {5, 6, 8}
 
 
-async def _async_upload(args, registry):
+async def _async_upload(args, registry, configuration):
     """Scan and upload all 'READY' test results."""
     status_checker = result_dir_status.ResultStatusChecker(
         min_age_to_upload=args.min_age_to_upload,
-        min_age_to_prune=args.min_age_to_prune,
+        configuration=configuration,
     )
     uploader = result_uploader.Uploader(
         timeout=datetime.timedelta(minutes=60),
@@ -376,13 +379,6 @@ def add_arguments(parent_parser):
         "can be uploaded, but not removed from local storage "
         "(default: %(default)s).",
     )
-    parser.add_argument(
-        "--min-age-to-prune",
-        type=lambda x: datetime.timedelta(days=float(x)),
-        default=_DEFAULT_MIN_AGE_TO_PRUNE,
-        help="Minimum job age in days (can be a float number) before a result "
-        "can be removed from local storage (default: %(default)s).",
-    )
 
     parser.set_defaults(
         func=run, post_parse_args=functools.partial(_post_parse_args, parser)
@@ -417,6 +413,18 @@ def _post_parse_args(arg_parser, args):
         args.once = True
 
 
+async def _async_config_poll(args, configuration: UploaderConfiguration):
+    """Polls the config changes and updates the configuration object."""
+    while True:
+        results_retention_time = (
+            MoblabConfigurationRpcConnector.get_local_results_retention_time()
+        )
+        if results_retention_time:
+            configuration.set_min_age_to_prune(results_retention_time)
+
+        await asyncio.sleep(_RUN_INTERVAL.total_seconds())
+
+
 def run(args, test_result_registry=None):
     """Main logic to scan, upload and prune the test results.
 
@@ -431,10 +439,13 @@ def run(args, test_result_registry=None):
     registry = test_result_registry or test_result_registry_module.REGISTRY
     loop = asyncio.get_event_loop()
 
+    configuration = UploaderConfiguration()
     try:
         loop.run_until_complete(
             asyncio.gather(
-                _async_upload(args, registry), _async_prune(args, registry)
+                _async_config_poll(configuration),
+                _async_upload(args, registry, configuration),
+                _async_prune(args, registry, configuration),
             )
         )
     except KeyboardInterrupt:

@@ -93,3 +93,20 @@ class MoblabConfigurationRpcConnector(object):
         if response.override_version:
             return response.override_version
         return response.default_version
+
+    @classmethod
+    def get_local_results_retention_time(cls):
+        """Returns the local retention period taht is configured in the system
+
+        Raises:
+            MoblabRpcConnectorError: [description]
+        """
+        cls.connect()
+        try:
+            return cls.stub.get_local_results_retention_time(
+                empty_pb2.Empty()
+            ).days
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception("Error getting jobs.")
+            raise MoblabRpcConnectorError("Error getting getting jobs.")

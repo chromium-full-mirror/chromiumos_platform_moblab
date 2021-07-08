@@ -120,6 +120,11 @@ class MoblabRpcConnector(object):
 
     @classmethod
     def get_jobs(cls, query_start, query_limit):
+        """Returns the list of jobs with details
+
+        Raises:
+            MoblabRpcConnectorError: [description]
+        """
         cls.connect()
         try:
             request = moblabrpc_pb2.GetJobsRequest()
