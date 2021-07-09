@@ -2,9 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-PROTO = "hostservice.proto"
-WORKDIR="/tmp"
-PROTO_OUT_DIR = ${WORKDIR}/host_service
+# TODO(gregorynisbet): Remove quotes from make variables.
+PROTO := "hostservice.proto"
+WORKDIR := "/tmp"
+PROTO_OUT_DIR := ${WORKDIR}/host_service
 
 .PHONY: all
 

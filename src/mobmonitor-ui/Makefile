@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-APP_BASE="${DESTDIR}/etc/moblab/mobmonitor/static"
+APP_BASE := "${DESTDIR}/etc/moblab/mobmonitor/static"
 
 all:
 	cp -r "${S}/src/mobmonitor-ui" "${WORKDIR}/src"

@@ -2,18 +2,18 @@
 include common.mk
 -include local_registry.mk
 
-REGISTRY=gcr.io/chromeos-partner-moblab
-LABEL=${USER}
+REGISTRY := gcr.io/chromeos-partner-moblab
+LABEL := ${USER}
 
 .DEFAULT_GOAL := dev-env
 
-dev-env: export DOCKER_BUILDKIT=1
+dev-env: export DOCKER_BUILDKIT := 1
 dev-env: protoc
 	docker build -t ${REGISTRY_URI}/moblab-dev-environment:${LABEL} \
 		-f dockerfiles/local-dev-environment/Dockerfile.base dockerfiles/local-dev-environment
 	docker push ${REGISTRY_URI}/moblab-dev-environment:${LABEL}
 
-release: USER=release
+release: USER := release
 release: dev-env
 	echo "Pushind to ${USER}"
 

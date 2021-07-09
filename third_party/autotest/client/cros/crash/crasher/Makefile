@@ -2,12 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-BINS = crasher_nobreakpad
-SRC = crasher.cc
-OBJS = crasher.o bomb.o
+BINS := crasher_nobreakpad
+SRC := crasher.cc
+OBJS := crasher.o bomb.o
 # Use a non-standard extension to avoid the AUTOTEST_MASK that intends to
 # remove these since they're usually large and redundant.
-TGZ = crasher.tgz-unmasked
+TGZ := crasher.tgz-unmasked
 
 all: $(TGZ)
 
