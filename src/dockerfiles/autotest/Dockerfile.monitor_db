@@ -2,10 +2,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=autopush
 
 FROM ${REGISTRY_URI}/moblab-autotest-lucifer:${LABEL} as lucifer
+
+######################################################################
+
+FROM ${BASE_REGISTRY_URI}/alpine/git as fw-testing-configs
+
+WORKDIR /
+
+RUN git clone https://chromium.googlesource.com/chromiumos/platform/fw-testing-configs
 
 ######################################################################
 
@@ -32,6 +41,9 @@ RUN ln -s /usr/local/lib/python3.7/site-packages/* /usr/local/autotest/site-pack
 
 COPY --from=lucifer /usr/bin/lucifer /usr/bin/lucifer
 COPY --chown=moblab --from=lucifer /*_pb*  /usr/local/autotest/utils/side_effects/proto/
+
+RUN mkdir -p /usr/local/autotest/server/cros/faft
+COPY --chown=moblab --from=fw-testing-configs /fw-testing-configs/ /usr/local/autotest/server/cros/faft/fw-testing-configs/
 
 # Need to be in docker group to use docker API
 RUN addgroup --gid 412 docker
