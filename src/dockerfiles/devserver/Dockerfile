@@ -39,7 +39,8 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
         python3-dev \
         python3-distutils \
         sudo \
-        unzip
+        unzip \
+        xz-utils
 
 RUN mkdir /run/sshd
 RUN mkdir -p /config/.ssh/
