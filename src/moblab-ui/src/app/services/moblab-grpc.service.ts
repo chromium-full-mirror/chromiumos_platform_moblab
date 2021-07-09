@@ -408,7 +408,10 @@ export class MoblabGrpcService {
     );
   }
 
-  listConnectedDuts(callback: (x: ConnectedDutInfo[]) => void) {
+  listConnectedDuts(
+    callback: (x: ConnectedDutInfo[]) => void,
+    error_callback: (err: string) => void
+  ) {
     const request = new ListConnectedDutsRequest();
 
     this.moblabRpcService.list_connected_duts(
@@ -417,6 +420,7 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListConnectedDutsResponse) => {
         if (err) {
           console.log(err);
+          error_callback("Failed to fetch DUTs");
         } else {
           callback(response.getDutsList());
         }

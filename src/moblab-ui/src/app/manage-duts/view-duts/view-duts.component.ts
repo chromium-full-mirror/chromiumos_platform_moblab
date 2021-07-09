@@ -1,11 +1,12 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {INT_TO_DUT_STATUS} from '../../utils/proto_helpers';
-import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MatSort, Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
-import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {SelectionModel} from '@angular/cdk/collections';
+import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
+import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
+import {NotificationsService} from 'app/services/notifications.service';
 
+import {INT_TO_DUT_STATUS} from '../../utils/proto_helpers';
 import {TableHeaderSelectorComponent} from '../../widgets/table-header-selector/table-header-selector.component';
 
 const NOT_CONNECTED_MESSAGE = 'DUT not reachable by SSH';
@@ -43,7 +44,10 @@ export class ViewDutsComponent implements OnInit {
 
   selection = new SelectionModel<ConnectedDutInfo>(true, []);
 
-  constructor(public moblabGrpcService: MoblabGrpcService) { }
+  constructor(
+    public moblabGrpcService: MoblabGrpcService,
+    private notificationsService: NotificationsService,
+  ) { }
 
   @ViewChild(MatSort, {}) sort: MatSort;
 
@@ -77,6 +81,12 @@ export class ViewDutsComponent implements OnInit {
         this.loading = false;
         this.assignDuts(connectedDuts);
         this.unselectAll();
+      },
+      (message) => {
+        this.loading = false;
+        this.assignDuts([]);
+        this.unselectAll();
+        this.notificationsService.error(message);
       }
     );
   }
