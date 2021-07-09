@@ -14,3 +14,4 @@ pyparsing
 python-dateutil
 setuptools
 wheel
+docker

@@ -4,7 +4,15 @@
 #
 #    pip-compile
 #
+backports.ssl-match-hostname==3.7.0.1
+    # via docker
+certifi==2021.5.30
+    # via requests
+chardet==4.0.0
+    # via requests
 crcmod==1.7
+    # via -r requirements.in
+docker==4.4.4
     # via -r requirements.in
 enum34==1.1.10
     # via grpcio
@@ -14,6 +22,10 @@ futures==3.3.0
     # via grpcio
 grpcio==1.37.1
     # via -r requirements.in
+idna==2.10
+    # via requests
+ipaddress==1.0.23
+    # via docker
 lxml==4.6.3
     # via -r requirements.in
 mock==3.0.5
@@ -28,12 +40,20 @@ python-dateutil==2.8.1
     # via -r requirements.in
 pyyaml==5.4.1
     # via -r requirements.in
+requests==2.25.1
+    # via docker
 six==1.16.0
     # via
+    #   docker
     #   grpcio
     #   mock
     #   protobuf
     #   python-dateutil
+    #   websocket-client
+urllib3==1.26.6
+    # via requests
+websocket-client==0.59.0
+    # via docker
 wheel==0.36.2
     # via -r requirements.in
 

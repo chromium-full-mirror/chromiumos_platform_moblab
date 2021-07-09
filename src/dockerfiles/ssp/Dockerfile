@@ -88,6 +88,10 @@ RUN chown moblab:moblab /tmp/autotest-tradefed-cache
 # Used by autotest to detect it is running on a moblab
 RUN echo "moblab" > /etc/lsb-release
 
+# Need to be in docker group to use docker API
+RUN addgroup --gid 412 docker
+RUN usermod -aG docker moblab
+
 USER moblab
 
 

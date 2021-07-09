@@ -105,9 +105,12 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
         user='moblab',
         dns=['192.168.100.51'],
         detach=True,
-        volumes=['default_results:/results',
-                 'default_results:/usr/local/autotest/results',
-                 'default_shadowconfig:/shadow_config']
+        volumes={
+            'default_results': {'bind': '/results', 'mode': 'rw'},
+            'default_results': {'bind': '/usr/local/autotest/results', 'mode': 'rw'},
+            'default_shadowconfig': {'bind': '/shadow_config', 'mode': 'ro'},
+            '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'},
+        }
     )
 
 @contextmanager
