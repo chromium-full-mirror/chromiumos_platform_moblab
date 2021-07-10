@@ -49,6 +49,26 @@ class DutManagerRpcConnector(object):
         cls.stub = None
 
     @classmethod
+    def list_managed_duts(cls):
+        """List all DUTs managed by DUT Manager.
+
+        Raises:
+            MoblabRpcConnectorError: If rpc call failed.
+
+        Returns: LIst of ManagedDut objects.
+        """
+
+        cls.connect()
+        try:
+            request = dut_manager_pb2.ListManagedDutsRequest()
+            response = cls.stub.ListManagedDuts(request)
+            return response.duts if response else None
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception("Error listing all duts")
+            raise MoblabRpcConnectorError("Error listing all duts")
+
+    @classmethod
     def get_managed_dut(cls, dut_ip):
         """Get managed dut details.
 

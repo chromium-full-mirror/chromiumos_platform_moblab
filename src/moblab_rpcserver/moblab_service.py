@@ -25,6 +25,7 @@ from moblab_common import moblab_build_connector
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import result_upload_status_connector
+from dut_manager_connector import DutManagerRpcConnector
 
 from host_scheduler_pause_service import HostSchedulerPauseService
 
@@ -68,6 +69,8 @@ STORAGE_QUAL_DUAL_NAMESPACE = "tast_storage_slc_qual"
 MOBLAB_DOCKER_REGISTRY = "gcr.io/chromeos-partner-moblab/"
 
 MAX_BUILD_STAGING_SECONDS = 300  # 5 minutes
+
+_USE_DUT_MANAGER_FEATURE_FLAG = False  # True
 
 
 class MoblabRpcError(Exception):
@@ -230,14 +233,42 @@ class MoblabService(object):
             )
         return afe_formatted_duts
 
+    def _list_duts_from_dut_manager(self):
+        managed_duts = DutManagerRpcConnector.list_managed_duts()
+        duts = []
+        for managed_dut in managed_duts:
+            dut = {}
+            dut["hostname"] = managed_dut.name.ip_address
+            dut["status"] = "Running"  # TODO: add mapper for managed_dut.state
+
+            labels = [
+                a.id.value
+                for a in managed_dut.tag.dut_attributes
+                if not a.field_path
+            ]
+            attributes = {
+                a.id.value: a.field_path
+                for a in managed_dut.tag.dut_attributes
+                if a.field_path
+            }
+            dut["labels"] = labels
+            dut["attributes"] = attributes
+
+            duts.append(dut)
+        return duts
+
     def list_duts(self):
         """Returns the merge of enrolled and connected DUTs"""
-        afe_hosts = self.afe_connector.get_connected_devices()
+        managed_duts = (
+            self._list_duts_from_dut_manager()
+            if _USE_DUT_MANAGER_FEATURE_FLAG
+            else self.afe_connector.get_connected_devices()
+        )
         potential_hosts = self.get_connected_devices()
         connected_ips = []
         connected_duts = []
 
-        for dut in afe_hosts:
+        for dut in managed_duts:
             dut["enrolled"] = True
             connected_ips.append(dut["hostname"])
             connected_duts.append(dut)
@@ -247,7 +278,6 @@ class MoblabService(object):
                 dut["hostname"] = dut["ip"]
                 dut["enrolled"] = False
                 dut["status"] = "Not Enrolled"
-                dut["error"] = dut["error"]
                 connected_duts.append(dut)
 
         self._hydrate_dut_details_with_mac(connected_duts)
