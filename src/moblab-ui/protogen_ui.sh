@@ -23,6 +23,7 @@ protoc \
     --grpc-web_out=import_style=commonjs+dts,mode=grpcwebtext:/workspace/src/moblab-ui/src/app/services/ \
     /workspace/src/moblab-ui/protos_temp/moblabrpc.proto \
     /workspace/src/moblab-ui/protos_temp/moblab_configuration_rpc.proto \
+    google/protobuf/duration.proto \
     google/protobuf/empty.proto \
     google/protobuf/any.proto
 

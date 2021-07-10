@@ -3,6 +3,7 @@ import * as grpcWeb from 'grpc-web';
 
 import {MoblabConfigurationServicePromiseClient} from './moblab_configuration_rpc_grpc_web_pb';
 import {Empty} from './google/protobuf/empty_pb';
+import {Duration} from './google/protobuf/duration_pb';
 import {
   PauseHostSchedulerRequest,
   PauseHostSchedulerResponse,
@@ -14,6 +15,8 @@ import {
   GetStableBuildVersionResponse,
   SetStableBuildVersionRequest,
   SetStableBuildVersionResponse,
+  GetLocalResultsRetentionDurationResponse,
+  SetLocalResultsRetentionDurationRequest,
   StableVersion,
 } from './moblab_configuration_rpc_pb';
 
@@ -121,7 +124,7 @@ export class MoblabConfigurationGrpcService {
       );
   }
 
-  getStableBuildVersion() {
+  getStableBuildVersion(): Promise<StableCrOSVersion> {
     const request = new GetStableBuildVersionRequest();
     return this.configurationRpcClient
       .get_stable_build_version(request)
@@ -133,7 +136,7 @@ export class MoblabConfigurationGrpcService {
       });
   }
 
-  setStableBuildVersion(override_version: string) {
+  setStableBuildVersion(override_version: string): Promise<StableCrOSVersion> {
     const request = new SetStableBuildVersionRequest();
     request.setStableVersion(new StableVersion().setOverrideVersion(override_version));
     return this.configurationRpcClient
@@ -144,6 +147,38 @@ export class MoblabConfigurationGrpcService {
         result.UserOverrideVersion = response.getStableVersion().getOverrideVersion();
         return result;
       });
+  }
+
+  getResultsRetentionPeriod(): Promise<string> {
+    return this.configurationRpcClient
+      .get_local_results_retention_duration(new Empty())
+      .then((response: GetLocalResultsRetentionDurationResponse) => {
+        var hours = response.getDuration().getSeconds() / (60 * 60);
+        if (hours < 24 && hours > 0) {
+          return `${hours}h`;
+        }
+        var days = hours / 24;
+        if (days < 8 && days > 0) {
+          return `${days}d`;
+        }
+        throw new Error(`Invalid results retention duration: ${hours}`);
+      });
+  }
+
+  setResultsRetentionPeriod(period: string): Promise<void> {
+    var duration = Number(period.slice(0, -1));
+    if (period[period.length - 1] === `h`) {
+      duration = duration * 60 * 60;      // Convert hours to seconds
+    } else if (period[period.length - 1] === `d`) {
+      duration = duration * 60 * 60 * 24; // Convert days to seconds
+    } else {
+      throw new Error(`Incorrect format of duration: ${period}`);
+    }
+    const request = new SetLocalResultsRetentionDurationRequest()
+      .setDuration(new Duration().setSeconds(duration));
+    return this.configurationRpcClient
+      .set_local_results_retention_duration(request)
+      .then((_: Empty) => { });
   }
 
   private mapRequestors(requestor: PauseRequestor) {

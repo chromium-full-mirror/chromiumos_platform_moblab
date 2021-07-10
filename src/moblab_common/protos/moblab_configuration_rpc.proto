@@ -3,6 +3,7 @@ syntax = "proto3";
 package moblab;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/duration.proto";
 
 // Service exposes Moblab static and runtime configuration
 service MoblabConfigurationService {
@@ -26,25 +27,25 @@ service MoblabConfigurationService {
   rpc set_stable_build_version(SetStableBuildVersionRequest)
     returns (SetStableBuildVersionResponse) {}
 
-  // set the time period that the results are kept locally
-  rpc set_local_results_retention_time(SetLocalResultsRetentionTimeRequest)
+  // set the time duration that the results are kept locally
+  rpc set_local_results_retention_duration(SetLocalResultsRetentionDurationRequest)
     returns (google.protobuf.Empty);
-  // get the time period that the results are kept locally
-  rpc get_local_results_retention_time(google.protobuf.Empty)
-    returns (GetLocalResultsRetentionTimeResponse);
+  // get the time duration that the results are kept locally
+  rpc get_local_results_retention_duration(google.protobuf.Empty)
+    returns (GetLocalResultsRetentionDurationResponse);
 }
 
 // NEXT_TAG = 2
-message SetLocalResultsRetentionTimeRequest {
-  // Number of days to keep the results locally after job completion
-  // but not earlier then offloaded
-  int32 days = 1;
+message SetLocalResultsRetentionDurationRequest {
+  // Duration of keeping the results locally after job completion
+  // Should be hours between 1 and 23 or days between 1 and 7 
+  google.protobuf.Duration duration = 1;
 }
 
-message GetLocalResultsRetentionTimeResponse {
-  // Number of days the results are kept locally after job completion
-  // but not earlier then offloaded
-  int32 days = 1;
+message GetLocalResultsRetentionDurationResponse {
+  // Duration of keeping the results locally after job completion
+  // Should be hours between 1 and 23 or days between 1 and 7 
+  google.protobuf.Duration duration = 1;
 }
 
 // NEXT_TAG = 2
