@@ -101,7 +101,7 @@ mat-toolbar {
 
 .notifications-panel {
   z-index: 1000;
-  position: absolute;
+  position: fixed;
   pointer-events: none;
   top: 0px;
   width: 100%;
