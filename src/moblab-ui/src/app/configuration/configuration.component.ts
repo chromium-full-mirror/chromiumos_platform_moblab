@@ -71,8 +71,10 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     Validators.pattern(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/)
   );
   defaultCrOSVersionForm = new FormControl('');
+  resultsRetentionPeriodForm = new FormControl('', [Validators.required, Validators.pattern(/^(([01]?\d|2[0-3])h)$|^([1-7]d)$/)]);
 
   userCrOSVersionValue = 'None';
+  resultsRetentionPeriod = '';
 
   bucketLink = '';
   cloudConfigDisabledMessage = '';
@@ -127,6 +129,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     this.defaultCrOSVersionForm.disable();
     this.initCanUpdateCloudConfigFlag();
     await this.getStableCrOSVersion();
+    await this.getResultsRetentionPeriod();
   }
 
   ngOnDestroy(): void {
@@ -143,6 +146,33 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     } catch (error) {
       console.log('getStableBuildVersion call failed with:' + error);
       this.notificationsService.error('Failed to fetch stable Chrome OS version: ' + error.message);
+    } finally {
+      this.userCrOSVersionForm.enable();
+    }
+  }
+
+  public async getResultsRetentionPeriod() {
+    this.resultsRetentionPeriodForm.disable();
+    try {
+      const period_days = await this.moblabConfigurationRpcService.getResultsRetentionPeriod();
+      this.resultsRetentionPeriod = period_days;
+      this.resultsRetentionPeriodForm.setValue(period_days);
+    } catch (error) {
+      console.log('getResultsRetentionPeriod call failed with:' + error);
+      this.notificationsService.error('Failed to fetch stable Chrome OS version: ' + error.message);
+    } finally {
+      this.resultsRetentionPeriodForm.enable();
+    }
+  }
+
+  public async setResultsRetentionPeriod(period: string) {
+    this.userCrOSVersionForm.disable();
+    try {
+      await this.moblabConfigurationRpcService.setResultsRetentionPeriod(period);
+      this.getResultsRetentionPeriod();
+    } catch (error) {
+      console.log('setStableBuildVersion call failed with:' + error);
+      this.notificationsService.error('Failed to set stable Chrome OS version: ' + error.message);
     } finally {
       this.userCrOSVersionForm.enable();
     }
@@ -304,6 +334,13 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     return (
       this.userCrOSVersionForm.value !== this.userCrOSVersionValue &&
       !this.userCrOSVersionForm.errors
+    );
+  }
+
+  isRetentionPeriodValidForSubmit() {
+    return (
+      this.resultsRetentionPeriodForm.value !== this.resultsRetentionPeriod &&
+      !this.resultsRetentionPeriodForm.errors
     );
   }
 

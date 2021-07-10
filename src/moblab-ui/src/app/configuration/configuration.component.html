@@ -197,6 +197,32 @@
     </form>
   </mat-card-content>
 </mat-card>
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Results retention period (locally on Moblab) </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form #formRef="ngForm" (ngSubmit)="setResultsRetentionPeriod(resultsRetentionPeriodForm.value)">
+      <mat-list>
+        <mat-list-item>
+          <mat-form-field class="configuration-input" appearance="legacy">
+            <mat-label>Retention period (days or hours)</mat-label>
+            <input matInput placeholder="7h or 7d" [formControl]="resultsRetentionPeriodForm">
+            <mat-error *ngIf="this.resultsRetentionPeriodForm.hasError('pattern')">
+              Must be either 1-23 hours or 1-7 days e.g. 12h or 3d
+            </mat-error>
+          </mat-form-field>
+        </mat-list-item>
+        <mat-list-item>
+          <button mat-raised-button color="primary" [disabled]="!isRetentionPeriodValidForSubmit()" type="submit">Save
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </form>
+  </mat-card-content>
+</mat-card>
+
 <mat-card id="moblab-information-card">
   <mat-card-header>
     <mat-card-title>Moblab Information</mat-card-title>
