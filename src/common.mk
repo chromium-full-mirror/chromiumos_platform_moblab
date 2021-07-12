@@ -15,6 +15,7 @@ all:	autotest \
 		common \
 		db \
 		devserver \
+		dut_manager \
 		dut_manager_storage \
 		moblab-db-setup \
 		dhcp \
@@ -30,7 +31,6 @@ all:	autotest \
 		ssp \
 		ui \
 		watchtower
-
 
 #TODO refactor the common rules into a single rule.
 
