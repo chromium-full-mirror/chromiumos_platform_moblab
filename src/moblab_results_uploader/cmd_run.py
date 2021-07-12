@@ -443,7 +443,7 @@ def run(args, test_result_registry=None):
     try:
         loop.run_until_complete(
             asyncio.gather(
-                _async_config_poll(configuration),
+                _async_config_poll(args, configuration),
                 _async_upload(args, registry, configuration),
                 _async_prune(args, registry, configuration),
             )
