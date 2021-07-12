@@ -48,4 +48,4 @@ RUN mkdir -p /var/log/moblab
 RUN chown moblab:moblab /var/log/moblab
 USER moblab
 
-CMD ["python", "dut_manager_storage.py"]
+CMD ["python", "dut_manager_storage.py", "-v"]

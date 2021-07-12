@@ -537,6 +537,25 @@ services:
       - LOGFILE=/var/log/moblab/dut_manager.log
       - DUT_MANAGER_STORAGE_GRPS_SERVICE_ADDRESS=dut-manager-storage:7003
 ##############################################################################
+  dut-manager-storage:
+    container_name: dut-manager-storage
+    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/dut-manager-storage:${DUT_MANAGER_STORAGE:-release}
+    user:  moblab
+    restart: unless-stopped
+    volumes:
+      - logs:/var/log/moblab
+      - moblab_home:/home/moblab:ro
+
+    networks:
+      - moblab
+
+    depends_on:
+      - autotest-afe
+      - dns
+
+    dns:
+      - 192.168.100.51
+##############################################################################
 
 volumes:
   db_data: {}
