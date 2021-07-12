@@ -415,12 +415,19 @@ def _post_parse_args(arg_parser, args):
 
 async def _async_config_poll(args, configuration: UploaderConfiguration):
     """Polls the config changes and updates the configuration object."""
+    previous_value = -1
     while True:
         results_retention_time = (
-            MoblabConfigurationRpcConnector.get_local_results_retention_time()
+            MoblabConfigurationRpcConnector.get_local_results_retention_duration()
         )
-        if results_retention_time:
-            configuration.set_min_age_to_prune(results_retention_time)
+        if results_retention_time and previous_value != results_retention_time:
+            timeperiod = datetime.timedelta(seconds=results_retention_time)
+            configuration.set_min_age_to_prune(timeperiod)
+            _LOGGER.info(
+                "Results retention period set to: %s",
+                timeperiod,
+            )
+            previous_value = results_retention_time
 
         await asyncio.sleep(_RUN_INTERVAL.total_seconds())
 

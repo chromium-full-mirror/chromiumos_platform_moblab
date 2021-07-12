@@ -5,9 +5,10 @@
 # found in the LICENSE file.
 import logging
 import asyncio
-from google.protobuf import empty_pb2
+from google.protobuf import duration_pb2, empty_pb2
 
 from moblab_common.proto.moblab_configuration_rpc_pb2 import (
+    GetLocalResultsRetentionDurationResponse,
     PauseHostSchedulerResponse,
     ResumeHostSchedulerResponse,
     GetHostSchedulerPauseStatusResponse,
@@ -15,7 +16,6 @@ from moblab_common.proto.moblab_configuration_rpc_pb2 import (
     GetStableBuildVersionResponse,
     SetStableBuildVersionResponse,
     StableVersion,
-    GetLocalResultsRetentionTimeResponse,
 )
 from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
     MoblabConfigurationServiceServicer,
@@ -111,27 +111,29 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
             stable_version=self._get_stable_build_version()
         )
 
-    def set_local_results_retention_time(self, request):
-        """Set the number of days the results are kept locally"""
+    def set_local_results_retention_duration(self, request, context):
+        """Set the number of seconds the results are kept locally"""
         setting = MoblabSetting(
             key=MoblabSettingKey.LOCAL_RESULTS_RETENTION_TIME,
-            value=Value(double_value=request.days),
+            value=Value(double_value=request.duration.seconds),
         )
         logging.info("Setting %s", setting)
         self._settings_service.set_setting(setting=setting)
 
         return empty_pb2.Empty()
 
-    def get_local_results_retention_time(self):
-        """Get the number of days the results are kept locally"""
+    def get_local_results_retention_duration(self, request, context):
+        """Get the number of seconds the results are kept locally"""
         keys = [MoblabSettingKey.LOCAL_RESULTS_RETENTION_TIME]
         settings = self._settings_service.get_settings(keys=keys)
         logging.debug("Reading %s = %s", keys, settings)
         if settings:
-            return GetLocalResultsRetentionTimeResponse(
-                days=int(settings[0].value.double_value)
+            return GetLocalResultsRetentionDurationResponse(
+                duration=duration_pb2.Duration(
+                    seconds=int(settings[0].value.double_value)
+                )
             )
-        return GetLocalResultsRetentionTimeResponse()
+        return GetLocalResultsRetentionDurationResponse()
 
     def _get_stable_build_version(self):
         keys = [
