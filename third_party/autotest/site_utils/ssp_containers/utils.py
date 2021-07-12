@@ -110,7 +110,9 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
             'default_results': {'bind': '/usr/local/autotest/results', 'mode': 'rw'},
             'default_shadowconfig': {'bind': '/shadow_config', 'mode': 'ro'},
             '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'},
-        }
+        },
+        environment=["MOBLAB=1"]
+
     )
 
 @contextmanager
