@@ -22,7 +22,7 @@ function gsURLValidator(control) {
   if (!control.value) {
     return null;
   }
-  const forbidden = !new RegExp('^gs:\\/\\/.*\\/$').test(control.value);
+  const forbidden = !new RegExp('^gs:\\/\\/.*').test(control.value);
   return forbidden ? {notAGSUrl: {value: control.value}} : null;
 }
 
@@ -428,6 +428,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   onCloudConfigSubmit(formValue) {
+    if (!this.bucketURLForm.value.endsWith('/')) {
+      this.bucketURLForm.setValue(this.bucketURLForm.value + '/')
+    }
     this.configurationLoading = true;
     this.moblabRpcService.set_cloud_configuration(
       (message: string) => {
