@@ -41,6 +41,10 @@ KEYVAL_FILE = "keyval"
 NEW_KEYVAL_FILE = "new_keyval"
 UPLOADED_STATUS_FILE = ".uploader_status"
 FAKE_MOBLAB_ID_FILE = "fake_moblab_id_do_not_delete.txt"
+GIT_HASH_FILE = "git_hash.txt"
+GIT_COMMAND = ("git log --pretty=format:'%h -%d %s (%ci) <%an>'"
+               " --abbrev-commit -20")
+AUTOTEST_DIR = "/mnt/host/source/src/third_party/autotest/files/"
 
 
 def parse_arguments(argv):
@@ -473,6 +477,20 @@ def _get_fake_moblab_id():
     return fake_moblab_id
 
 
+def print_autotest_git_history(test_dir):
+    """
+       Print the hash of the latest git commit of the autotest directory.
+
+    Args:
+        test_dir: The test directory for non-moblab test results.
+    """
+    git_hash = subprocess.check_output(shlex.split(GIT_COMMAND),
+                                       cwd=AUTOTEST_DIR)
+    git_hash_path = os.path.join(test_dir, GIT_HASH_FILE)
+    with open(git_hash_path, "w") as git_hash_file:
+        git_hash_file.write(git_hash.decode("utf-8"))
+
+
 def main(args):
     parsed_args = parse_arguments(args)
     bucket = parsed_args.bucket
@@ -521,6 +539,8 @@ def main(args):
             continue
 
         generate_job_serialize(test_dir, job, job_keyval)
+
+        print_autotest_git_history(test_dir)
 
         if not is_uploaded(test_dir) and not parsed_args.dry_run:
             try:
