@@ -171,10 +171,6 @@ describe('ConfigurationComponent', () => {
     inputConfiguration('image-storage-url-input', 'gs:/xxx/');
     console.log(component.bucketURLForm.hasError('notAGSUrl'));
     expect(component.bucketURLForm.hasError('notAGSUrl')).toBeTrue();
-
-    inputConfiguration('image-storage-url-input', 'gs://xxx');
-    console.log(component.bucketURLForm.hasError('notAGSUrl'));
-    expect(component.bucketURLForm.hasError('notAGSUrl')).toBeTrue();
   });
 
   it('hover over cloud checkbox will show clear warnings', () => {
