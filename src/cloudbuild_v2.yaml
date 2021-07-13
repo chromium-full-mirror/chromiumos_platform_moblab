@@ -26,6 +26,7 @@ substitutions:
   _DNS: "undef"
   _LOGROTATE: "undef"
   _DUT_MANAGER: "undef"
+  _DUT_MANAGER_STORAGE: "undef"
 
 steps:
   - id: buster-slim
@@ -590,6 +591,7 @@ steps:
         "--build-arg", "DNS_VER=${_DNS}",
         "--build-arg", "LOGROTATE_VER=${_LOGROTATE}",
         "--build-arg", "DUT_MANAGER_VER=${_DUT_MANAGER}",
+        "--build-arg", "DUT_MANAGER_STORAGE_VER=${_DUT_MANAGER_STORAGE}",
 
         "--label=version=${__BUILD_VERSION}",
 
@@ -705,6 +707,27 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor:
       - "python-3.8-slim"
+
+  - id: dut-manager-storage
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${__BUILD_VERSION}",
+        "-f",
+        "/workspace/src/dockerfiles/dut_manager_storage/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/dut-manager-storage:${__BUILD_VERSION}",
+        "/workspace/src/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "python-3.8-slim"
+      - "moblab_common"
 
 images:
   [
