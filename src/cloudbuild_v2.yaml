@@ -759,6 +759,7 @@ images:
     "${_REGISTRY_URI}/logrotate:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/chromite:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/dut-manager:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/dut-manager-storage:${__BUILD_VERSION}",
   ]
 
 options:
