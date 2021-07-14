@@ -20,7 +20,7 @@ class DiskSpaceMonitorService:
     def __init__(self):
         # TODO: threshold should be a function of the context:
         # number of DUTs, running tests suites, etc
-        self._min_available_disk_space_MB = 10000
+        self._min_available_disk_space_MB = 30000
         self.pause_service = HostSchedulerPauseService()
 
     async def run(self):
