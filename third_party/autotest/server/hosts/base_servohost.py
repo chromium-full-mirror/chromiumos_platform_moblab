@@ -14,9 +14,11 @@ import six.moves.http_client
 import logging
 import socket
 import six.moves.xmlrpc_client
+import time
+import os
 
 from client.bin import utils
-from client.common_lib import enum
+from client.common_lib import autotest_enum
 from client.common_lib import error
 from client.common_lib import hosts
 from client.common_lib import lsbrelease_utils
@@ -25,7 +27,7 @@ from client.common_lib.cros import kernel_utils
 from client.cros import constants as client_constants
 from server import autotest
 from server import site_utils as server_utils
-from server.cros import autoupdater
+from server.cros import provisioner
 from server.hosts import ssh_host
 #from site_utils.rpm_control_system import rpm_client
 
@@ -48,9 +50,15 @@ class BaseServoHost(ssh_host.SSHHost):
     BOOT_TIMEOUT = 240
 
     # Constants that reflect current host update state.
-    UPDATE_STATE = enum.Enum('IDLE', 'RUNNING', 'PENDING_REBOOT')
+    UPDATE_STATE = autotest_enum.AutotestEnum('IDLE', 'RUNNING',
+                                              'PENDING_REBOOT')
 
-    def _initialize(self, hostname, is_in_lab=None, *args, **dargs):
+    def _initialize(self,
+                    hostname,
+                    is_in_lab=None,
+                    servo_host_ssh_port=None,
+                    *args,
+                    **dargs):
         """Construct a BaseServoHost object.
 
         @param is_in_lab: True if the servo host is in Cros Lab. Default is set
@@ -58,24 +66,25 @@ class BaseServoHost(ssh_host.SSHHost):
                           called to check if the servo host is in Cros lab.
 
         """
+        if servo_host_ssh_port is not None:
+            dargs['port'] = int(servo_host_ssh_port)
+
         super(BaseServoHost, self)._initialize(hostname=hostname,
                                                *args, **dargs)
-        self._is_localhost = (self.hostname == 'localhost')
-        if self._is_localhost:
+
+        self._is_containerized_servod = self.hostname.endswith('docker_servod')
+
+        self._is_localhost = (self.hostname == 'localhost'
+                              and servo_host_ssh_port is None)
+        if self._is_localhost or self._is_containerized_servod:
             self._is_in_lab = False
         elif is_in_lab is None:
             self._is_in_lab = utils.host_is_in_lab_zone(self.hostname)
         else:
             self._is_in_lab = is_in_lab
 
-        # Commands on the servo host must be run by the superuser.
-        # Our account on a remote host is root, but if our target is
-        # localhost then we might be running unprivileged.  If so,
-        # `` will have to be added to the commands.
-        if self._is_localhost:
-            self.__required = utils.system_output('id -u') != '0'
-        else:
-            self.__required = False
+
+        self._sudo_required = False
 
         self._is_labstation = None
         self._dut_host_info = None
@@ -210,6 +219,14 @@ class BaseServoHost(ssh_host.SSHHost):
         return self._is_localhost
 
 
+    def is_containerized_servod(self):
+        """Checks whether the servo host is a containerized servod.
+
+        @returns: True if using containerized servod, otherwise False.
+
+        """
+        return self._is_containerized_servod
+
     def is_cros_host(self):
         """Check if a servo host is running chromeos.
 
@@ -303,12 +320,13 @@ class BaseServoHost(ssh_host.SSHHost):
         ds = dev_server.ImageServer.resolve(self.hostname,
                                             hostname=self.hostname)
         url = ds.get_update_url(target_build)
-        updater = autoupdater.ChromiumOSUpdater(update_url=url, host=self,
-                                                is_servohost=True)
+        cros_provisioner = provisioner.ChromiumOSProvisioner(update_url=url,
+                                                             host=self,
+                                                             is_servohost=True)
         logging.info('Using devserver url: %s to trigger update on '
                      'servo host %s, from %s to %s', url, self.hostname,
                      current_build_number, target_build_number)
-        updater.run_update()
+        cros_provisioner.run_provision()
 
 
     def has_power(self):
@@ -334,6 +352,21 @@ class BaseServoHost(ssh_host.SSHHost):
         # here is unexpected, and could signal a bug, the point of
         # the exercise is to paper over problems; allowing this to
         # fail would defeat the purpose.
+
+        # Preserve critical files before reboot since post-provision
+        # clobbering will wipe the stateful partition.
+        # TODO(xianuowang@) Remove this logic once we have updated to
+        # a image with https://crrev.com/c/2485908.
+        path_to_preserve = [
+                '/var/lib/servod',
+                '/var/lib/device_health_profile',
+        ]
+        safe_location = '/mnt/stateful_partition/unencrypted/preserve/'
+        for item in path_to_preserve:
+            dest = os.path.join(safe_location, item.split('/')[-1])
+            self.run('rm -rf %s' % dest, ignore_status=True)
+            self.run('mv %s %s' % (item, safe_location), ignore_status=True)
+
         self.run('crossystem clear_tpm_owner_request=1', ignore_status=True)
         self._servo_host_reboot()
         logging.debug('Cleaning up autotest directories if exist.')
@@ -343,6 +376,13 @@ class BaseServoHost(ssh_host.SSHHost):
         except autotest.AutodirNotFoundError:
             logging.debug('No autotest installed directory found.')
 
+        # Recover preserved files to original location.
+        # TODO(xianuowang@) Remove this logic once we have updated to
+        # a image with https://crrev.com/c/2485908.
+        for item in path_to_preserve:
+            src = os.path.join(safe_location, item.split('/')[-1])
+            dest = '/'.join(item.split('/')[:-1])
+            self.run('mv %s %s' % (src, dest), ignore_status=True)
 
     def power_cycle(self):
         """Cycle power to this host via PoE(servo v3) or RPM(labstation)
@@ -368,6 +408,18 @@ class BaseServoHost(ssh_host.SSHHost):
 
     def _servo_host_reboot(self):
         """Reboot this servo host because a reboot is requested."""
+        try:
+            # TODO(otabek) remove if found the fix for b/174514811
+            # The default factory firmware remember the latest chromeboxes
+            # status after power off. If box was in sleep mode before the
+            # break, the box will stay at sleep mode after power on.
+            # Disable power manager has make chromebox to boot always when
+            # we deliver the power to the device.
+            logging.info('Stoping powerd service on device')
+            self.run('stop powerd', ignore_status=True, timeout=30)
+        except Exception as e:
+            logging.debug('(Not critical) Fail to stop powerd; %s', e)
+
         logging.info('Rebooting servo host %s from build %s', self.hostname,
                      self.get_release_version())
         # Tell the reboot() call not to wait for completion.
@@ -384,7 +436,7 @@ class BaseServoHost(ssh_host.SSHHost):
         # with the logging bits ripped out, so that they can't cause
         # the failure logging problem described above.
         #
-        # The black stain that this has left on my soul can never be
+        # The stain that this has left on my soul can never be
         # erased.
         old_boot_id = self.get_boot_id()
         if not self.wait_down(timeout=self.WAIT_DOWN_REBOOT_TIMEOUT,
@@ -460,7 +512,7 @@ class BaseServoHost(ssh_host.SSHHost):
         """
         command = ('scp -rq %s -o BatchMode=yes -o StrictHostKeyChecking=no '
                    '-o UserKnownHostsFile=/dev/null -P %d %s "%s"')
-        return command % (self._client_ssh.ssh_option,
+        return command % (self._main_ssh.ssh_option,
                           self.port, sources, dest)
 
 
@@ -515,6 +567,9 @@ class BaseServoHost(ssh_host.SSHHost):
             'args'                : args,
         }
         if self.is_localhost():
+            if self._sudo_required:
+                run_args['command'] = 'sudo -n sh -c "%s"' % utils.sh_escape(
+                    command)
             try:
                 return utils.run(**run_args)
             except error.CmdError as e:
@@ -552,3 +607,25 @@ class BaseServoHost(ssh_host.SSHHost):
         """
         result = self.run('umount %s' % mount_path, ignore_status=True)
         return result.exit_status == 0
+
+    def wait_ready(self, required_uptime=300):
+        """Wait ready for a servohost if it has been rebooted recently.
+
+        It may take a few minutes until all servos and their componments
+        re-enumerated and become ready after a servohost(especially labstation
+        as it supports multiple servos) reboot, so we need to make sure the
+        servohost has been up for a given a mount of time before trying to
+        start any actions.
+
+        @param required_uptime: Minimum uptime in seconds that we can
+                                consdier a servohost be ready.
+        """
+        uptime = float(self.check_uptime())
+        # To prevent unexpected output from check_uptime() that causes long
+        # sleep, make sure the maximum wait time <= required_uptime.
+        diff = min(required_uptime - uptime, required_uptime)
+        if diff > 0:
+            logging.info(
+                    'The servohost was just rebooted, wait %s'
+                    ' seconds for it to become ready', diff)
+            time.sleep(diff)
