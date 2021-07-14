@@ -159,7 +159,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       this.resultsRetentionPeriodForm.setValue(period_days);
     } catch (error) {
       console.log('getResultsRetentionPeriod call failed with:' + error);
-      this.notificationsService.error('Failed to fetch stable Chrome OS version: ' + error.message);
+      this.notificationsService.error('Failed to fetch results retention duration: ' + error.message);
     } finally {
       this.resultsRetentionPeriodForm.enable();
     }
