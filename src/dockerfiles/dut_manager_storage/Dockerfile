@@ -27,7 +27,7 @@ RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
 RUN apt-get update && apt-get install -yq nmap
 
 WORKDIR /etc/moblab/dut_manager_storage
-COPY --chown=moblab dut_manager_storage/*.py .
+COPY --chown=moblab dut_manager_storage/ .
 COPY --from=protos /protos .
 
 WORKDIR /wheels

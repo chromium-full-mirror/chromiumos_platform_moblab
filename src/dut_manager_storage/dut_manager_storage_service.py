@@ -71,7 +71,7 @@ class DutManagerStorageService(object):
         managed_duts = self.get_managed_duts_from_host_dict(connected_dut)
         return managed_duts[0] if managed_duts else None
 
-    def update_dut(self, update_dut, dut_update_mask):
+    def update_managed_dut(self, update_dut, dut_update_mask):
         """Update the managed dut info through autotest afe."""
         dut_identifier = self.get_dut_identifier(update_dut)
         current_dut = self.get_managed_dut(dut_identifier)

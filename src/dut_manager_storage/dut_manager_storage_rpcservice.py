@@ -70,7 +70,9 @@ class DutManagerStorageRpcService(DutManagerStorageServiceServicer):
     def UpdateDut(self, request, context):
         """Update the given fields of a managed DUT in the db."""
         try:
-            self.storage_service.update_dut(request.dut, request.update_mask)
+            self.storage_service.update_managed_dut(
+                request.dut, request.update_mask
+            )
         except DutManagerStorageServicesException as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(e)
