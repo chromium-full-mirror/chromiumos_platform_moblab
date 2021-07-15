@@ -945,6 +945,7 @@ export class MoblabGrpcService {
     end_time_lt?: number
   ) {
     const request = new GetDutTasksRequest();
+    request.setIp(ip);
     request.setQueryStart(queryStart);
     request.setQueryLimit(queryLimit);
 
