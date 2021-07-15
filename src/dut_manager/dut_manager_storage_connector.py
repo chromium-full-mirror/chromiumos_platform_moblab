@@ -10,20 +10,10 @@ import logging
 import grpc
 import os
 
-# from lab import dut_manager_pb2
-# from lab import dut_manager_pb2_grpc as grpc_stub
-
 from lab import dut_manager_storage_pb2_grpc as grpc_stub
 from lab import dut_manager_storage_pb2 as pb2
 from lab.dut_manager_storage_pb2 import GetDutResponse
-from lab.managed_dut_pb2 import (
-    ManagedDut,
-    NetworkIdentifier,
-)
-from chromiumos.test.api.dut_attribute_pb2 import (
-    DutAttribute,
-    DutAttributeList,
-)
+from lab.managed_dut_pb2 import ManagedDut
 
 
 class DutManagerRpcError(Exception):
