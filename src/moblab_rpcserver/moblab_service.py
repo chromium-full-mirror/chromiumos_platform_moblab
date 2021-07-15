@@ -29,6 +29,8 @@ from dut_manager_connector import DutManagerRpcConnector
 
 from host_scheduler_pause_service import HostSchedulerPauseService
 
+from lab.managed_dut_pb2 import ManagedDut
+
 MilestonePair = namedtuple("MilestonePair", ["milestone", "is_staged"])
 BuildVersionPair = namedtuple(
     "BuildVersionPair", ["build_version", "status", "is_staged"]
@@ -70,7 +72,17 @@ MOBLAB_DOCKER_REGISTRY = "gcr.io/chromeos-partner-moblab/"
 
 MAX_BUILD_STAGING_SECONDS = 300  # 5 minutes
 
-_USE_DUT_MANAGER_FEATURE_FLAG = False  # True
+DUT_MANAGER_TO_AFE_DUT_STATUS_MAPPINGS = {
+    ManagedDut.ManagedState.VERIFY: "Verifying",
+    ManagedDut.ManagedState.LEASED: "Running",
+    ManagedDut.ManagedState.READY: "Ready",
+    ManagedDut.ManagedState.FAILED: "Repair Failed",
+    ManagedDut.ManagedState.RESET: "Resetting",
+    ManagedDut.ManagedState.PROVISION: "Provisioning",
+    ManagedDut.ManagedState.UNKNOWN: "Unknown",
+}
+
+_USE_DUT_MANAGER_FEATURE_FLAG = True  # True
 
 
 class MoblabRpcError(Exception):
@@ -239,7 +251,9 @@ class MoblabService(object):
         for managed_dut in managed_duts:
             dut = {}
             dut["hostname"] = managed_dut.name.ip_address
-            dut["status"] = "Running"  # TODO: add mapper for managed_dut.state
+            dut["status"] = DUT_MANAGER_TO_AFE_DUT_STATUS_MAPPINGS[
+                managed_dut.state
+            ]
 
             labels = [
                 a.id.value
