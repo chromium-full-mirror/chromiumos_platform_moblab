@@ -356,7 +356,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def get_dut_details(self, request, _context):
         try:
-            dut = self.service.get_dut_details(request.dut)[0]
+            dut = self.service.get_dut_details(request.dut)
         except IndexError:
             error_msg = "Unable to find DUT: {}".format(request.dut)
             logging.error(error_msg)

@@ -245,29 +245,32 @@ class MoblabService(object):
             )
         return afe_formatted_duts
 
+    def _convert_managed_dut_to_dut_dict(self, managed_dut):
+        dut = {}
+        dut["hostname"] = managed_dut.name.ip_address
+        dut["status"] = DUT_MANAGER_TO_AFE_DUT_STATUS_MAPPINGS[
+            managed_dut.state
+        ]
+
+        labels = [
+            a.id.value
+            for a in managed_dut.tag.dut_attributes
+            if not a.field_path
+        ]
+        attributes = {
+            a.id.value: a.field_path
+            for a in managed_dut.tag.dut_attributes
+            if a.field_path
+        }
+        dut["labels"] = labels
+        dut["attributes"] = attributes
+        return dut
+
     def _list_duts_from_dut_manager(self):
         managed_duts = DutManagerRpcConnector.list_managed_duts()
         duts = []
         for managed_dut in managed_duts:
-            dut = {}
-            dut["hostname"] = managed_dut.name.ip_address
-            dut["status"] = DUT_MANAGER_TO_AFE_DUT_STATUS_MAPPINGS[
-                managed_dut.state
-            ]
-
-            labels = [
-                a.id.value
-                for a in managed_dut.tag.dut_attributes
-                if not a.field_path
-            ]
-            attributes = {
-                a.id.value: a.field_path
-                for a in managed_dut.tag.dut_attributes
-                if a.field_path
-            }
-            dut["labels"] = labels
-            dut["attributes"] = attributes
-
+            dut = self._convert_managed_dut_to_dut_dict(managed_dut)
             duts.append(dut)
         return duts
 
@@ -598,11 +601,20 @@ class MoblabService(object):
         duts = self.dut_connector.get_connected_dut_firmware()
         return duts
 
-    def get_dut_details(self, dut):
-        dut_details = self.afe_connector.get_connected_devices(
-            dut, get_current_jobs=True
+    def _get_managed_dut_from_dut_manager(self, dut_ip):
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_ip)
+        dut = self._convert_managed_dut_to_dut_dict(managed_dut)
+        return dut
+
+    def get_dut_details(self, dut: str):
+        dut_details = (
+            self._get_managed_dut_from_dut_manager(dut)
+            if _USE_DUT_MANAGER_FEATURE_FLAG
+            else self.afe_connector.get_connected_devices(
+                dut, get_current_jobs=True
+            )[0]
         )
-        self._hydrate_dut_details_with_mac(dut_details)
+        self._hydrate_dut_details_with_mac([dut_details])
         return dut_details
 
     def _hydrate_dut_details_with_mac(self, duts_details):
