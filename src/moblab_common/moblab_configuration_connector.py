@@ -12,7 +12,7 @@ import grpc
 from moblab_common.proto import moblab_configuration_rpc_pb2
 from moblab_common.proto import moblab_configuration_rpc_pb2_grpc as grpc_stub
 
-from moblab_common.moblabrpc_connector import MoblabRpcConnectorError
+from moblab_common import moblabrpc_connector
 
 from google.protobuf import empty_pb2
 
@@ -44,11 +44,11 @@ class MoblabConfigurationRpcConnector(object):
                     cls.channel
                 )
                 if not cls.stub:
-                    raise MoblabRpcConnectorError(
+                    raise moblabrpc_connector.MoblabRpcConnectorError(
                         "Unable to connect to server %s" % DEFAULT_SERVER
                     )
             else:
-                raise MoblabRpcConnectorError(
+                raise moblabrpc_connector.MoblabRpcConnectorError(
                     "No server found %s" % DEFAULT_SERVER
                 )
 
@@ -77,7 +77,9 @@ class MoblabConfigurationRpcConnector(object):
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error getting the host identifier")
-            raise MoblabRpcConnectorError("Error getting the host identifier")
+            raise moblabrpc_connector.MoblabRpcConnectorError(
+                "Error getting the host identifier"
+            )
 
     @classmethod
     def get_stable_build_version_resolved(cls):
@@ -109,4 +111,6 @@ class MoblabConfigurationRpcConnector(object):
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error getting jobs.")
-            raise MoblabRpcConnectorError("Error getting getting jobs.")
+            raise moblabrpc_connector.MoblabRpcConnectorError(
+                "Error getting getting jobs."
+            )
