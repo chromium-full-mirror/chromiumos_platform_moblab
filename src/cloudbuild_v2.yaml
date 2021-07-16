@@ -558,6 +558,7 @@ steps:
       - "python-3.8"
       - "python-3.8-slim"
       - "moblab_common"
+      - "infra-protos"
     env:
       - "DOCKER_BUILDKIT=1"
 
@@ -707,6 +708,7 @@ steps:
       - "DOCKER_BUILDKIT=1"
     waitFor:
       - "python-3.8-slim"
+      - "infra-protos"
 
   - id: dut-manager-storage
     name: "docker:19.03.8"
@@ -728,6 +730,29 @@ steps:
     waitFor:
       - "python-3.8-slim"
       - "moblab_common"
+      - "infra-protos"
+
+  - id: infra-protos
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${__BUILD_VERSION}",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.infra_protos",
+        "-t",
+        "${_REGISTRY_URI}/infra-protos:${__BUILD_VERSION}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "protoc"
+      - "buster-slim"
+      - "alpine-git"
 
 images:
   [
@@ -760,6 +785,7 @@ images:
     "${_REGISTRY_URI}/chromite:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/dut-manager:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/dut-manager-storage:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/infra-protos:${__BUILD_VERSION}",
   ]
 
 options:

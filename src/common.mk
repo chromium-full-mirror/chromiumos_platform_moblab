@@ -35,7 +35,7 @@ all:	autotest \
 #TODO refactor the common rules into a single rule.
 
 rpcserver: export DOCKER_BUILDKIT := 1
-rpcserver: common
+rpcserver: common infra-protos
 	docker build ${EXTRA_ARGS} --label "version=${BUILD_VERSION}"  \
 		-t ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
 		-f dockerfiles/rpcserver/Dockerfile ..
