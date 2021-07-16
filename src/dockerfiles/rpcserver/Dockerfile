@@ -8,7 +8,7 @@ ARG LABEL=autopush
 
 ######################################################################
 
-FROM gcr.io/chromeos-partner-moblab/infra_protos:haddowk as protos
+FROM ${REGISTRY_URI}/infra-protos:${LABEL} as protos
 
 FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
