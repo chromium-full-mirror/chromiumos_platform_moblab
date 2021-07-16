@@ -12,6 +12,7 @@ import settings_store
 class SettingsStoreTest(unittest.TestCase):
     """Testing the MoblabSettingsStore code."""
 
+    @mock.patch("settings_store.MoblabSettings.key.in_", new=mock.MagicMock)
     def test_get_settings(self, mock_get_session):
         session_mock = mock.MagicMock()
         mock_get_session.return_value = session_mock

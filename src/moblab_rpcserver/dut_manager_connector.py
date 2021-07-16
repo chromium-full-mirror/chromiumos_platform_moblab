@@ -12,7 +12,7 @@ import os
 
 from lab import dut_manager_pb2
 from lab import dut_manager_pb2_grpc as grpc_stub
-from moblab_common.moblabrpc_connector import MoblabRpcConnectorError
+from moblab_common import moblabrpc_connector
 
 
 class DutManagerRpcConnector(object):
@@ -36,11 +36,13 @@ class DutManagerRpcConnector(object):
             if cls.channel:
                 cls.stub = grpc_stub.DutManagerServiceStub(cls.channel)
                 if not cls.stub:
-                    raise MoblabRpcConnectorError(
+                    raise moblabrpc_connector.MoblabRpcConnectorError(
                         "Unable to connect to server %s" % address
                     )
             else:
-                raise MoblabRpcConnectorError("No server found %s" % address)
+                raise moblabrpc_connector.MoblabRpcConnectorError(
+                    "No server found %s" % address
+                )
 
     @classmethod
     def disconnect(cls):
@@ -66,10 +68,12 @@ class DutManagerRpcConnector(object):
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error listing all duts")
-            raise MoblabRpcConnectorError("Error listing all duts")
+            raise moblabrpc_connector.MoblabRpcConnectorError(
+                "Error listing all duts"
+            )
 
     @classmethod
-    def get_managed_dut(cls, dut_ip):
+    def get_managed_dut(cls, dut_ip: str):
         """Get managed dut details.
 
         Raises:
@@ -87,4 +91,6 @@ class DutManagerRpcConnector(object):
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error reading the %s dut", dut_ip)
-            raise MoblabRpcConnectorError("Error reading the %s dut", dut_ip)
+            raise moblabrpc_connector.MoblabRpcConnectorError(
+                "Error reading the %s dut", dut_ip
+            )
