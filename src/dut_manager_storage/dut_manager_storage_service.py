@@ -60,21 +60,26 @@ class DutManagerStorageService(object):
     def list_managed_duts(self):
         """Get all managed duts by mapping the afe hosts to managed dut."""
         connected_duts = self.afe_connector.get_connected_devices()
-        managed_duts = self.get_managed_duts_from_host_dict(connected_duts)
+        managed_duts = self.get_managed_duts_from_host_dict(
+            connected_duts, ignore_fields={"history"}
+        )
         return managed_duts if managed_duts else None
 
-    def get_managed_dut(self, dut_name):
+    def get_managed_dut(self, dut_name, ignore_fields={}):
         """Get the managed dut by mapping the afe hosts to managed dut."""
         connected_dut = self.afe_connector.get_connected_devices(
             hostname=dut_name
         )
-        managed_duts = self.get_managed_duts_from_host_dict(connected_dut)
+        managed_duts = self.get_managed_duts_from_host_dict(
+            connected_dut, ignore_fields
+        )
         return managed_duts[0] if managed_duts else None
 
     def update_managed_dut(self, update_dut, dut_update_mask):
         """Update the managed dut info through autotest afe."""
         dut_identifier = self.get_dut_identifier(update_dut)
-        current_dut = self.get_managed_dut(dut_identifier)
+        ignore_fields = {"history", "provisioned_firmware_version"}
+        current_dut = self.get_managed_dut(dut_identifier, ignore_fields)
 
         fields_to_update = dut_update_mask.paths
         for field_to_update in fields_to_update:
@@ -89,7 +94,7 @@ class DutManagerStorageService(object):
                     dut_identifier, current_dut.pool, update_dut.pool
                 )
 
-    def get_managed_duts_from_host_dict(self, duts):
+    def get_managed_duts_from_host_dict(self, duts, ignore_fields):
         managed_duts = []
 
         for dut in duts:
@@ -109,10 +114,14 @@ class DutManagerStorageService(object):
                 operator_notes="",
                 provisioned_firmware_version=self.get_current_firmware_version(
                     dut["hostname"]
-                ),
+                )
+                if "provisioned_firmware_version" not in ignore_fields
+                else None,
                 history=self.get_history_record_from_special_tasks(
                     dut["hostname"]
-                ),
+                )
+                if "history" not in ignore_fields
+                else None,
                 associated_dut=None,
                 is_associated_dut=None,
             )
