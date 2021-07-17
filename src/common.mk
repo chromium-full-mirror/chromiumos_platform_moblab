@@ -15,8 +15,8 @@ all:	autotest \
 		common \
 		db \
 		devserver \
-		dut_manager \
-		dut_manager_storage \
+		dut-manager \
+		dut-manager-storage \
 		moblab-db-setup \
 		dhcp \
 		dns \
