@@ -13,6 +13,7 @@ from client.common_lib import global_config
 from client.cros import constants
 from server import utils
 
+
 metrics = utils.metrics_mock
 
 
@@ -309,7 +310,7 @@ def collect_command(host, command, dest_path):
     logging.info("Collecting '%s' ...", command)
     try:
         result = host.run(command, stdout_tee=None).stdout
-        utils.open_write_close(dest_path, result)
+        utils.open_write_close(dest_path, result.decode('utf-8'))
     except Exception as e:
         logging.warning("Collection of '%s' failed:\n%s", command, e)
 

@@ -7,7 +7,6 @@ Run a control file through the server side engine
 """
 
 import datetime
-import contextlib
 import getpass
 import logging
 import os
@@ -16,11 +15,12 @@ import shutil
 import signal
 import socket
 import sys
+
 sys.path.pop(0)
 import traceback
 import time
 import six
-from six.moves import urllib
+import docker
 
 import common
 from client.bin.result_tools import utils as result_utils
@@ -295,56 +295,74 @@ def _start_servod(machine):
 
     @param machine: Name of the dut used for test.
     """
-    if not utils.is_moblab():
-        return
+    afe = server_frontend.AFE()
+    hosts = afe.get_hosts(hostname=machine)
+    board = server_utils.get_board_from_afe(machine, afe)
+    model = hosts[0].attributes.get("model", None)
+    servo_host = hosts[0].attributes.get("servo_host", None)
+    servo_port = hosts[0].attributes.get("servo_port", 9999)
+    servo_serial = hosts[0].attributes.get("servo_serial", None)
 
-    logging.debug("Trying to start servod.")
-    try:
-        afe = server_frontend.AFE()
-        board = server_utils.get_board_from_afe(machine, afe)
-        hosts = afe.get_hosts(hostname=machine)
-        servo_host = hosts[0].attributes.get("servo_host", None)
-        servo_port = hosts[0].attributes.get("servo_port", 9999)
-        if not servo_host in ["localhost", "127.0.0.1"]:
-            logging.warn(
-                "Starting servod is aborted. The dut's servo_host "
-                "attribute is not set to localhost."
-            )
-            return
-    except (urllib.error.HTTPError, urllib.error.URLError):
-        # Ignore error if RPC failed to get board
-        logging.error(
-            "Failed to get board name from AFE. Start servod is " "aborted"
-        )
-        return
+    label = os.environ.get('LABEL', 'release')
+    registry = os.environ.get('REGISTRY_URI', 'gcr.io/chromeos-partner-moblab')
+    client = docker.from_env(timeout=300)
 
     try:
-        pid = utils.run("pgrep servod").stdout
-        cmd_line = utils.run("ps -fp %s" % pid).stdout
-        if (
-            "--board %s" % board in cmd_line
-            and "--port %s" % servo_port in cmd_line
-        ):
-            logging.debug(
-                "Servod is already running with given board and port."
-                " There is no need to restart servod."
-            )
-            return
-        logging.debug(
-            "Servod is running with different board or port. "
-            "Stopping existing servod."
-        )
-        utils.run(" stop servod")
-    except error.CmdError:
-        # servod is not running.
+        cont = client.containers.get(servo_host)
+    except docker.errors.NotFound:
         pass
+    else:
+        logging.warning("Container already exists - not starting")
+        return
+
+    image = "%s/servod:%s" % (registry, label)
+    logging.info("Image %s", image)
+    try:
+        client.images.pull(image)
+    except docker.errors.APIError:
+        logging.exception('Failed to pull image')
+
+    label = os.environ.get("LABEL", "release")
+    registry = os.environ.get(
+        "REGISTRY_URI", "gcr.io/chromeos-partner-moblab"
+    )
+    image = "%s/servod:%s" % (registry, label)
+    logging.info("Image %s", image)
 
     try:
-        utils.run(START_SERVOD_CMD % (board, servo_port))
-        logging.debug("Servod is started")
-    except error.CmdError as e:
-        logging.error("Servod failed to be started, error: %s", e)
+        client.images.pull(image)
+    except docker.errors.APIError:
+        logging.exception("Failed to pull image")
 
+    environment = [
+                "BOARD=%s" % board,
+                "MODEL=%s" % model,
+                "SERIAL=%s" % servo_serial,
+                "PORT=%s" % servo_port,
+    ]
+    logging.info('Servo container environment: %s', environment)
+    try:
+        client.containers.run(
+            image,
+            remove=False,
+            privileged=True,
+            name=servo_host,
+            hostname=servo_host,
+            network="default_moblab",
+            cap_add=["NET_ADMIN"],
+            detach=True,
+            volumes=["/dev:/dev"],
+            environment=environment,
+            command=["bash", "/start_servod.sh"],
+        )
+        time.sleep(30)
+    except docker.errors.ContainerError as e:
+        logging.exception("Failed to start servod")
+        for line in str(e).split(b'\n'):
+            print(line)
+        raise
+    except docker.errors.ImageNotFound:
+        logging.exception("Image not found")
 
 def _control_path_on_disk(control_name):
     """Find the control file corresponding to the given control name, on disk.

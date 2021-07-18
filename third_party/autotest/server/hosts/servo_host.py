@@ -19,7 +19,10 @@ import threading
 import json
 import time
 import six
-import six.moves.xmlrpc_client
+import xmlrpc.client
+
+import docker
+import tempfile
 
 from client.bin import utils
 from client.common_lib import error
@@ -198,6 +201,7 @@ class ServoHost(base_servohost.BaseServoHost):
         self.servo_recovery = servo_recovery
         self.servo_fw_channel = servo_fw_channel
         self.additional_servod_args = additional_servod_args
+        self._is_locked = False
 
         # The location of the log files on the servo host for this instance.
         self.remote_log_dir = '%s_%s' % (self.SERVOD_LOG_PREFIX,
@@ -208,21 +212,6 @@ class ServoHost(base_servohost.BaseServoHost):
         # File path to declare a reboot request.
         self._reboot_file = (self.TEMP_FILE_DIR + str(self.servo_port) +
                              self.REBOOT_FILE_POSTFIX)
-
-        # Lock the servo host if it's an in-lab labstation to prevent other
-        # task to reboot it until current task completes. We also wait and
-        # make sure the labstation is up here, in the case of the labstation is
-        # in the middle of reboot.
-        self._is_locked = False
-        if (self.wait_up(self.REBOOT_TIMEOUT) and self.is_in_lab()
-            and self.is_labstation()):
-            self._lock()
-            try:
-                self.wait_ready()
-            except Exception as e:
-                logging.info(
-                        'Unexpected error while ensure labstation'
-                        ' readiness; %s', str(e))
 
         self._repair_strategy = (
                 servo_repair.create_servo_repair_strategy())
@@ -279,20 +268,6 @@ class ServoHost(base_servohost.BaseServoHost):
             self.rpc_server_tracker.disconnect(self.servo_port)
             self._servo = None
 
-    def _maybe_create_servod_ssh_tunnel_proxy(self):
-        """Create a xmlrpc proxy for use with a ssh tunnel.
-        A lock is used to safely create a singleton proxy.
-        """
-        with self._tunnel_proxy_lock:
-            if self._tunnel_proxy is None:
-                self._tunnel_proxy = self.rpc_server_tracker.xmlrpc_connect(
-                       None,
-                       self.servo_port,
-                       ready_test_name=self.SERVO_READY_METHOD,
-                       timeout_seconds=60,
-                       request_timeout_seconds=3600,
-                       server_desc=str(self))
-
     def get_servod_server_proxy(self):
         """Return a proxy if it exists; otherwise, create a new one.
         A proxy can either be a ssh tunnel based proxy, or a httplib
@@ -301,19 +276,13 @@ class ServoHost(base_servohost.BaseServoHost):
         @returns: An xmlrpclib.ServerProxy that is connected to the servod
                   server on the host.
         """
-        if (servo_constants.ENABLE_SSH_TUNNEL_FOR_SERVO
-                and not self.is_localhost()):
-            # Check for existing ssh tunnel proxy.
-            if self._tunnel_proxy is None:
-                self._maybe_create_servod_ssh_tunnel_proxy()
-            return self._tunnel_proxy
-        else:
-            # xmlrpc/httplib is not thread-safe, so each thread must have its
-            # own separate proxy connection.
-            if not hasattr(self._local, "_per_thread_proxy"):
-                remote = 'http://%s:%s' % (self.hostname, self.servo_port)
-                self._local._per_thread_proxy = six.moves.xmlrpc_client.ServerProxy(remote)
-            return self._local._per_thread_proxy
+        # xmlrpc/httplib is not thread-safe, so each thread must have its
+        # own separate proxy connection.
+        if not hasattr(self._local, "_per_thread_proxy"):
+            remote = 'http://%s:%s' % (self.hostname, self.servo_port)
+            self._local._per_thread_proxy = xmlrpc.client.ServerProxy(
+                remote, verbose=False)
+        return self._local._per_thread_proxy
 
     def verify(self, silent=False):
         """Update the servo host and verify it's in a good state.
@@ -329,11 +298,10 @@ class ServoHost(base_servohost.BaseServoHost):
             self.record('INFO', None, None,
                         'ServoHost verify set servo_state as WORKING')
         except Exception as e:
-            if not self.is_localhost():
-                self._servo_state = self.determine_servo_state()
-                self.record('INFO', None, None,
-                            'ServoHost verify set servo_state as %s'
-                            % self._servo_state)
+            self._servo_state = self.determine_servo_state()
+            self.record('INFO', None, None,
+                        'ServoHost verify set servo_state as %s'
+                        % self._servo_state)
             if self._is_critical_error(e):
                 raise
 
@@ -560,16 +528,14 @@ class ServoHost(base_servohost.BaseServoHost):
             self._servo_state = servo_constants.SERVO_STATE_WORKING
             self.record('INFO', None, None,
                         'ServoHost repair set servo_state as WORKING')
-            # If target is a labstation then try to withdraw any existing
-            # reboot request created by this servo because it passed repair.
-            if self.is_labstation():
-                self.withdraw_reboot_request()
+
+            self.withdraw_reboot_request()
         except Exception as e:
-            if not self.is_localhost():
-                self._servo_state = self.determine_servo_state()
-                self.record('INFO', None, None,
-                            'ServoHost repair set servo_state as %s'
-                            % self._servo_state)
+            logging.exception("Repair Failed")
+            self._servo_state = self.determine_servo_state()
+            self.record('INFO', None, None,
+                        'ServoHost repair set servo_state as %s'
+                        % self._servo_state)
             if self._is_critical_error(e):
                 self.disconnect_servo()
                 self.stop_servod()
@@ -616,80 +582,72 @@ class ServoHost(base_servohost.BaseServoHost):
         self.run('rm -f %s' % self._reboot_file, ignore_status=True)
 
     def start_servod(self, quick_startup=False):
-        """Start the servod process on servohost.
-        """
-        # Skip if running on the localhost.(crbug.com/1038168)
-        if self.is_localhost():
-            logging.debug("Servohost is a localhost, skipping start servod.")
+        """Start the servod process on servohost."""
+        client = docker.from_env(timeout=300)
+        try:
+            client.containers.get(self.hostname)
+        except docker.errors.NotFound:
+            pass
+        else:
+            logging.warning("Container already exists - not starting")
             return
 
-        cmd = 'start servod'
-        if self.servo_board:
-            cmd += ' BOARD=%s' % self.servo_board
-            if self.servo_model:
-                cmd += ' MODEL=%s' % self.servo_model
-        else:
-            logging.warning('Board for DUT is unknown; starting servod'
-                            ' assuming a pre-configured board.')
+        label = os.environ.get("LABEL", "release")
+        registry = os.environ.get(
+            "REGISTRY_URI", "gcr.io/chromeos-partner-moblab"
+        )
+        image = "%s/servod:%s" % (registry, label)
+        logging.info("Servo container image: %s", image)
 
-        cmd += ' PORT=%d' % self.servo_port
-        if self.servo_serial:
-            cmd += ' SERIAL=%s' % self.servo_serial
+        try:
+            client.images.pull(image)
+        except docker.errors.APIError:
+            logging.exception("Failed to pull image")
 
-        # Start servod with dual_v4 based on servo_setup.
-        if self.is_dual_setup():
-            cmd += ' DUAL_V4=1'
+        environment = [
+                    "BOARD=%s" % self.servo_board,
+                    "MODEL=%s" % self.servo_model,
+                    "SERIAL=%s" % self.servo_serial,
+                    "PORT=%s" % self.servo_port,
+        ]
+        logging.info('Servo container environment: %s', environment)
+        try:
+            client.containers.run(
+                image,
+                remove=False,
+                privileged=True,
+                name=self.hostname,
+                hostname=self.hostname,
+                network="default_moblab",
+                cap_add=["NET_ADMIN"],
+                detach=True,
+                volumes=["/dev:/dev"],
+                environment=environment,
+                command=["bash", "/start_servod.sh"],
+            )
+            time.sleep(servo_constants.SERVOD_STARTUP_TIMEOUT)
+        except docker.errors.ContainerError as e:
+            logging.exception("Failed to start servod")
+            for line in str(e).split(b'\n'):
+                print(line)
+            raise
+        except docker.errors.ImageNotFound:
+            logging.exception("Image not found")
 
-        # Start servod with CONFIG=cr50.xml which required for some pools.
-        if self._require_cr50_servod_config():
-            cmd += ' CONFIG=cr50.xml'
 
-        if self.servo_recovery == True:
-            cmd += ' REC_MODE=1'
-
-        # Adding customized args if any.
-        if self.additional_servod_args:
-            cmd += ' ' + self.additional_servod_args
-
-        # Remove the symbolic links from the logs. This helps ensure that
-        # a failed servod instantiation does not cause us to grab old logs
-        # by mistake.
-        self.remove_latest_log_symlinks()
-        self.run(cmd, timeout=60)
-
-        # There's a lag between when `start servod` completes and when
-        # the _ServodConnectionVerifier trigger can actually succeed.
-        # The call to time.sleep() below gives time to make sure that
-        # the trigger won't fail after we return.
-
-        # Normally servod on servo_v3 and labstation take ~10 seconds to ready,
-        # But in the rare case all servo on a labstation are in heavy use they
-        # may take ~30 seconds. So the timeout value will double these value,
-        # and we'll try quick start up when first time initialize servohost,
-        # and use standard start up timeout in repair.
-        if quick_startup:
-            timeout = servo_constants.SERVOD_QUICK_STARTUP_TIMEOUT
-        else:
-            timeout = servo_constants.SERVOD_STARTUP_TIMEOUT
-        logging.debug('Wait %s seconds for servod process fully up.', timeout)
-        time.sleep(timeout)
         # Cache the initial instance timestamp to check against servod restarts
         self._initial_instance_ts = self.get_instance_logs_ts()
 
     def stop_servod(self):
-        """Stop the servod process on servohost.
-        """
-        # Skip if running on the localhost.(crbug.com/1038168)
-        if self.is_localhost():
-            logging.debug("Servohost is a localhost, skipping stop servod.")
-            return
-
-        logging.debug('Stopping servod on port %s', self.servo_port)
-        self.run('stop servod PORT=%d' % self.servo_port,
-                 timeout=60, ignore_status=True)
-        logging.debug('Wait %s seconds for servod process fully teardown.',
-                      servo_constants.SERVOD_TEARDOWN_TIMEOUT)
-        time.sleep(servo_constants.SERVOD_TEARDOWN_TIMEOUT)
+        """Stop the servod process on servohost."""
+        client = docker.from_env(timeout=300)
+        try:
+            cont = client.containers.get(self.hostname)
+        except docker.errors.NotFound:
+            logging.info("Container does not exist no need to stop it.")
+        else:
+            cont.stop()
+            cont.remove()
 
     def restart_servod(self, quick_startup=False):
         """Restart the servod process on servohost.
@@ -725,16 +683,11 @@ class ServoHost(base_servohost.BaseServoHost):
         @returns: string, usb-path to the main servo device.
             e.g.: '/sys/bus/usb/devices/1-6.1.3.1'
         """
-        # TODO remove try-except when fix crbug.com/1087964
-        try:
-            cmd = 'servodtool device -s %s usb-path' % self.servo_serial
-            resp = self.run(cmd, ignore_status=True, timeout=30)
-        except Exception as e:
-            # Here we catch only timeout errors.
-            # Other errors is filtered by ignore_status=True
-            logging.debug('Attempt to get servo usb-path failed due to '
-                          'timeout; %s', e)
-            return ''
+
+        cmd = 'servodtool device -s %s usb-path' % self.servo_serial
+        resp = self.run(cmd, ignore_status=True, timeout=30)
+
+        return ''
         if resp.exit_status != 0:
             self._process_servodtool_error(resp)
             return ''
@@ -780,31 +733,20 @@ class ServoHost(base_servohost.BaseServoHost):
             reboot_method = self._servo_host_reboot
         self.record('INFO', None, None, message)
         logging.info(message)
-        try:
-            reboot_method()
-            message = 'Servo_v3 reboot completed successfully.'
-        except Exception as e:
-            logging.debug("Fail to reboot servo_v3; %s", e)
-            message = ('Servo_v3 reboot failed, please check debug log '
-                       'for details.')
+        reboot_method()
+        message = 'Servo_v3 reboot completed successfully.'
+
         logging.info(message)
         self.record('INFO', None, None, message)
 
     def _reset_servo(self):
         logging.info('Resetting servo through smart usbhub.')
-        # TODO remove try-except when fix crbug.com/1087964
-        try:
-            resp = self.run('servodtool device -s %s power-cycle' %
-                            self.servo_serial, ignore_status=True,
-                            timeout=30)
-            if resp.exit_status != 0:
-                self._process_servodtool_error(resp)
-                return False
-        except Exception as e:
-            # Here we catch only timeout errors.
-            # Other errors is filtered by ignore_status=True
-            logging.debug('Attempt to reset servo failed due to timeout;'
-                          ' %s', e)
+
+        resp = self.run('servodtool device -s %s power-cycle' %
+                        self.servo_serial, ignore_status=True,
+                        timeout=30)
+        if resp.exit_status != 0:
+            self._process_servodtool_error(resp)
             return False
 
         logging.debug('Wait %s seconds for servo to come back from reset.',
@@ -817,10 +759,6 @@ class ServoHost(base_servohost.BaseServoHost):
     def reset_servo(self):
         """Reset(power-cycle) the servo via smart usbhub.
         """
-        if not self.is_labstation():
-            logging.info('Servo reset is not applicable to servo_v3.')
-            return
-
         pre_reset_devnum = self._get_servo_usb_devnum()
         logging.info('Servo usb devnum before reset: %s', pre_reset_devnum)
         result = self._reset_servo()
@@ -1026,7 +964,7 @@ class ServoHost(base_servohost.BaseServoHost):
             return None
         fname = os.path.basename(res.stdout.strip())
         # From the fname, ought to extract the timestamp using the TS_EXTRACTOR
-        ts_match = self.TS_EXTRACTOR.match(fname)
+        ts_match = self.TS_EXTRACTOR.match(fname.decode('utf-8'))
         if not ts_match:
             logging.warning('Failed to extract timestamp from servod log file '
                             '%r. Skipping. The servo host is using outdated '
@@ -1056,10 +994,7 @@ class ServoHost(base_servohost.BaseServoHost):
         crashcollect.collect_command(self, 'dmesg -H',
                                      os.path.join(log_dir, 'dmesg'))
         # Collect messages log from the servohost.
-        try:
-            self.get_file('/var/log/messages', log_dir, try_rsync=False)
-        except error.AutoservRunError as e:
-            logging.warning('Failed to collect messages log from servohost.')
+        logging.info('No /var/log/messages in containerized servod')
 
     def get_instance_logs(self, instance_ts, outdir, old=False):
         """Collect all logs with |instance_ts| and dump into a dir in |outdir|
@@ -1092,10 +1027,23 @@ class ServoHost(base_servohost.BaseServoHost):
         res = self.run(cmd, stderr_tee=None, ignore_status=True)
         files = res.stdout.strip().split()
         try:
-            self.get_file(files, log_dir, try_rsync=False)
+            client = docker.from_env(timeout=300)
+            container = client.containers.get(self.hostname)
+            file_stream, stat = container.get_archive(files)
+            tf = tempfile.NamedTemporaryFile(delete=False)
+            for block in file_stream:
+                tf.write(block)
+            tf.close()
+            pw_tar = tarfile.TarFile(tf.name)
+            pw_tar.extractall(log_dir)
+            os.remove(tf.name)
+
             if not os.listdir(log_dir):
-                logging.info('No servod logs retrieved. Ignoring, and removing '
-                             '%r again.', log_dir)
+                logging.info(
+                    "No servod logs retrieved. Ignoring, and removing "
+                    "%r again.",
+                    log_dir,
+                )
                 os.rmdir(log_dir)
                 return
         except error.AutoservRunError as e:
@@ -1194,8 +1142,7 @@ class ServoHost(base_servohost.BaseServoHost):
         # TODO(crbug.com/1011516): once enabled, remove the check against
         # localhost and instead check against log-rotiation enablement.
         logs_available = (instance_ts is not None and
-                          self.job and
-                          not self.is_localhost())
+                          self.job)
         if logs_available:
             # Probe whether there was a servod restart, and grab those old
             # logs as well.
@@ -1301,7 +1248,11 @@ class ServoHost(base_servohost.BaseServoHost):
 
         @returns: _DependencyNode or None
         """
-        return self._repair_strategy.node_by_tag(tag)
+        try:
+            return self._repair_strategy.node_by_tag(tag)
+        except AttributeError:
+            logging.exception("Unable to find tag: %s", tag)
+            raise
 
     def determine_servo_state(self):
         """Determine servo state based on the failed verifier.
@@ -1310,13 +1261,8 @@ class ServoHost(base_servohost.BaseServoHost):
         The state detecting based on first fail verifier or collecting of
         them.
         """
-        ssh = self.get_verifier_state('servo_ssh')
-        servo_root_present = self.get_verifier_state('servo_root_present')
-        servo_root_present_node = self.get_repair_strategy_node(
-                'servo_root_present')
-        servo_v3_present = self.get_verifier_state('servo_v3_root_present')
+        servo_container = self.get_verifier_state('servo_container')
         servo_fw = self.get_verifier_state('servo_fw')
-        servo_fw_update = self.get_repair_strategy_node('servo_fw_update')
         disk_space = self.get_verifier_state('servo_disk_space')
         start_servod = self.get_verifier_state('start_servod')
         servod_started = self.get_verifier_state('servod_started')
@@ -1334,19 +1280,10 @@ class ServoHost(base_servohost.BaseServoHost):
         cr50_console = self.get_verifier_state('servo_cr50_console')
         ccd_testlab = self.get_verifier_state('servo_ccd_testlab')
 
-        if not ssh:
+        if not servo_container:
             return servo_constants.SERVO_STATE_NO_SSH
         if start_servod == hosts.VERIFY_FAILED:
             return servo_constants.SERVO_STATE_SERVO_HOST_ISSUE
-        if servo_root_present == hosts.VERIFY_FAILED:
-            if not self.servo_serial:
-                return servo_constants.SERVO_STATE_WRONG_CONFIG
-            if hasattr(servo_root_present_node, 'serial_mismatch'):
-                return servo_constants.SERVO_STATE_SERIAL_MISMATCH
-            return servo_constants.SERVO_STATE_NOT_CONNECTED
-        if servo_v3_present == hosts.VERIFY_FAILED:
-            # if we cannot find required board on servo_v3
-            return servo_constants.SERVO_STATE_NEED_REPLACEMENT
         if servo_fw == hosts.VERIFY_FAILED:
             logging.info(servo_fw_update)
             if hasattr(servo_fw_update, 'servo_updater_issue_detected'):
@@ -1403,12 +1340,6 @@ class ServoHost(base_servohost.BaseServoHost):
 
     def is_servo_topology_supported(self):
         """Check if servo_topology is supported."""
-        if not self.is_up_fast():
-            logging.info('Servo-Host is not reachable.')
-            return False
-        if not self.is_labstation():
-            logging.info('Servo-topology supported only for labstation.')
-            return False
         if not self.servo_serial:
             logging.info('Servo-topology required a servo serial.')
             return False
@@ -1605,6 +1536,8 @@ def create_servo_host(dut,
     # We are explicitly looking for if servo_args is None here(which means
     # servo not needed), as servo_args == {} means servo is needed and
     # we expect load servo_args from host_info_store.
+    servo_args = get_servo_args_for_host(dut)
+
     if servo_args is None:
         servo_dependency = False
         local_run = False
@@ -1655,18 +1588,19 @@ def create_servo_host(dut,
                     servo_hostname, servo_port)
             return None, servo_constants.SERVO_STATE_WRONG_CONFIG
 
-        if try_servo_recovery == True:
+        if try_servo_recovery is True:
             servo_args[servo_constants.SERVO_RECOVERY_MODE] = True
 
     newhost = ServoHost(**servo_args)
     if local_run:
         try:
             newhost.start_servod()
-        except:
+        except Exception:
             # If we failed to start servod here, we can assume the servod
             # either already started or the test is running against a
             # non-standard servohost so the user will resiponsble for ensure
             # servod is running.
+            logging.execption("Failed to start servod")
             pass
         try:
             newhost.initialize_servo()
@@ -1674,6 +1608,7 @@ def create_servo_host(dut,
             newhost._servo_state = servo_constants.SERVO_STATE_WORKING
             return newhost, newhost.get_servo_state()
         except Exception as e:
+            newhost.stop_servod()
             logging.error('Failed to initialize servo. %s', e)
             return None, servo_constants.SERVO_STATE_BROKEN
 
@@ -1699,12 +1634,9 @@ def create_servo_host(dut,
         newhost.set_dut_host_info(dut_host_info)
     if dut_health_profile and (try_lab_servo or try_servo_repair):
         try:
-            if newhost.is_localhost():
-                logging.info('Servohost is a localhost, skip device'
-                             ' health profile setup...')
-            else:
-                dut_health_profile.init_profile(newhost)
-                newhost.set_dut_health_profile(dut_health_profile)
+
+            dut_health_profile.init_profile(newhost)
+            newhost.set_dut_health_profile(dut_health_profile)
         except Exception as e:
             logging.info(
                     '[Non-critical] Unexpected error while trying to'
@@ -1757,7 +1689,7 @@ def is_servo_host_information_valid(hostname, port):
     port_int = int(port)
     if port_int < 1 or port_int > 65000:
         return False
-    # we expecting host contain only latters, digits and '-' or '_'
+    # we expecting host contain only letters, digits and '-' or '_'
     if not re.match('[a-zA-Z0-9-_\.:]*$', hostname) or len(hostname) < 5:
         return False
     return True
