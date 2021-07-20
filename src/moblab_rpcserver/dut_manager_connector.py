@@ -94,3 +94,25 @@ class DutManagerRpcConnector(object):
             raise moblabrpc_connector.MoblabRpcConnectorError(
                 "Error reading the %s dut", dut_ip
             )
+
+    @classmethod
+    def update_managed_dut(cls, dut, field_mask):
+        """Update managed dut details.
+
+        Raises:
+            MoblabRpcConnectorError: If rpc call failed.
+
+        Returns: None
+        """
+
+        cls.connect()
+        try:
+            request = dut_manager_pb2.UpdateManagedDutRequest(
+                dut=dut, update_mask=field_mask
+            )
+            cls.stub.UpdateManagedDut(request)
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            error_msg = "Error updating dut: {}".format(dut.name.ip_address)
+            logging.exception(error_msg)
+            raise moblabrpc_connector.MoblabRpcConnectorError(error_msg)

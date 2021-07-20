@@ -105,7 +105,7 @@ export class EditAttributesComponent {
     const confirmation_message =
       'Adding label ' +
       context.label.value +
-      'to ' +
+      ' to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
     context.notificationsService.notify(confirmation_message);
 
@@ -126,7 +126,7 @@ export class EditAttributesComponent {
     const confirmation_message =
       'Removing label ' +
       context.label.value +
-      'from ' +
+      ' from ' +
       context.get_confirmation_message_suffix(dut_hostnames);
     context.moblabGrpcService.removeLabelFromDuts(
       message => {
@@ -153,7 +153,7 @@ export class EditAttributesComponent {
     const confirmation_message =
       'Adding pool ' +
       context.pool.value +
-      'to ' +
+      ' to ' +
       context.get_confirmation_message_suffix(dut_hostnames);
     context.notificationsService.notify(confirmation_message);
 
@@ -182,7 +182,7 @@ export class EditAttributesComponent {
     const confirmation_message =
       'Removing pool ' +
       context.pool.value +
-      'from ' +
+      ' from ' +
       context.get_confirmation_message_suffix(dut_hostnames);
     context.moblabGrpcService.removePoolFromDuts(
       message => {

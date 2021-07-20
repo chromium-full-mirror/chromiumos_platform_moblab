@@ -16,6 +16,7 @@ import logging
 from collections import namedtuple
 from datetime import datetime
 from google.cloud import storage
+from google.protobuf.field_mask_pb2 import FieldMask
 
 from moblab_common import build_connector
 from moblab_common import dut_connector
@@ -29,7 +30,8 @@ from dut_manager_connector import DutManagerRpcConnector
 
 from host_scheduler_pause_service import HostSchedulerPauseService
 
-from lab.managed_dut_pb2 import ManagedDut
+from lab.managed_dut_pb2 import ManagedDut, Pool
+from chromiumos.test.api.dut_attribute_pb2 import DutAttribute
 
 MilestonePair = namedtuple("MilestonePair", ["milestone", "is_staged"])
 BuildVersionPair = namedtuple(
@@ -1123,11 +1125,83 @@ class MoblabService(object):
         except (IndexError, KeyError):
             logging.error("Unable to find AFE id for dut: {}".format(dut_id))
 
-    def add_label_to_host(self, dut_hostname, label):
-        return self.afe_connector.add_label_to_host(dut_hostname, label)
+    def add_label_to_managed_dut(self, dut_hostname, label):
+        # Get the current instance of managed dut and append the label as tag
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_hostname)
+        add_label = DutAttribute(id=DutAttribute.Id(value=label))
+        managed_dut.tag.dut_attributes.append(add_label)
+        field_mask = FieldMask(paths=["tag"])
+        DutManagerRpcConnector.update_managed_dut(managed_dut, field_mask)
+        return True, ""  # Status, Message
 
-    def remove_label_from_host(self, dut_hostname, label):
-        return self.afe_connector.remove_label_to_host(dut_hostname, label)
+    def remove_label_from_managed_dut(self, dut_hostname, label):
+        # Get the current instance of managed dut and remove the label as tag
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_hostname)
+        remove_label = DutAttribute(id=DutAttribute.Id(value=label))
+        try:
+            managed_dut.tag.dut_attributes.remove(remove_label)
+        except ValueError:
+            return False, "The label {} does not exist to remove".format(label)
+
+        field_mask = FieldMask(paths=["tag"])
+        DutManagerRpcConnector.update_managed_dut(managed_dut, field_mask)
+        return True, ""
+
+    def add_attribute_to_managed_dut(self, dut_hostname, key, value):
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_hostname)
+        add_attribute = DutAttribute(
+            id=DutAttribute.Id(value=key), field_path=value
+        )
+        managed_dut.tag.dut_attributes.append(add_attribute)
+        field_mask = FieldMask(paths=["tag"])
+        DutManagerRpcConnector.update_managed_dut(managed_dut, field_mask)
+        return True, ""
+
+    def remove_attribute_from_managed_dut(self, dut_hostname, key):
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_hostname)
+
+        # Find the value given the key, this is needed to distinguish
+        # attributes from labels
+        values = [
+            tag.field_path
+            for tag in managed_dut.tag.dut_attributes
+            if tag and tag.id.value == key
+        ]
+        if not values:
+            return (
+                False,
+                "The attribute key {} does not exist to remove".format(key),
+            )
+
+        remove_attribute = DutAttribute(
+            id=DutAttribute.Id(value=key), field_path=values[0]
+        )
+        managed_dut.tag.dut_attributes.remove(remove_attribute)
+        field_mask = FieldMask(paths=["tag"])
+        DutManagerRpcConnector.update_managed_dut(managed_dut, field_mask)
+        return True, ""
+
+    def add_pool_to_managed_dut(self, dut_identifier, pool_name):
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_identifier)
+        add_pool = Pool(name=pool_name)
+        managed_dut.pool.append(add_pool)
+        field_mask = FieldMask(paths=["pool"])
+        DutManagerRpcConnector.update_managed_dut(managed_dut, field_mask)
+        return True, ""
+
+    def remove_pool_from_managed_dut(self, dut_identifier, pool_name):
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_identifier)
+        remove_pool = Pool(name=pool_name)
+        try:
+            managed_dut.pool.remove(remove_pool)
+        except ValueError:
+            return False, "The pool {} does not exist to remove".format(
+                pool_name
+            )
+
+        field_mask = FieldMask(paths=["pool"])
+        DutManagerRpcConnector.update_managed_dut(managed_dut, field_mask)
+        return True, ""
 
     def _apply_edit_to_duts(
         self, dut_hostnames, afe_edit_func, success_msg, *args
@@ -1156,8 +1230,8 @@ class MoblabService(object):
             if not is_success:
                 failures[dut_hostname] = message
 
-        response_message = success_msg.format(*args) + " to {} DUTs\n".format(
-            len(dut_hostnames) - len(failures.keys())
+        response_message = success_msg.format(
+            *args, len(dut_hostnames) - len(failures.keys())
         )
 
         if failures:
@@ -1183,9 +1257,10 @@ class MoblabService(object):
         """
         return self._apply_edit_to_duts(
             dut_hostnames,
-            # self.add_attribute_to_host,
-            self.afe_connector.add_attribute_to_host,
-            "Successfully added attribute {}:{}",
+            self.add_attribute_to_managed_dut
+            if _USE_DUT_MANAGER_FEATURE_FLAG
+            else self.afe_connector.add_attribute_to_host,
+            "Successfully added attribute {}:{} to {} DUT(s)\n",
             key,
             value,
         )
@@ -1206,8 +1281,10 @@ class MoblabService(object):
         """
         return self._apply_edit_to_duts(
             dut_hostnames,
-            self.afe_connector.remove_attribute_from_host,
-            "Successfully removed attribute {}",
+            self.remove_attribute_from_managed_dut
+            if _USE_DUT_MANAGER_FEATURE_FLAG
+            else self.afe_connector.remove_attribute_from_host,
+            "Successfully removed attribute {} from {} DUT(s)\n",
             key,
         )
 
@@ -1225,8 +1302,10 @@ class MoblabService(object):
         """
         return self._apply_edit_to_duts(
             dut_hostnames,
-            self.afe_connector.add_label_to_host,
-            "Successfully added label {}",
+            self.add_label_to_managed_dut
+            if _USE_DUT_MANAGER_FEATURE_FLAG
+            else self.afe_connector.add_label_to_host,
+            "Successfully added label {} to {} DUT(s)\n",
             label,
         )
 
@@ -1244,8 +1323,10 @@ class MoblabService(object):
         """
         return self._apply_edit_to_duts(
             dut_hostnames,
-            self.afe_connector.remove_label_from_host,
-            "Successfully removed label {}",
+            self.remove_label_from_managed_dut
+            if _USE_DUT_MANAGER_FEATURE_FLAG
+            else self.afe_connector.remove_label_from_host,
+            "Successfully removed label {} from {} DUT(s)\n",
             label,
         )
 
@@ -1261,7 +1342,15 @@ class MoblabService(object):
         Returns:
             String message summarizing results.
         """
-        return self.add_label_to_duts(dut_hostnames, "pool:" + pool)
+        if not _USE_DUT_MANAGER_FEATURE_FLAG:
+            return self.add_label_to_duts(dut_hostnames, "pool:" + pool)
+
+        return self._apply_edit_to_duts(
+            dut_hostnames,
+            self.add_pool_to_managed_dut,
+            "Successfully added pool {} to {} DUT(s)\n",
+            pool,
+        )
 
     def remove_pool_from_duts(self, dut_hostnames, pool):
         """
@@ -1275,7 +1364,15 @@ class MoblabService(object):
         Returns:
             String message summarizing results.
         """
-        return self.remove_label_from_duts(dut_hostnames, "pool:" + pool)
+        if not _USE_DUT_MANAGER_FEATURE_FLAG:
+            return self.remove_label_from_duts(dut_hostnames, "pool:" + pool)
+
+        return self._apply_edit_to_duts(
+            dut_hostnames,
+            self.remove_pool_from_managed_dut,
+            "Successfully removed pool {} from {} DUT(s)\n",
+            pool,
+        )
 
     def reverify_host(self, dut_hostnames):
         """Starts repair run on given DUTs hostnames.

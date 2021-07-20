@@ -99,7 +99,6 @@ class DutManagerStorageRpcConnector(object):
             logging.exception("Error reading the %s dut", dut_ip)
             raise DutManagerRpcError("Error reading the %s dut", dut_ip)
 
-    # TODO Implement update endpoint
     @classmethod
     def update_dut(cls, managed_dut: ManagedDut, update_mask):
         """Update dut"""
@@ -108,11 +107,12 @@ class DutManagerStorageRpcConnector(object):
             request = pb2.UpdateDutRequest(
                 dut=managed_dut, update_mask=update_mask
             )
-            response = cls.stub.UpdateDut(request)
-            return response.dut if response else None
+            cls.stub.UpdateDut(request)
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
-            raise DutManagerRpcError("Error reading the %s dut")
+            error_msg = "Error updating dut: {}".format(managed_dut)
+            logging.exception(error_msg)
+            raise DutManagerRpcError(error_msg)
 
     @classmethod
     def delete_dut(cls, dut_ip: str):
