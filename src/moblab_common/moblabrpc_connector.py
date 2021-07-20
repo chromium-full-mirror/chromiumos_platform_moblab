@@ -135,4 +135,4 @@ class MoblabRpcConnector(object):
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             logging.exception("Error getting jobs.")
-            raise MoblabRpcConnectorError("Error getting getting jobs.")
+            raise MoblabRpcConnectorError("Error getting jobs.")

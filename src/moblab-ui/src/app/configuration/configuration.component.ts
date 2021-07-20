@@ -71,7 +71,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     Validators.pattern(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/)
   );
   defaultCrOSVersionForm = new FormControl('');
-  resultsRetentionPeriodForm = new FormControl('', [Validators.required, Validators.pattern(/^(([01]?\d|2[0-3])h)$|^([1-7]d)$/)]);
+  resultsRetentionPeriodForm = new FormControl('', [Validators.required, Validators.pattern(/^(([01]?[1-9]|2[0-3])h)$|^([1-7]d)$/)]);
 
   userCrOSVersionValue = 'None';
   resultsRetentionPeriod = '';
