@@ -269,6 +269,16 @@ test-rpcserver: rpcserver
 	docker run -w /etc/moblab/moblab_rpcserver -v "${PWD}/moblab_rpcserver/coverage":/etc/moblab/moblab_rpcserver/coverage --rm ${REGISTRY_URI}/moblab-rpcserver:${LABEL} \
 		bash -c 'coverage run -m unittest discover -p "*_unittest.py" && coverage html -d coverage --omit "*_unittest.py"'
 
+test-dut-manager: export DOCKER_BUILDKIT := 1
+test-dut-manager: dut-manager
+	docker run -it ${REGISTRY_URI}/dut-manager:${LABEL} \
+		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v ./tests/'
+
+test-dut-manager-storage: export DOCKER_BUILDKIT := 1
+test-dut-manager-storage: dut-manager-storage
+	docker run -it ${REGISTRY_URI}/dut-manager-storage:${LABEL} \
+		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v ./tests/'
+
 # Change to run in a container
 test-moblab-ui: export DOCKER_BUILDKIT := 1
 test-moblab-ui: moblab-ui
@@ -283,4 +293,6 @@ test-common:
 		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v /test/'
 
 test:	test-rpcserver \
-		test-common
+		test-common \
+		test-dut-manager \
+		test-dut-manager-storage
