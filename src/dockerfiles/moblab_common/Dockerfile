@@ -36,8 +36,8 @@ FROM python3-build as python3-test
 
 # Installs Moblab API client library
 WORKDIR /tmp/moblab_api_client_library
-RUN curl https://storage.googleapis.com/moblab-api-distribution/google-chromeos-moblab-python.tar.gz -o google-chromeos-moblab-python.tar.gz
-RUN tar -xvzf google-chromeos-moblab-python.tar.gz
+RUN curl https://storage.googleapis.com/moblab-api-distribution/python-client-library/google-chromeos-moblab-python-1.2.0-beta.tar.gz -o google-chromeos-moblab-python-1.2.0-beta.tar.gz
+RUN tar -xvzf google-chromeos-moblab-python-1.2.0-beta.tar.gz
 RUN python3 -m pip install .
 RUN rm -rf /tmp/moblab_api_client_library
 

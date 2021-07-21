@@ -70,8 +70,8 @@ RUN python3 /setup_chromite.py install
 
 # Installs Moblab API client library
 WORKDIR /tmp/moblab_api_client_library
-RUN curl https://storage.googleapis.com/moblab-api-distribution/google-chromeos-moblab-python.tar.gz -o google-chromeos-moblab-python.tar.gz \
-    && tar -xvzf google-chromeos-moblab-python.tar.gz \
+RUN curl https://storage.googleapis.com/moblab-api-distribution/python-client-library/google-chromeos-moblab-python-1.2.0-beta.tar.gz -o google-chromeos-moblab-python-1.2.0-beta.tar.gz \
+    && tar -xvzf google-chromeos-moblab-python-1.2.0-beta.tar.gz \
     && python3 -m pip install . \
     && rm -rf /tmp/moblab_api_client_library
 
