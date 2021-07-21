@@ -25,9 +25,9 @@ RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade setuptools wheel
 RUN python3 /setup.py bdist_wheel
 
-WORKDIR /wheel
+WORKDIR /install
 RUN cp /src/moblab_common/dist/* .
-
+COPY src/dockerfiles/moblab_common/install.sh .
 
 ######################################################################
 # Unit testing stage
@@ -51,6 +51,6 @@ RUN rm -rf /src
 
 FROM ${BASE_REGISTRY_URI}/debian:buster-slim
 
-WORKDIR /wheel
+WORKDIR /install
 
-COPY --from=python3-build /wheel/* .
+COPY --from=python3-build /install/* .

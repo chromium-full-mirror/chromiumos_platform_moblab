@@ -8,14 +8,25 @@ import json
 import logging
 import os
 import ssh2
+import subprocess
+import re
 
-import cachetools
-import nmap
 from pssh.clients.native.parallel import ParallelSSHClient
+import pssh
 
 
 # Location where dhcp leases are stored.
 _DHCPD_LEASES = "/leases/dnsmasq.leases"
+
+# fping, ping a range of IP addresses in parallel.
+# -c is the number of packets to send.
+# -p is the interval between ping packets to a single target.
+# -i is the interval between sending ping packets.
+FIND_DUT_CMD = [
+    "cat %s | awk -F ' ' '{print $3}' | /usr/bin/fping -a" % _DHCPD_LEASES
+]
+
+SUBNET_DUT_SEARCH_RE = r"(?P<ip>192\.168\.231\.[0-9][0-9]*[0-9]*).*"
 
 
 class MoblabDUTConnectorException(Exception):
@@ -140,36 +151,30 @@ class MoblabDUTConnector(object):
             )
         except ssh2.exceptions.SocketRecvError:
             logging.exception("Command failed to run %s", command)
+        except pssh.exceptions.Timeout:
+            logging.exception("Command failed to run %s", command)
         return command_results
 
     def get_all_known_mac_addresses(self):
         return self._get_dhcp_dut_leases()
 
     def _get_active_network_devices(self):
-        """Use the tool nmap to find devices currently alive on the network.
-
-        Nmap docs https://nmap.org/docs.html
-        It is a network port scanner.
-
-        Docker containers have issues with ping, considered a admin tool
-        it is unreliable for containers not running as root.
-
-        nmap command:   Pn - do not use ping discovery
-                        T 5 - be fast / fewer retries
-                        22 scan only port 22
-                        Scan the full DUT IP range 192.168.231.0/24'
-
-        Returns:
-            list: A list of IP addresses with port 22 open and active.
-        """
-        nm = nmap.PortScanner()
-        nm.scan("192.168.231.0/24", "22", "-T 5 --open -Pn")
-        hosts = nm.all_hosts()
-        return hosts
+        connected_ip_addresses = []
+        process = subprocess.run(FIND_DUT_CMD, capture_output=True, shell=True)
+        # TODO: Research the return codes and do something smart with them.
+        # process.check_returncode()
+        fping_result = process.stdout
+        for line in fping_result.decode("utf-8").splitlines():
+            match = re.match(SUBNET_DUT_SEARCH_RE, line)
+            if match:
+                connected_ip_addresses.append(match.group("ip"))
+            else:
+                logging.info("Ignoring %s no match" % line)
+        return list(set(connected_ip_addresses))
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
-            "timeout 2 cat /etc/lsb-release", timeout=100
+            "timeout 2 cat /etc/lsb-release", timeout=10
         )
 
         def is_dut_connected(output):
@@ -198,13 +203,13 @@ class MoblabDUTConnector(object):
         """
         command_results = self.run_command_on_connected_duts(
             (
-                "fwid=`timeout 10 crossystem fwid`;"
-                "model=`timeout 10 mosys platform model`;"
-                "fw_update=`timeout 20 chromeos-firmwareupdate --manifest`;"
+                "fwid=`timeout 5 crossystem fwid`;"
+                "model=`timeout 5 mosys platform model`;"
+                "fw_update=`timeout 5 chromeos-firmwareupdate --manifest`;"
                 'printf "{\\"fwid\\": \\"%s\\",\\"model\\": \\"%s\\",'
                 '\\"fw_update\\":%s}" $fwid $model "$fw_update"'
             ),
-            timeout=50,
+            timeout=20,
         )
 
         results = []

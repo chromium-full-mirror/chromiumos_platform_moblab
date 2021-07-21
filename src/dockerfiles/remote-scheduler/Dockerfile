@@ -32,10 +32,10 @@ COPY --chown=moblab src/dockerfiles/rpcserver/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /wheel
-COPY --from=common /wheel/*py3* .
-RUN pip install *.whl
-RUN rm -rf /wheels
+WORKDIR /install
+COPY --from=common /install/* .
+RUN bash ./install.sh
+RUN rm -rf /install
 
 RUN mkdir /var/log/moblab
 

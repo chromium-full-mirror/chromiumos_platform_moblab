@@ -60,10 +60,10 @@ COPY src/dockerfiles/mobmonitor/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip install *.whl
-RUN rm -rf /wheels
+WORKDIR /install
+COPY --from=common /install/* .
+RUN bash ./install.sh
+RUN rm -rf /install
 
 WORKDIR /etc/moblab/mobmonitor
 COPY --chown=moblab src/mobmonitor/ /etc/moblab/mobmonitor

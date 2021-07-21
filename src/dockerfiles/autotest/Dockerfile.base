@@ -79,10 +79,10 @@ RUN apt purge -yq gcc-multilib python-pip cmake libssl-dev curl \
     && apt autoremove -yq \
     && apt-get clean
 
-WORKDIR /wheels
-COPY --from=common /wheel/*py3* .
-RUN pip install *.whl \
-    && rm -rf /wheels
+WORKDIR /install
+COPY --from=common /install/* .
+RUN bash ./install.sh \
+    && rm -rf /install
 
 WORKDIR /shadow_config
 COPY --chown=moblab src/dockerfiles/autotest/shadow_config.ini .
