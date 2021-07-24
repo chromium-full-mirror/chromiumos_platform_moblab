@@ -14,7 +14,6 @@ from constants import (
     AFE_TO_DUT_STATUS_MAPPINGS,
     PERIPHERALS,
 )
-from lab import dut_manager_storage_pb2
 from lab.managed_dut_pb2 import (
     ManagedDut,
     Pool,
@@ -26,7 +25,6 @@ from chromiumos.test.api.dut_attribute_pb2 import (
     DutAttribute,
     DutAttributeList,
 )
-from chromiumos.config.api import mfg_config_id_pb2
 from chromiumos.storage_path_pb2 import StoragePath
 from moblab_common import afe_connector, dut_connector
 

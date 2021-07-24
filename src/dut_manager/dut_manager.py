@@ -4,15 +4,19 @@
 # found in the LICENSE file.
 
 import argparse
-import concurrent
+from concurrent import futures
 import logging
 import sys
-import time
 import os
+import time
 import grpc
 
-from dut_manager_rpcservice import DutManagerRpcService
+from dut_manager_rpcservice import (
+    DutManagerRpcService,
+    DutManagerOperationsRpcService,
+)
 from lab import dut_manager_pb2_grpc
+from chromiumos.longrunning import operations_pb2_grpc
 
 _LOGGER = logging.getLogger("dut-manager")
 
@@ -93,30 +97,32 @@ class DutManager:
         logfile = os.environ.get("LOGFILE") or options.logfile
         self.setup_logging(logging_severity, logfile)
 
-        server = grpc.server(
-            concurrent.futures.ThreadPoolExecutor(max_workers=500)
-        )
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=500))
 
         port = os.getenv("GRPC_SERVER_PORT") or options.grpc_port
         if not port:
             raise argparse.ArgumentError("Port is a required argument!")
 
-        dut_manager = DutManagerRpcService()
+        dut_manager_operations = DutManagerOperationsRpcService()
+        dut_manager = DutManagerRpcService(dut_manager_operations)
         try:
             dut_manager_pb2_grpc.add_DutManagerServiceServicer_to_server(
                 dut_manager, server
             )
+            operations_pb2_grpc.add_OperationsServicer_to_server(
+                dut_manager_operations, server
+            )
 
             server.add_insecure_port("[::]:%s" % port)
-            _LOGGER.info("Starting server on %s", port)
             server.start()
+            _LOGGER.info("Starting server on %s", port)
             while True:
                 _LOGGER.info("Server sleeping")
                 time.sleep(60 * 60 * 24)
+
         except KeyboardInterrupt:
             server.stop(0)
 
 
 if __name__ == "__main__":
-    host_server = DutManager()
-    host_server.serve(sys.argv[1:])
+    DutManager().serve(sys.argv[1:])

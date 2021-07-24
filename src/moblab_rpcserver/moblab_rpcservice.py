@@ -346,9 +346,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             error=dut_dict.get("error", ""),
         )
 
-    def list_connected_duts(self, _request, _context):
+    async def list_connected_duts(self, _request, _context):
         response = moblabrpc_pb2.ListConnectedDutsResponse()
-        duts = self.service.list_duts()
+        duts = await self.service.list_duts()
         for dut in duts:
             dut_info = self._get_connected_dut_from_dict(dut)
             response.duts.extend([dut_info])
@@ -462,8 +462,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response = moblabrpc_pb2.ListModelsResponse(models=list(models))
         return response
 
-    def enroll_duts(self, request, _context):
-        self.service.enroll_duts(request.ips)
+    async def enroll_duts(self, request, _context):
+        await self.service.enroll_duts(request.ips)
         response = moblabrpc_pb2.EnrollDutsResponse()
         return response
 

@@ -3,6 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import asyncio
 import distutils
 import docker
 import google.api_core
@@ -26,7 +27,10 @@ from moblab_common import moblab_build_connector
 from moblab_common import afe_connector
 from moblab_common import config_connector
 from moblab_common import result_upload_status_connector
-from dut_manager_connector import DutManagerRpcConnector
+from dut_manager_connector import (
+    DutManagerRpcConnector,
+    DutManagerRpcConnectorAsync,
+)
 
 from host_scheduler_pause_service import HostSchedulerPauseService
 
@@ -268,18 +272,18 @@ class MoblabService(object):
         dut["attributes"] = attributes
         return dut
 
-    def _list_duts_from_dut_manager(self):
-        managed_duts = DutManagerRpcConnector.list_managed_duts()
+    async def _list_duts_from_dut_manager(self):
+        managed_duts = await DutManagerRpcConnectorAsync.list_managed_duts()
         duts = []
         for managed_dut in managed_duts:
             dut = self._convert_managed_dut_to_dut_dict(managed_dut)
             duts.append(dut)
         return duts
 
-    def list_duts(self):
+    async def list_duts(self):
         """Returns the merge of enrolled and connected DUTs"""
         managed_duts = (
-            self._list_duts_from_dut_manager()
+            await self._list_duts_from_dut_manager()
             if _USE_DUT_MANAGER_FEATURE_FLAG
             else self.afe_connector.get_connected_devices()
         )
@@ -592,8 +596,16 @@ class MoblabService(object):
                 messages.append(str(ex))
         return ", ".join(messages)
 
-    def enroll_duts(self, ip_addresses):
-        self.afe_connector.enroll_duts(ip_addresses)
+    async def enroll_duts(self, ip_addresses):
+        if _USE_DUT_MANAGER_FEATURE_FLAG:
+            tasks = [
+                DutManagerRpcConnectorAsync.create_managed_dut(ip)
+                for ip in ip_addresses
+            ]
+            await asyncio.gather(*tasks, return_exceptions=True)
+        else:
+            self.afe_connector.enroll_duts(ip_addresses)
+
         self.pause_service.ensure_duts_pause_state(list(ip_addresses))
 
     def unenroll_duts(self, ip_addresses):
