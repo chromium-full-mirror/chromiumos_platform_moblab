@@ -522,9 +522,6 @@ services:
     networks:
       - moblab
 
-    #ports:
-    #  - 7004:7004
-
     depends_on:
       - dns
 
@@ -545,6 +542,7 @@ services:
     volumes:
       - logs:/var/log/moblab
       - moblab_home:/home/moblab:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
 
     networks:
       - moblab

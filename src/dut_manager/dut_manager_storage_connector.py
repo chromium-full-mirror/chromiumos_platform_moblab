@@ -7,13 +7,17 @@
 
 
 import logging
+import grpc.aio
 import grpc
 import os
 
 from lab import dut_manager_storage_pb2_grpc as grpc_stub
 from lab import dut_manager_storage_pb2 as pb2
 from lab.dut_manager_storage_pb2 import GetDutResponse
-from lab.managed_dut_pb2 import ManagedDut
+from lab.managed_dut_pb2 import (
+    ManagedDut,
+    NetworkIdentifier,
+)
 
 
 class DutManagerRpcError(Exception):
@@ -55,14 +59,16 @@ class DutManagerStorageRpcConnector(object):
         cls.stub = None
 
     @classmethod
-    def create_dut(cls):
+    def create_dut(cls, ip_address):
         """ """
         cls.connect()
         try:
-            request = pb2.CreateDutRequest()
-
-            response = cls.stub.CreateDut(request)
-            return response.dut if response else None
+            request = pb2.CreateDutRequest(
+                dut=ManagedDut(
+                    name=NetworkIdentifier(ip_address=ip_address),
+                )
+            )
+            cls.stub.CreateDut(request)
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
             raise DutManagerRpcError("Error reading the %s dut")
