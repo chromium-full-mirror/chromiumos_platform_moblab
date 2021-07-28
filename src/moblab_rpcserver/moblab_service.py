@@ -1777,3 +1777,25 @@ class MoblabService(object):
                 "Failed to get the service account from %s"
                 % self.moblab_bucket_name,
             )
+
+    def add_servo(self, dut_hostname, servo_serial_number):
+        """Configure a DUT to have a servo connected to it.
+
+        DUT's can be connected to the moblab via a servo, for the testing
+        infrastructure to work there needs to be attributes added to the DUT
+        to specify the servo serial number, servo hostname and servo host port.
+
+        Serial number is provided by the user hostname and port are generated.
+
+        Then verify is called which collects informationtion about the DUT
+        similar to how add dut works, labels like servo_state:WORKING will be
+        added to the dut by that process.
+        """
+        self.add_attribute_to_managed_dut(
+            dut_hostname, "servo_serial", servo_serial_number
+        )
+        self.add_attribute_to_managed_dut(dut_hostname, "servo_port", "9999")
+        self.add_attribute_to_managed_dut(
+            dut_hostname, "servo_host", "%s_docker_servod" % dut_hostname
+        )
+        return self.reverify_host([dut_hostname])
