@@ -55,7 +55,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         )
 
     async def get_host_scheduler_pause_status(self, request, context):
-        """Request pause of host scheduling"""
+        """Request the pause status of the host scheduler"""
         requestors = self.pause_service.get_pause_status()
         return GetHostSchedulerPauseStatusResponse(
             pauseRequestors=self._map_to_requestors(requestors)
