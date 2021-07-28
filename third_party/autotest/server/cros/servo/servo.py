@@ -12,7 +12,7 @@ import os
 import re
 import six
 import xmlrpc.client
-import six.moves.http_client
+import http.client
 import time
 
 from client.common_lib import error
@@ -74,7 +74,7 @@ class ResponsiveConsoleError(ConsoleError):
     pass
 
 
-class ServodBadResponse(six.moves.http_client.BadStatusLine):
+class ServodBadResponse(http.client.BadStatusLine):
     """Indicates a bad HTTP response from servod"""
 
     def __init__(self, when, line):
@@ -181,7 +181,7 @@ class _WrapServoErrors(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Exit the context, handling the exception if there was one"""
         try:
-            if isinstance(exc_val, six.moves.http_client.BadStatusLine):
+            if isinstance(exc_val, http.client.BadStatusLine):
                 self._log_exception(exc_type, exc_val, exc_tb)
                 if exc_val.line in ('', "''"):
                     err = ServodEmptyResponse(self.description, exc_val.line)
@@ -1119,7 +1119,7 @@ class Servo(object):
         # The real danger here is to pass a None value through the xmlrpc.
         assert ctrl_value is not None
         description = 'Setting %s to %r' % (ctrl_name, ctrl_value)
-        logging.debug('%s', description)
+        logging.info('%s', description)
         with _WrapServoErrors(servo=self, description=description):
             self._server.set(ctrl_name, ctrl_value)
 

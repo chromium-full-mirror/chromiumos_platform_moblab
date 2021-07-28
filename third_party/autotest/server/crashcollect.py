@@ -310,7 +310,9 @@ def collect_command(host, command, dest_path):
     logging.info("Collecting '%s' ...", command)
     try:
         result = host.run(command, stdout_tee=None).stdout
-        utils.open_write_close(dest_path, result.decode('utf-8'))
+        if isinstance(bytearray, result):
+            result = result.decode('utf-8')
+        utils.open_write_close(dest_path, result)
     except Exception as e:
         logging.warning("Collection of '%s' failed:\n%s", command, e)
 
