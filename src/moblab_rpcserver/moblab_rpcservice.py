@@ -834,19 +834,15 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
         response = moblabrpc_pb2.GetDutTasksResponse()
         for dut_task_dict in dut_task_list:
-            dut_task = moblabrpc_pb2.DutTask(
-                id=dut_task_dict.get("id", ""),
-                task=dut_task_dict.get("task", ""),
-                status=self._extract_dut_task_status(dut_task_dict),
-                created_time_utc=self._convert_timestamp_to_utc_secs(
-                    dut_task_dict.get("time_requested", "")
-                ),
-                started_time_utc=self._convert_timestamp_to_utc_secs(
-                    dut_task_dict.get("time_started", "")
-                ),
-                finished_time_utc=self._convert_timestamp_to_utc_secs(
-                    dut_task_dict.get("time_finished", "")
-                ),
+            dut_task = moblabrpc_pb2.DutTask()
+            dut_task.id = dut_task_dict.get("id", 0)
+            dut_task.task = dut_task_dict.get("task", "")
+            dut_task.status = self._extract_dut_task_status(dut_task_dict)
+            dut_task.started_time_utc = self._convert_timestamp_to_utc_secs(
+                dut_task_dict.get("time_started", None)
+            )
+            dut_task.finished_time_utc = self._convert_timestamp_to_utc_secs(
+                dut_task_dict.get("time_finished", None)
             )
             response.tasks.extend([dut_task])
         return response

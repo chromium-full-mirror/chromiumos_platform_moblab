@@ -1092,6 +1092,13 @@ class MoblabService(object):
             parameters.  If DUT itself is not found, returns -1.
         """
         try:
+            if _USE_DUT_MANAGER_FEATURE_FLAG:
+                return len(
+                    self._get_dut_tasks_from_dut_manager(
+                        ip, start_time_gt, end_time_lt
+                    )
+                )
+
             dut_id = self.afe_connector.get_connected_devices(hostname=ip)[0][
                 "id"
             ]
@@ -1103,6 +1110,29 @@ class MoblabService(object):
         except (IndexError, KeyError):
             logging.error("Unable to find AFE id for dut: {}".format(dut_id))
             return -1
+
+    def _get_dut_tasks_from_dut_manager(
+        self, dut_ip: str, query_start: int, query_limit: int
+    ):
+        managed_dut = DutManagerRpcConnector.get_managed_dut(dut_ip)
+        tasks = managed_dut.history
+        if query_limit and query_start + query_limit <= len(tasks):
+            query_end = query_start + query_limit
+            tasks = tasks[query_start:query_end]
+        else:
+            tasks = tasks[query_start:]
+
+        result = []
+        for t in tasks:
+            task_dict = {}
+            task_dict["task"] = DUT_MANAGER_TO_AFE_DUT_STATUS_MAPPINGS[t.state]
+            task_dict["time_started"] = str(t.start_time.ToDatetime())
+            task_dict["time_finished"] = str(t.end_time.ToDatetime())
+            task_dict["lease_owner"] = str(t.lease_owner)
+            task_dict["note"] = t.note
+
+            result.append(task_dict)
+        return result
 
     def get_dut_tasks(
         self, ip, query_start, query_limit, start_time_gt, end_time_lt
@@ -1124,6 +1154,11 @@ class MoblabService(object):
             queried DUT. If DUT is not found returns None.
         """
         try:
+            if _USE_DUT_MANAGER_FEATURE_FLAG:
+                return self._get_dut_tasks_from_dut_manager(
+                    ip, query_start, query_limit
+                )
+
             dut_id = self.afe_connector.get_connected_devices(hostname=ip)[0][
                 "id"
             ]
