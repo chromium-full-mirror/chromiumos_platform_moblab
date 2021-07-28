@@ -908,7 +908,7 @@ export class MoblabGrpcService {
     end_time_lt?: number
   ) {
     const request = new GetNumDutTasksRequest();
-
+    request.setIp(ip);
     if (start_time_gt) {
       request.setStartTimeGt(start_time_gt);
     }
