@@ -1031,3 +1031,9 @@ class AbstractSSHHost(remote.RemoteHost):
                           timeout=30,
                           ignore_status=True)
         return result.exit_status == 0
+
+
+    def is_satlab(self):
+        if not hasattr(self, '_is_satlab'):
+            self._is_satlab = self.hostname.startswith('satlab-')
+        return self._is_satlab
