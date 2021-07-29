@@ -32,7 +32,7 @@ class DutManagerRpcService(dut_manager_pb2_grpc.DutManagerServiceServicer):
         self.operations_service = operations_service
 
     def CreateManagedDut(self, request, context):
-        """Update managed DUT given by DUT name."""
+        """Create and add a DUT to managed DUTs collection."""
         try:
             _LOGGER.info("CreateManagedDut received request: %s", request)
             ip = request.name.ip_address
@@ -108,6 +108,18 @@ class DutManagerRpcService(dut_manager_pb2_grpc.DutManagerServiceServicer):
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(e)
             _LOGGER.exception("UpdateManagedDut handler failed")
+            raise
+
+    def DeleteManagedDut(self, request, context):
+        """Delete DUT from the managed DUTs collection."""
+        try:
+            DutManagerStorageRpcConnector.delete_dut(request.name.ip_address)
+            _LOGGER.debug("DeleteManagedDut request: %s", request)
+            return dut_manager_pb2.UpdateManagedDutResponse()
+        except DutManagerRpcError as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(e)
+            _LOGGER.exception("DeleteManagedDut handler failed")
             raise
 
 

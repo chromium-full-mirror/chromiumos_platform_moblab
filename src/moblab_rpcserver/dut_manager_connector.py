@@ -201,3 +201,25 @@ class DutManagerRpcConnector(object):
             error_msg = "Error updating dut: {}".format(dut.name.ip_address)
             logging.exception(error_msg)
             raise moblabrpc_connector.MoblabRpcConnectorError(error_msg)
+
+    @classmethod
+    def delete_managed_dut(cls, dut_ip: str):
+        """Delete dut from managed dut collection.
+
+        Raises:
+            MoblabRpcConnectorError: If rpc call failed.
+
+        Returns: None
+        """
+
+        cls.connect()
+        try:
+            request = dut_manager_pb2.DeleteManagedDutRequest(
+                name=managed_dut_pb2.NetworkIdentifier(ip_address=dut_ip)
+            )
+            cls.stub.DeleteManagedDut(request)
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            error_msg = "Error deleting dut: {}".format(dut_ip)
+            logging.exception(error_msg)
+            raise moblabrpc_connector.MoblabRpcConnectorError(error_msg)

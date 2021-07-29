@@ -609,7 +609,11 @@ class MoblabService(object):
         self.pause_service.ensure_duts_pause_state(list(ip_addresses))
 
     def unenroll_duts(self, ip_addresses):
-        self.afe_connector.unenroll_duts(ip_addresses)
+        if _USE_DUT_MANAGER_FEATURE_FLAG:
+            for ip in ip_addresses:
+                DutManagerRpcConnector.delete_managed_dut(ip)
+        else:
+            self.afe_connector.unenroll_duts(ip_addresses)
 
     def list_connected_duts_firmware(self):
         duts = self.dut_connector.get_connected_dut_firmware()
