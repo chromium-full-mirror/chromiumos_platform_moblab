@@ -120,7 +120,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
 
   addServo() {
     this.moblabGrpcService.addServo(
-      (message: string) => {
+      () => {
         this.notificationsService.notify(
           'Add servo serial number to dut and reverify, please refresh page for status.'
         );

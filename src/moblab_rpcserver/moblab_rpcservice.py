@@ -321,6 +321,39 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
+    def run_faft_suite(self, request, _context):
+        """Sets off FAFT suite run.
+
+        Args:
+          request: RunFaftSuiteRequest object with parameters describing suite
+            to be
+          run and arguments for suite run:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            suite: A string specifying which suite to
+             run ( Ex. faft_setup )
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            specific_modules: Comma-separated string of specific test names
+            to run, just part of the suite.
+          _context: grpc.server.Context
+        Returns:
+          RunSuiteResponse object with a string result message.
+        """
+        response = moblabrpc_pb2.RunSuiteResponse(
+            message=self.service.run_faft_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.suite,
+                request.pool,
+                request.specific_tests,
+            )
+        )
+        return response
+
     def _get_connected_dut_from_dict(self, dut_dict):
         return moblabrpc_pb2.ConnectedDutInfo(
             name=dut_dict.get("platform", ""),

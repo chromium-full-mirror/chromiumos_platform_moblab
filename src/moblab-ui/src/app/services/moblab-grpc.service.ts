@@ -76,6 +76,7 @@ import {
   RunGtsSuiteRequest,
   RunMemoryQualificationSuiteRequest,
   RunStorageQualificationSuiteRequest,
+  RunFAFTSuiteRequest,
   RunSuiteRequest,
   RunSuiteResponse,
   SendMoblabScreenshotRequest,
@@ -376,6 +377,51 @@ export class MoblabGrpcService {
     );
   }
 
+  /** Starts CTS suite run.
+   *  @param callback: function invoked in success scenarios.
+   *  @param error_callback: function invoked in failure scenarios.
+   *  @param suite: ex. String identifier indicating the faft suite to run.
+   *  @param build: String name of build the suite is being run under.
+   *  @param buildtarget: ex. XXX-release/R99-99999.9.9
+   *  @param model: Device model.
+   *  @param pool: String identifer of a group of DUTs
+   *    (as configured in the 'Manage DUTs' component ).
+   *  @param specific_test_list: Comma separated string containing names of
+   *    tests in the suite. If not empty, only tests in this list will be
+   *    run as a part of suite execution.
+   * */
+   runFAFTSuite(
+    callback: (response: RunSuiteResponse) => void,
+    error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
+    suite: string,
+    build: string,
+    milestone: string,
+    buildtarget: string,
+    model: string,
+    pool: string,
+    specific_test_list: string[]
+  ) {
+    const request = new RunFAFTSuiteRequest();
+    request.setSuite(suite);
+    request.setBuildVersion(build);
+    request.setBuildTarget(buildtarget);
+    request.setMilestone(milestone);
+    request.setModel(model);
+    request.setPool(pool);
+    request.setSpecificTestsList(specific_test_list);
+
+    this.moblabRpcService.run_faft_suite(
+      request,
+      {},
+      (err: grpcWeb.Error, response: RunSuiteResponse) => {
+        if (err) {
+          error_callback(err, response);
+        } else {
+          callback(response);
+        }
+      }
+    );
+  }
   /** Starts provision suite run.
    *  @param callback: function invoked in success scenarios.
    *  @param error_callback: function invoked in failure scenarios.
