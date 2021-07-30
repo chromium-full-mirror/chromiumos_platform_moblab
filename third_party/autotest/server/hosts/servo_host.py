@@ -1619,7 +1619,7 @@ def create_servo_host(dut,
             # either already started or the test is running against a
             # non-standard servohost so the user will resiponsble for ensure
             # servod is running.
-            logging.execption("Failed to start servod")
+            logging.exception("Failed to start servod")
             pass
         try:
             newhost.initialize_servo()
