@@ -38,6 +38,7 @@ from server.cros.faft.utils import config
 from client.common_lib import global_config
 from server.cros.servo.topology import servo_topology
 
+from chromite.lib import timeout_util
 
 metrics = utils.metrics_mock
 
@@ -54,7 +55,7 @@ class ServoHost(base_servohost.BaseServoHost):
     DEFAULT_PORT = int(os.getenv('SERVOD_PORT', '9999'))
 
     # Timeout for initializing servo signals.
-    INITIALIZE_SERVO_TIMEOUT_SECS = 60
+    INITIALIZE_SERVO_TIMEOUT_SECS = 120
 
     # Default timeout for run terminal command.
     DEFAULT_TERMINAL_TIMEOUT = 30
@@ -581,20 +582,25 @@ class ServoHost(base_servohost.BaseServoHost):
                       self.hostname, self.servo_port)
         self.run('rm -f %s' % self._reboot_file, ignore_status=True)
 
+    @timeout_util.TimeoutDecorator(INITIALIZE_SERVO_TIMEOUT_SECS)
     def start_servod(self, quick_startup=False):
         """Start the servod process on servohost."""
         client = docker.from_env(timeout=300)
         try:
-            client.containers.get(self.hostname)
+            if self.is_up():
+                logging.warning("Container already exists - not starting")
+                return
+            self.stop_servod()
         except docker.errors.NotFound:
             pass
-        else:
-            logging.warning("Container already exists - not starting")
-            return
+        except docker.errors.APIError:
+            # Container exists but is not running
+            logging.info("Cleanup of non functional container.")
+            self.stop_servod()
 
         label = os.environ.get("LABEL", "release")
         registry = os.environ.get(
-            "REGISTRY_URI", "gcr.io/chromeos-partner-moblab"
+            "REGISTRY_URI", "us-docker.pkg.dev/chromeos-partner-moblab/common-core"
         )
         image = "%s/servod:%s" % (registry, label)
         logging.info("Servo container image: %s", image)
@@ -611,8 +617,9 @@ class ServoHost(base_servohost.BaseServoHost):
                     "PORT=%s" % self.servo_port,
         ]
         logging.info('Servo container environment: %s', environment)
+        cont = None
         try:
-            client.containers.run(
+            cont = client.containers.run(
                 image,
                 remove=False,
                 privileged=True,
@@ -621,11 +628,24 @@ class ServoHost(base_servohost.BaseServoHost):
                 network="default_moblab",
                 cap_add=["NET_ADMIN"],
                 detach=True,
-                volumes=["/dev:/dev"],
+                volumes=[
+                    "/dev:/dev",
+                    "%s_log:/var/log/servod_%s/" % (self.hostname,
+                                                    self.servo_port)
+                ],
                 environment=environment,
                 command=["bash", "/start_servod.sh"],
             )
-            time.sleep(servo_constants.SERVOD_STARTUP_TIMEOUT)
+            log_lines = cont.logs(stream=True, follow=True)
+            started = False
+            while log_lines and not started:
+                for line in log_lines:
+                    logging.info(line.decode('utf-8').strip())
+                    if b'servod - INFO - Listening on 0.0.0.0 port' in line:
+                        started = True
+                        logging.info("Detected servod has started.")
+                        break
+
         except docker.errors.ContainerError as e:
             logging.exception("Failed to start servod")
             for line in str(e).split(b'\n'):
@@ -646,8 +666,7 @@ class ServoHost(base_servohost.BaseServoHost):
         except docker.errors.NotFound:
             logging.info("Container does not exist no need to stop it.")
         else:
-            cont.stop()
-            cont.remove()
+            cont.remove(force=True)
 
     def restart_servod(self, quick_startup=False):
         """Restart the servod process on servohost.

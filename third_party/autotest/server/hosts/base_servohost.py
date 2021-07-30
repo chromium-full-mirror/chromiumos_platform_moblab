@@ -122,21 +122,6 @@ class BaseServoHost(ssh_host.SSHHost):
         @returns hostname of the DUT that connected to this servo.
         """
         return self._dut_hostname
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def is_containerized_servod(self):
         """Checks whether the servo host is a containerized servod.
 
@@ -145,19 +130,11 @@ class BaseServoHost(ssh_host.SSHHost):
         """
         return self._is_containerized_servod
 
-
-
-
-
     def reboot(self, *args, **dargs):
         """Reboot using special servo host reboot command."""
         super(BaseServoHost, self).reboot(
             reboot_cmd=self.REBOOT_CMD, *args, **dargs
         )
-
-
-
-
 
         # Recover preserved files to original location.
         # TODO(xianuowang@) Remove this logic once we have updated to
@@ -166,14 +143,6 @@ class BaseServoHost(ssh_host.SSHHost):
             src = os.path.join(safe_location, item.split('/')[-1])
             dest = '/'.join(item.split('/')[:-1])
             self.run('mv %s %s' % (src, dest), ignore_status=True)
-
-
-
-
-
-
-
-
 
     def run(
         self,
@@ -226,18 +195,18 @@ class BaseServoHost(ssh_host.SSHHost):
         logging.info("Trying to run the command %s", command)
         client = docker.from_env(timeout=300)
         container = client.containers.get(self.hostname)
-        (exit_code, output) = container.exec_run("bash -c '%s'" % command)
+        try:
+            (exit_code, output) = container.exec_run("bash -c '%s'" % command)
+        except docker.errors.APIError:
+            logging.exception("Failed to run command %s", command)
+            for line in container.logs().split(b'\n'):
+                logging.error(line.decode('utf-8'))
+            return utils.CmdResult(command=command, stdout="", exit_status=-1)
         return utils.CmdResult(
             command=command, stdout=output, exit_status=exit_code
         )
 
-
-
-
-
-
-
-    def is_up(self, timeout=60, connect_timeout=None, base_cmd="true"):
+    def is_up(self, timeout=60, connect_timeout=None, base_cmd=""):
         """
         Check if the remote host is up by ssh-ing and running a base command.
 
@@ -249,7 +218,10 @@ class BaseServoHost(ssh_host.SSHHost):
         """
         client = docker.from_env(timeout=300)
         try:
-            client.containers.get(self.hostname)
+            (exit_code, output) = client.containers.get(self.hostname).exec_run("ps")
+            logging.info("Is Up output %s", output)
+            if b"servod" not in output:
+                return False
         except docker.errors.NotFound:
             return False
         return True
