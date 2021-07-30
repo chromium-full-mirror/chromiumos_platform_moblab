@@ -13,6 +13,8 @@ service MoblabRpcService {
     returns (RunSuiteResponse) {}
   rpc run_memory_qualification_suite (RunMemoryQualificationSuiteRequest)
     returns (RunSuiteResponse) {}
+  rpc run_faft_suite (RunFAFTSuiteRequest)
+    returns (RunSuiteResponse) {}
   rpc provision_duts (ProvisionDutsRequest) returns (google.protobuf.Empty) {}
 
   rpc list_connected_duts (ListConnectedDutsRequest) returns (ListConnectedDutsResponse) {}
@@ -171,6 +173,18 @@ message RunMemoryQualificationSuiteRequest {
   string pool = 5;
   string avl_process_bug_id = 6;
   string avl_part_number = 7;
+}
+
+// NEXT_TAG = 8
+message RunFAFTSuiteRequest {
+  string suite = 1;
+  string build_target = 2;
+  string build_version = 3;
+  string milestone = 4;
+  string model = 5;
+  string pool = 6;
+  // Comma separated list of tests, if specified only these tests will run.
+  repeated string specific_tests = 7;
 }
 
 // NEXT_TAG = 17

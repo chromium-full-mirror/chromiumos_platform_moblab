@@ -474,21 +474,44 @@ class MoblabService(object):
             suite_args=suite_args,
         )
 
-    def run_suite_faft(
+    def run_faft_suite(
         self,
         build_target,
+        model,
+        milestone,
         build_version,
         suite,
-        model=None,
         pool=None,
-        ro_firmware=None,
-        rw_firmware=None,
+        tests=None,
     ):
-        build_versions = {}
-        if rw_firmware:
-            build_versions["fwrw-version"] = rw_firmware
-        if ro_firmware:
-            build_versions["fwro-version"] = ro_firmware
+        """Starts faft suite run. Formats arguments s.t. they can be ingested by
+        AFE.
+
+        Args:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            tests: List of strings of specific test names to
+            run.
+        Returns:
+          String response message.
+        """
+
+        suite_args = {}
+        if tests and len(tests):
+            suite_args["tests"] = [test.strip() for test in tests]
+
+        return self.run_suite(
+            build_target,
+            model,
+            milestone,
+            build_version,
+            suite,
+            pool,
+            suite_args=suite_args,
+        )
 
     def run_suite(
         self,

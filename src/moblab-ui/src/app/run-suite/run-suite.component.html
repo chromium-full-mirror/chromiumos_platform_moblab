@@ -51,6 +51,16 @@
           </div>
         </ng-template>
       </mat-tab>
+      <mat-tab label="FAFT">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper">
+            <app-loading-overlay></app-loading-overlay>
+            <app-faft
+              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            </app-faft>
+          </div>
+        </ng-template>
+      </mat-tab>
       <mat-tab label="Other">
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
