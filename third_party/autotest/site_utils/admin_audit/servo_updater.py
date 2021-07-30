@@ -68,8 +68,6 @@ class _BaseUpdateServoFw(object):
             return False
         elif not self.get_serial_number():
             return False
-        elif not self._host.is_labstation():
-            return False
         elif not self._custom_verifier():
             return False
         elif not ignore_version:

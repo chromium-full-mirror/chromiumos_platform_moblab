@@ -1196,7 +1196,6 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             # verifier(s) failed during the repair.
             if e.is_critical():
                 profile_state = profile_constants.DUT_STATE_REPAIR_FAILED
-                self._reboot_labstation_if_needed()
                 self.try_set_device_needs_manual_repair()
                 raise
 
@@ -2720,37 +2719,6 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
         if needs_manual_repair:
             self.set_device_repair_state(
                     cros_constants.DEVICE_STATE_NEEDS_MANUAL_REPAIR)
-
-    def _reboot_labstation_if_needed(self):
-        """Place request to reboot the labstation if DUT is not sshable.
-
-        @returns: None
-        """
-        message_prefix = "Don't need to request servo-host reboot "
-        if not self._dut_fail_ssh_verifier():
-            return
-        if not self._servo_host:
-            logging.debug(message_prefix + 'as it not initialized')
-            return
-        if not self._servo_host.is_up_fast():
-            logging.debug(message_prefix + 'as servo-host is not sshable')
-            return
-        if not self._servo_host.is_labstation():
-            logging.debug('Servo_v3 is not requested to reboot for the DUT')
-            return
-        usb_path = self._servo_host.get_main_servo_usb_path()
-        if usb_path:
-            connected_port = os.path.basename(os.path.normpath(usb_path))
-            # Directly connected servo to the labstation looks like '1-5.3'
-            # and when connected by hub - '1-5.2.3' or '1-5.2.1.3'. Where:
-            # - '1-5' - port on labstation
-            # - '2' or '2.1'   - port on the hub or smart-hub
-            # - '3'   - port on servo hub
-            if len(connected_port.split('.')) > 2:
-                logging.debug(message_prefix + 'as servo connected by hub')
-                return
-        self._servo_host.request_reboot()
-        logging.info('Requested labstation reboot because DUT is not sshable')
 
     def is_file_system_writable(self, testdirs=None):
         """Check is the file systems are writable.
