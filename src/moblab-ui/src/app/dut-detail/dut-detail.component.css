@@ -65,3 +65,7 @@
 .body {
   style: "background: white;"
 }
+
+.set-servo-serial-box {
+  width: 200px;
+}

@@ -1206,3 +1206,15 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             _context.set_code(grpc.StatusCode.INTERNAL)
             _context.set_details(str(ex))
         return empty_pb2.Empty()
+
+    def add_servo(self, request, _context):
+        """Set the information about the servo connected to a DUT.
+
+        When a DUT is connected via servo hardware you need to configure that
+        DUT to know about the servo.
+        """
+
+        self.service.add_servo(
+            request.dut_hostname, request.servo_serial_number
+        )
+        return moblabrpc_pb2.AddServoResponse()

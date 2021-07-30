@@ -28,7 +28,13 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   @ViewChild('associated_jobs_table') associatedJobsTableRef: ViewJobsComponent;
 
   serverControlFile = '';
-  dutQuery = new FormControl('', [Validators.minLength(1)]);
+  dutQuery = new FormControl('', Validators.minLength(1));
+  servoSerialNumber = new FormControl(
+    '',
+    Validators.pattern(
+      '(SERVOV4P1-)?[CGS](-)?[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[0-9]{4}'
+    )
+  );
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -109,6 +115,21 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
         this.notificationsService.error(errorMsg);
       },
       [this.dutQuery.value]
+    );
+  }
+
+  addServo() {
+    this.moblabGrpcService.addServo(
+      (message: string) => {
+        this.notificationsService.notify(
+          'Add servo serial number to dut and reverify, please refresh page for status.'
+        );
+      },
+      errorMsg => {
+        this.notificationsService.error(errorMsg);
+      },
+      this.dutQuery.value,
+      this.servoSerialNumber.value
     );
   }
 

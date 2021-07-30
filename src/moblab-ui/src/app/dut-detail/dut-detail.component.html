@@ -24,6 +24,19 @@
         (click)="reverifyDut()"> Reverify DUT
 </button>
 
+<mat-form-field class="set-servo-serial-box" >
+  <mat-label>Servo Serial Number</mat-label>
+  <input id="set-servo-serial-input" matInput [formControl]="servoSerialNumber">
+  <mat-error *ngIf="this.servoSerialNumber.hasError('pattern')">
+    Invalid serial number, check the label on your servo.
+  </mat-error>
+</mat-form-field>
+
+<button mat-raised-button color="primary" id="add-servo-serial-number-button" (click)="addServo()"
+  [disabled]="!this.servoSerialNumber.value || !this.servoSerialNumber.valid" class="edit-box-contents">
+  Set
+</button>
+
 <button
   id="dut-refresh-button"
   matTooltip="Refresh"
@@ -32,7 +45,7 @@
   (click)="fetchDutDetails()">
   <mat-icon>refresh</mat-icon>
 </button>
-
+<mat-divider></mat-divider>
 <div id="dut-detail-table-wrapper">
   <div id="loading-overlay" *ngIf="isDutInfoTableEmpty()">
   </div>

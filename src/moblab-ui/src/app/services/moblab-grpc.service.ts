@@ -14,6 +14,8 @@ import {
   AddLabelToDutsResponse,
   AddPoolToDutsRequest,
   AddPoolToDutsResponse,
+  AddServoRequest,
+  AddServoResponse,
   ConnectedDutFirmwareInfo,
   ConnectedDutInfo,
   DutTask,
@@ -1448,6 +1450,28 @@ export class MoblabGrpcService {
       request,
       {},
       (err: grpcWeb.Error, _) => {
+        if (err) {
+          errorHandlingCallback(err.message);
+        } else {
+          callback();
+        }
+      }
+    );
+  }
+
+  addServo(
+    callback: () => void,
+    errorHandlingCallback: (errorMsg: string) => void,
+    dut_hostname: string,
+    servo_serial_number: string,
+  ) {
+    const request = new AddServoRequest();
+    request.setDutHostname(dut_hostname);
+    request.setServoSerialNumber(servo_serial_number);
+    this.moblabRpcService.add_servo(
+      request,
+      {},
+      (err: grpcWeb.Error, response: AddServoResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
         } else {

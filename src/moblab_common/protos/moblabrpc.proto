@@ -68,6 +68,8 @@ service MoblabRpcService {
   rpc download_service_account(google.protobuf.Empty) returns (google.protobuf.Empty) {};
 
   rpc validate_storage_qual_setup(ValidateStorageQualSetupRequest) returns (google.protobuf.Empty) {};
+
+  rpc add_servo(AddServoRequest) returns (AddServoResponse) {};
 }
 
 
@@ -772,4 +774,14 @@ message SetRemoteAgentConfigurationResponse {
 // NEXT_TAG = 2
 message ValidateStorageQualSetupRequest {
   string pool_name = 1;
+}
+
+// NEXT_TAG = 3
+message AddServoRequest {
+  string dut_hostname = 1;
+  string servo_serial_number = 2;
+}
+
+// NEXT_TAG = 1
+message AddServoResponse {
 }
