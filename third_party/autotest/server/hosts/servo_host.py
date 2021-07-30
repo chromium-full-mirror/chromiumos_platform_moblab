@@ -55,7 +55,7 @@ class ServoHost(base_servohost.BaseServoHost):
     DEFAULT_PORT = int(os.getenv('SERVOD_PORT', '9999'))
 
     # Timeout for initializing servo signals.
-    INITIALIZE_SERVO_TIMEOUT_SECS = 120
+    INITIALIZE_SERVO_TIMEOUT_SECS = 600
 
     # Default timeout for run terminal command.
     DEFAULT_TERMINAL_TIMEOUT = 30
