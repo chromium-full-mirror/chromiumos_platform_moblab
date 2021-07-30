@@ -10,11 +10,11 @@
 """This is a base host class for servohost and labstation."""
 
 
-import six.moves.http_client
 import logging
 import socket
 import time
 import os
+
 
 from client.bin import utils
 from client.common_lib import autotest_enum
@@ -31,20 +31,19 @@ from server.hosts import ssh_host
 
 import docker
 
-# from site_utils.rpm_control_system import rpm_client
+#from site_utils.rpm_control_system import rpm_client
 
 
 class BaseServoHost(ssh_host.SSHHost):
     """Base host class for a host that manage servo(s).
-    E.g. beaglebone, labstation.
+     E.g. beaglebone, labstation.
     """
+    REBOOT_CMD = 'sleep 5; reboot & sleep 10; reboot -f'
 
-    REBOOT_CMD = "sleep 5; reboot & sleep 10; reboot -f"
+    TEMP_FILE_DIR = '/var/lib/servod/'
 
-    TEMP_FILE_DIR = "/var/lib/servod/"
-
-    LOCK_FILE_POSTFIX = "_in_use"
-    REBOOT_FILE_POSTFIX = "_reboot"
+    LOCK_FILE_POSTFIX = '_in_use'
+    REBOOT_FILE_POSTFIX = '_reboot'
 
     # Time to wait a rebooting servohost, in seconds.
     REBOOT_TIMEOUT = 240
@@ -53,18 +52,15 @@ class BaseServoHost(ssh_host.SSHHost):
     BOOT_TIMEOUT = 240
 
     # Constants that reflect current host update state.
-    UPDATE_STATE = autotest_enum.AutotestEnum(
-        "IDLE", "RUNNING", "PENDING_REBOOT"
-    )
+    UPDATE_STATE = autotest_enum.AutotestEnum('IDLE', 'RUNNING',
+                                              'PENDING_REBOOT')
 
-    def _initialize(
-        self,
-        hostname,
-        is_in_lab=None,
-        servo_host_ssh_port=None,
-        *args,
-        **dargs
-    ):
+    def _initialize(self,
+                    hostname,
+                    is_in_lab=None,
+                    servo_host_ssh_port=None,
+                    *args,
+                    **dargs):
         """Construct a BaseServoHost object.
 
         @param is_in_lab: True if the servo host is in Cros Lab. Default is set
@@ -84,9 +80,9 @@ class BaseServoHost(ssh_host.SSHHost):
 
         self._sudo_required = False
 
-        self._is_labstation = None
         self._dut_host_info = None
         self._dut_hostname = None
+
 
     def get_board(self):
         """Determine the board for this servo host. E.g. fizz-labstation
@@ -94,15 +90,17 @@ class BaseServoHost(ssh_host.SSHHost):
         @returns a string representing this labstation's board or None if
          target host is not using a ChromeOS image(e.g. test in chroot).
         """
-        output = self.run("cat /etc/lsb-release", ignore_status=True).stdout
+        output = self.run('cat /etc/lsb-release', ignore_status=True).stdout
         return lsbrelease_utils.get_current_board(lsb_release_content=output)
+
 
     def set_dut_host_info(self, dut_host_info):
         """
         @param dut_host_info: A HostInfo object.
         """
-        logging.info("setting dut_host_info field to (%s)", dut_host_info)
+        logging.info('setting dut_host_info field to (%s)', dut_host_info)
         self._dut_host_info = dut_host_info
+
 
     def get_dut_host_info(self):
         """
@@ -110,18 +108,21 @@ class BaseServoHost(ssh_host.SSHHost):
         """
         return self._dut_host_info
 
+
     def set_dut_hostname(self, dut_hostname):
         """
         @param dut_hostname: hostname of the DUT that connected to this servo.
         """
-        logging.info("setting dut_hostname as (%s)", dut_hostname)
+        logging.info('setting dut_hostname as (%s)', dut_hostname)
         self._dut_hostname = dut_hostname
+
 
     def get_dut_hostname(self):
         """
         @returns hostname of the DUT that connected to this servo.
         """
         return self._dut_hostname
+
     def is_containerized_servod(self):
         """Checks whether the servo host is a containerized servod.
 
@@ -132,32 +133,13 @@ class BaseServoHost(ssh_host.SSHHost):
 
     def reboot(self, *args, **dargs):
         """Reboot using special servo host reboot command."""
-        super(BaseServoHost, self).reboot(
-            reboot_cmd=self.REBOOT_CMD, *args, **dargs
-        )
+        super(BaseServoHost, self).reboot(reboot_cmd=self.REBOOT_CMD,
+                                          *args, **dargs)
 
-        # Recover preserved files to original location.
-        # TODO(xianuowang@) Remove this logic once we have updated to
-        # a image with https://crrev.com/c/2485908.
-        for item in path_to_preserve:
-            src = os.path.join(safe_location, item.split('/')[-1])
-            dest = '/'.join(item.split('/')[:-1])
-            self.run('mv %s %s' % (src, dest), ignore_status=True)
-
-    def run(
-        self,
-        command,
-        timeout=3600,
-        ignore_status=False,
-        stdout_tee=utils.TEE_TO_LOGS,
-        stderr_tee=utils.TEE_TO_LOGS,
-        connect_timeout=30,
-        ssh_failure_retry_ok=False,
-        options="",
-        stdin=None,
-        verbose=True,
-        args=(),
-    ):
+    def run(self, command, timeout=3600, ignore_status=False,
+        stdout_tee=utils.TEE_TO_LOGS, stderr_tee=utils.TEE_TO_LOGS,
+        connect_timeout=30, ssh_failure_retry_ok=False,
+        options='', stdin=None, verbose=True, args=()):
         """Run a command on the servo host.
 
         Extends method `run` in SSHHost. If the servo host is a remote device,
@@ -206,7 +188,33 @@ class BaseServoHost(ssh_host.SSHHost):
             command=command, stdout=output, exit_status=exit_code
         )
 
-    def is_up(self, timeout=60, connect_timeout=None, base_cmd=""):
+    def _mount_drive(self, src_path, dst_path):
+        """Mount an external drive on servohost.
+
+        @param: src_path  the drive path to mount(e.g. /dev/sda3).
+        @param: dst_path  the destination directory on servohost to mount
+                          the drive.
+
+        @returns: True if mount success otherwise False.
+        """
+        # Make sure the dst dir exists.
+        self.run('mkdir -p %s' % dst_path)
+
+        result = self.run('mount -o ro %s %s' % (src_path, dst_path),
+                          ignore_status=True)
+        return result.exit_status == 0
+
+    def _unmount_drive(self, mount_path):
+        """Unmount a drive from servohost.
+
+        @param: mount_path  the path on servohost to unmount.
+
+        @returns: True if unmount success otherwise False.
+        """
+        result = self.run('umount %s' % mount_path, ignore_status=True)
+        return result.exit_status == 0
+
+    def is_up(self, timeout=60, connect_timeout=None, base_cmd="true"):
         """
         Check if the remote host is up by ssh-ing and running a base command.
 
