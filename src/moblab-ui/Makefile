@@ -6,14 +6,10 @@ all: compile_proto install start
 
 
 clean_proto:
-	rm -f ${T}/src/app/services/moblabrpc*pb*
+	rm -f ./src/app/services/*_pb*
 
 compile_proto: clean_proto
-	protoc \
-                -I="../moblab-rpcserver" \
-		--js_out=import_style=commonjs:src/app/services \
-                --grpc-web_out="import_style=commonjs+dts,mode=grpcwebtext:src/app/services" \
-                "../moblab-rpcserver/moblabrpc.proto"
+	./run_protogen_ui.sh
 
 # TODO - fix the npm install errors that make the || true required.
 install:
