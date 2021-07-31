@@ -558,7 +558,7 @@ message GetDutTasksRequest {
   int64 end_time_lt = 5;
 }
 
-// NEXT_TAG = 7
+// NEXT_TAG = 8
 message DutTask {
   // NEXT_TAG = 6
   enum Status {
@@ -576,6 +576,7 @@ message DutTask {
   int64 created_time_utc = 4;
   int64 started_time_utc = 5;
   int64 finished_time_utc = 6;
+  string task_log_id = 7;
 }
 
 // NEXT_TAG = 2

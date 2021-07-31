@@ -5,6 +5,7 @@
 
 import logging
 import re
+import json
 from datetime import datetime
 
 from google.protobuf import timestamp_pb2
@@ -183,7 +184,7 @@ class DutManagerStorageService(object):
                     end_time=self.get_timestamp_from_datetime_str(
                         task.get("time_finished", "")
                     ),
-                    note="",
+                    note=json.dumps(task),
                     lease_owner="MOBLAB",
                 )
                 history_record.append(dut_history)

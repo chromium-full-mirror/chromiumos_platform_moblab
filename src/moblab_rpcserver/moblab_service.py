@@ -13,6 +13,7 @@ import requests
 import subprocess
 import time
 import logging
+import json
 
 from collections import namedtuple
 from datetime import datetime
@@ -1151,12 +1152,14 @@ class MoblabService(object):
 
         result = []
         for t in tasks:
+            task = json.loads(t.note)
             task_dict = {}
             task_dict["task"] = DUT_MANAGER_TO_AFE_DUT_STATUS_MAPPINGS[t.state]
             task_dict["time_started"] = str(t.start_time.ToDatetime())
             task_dict["time_finished"] = str(t.end_time.ToDatetime())
             task_dict["lease_owner"] = str(t.lease_owner)
             task_dict["note"] = t.note
+            task_dict["task_log_id"] = "%s-%s" % (task["id"], task["task"])
 
             result.append(task_dict)
         return result

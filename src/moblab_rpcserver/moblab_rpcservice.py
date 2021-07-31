@@ -877,6 +877,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             dut_task.finished_time_utc = self._convert_timestamp_to_utc_secs(
                 dut_task_dict.get("time_finished", None)
             )
+            dut_task.task_log_id = dut_task_dict.get("task_log_id")
             response.tasks.extend([dut_task])
         return response
 

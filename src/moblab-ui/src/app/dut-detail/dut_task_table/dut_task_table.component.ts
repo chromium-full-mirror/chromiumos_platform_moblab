@@ -75,4 +75,8 @@ export class DutTaskTableComponent implements AfterViewInit {
   getStatusFromNum(statusNum) {
     return INT_TO_DUT_TASK_STATUS[statusNum];
   }
+
+  construct_task_logs_link(task: DutTask): string {
+    return `/results/hosts/${this.dutIp}/${task.getTaskLogId().toLowerCase()}/`;
+  }
 }

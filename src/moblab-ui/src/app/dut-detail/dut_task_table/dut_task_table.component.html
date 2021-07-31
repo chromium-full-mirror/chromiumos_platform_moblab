@@ -33,8 +33,7 @@
     </th>
     <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()">
       <span>
-        <a class="logbutton" mat-button target="_blank"
-          href="/results/hosts/{{dutIp}}/{{element.getId()}}-{{element.getTask().toLowerCase()}}/">
+        <a class="logbutton" mat-button target="_blank" href="{{construct_task_logs_link(element)}}">
           <mat-icon class="norm-icon">text_snippet</mat-icon>
         </a>
       </span>
