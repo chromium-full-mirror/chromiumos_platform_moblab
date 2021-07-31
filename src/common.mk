@@ -292,7 +292,21 @@ test-common:
 	docker run -it moblab_common_test_py3:${LABEL} \
 		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v /test/'
 
-test:	test-rpcserver \
+
+unit-test:	test-rpcserver \
 		test-common \
 		test-dut-manager \
 		test-dut-manager-storage
+
+
+# This will run e2e tests from moblab-ui project agains E2E_TARGET_URL.
+# NOTE: This will NOT start any Moblab containers. Instead it assumes
+# the Moblab UI is available on the URL address given by E2E_TARGET_URL
+# variable configured in Makefile.
+# You can override the value in your local_registry.mk.
+e2e-moblab-ui: export DOCKER_BUILDKIT := 1
+e2e-moblab-ui: protoc
+	./moblab-ui/run_protogen_ui.sh
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/moblab-ui-e2e:${LABEL} \
+		-f dockerfiles/ui/Dockerfile.e2e .
+	docker run -it --net="host" ${REGISTRY_URI}/moblab-ui-e2e:${LABEL} --base-url=${E2E_TARGET_URL}
