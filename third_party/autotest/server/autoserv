@@ -305,6 +305,9 @@ def _start_servod(machine):
     servo_port = hosts[0].attributes.get("servo_port", 9999)
     servo_serial = hosts[0].attributes.get("servo_serial", None)
 
+    if not servo_host:
+        return
+
     label = os.environ.get('LABEL', 'release')
     registry = os.environ.get('REGISTRY_URI', 'gcr.io/chromeos-partner-moblab')
     client = docker.from_env(timeout=300)
