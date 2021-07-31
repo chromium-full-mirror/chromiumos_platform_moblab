@@ -54,11 +54,7 @@ export class CtsRunComponent extends BaseSuite implements AfterContentInit {
   /** Method triggered on change of the cts version form.
    * */
   ctsVersionChanged(suiteName: string) {
-    if (suiteName === 'cts_R') {
-      this.suiteName = 'cts';
-    } else {
-      this.suiteName = suiteName;
-    }
+    this.suiteName = suiteName;
     this.runSuiteButton.enable();
   }
 
