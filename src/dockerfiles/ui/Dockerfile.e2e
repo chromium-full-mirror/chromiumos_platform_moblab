@@ -1,0 +1,39 @@
+# Copyright 2019 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
+ARG LABEL=autopush
+######################################################################
+
+FROM ${BASE_REGISTRY_URI}/node:15 as build
+
+# install chrome for protractor tests
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+RUN apt-get update && apt-get install -yq google-chrome-stable
+
+RUN npm install -g gts eslint
+ENV NODE_PATH=/usr/local/lib/node_modules/gts/node_modules:/usr/local/lib/node_modules
+
+WORKDIR /app
+
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
+
+# install and cache app dependencies
+# add app
+COPY ./moblab-ui/package.json /app
+COPY ./moblab-ui/package-lock.json /app
+
+RUN npm install --ignore-scripts
+
+RUN ngcc
+
+# install and cache app dependencies
+# add app
+COPY ./moblab-ui /app
+
+ENTRYPOINT [ "ng", "e2e", "e2e-only"]
