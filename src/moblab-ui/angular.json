@@ -145,7 +145,7 @@
       }
     },
     "moblab-partner-ui-e2e": {
-      "root": "e2e",
+      "root": "",
       "sourceRoot": "e2e",
       "projectType": "application",
       "architect": {
