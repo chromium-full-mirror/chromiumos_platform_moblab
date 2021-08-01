@@ -5,6 +5,8 @@ import {
   LoadingOverlayComponent,
   LoadingOverlayStyle,
 } from '../widgets/loading-overlay/loading-overlay.component';
+import {GlobalInfoService} from 'app/services/services.module';
+import {Feature} from 'app/services/services.module';
 
 @Component({
   selector: 'app-run-suite',
@@ -13,6 +15,8 @@ import {
 })
 export class RunSuiteComponent {
   @ViewChild(LoadingOverlayComponent) loadingOverlay: LoadingOverlayComponent;
+
+  constructor(private globalInfo: GlobalInfoService) {}
 
   onSuiteStart() {
     this.onSuiteStatusUpdate('submitting');
@@ -42,5 +46,13 @@ export class RunSuiteComponent {
 
   onSuiteStatusUpdate(current_state: string) {
     this.loadingOverlay.updateStatus(current_state);
+  }
+
+  isFaftTestEnabled() {
+    return this.isTestEnabled(Feature.FAFT_TESTING);
+  }
+
+  isTestEnabled(feature: Feature) {
+    return this.globalInfo.isFeatureEnabled(feature);
   }
 }
