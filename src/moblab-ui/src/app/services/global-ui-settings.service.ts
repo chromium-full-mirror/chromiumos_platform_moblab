@@ -27,6 +27,7 @@ export enum Feature {
   JOB_DETAIL,
   DUT_DETAIL,
   FAFT_TESTING,
+  ABOUT,
 }
 
 @Injectable()
@@ -40,6 +41,7 @@ export class GlobalInfoService {
     Feature.DUT_DETAIL,
     Feature.SYSTEM_CONFIGURATION,
     Feature.ADVANCED_SETTINGS,
+    Feature.ABOUT,
   ];
   enableNavBarObservable: Observable<boolean>;
   private enableNavBarSubject: BehaviorSubject<boolean>;

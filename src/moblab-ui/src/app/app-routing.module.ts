@@ -16,6 +16,7 @@ import {HealthCheckComponent} from './health-check/health-check.component';
 import {MoblabHealthCheckGuard} from './guards/moblab-health-check.guard';
 import {NewUpdateService} from './services/new-update.service';
 import {AdvancedSettingsComponent} from './advanced-settings/advanced-settings.component';
+import {AboutComponent} from './about/about.component';
 
 const routes: Routes = [
   {path: 'health_check', component: HealthCheckComponent},
@@ -48,6 +49,7 @@ const routes: Routes = [
           {path: 'manage_dut', component: ManageDutsComponent},
           {path: 'mobmonitor', component: MobmonitorComponent},
           {path: 'advanced', component: AdvancedSettingsComponent},
+          {path: 'about', component: AboutComponent},
           {path: 'report_problem', component: ViewJobsComponent},
           {path: '**', component: ViewJobsComponent},
         ],

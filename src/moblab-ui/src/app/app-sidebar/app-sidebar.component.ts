@@ -87,6 +87,11 @@ export class AppSidebarComponent implements OnInit {
       label: 'Documentation',
       icon: 'help',
     });
+    this.addSidebarEntry(Feature.ABOUT, this.navTabs, {
+      route: '/about',
+      label: 'About',
+      icon: 'info',
+    });
   }
 
   isPageInformationEnabled() {

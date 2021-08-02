@@ -1,0 +1,46 @@
+hr {
+  border: 1px solid #ebebeb;
+}
+
+input[type="text"][readonly] {
+  color: grey;
+}
+
+mat-card {
+  border: 1px solid #ebebeb;
+  box-shadow: none !important;
+  max-width: 650px;
+  margin: 16px;
+  padding: 16px;
+}
+
+mat-card-header {
+  font-family: Roboto, sans-serif;
+  color:rgba(0, 0, 0, 0.87);
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+::ng-deep .readonly input.mat-input-element {
+  color: grey;
+}
+
+::ng-deep .readonly .mat-form-field-label {
+  /*change color of label*/
+  color: grey;
+}
+
+.reboot-button-wrapper {
+  display: inline-flex;
+  margin-left: 40px;
+  margin-top: 10px;
+}
+
+.update-button-wrapper {
+  display: inline-flex;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+
