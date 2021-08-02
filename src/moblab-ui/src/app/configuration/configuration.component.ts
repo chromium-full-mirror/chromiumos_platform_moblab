@@ -93,16 +93,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
   lastFetchedDutWifiName = '';
   lastFetchedDutWifiPassword = '';
 
-  moblabReleaseVersion = '';
-  chromeosReleaseVersion = '';
-  chromeosReleaseTrack = '';
-  chromeosReleaseDescription = '';
-  moblabInstallId = '';
-  moblabSerialNumber = '';
-
-  moblabHostname = '';
-  isConnectedToInternet = false;
-
   pauseStatusSubscription: Subscription = null;
 
   faftEnabled = false;
@@ -127,9 +117,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
         requestors &&
         requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
     });
-    this.getNetworkInfo();
     this.getCloudConfiguration();
-    this.getVersionInfo();
     this.getDutWifiInfo();
     this.defaultCrOSVersionForm.disable();
     this.initCanUpdateCloudConfigFlag();
@@ -200,17 +188,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     }
   }
 
-  getNetworkInfo() {
-    this.moblabRpcService.get_network_info(
-      (moblab_hostname: string, is_connected: boolean) => {
-        this.setNetworkInfo(moblab_hostname, is_connected);
-      },
-      (errorMsg: string) => {
-        console.log('Encountered failure getting network info. ', errorMsg);
-      }
-    );
-  }
-
   getCloudConfiguration(calledOnSubmit: boolean = false) {
     /**
      * Method sends RPC command to fetch cloud configuration information and
@@ -241,8 +218,8 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
         );
         // If called from the onCloudConfigSubmit method, suppress the popup.
         if (!this.configSetupService.getIsCloudConfigEnabled() && !calledOnSubmit) {
-          this.notificationsService.notify(`Please enable the Cloud integration to 
-              allow system to fetch Chrome OS test images and upload test 
+          this.notificationsService.notify(`Please enable the Cloud integration to
+              allow system to fetch Chrome OS test images and upload test
               results for CPCon ingestion.`);
         }
       },
@@ -282,30 +259,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     );
   }
 
-  getVersionInfo() {
-    this.moblabRpcService.get_version_info(
-      (
-        moblab_release_version: string,
-        chromeos_release_version: string,
-        chromeos_release_track: string,
-        chromeos_release_description: string,
-        moblab_install_id: string,
-        moblab_serial_number: string
-      ) => {
-        this.refreshShownVersionInfo(
-          moblab_release_version,
-          chromeos_release_version,
-          chromeos_release_track,
-          chromeos_release_description,
-          moblab_install_id,
-          moblab_serial_number
-        );
-      },
-      (errorMsg: string) => {
-        console.log('Encountered failure getting version info. ', errorMsg);
-      }
-    );
-  }
+
 
   isCloudConfigurationChanged() {
     /**
@@ -357,29 +311,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     this.lastFetchedDutWifiPassword = dut_wifi_password;
 
     this.dutWifiInfoLoading = false;
-  }
-
-  setNetworkInfo(moblab_hostname: string, is_connected: boolean) {
-    this.moblabHostname = moblab_hostname;
-    this.isConnectedToInternet = is_connected;
-  }
-
-  refreshShownVersionInfo(
-    moblab_release_version: string,
-    chromeos_release_version: string,
-    chromeos_release_track: string,
-    chromeos_release_description: string,
-    moblab_install_id: string,
-    moblab_serial_number: string
-  ) {
-    // local setter of variables that are shown in the config UI ( not to be confused with getter/setters that commit and
-    // fetch changes from actual backend. )
-    this.moblabReleaseVersion = moblab_release_version;
-    this.chromeosReleaseVersion = chromeos_release_version;
-    this.chromeosReleaseTrack = chromeos_release_track;
-    this.chromeosReleaseDescription = chromeos_release_description;
-    this.moblabInstallId = moblab_install_id;
-    this.moblabSerialNumber = moblab_serial_number;
   }
 
   disableCloudConfigSubmissionButton() {
