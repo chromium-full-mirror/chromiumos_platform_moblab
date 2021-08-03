@@ -116,8 +116,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     this.getDutWifiInfo();
     this.defaultCrOSVersionForm.disable();
     this.initCanUpdateCloudConfigFlag();
-    await this.getStableCrOSVersion();
-    await this.getResultsRetentionPeriod();
+    await Promise.all([this.getStableCrOSVersion(), this.getResultsRetentionPeriod()]);
   }
 
   ngOnDestroy(): void {
@@ -154,7 +153,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   public async setResultsRetentionPeriod(period: string) {
-    this.userCrOSVersionForm.disable();
+    this.resultsRetentionPeriodForm.disable();
     try {
       await this.moblabConfigurationRpcService.setResultsRetentionPeriod(period);
       this.getResultsRetentionPeriod();
@@ -162,7 +161,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       console.log('setStableBuildVersion call failed with:' + error);
       this.notificationsService.error('Failed to set stable Chrome OS version: ' + error.message);
     } finally {
-      this.userCrOSVersionForm.enable();
+      this.resultsRetentionPeriodForm.enable();
     }
   }
 
