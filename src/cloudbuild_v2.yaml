@@ -539,6 +539,28 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
 
+  - id: infra-protos
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${__BUILD_VERSION}",
+        "-f",
+        "/workspace/src/dockerfiles/utilities/Dockerfile.infra_protos",
+        "-t",
+        "${_REGISTRY_URI}/infra-protos:${__BUILD_VERSION}",
+        "/workspace/src/dockerfiles/utilities/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "protoc"
+      - "buster-slim"
+      - "alpine-git"
+
   - id: rpcserver
     name: "docker:19.03.8"
     args:
@@ -731,28 +753,6 @@ steps:
       - "python-3.8-slim"
       - "moblab_common"
       - "infra-protos"
-
-  - id: infra-protos
-    name: "docker:19.03.8"
-    args:
-      [
-        "build",
-        "--build-arg",
-        "REGISTRY_URI=${_REGISTRY_URI}",
-        "--build-arg",
-        "LABEL=${__BUILD_VERSION}",
-        "-f",
-        "/workspace/src/dockerfiles/utilities/Dockerfile.infra_protos",
-        "-t",
-        "${_REGISTRY_URI}/infra-protos:${__BUILD_VERSION}",
-        "/workspace/src/dockerfiles/utilities/",
-      ]
-    env:
-      - "DOCKER_BUILDKIT=1"
-    waitFor:
-      - "protoc"
-      - "buster-slim"
-      - "alpine-git"
 
 images:
   [
