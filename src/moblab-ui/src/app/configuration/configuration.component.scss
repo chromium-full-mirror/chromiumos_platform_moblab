@@ -2,7 +2,7 @@ hr {
   border: 1px solid #ebebeb;
 }
 
-input[type="text"][readonly] {
+input[type='text'][readonly] {
   color: grey;
 }
 
@@ -16,7 +16,7 @@ mat-card {
 
 mat-card-header {
   font-family: Roboto, sans-serif;
-  color:rgba(0, 0, 0, 0.87);
+  color: rgba(0, 0, 0, 0.87);
   font-size: 18px;
   font-weight: 500;
   margin-bottom: 16px;
@@ -53,8 +53,8 @@ mat-card-header {
 }
 
 .form-text {
-  font-family: "Open Sans", "Helvetica Neue", sans-serif;
-  color:rgba(0, 0, 0, 0.87);
+  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: rgba(0, 0, 0, 0.87);
   font-size: 14px;
   margin-bottom: 10px;
 }
@@ -62,7 +62,7 @@ mat-card-header {
 .loading-overlay {
   background-color: #fafafa;
   height: 100%;
-  opacity: .8;
+  opacity: 0.8;
   position: absolute;
   top: 0px;
   margin-left: -8px;
@@ -76,7 +76,7 @@ mat-card-header {
   margin-top: 10px;
   overflow: hidden;
   position: absolute;
-  top:25%;
+  top: 25%;
   /*min-height: 300px;*/
   margin-left: 180px;
   z-index: 101;
@@ -131,7 +131,7 @@ mat-card-header {
 }
 
 #test-runner-config {
-  padding: 2px
+  padding: 2px;
 }
 
 .card-table-content {
@@ -142,4 +142,12 @@ mat-card-header {
   color: orange;
   transform: scale(2);
   margin: 16px;
+}
+
+mat-expansion-panel {
+  border: 1px solid #ebebeb;
+  box-shadow: none !important;
+  max-width: 650px;
+  margin: 16px;
+  padding: 16px;
 }

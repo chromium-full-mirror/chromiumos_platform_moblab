@@ -39,7 +39,7 @@ export class GlobalInfoService {
     Feature.JOB_DETAIL,
     Feature.DUT_DETAIL,
     Feature.SYSTEM_CONFIGURATION,
-    Feature.ADVANCED_SETTINGS,
+    Feature.ABOUT,
   ];
 
   constructor() {
