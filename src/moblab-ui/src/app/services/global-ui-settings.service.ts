@@ -41,8 +41,6 @@ export class GlobalInfoService {
     Feature.SYSTEM_CONFIGURATION,
     Feature.ADVANCED_SETTINGS,
   ];
-  enableNavBarObservable: Observable<boolean>;
-  private enableNavBarSubject: BehaviorSubject<boolean>;
 
   constructor() {
     this.enableNavBarSubject = new BehaviorSubject<boolean>(true);
@@ -58,16 +56,5 @@ export class GlobalInfoService {
   }
   isFeatureEnabled(f: Feature) {
     return this.enabledFeatures.indexOf(f) > -1;
-  }
-
-  enableFeature(f: Feature) {
-    return this.enabledFeatures.push(f);
-  }
-
-  disableFeature(f: Feature) {
-    const index = this.enabledFeatures.indexOf(f, 0);
-    if (index > -1) {
-      this.enabledFeatures.splice(index, 1);
-    }
   }
 }
