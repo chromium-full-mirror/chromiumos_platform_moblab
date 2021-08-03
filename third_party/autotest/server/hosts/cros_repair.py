@@ -33,6 +33,7 @@ from site_utils.admin_audit import verifiers as audit_verify
 from site_utils.admin_audit import constants as audit_const
 from site_utils.admin_audit import battery_validator
 
+from moblab_common import moblab_build_connector
 
 metrics = utils.metrics_mock
 
@@ -1186,6 +1187,29 @@ class ProvisionRepair(hosts.RepairAction):
     def repair(self, host):
         # pylint: disable=missing-docstring
         image_name = host.get_cros_repair_image_name()
+        info = host.host_info_store.get()
+        connector = moblab_build_connector.MoblabBuildConnector()
+        # hatch-release/R87-13505.73.0 => 13505.73.0
+        build_version = image_name.split('-')[2]
+        # gs://chromeos-moblab-peng-staging/ => chromeos-moblab-peng-staging
+        bucket_name = dev_server._get_image_storage_server().split('/')[2]
+        if not connector.check_build_stage_status(
+                info.board, info.model, build_version,
+                bucket_name):
+            logging.info('API Call to stage build %s %s.' % (info.board,
+                         build_version))
+            logging.info(connector.stage_build(info.board, info.model,
+                         build_version, bucket_name))
+            counter = 0
+            while ((not connector.check_build_stage_status(
+                    info.board, info.model, build_version, bucket_name))
+                   and counter < 60):
+                logging.info("Waiting for recovery build to stage in bucket")
+                time.sleep(10)
+                counter += 1
+        else:
+            logging.info('API States %s %s is staged.' % (info.board,
+                         build_version))
         logging.info('Staging build for provision: %s', image_name)
         devserver = dev_server.ImageServer.resolve(image_name, host.hostname)
         devserver.trigger_download(image_name, synchronous=False)
