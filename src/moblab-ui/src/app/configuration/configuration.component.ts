@@ -17,6 +17,7 @@ import {ButtonWithProgressComponent} from '../widgets/button-with-progress/butto
 import {MoblabSettingsConstains} from '../constants';
 import {NotificationsService} from '../services/notifications.service';
 import {Subscription} from 'rxjs';
+import {Feature, GlobalInfoService} from 'app/services/global-ui-settings.service';
 
 function gsURLValidator(control) {
   if (!control.value) {
@@ -94,6 +95,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
 
   pauseStatusSubscription: Subscription = null;
 
+  faftEnabled = false;
+  panelOpenState = true;
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     private moblabRpcService: MoblabGrpcService,
@@ -101,6 +105,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     private moblabConfigurationRpcService: MoblabConfigurationGrpcService,
     private configSetupService: ConfigSetupService,
     private notificationsService: NotificationsService,
+    private globalInfo: GlobalInfoService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -117,6 +122,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     this.defaultCrOSVersionForm.disable();
     this.initCanUpdateCloudConfigFlag();
     await Promise.all([this.getStableCrOSVersion(), this.getResultsRetentionPeriod()]);
+    this.faftEnabled = this.globalInfo.isFeatureEnabled(Feature.FAFT_TESTING);
   }
 
   ngOnDestroy(): void {
@@ -505,4 +511,13 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       this.resumeButton.setIsLoadingStatus(false);
     }
   }
+
+  saveFAFTSetting(newValue) {
+    if (newValue === true) {
+      this.globalInfo.enableFeature(Feature.FAFT_TESTING);
+    } else {
+      this.globalInfo.disableFeature(Feature.FAFT_TESTING);
+    }
+  }
+
 }
