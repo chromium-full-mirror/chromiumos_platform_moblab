@@ -42,9 +42,11 @@ def get_all():
 def get(board=DEFAULT):
     """Get stable version for the given board.
 
-    @param board: Currently ignored! Name of the board.
+    @param board: Name of the board.
 
     @return: Stable build version configured by user in MoblabConfiguration
              service. If nothing was configured returns system default.
     """
-    return MoblabConfigurationRpcConnector.get_stable_build_version_resolved()
+    return MoblabConfigurationRpcConnector.get_stable_build_version_resolved(
+        board
+    )

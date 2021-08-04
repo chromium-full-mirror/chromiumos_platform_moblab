@@ -28,6 +28,7 @@ from moblab_common.proto.moblab_settings_pb2 import (
     MoblabSetting,
     Value,
 )
+from moblab_common import moblab_build_connector
 
 
 class ConfigurationRpcService(MoblabConfigurationServiceServicer):
@@ -35,6 +36,13 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         super(ConfigurationRpcService, self).__init__()
         self.pause_service = HostSchedulerPauseService()
         self._settings_service = SettingsService()
+        try:
+            self._moblab_build_connector = (
+                moblab_build_connector.MoblabBuildConnector()
+            )
+        except moblab_build_connector.MoblabBuildConnectorException:
+            logging.exception("Failed to initialize MoblabBuildConnector.")
+            raise
 
     async def pause_host_scheduler(self, request, context):
         """Request pause of host scheduling"""
@@ -82,7 +90,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
     async def get_stable_build_version(self, request, context):
         """Read stable build version configuration"""
         return GetStableBuildVersionResponse(
-            stable_version=self._get_stable_build_version()
+            stable_version=self._get_stable_build_version(request.board)
         )
 
     def set_stable_build_version(self, request, context):
@@ -138,35 +146,13 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
             duration=duration_pb2.Duration(seconds=(3 * 24 * 60 * 60))
         )
 
-    def _get_stable_build_version(self):
-        keys = [
-            MoblabSettingKey.STABLE_CROS_VERSION_DEFAULT,
-            MoblabSettingKey.STABLE_CROS_VERSION_OVERRIDE,
-        ]
-        settings = self._settings_service.get_settings(keys=keys)
-        default_version = next(
-            (
-                s
-                for s in settings
-                if s.key == MoblabSettingKey.STABLE_CROS_VERSION_DEFAULT
-            ),
-            None,
-        )
-        override_version = next(
-            (
-                s
-                for s in settings
-                if s.key == MoblabSettingKey.STABLE_CROS_VERSION_OVERRIDE
-            ),
-            None,
+    def _get_stable_build_version(self, board):
+        most_stable_build = self._moblab_build_connector.get_most_stable_build(
+            board
         )
         return StableVersion(
-            default_version=default_version.value.string_value
-            if default_version
-            else "R91-13904.77.0",
-            override_version=override_version.value.string_value
-            if override_version
-            else "",
+            default_version=most_stable_build,
+            override_version="",
         )
 
     def _map_to_requestors(self, setting_keys):

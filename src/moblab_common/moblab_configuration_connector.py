@@ -59,7 +59,7 @@ class MoblabConfigurationRpcConnector(object):
         cls.stub = None
 
     @classmethod
-    def get_stable_build_version(cls):
+    def get_stable_build_version(cls, board):
         """Read stable build version configuration.
 
         Raises:
@@ -70,7 +70,9 @@ class MoblabConfigurationRpcConnector(object):
         cls.connect()
         try:
             request = (
-                moblab_configuration_rpc_pb2.GetStableBuildVersionRequest()
+                moblab_configuration_rpc_pb2.GetStableBuildVersionRequest(
+                    board=board
+                )
             )
             response = cls.stub.get_stable_build_version(request)
             return response.stable_version if response else None
@@ -82,7 +84,7 @@ class MoblabConfigurationRpcConnector(object):
             )
 
     @classmethod
-    def get_stable_build_version_resolved(cls):
+    def get_stable_build_version_resolved(cls, board):
         """Read stable build version resolved between default and override.
 
         Raises:
@@ -91,7 +93,7 @@ class MoblabConfigurationRpcConnector(object):
         Returns:
             Configured Build Version string
         """
-        response = cls.get_stable_build_version()
+        response = cls.get_stable_build_version(board)
         if response.override_version:
             return response.override_version
         return response.default_version

@@ -39,7 +39,7 @@ _CONFIG = global_config.global_config
 ENABLE_DEVSERVER_TRIGGER_AUTO_UPDATE = _CONFIG.get_config_value(
         'CROS', 'enable_devserver_trigger_auto_update', type=bool,
         default=False)
-AFE = frontend_wrappers.RetryingAFE(timeout_min=(1.0/60), delay_sec=1)
+AFE = frontend_wrappers.RetryingAFE(timeout_min=(15.0/60), delay_sec=1)
 _CROS_VERSION_MAP = AFE.get_stable_version_map(AFE.CROS_IMAGE_TYPE)
 
 DEVICE_BASE_DIR = '/usr/local/tmp/au-provision'
