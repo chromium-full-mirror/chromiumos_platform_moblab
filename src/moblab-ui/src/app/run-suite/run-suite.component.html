@@ -51,7 +51,7 @@
           </div>
         </ng-template>
       </mat-tab>
-      <mat-tab label="FAFT">
+      <mat-tab label="FAFT" *ngIf="isFaftTestEnabled()">
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
