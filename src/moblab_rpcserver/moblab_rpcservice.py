@@ -161,7 +161,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             context.set_details(str(ex))
             return moblabrpc_pb2.RunSuiteResponse()
 
-    def provision_duts(self, request, context):
+    async def provision_duts(self, request, context):
         """Starts provision test suite.
 
         Args:
@@ -171,7 +171,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
           Empty message if started successfully.
         """
-        message = self.service.provision_duts(
+        message = await self.service.provision_duts(
             request.pool,
             request.milestone,
             request.build_version,
