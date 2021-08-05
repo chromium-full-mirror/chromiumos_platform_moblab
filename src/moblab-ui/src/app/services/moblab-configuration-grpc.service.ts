@@ -124,8 +124,9 @@ export class MoblabConfigurationGrpcService {
       );
   }
 
-  getStableBuildVersion(): Promise<StableCrOSVersion> {
+  getStableBuildVersion(board: string): Promise<StableCrOSVersion> {
     const request = new GetStableBuildVersionRequest();
+    request.setBoard(board);
     return this.configurationRpcClient
       .get_stable_build_version(request)
       .then((response: GetStableBuildVersionResponse) => {

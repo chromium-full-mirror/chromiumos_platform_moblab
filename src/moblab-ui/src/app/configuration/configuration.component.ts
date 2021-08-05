@@ -67,11 +67,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     validators: [Validators.required, gsURLValidator],
   });
 
-  userCrOSVersionForm = new FormControl(
-    '',
-    Validators.pattern(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/)
-  );
-  defaultCrOSVersionForm = new FormControl('');
   resultsRetentionPeriodForm = new FormControl('', [Validators.required, Validators.pattern(/^(([01]?[1-9]|2[0-3])h)$|^([1-7]d)$/)]);
 
   userCrOSVersionValue = 'None';
@@ -119,29 +114,13 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     });
     this.getCloudConfiguration();
     this.getDutWifiInfo();
-    this.defaultCrOSVersionForm.disable();
     this.initCanUpdateCloudConfigFlag();
-    await Promise.all([this.getStableCrOSVersion(), this.getResultsRetentionPeriod()]);
+    await Promise.all([this.getResultsRetentionPeriod()]);
     this.faftEnabled = this.globalInfo.isFeatureEnabled(Feature.FAFT_TESTING);
   }
 
   ngOnDestroy(): void {
     this.pauseStatusSubscription.unsubscribe();
-  }
-
-  public async getStableCrOSVersion() {
-    this.userCrOSVersionForm.disable();
-    try {
-      const version = await this.moblabConfigurationRpcService.getStableBuildVersion();
-      this.userCrOSVersionValue = version.UserOverrideVersion;
-      this.userCrOSVersionForm.setValue(version.UserOverrideVersion);
-      this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
-    } catch (error) {
-      console.log('getStableBuildVersion call failed with:' + error);
-      this.notificationsService.error('Failed to fetch stable Chrome OS version: ' + error.message);
-    } finally {
-      this.userCrOSVersionForm.enable();
-    }
   }
 
   public async getResultsRetentionPeriod() {
@@ -168,23 +147,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       this.notificationsService.error('Failed to set stable Chrome OS version: ' + error.message);
     } finally {
       this.resultsRetentionPeriodForm.enable();
-    }
-  }
-
-  public async setStableCrOSVersion(override_value: string) {
-    this.userCrOSVersionForm.disable();
-    try {
-      const version = await this.moblabConfigurationRpcService.setStableBuildVersion(
-        override_value
-      );
-      this.userCrOSVersionValue = version.UserOverrideVersion;
-      this.userCrOSVersionForm.setValue(version.UserOverrideVersion);
-      this.defaultCrOSVersionForm.setValue(version.DefaultVersion);
-    } catch (error) {
-      console.log('setStableBuildVersion call failed with:' + error);
-      this.notificationsService.error('Failed to set stable Chrome OS version: ' + error.message);
-    } finally {
-      this.userCrOSVersionForm.enable();
     }
   }
 
@@ -286,13 +248,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       !this.dutWifiPasswordForm.errors &&
       (this.lastFetchedDutWifiName !== this.dutWifiNameForm.value ||
         this.lastFetchedDutWifiPassword !== this.dutWifiPasswordForm.value)
-    );
-  }
-
-  isStableCrOsVersionValidForSubmit() {
-    return (
-      this.userCrOSVersionForm.value !== this.userCrOSVersionValue &&
-      !this.userCrOSVersionForm.errors
     );
   }
 

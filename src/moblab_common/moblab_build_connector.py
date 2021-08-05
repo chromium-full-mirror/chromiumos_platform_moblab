@@ -19,10 +19,7 @@ from google.auth import exceptions as auth_exceptions
 from google.chromeos.moblab_v1beta1.services.build_service.client import (
     BuildServiceClient,
 )
-from google.chromeos.moblab_v1beta1.types import (
-    build_service,
-    resources
-)
+from google.chromeos.moblab_v1beta1.types import build_service, resources
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 DEFAULT_PAGE_SIZE = 500
@@ -30,13 +27,15 @@ DEFAULT_PAGE_SIZE = 500
 
 class MoblabBuildConnectorException(Exception):
     """Generic exception for this module."""
+
     pass
+
 
 BuildStatus = enum.Enum(
     "BuildStatus", ["AVAILABLE", "FAILED", "RUNNING", "ABORTED"]
 )
 
-BuildVersion = collections.namedtuple('BuildVersion', ['version', 'status'])
+BuildVersion = collections.namedtuple("BuildVersion", ["version", "status"])
 
 API_TO_INTERNAL_BUILD_STATUS_MAP = {
     resources.Build.BuildStatus.PASS: BuildStatus.AVAILABLE,
@@ -44,11 +43,21 @@ API_TO_INTERNAL_BUILD_STATUS_MAP = {
     resources.Build.BuildStatus.RUNNING: BuildStatus.RUNNING,
     resources.Build.BuildStatus.ABORTED: BuildStatus.ABORTED,
 }
+
+
 class MoblabBuildConnector(object):
     """
     Class that provides RPC server an interface to access build resources by
     using Moblab API.
     """
+
+    @classmethod
+    def build_target_path(cls, build_target):
+        """Return a fully-qualified build_target string."""
+        return google.api_core.path_template.expand(
+            "buildTargets/{build_target}",
+            build_target=build_target,
+        )
 
     @classmethod
     def model_path(cls, build_target, model):
@@ -101,6 +110,16 @@ class MoblabBuildConnector(object):
                 "Encountered API error when attempting to list builds."
             ) from e
 
+    def _find_most_stable_build(self, request):
+        try:
+            return self.build_service_client.find_most_stable_build(
+                request
+            ).build
+        except GoogleAPICallError as e:
+            raise MoblabBuildConnectorException(
+                "Encountered API error when attempting to find the most stable build."
+            ) from e
+
     def list_available_milestones(
         self, build_target, model, page_size=DEFAULT_PAGE_SIZE, page_token=None
     ):
@@ -131,6 +150,22 @@ class MoblabBuildConnector(object):
         return [
             self._parse_milestone(build.milestone) for build in build_results
         ]
+
+    def get_most_stable_build(self, build_target):
+        """Gets the most stable build for the given build target.
+
+        Args:
+            build_target (str): Build target name.
+
+        Returns:
+            string: most stable build version.
+        """
+        request = build_service.FindMostStableBuildRequest(
+            build_target=self.build_target_path(build_target),
+        )
+        build = self._find_most_stable_build(request)
+        milestone = self._parse_milestone(build.milestone)
+        return "R{}-{}".format(milestone, build.build_version)
 
     def _convert_to_internal_build_status(self, status):
         if status in API_TO_INTERNAL_BUILD_STATUS_MAP:
@@ -173,7 +208,7 @@ class MoblabBuildConnector(object):
         return [
             BuildVersion(
                 version=build.build_version,
-                status=self._convert_to_internal_build_status(build.status)
+                status=self._convert_to_internal_build_status(build.status),
             )
             for build in build_results
         ]

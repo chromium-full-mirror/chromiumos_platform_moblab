@@ -35,7 +35,9 @@ class MoblabConfigurationRpcConnectorTest(unittest.TestCase):
         )
 
         res = (
-            MoblabConfigurationRpcConnector.get_stable_build_version_resolved()
+            MoblabConfigurationRpcConnector.get_stable_build_version_resolved(
+                "board"
+            )
         )
         self.assertEqual(res, "override_version")
 

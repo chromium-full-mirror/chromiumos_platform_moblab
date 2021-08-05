@@ -83,8 +83,9 @@ enum PauseRequestor {
   PAUSE_REQUESTOR_PAUSED_BY_USER = 1;
 }
 
-// NEXT_TAG = 1
+// NEXT_TAG = 2
 message GetStableBuildVersionRequest {
+  string board = 1;
 }
 
 // NEXT_TAG = 2
