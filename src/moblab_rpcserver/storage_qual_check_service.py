@@ -22,8 +22,8 @@ class StorageQualCheckService(object):
     def __init__(self):
         self.service = moblab_service.MoblabService()
 
-    def _get_pool(self, pool_name):
-        duts = self.service.list_duts()
+    async def _get_pool(self, pool_name):
+        duts = await self.service.list_duts()
         if pool_name is None:
             return duts
         pool = []
@@ -35,7 +35,9 @@ class StorageQualCheckService(object):
                 pool.append(dut)
         return pool
 
-    def check_setup(self, pool_name, variation=0):  # 0 - VARIATION_NOT_SET
+    async def check_setup(
+        self, pool_name, variation=0
+    ):  # 0 - VARIATION_NOT_SET
         """Tests the moblab's connected DUTs to see if the current
         configuration is valid for storage qual run.
         """
@@ -48,7 +50,7 @@ class StorageQualCheckService(object):
             return
 
         # get the pool of the host this test is running on
-        pool = self._get_pool(pool_name)
+        pool = await self._get_pool(pool_name)
 
         # verify that the pool is set up to run storage qual, with correct
         # number of DUTs and correct labels
