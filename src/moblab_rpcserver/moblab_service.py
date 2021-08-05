@@ -584,11 +584,11 @@ class MoblabService(object):
 
         return "Suite started (suite job ID: {})".format(suite_job_id)
 
-    def provision_duts(self, pool, milestone, build_version):
+    async def provision_duts(self, pool, milestone, build_version):
         ModelBoard = namedtuple("ModelBoard", ["model", "board"])
 
         boards = {}
-        duts = self.list_duts()
+        duts = await self.list_duts()
         for dut in duts:
             labels = dut.get("labels", [])
             pools = self.extract_pool_from_labels(labels)
