@@ -243,7 +243,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
-    def run_storage_qualification_suite(self, request, _context):
+    async def run_storage_qualification_suite(self, request, _context):
         """Sets off hardware storage qualification suite run.
 
         Args:
@@ -268,7 +268,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             pool_name = request.pool
             if pool_name == "":
                 pool_name = None
-            self.storage_qual_check_service.check_setup(
+            await self.storage_qual_check_service.check_setup(
                 pool_name, request.variation
             )
         except StorageQualCheckError as ex:
@@ -1224,7 +1224,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         self.service.download_service_account()
         return empty_pb2.Empty()
 
-    def validate_storage_qual_setup(self, request, _context):
+    async def validate_storage_qual_setup(self, request, _context):
         """Validates the DUTs setup for storage qual run.
 
         Storage qual requires 3 DUTs with 3 different labels to be configured.
@@ -1235,7 +1235,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         if pool_name == "":
             pool_name = None
         try:
-            self.storage_qual_check_service.check_setup(pool_name)
+            await self.storage_qual_check_service.check_setup(pool_name)
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)
             _context.set_details(str(ex))
