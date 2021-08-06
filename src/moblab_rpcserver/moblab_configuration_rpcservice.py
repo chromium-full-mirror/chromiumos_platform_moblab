@@ -36,6 +36,9 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         super(ConfigurationRpcService, self).__init__()
         self.pause_service = HostSchedulerPauseService()
         self._settings_service = SettingsService()
+        self._moblab_build_connector = None
+
+    def _init_moblab_build_connector(self):
         try:
             self._moblab_build_connector = (
                 moblab_build_connector.MoblabBuildConnector()
@@ -43,6 +46,13 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         except moblab_build_connector.MoblabBuildConnectorException:
             logging.exception("Failed to initialize MoblabBuildConnector.")
             raise
+
+    @property
+    def moblab_build_connector(self):
+        if not self._moblab_build_connector:
+            self._init_moblab_build_connector()
+
+        return self._moblab_build_connector
 
     async def pause_host_scheduler(self, request, context):
         """Request pause of host scheduling"""
@@ -147,7 +157,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         )
 
     def _get_stable_build_version(self, board):
-        most_stable_build = self._moblab_build_connector.get_most_stable_build(
+        most_stable_build = self.moblab_build_connector.get_most_stable_build(
             board
         )
         return StableVersion(
