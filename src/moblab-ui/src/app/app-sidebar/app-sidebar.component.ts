@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {GlobalInfoService} from 'app/services/services.module';
 import {MoblabSettingsService} from 'app/services/moblab-settings.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
+import {BuildTargetAccessService} from 'app/services/build-target-access.service';
 import {Feature} from 'app/services/services.module';
 import {MoblabSettingsConstains} from '../constants';
 import {
@@ -21,6 +22,8 @@ export class AppSidebarComponent implements OnInit {
   // (so we don't hardcode these numbers in multiple places)
   mobmonitor_port = '9991';
 
+  build_access_permission_request_link =
+    'https://b.corp.google.com/issues/new?component=1038089&template=1608353';
   mobmonitor_link = this._format_mobmonitor_link(
     window.location.hostname,
     this.mobmonitor_port
@@ -32,12 +35,14 @@ export class AppSidebarComponent implements OnInit {
   cloudConfigEnabled: boolean;
   cloudConfigError: boolean;
   notificationsList: Notification[] = [];
+  modelsWithoutAccess: string[] = [];
 
   constructor(
     private globalInfo: GlobalInfoService,
     private settingsService: MoblabSettingsService,
     private configSetupService: ConfigSetupService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private buildTargetAccessService: BuildTargetAccessService
   ) {
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabs, {
       route: '/manage_dut',
@@ -139,6 +144,11 @@ export class AppSidebarComponent implements OnInit {
     this.notificationsService.notificationsObservable.subscribe(
       notifications => {
         this.notificationsList = notifications;
+      }
+    );
+    this.buildTargetAccessService.modelsWithoutAccessObservable.subscribe(
+      models => {
+        this.modelsWithoutAccess = models;
       }
     );
   }

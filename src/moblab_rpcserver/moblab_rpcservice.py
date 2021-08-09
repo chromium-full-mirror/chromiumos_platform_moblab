@@ -416,15 +416,30 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def list_build_targets(self, request, _context):
         """
-            Returns build targets associated with the given model.
+            Returns build targets associated with an account.
         Args:
-            request: ListBuildTargetsRequest object with model parameter.
+            request: ListBuildTargetsRequest object.
             _context: grpc.server.Context
         Returns:
             ListBuildTargetsResponse
         """
-        build_targets = self.service.list_usable_build_targets(request.model)
+        build_targets = self.service.list_build_targets()
         response = moblabrpc_pb2.ListBuildTargetsResponse(
+            build_targets=build_targets
+        )
+        return response
+
+    def list_build_targets_by_model(self, request, _context):
+        """
+            Returns build targets associated with the given model.
+        Args:
+            request: ListBuildTargetsByModelRequest object with model parameter.
+            _context: grpc.server.Context
+        Returns:
+            ListBuildTargetsByModelResponse
+        """
+        build_targets = self.service.list_usable_build_targets(request.model)
+        response = moblabrpc_pb2.ListBuildTargetsByModelResponse(
             build_targets=build_targets
         )
         return response

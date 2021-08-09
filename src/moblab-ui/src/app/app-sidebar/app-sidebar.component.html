@@ -38,6 +38,21 @@
       </span>
     </div>
   </mat-toolbar>
+
+  <mat-toolbar class="mat-toolbar-warn" *ngIf="this.modelsWithoutAccess?.length">
+    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+      <span> This account does not have permission to run tests on </span>
+      <mat-chip-list>
+        <mat-chip *ngFor="let model of this.modelsWithoutAccess" color="primary" selected="true">
+          {{ model }}
+        </mat-chip>
+      </mat-chip-list>
+      <span> devices, please request access
+        <a href="{{build_access_permission_request_link}}" target="_blank">here.</a>
+      </span>
+    </div>
+  </mat-toolbar>
+
   <mat-toolbar class="mat-toolbar-warn" *ngIf="this.pauseRequestors?.length">
     <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
       <span>Job Scheduler is paused due to:</span>

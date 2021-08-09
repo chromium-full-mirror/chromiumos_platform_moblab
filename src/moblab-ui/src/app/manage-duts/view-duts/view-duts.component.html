@@ -69,8 +69,9 @@
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns" matTooltip="{{this.getDisabledReason(row)}}"
-      [routerLink]="row.getIsConnected() && row.getIsEnrolled() ? ['/dut_detail', row.getIp()] : []"
-      [attr.notConnected]="!row.getIsConnected()" [hidden]="this.hideUnenrolledDuts && !row.getIsEnrolled() "></tr>
+      [routerLink]="row.getIsConnected() && row.getIsEnrolled() && this.hasAccessToBuildTarget(row) ? ['/dut_detail', row.getIp()] : []"
+      [attr.notConnected]="!row.getIsConnected()" [attr.noAccessToBuildTarget]="!this.hasAccessToBuildTarget(row)"
+      [hidden]="this.hideUnenrolledDuts && !row.getIsEnrolled() "></tr>
   </table>
   <div id="loading-overlay" *ngIf="loading">
     <div class="loading-spinner-wrapper">

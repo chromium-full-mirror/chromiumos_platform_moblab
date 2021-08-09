@@ -759,6 +759,19 @@ class MoblabService(object):
                 )
         return list(build_targets)
 
+    def list_build_targets(self):
+        """List build targets associated with the given model.
+
+        Returns:
+            List of build target strings.
+        """
+        try:
+            return self.moblab_build_connector.list_build_targets()
+        except moblab_build_connector.MoblabBuildConnectorException:
+            logging.exception(
+                "Encountered error trying to list build targets."
+            )
+
     def list_usable_milestones(self, build_target, model):
         """
         Returns milestones available for a given model/build_target, both

@@ -2,7 +2,10 @@ import {Injectable} from '@angular/core';
 import {Empty} from 'google-protobuf/google/protobuf/empty_pb';
 import * as grpcWeb from 'grpc-web';
 
-import {MoblabRpcServiceClient} from './moblabrpc_grpc_web_pb';
+import {
+  MoblabRpcServiceClient,
+  MoblabRpcServicePromiseClient,
+} from './moblabrpc_grpc_web_pb';
 import {ConfigSetupService} from './moblab-configuration-alerting.service';
 import {environment} from '../../environments/environment';
 import {
@@ -48,7 +51,8 @@ import {
   GetVersionInfoResponse,
   Job,
   ListBuildTargetsRequest,
-  ListBuildTargetsResponse,
+  ListBuildTargetsByModelRequest,
+  ListBuildTargetsByModelResponse,
   ListBuildVersionsRequest,
   ListBuildVersionsResponse,
   ListConnectedDutsFirmwareResponse,
@@ -100,6 +104,7 @@ import {
 @Injectable({providedIn: 'root'})
 export class MoblabGrpcService {
   moblabRpcService: MoblabRpcServiceClient = null;
+  moblabRpcServicePromiseClient: MoblabRpcServicePromiseClient = null;
 
   constructor(private configSetupService: ConfigSetupService) {
     const url = new URL(window.location.href);
@@ -110,6 +115,9 @@ export class MoblabGrpcService {
     console.log(service_url);
 
     this.moblabRpcService = new MoblabRpcServiceClient(service_url.toString());
+    this.moblabRpcServicePromiseClient = new MoblabRpcServicePromiseClient(
+      service_url.toString()
+    );
   }
 
   /** Method for submitting feedback and screenshots to Moblab-associated GCS
@@ -390,7 +398,7 @@ export class MoblabGrpcService {
    *    tests in the suite. If not empty, only tests in this list will be
    *    run as a part of suite execution.
    * */
-   runFAFTSuite(
+  runFAFTSuite(
     callback: (response: RunSuiteResponse) => void,
     error_callback: (err: grpcWeb.Error, response: RunSuiteResponse) => void,
     suite: string,
@@ -468,7 +476,7 @@ export class MoblabGrpcService {
       (err: grpcWeb.Error, response: ListConnectedDutsResponse) => {
         if (err) {
           console.log(err);
-          error_callback("Failed to fetch DUTs");
+          error_callback('Failed to fetch DUTs');
         } else {
           callback(response.getDutsList());
         }
@@ -747,7 +755,7 @@ export class MoblabGrpcService {
     );
   }
 
-  listBuildTargets(
+  listBuildTargetsByModel(
     model: string,
     callback: (x: string[]) => void,
     errorHandlingCallback: (err_msg: string) => void
@@ -757,13 +765,13 @@ export class MoblabGrpcService {
      *  @param callback: function invoked in success scenarios.
      *  @param error_callback: function invoked in failure scenarios.
      * */
-    const request = new ListBuildTargetsRequest();
+    const request = new ListBuildTargetsByModelRequest();
     request.setModel(model);
 
-    this.moblabRpcService.list_build_targets(
+    this.moblabRpcService.list_build_targets_by_model(
       request,
       {},
-      (err: grpcWeb.Error, response: ListBuildTargetsResponse) => {
+      (err: grpcWeb.Error, response: ListBuildTargetsByModelResponse) => {
         if (err) {
           errorHandlingCallback(err.message);
         } else {
@@ -771,6 +779,16 @@ export class MoblabGrpcService {
         }
       }
     );
+  }
+
+  async listBuildTargetsPromise(): Promise<string[]> {
+    /** Returns the build_target(s) that the account has access to as promise.
+     * */
+    const request = new ListBuildTargetsRequest();
+    const response = await this.moblabRpcServicePromiseClient.list_build_targets(
+      request
+    );
+    return response.getBuildTargetsList();
   }
 
   listMilestones(
@@ -1509,7 +1527,7 @@ export class MoblabGrpcService {
     callback: () => void,
     errorHandlingCallback: (errorMsg: string) => void,
     dut_hostname: string,
-    servo_serial_number: string,
+    servo_serial_number: string
   ) {
     const request = new AddServoRequest();
     request.setDutHostname(dut_hostname);

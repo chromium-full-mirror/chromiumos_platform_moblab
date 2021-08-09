@@ -120,6 +120,16 @@ class MoblabBuildConnector(object):
                 "Encountered API error when attempting to find the most stable build."
             ) from e
 
+    def _list_build_targets(self, request):
+        try:
+            return self.build_service_client.list_build_targets(
+                request
+            ).build_targets
+        except GoogleAPICallError as e:
+            raise MoblabBuildConnectorException(
+                "Encountered API error when attempting to list build targets."
+            ) from e
+
     def list_available_milestones(
         self, build_target, model, page_size=DEFAULT_PAGE_SIZE, page_token=None
     ):
@@ -268,3 +278,28 @@ class MoblabBuildConnector(object):
             )
         )
         return self.build_service_client.stage_build(request)
+
+    def list_build_targets(
+        self,
+        page_size=DEFAULT_PAGE_SIZE,
+        page_token=None,
+    ):
+        """List all build targets that an account has access to.
+
+        Args:
+            page_size (int): The number of milestones to return in the response.
+                The default size is DEFAULT_PAGE_SIZE.
+            page_token (str): The page token, received from a previous
+                ``ListBuilds`` call. Provide this to retrieve the subsequent
+                page.
+
+        Returns:
+            list of string representating the build targets.
+        """
+        request = build_service.ListBuildTargetsRequest(
+            page_size=page_size,
+            page_token=page_token,
+        )
+
+        build_targets = self._list_build_targets(request)
+        return [build_target.name for build_target in build_targets]

@@ -19,6 +19,7 @@ service MoblabRpcService {
 
   rpc list_connected_duts (ListConnectedDutsRequest) returns (ListConnectedDutsResponse) {}
   rpc list_build_targets (ListBuildTargetsRequest) returns (ListBuildTargetsResponse) {}
+  rpc list_build_targets_by_model (ListBuildTargetsByModelRequest) returns (ListBuildTargetsByModelResponse) {}
   rpc list_milestones (ListMilestonesRequest) returns (ListMilestonesResponse) {}
   rpc list_build_versions (ListBuildVersionsRequest) returns (ListBuildVersionsResponse) {}
   rpc list_models (ListModelsRequest) returns (ListModelsResponse) {}
@@ -234,13 +235,21 @@ message ListConnectedDutsResponse {
   repeated ConnectedDutInfo duts = 1;
 }
 
-// NEXT_TAG = 2
 message ListBuildTargetsRequest {
-  string model = 1;
 }
 
 // NEXT_TAG = 2
 message ListBuildTargetsResponse {
+  repeated string build_targets = 1;
+}
+
+// NEXT_TAG = 2
+message ListBuildTargetsByModelRequest {
+  string model = 1;
+}
+
+// NEXT_TAG = 2
+message ListBuildTargetsByModelResponse {
   repeated string build_targets = 1;
 }
 

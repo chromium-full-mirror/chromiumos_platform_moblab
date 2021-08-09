@@ -5,11 +5,14 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {NotificationsService} from 'app/services/notifications.service';
+import {BuildTargetAccessService} from 'app/services/build-target-access.service';
 
 import {INT_TO_DUT_STATUS} from '../../utils/proto_helpers';
 import {TableHeaderSelectorComponent} from '../../widgets/table-header-selector/table-header-selector.component';
 
 const NOT_CONNECTED_MESSAGE = 'DUT not reachable by SSH';
+const NO_ACCESS_MESSAGE =
+  'The account does not have access to this build target';
 
 @Component({
   selector: 'app-view-duts',
@@ -30,7 +33,7 @@ export class ViewDutsComponent implements OnInit {
     'model',
     'status',
     'pools',
-    'labels'
+    'labels',
   ];
 
   loading = false;
@@ -43,10 +46,12 @@ export class ViewDutsComponent implements OnInit {
   filterLabels = true;
 
   selection = new SelectionModel<ConnectedDutInfo>(true, []);
+  buildTargets: string[] = [];
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
     private notificationsService: NotificationsService,
+    private buildTargetAccessService: BuildTargetAccessService
   ) { }
 
   @ViewChild(MatSort, {}) sort: MatSort;
@@ -68,6 +73,11 @@ export class ViewDutsComponent implements OnInit {
 
   ngOnInit() {
     this.getConnectedDuts();
+    this.buildTargetAccessService.buildTargetsObservable.subscribe(
+      buildTargets => {
+        this.buildTargets = buildTargets;
+      }
+    );
   }
 
   assignDuts(duts: ConnectedDutInfo[]) {
@@ -79,10 +89,11 @@ export class ViewDutsComponent implements OnInit {
     this.moblabGrpcService.listConnectedDuts(
       (connectedDuts: ConnectedDutInfo[]) => {
         this.loading = false;
+        this.buildTargetAccessService.updateModelsWithoutAccess(connectedDuts);
         this.assignDuts(connectedDuts);
         this.unselectAll();
       },
-      (message) => {
+      (message: string) => {
         this.loading = false;
         this.assignDuts([]);
         this.unselectAll();
@@ -91,8 +102,18 @@ export class ViewDutsComponent implements OnInit {
     );
   }
 
+  hasAccessToBuildTarget(dut: ConnectedDutInfo) {
+    // skip the access check if dut is not enrolled or API has not returned yet
+    if (this.buildTargets.length === 0 || !dut.getIsEnrolled()) {
+      return true;
+    }
+    return this.buildTargets.includes(dut.getBuildTarget());
+  }
+
   getDisabledReason(dut: ConnectedDutInfo) {
-    if (!dut.getIsConnected()) {
+    if (!this.hasAccessToBuildTarget(dut)) {
+      return NO_ACCESS_MESSAGE;
+    } else if (!dut.getIsConnected()) {
       return NOT_CONNECTED_MESSAGE;
     } else {
       return '';
@@ -162,7 +183,10 @@ export class ViewDutsComponent implements OnInit {
       });
     } else if (event.selection === this.selectOptions[2]) {
       this.duts.data.filter(row => {
-        if (row.getStatus() === ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED) {
+        if (
+          row.getStatus() ===
+          ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED
+        ) {
           this.selection.select(row);
         } else {
           this.selection.deselect(row);
