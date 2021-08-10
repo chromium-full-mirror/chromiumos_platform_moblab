@@ -107,7 +107,8 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
         detach=True,
         volumes=['default_results:/results',
                  'default_results:/usr/local/autotest/results',
-                 'default_shadowconfig:/shadow_config']
+                 'default_shadowconfig:/shadow_config'],
+        environment=["MOBLAB=1"]
     )
 
 @contextmanager
