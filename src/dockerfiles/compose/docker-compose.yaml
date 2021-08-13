@@ -554,24 +554,6 @@ services:
     dns:
       - 192.168.100.51
 ##############################################################################
-  test-lab-wiring:
-    container_name:  test-lab-wiring
-    image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/test-lab-wiring:${TEST_LAB_WIRING:-release}
-    user:  moblab
-    restart: unless-stopped
-    volumes:
-      - logs:/var/log/moblab
-      - moblab_home:/home/moblab:ro
-
-    networks:
-      - moblab
-
-    depends_on:
-      - dns
-
-    dns:
-      - 192.168.100.51
-##############################################################################
 
 volumes:
   db_data: {}

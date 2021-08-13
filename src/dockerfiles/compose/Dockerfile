@@ -34,7 +34,6 @@ ARG DNS_VER
 ARG LOGROTATE_VER
 ARG DUT_MANAGER_VER
 ARG DUT_MANAGER_STORAGE_VER
-ARG TEST_LAB_WIRING_VER
 
 
 ENV LABEL="${LABEL}"
@@ -75,7 +74,6 @@ RUN ./override_service_version.sh DNS ${DNS_VER:-${BUILD_VERSION}}
 RUN ./override_service_version.sh LOGROTATE ${LOGROTATE_VER:-${BUILD_VERSION}}
 RUN ./override_service_version.sh DUT_MANAGER ${DUT_MANAGER_VER:-${BUILD_VERSION}}
 RUN ./override_service_version.sh DUT_MANAGER_STORAGE ${DUT_MANAGER_STORAGE_VER:-${BUILD_VERSION}}
-RUN ./override_service_version.sh TEST_LAB_WIRING ${TEST_LAB_WIRING_VER:-${BUILD_VERSION}}
 
 
 ENTRYPOINT ["/compose_startup.sh"]

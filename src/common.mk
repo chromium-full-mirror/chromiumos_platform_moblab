@@ -30,8 +30,7 @@ all:	autotest \
 		rpcserver \
 		ssp \
 		ui \
-		watchtower \
-		test-lab-wiring
+		watchtower
 
 #TODO refactor the common rules into a single rule.
 
@@ -226,11 +225,6 @@ infra-protos: protoc
 	docker push ${REGISTRY_URI}/infra-protos:${LABEL}
 
 
-test-lab-wiring: export DOCKER_BUILDKIT := 1
-test-lab-wiring: infra-protos
-	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/test-lab-wiring:${LABEL} \
-		-f dockerfiles/test_lab_wiring/Dockerfile .
-	docker push ${REGISTRY_URI}/test-lab-wiring:${LABEL}
 
 
 moblab:	autotest \
