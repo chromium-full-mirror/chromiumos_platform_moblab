@@ -1,0 +1,23 @@
+<div class="loading-overlay-wrapper">
+    <app-loading-overlay></app-loading-overlay>
+</div>
+<mat-card *ngIf="stageBuildNotification" class="notification-banner {{ stageBuildNotification.cssClass }}">
+    <mat-icon class="notification-icon {{ stageBuildNotification.cssClass }}">{{ stageBuildNotification.icon }}
+    </mat-icon>
+    {{ stageBuildNotification.message }}
+</mat-card>
+<h2 mat-dialog-title>Access Test Build</h2>
+<mat-dialog-content class="mat-typography">
+    <app-build-select-forms [hidePoolSelector]="true" (allRequiredFieldsSet)="onBuildSet($event)"
+        (formLoading)="updateLoadingOverlay($event.message)" (formLoaded)="hideLoadingOverlay()"
+        (buildVersionUnselected)="onBuildVersionUnselected()">
+    </app-build-select-forms>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button *ngIf="!isStageBuildSucceeded()" mat-button (click)="stageBuild()"
+        [disabled]="this.stageBuildButtonDisabled">Start</button>
+    <a href="{{buildBucketUrl}}" target="_blank" *ngIf="isStageBuildSucceeded()" [mat-dialog-close]="returnMessage"
+        mat-button>Go to Build Bucket</a>
+</mat-dialog-actions>

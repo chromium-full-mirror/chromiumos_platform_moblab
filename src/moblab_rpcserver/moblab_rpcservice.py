@@ -181,6 +181,27 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             context.set_details(message)
         return empty_pb2.Empty()
 
+    def stage_build(self, request, context):
+        """Stage the build to the bucket configured for this moblab.
+
+        Args:
+          request: StageBuildRequest object with parameters describing the
+          model, build target and build version to be staged.
+          context: grpc.server.Context
+        Returns:
+          StageBuildRequest object with a string bucket name.
+        """
+        try:
+            return moblabrpc_pb2.StageBuildResponse(
+                build_bucket=self.service._stage_build(
+                    request.model, request.build_target, request.build_version
+                )
+            )
+        except moblab_service.MoblabRpcError as ex:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(ex))
+            raise
+
     def run_cts_suite(self, request, _context):
         """Sets off CTS suite run.
 

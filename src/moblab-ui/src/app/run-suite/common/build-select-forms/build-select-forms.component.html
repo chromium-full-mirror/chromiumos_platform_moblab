@@ -19,5 +19,6 @@
 </app-basic-autocomplete-selector>
 
 <app-basic-autocomplete-selector #poolSelector id="poolSelector" [title]="'Pool (Optional):'"
-    [placeholder]="['Select a pool']" [options]="pools" [isShown]="true" (select)="poolChanged($event.value)">
+    [placeholder]="['Select a pool']" [options]="pools" [isShown]="true" (select)="poolChanged($event.value)"
+    *ngIf="!this.hidePoolSelector">
 </app-basic-autocomplete-selector>
