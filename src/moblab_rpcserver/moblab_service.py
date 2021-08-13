@@ -717,7 +717,7 @@ class MoblabService(object):
             build_version (string): Build version to be applied to DUT for
                 testing.
         Returns:
-            Nothing.
+            gcs bucket name configured on this moblab.
         """
         self.moblab_build_connector.stage_build(
             build_target, model, build_version, self.moblab_bucket_name
@@ -729,7 +729,7 @@ class MoblabService(object):
             if self.moblab_build_connector.check_build_stage_status(
                 build_target, model, build_version, self.moblab_bucket_name
             ):
-                return
+                return self.moblab_bucket_name
             time.sleep(sleep_interval)
             # every failure, increase wait interval by 1.5 times
             # ( exponential backoff, of sorts )

@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  Input,
   Output,
   ViewChild,
 } from '@angular/core';
@@ -32,6 +33,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   @ViewChild('buildSelector') buildSelector;
   @ViewChild('poolSelector') poolSelector;
 
+  @Input() hidePoolSelector?: boolean = false;
   @Output() formLoading = new EventEmitter();
   @Output() formLoaded = new EventEmitter();
   @Output() allRequiredFieldsSet = new EventEmitter();
@@ -64,7 +66,9 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     this.boardSelector.disable(SELECT_MODEL_PROMPT);
     this.milestoneSelector.disable(SELECT_BUILD_TARGET_PROMPT);
     this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
-    this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
+    if (!this.hidePoolSelector) {
+      this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
+    }
     this.changeDetector.detectChanges();
   }
 
@@ -206,7 +210,9 @@ export class BuildSelectFormsComponent implements AfterViewInit {
 
   buildVersionChanged(newBuildVersion: string): void {
     this.buildVersionName = newBuildVersion;
-    this.poolSelector.enable();
+    if (!this.hidePoolSelector) {
+      this.poolSelector.enable();
+    }
     this.buildChanged(this.getBuildFormattedString(), this.buildTargetName);
     this.emitBuildSelections();
   }
@@ -214,6 +220,9 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   buildChanged(build: string, board: string) {
     if (build) {
       this.selectedBuild = build;
+      if (this.hidePoolSelector) {
+        return;
+      }
       this.moblabGrpcService.listPools(
         (pools: string[]) => {
           this.updatePools(pools);
@@ -272,7 +281,9 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   unselectBuildVersion() {
     this.buildVersionName = null;
     this.buildSelector.clearSelection();
-    this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
+    if (!this.hidePoolSelector) {
+      this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
+    }
     this.buildVersionUnselected.emit();
   }
 }

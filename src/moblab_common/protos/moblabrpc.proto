@@ -16,6 +16,7 @@ service MoblabRpcService {
   rpc run_faft_suite (RunFAFTSuiteRequest)
     returns (RunSuiteResponse) {}
   rpc provision_duts (ProvisionDutsRequest) returns (google.protobuf.Empty) {}
+  rpc stage_build (StageBuildRequest) returns (StageBuildResponse) {}
 
   rpc list_connected_duts (ListConnectedDutsRequest) returns (ListConnectedDutsResponse) {}
   rpc list_build_targets (ListBuildTargetsRequest) returns (ListBuildTargetsResponse) {}
@@ -112,6 +113,18 @@ message ProvisionDutsRequest {
   string milestone = 1;
   string build_version = 2;
   string pool = 3;
+}
+
+// NEXT_TAG = 4
+message StageBuildRequest {
+  string model = 1;
+  string build_target = 2;
+  string build_version = 3;
+}
+
+// NEXT_TAG = 2
+message StageBuildResponse {
+  string build_bucket = 1;
 }
 
 // NEXT_TAG = 8

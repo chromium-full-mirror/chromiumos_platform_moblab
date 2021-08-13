@@ -1,0 +1,32 @@
+.loading-overlay-wrapper {
+  display: block;
+  font-size: 13px;
+  position: relative;
+  margin-bottom: 35px;
+  margin-top: 0px;
+}
+
+.notification-banner {
+  margin-bottom: 16px;
+}
+
+.notification-banner.success {
+  background-color: #CEEAD6;
+}
+
+.notification-banner.error {
+  background-color: #FAD2CF;
+}
+
+.notification-icon {
+  vertical-align: middle;
+}
+
+.notification-icon.success {
+  color: #0D652D;
+  vertical-align: middle;
+}
+
+.notification-icon.error {
+  color: #A50E0E;
+}

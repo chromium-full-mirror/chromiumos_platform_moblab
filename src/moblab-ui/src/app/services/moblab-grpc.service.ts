@@ -98,6 +98,8 @@ import {
   FirmwareUpdateCommandOutput,
   ValidateStorageQualSetupRequest,
   ProvisionDutsRequest,
+  StageBuildRequest,
+  StageBuildResponse,
   BuildItem,
 } from './moblabrpc_pb';
 
@@ -462,6 +464,23 @@ export class MoblabGrpcService {
         }
       }
     );
+  }
+
+  async stageBuildPromise(
+    model: string,
+    build_target: string,
+    build_version: string
+  ): Promise<string> {
+    /** Stage the given build on the bucket configured on this moblab.
+     * */
+    const request = new StageBuildRequest();
+    request.setModel(model);
+    request.setBuildTarget(build_target);
+    request.setBuildVersion(build_version);
+    const response = await this.moblabRpcServicePromiseClient.stage_build(
+      request
+    );
+    return response.getBuildBucket();
   }
 
   listConnectedDuts(

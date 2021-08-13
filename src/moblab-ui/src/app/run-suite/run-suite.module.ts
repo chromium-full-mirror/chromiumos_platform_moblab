@@ -58,6 +58,7 @@ import {FAFTRunComponent} from './custom-run-suite/faft/faft.component';
   ],
   exports: [
     BasicAutocompleteSelectorComponent,
+    BuildSelectFormsComponent,
     BvtComponent,
     CtsRunComponent,
     MemoryQualComponent,

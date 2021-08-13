@@ -37,6 +37,7 @@ import {
 
 import {PipesModule} from 'app/pipes/pipes.module';
 import {ProvisionDialogComponent} from './provision-dialog/provision-dialog.component';
+import {StageBuildDialogComponent} from './stage-build-dialog/stage-build-dialog.component';
 
 @NgModule({
   imports: [
@@ -76,6 +77,7 @@ import {ProvisionDialogComponent} from './provision-dialog/provision-dialog.comp
     FirmwareUpdateConfirmDialog,
     FirmwareUpdateResultDialog,
     ProvisionDialogComponent,
+    StageBuildDialogComponent,
   ],
   exports: [ManageDutsComponent],
 })
