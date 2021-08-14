@@ -27,6 +27,7 @@ substitutions:
   _LOGROTATE: ""
   _DUT_MANAGER: ""
   _DUT_MANAGER_STORAGE: ""
+  _INVENTORY: ""
 
 steps:
   - id: buster-slim
@@ -615,6 +616,7 @@ steps:
         "--build-arg", "LOGROTATE_VER=${_LOGROTATE}",
         "--build-arg", "DUT_MANAGER_VER=${_DUT_MANAGER}",
         "--build-arg", "DUT_MANAGER_STORAGE_VER=${_DUT_MANAGER_STORAGE}",
+        "--build-arg", "INVENTORY_VER=${_INVENTORY}",
 
         "--label=version=${__BUILD_VERSION}",
 
@@ -754,6 +756,27 @@ steps:
       - "moblab_common"
       - "infra-protos"
 
+  - id: inventory
+    name: "docker:19.03.8"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "REGISTRY_URI=${_REGISTRY_URI}",
+        "--build-arg",
+        "LABEL=${__BUILD_VERSION}",
+        "-f",
+        "/workspace/src/dockerfiles/inventory/Dockerfile",
+        "-t",
+        "${_REGISTRY_URI}/inventory:${__BUILD_VERSION}",
+        "/workspace/src/",
+      ]
+    env:
+      - "DOCKER_BUILDKIT=1"
+    waitFor:
+      - "python-3.8-slim"
+      - "infra-protos"
+
 images:
   [
     "${_REGISTRY_URI}/protoc:${__BUILD_VERSION}",
@@ -786,6 +809,7 @@ images:
     "${_REGISTRY_URI}/dut-manager:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/dut-manager-storage:${__BUILD_VERSION}",
     "${_REGISTRY_URI}/infra-protos:${__BUILD_VERSION}",
+    "${_REGISTRY_URI}/inventory:${__BUILD_VERSION}",
   ]
 
 options:

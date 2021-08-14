@@ -30,7 +30,8 @@ all:	autotest \
 		rpcserver \
 		ssp \
 		ui \
-		watchtower
+		watchtower \
+		inventory
 
 #TODO refactor the common rules into a single rule.
 
@@ -224,8 +225,11 @@ infra-protos: protoc
 		-f dockerfiles/utilities/Dockerfile.infra_protos dockerfiles/utilities
 	docker push ${REGISTRY_URI}/infra-protos:${LABEL}
 
-
-
+inventory: export DOCKER_BUILDKIT := 1
+inventory: infra-protos
+	docker build ${EXTRA_ARGS} -t ${REGISTRY_URI}/inventory:${LABEL} \
+		-f dockerfiles/inventory/Dockerfile .
+	docker push ${REGISTRY_URI}/inventory:${LABEL}
 
 moblab:	autotest \
 		common \
