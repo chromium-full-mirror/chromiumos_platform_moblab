@@ -40,6 +40,12 @@ $theme: mat-light-theme($primary, $accent, $warn);
 
 $moblab-colors-attention: #fbbc04;
 
+// Colors to denote status across moblab.
+$moblab-colors-status-failed: #ff4500;
+$moblab-colors-status-aborted: #9370db;
+$moblab-colors-status-running: #ffd700;
+$moblab-colors-status-unknown: #d3d3d3;
+
 
 .mat-tooltip {
   font-size: 12px!important;

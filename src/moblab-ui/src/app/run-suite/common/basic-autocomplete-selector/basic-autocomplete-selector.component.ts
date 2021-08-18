@@ -14,9 +14,7 @@ import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 
 export class SelectableItem {
-  constructor(
-    public text: string,
-    public enabled: boolean = true) { }
+  constructor(public text: string, public status: string = '') {}
 }
 
 /**
@@ -73,8 +71,8 @@ export class BasicAutocompleteSelectorComponent
 
   // If only one option is available, it is automatically selected.
   autoSelectedSingleOption() {
-    if (this.autoselect && this.options.filter(o => o.enabled).length === 1) {
-      this.selectFormControl.setValue(this.options.filter(o => o.enabled)[0].text);
+    if (this.autoselect && this.options.filter(o => o.text).length === 1) {
+      this.selectFormControl.setValue(this.options.filter(o => o.text)[0].text);
       this.lock();
       this.select.emit({value: this.selectFormControl.value});
     }

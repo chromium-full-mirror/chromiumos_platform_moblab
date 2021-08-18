@@ -120,7 +120,7 @@ export class ProvisionDialogComponent implements AfterViewInit {
       this.board,
       this.model,
       this.build.milestone,
-      (buildVersions: {version: string, isGood: boolean}[], _) => {
+      (buildVersions: {version: string, status: string}[], _) => {
         this.updateBuildVersions(buildVersions);
         this.loadingOverlay.hide();
       },
@@ -135,8 +135,15 @@ export class ProvisionDialogComponent implements AfterViewInit {
     this.canStart = false;
   }
 
-  updateBuildVersions(newBuildVersions: {version: string, isGood: boolean}[]) {
-    this.buildVersions = newBuildVersions.map(v => new SelectableItem(v.version, v.isGood));
+  updateBuildVersions(
+    newBuildVersions: {
+      version: string;
+      status: string;
+    }[]
+  ) {
+    this.buildVersions = newBuildVersions.map(
+      v => new SelectableItem(v.version, v.status)
+    );
 
     if (this.buildVersions.length === 0) {
       this.buildSelector.disable('No builds found for the milestone.');

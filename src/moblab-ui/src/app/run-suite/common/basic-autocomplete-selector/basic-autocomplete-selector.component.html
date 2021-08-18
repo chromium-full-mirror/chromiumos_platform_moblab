@@ -11,8 +11,11 @@
       <mat-hint *ngIf="this.isDisabled()"><span class="mat-error">{{disabledReasonMessage}}</span></mat-hint>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelect($event)">
         <mat-option #options *ngFor="let option of filteredOptions | async" [value]="option"
-          [disabled]="!option.enabled">
+          [disabled]="option.status !== ''">
           {{option.text}}
+          <span *ngIf="option.status !== ''">
+            <span class="chip {{ option.status | lowercase }}-chip">{{ option.status }}</span>
+          </span>
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
