@@ -6,7 +6,7 @@
 set -e
 
 pwd=$(pwd)
-files=$(python $pwd/hooks/find_py_files.py)
+files=$(python $pwd/hooks/find_files.py -e .py)
 if [ ! -z "$files" ]
 then
     flake8 ${files} || true
