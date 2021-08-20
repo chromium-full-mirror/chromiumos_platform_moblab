@@ -90,7 +90,6 @@
     "python.formatting.blackArgs": [
         "--line-length=79"
     ],
-    "editor.formatOnSave": true,
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
@@ -98,12 +97,29 @@
         "**/core": true
     },
     "cSpell.diagnosticLevel": "Hint",
+    "eslint.format.enable": true,
     "eslint.validate": [
         "typescript"
     ],
     "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
-    "[typescript]": {
+    "eslint.lintTask.options": "-c /moblab_source/moblab/src/moblab-ui/.eslintrc.json --ignore-path /moblab_source/moblab/src/moblab-ui/.eslintignore .",
+    "css.validate": false,
+    "scss.validate": false,
+    "stylelint.enable": true,
+    "stylelint.validate": [
+        "css",
+        "markdown",
+        "sass",
+        "scss",
+    ],
+    "[python]": {
         "editor.formatOnSave": true
     },
-    "eslint.lintTask.options": "-c /moblab_source/moblab/src/moblab-ui/.eslintrc.json --ignore-path /moblab_source/moblab/src/moblab-ui/.eslintignore .",
+    "[html]": {
+        "editor.formatOnSave": true
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true,
+        "source.fixAll.stylelint": true
+    },
 }
