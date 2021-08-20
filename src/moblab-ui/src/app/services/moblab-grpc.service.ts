@@ -8,6 +8,7 @@ import {
 } from './moblabrpc_grpc_web_pb';
 import {ConfigSetupService} from './moblab-configuration-alerting.service';
 import {environment} from '../../environments/environment';
+import { BUILD_STATUS_MAPPINGS } from '../utils/proto_helpers';
 import {
   AbortJobsRequest,
   AbortJobsResponse,
@@ -842,7 +843,7 @@ export class MoblabGrpcService {
     model: string,
     milestone: string,
     callback: (
-      buildVersions: {version: string; isGood: boolean}[],
+      buildVersions: {version: string; status: string;}[],
       isIncomplete: boolean
     ) => void,
     errorHandlingCallback: (err_msg: string) => void
@@ -860,10 +861,20 @@ export class MoblabGrpcService {
         } else {
           const buildVersionNames = [];
           for (const item of response.getBuildVersionsList()) {
+            let buildStatus = '';
+            if (item.getStatus() !== BuildItem.BuildStatus.BUILD_STATUS_PASS) {
+              if (item.getStatus() in BUILD_STATUS_MAPPINGS) {
+                buildStatus = BUILD_STATUS_MAPPINGS[item.getStatus()];
+              } else {
+                // Gracefull fallback to Unknown status in case when
+                // BuildItem.BuildStatus changes and this block is not
+                // updated.
+                buildStatus = 'Unknown';
+              }
+            }
             buildVersionNames.push({
               version: item.getValue(),
-              isGood:
-                item.getStatus() === BuildItem.BuildStatus.BUILD_STATUS_PASS,
+              status: buildStatus,
             });
           }
           callback(buildVersionNames, response.getIsIncomplete());

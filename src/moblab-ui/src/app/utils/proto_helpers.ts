@@ -5,6 +5,13 @@ import {
   RunStorageQualificationSuiteRequest,
 } from '../services/moblabrpc_pb';
 
+export const BUILD_STATUS_MAPPINGS: {[key: number]: string} = {
+  0: 'Passed',
+  1: 'Failed',
+  2: 'Running',
+  3: 'Aborted',
+};
+
 const DUT_STATUS_MAPPINGS: {[key: string]: string} = {
   "DUT_STATUS_UNKNOWN": "Unknown",
   "DUT_STATUS_READY": "Ready",

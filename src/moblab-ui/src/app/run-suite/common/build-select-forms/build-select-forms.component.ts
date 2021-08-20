@@ -187,7 +187,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
       this.buildTargetName,
       this.selectedModel,
       this.milestone,
-      (builds: {version: string, isGood: boolean}[]) => {
+      (builds: {version: string, status: string}[]) => {
         this.updateBuildVersions(builds);
         this.formLoaded.emit();
       },
@@ -198,8 +198,15 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     );
   }
 
-  updateBuildVersions(newBuildVersions: {version: string, isGood: boolean}[]) {
-    this.buildVersions = newBuildVersions.map(v => new SelectableItem(v.version, v.isGood));
+  updateBuildVersions(
+    newBuildVersions: {
+      version: string;
+      status: string;
+    }[]
+  ) {
+    this.buildVersions = newBuildVersions.map(
+      v => new SelectableItem(v.version, v.status)
+    );
 
     if (this.buildVersions.length === 0) {
       this.buildSelector.disable('No builds found in configured bucket.');
