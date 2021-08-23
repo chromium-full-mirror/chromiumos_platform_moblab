@@ -283,6 +283,11 @@ test-dut-manager-storage: dut-manager-storage
 	docker run -it ${REGISTRY_URI}/dut-manager-storage:${LABEL} \
 		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v ./tests/'
 
+test-inventory: export DOCKER_BUILDKIT := 1
+test-inventory: inventory
+	docker run -it ${REGISTRY_URI}/inventory:${LABEL} \
+		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v ./tests/'
+
 # Change to run in a container
 test-moblab-ui: export DOCKER_BUILDKIT := 1
 test-moblab-ui: moblab-ui
@@ -300,7 +305,8 @@ test-common:
 unit-test:	test-rpcserver \
 		test-common \
 		test-dut-manager \
-		test-dut-manager-storage
+		test-dut-manager-storage \
+		test-inventory
 
 
 # This will run e2e tests from moblab-ui project agains E2E_TARGET_URL.
