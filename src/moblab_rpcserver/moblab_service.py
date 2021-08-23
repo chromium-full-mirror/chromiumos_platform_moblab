@@ -55,6 +55,9 @@ _SUITE_TIMEOUT_MAP = {
     "storage_qual_v2_xl": 28800,  # 20 days
     "cts": 2880,  # 2 days
     "gts": 2880,  # 2 days
+    "performance_cuj": 10080, # 7 days
+    "performance_cuj_experimental": 10080, #7 days
+    "mtbf": 14400, # 10 days
 }
 
 _STORAGE_QUAL_VARIATIONS = {
