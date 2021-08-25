@@ -65,17 +65,7 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
 
   diskInputChanged() {
     if (this.diskSizeInput.getInput()) {
-      if (this.diskSizeInput.getInput() < 35) {
-        this.suiteSelector.selectOption(1);
-      } else if (this.diskSizeInput.getInput() < 70) {
-        this.suiteSelector.selectOption(2);
-      } else if (this.diskSizeInput.getInput() < 140) {
-        this.suiteSelector.selectOption(3);
-      } else if (this.diskSizeInput.getInput() < 280) {
-        this.suiteSelector.selectOption(4);
-      } else {
-        this.suiteSelector.selectOption(5);
-      }
+      this.suiteSelector.selectOption(5);
       this.bugIdInput.enable();
       this.partNumberInput.enable();
     }
