@@ -23,6 +23,8 @@ service MoblabConfigurationService {
   // from system default and user override
   rpc get_stable_build_version(GetStableBuildVersionRequest)
     returns (GetStableBuildVersionResponse) {}
+  rpc list_stable_build_versions(ListStableBuildVersionsRequest)
+    returns (ListStableBuildVersionsResponse) {}
   // sets a user override for known good CrOS version
   rpc set_stable_build_version(SetStableBuildVersionRequest)
     returns (SetStableBuildVersionResponse) {}
@@ -83,6 +85,14 @@ enum PauseRequestor {
   PAUSE_REQUESTOR_PAUSED_BY_USER = 1;
 }
 
+message ListStableBuildVersionsRequest {
+}
+
+// NEXT_TAG = 2
+message ListStableBuildVersionsResponse {
+  repeated BuildTargetStableVersion build_target_stable_version = 1;
+}
+
 // NEXT_TAG = 2
 message GetStableBuildVersionRequest {
   string board = 1;
@@ -98,9 +108,13 @@ message SetStableBuildVersionRequest {
   StableVersion stable_version = 1;
 }
 
-// NEXT_TAG = 2
 message SetStableBuildVersionResponse {
-  StableVersion stable_version = 1;
+}
+
+// NEXT_TAG = 3
+message BuildTargetStableVersion {
+  string build_target = 1;
+  StableVersion stable_version = 2;
 }
 
 // NEXT_TAG = 3

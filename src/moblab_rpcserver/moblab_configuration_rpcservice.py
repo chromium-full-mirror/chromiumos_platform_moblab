@@ -7,6 +7,7 @@ import logging
 import asyncio
 from google.protobuf import duration_pb2, empty_pb2
 
+import moblab_service
 from moblab_common.proto.moblab_configuration_rpc_pb2 import (
     GetLocalResultsRetentionDurationResponse,
     PauseHostSchedulerResponse,
@@ -14,7 +15,9 @@ from moblab_common.proto.moblab_configuration_rpc_pb2 import (
     GetHostSchedulerPauseStatusResponse,
     PauseRequestor,
     GetStableBuildVersionResponse,
+    ListStableBuildVersionsResponse,
     SetStableBuildVersionResponse,
+    BuildTargetStableVersion,
     StableVersion,
 )
 from moblab_common.proto.moblab_configuration_rpc_pb2_grpc import (
@@ -37,6 +40,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         self.pause_service = HostSchedulerPauseService()
         self._settings_service = SettingsService()
         self._moblab_build_connector = None
+        self.moblab_service = moblab_service.MoblabService()
 
     def _init_moblab_build_connector(self):
         try:
@@ -103,6 +107,21 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
             stable_version=self._get_stable_build_version(request.board)
         )
 
+    async def list_stable_build_versions(self, request, context):
+        """List stable build versions for all boards."""
+        response = ListStableBuildVersionsResponse()
+        build_targets = self.moblab_service.list_connected_build_targets()
+
+        for build_target in build_targets:
+            stable_version = self._get_stable_build_version(build_target)
+            build_target_stable_version = BuildTargetStableVersion(
+                build_target=build_target, stable_version=stable_version
+            )
+            response.build_target_stable_version.extend(
+                [build_target_stable_version]
+            )
+        return response
+
     def set_stable_build_version(self, request, context):
         """Update stable build version configuration"""
         if request.stable_version.override_version is not None:
@@ -125,9 +144,7 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
             logging.info("Setting %s", setting)
             self._settings_service.set_setting(setting=setting)
 
-        return SetStableBuildVersionResponse(
-            stable_version=self._get_stable_build_version()
-        )
+        return SetStableBuildVersionResponse()
 
     def set_local_results_retention_duration(self, request, context):
         """Set the number of seconds the results are kept locally"""
@@ -157,12 +174,22 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         )
 
     def _get_stable_build_version(self, board):
+        keys = [
+            MoblabSettingKey.STABLE_CROS_VERSION_OVERRIDE,
+        ]
+        settings = self._settings_service.get_settings(keys=keys)
+        override_version = next(
+            (s for s in settings),
+            None,
+        )
         most_stable_build = self.moblab_build_connector.get_most_stable_build(
             board
         )
         return StableVersion(
             default_version=most_stable_build,
-            override_version="",
+            override_version=override_version.value.string_value
+            if override_version
+            else "",
         )
 
     def _map_to_requestors(self, setting_keys):

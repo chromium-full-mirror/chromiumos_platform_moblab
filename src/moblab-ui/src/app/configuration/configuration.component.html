@@ -141,6 +141,73 @@
   </mat-card-content>
 </mat-card>
 
+<mat-card>
+  <div class="loading-overlay" *ngIf="stableBuildVersionLoading">
+    <div class="loading-spinner-wrapper">
+      <mat-spinner></mat-spinner>
+    </div>
+  </div>
+  <mat-card-header>
+    <mat-card-title>Known Good DUT OS Version</mat-card-title>
+  </mat-card-header>
+  <mat-card-subtitle class="stable-build-card-content">
+    This build may be used to attempt to recover repaired failed DUTs, it is
+    not used for running tests.
+  </mat-card-subtitle>
+  <mat-card-content>
+    <form #formRef="ngForm" (ngSubmit)="setStableCrOSVersion(userCrOSVersionForm.value)">
+      <div class="stable-build-card-content">
+        <table mat-table [dataSource]="stableBuildVersions">
+          <ng-container matColumnDef="build_target">
+            <th mat-header-cell *matHeaderCellDef>Build Target</th>
+            <td mat-cell *matCellDef="let element">{{element.getBuildTarget()}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="default_version">
+            <th mat-header-cell *matHeaderCellDef>In-use Version
+            </th>
+            <td mat-cell *matCellDef="let element">
+              <span><b>{{getStableBuildVersion(element)}}
+                </b><i>{{getStableBuildVersionDefault(element)}}</i></span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="override_version">
+            <th mat-header-cell *matHeaderCellDef>Default Version
+            </th>
+            <td mat-cell *matCellDef="let element">
+              <span class='default-version-text'>{{element.getStableVersion().getDefaultVersion()}}</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <div class="stable-build-card-content">
+        <mat-form-field class="configuration-input" appearance="legacy">
+          <mat-label>User Override</mat-label>
+          <input matInput placeholder="Rxx-yyyyy.zz.0" [formControl]="userCrOSVersionForm">
+          <mat-error *ngIf="this.userCrOSVersionForm.hasError('pattern')">
+            Must follow the correct OS version format e.g. R88-13597.105.0
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="stable-build-card-content">
+        <button mat-raised-button color="primary" [disabled]="!isStableCrOsVersionValidForSubmit()"
+          type="submit">Override All
+        </button>
+        <button class="secondary-button-wrapper" mat-raised-button color="primary" (click)="setStableCrOSVersion('')"
+          matTooltip="Undo the user override and use the system defaults">
+          Restore Defaults
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
 <mat-card id="dut-wifi-card">
   <div class="loading-overlay" *ngIf="dutWifiInfoLoading">
     <div class="loading-spinner-wrapper">

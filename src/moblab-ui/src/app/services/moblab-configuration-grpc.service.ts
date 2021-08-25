@@ -13,10 +13,13 @@ import {
   GetHostSchedulerPauseStatusResponse,
   GetStableBuildVersionRequest,
   GetStableBuildVersionResponse,
+  ListStableBuildVersionsRequest,
+  ListStableBuildVersionsResponse,
   SetStableBuildVersionRequest,
   SetStableBuildVersionResponse,
   GetLocalResultsRetentionDurationResponse,
   SetLocalResultsRetentionDurationRequest,
+  BuildTargetStableVersion,
   StableVersion,
 } from './moblab_configuration_rpc_pb';
 
@@ -137,17 +140,22 @@ export class MoblabConfigurationGrpcService {
       });
   }
 
-  setStableBuildVersion(override_version: string): Promise<StableCrOSVersion> {
+  async listStableBuildVersions(): Promise<BuildTargetStableVersion[]> {
+    const request = new ListStableBuildVersionsRequest();
+    const response: ListStableBuildVersionsResponse = await this.configurationRpcClient.list_stable_build_versions(
+      request
+    );
+    return response.getBuildTargetStableVersionList();
+  }
+
+  async setStableBuildVersion(
+    overrideVersion: string
+  ): Promise<SetStableBuildVersionResponse> {
     const request = new SetStableBuildVersionRequest();
-    request.setStableVersion(new StableVersion().setOverrideVersion(override_version));
-    return this.configurationRpcClient
-      .set_stable_build_version(request)
-      .then((response: SetStableBuildVersionResponse) => {
-        let result = new StableCrOSVersion();
-        result.DefaultVersion = response.getStableVersion().getDefaultVersion();
-        result.UserOverrideVersion = response.getStableVersion().getOverrideVersion();
-        return result;
-      });
+    request.setStableVersion(
+      new StableVersion().setOverrideVersion(overrideVersion)
+    );
+    return await this.configurationRpcClient.set_stable_build_version(request);
   }
 
   getResultsRetentionPeriod(): Promise<string> {

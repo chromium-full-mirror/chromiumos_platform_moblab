@@ -139,3 +139,22 @@ mat-expansion-panel {
   margin: 16px;
   padding: 16px;
 }
+
+.secondary-button-wrapper {
+  display: inline-flex;
+  margin-left: 20px;
+}
+
+.stable-build-card-content {
+  margin-left: 16px;
+  padding-bottom: 10px;
+}
+
+table {
+  width: 100%;
+  height: 100%;
+}
+
+.default-version-text {
+  color: grey;
+}
