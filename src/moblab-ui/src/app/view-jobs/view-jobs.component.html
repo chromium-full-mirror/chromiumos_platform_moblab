@@ -64,12 +64,13 @@
       <mat-divider></mat-divider>
     </div>
     <div class="table-action-header">
-        <button class="job-refresh-button" color="primary" matTooltip="Refresh" mat-icon-button (click)="refreshJobs()">
-          <mat-icon>refresh</mat-icon>
-        </button>
-        <mat-slide-toggle class="auto-refresh-toggle" matTooltip="Auto refresh every minute" [checked]="autoRefresh" (change)="updateAutoRefresh($event)">Auto Refresh</mat-slide-toggle>
-        <app-job-action *ngIf="!hideActionBar" (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
-        </app-job-action>
+      <button class="job-refresh-button" color="primary" matTooltip="Refresh" mat-icon-button (click)="refreshJobs()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <mat-slide-toggle class="auto-refresh-toggle" matTooltip="Auto refresh every minute" [checked]="autoRefresh"
+        (change)="updateAutoRefresh($event)">Auto Refresh</mat-slide-toggle>
+      <app-job-action *ngIf="!hideActionBar" (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
+      </app-job-action>
     </div>
     <mat-divider></mat-divider>
     <div style="position: relative;">
@@ -156,8 +157,10 @@
           </th>
           <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()">
             <span>
-              <a class="logbutton" mat-button target="_blank" href="/results/{{element.getJobId()}}-moblab/">
+              <a class="logbutton" mat-button target="_blank" href="{{ constructJobLogsLink(element) }}">
                 <mat-icon class="norm-icon">text_snippet</mat-icon>
+                <mat-icon *ngIf="isResultsDeleted(element)" class="additional-icon material-icons-outlined"
+                  color="primary">cloud</mat-icon>
               </a>
             </span>
           </td>

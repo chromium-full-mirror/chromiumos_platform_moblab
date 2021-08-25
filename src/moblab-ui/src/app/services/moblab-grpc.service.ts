@@ -8,7 +8,7 @@ import {
 } from './moblabrpc_grpc_web_pb';
 import {ConfigSetupService} from './moblab-configuration-alerting.service';
 import {environment} from '../../environments/environment';
-import { BUILD_STATUS_MAPPINGS } from '../utils/proto_helpers';
+import {BUILD_STATUS_MAPPINGS} from '../utils/proto_helpers';
 import {
   AbortJobsRequest,
   AbortJobsResponse,
@@ -108,13 +108,18 @@ import {
 export class MoblabGrpcService {
   moblabRpcService: MoblabRpcServiceClient = null;
   moblabRpcServicePromiseClient: MoblabRpcServicePromiseClient = null;
+  public service_address: String;
 
   constructor(private configSetupService: ConfigSetupService) {
     const url = new URL(window.location.href);
     const hostname = environment.defaultHostName || url.hostname;
     const port = environment.defaultApiPort || url.port;
     let service_url = new String(url.protocol);
-    service_url = service_url.concat('//', hostname, ':', port, '/rpc');
+
+    service_url = service_url.concat('//', hostname, ':', port);
+    this.service_address = service_url;
+
+    service_url = service_url.concat('/rpc');
     console.log(service_url);
 
     this.moblabRpcService = new MoblabRpcServiceClient(service_url.toString());
@@ -1573,5 +1578,46 @@ export class MoblabGrpcService {
         }
       }
     );
+  }
+
+  async getCloudBucketUrl(): Promise<string> {
+
+    const version = await new Promise<string>((resolve, reject) => {
+      this.get_version_info(
+        (
+          _moblab_release_version: string,
+          _chromeos_release_version: string,
+          _chromeos_release_track: string,
+          _chromeos_release_description: string,
+          moblab_install_id: string,
+          moblab_serial_number: string
+        ) => {
+          resolve(`${moblab_serial_number}/${moblab_install_id}`)
+        },
+        (errorMsg: string) => {
+          reject(errorMsg);
+        }
+      );
+    });
+
+    const bucket = await new Promise<string>((resolve, reject) => {
+      this.get_cloud_configuration(
+        (
+          _boto_key_id: string,
+          _boto_key_secret: string,
+          gcs_bucket_url: string,
+          _is_cloud_enabled: boolean,
+          _is_remote_console_enabled: boolean,
+          _is_remote_command_enabled: boolean
+        ) => {
+          if (gcs_bucket_url && gcs_bucket_url.startsWith("gs://"))
+            resolve(gcs_bucket_url.substr(5));
+
+        },
+        (errorMsg: string) => reject(errorMsg),
+      )
+    });
+
+    return `https://console.cloud.google.com/storage/browser/${bucket}results/${version}`;
   }
 }

@@ -166,6 +166,7 @@ a.logbutton {
 .norm-icon, .progress-icon, .error-icon {
   vertical-align: middle;
   text-align: center !important;
+  width: 18px;
 }
 
 .error-icon {
@@ -191,4 +192,10 @@ table {
 
 .upload-status-td {
   text-align: center;
+}
+
+.additional-icon {
+  vertical-align: top;
+  transform: scale(0.7);
+  line-height: 0px;
 }

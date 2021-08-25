@@ -169,6 +169,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     Object.keys(Job.Relationship).slice(1)
   );
   queueStatusFilterOptions = [''].concat(Object.keys(Job.QueueStatus).slice(1));
+  cloudBucketUrl = "";
 
   constructor(
     public readonly moblabGrpcService: MoblabGrpcService,
@@ -176,7 +177,12 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     private datePipe: DatePipe,
     private route: ActivatedRoute,
     private notificationsService: NotificationsService
-  ) { }
+  ) {
+    this.moblabGrpcService
+      .getCloudBucketUrl()
+      .then(s => this.cloudBucketUrl = s)
+      .catch(e => notificationsService.error(e));
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -397,6 +403,18 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
         return new UploadStatus();
     }
   }
+
+  isResultsDeleted(job: Job): boolean {
+    return job.getUploadState().getStatus() == Job.UploadStatus.UPLOAD_STATUS_DELETED;
+  }
+
+  constructJobLogsLink(job: Job):  string {
+    if (this.isResultsDeleted(job)) {
+      return `${this.cloudBucketUrl}/${job.getJobId()}-moblab/`;
+    }
+    return `${this.moblabGrpcService.service_address}/results/${job.getJobId()}-moblab/`;
+  }
+
 
   assignJobs(jobs: Job[] | undefined) {
     this.jobs = new MatTableDataSource(jobs);
