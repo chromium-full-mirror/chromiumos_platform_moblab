@@ -775,6 +775,20 @@ class MoblabService(object):
                 "Encountered error trying to list build targets."
             )
 
+    def list_connected_build_targets(self):
+        """List all connected build targets on this moblab.
+
+        Returns:
+            List of build target strings.
+        """
+        afe_hosts = self.afe_connector.get_connected_devices()
+        build_targets = set()
+        for host in afe_hosts:
+            build_targets.add(
+                self.extract_build_target_from_labels(host.get("labels", []))
+            )
+        return list(build_targets)
+
     def list_usable_milestones(self, build_target, model):
         """
         Returns milestones available for a given model/build_target, both
