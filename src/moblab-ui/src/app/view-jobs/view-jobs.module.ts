@@ -54,4 +54,4 @@ import {WidgetsModule} from '../widgets/widgets.module';
   declarations: [JobActionComponent, ViewJobsComponent],
   exports: [MatBadgeModule, ViewJobsComponent],
 })
-export class ViewJobsModule { }
+export class ViewJobsModule {}

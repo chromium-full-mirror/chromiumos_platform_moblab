@@ -1,8 +1,4 @@
-import {
-  Directive,
-  HostListener,
-  Input,
-} from '@angular/core';
+import {Directive, HostListener, Input} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {NewUpdateDialogComponent} from './new-update-dialog/new-update-dialog.component';
 import {NewUpdateStatus} from '../../constants';
@@ -12,10 +8,7 @@ import {Overlay} from '@angular/cdk/overlay';
 export class NewUpdateDirective {
   private overlay: Overlay;
 
-  public constructor(
-    private dialogRef: MatDialog,
-    overlay: Overlay
-  ) {
+  public constructor(private dialogRef: MatDialog, overlay: Overlay) {
     this.overlay = overlay;
   }
 
@@ -34,5 +27,4 @@ export class NewUpdateDirective {
       scrollStrategy: this.overlay.scrollStrategies.reposition(),
     });
   }
-
 }

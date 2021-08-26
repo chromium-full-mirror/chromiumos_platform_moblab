@@ -10,7 +10,7 @@ export class MoblabHealthCheckGuard implements CanActivate {
   constructor(
     private router: Router,
     private healthCheckService: MoblabHealthCheckService
-  ) { }
+  ) {}
 
   canActivate(): Promise<boolean> | boolean {
     if (environment.disableHealthCheckGuard) {

@@ -20,8 +20,8 @@ export class EditAttributesComponent {
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
-    public notificationsService: NotificationsService,
-  ) { }
+    public notificationsService: NotificationsService
+  ) {}
 
   get_confirmation_message_suffix(dut_hostnames: string[]) {
     let confirmation_message_suffix = '';
@@ -35,7 +35,12 @@ export class EditAttributesComponent {
     return confirmation_message_suffix;
   }
 
-  doEdit(editFunc: (dut_hostnames: string[], context: EditAttributesComponent) => void) {
+  doEdit(
+    editFunc: (
+      dut_hostnames: string[],
+      context: EditAttributesComponent
+    ) => void
+  ) {
     /**
      * This method is the point of entry for all of the edit functionality that
      * is provided in this component. There is some logic common to all of the

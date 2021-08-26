@@ -4,20 +4,19 @@ import {v4 as uuidv4} from 'uuid';
 
 export enum NotificationType {
   Info,
-  Error
+  Error,
 }
 
 export class Notification {
   constructor(
     public message: string,
     public type: NotificationType = NotificationType.Info,
-    public id: string = uuidv4(),
-  ) { }
+    public id: string = uuidv4()
+  ) {}
 }
 
 @Injectable({providedIn: 'root'})
 export class NotificationsService {
-
   public notificationsObservable: Observable<Notification[]>;
   private notifications: Notification[] = [];
   private notificationsSubject = new BehaviorSubject(this.notifications);
@@ -27,7 +26,7 @@ export class NotificationsService {
   }
 
   public notify(message: string) {
-    const notification = new Notification(message, NotificationType.Info)
+    const notification = new Notification(message, NotificationType.Info);
     this.notifications.push(notification);
     this.pushNotificationsUpdate();
     this.hideInfoMessage(notification.id);

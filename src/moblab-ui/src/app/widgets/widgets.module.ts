@@ -81,6 +81,6 @@ import {NewUpdateComponent} from './new-update/new-update.component';
     ScreenshotFeedbackModule,
     NewUpdateModule,
   ],
-  providers: [NotificationBannerComponent]
+  providers: [NotificationBannerComponent],
 })
-export class WidgetsModule { }
+export class WidgetsModule {}

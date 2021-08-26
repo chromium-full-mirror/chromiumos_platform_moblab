@@ -35,7 +35,7 @@ export class HealthCheckComponent implements OnInit, OnDestroy {
     private router: Router,
     private healthCheckService: MoblabHealthCheckService,
     private globalInfoService: GlobalInfoService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.globalInfoService.setEnableNavBar(false);

@@ -81,4 +81,4 @@ import {StageBuildDialogComponent} from './stage-build-dialog/stage-build-dialog
   ],
   exports: [ManageDutsComponent],
 })
-export class ManageDutsModule { }
+export class ManageDutsModule {}

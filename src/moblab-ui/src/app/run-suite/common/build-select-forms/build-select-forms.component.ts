@@ -57,8 +57,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   constructor(
     private changeDetector: ChangeDetectorRef,
     public moblabGrpcService: MoblabGrpcService,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   ngAfterViewInit() {
     this.getModels();
@@ -103,8 +103,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   modelChanged(model: string) {
-    if (this.selectedModel != model) {
-      this.unselectBuildTarget()
+    if (this.selectedModel !== model) {
+      this.unselectBuildTarget();
       this.selectedModel = model;
       this.getBuildTargets();
     }
@@ -138,8 +138,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   buildTargetChanged(newBuildTarget: string): void {
-    if (this.buildTargetName != newBuildTarget) {
-      this.unselectMilestone()
+    if (this.buildTargetName !== newBuildTarget) {
+      this.unselectMilestone();
       this.buildTargetName = newBuildTarget;
       this.getMilestones();
     }
@@ -174,8 +174,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   }
 
   milestoneChanged(newMilestone: string): void {
-    if (this.milestone != newMilestone) {
-      this.unselectBuildVersion()
+    if (this.milestone !== newMilestone) {
+      this.unselectBuildVersion();
       this.milestone = newMilestone;
       this.getBuildVersions();
     }
@@ -187,7 +187,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
       this.buildTargetName,
       this.selectedModel,
       this.milestone,
-      (builds: {version: string, status: string}[]) => {
+      (builds: {version: string; status: string}[]) => {
         this.updateBuildVersions(builds);
         this.formLoaded.emit();
       },

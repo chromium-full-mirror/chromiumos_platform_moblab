@@ -17,9 +17,7 @@ import {NotificationsService} from 'app/services/notifications.service';
   templateUrl: './storage-qual.component.html',
   styleUrls: ['./storage-qual.component.scss'],
 })
-export class StorageQualComponent
-  extends BaseSuite
-  implements AfterViewInit {
+export class StorageQualComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
@@ -30,13 +28,13 @@ export class StorageQualComponent
   variationSelection = 0;
 
   isStorageQualSetupValid = false;
-  storageQualCheckError = "";
+  storageQualCheckError = '';
 
   constructor(
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationsService: NotificationsService,
+    notificationsService: NotificationsService
   ) {
     super(moblabGrpcService, router, notificationsService);
   }
@@ -57,7 +55,11 @@ export class StorageQualComponent
   /** Method triggered on change of either bug ID or part number.
    * */
   inputChanged() {
-    if (this.bugIdInput.getInput() && this.partNumberInput.getInput() && this.isStorageQualSetupValid) {
+    if (
+      this.bugIdInput.getInput() &&
+      this.partNumberInput.getInput() &&
+      this.isStorageQualSetupValid
+    ) {
       this.runSuiteButton.enable();
     } else {
       this.runSuiteButton.disable();
@@ -108,21 +110,24 @@ export class StorageQualComponent
   }
 
   validateStorageQualSetup() {
-    this.storageQualCheckError = "";
+    this.storageQualCheckError = '';
     this.isStorageQualSetupValid = false;
     this.inputChanged();
 
-    var variationsToCheck = [RunStorageQualificationSuiteRequest.Variation.VARIATION_NOT_SET, RunStorageQualificationSuiteRequest.Variation.QUICK];
+    const variationsToCheck = [
+      RunStorageQualificationSuiteRequest.Variation.VARIATION_NOT_SET,
+      RunStorageQualificationSuiteRequest.Variation.QUICK,
+    ];
     if (!variationsToCheck.includes(this.variationSelection)) {
       this.isStorageQualSetupValid = true;
       this.inputChanged();
       return;
     }
-    this.onFormLoading("validating storage qual setup ...");
+    this.onFormLoading('validating storage qual setup ...');
     this.moblabGrpcService.validateStorageQualSetup(
       () => {
         this.isStorageQualSetupValid = true;
-        this.storageQualCheckError = "";
+        this.storageQualCheckError = '';
         this.inputChanged();
         this.onFormLoaded();
       },

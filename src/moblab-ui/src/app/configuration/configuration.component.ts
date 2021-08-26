@@ -17,7 +17,10 @@ import {ButtonWithProgressComponent} from '../widgets/button-with-progress/butto
 import {MoblabSettingsConstains} from '../constants';
 import {NotificationsService} from '../services/notifications.service';
 import {Subscription} from 'rxjs';
-import {Feature, GlobalInfoService} from 'app/services/global-ui-settings.service';
+import {
+  Feature,
+  GlobalInfoService,
+} from 'app/services/global-ui-settings.service';
 import {BuildTargetStableVersion} from './../services/moblab_configuration_rpc_pb';
 
 function gsURLValidator(control) {
@@ -36,7 +39,7 @@ class CloudConfiguration {
     public botoKeyID: string = '',
     public botoKeySecret: string = '',
     public bucketURL: string = ''
-  ) { }
+  ) {}
 }
 
 @Component({
@@ -44,7 +47,8 @@ class CloudConfiguration {
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.scss'],
 })
-export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentInit {
+export class ConfigurationComponent
+  implements OnInit, OnDestroy, AfterContentInit {
   @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
   @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
   errors = false;
@@ -72,7 +76,10 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     '',
     Validators.pattern(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/)
   );
-  resultsRetentionPeriodForm = new FormControl('', [Validators.required, Validators.pattern(/^(([01]?[1-9]|2[0-3])h)$|^([1-7]d)$/)]);
+  resultsRetentionPeriodForm = new FormControl('', [
+    Validators.required,
+    Validators.pattern(/^(([01]?[1-9]|2[0-3])h)$|^([1-7]d)$/),
+  ]);
 
   userCrOSVersionValue = '';
   resultsRetentionPeriod = '';
@@ -114,17 +121,19 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     private configSetupService: ConfigSetupService,
     private notificationsService: NotificationsService,
     private globalInfo: GlobalInfoService
-  ) { }
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.bucketURLForm.valueChanges.subscribe(value => {
       this.formatBucketLink();
     });
-    this.pauseStatusSubscription = this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
-      this.isHostSchedulerPauseRequested =
-        requestors &&
-        requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
-    });
+    this.pauseStatusSubscription = this.settingsService.pauseRequestorsObservable.subscribe(
+      requestors => {
+        this.isHostSchedulerPauseRequested =
+          requestors &&
+          requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
+      }
+    );
     this.getCloudConfiguration();
     this.getDutWifiInfo();
     this.initCanUpdateCloudConfigFlag();
@@ -183,7 +192,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       this.resultsRetentionPeriodForm.setValue(period_days);
     } catch (error) {
       console.log('getResultsRetentionPeriod call failed with:' + error);
-      this.notificationsService.error('Failed to fetch results retention duration: ' + error.message);
+      this.notificationsService.error(
+        'Failed to fetch results retention duration: ' + error.message
+      );
     } finally {
       this.resultsRetentionPeriodForm.enable();
     }
@@ -192,11 +203,15 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
   public async setResultsRetentionPeriod(period: string) {
     this.resultsRetentionPeriodForm.disable();
     try {
-      await this.moblabConfigurationRpcService.setResultsRetentionPeriod(period);
+      await this.moblabConfigurationRpcService.setResultsRetentionPeriod(
+        period
+      );
       this.getResultsRetentionPeriod();
     } catch (error) {
       console.log('setStableBuildVersion call failed with:' + error);
-      this.notificationsService.error('Failed to set stable Chrome OS version: ' + error.message);
+      this.notificationsService.error(
+        'Failed to set stable Chrome OS version: ' + error.message
+      );
     } finally {
       this.resultsRetentionPeriodForm.enable();
     }
@@ -222,7 +237,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     }
   }
 
-  getCloudConfiguration(calledOnSubmit: boolean = false) {
+  getCloudConfiguration(calledOnSubmit = false) {
     /**
      * Method sends RPC command to fetch cloud configuration information and
      * apply fetched values to the UI forms.
@@ -251,15 +266,21 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
           )
         );
         // If called from the onCloudConfigSubmit method, suppress the popup.
-        if (!this.configSetupService.getIsCloudConfigEnabled() && !calledOnSubmit) {
-          this.notificationsService.notify(`Please enable the Cloud integration to
+        if (
+          !this.configSetupService.getIsCloudConfigEnabled() &&
+          !calledOnSubmit
+        ) {
+          this.notificationsService
+            .notify(`Please enable the Cloud integration to
               allow system to fetch Chrome OS test images and upload test
               results for CPCon ingestion.`);
         }
       },
       (errorMsg: string) => {
         this.configurationLoading = false;
-        this.notificationsService.error('Failed to get cloud configuration: ' + errorMsg);
+        this.notificationsService.error(
+          'Failed to get cloud configuration: ' + errorMsg
+        );
       }
     );
   }
@@ -272,7 +293,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       },
       (errorMsg: string) => {
         this.dutWifiInfoLoading = false;
-        this.notificationsService.error('Failed to get DUT wifi info: ' + errorMsg);
+        this.notificationsService.error(
+          'Failed to get DUT wifi info: ' + errorMsg
+        );
       }
     );
   }
@@ -293,8 +316,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     );
   }
 
-
-
   isCloudConfigurationChanged() {
     /**
      * Returns true IFF there is a change in any of the cloud configuration
@@ -303,13 +324,13 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
     return (
       this.lastFetchedCloudConfig.botoKeyID !== this.botoKeyIDForm.value ||
       this.lastFetchedCloudConfig.botoKeySecret !==
-      this.botoKeySecretForm.value ||
+        this.botoKeySecretForm.value ||
       this.lastFetchedCloudConfig.bucketURL !== this.bucketURLForm.value ||
       this.lastFetchedCloudConfig.isCloudEnabled !== this.isCloudEnabled ||
       this.lastFetchedCloudConfig.isRemoteConsoleEnabled !==
-      this.isRemoteConsoleEnabled ||
+        this.isRemoteConsoleEnabled ||
       this.lastFetchedCloudConfig.isRemoteCommandEnabled !==
-      this.isRemoteCommandEnabled
+        this.isRemoteCommandEnabled
     );
   }
 
@@ -437,7 +458,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
 
   onCloudConfigSubmit(formValue) {
     if (!this.bucketURLForm.value.endsWith('/')) {
-      this.bucketURLForm.setValue(this.bucketURLForm.value + '/')
+      this.bucketURLForm.setValue(this.bucketURLForm.value + '/');
     }
     this.configurationLoading = true;
     this.moblabRpcService.set_cloud_configuration(
@@ -528,7 +549,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
       console.log('pauseHostScheduling call failed with:' + error);
-      this.notificationsService.error('Failed to pause host scheduling: ' + error);
+      this.notificationsService.error(
+        'Failed to pause host scheduling: ' + error
+      );
     } finally {
       this.pauseButton.setIsLoadingStatus(false);
     }
@@ -541,7 +564,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
       console.log('resumeHostScheduler call failed with:' + error);
-      this.notificationsService.error('Failed to resume host scheduling: ' + error);
+      this.notificationsService.error(
+        'Failed to resume host scheduling: ' + error
+      );
     } finally {
       this.resumeButton.setIsLoadingStatus(false);
     }
@@ -554,5 +579,4 @@ export class ConfigurationComponent implements OnInit, OnDestroy, AfterContentIn
       this.globalInfo.disableFeature(Feature.FAFT_TESTING);
     }
   }
-
 }

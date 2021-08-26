@@ -30,8 +30,8 @@ export class DutTaskTableComponent implements AfterViewInit {
 
   constructor(
     readonly moblabGrpcService: MoblabGrpcService,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   ngAfterViewInit() {
     this.paginator.page.subscribe(() => this.getNextPageDutTasks());

@@ -1,5 +1,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {Notification, NotificationType} from '../../services/notifications.service';
+import {
+  Notification,
+  NotificationType,
+} from '../../services/notifications.service';
 
 @Component({
   selector: 'app-notification-banner',
@@ -10,7 +13,7 @@ export class NotificationBannerComponent {
   @Input() notification: Notification;
   @Output() dismissClick = new EventEmitter<Notification>();
 
-  constructor() { }
+  constructor() {}
 
   onDismissClicked(): void {
     this.dismissClick.emit(this.notification);
@@ -18,9 +21,9 @@ export class NotificationBannerComponent {
 
   getCssClass() {
     if (this.notification.type === NotificationType.Error) {
-      return "error-notification";
+      return 'error-notification';
     }
-    return "info-notification";
+    return 'info-notification';
   }
 
   isDismissable() {

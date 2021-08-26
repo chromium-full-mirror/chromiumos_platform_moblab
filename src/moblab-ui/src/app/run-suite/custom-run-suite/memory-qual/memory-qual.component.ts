@@ -27,7 +27,7 @@ export class MemoryQualComponent extends BaseSuite implements AfterViewInit {
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationsService: NotificationsService,
+    notificationsService: NotificationsService
   ) {
     super(moblabGrpcService, router, notificationsService);
   }

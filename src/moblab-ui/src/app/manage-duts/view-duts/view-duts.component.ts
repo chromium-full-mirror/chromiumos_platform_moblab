@@ -7,7 +7,7 @@ import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {NotificationsService} from 'app/services/notifications.service';
 import {BuildTargetAccessService} from 'app/services/build-target-access.service';
-import {StageBuildDialogComponent} from '../stage-build-dialog/stage-build-dialog.component'
+import {StageBuildDialogComponent} from '../stage-build-dialog/stage-build-dialog.component';
 
 import {INT_TO_DUT_STATUS} from '../../utils/proto_helpers';
 import {TableHeaderSelectorComponent} from '../../widgets/table-header-selector/table-header-selector.component';
@@ -55,7 +55,7 @@ export class ViewDutsComponent implements OnInit {
     public dialog: MatDialog,
     private notificationsService: NotificationsService,
     private buildTargetAccessService: BuildTargetAccessService
-  ) { }
+  ) {}
 
   @ViewChild(MatSort, {}) sort: MatSort;
 

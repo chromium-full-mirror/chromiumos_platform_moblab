@@ -19,9 +19,7 @@ import {NotificationsService} from 'app/services/notifications.service';
   selector: 'app-run-any-suite',
   templateUrl: './run-any-suite.component.html',
 })
-export class RunAnySuiteComponent
-  extends BaseSuite
-  implements AfterViewInit {
+export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('suiteInput') suiteInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
@@ -53,7 +51,7 @@ export class RunAnySuiteComponent
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationsService: NotificationsService,
+    notificationsService: NotificationsService
   ) {
     super(moblabGrpcService, router, notificationsService);
   }

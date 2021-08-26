@@ -15,7 +15,7 @@ export class MoblabSettingsService {
   constructor(private grpcService: MoblabConfigurationGrpcService) {
     this.pauseRequestorsObservable = merge(
       this.pauseRequestorsSubject.asObservable(),
-      this.grpcService.pauseStateObservable,
+      this.grpcService.pauseStateObservable
     ).pipe(shareReplay(1));
   }
 

@@ -20,9 +20,7 @@ import {NotificationsService} from 'app/services/notifications.service';
   templateUrl: './storage-qual-v2.component.html',
   styleUrls: ['./storage-qual-v2.component.scss'],
 })
-export class StorageQualV2Component
-  extends BaseSuite
-  implements AfterViewInit {
+export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
   @ViewChild('bugIdInput') bugIdInput;
   @ViewChild('partNumberInput') partNumberInput;
   @ViewChild('diskSizeInput') diskSizeInput;
@@ -44,7 +42,7 @@ export class StorageQualV2Component
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationsService: NotificationsService,
+    notificationsService: NotificationsService
   ) {
     super(moblabGrpcService, router, notificationsService);
   }
@@ -135,7 +133,7 @@ export class StorageQualV2Component
       this.bugIdInput.getInput(),
       this.partNumberInput.getInput(),
       this.suiteIndex +
-      Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2),
+        Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2),
       this.diskSizeInput.getInput(),
       this.dualNamespace.getChecked()
     );

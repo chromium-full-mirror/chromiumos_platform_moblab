@@ -33,4 +33,4 @@ import {NewUpdateDirective} from './new-update.directive';
   entryComponents: [NewUpdateDialogComponent],
   providers: [],
 })
-export class NewUpdateModule { }
+export class NewUpdateModule {}

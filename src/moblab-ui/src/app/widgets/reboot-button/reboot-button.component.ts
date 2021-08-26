@@ -17,8 +17,8 @@ export class RebootButtonComponent {
   constructor(
     private dialog: MatDialog,
     private moblabGrpcService: MoblabGrpcService,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   rebootClick(): void {
     const dialogRef = this.dialog.open(ConfirmationDialog, {

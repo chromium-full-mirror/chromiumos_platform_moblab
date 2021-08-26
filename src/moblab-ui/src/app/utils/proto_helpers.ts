@@ -13,18 +13,18 @@ export const BUILD_STATUS_MAPPINGS: {[key: number]: string} = {
 };
 
 const DUT_STATUS_MAPPINGS: {[key: string]: string} = {
-  "DUT_STATUS_UNKNOWN": "Unknown",
-  "DUT_STATUS_READY": "Ready",
-  "DUT_STATUS_RUNNING": "Running",
-  "DUT_STATUS_REPAIRING": "Repairing",
-  "DUT_STATUS_REPAIR_FAILED": "Repair Failed",
-  "DUT_STATUS_CLEANING": "Cleaning",
-  "DUT_STATUS_PENDING": "Pending",
-  "DUT_STATUS_RESETTING": "Resetting",
-  "DUT_STATUS_PROVISIONING": "Provisioning",
-  "DUT_STATUS_VERIFYING": "Verifying",
-  "DUT_STATUS_DISCONNECTED": "Disconnected",
-  "DUT_STATUS_NOT_ENROLLED": "Not Enrolled",
+  DUT_STATUS_UNKNOWN: 'Unknown',
+  DUT_STATUS_READY: 'Ready',
+  DUT_STATUS_RUNNING: 'Running',
+  DUT_STATUS_REPAIRING: 'Repairing',
+  DUT_STATUS_REPAIR_FAILED: 'Repair Failed',
+  DUT_STATUS_CLEANING: 'Cleaning',
+  DUT_STATUS_PENDING: 'Pending',
+  DUT_STATUS_RESETTING: 'Resetting',
+  DUT_STATUS_PROVISIONING: 'Provisioning',
+  DUT_STATUS_VERIFYING: 'Verifying',
+  DUT_STATUS_DISCONNECTED: 'Disconnected',
+  DUT_STATUS_NOT_ENROLLED: 'Not Enrolled',
 };
 
 function invertAndMap(obj, new_mappings) {
@@ -38,7 +38,10 @@ function invertAndMap(obj, new_mappings) {
   return readble_dut_states;
 }
 
-export const INT_TO_DUT_STATUS = invertAndMap(ConnectedDutInfo.DutStatus, DUT_STATUS_MAPPINGS);
+export const INT_TO_DUT_STATUS = invertAndMap(
+  ConnectedDutInfo.DutStatus,
+  DUT_STATUS_MAPPINGS
+);
 
 function createInvertedObj(obj) {
   const inverted_mappings = {};

@@ -107,7 +107,10 @@ export class BasicAutocompleteSelectorComponent
   }
 
   isExactMatchToOption() {
-    return this.options.findIndex(e => e.text === this.selectFormControl.value) !== -1;
+    return (
+      this.options.findIndex(e => e.text === this.selectFormControl.value) !==
+      -1
+    );
   }
 
   isNextUp() {

@@ -44,7 +44,7 @@ import {ServicesModule} from './services/services.module';
 import {ViewJobsModule} from './view-jobs/view-jobs.module';
 import {WidgetsModule} from './widgets/widgets.module';
 import {HealthCheckComponent} from './health-check/health-check.component';
-import { AboutComponent } from './about/about.component';
+import {AboutComponent} from './about/about.component';
 
 @NgModule({
   declarations: [
@@ -108,4 +108,4 @@ import { AboutComponent } from './about/about.component';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

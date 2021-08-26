@@ -8,10 +8,10 @@ import {NewUpdateStatus} from '../../../constants';
   styleUrls: ['./new-update-notifier.component.scss'],
 })
 export class NewUpdateNotifierComponent implements OnInit {
-  showNotifier: boolean = false;
+  showNotifier = false;
   updateStatus: number = NewUpdateStatus.UNKNOWN;
 
-  constructor(private newUpdateService: NewUpdateService) { }
+  constructor(private newUpdateService: NewUpdateService) {}
 
   ngOnInit(): void {
     // Subscribe to the Observable provided by NewUpdateService.

@@ -4,10 +4,9 @@ import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 @Component({
   selector: 'app-about',
   templateUrl: './about.component.html',
-  styleUrls: ['./about.component.scss']
+  styleUrls: ['./about.component.scss'],
 })
 export class AboutComponent implements OnInit {
-
   moblabReleaseVersion = '';
   chromeosReleaseVersion = '';
   chromeosReleaseTrack = '';
@@ -18,7 +17,7 @@ export class AboutComponent implements OnInit {
   moblabHostname = '';
   isConnectedToInternet = false;
 
-  constructor(private moblabRpcService: MoblabGrpcService) { }
+  constructor(private moblabRpcService: MoblabGrpcService) {}
 
   ngOnInit(): void {
     this.getVersionInfo();

@@ -12,7 +12,6 @@ import {ModuleWithProviders} from '@angular/core';
   imports: [HttpClientModule],
 })
 export class ServicesModule {
-
   static forRoot(): ModuleWithProviders<ServicesModule> {
     return {
       ngModule: ServicesModule,

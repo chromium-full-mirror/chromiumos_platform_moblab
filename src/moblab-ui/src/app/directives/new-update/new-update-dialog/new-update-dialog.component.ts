@@ -60,14 +60,14 @@ export class NewUpdateDialogComponent implements OnInit {
   public sendLabel: string = data[this.updateStatus].sendLabel;
   public showCancelLabelOnly: boolean =
     data[this.updateStatus].showCancelLabelOnly;
-  private error: string = `This error message should never show on screen. 
+  private error = `This error message should never show on screen. 
                           If it does, please report feedback with detailing 
-                          this error message.`
+                          this error message.`;
 
   constructor(
     public dialogRef: MatDialogRef<NewUpdateDialogComponent>,
-    private globalNewUpdateService: GlobalNewUpdateService,
-  ) { }
+    private globalNewUpdateService: GlobalNewUpdateService
+  ) {}
 
   ngOnInit() {
     // Subscribe to the NewUpdateStatusObservable.
@@ -88,5 +88,4 @@ export class NewUpdateDialogComponent implements OnInit {
       this.showCancelLabelOnly = data[this.updateStatus]['showCancelLabelOnly'];
     });
   }
-
 }

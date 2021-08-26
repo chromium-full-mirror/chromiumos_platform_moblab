@@ -6,19 +6,16 @@ import {Job} from './moblabrpc_pb';
 import {NewUpdateStatus} from '../constants';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NewUpdateService {
-
   private data$ = new BehaviorSubject({
     status: NewUpdateStatus.UNKNOWN,
-    reason: "Service not called."
+    reason: 'Service not called.',
   });
   public newUpdateStatusObservable: Observable<{}> = this.data$.asObservable();
 
-  constructor(
-    private moblabGrpcService: MoblabGrpcService,
-  ) { }
+  constructor(private moblabGrpcService: MoblabGrpcService) {}
 
   pollForUpdates(delay?: number) {
     /**
@@ -42,24 +39,23 @@ export class NewUpdateService {
     this.isUpdateAvailablePromise()
       .then((is_update_available: boolean) => {
         if (is_update_available) {
-          this.getNumJobsPromise()
-            .then((numJobs: number) => {
-              if (numJobs > 0) {
-                this.data$.next({
-                  status: NewUpdateStatus.UPDATE_AVAILABLE_WITH_JOBS_RUNNING,
-                  reason: "",
-                });
-              } else {
-                this.data$.next({
-                  status: NewUpdateStatus.UPDATE_AVAILABLE,
-                  reason: "",
-                });
-              }
-            })
+          this.getNumJobsPromise().then((numJobs: number) => {
+            if (numJobs > 0) {
+              this.data$.next({
+                status: NewUpdateStatus.UPDATE_AVAILABLE_WITH_JOBS_RUNNING,
+                reason: '',
+              });
+            } else {
+              this.data$.next({
+                status: NewUpdateStatus.UPDATE_AVAILABLE,
+                reason: '',
+              });
+            }
+          });
         } else {
           this.data$.next({
             status: NewUpdateStatus.NO_UPDATE,
-            reason: "",
+            reason: '',
           });
         }
       })
@@ -81,7 +77,9 @@ export class NewUpdateService {
           resolve(is_update_available);
         },
         (errorMsg: string) => {
-          console.log('Failed to get uvailable update information: ' + errorMsg);
+          console.log(
+            'Failed to get uvailable update information: ' + errorMsg
+          );
           reject(false);
         }
       );
@@ -101,7 +99,7 @@ export class NewUpdateService {
         undefined, // name_filter
         undefined, // created_time_lt
         undefined, // created_time_gt
-        Job.QueueStatus.JOBS_RUNNING, // status_filter
+        Job.QueueStatus.JOBS_RUNNING // status_filter
       );
     });
   }

@@ -3,11 +3,10 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatDialog} from '@angular/material/dialog';
 import {Router} from '@angular/router';
 
-
 import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
-import {ProvisionDialogComponent} from '../provision-dialog/provision-dialog.component'
+import {ProvisionDialogComponent} from '../provision-dialog/provision-dialog.component';
 import {NotificationsService} from 'app/services/notifications.service';
 @Component({
   selector: 'app-enrollment',
@@ -22,8 +21,8 @@ export class EnrollmentComponent {
     private moblabGrpcService: MoblabGrpcService,
     private router: Router,
     public dialog: MatDialog,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   enrollSelected() {
     this.dutsTableRef.startLoadingSpinner();
@@ -76,18 +75,21 @@ export class EnrollmentComponent {
 
   provisionDuts() {
     if (!this.dutsTableRef.duts.data) {
-      this.notificationsService.notify("You need to have at least one enrolled DUT")
+      this.notificationsService.notify(
+        'You need to have at least one enrolled DUT'
+      );
       return;
     }
 
-    const dialogRef = this.dialog.open(ProvisionDialogComponent,
-      {data: {duts: this.dutsTableRef.duts.data}});
+    const dialogRef = this.dialog.open(ProvisionDialogComponent, {
+      data: {duts: this.dutsTableRef.duts.data},
+    });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         let duts = this.dutsTableRef.duts.data;
         if (result.pool) {
-          duts = duts.filter((dut) => dut.getPoolsList()?.includes(result.pool))
+          duts = duts.filter(dut => dut.getPoolsList()?.includes(result.pool));
         }
         this.moblabGrpcService.provisionDuts(
           () => {
@@ -100,7 +102,8 @@ export class EnrollmentComponent {
           },
           result.buildVersion,
           result.milestone,
-          result.pool);
+          result.pool
+        );
         this.dutsTableRef.startLoadingSpinner();
       }
     });

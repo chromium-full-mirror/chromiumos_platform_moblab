@@ -848,7 +848,7 @@ export class MoblabGrpcService {
     model: string,
     milestone: string,
     callback: (
-      buildVersions: {version: string; status: string;}[],
+      buildVersions: {version: string; status: string}[],
       isIncomplete: boolean
     ) => void,
     errorHandlingCallback: (err_msg: string) => void
@@ -1581,7 +1581,6 @@ export class MoblabGrpcService {
   }
 
   async getCloudBucketUrl(): Promise<string> {
-
     const version = await new Promise<string>((resolve, reject) => {
       this.get_version_info(
         (
@@ -1592,7 +1591,7 @@ export class MoblabGrpcService {
           moblab_install_id: string,
           moblab_serial_number: string
         ) => {
-          resolve(`${moblab_serial_number}/${moblab_install_id}`)
+          resolve(`${moblab_serial_number}/${moblab_install_id}`);
         },
         (errorMsg: string) => {
           reject(errorMsg);
@@ -1610,12 +1609,11 @@ export class MoblabGrpcService {
           _is_remote_console_enabled: boolean,
           _is_remote_command_enabled: boolean
         ) => {
-          if (gcs_bucket_url && gcs_bucket_url.startsWith("gs://"))
+          if (gcs_bucket_url && gcs_bucket_url.startsWith('gs://'))
             resolve(gcs_bucket_url.substr(5));
-
         },
-        (errorMsg: string) => reject(errorMsg),
-      )
+        (errorMsg: string) => reject(errorMsg)
+      );
     });
 
     return `https://console.cloud.google.com/storage/browser/${bucket}results/${version}`;

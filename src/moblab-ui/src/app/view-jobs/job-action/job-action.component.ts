@@ -17,7 +17,7 @@ export class JobActionComponent {
   constructor(
     private moblabGrpcService: MoblabGrpcService,
     private notificationsService: NotificationsService
-  ) { }
+  ) {}
 
   toggleJobSelection(element) {
     this.jobSelections.toggle(element.getJobId());

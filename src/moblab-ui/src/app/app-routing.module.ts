@@ -1,6 +1,6 @@
 import {APP_BASE_HREF} from '@angular/common';
 import {NgModule, APP_INITIALIZER} from '@angular/core';
-import {RouterModule, Routes, CanActivate} from '@angular/router';
+import {RouterModule, Routes} from '@angular/router';
 
 import {ConfigurationComponent} from './configuration/configuration.component';
 import {CtsRunComponent} from './run-suite/custom-run-suite/cts-run/cts-run.component';
@@ -63,12 +63,12 @@ const routes: Routes = [
     {provide: APP_BASE_HREF, useValue: ''},
     {
       provide: APP_INITIALIZER,
-      useFactory: (newUpdateService: NewUpdateService) =>
-        () => newUpdateService.pollForUpdates(),
+      useFactory: (newUpdateService: NewUpdateService) => () =>
+        newUpdateService.pollForUpdates(),
       deps: [NewUpdateService],
-      multi: true
+      multi: true,
     },
-    ConfigGuard
+    ConfigGuard,
   ],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

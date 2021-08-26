@@ -40,8 +40,8 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
     private cd: ChangeDetectorRef,
     readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {

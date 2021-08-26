@@ -29,8 +29,8 @@ import {Observable, timer} from 'rxjs';
 import {retryWhen, delayWhen} from 'rxjs/operators';
 
 export class StableCrOSVersion {
-  public DefaultVersion: string = "";
-  public UserOverrideVersion: string = "";
+  public DefaultVersion = '';
+  public UserOverrideVersion = '';
 }
 
 @Injectable({providedIn: 'root'})
@@ -65,33 +65,40 @@ export class MoblabConfigurationGrpcService {
   }
 
   private configurePauseStateObservable() {
-    this.pauseStateObservable = new Observable<string[]>((observer) => {
-
-      let stream = this.configurationRpcClient.stream_host_scheduler_pause_status(new Empty());
+    this.pauseStateObservable = new Observable<string[]>(observer => {
+      const stream = this.configurationRpcClient.stream_host_scheduler_pause_status(
+        new Empty()
+      );
       stream
         .on('data', (response: GetHostSchedulerPauseStatusResponse) => {
-          const pauseRequestors = response.getPauserequestorsList().map(this.mapRequestors)
+          const pauseRequestors = response
+            .getPauserequestorsList()
+            .map(this.mapRequestors);
           console.log(pauseRequestors);
           observer.next(pauseRequestors);
         })
         .on('status', (status: grpcWeb.Status) => {
           console.log(
-            "Status: Code: " + status.code +
-            "Details: " + status.details +
-            "Metadata: " + status.metadata);
+            'Status: Code: ' +
+              status.code +
+              'Details: ' +
+              status.details +
+              'Metadata: ' +
+              status.metadata
+          );
         })
         .on('end', () => {
-          console.log("stream_host_scheduler_pause_status stream is closed!");
+          console.log('stream_host_scheduler_pause_status stream is closed!');
           observer.error('Stream ended');
         })
-        .on('error', (er) => {
-          console.log("Error in stream_host_scheduler_pause_status:", er);
+        .on('error', er => {
+          console.log('Error in stream_host_scheduler_pause_status:', er);
           observer.error(er);
         });
     }).pipe(
       retryWhen(errors => {
-        console.log("Retrying in 60s ... ");
-        return errors.pipe(delayWhen(_ => timer(60000)))
+        console.log('Retrying in 60s ... ');
+        return errors.pipe(delayWhen(_ => timer(60000)));
       })
     );
   }
@@ -133,9 +140,11 @@ export class MoblabConfigurationGrpcService {
     return this.configurationRpcClient
       .get_stable_build_version(request)
       .then((response: GetStableBuildVersionResponse) => {
-        let result = new StableCrOSVersion();
+        const result = new StableCrOSVersion();
         result.DefaultVersion = response.getStableVersion().getDefaultVersion();
-        result.UserOverrideVersion = response.getStableVersion().getOverrideVersion();
+        result.UserOverrideVersion = response
+          .getStableVersion()
+          .getOverrideVersion();
         return result;
       });
   }
@@ -162,11 +171,11 @@ export class MoblabConfigurationGrpcService {
     return this.configurationRpcClient
       .get_local_results_retention_duration(new Empty())
       .then((response: GetLocalResultsRetentionDurationResponse) => {
-        var hours = response.getDuration().getSeconds() / (60 * 60);
+        const hours = response.getDuration().getSeconds() / (60 * 60);
         if (hours < 24 && hours > 0) {
           return `${hours}h`;
         }
-        var days = hours / 24;
+        const days = hours / 24;
         if (days < 8 && days > 0) {
           return `${days}d`;
         }
@@ -175,19 +184,20 @@ export class MoblabConfigurationGrpcService {
   }
 
   setResultsRetentionPeriod(period: string): Promise<void> {
-    var duration = Number(period.slice(0, -1));
-    if (period[period.length - 1] === `h`) {
-      duration = duration * 60 * 60;      // Convert hours to seconds
-    } else if (period[period.length - 1] === `d`) {
+    let duration = Number(period.slice(0, -1));
+    if (period[period.length - 1] === 'h') {
+      duration = duration * 60 * 60; // Convert hours to seconds
+    } else if (period[period.length - 1] === 'd') {
       duration = duration * 60 * 60 * 24; // Convert days to seconds
     } else {
       throw new Error(`Incorrect format of duration: ${period}`);
     }
-    const request = new SetLocalResultsRetentionDurationRequest()
-      .setDuration(new Duration().setSeconds(duration));
+    const request = new SetLocalResultsRetentionDurationRequest().setDuration(
+      new Duration().setSeconds(duration)
+    );
     return this.configurationRpcClient
       .set_local_results_retention_duration(request)
-      .then((_: Empty) => { });
+      .then((_: Empty) => {});
   }
 
   private mapRequestors(requestor: PauseRequestor) {

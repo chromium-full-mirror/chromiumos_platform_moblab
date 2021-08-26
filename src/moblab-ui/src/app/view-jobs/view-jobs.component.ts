@@ -106,7 +106,7 @@ export class UploadStatus {
     public iconStyle = '',
     public tooltip = '',
     public attemptNumber = ''
-  ) { }
+  ) {}
 }
 
 @Component({
@@ -169,7 +169,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     Object.keys(Job.Relationship).slice(1)
   );
   queueStatusFilterOptions = [''].concat(Object.keys(Job.QueueStatus).slice(1));
-  cloudBucketUrl = "";
+  cloudBucketUrl = '';
 
   constructor(
     public readonly moblabGrpcService: MoblabGrpcService,
@@ -180,7 +180,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   ) {
     this.moblabGrpcService
       .getCloudBucketUrl()
-      .then(s => this.cloudBucketUrl = s)
+      .then(s => (this.cloudBucketUrl = s))
       .catch(e => notificationsService.error(e));
   }
 
@@ -405,16 +405,20 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   }
 
   isResultsDeleted(job: Job): boolean {
-    return job.getUploadState().getStatus() == Job.UploadStatus.UPLOAD_STATUS_DELETED;
+    return (
+      job.getUploadState().getStatus() ===
+      Job.UploadStatus.UPLOAD_STATUS_DELETED
+    );
   }
 
-  constructJobLogsLink(job: Job):  string {
+  constructJobLogsLink(job: Job): string {
     if (this.isResultsDeleted(job)) {
       return `${this.cloudBucketUrl}/${job.getJobId()}-moblab/`;
     }
-    return `${this.moblabGrpcService.service_address}/results/${job.getJobId()}-moblab/`;
+    return `${
+      this.moblabGrpcService.service_address
+    }/results/${job.getJobId()}-moblab/`;
   }
-
 
   assignJobs(jobs: Job[] | undefined) {
     this.jobs = new MatTableDataSource(jobs);

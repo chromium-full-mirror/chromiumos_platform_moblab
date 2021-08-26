@@ -23,7 +23,7 @@ export class StageBuildNotification {
     public status: StageBuildStatus,
     public icon: string,
     public cssClass: string
-  ) { }
+  ) {}
 }
 const GCS_URL = 'https://console.developers.google.com/storage/';
 
@@ -47,7 +47,7 @@ export class StageBuildDialogComponent {
   selectedMilestone = '';
   selectedModel = '';
 
-  constructor(public moblabGrpcService: MoblabGrpcService) { }
+  constructor(public moblabGrpcService: MoblabGrpcService) {}
 
   onBuildSet(event) {
     this.selectedModel = event.model;

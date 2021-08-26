@@ -88,4 +88,4 @@ import {FAFTRunComponent} from './custom-run-suite/faft/faft.component';
     NewUpdateModule,
   ],
 })
-export class RunSuiteModule { }
+export class RunSuiteModule {}

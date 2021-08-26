@@ -42,8 +42,8 @@ export abstract class BaseSuite {
   constructor(
     public moblabGrpcService: MoblabGrpcService,
     public router: Router,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   onBuildSet(event: BuildSettings) {
     this.selectedModel = event.model;

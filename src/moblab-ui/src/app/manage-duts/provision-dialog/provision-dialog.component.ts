@@ -1,7 +1,10 @@
 import {AfterViewInit, Component, Inject, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
-import {LoadingOverlayComponent, LoadingOverlayStyle} from 'app/widgets/loading-overlay/loading-overlay.component';
+import {
+  LoadingOverlayComponent,
+  LoadingOverlayStyle,
+} from 'app/widgets/loading-overlay/loading-overlay.component';
 import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 import {SelectableItem} from 'app/run-suite/common/basic-autocomplete-selector/basic-autocomplete-selector.component';
 
@@ -14,7 +17,7 @@ export interface DialogData {
 @Component({
   selector: 'app-provision-dialog',
   templateUrl: 'provision-dialog.component.html',
-  styleUrls: ['provision-dialog.component.scss']
+  styleUrls: ['provision-dialog.component.scss'],
 })
 export class ProvisionDialogComponent implements AfterViewInit {
   @ViewChild('buildSelector') buildSelector;
@@ -26,16 +29,16 @@ export class ProvisionDialogComponent implements AfterViewInit {
   buildVersions: SelectableItem[] = [];
   pools: SelectableItem[] = [];
 
-  build: DialogData = {milestone: "", buildVersion: "", pool: ""};
+  build: DialogData = {milestone: '', buildVersion: '', pool: ''};
 
-  private model = "";
-  private board = "";
-  public canStart = false
+  private model = '';
+  private board = '';
+  public canStart = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {duts: ConnectedDutInfo[]},
-    private moblabGrpcService: MoblabGrpcService) {
-  }
+    private moblabGrpcService: MoblabGrpcService
+  ) {}
 
   ngAfterViewInit() {
     this.loadPools();
@@ -43,21 +46,26 @@ export class ProvisionDialogComponent implements AfterViewInit {
 
   loadPools(): void {
     this.resetPools();
-    this.loadingOverlay.updateStatus("Loading pools ...", LoadingOverlayStyle.Top)
+    this.loadingOverlay.updateStatus(
+      'Loading pools ...',
+      LoadingOverlayStyle.Top
+    );
     this.moblabGrpcService.listPools(
-      (pools) => {
-        pools.push("<all>");
+      pools => {
+        pools.push('<all>');
         this.updatePools(pools);
         this.loadingOverlay.hide();
       },
-      (errorMessage) => {this.showErrorMessage(errorMessage);}
+      errorMessage => {
+        this.showErrorMessage(errorMessage);
+      }
     );
   }
 
   resetPools() {
     this.pools = [];
-    this.poolSelector.disable("loading...");
-    this.resetMilestones("Please select pool.");
+    this.poolSelector.disable('loading...');
+    this.resetMilestones('Please select pool.');
   }
 
   updatePools(pools: string[]) {
@@ -66,19 +74,24 @@ export class ProvisionDialogComponent implements AfterViewInit {
   }
 
   poolChanged(pool: string): void {
-    if (pool == "<all>") {
-      pool = "";
+    if (pool === '<all>') {
+      pool = '';
     }
     this.build.pool = pool;
-    const chosenDut = this.data.duts.find(d => !pool || d.getPoolsList()?.includes(pool));
+    const chosenDut = this.data.duts.find(
+      d => !pool || d.getPoolsList()?.includes(pool)
+    );
     this.model = chosenDut.getModel();
     this.board = chosenDut.getBuildTarget();
     this.loadMilestones();
   }
 
   loadMilestones(): void {
-    this.resetMilestones("loading...");
-    this.loadingOverlay.updateStatus("Loading milestones ...", LoadingOverlayStyle.Top)
+    this.resetMilestones('loading...');
+    this.loadingOverlay.updateStatus(
+      'Loading milestones ...',
+      LoadingOverlayStyle.Top
+    );
     this.moblabGrpcService.listMilestones(
       this.board,
       this.model,
@@ -86,7 +99,9 @@ export class ProvisionDialogComponent implements AfterViewInit {
         this.updateMilestones(milestones);
         this.loadingOverlay.hide();
       },
-      (errorMessage) => {this.showErrorMessage(errorMessage);}
+      errorMessage => {
+        this.showErrorMessage(errorMessage);
+      }
     );
   }
 
@@ -94,15 +109,13 @@ export class ProvisionDialogComponent implements AfterViewInit {
     this.milestones = [];
     this.milestoneSelector.selectFormControl.reset();
     this.milestoneSelector.disable(message);
-    this.resetBuildVersions("Please select milestone.");
+    this.resetBuildVersions('Please select milestone.');
   }
 
   updateMilestones(newMilestones: string[]) {
     this.milestones = newMilestones.map(m => new SelectableItem(m));
     if (this.milestones.length === 0) {
-      this.milestoneSelector.disable(
-        'No milestones found for the model.'
-      );
+      this.milestoneSelector.disable('No milestones found for the model.');
     } else {
       this.milestoneSelector.enable();
     }
@@ -114,17 +127,22 @@ export class ProvisionDialogComponent implements AfterViewInit {
   }
 
   loadBuildVersions(): void {
-    this.resetBuildVersions("loading...");
-    this.loadingOverlay.updateStatus("Loading build versions ...", LoadingOverlayStyle.Top)
+    this.resetBuildVersions('loading...');
+    this.loadingOverlay.updateStatus(
+      'Loading build versions ...',
+      LoadingOverlayStyle.Top
+    );
     this.moblabGrpcService.listBuildVersions(
       this.board,
       this.model,
       this.build.milestone,
-      (buildVersions: {version: string, status: string}[], _) => {
+      (buildVersions: {version: string; status: string}[], _) => {
         this.updateBuildVersions(buildVersions);
         this.loadingOverlay.hide();
       },
-      (errorMessage) => {this.showErrorMessage(errorMessage);}
+      errorMessage => {
+        this.showErrorMessage(errorMessage);
+      }
     );
   }
 
@@ -158,6 +176,6 @@ export class ProvisionDialogComponent implements AfterViewInit {
   }
 
   showErrorMessage(message: string) {
-    this.loadingOverlay.updateStatus(message, LoadingOverlayStyle.Top)
+    this.loadingOverlay.updateStatus(message, LoadingOverlayStyle.Top);
   }
 }

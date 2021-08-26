@@ -28,7 +28,7 @@ export class FAFTRunComponent extends BaseSuite implements AfterContentInit {
   constructor(
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationsService: NotificationsService,
+    notificationsService: NotificationsService
   ) {
     super(moblabGrpcService, router, notificationsService);
   }

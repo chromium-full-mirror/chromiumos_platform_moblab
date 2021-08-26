@@ -56,14 +56,19 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
     'time_used',
     'status',
   ];
-  associatedDutsTableColumns: string[] = ['dut', 'dut_status', 'status', 'logs',];
+  associatedDutsTableColumns: string[] = [
+    'dut',
+    'dut_status',
+    'status',
+    'logs',
+  ];
 
   constructor(
     private cd: ChangeDetectorRef,
     private readonly moblabGrpcService: MoblabGrpcService,
     private route: ActivatedRoute,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -129,7 +134,7 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
   }
 
   getLogsLink(execution: Execution) {
-    let link = `/results/${execution.getJobId()}-moblab/${execution.getDut()}/`;
+    const link = `/results/${execution.getJobId()}-moblab/${execution.getDut()}/`;
     return link;
   }
 

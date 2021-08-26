@@ -20,8 +20,8 @@ export class UpdateButtonComponent implements OnInit {
   constructor(
     private moblabGrpcService: MoblabGrpcService,
     private dialog: MatDialog,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   ngOnInit(): void {
     this.moblabGrpcService.get_is_update_available(

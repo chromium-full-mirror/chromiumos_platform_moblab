@@ -12,8 +12,8 @@ export class ConfigGuard implements CanActivate {
     private router: Router,
     private moblabRpcService: MoblabGrpcService,
     private configSetupService: ConfigSetupService,
-    private notificationsService: NotificationsService,
-  ) { }
+    private notificationsService: NotificationsService
+  ) {}
 
   canActivate(): Promise<boolean> {
     if (environment.disableConfigGuard) {
@@ -39,7 +39,9 @@ export class ConfigGuard implements CanActivate {
           }
         },
         (errorMsg: string) => {
-          this.notificationsService.error('Failed to get cloud configuration: ' + errorMsg);
+          this.notificationsService.error(
+            'Failed to get cloud configuration: ' + errorMsg
+          );
         }
       );
     });

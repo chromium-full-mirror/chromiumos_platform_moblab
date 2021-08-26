@@ -27,7 +27,7 @@ export class GtsRunComponent extends BaseSuite implements AfterContentInit {
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
     router: Router,
-    notificationsService: NotificationsService,
+    notificationsService: NotificationsService
   ) {
     super(moblabGrpcService, router, notificationsService);
   }
