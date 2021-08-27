@@ -97,11 +97,13 @@ class CollectService(Constants):
             self.moblab_install_id = self.moblab_version_info[
                 MoblabConstants.MOBLAB_INSTALL_ID_NAME
             ].rstrip()
-            _LOGGER.info("Successfully collected moblab host id: %s, moblab "
-                         "install id: %s and moblab version info: %s",
-                         self.moblab_host_id,
-                         self.moblab_install_id,
-                         self.moblab_version_info)
+            _LOGGER.info(
+                "Successfully collected moblab host id: %s, moblab "
+                "install id: %s and moblab version info: %s",
+                self.moblab_host_id,
+                self.moblab_install_id,
+                self.moblab_version_info,
+            )
             return True
         except KeyError as err:
             _LOGGER.exception(
@@ -158,10 +160,11 @@ class CollectService(Constants):
             ).rstrip()
             moblab.build_version = build_version
 
-            end = build_version.find('-')
+            end = build_version.find("-")
             moblab.milestone = int(build_version[1:end]) if end != -1 else 0
 
             moblab.ip_address = self.host_connector.get_ip()
+            moblab.cpu_temperature = self.host_connector.get_cpu_temperature()
             moblab.channel = self.moblab_version_info.get(
                 MoblabConstants.CHANNEL_NAME, "No available channel"
             ).rstrip()
@@ -269,8 +272,9 @@ class CollectService(Constants):
             disk_stats.total_disk_size_bytes
         )
 
-        _LOGGER.info("Successfully created Moblab disk stats message: %s",
-                     moblab)
+        _LOGGER.info(
+            "Successfully created Moblab disk stats message: %s", moblab
+        )
         return moblab
 
     def create_moblab_network_message(self):
@@ -300,8 +304,10 @@ class CollectService(Constants):
             moblab.network_stats.broken_connections = network_json[
                 "connection_breaks"
             ]
-            _LOGGER.info("Successfully created Moblab network stats message: "
-                         "%s", moblab)
+            _LOGGER.info(
+                "Successfully created Moblab network stats message: " "%s",
+                moblab,
+            )
             return moblab
         except (RunCommandError, KeyError) as err:
             _LOGGER.exception(
@@ -461,8 +467,11 @@ class CollectService(Constants):
                 "Moblab does not have attribute type: %s", attribute_type
             )
 
-        _LOGGER.info("Successfully collected Moblab information for the "
-                     "attribute: %s", attribute_type)
+        _LOGGER.info(
+            "Successfully collected Moblab information for the "
+            "attribute: %s",
+            attribute_type,
+        )
         return moblab
 
     def collect_attr_for_duts(self, attribute_type):
@@ -488,12 +497,16 @@ class CollectService(Constants):
         #   enrolled_duts =
         #   [{'hostname': '192.168.231.11', 'labels': [], 'status': 'Running'},
         #     {'hostname': '192.168.231.19', 'labels': [], 'status': 'Ready'}]
-        connected_moblab_dut_ids = self.dut_connector.get_connected_dut_serialno()
+        connected_moblab_dut_ids = (
+            self.dut_connector.get_connected_dut_serialno()
+        )
         enrolled_duts = self.afe_connector.get_connected_devices()
-        _LOGGER.info("Found connected DUT serial numbers: %s",
-                     connected_moblab_dut_ids)
-        _LOGGER.info("Found enrolled DUT device information: %s",
-                     enrolled_duts)
+        _LOGGER.info(
+            "Found connected DUT serial numbers: %s", connected_moblab_dut_ids
+        )
+        _LOGGER.info(
+            "Found enrolled DUT device information: %s", enrolled_duts
+        )
 
         message_attributes = {
             "DUT_BASIC": self.create_dut_basic_message,
@@ -524,7 +537,7 @@ class CollectService(Constants):
         if moblab_duts_ids_map:
             for dut_info_dict in enrolled_duts:
                 dut_ip = dut_info_dict["hostname"]
-                dut_status = dut_info_dict['status']
+                dut_status = dut_info_dict["status"]
                 enrolled_dut_ips.add(dut_ip)
                 if dut_ip in moblab_duts_ids_map:
                     # Collects connected enrolled DUTs
@@ -542,39 +555,50 @@ class CollectService(Constants):
                 else:
                     # Only collects disconnected enrolled DUTs with Ready or
                     # Repair Failed status.
-                    if dut_status == 'Ready' or dut_status == 'Repair Failed':
+                    if dut_status == "Ready" or dut_status == "Repair Failed":
                         disconnected_dut_ip_status_map[dut_ip] = dut_status
 
         # Generates pubsub messages for connected unenrolled DUTs.
         if connected_unenrolled_dut_ips:
-            _LOGGER.info("Found connected unenrolled DUT IPs: %s",
-                         connected_unenrolled_dut_ips)
+            _LOGGER.info(
+                "Found connected unenrolled DUT IPs: %s",
+                connected_unenrolled_dut_ips,
+            )
             for dut_ip in connected_unenrolled_dut_ips:
                 dut = self._initiate_dut_message(dut_ip)
-                dut.status = \
+                dut.status = (
                     remoteagentrpc_pb2.DutStatus.DUT_STATUS_NOT_ENROLLED
-                dut.last_update_time = \
-                    round(time.time() * 1000)  # in millisecond
+                )
+                dut.last_update_time = round(
+                    time.time() * 1000
+                )  # in millisecond
                 duts.append(dut)
 
         # Generates pubsub messages for disconnected enrolled DUTs.
-        dhcp_disconnected_dut_ips = \
+        dhcp_disconnected_dut_ips = (
             self.dut_connector.get_disconnected_dut_ips()
+        )
         for dut_ip in dhcp_disconnected_dut_ips:
             if dut_ip not in enrolled_dut_ips:
-                disconnected_dut_ip_status_map[dut_ip] = 'DHCP Disconnected'
+                disconnected_dut_ip_status_map[dut_ip] = "DHCP Disconnected"
         if disconnected_dut_ip_status_map:
-            _LOGGER.info("Found disconnected DUT IPs with Ready status, Repair "
-                         "Failed status or unenrolled state: %s",
-                         disconnected_dut_ip_status_map)
+            _LOGGER.info(
+                "Found disconnected DUT IPs with Ready status, Repair "
+                "Failed status or unenrolled state: %s",
+                disconnected_dut_ip_status_map,
+            )
             for dut_ip in disconnected_dut_ip_status_map:
                 dut = self._initiate_dut_message(dut_ip)
-                dut.status = \
+                dut.status = (
                     remoteagentrpc_pb2.DutStatus.DUT_STATUS_DISCONNECTED
-                dut.last_update_time = \
-                    round(time.time() * 1000)  # in millisecond
+                )
+                dut.last_update_time = round(
+                    time.time() * 1000
+                )  # in millisecond
                 duts.append(dut)
 
-        _LOGGER.info("Successfully collected DUT information for the "
-                     "attribute: %s", attribute_type)
+        _LOGGER.info(
+            "Successfully collected DUT information for the " "attribute: %s",
+            attribute_type,
+        )
         return duts

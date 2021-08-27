@@ -13,6 +13,11 @@ import hostservice_pb2
 import host_server_base
 
 
+from utils import cpu_temperature_orchestrator
+
+_LOGGER = logging.getLogger("host-server")
+
+
 class HostServerDebian(host_server_base.HostServerBase):
     """Implementation for the hostservice contract on debian.
 
@@ -25,6 +30,9 @@ class HostServerDebian(host_server_base.HostServerBase):
     perform write / destructive operations on such as machine as root user
     is undesirable.
     """
+
+    # CpuTemperatureOrchestrator instance.
+    _cpu_temp = cpu_temperature_orchestrator.CpuTemperatureOrchestrator(30, 1)
 
     def get_host_identifier(self, unused_request, unused_context):
         """Get a stable identifier for the machine.
@@ -75,6 +83,19 @@ class HostServerDebian(host_server_base.HostServerBase):
 
         response = hostservice_pb2.DiskInfoResponse()
         response.disk_info = result
+        return response
+
+    def get_cpu_temperature(self, unused_request, unused_context):
+        """Get average CPU temperature over the last 30 minutes."""
+        response = hostservice_pb2.CpuTemperatureResponse()
+        temp = HostServerDebian._cpu_temp.get_average_cpu_temperature()
+        if not isinstance(temp, float):
+            _LOGGER.error(
+                "Received temperature value is %s which "
+                "is not of type float." % str(temp)
+            )
+            temp = float(0)
+        response.temperature = temp
         return response
 
     def get_ip(self, unused_request, unused_context):

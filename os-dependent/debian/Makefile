@@ -50,6 +50,7 @@ proto: init
 python: proto
 	install -D host_server_debian.py ${INSTALL_DIR}
 	install -D ../common/host*.py ${INSTALL_DIR}
+	install -D ../common/utils/*.py ${INSTALL_DIR}/utils
 
 host_server: python
 	cp init/moblab-host-server /etc/init.d
