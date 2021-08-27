@@ -29,6 +29,14 @@ def get_disk_info(stub):
     print("Disk Info:\n%s" % stub.get_disk_info(empty_pb2.Empty()).disk_info)
 
 
+def get_cpu_temperature(stub):
+    """Check if get_cpu_temperature rpc is working."""
+    print(
+        "CPU Temperature:\n%s"
+        % stub.get_cpu_temperature(empty_pb2.Empty()).temperature
+    )
+
+
 def get_ip(stub):
     """Check the get IP call is working."""
     print("IP Address: %s" % stub.get_ip(empty_pb2.Empty()).ip_address)
@@ -114,6 +122,7 @@ if __name__ == "__main__":
 
     get_host_identifier(stub)
     get_disk_info(stub)
+    get_cpu_temperature(stub)
     get_ip(stub)
     check_for_system_update(stub)
     get_system_update_status(stub)

@@ -114,6 +114,17 @@ class HostServicesConnector(object):
             raise HostServicesException("Error getting disk info")
 
     @classmethod
+    def get_cpu_temperature(cls):
+        cls.connect()
+        try:
+            response = cls.stub.get_cpu_temperature(empty_pb2.Empty())
+            return response.temperature
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception("Error getting cpu temperature")
+            raise HostServicesException("Error getting cpu temperature")
+
+    @classmethod
     def get_ip(cls):
         """Get the host servers external IP address.
 
