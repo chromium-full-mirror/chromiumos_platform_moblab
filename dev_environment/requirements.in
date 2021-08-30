@@ -7,4 +7,5 @@
     pip-tools
     pylint
     requests
+    grpcio==1.23.0
     grpcio-tools
