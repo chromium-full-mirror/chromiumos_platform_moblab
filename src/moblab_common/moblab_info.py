@@ -86,6 +86,20 @@ def _get_public_ip_address():
         return None
 
 
+def _get_public_mac_address():
+    """
+        Gets the public IP address.
+
+    Returns:
+        public MAC address as string.
+    """
+    try:
+        return host_connector.HostServicesConnector.get_external_mac_address()
+    except host_connector.HostServicesException:
+        _LOGGER.exception("Failed to get MAC address from host.")
+        return None
+
+
 def get_network_info():
     """
         Gets network info of Moblab.
@@ -98,11 +112,20 @@ def get_network_info():
         'is_connected' which is true iff Moblab is connected to internet.
     """
     ip = _get_public_ip_address()
+    mac_addr = _get_public_mac_address()
+    is_connected = True
+
     if ip is None or ip == "localhost":
-        return {"server_ip": None, "is_connected": False}
+        ip = None
+        is_connected = False
     else:
         _LOGGER.info("Established TCP connection with well known server.")
-        return {"server_ip": ip, "is_connected": True}
+
+    return {
+        "server_ip": ip,
+        "server_mac_address": mac_addr,
+        "is_connected": is_connected,
+    }
 
 
 def get_version_info():
@@ -116,7 +139,9 @@ def get_version_info():
     version_info[MoblabConstants.MOBLAB_INSTALL_ID_NAME] = get_or_create_id()
     version_info[MoblabConstants.MOBLAB_HOST_ID_NAME] = get_serial_number()
 
-    version_info[MoblabConstants.MOBLAB_RELEASE_VERSION] = _get_moblab_version()
+    version_info[
+        MoblabConstants.MOBLAB_RELEASE_VERSION
+    ] = _get_moblab_version()
 
     host_version_info = None
     try:
@@ -140,6 +165,7 @@ def get_version_info():
 
     _LOGGER.info(version_info)
     return version_info
+
 
 def _get_moblab_version():
     """

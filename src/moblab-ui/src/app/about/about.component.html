@@ -1,0 +1,68 @@
+<mat-card id="moblab-about-card">
+  <mat-card-header>
+    <mat-card-title>Moblab Information</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="card-table-content">
+      <table>
+        <tr>
+          <td>Moblab Version:</td>
+          <td>{{moblabReleaseVersion}}</td>
+        </tr>
+        <tr>
+          <td>Chrome OS Version:</td>
+          <td>{{chromeosReleaseVersion}}</td>
+        </tr>
+        <tr>
+          <td>Track:</td>
+          <td>{{chromeosReleaseTrack}}</td>
+        </tr>
+        <tr>
+          <td>Description:</td>
+          <td>{{chromeosReleaseDescription}}</td>
+        </tr>
+        <tr>
+          <td>Moblab Install Id:</td>
+          <td>{{moblabInstallId}}</td>
+        </tr>
+        <tr>
+          <td>Moblab Host Id:</td>
+          <td>{{moblabSerialNumber}}</td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card id="network-information-card">
+  <mat-card-header>
+    <mat-card-title>Network Information</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="card-table-content">
+      <table>
+        <tr>
+          <td>Moblab Hostname:</td>
+          <td>{{moblabHostname}}</td>
+        </tr>
+        <tr>
+          <td>Moblab MAC Address:</td>
+          <td>{{moblabMacAddress}}</td>
+        </tr>
+        <tr>
+          <td>Connected to Internet:</td>
+          <td>{{isConnectedToInternet}}</td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<div class="reboot-button-wrapper">
+  <app-reboot-button></app-reboot-button>
+</div>
+
+
+<div class="update-button-wrapper">
+  <app-update-button></app-update-button>
+</div>
