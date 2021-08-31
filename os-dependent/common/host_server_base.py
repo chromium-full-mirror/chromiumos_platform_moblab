@@ -68,6 +68,14 @@ class HostServerBase(hostservice_pb2_grpc.MoblabHostServiceServicer):
         context.abort(grpc.StatusCode.UNIMPLEMENTED, "Not Implemented")
         raise NotImplementedError
 
+    def get_external_mac_address(self, unused_request, context):
+        """Return the external interface's ip address.
+
+        Raises: NotImplementedError
+        """
+        context.abort(grpc.StatusCode.UNIMPLEMENTED, "Not Implemented")
+        raise NotImplementedError
+
     def check_for_system_update(self, unused_request, context):
         """Check to see if there is a host os update available.
 

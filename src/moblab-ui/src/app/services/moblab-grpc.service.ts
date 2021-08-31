@@ -1264,7 +1264,11 @@ export class MoblabGrpcService {
   }
 
   get_network_info(
-    callback: (moblab_hostname: string, is_connected: boolean) => void,
+    callback: (
+      moblab_hostname: string,
+      moblab_mac_address: string,
+      is_connected: boolean
+    ) => void,
     errorHandlingCallback: (errorMsg: string) => void
   ) {
     const request = new GetNetworkInfoRequest();
@@ -1275,7 +1279,13 @@ export class MoblabGrpcService {
         if (err) {
           errorHandlingCallback(err.message);
         } else {
-          callback(response.getMoblabHostname(), response.getIsConnected());
+          console.log('NETWORK RESPONSE: ');
+          console.log(response);
+          callback(
+            response.getMoblabHostname(),
+            response.getMoblabMacAddress(),
+            response.getIsConnected()
+          );
         }
       }
     );

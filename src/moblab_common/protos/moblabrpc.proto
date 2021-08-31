@@ -696,9 +696,10 @@ message RemoveAttributeFromDutsResponse {
 // NEXT_TAG = 1;
 message GetNetworkInfoRequest {}
 
-// NEXT_TAG = 3;
+// NEXT_TAG = 4;
 message GetNetworkInfoResponse {
   string moblab_hostname = 1;
+  string moblab_mac_address = 3;
   bool is_connected = 2;
 }
 

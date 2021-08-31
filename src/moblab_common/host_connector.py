@@ -133,6 +133,25 @@ class HostServicesConnector(object):
             raise HostServicesException("Error getting host ip")
 
     @classmethod
+    def get_external_mac_address(cls):
+        """Get the host server's external MAC address.
+
+        Raises:
+            HostServicesException: if there is an issue with the host server.
+
+        Returns:
+            string: MAC address of the host server.
+        """
+        cls.connect()
+        try:
+            response = cls.stub.get_external_mac_address(empty_pb2.Empty())
+            return response.mac_address
+        except grpc.RpcError:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception("Error getting host MAC address")
+            raise HostServicesException("Error getting host MAC address")
+
+    @classmethod
     def check_for_system_update(cls):
         """Check to see if the underlying host system needs to update.
 

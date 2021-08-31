@@ -15,6 +15,7 @@ export class AboutComponent implements OnInit {
   moblabSerialNumber = '';
 
   moblabHostname = '';
+  moblabMacAddress = '';
   isConnectedToInternet = false;
 
   constructor(private moblabRpcService: MoblabGrpcService) {}
@@ -69,17 +70,18 @@ export class AboutComponent implements OnInit {
 
   getNetworkInfo() {
     this.moblabRpcService.get_network_info(
-      (moblab_hostname: string, is_connected: boolean) => {
-        this.setNetworkInfo(moblab_hostname, is_connected);
+      (
+        moblab_hostname: string,
+        moblab_mac_address: string,
+        is_connected: boolean
+      ) => {
+        this.moblabHostname = moblab_hostname;
+        this.moblabMacAddress = moblab_mac_address;
+        this.isConnectedToInternet = is_connected;
       },
       (errorMsg: string) => {
         console.log('Encountered failure getting network info. ', errorMsg);
       }
     );
-  }
-
-  setNetworkInfo(moblab_hostname: string, is_connected: boolean) {
-    this.moblabHostname = moblab_hostname;
-    this.isConnectedToInternet = is_connected;
   }
 }

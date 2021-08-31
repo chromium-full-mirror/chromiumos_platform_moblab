@@ -1060,6 +1060,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         network_info = moblab_info.get_network_info()
         response = moblabrpc_pb2.GetNetworkInfoResponse(
             moblab_hostname=network_info["server_ip"],
+            moblab_mac_address=network_info["server_mac_address"],
             is_connected=network_info["is_connected"],
         )
         return response
