@@ -2,8 +2,7 @@
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-import unittest
-from unittest import mock
+from unittest import mock, IsolatedAsyncioTestCase
 
 from storage_qual_check_service import (
     StorageQualCheckService,
@@ -11,103 +10,160 @@ from storage_qual_check_service import (
 )
 
 
-@mock.patch("moblab_service.MoblabService")
-class StorageQualCheckServiceTest(unittest.TestCase):
+# ToDO: Refactor MoblabService to move label processing methods out
+# and refactor these tests to mock the whole MoblabService class.
+@mock.patch("moblab_service.MoblabService.list_duts")
+class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
     """Testing the StorageQualCheckService code."""
 
-    def test_check_works(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["retention"], "hostname": "A"},
-            {"labels": ["trim"], "hostname": "B"},
-            {"labels": ["suspend"], "hostname": "C"},
+    async def test_check_works(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {
+                "labels": ["retention", "pool:p1"],
+                "hostname": "A",
+                "enrolled": True,
+            },
+            {
+                "labels": ["trim", "pool:p1"],
+                "hostname": "B",
+                "enrolled": True,
+            },
+            {
+                "labels": ["suspend", "pool:p1"],
+                "hostname": "C",
+                "enrolled": True,
+            },
         ]
 
         service = StorageQualCheckService()
-        service.check_setup(None)
+        await service.check_setup("p1")
 
-    def test_check_case_insensitive(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["RETENTION"], "hostname": "A"},
-            {"labels": ["TRIM"], "hostname": "B"},
-            {"labels": ["suspend"], "hostname": "C"},
-        ]
-
-        service = StorageQualCheckService()
-        service.check_setup(None)
-
-    def test_check_duplicated_labels(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["trim"], "hostname": "A"},
-            {"labels": ["trim"], "hostname": "B"},
-            {"labels": ["suspend"], "hostname": "C"},
-        ]
-
-        service = StorageQualCheckService()
-        with self.assertRaises(StorageQualCheckError):
-            service.check_setup(None)
-
-    def test_check_multiple_labels_on_one_dut(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["retention", "trim"], "hostname": "A"},
-            {"labels": ["suspend"], "hostname": "C"},
-        ]
-
-        service = StorageQualCheckService()
-        with self.assertRaises(StorageQualCheckError):
-            service.check_setup(None)
-
-    def test_check_missing_label(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["trim"], "hostname": "A"},
-            {"labels": ["label1"], "hostname": "B"},
-            {"labels": ["suspend"], "hostname": "C"},
+    async def test_check_no_pool_raises_exception(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {
+                "labels": ["retention"],
+                "hostname": "A",
+                "enrolled": True,
+            },
+            {"labels": ["trim"], "hostname": "B", "enrolled": True},
+            {
+                "labels": ["suspend"],
+                "hostname": "C",
+                "enrolled": True,
+            },
         ]
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            service.check_setup(None)
+            await service.check_setup(None)
 
-    def test_no_pool_includes_all_pools(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["retention", "pool:1"], "hostname": "A1"},
-            {"labels": ["trim", "pool:2"], "hostname": "B2"},
-            {"labels": ["suspend"], "hostname": "C"},
+    async def test_check_case_insensitive(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {
+                "labels": ["RETENTION", "pool:p1"],
+                "hostname": "A",
+                "enrolled": True,
+            },
+            {"labels": ["TRIM", "pool:p1"], "hostname": "B", "enrolled": True},
+            {
+                "labels": ["suspend", "pool:p1"],
+                "hostname": "C",
+                "enrolled": True,
+            },
         ]
 
         service = StorageQualCheckService()
-        service.check_setup(None, 2)
+        await service.check_setup("p1")
 
-    def test_check_missing_labels_for_specific_pool(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["retention", "pool:1"], "hostname": "A1"},
-            {"labels": ["trim", "pool:1"], "hostname": "B1"},
-            {"labels": ["suspend"], "hostname": "C"},
+    async def test_check_duplicated_labels(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {"labels": ["trim", "pool:p1"], "hostname": "A", "enrolled": True},
+            {"labels": ["trim", "pool:p1"], "hostname": "B", "enrolled": True},
+            {
+                "labels": ["suspend", "pool:p1"],
+                "hostname": "C",
+                "enrolled": True,
+            },
         ]
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            service.check_setup("1")
+            await service.check_setup("p1")
 
-    def test_check_duplicated_labels_across_pool_and_no_pool(
-        self, mock_service
-    ):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["retention", "pool:1"], "hostname": "A1"},
-            {"labels": ["trim", "pool:1"], "hostname": "B1"},
-            {"labels": ["trim"], "hostname": "B"},
-            {"labels": ["suspend"], "hostname": "C"},
+    async def test_check_multiple_labels_on_one_dut(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {
+                "labels": ["retention", "trim", "pool:p1"],
+                "hostname": "A",
+                "enrolled": True,
+            },
+            {
+                "labels": ["suspend", "pool:p1"],
+                "hostname": "C",
+                "enrolled": True,
+            },
         ]
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            service.check_setup(None)
+            await service.check_setup("p1")
 
-    def test_check_new_storage_qual(self, mock_service):
-        mock_service.return_value.list_duts.return_value = [
-            {"labels": ["retention", "pool:1"], "hostname": "A1"},
-            {"labels": ["trim", "pool:1"], "hostname": "B1"},
-            {"labels": ["suspend"], "hostname": "C"},
+    async def test_check_missing_label(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {"labels": ["trim", "pool:p1"], "hostname": "A", "enrolled": True},
+            {
+                "labels": ["label1", "pool:p1"],
+                "hostname": "B",
+                "enrolled": True,
+            },
+            {
+                "labels": ["suspend", "pool:p1"],
+                "hostname": "C",
+                "enrolled": True,
+            },
         ]
 
         service = StorageQualCheckService()
-        service.check_setup("1", 4)
+        with self.assertRaises(StorageQualCheckError):
+            await service.check_setup("p1")
+
+    async def test_check_excludes_not_enrolled(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {
+                "labels": ["retention", "pool:1"],
+                "hostname": "A1",
+                "enrolled": False,
+            },
+            {
+                "labels": ["trim", "pool:1"],
+                "hostname": "B2",
+                "enrolled": True,
+            },
+            {
+                "labels": ["suspend", "pool:1"],
+                "hostname": "C",
+                "enrolled": True,
+            },
+        ]
+
+        service = StorageQualCheckService()
+        with self.assertRaises(StorageQualCheckError):
+            await service.check_setup("1", 1)
+
+    async def test_check_bypassed_for_new_storage_qual(self, mock_list_duts):
+        mock_list_duts.return_value = [
+            {
+                "labels": ["retention", "pool:1"],
+                "hostname": "A1",
+                "enrolled": True,
+            },
+            {
+                "labels": ["trim", "pool:1"],
+                "hostname": "B1",
+                "enrolled": True,
+            },
+            {"labels": ["suspend"], "hostname": "C", "enrolled": True},
+        ]
+
+        service = StorageQualCheckService()
+        await service.check_setup("1", 4)
