@@ -24,6 +24,7 @@ class StorageQualCheckService(object):
 
     async def _get_pool(self, pool_name):
         duts = await self.service.list_duts()
+        duts = [dut for dut in duts if dut["enrolled"] is True]
         if pool_name is None:
             return duts
         pool = []
@@ -48,6 +49,11 @@ class StorageQualCheckService(object):
             # Only regular (VARIATION_NOT_SET) and quick storage quals
             # rely on DUT labels.
             return
+
+        if not pool_name:
+            raise StorageQualCheckError(
+                "Storage qualification suite has to be run within a pool."
+            )
 
         # get the pool of the host this test is running on
         pool = await self._get_pool(pool_name)
