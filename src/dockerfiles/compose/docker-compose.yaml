@@ -513,7 +513,7 @@ services:
   dut-manager:
     container_name: dut-manager
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/dut-manager:${DUT_MANAGER:-release}
-    user:  moblab
+    user: moblab
     restart: unless-stopped
     volumes:
       - logs:/var/log/moblab
@@ -537,7 +537,7 @@ services:
   dut-manager-storage:
     container_name: dut-manager-storage
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/dut-manager-storage:${DUT_MANAGER_STORAGE:-release}
-    user:  moblab
+    user: moblab
     restart: unless-stopped
     volumes:
       - logs:/var/log/moblab
@@ -557,7 +557,7 @@ services:
   inventory:
     container_name: inventory
     image: ${REGISTRY_URI:-gcr.io/chromeos-partner-moblab}/inventory:${INVENTORY:-release}
-    user:  moblab
+    user: moblab
     restart: unless-stopped
     volumes:
       - logs:/var/log/moblab

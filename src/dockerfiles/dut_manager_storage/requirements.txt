@@ -4,6 +4,7 @@
 #
 #    pip-compile requirements.in
 #
+coverage==5.5             # via -r requirements.in
 grpcio-tools==1.38.0      # via -r requirements.in
 grpcio==1.38.0            # via -r requirements.in, grpcio-tools
 portpicker==1.4.0         # via -r requirements.in

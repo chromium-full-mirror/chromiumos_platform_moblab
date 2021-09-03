@@ -17,9 +17,8 @@ FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-WORKDIR /etc/moblab/inventory
-COPY --chown=moblab inventory/ .
-COPY --from=protos /protos .
+COPY --chown=moblab inventory/ /etc/moblab/inventory
+COPY --from=protos /protos /etc/moblab/inventory
 
 COPY --chown=moblab dockerfiles/inventory/requirements.txt ./
 RUN pip install --upgrade pip
@@ -27,6 +26,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /var/log/moblab
 RUN chown moblab:moblab /var/log/moblab
+
+WORKDIR /etc/moblab/inventory
 USER moblab
 
 CMD ["python", "inventory.py"]

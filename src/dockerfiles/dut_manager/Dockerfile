@@ -17,9 +17,8 @@ FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
     --disabled-password --gecos "" moblab
 
-WORKDIR /etc/moblab/dut_manager
-COPY --chown=moblab dut_manager/ .
-COPY --from=protos /protos .
+COPY --chown=moblab dut_manager/ /etc/moblab/dut_manager
+COPY --from=protos /protos /etc/moblab/dut_manager
 
 COPY --chown=moblab dockerfiles/dut_manager/requirements.txt ./
 RUN pip install --upgrade pip
@@ -27,6 +26,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /var/log/moblab
 RUN chown moblab:moblab /var/log/moblab
+
+WORKDIR /etc/moblab/dut_manager
 USER moblab
 
 CMD ["python", "dut_manager.py"]

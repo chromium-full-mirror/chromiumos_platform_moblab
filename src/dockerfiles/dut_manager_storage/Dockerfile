@@ -26,16 +26,14 @@ RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
 # Needed for dut_connector
 RUN apt-get update && apt-get install -yq nmap
 
-WORKDIR /etc/moblab/dut_manager_storage
-COPY --chown=moblab dut_manager_storage/ .
-COPY --from=protos /protos .
+COPY --chown=moblab dut_manager_storage/ /etc/moblab/dut_manager_storage
+COPY --from=protos /protos /etc/moblab/dut_manager_storage
 
 WORKDIR /install
 COPY --from=common /install/* .
 RUN bash ./install.sh
 RUN rm -rf /install
 
-WORKDIR /etc/moblab/dut_manager_storage
 COPY --chown=moblab dockerfiles/dut_manager_storage/requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
@@ -46,6 +44,8 @@ RUN usermod -aG docker moblab
 
 RUN mkdir -p /var/log/moblab
 RUN chown moblab:moblab /var/log/moblab
+
+WORKDIR /etc/moblab/dut_manager_storage
 USER moblab
 
 CMD ["python", "dut_manager_storage.py", "-v"]

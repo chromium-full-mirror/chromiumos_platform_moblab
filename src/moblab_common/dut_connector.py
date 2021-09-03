@@ -100,7 +100,7 @@ class MoblabDUTConnector(object):
         command_results = []
 
         output = client.run_command(
-            command, stop_on_errors=False, timeout=timeout
+            command, stop_on_errors=False, read_timeout=timeout
         )
         try:
             client.join(output)

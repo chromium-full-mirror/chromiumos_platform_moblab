@@ -275,18 +275,18 @@ test-rpcserver: rpcserver
 
 test-dut-manager: export DOCKER_BUILDKIT := 1
 test-dut-manager: dut-manager
-	docker run -it ${REGISTRY_URI}/dut-manager:${LABEL} \
-		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v ./tests/'
+	docker run -w /etc/moblab/dut_manager --rm ${REGISTRY_URI}/dut-manager:${LABEL} \
+		bash -c 'coverage run -m unittest discover -p "*_unittest.py" -v ./tests/ && coverage report'
 
 test-dut-manager-storage: export DOCKER_BUILDKIT := 1
 test-dut-manager-storage: dut-manager-storage
-	docker run -it ${REGISTRY_URI}/dut-manager-storage:${LABEL} \
-		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v ./tests/'
+	docker run -w /etc/moblab/dut_manager_storage --rm ${REGISTRY_URI}/dut-manager-storage:${LABEL} \
+		bash -c 'coverage run -m unittest discover -p "*_unittest.py" -v ./tests/ && coverage report'
 
 test-inventory: export DOCKER_BUILDKIT := 1
 test-inventory: inventory
-	docker run -it ${REGISTRY_URI}/inventory:${LABEL} \
-		bash -c 'python3 -m unittest discover -p "*_unittest.py" -v ./tests/'
+	docker run -w /etc/moblab/inventory --rm ${REGISTRY_URI}/inventory:${LABEL} \
+		bash -c 'coverage run -m unittest discover -p "*_unittest.py" -v ./tests/ && coverage report'
 
 # Change to run in a container
 test-moblab-ui: export DOCKER_BUILDKIT := 1
