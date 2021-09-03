@@ -380,13 +380,13 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             name=dut_dict.get("platform", ""),
             ip=dut_dict.get("hostname", ""),
             mac_addr=dut_dict.get("mac", ""),
-            model=self.service.extract_model_from_labels(
+            model=moblab_service.LabelsParser.extract_model_from_labels(
                 dut_dict.get("labels", [])
             ),
-            build_target=self.service.extract_build_target_from_labels(
+            build_target=moblab_service.LabelsParser.extract_build_target_from_labels(
                 dut_dict.get("labels", [])
             ),
-            pools=self.service.extract_pool_from_labels(
+            pools=moblab_service.LabelsParser.extract_pool_from_labels(
                 dut_dict.get("labels", [])
             ),
             status=AFE_TO_DUT_STATUS_MAPPINGS[dut_dict["status"]],
@@ -516,7 +516,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         pools = set()
         for host in afe_hosts:
             pools = pools.union(
-                self.service.extract_pool_from_labels(host.get("labels", []))
+                moblab_service.LabelsParser.extract_pool_from_labels(
+                    host.get("labels", [])
+                )
             )
         response = moblabrpc_pb2.ListPoolsResponse(pools=list(pools))
         return response
@@ -526,7 +528,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         models = set()
         for host in afe_hosts:
             models.add(
-                self.service.extract_model_from_labels(host.get("labels", []))
+                moblab_service.LabelsParser.extract_model_from_labels(
+                    host.get("labels", [])
+                )
             )
         response = moblabrpc_pb2.ListModelsResponse(models=list(models))
         return response
