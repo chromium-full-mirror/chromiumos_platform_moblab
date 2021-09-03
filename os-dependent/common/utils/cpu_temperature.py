@@ -1,0 +1,96 @@
+# -*- coding: utf-8 -*-
+# Copyright 2021 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import collections
+import logging
+import os
+import threading
+
+
+_LOGGER = logging.getLogger("host-server")
+
+
+class CpuTemperatureException(Exception):
+    """Exception class for exceptions raised by CpuTemperature"""
+
+    pass
+
+
+class CpuTemperature(object):
+
+    # Constants for thermal zone file determination
+    _THERMAL_ZONE_DIR = "/sys/class/thermal/"
+    _THERMAL_ZONE_PREFIX = "thermal_zone"
+    _THERMAL_ZONE_TYPE = "type"
+    _THERMAL_ZONE_TEMP = "temp"
+    _THERMAL_ZONE = "x86_pkg_temp"
+
+    def __init__(self, queue_len):
+        """Create instance of the CpuTemperature class
+
+        Args:
+            queue_len: Length of temperature queue (int).
+        """
+        self._queue_len = queue_len
+        self._thermal_zone_filepath = None
+        self._queue_lock = threading.Lock()
+        self._temperatures = collections.deque(maxlen=self._queue_len)
+
+    def get_temperature_queue_stats(self):
+        """Returns stats about the thread safe temperatures queue.
+
+        Returns:
+            int: summation of all elements in the queue.
+            int: total number of elements in the queue.
+        """
+        with self._queue_lock:
+            return sum(self._temperatures), len(self._temperatures)
+
+    @property
+    def thermal_zone_filepath(self):
+        """Determine the correct thermal_zone file to read"""
+        if self._thermal_zone_filepath is None:
+            thermal_zone_dirpath = None
+            subdirs = [
+                f for f in os.scandir(self._THERMAL_ZONE_DIR) if f.is_dir()
+            ]
+            for subdir in subdirs:
+                if subdir.name.startswith(self._THERMAL_ZONE_PREFIX):
+                    tzf = os.path.join(subdir.path, self._THERMAL_ZONE_TYPE)
+                    with open(tzf, "r") as f:
+                        d = f.read().strip()
+                    if d == self._THERMAL_ZONE:
+                        thermal_zone_dirpath = subdir.path
+                        break
+            else:
+                raise CpuTemperatureException(
+                    "Could not find %s thermal zone "
+                    "file" % self._THERMAL_ZONE
+                )
+            self._thermal_zone_filepath = os.path.join(
+                thermal_zone_dirpath, self._THERMAL_ZONE_TEMP
+            )
+        return self._thermal_zone_filepath
+
+    def get_current_cpu_temperature(self):
+        """Read thermal_zone file to get CPU temperature and update
+        the thread safe temperature queue."""
+        try:
+            with open(self.thermal_zone_filepath, "r") as f:
+                data = f.read()
+        except CpuTemperatureException:
+            raise
+        except Exception as e:
+            raise CpuTemperatureException(
+                "Unable to read %s due to: %s"
+                % (self.thermal_zone_filepath, e)
+            )
+        with self._queue_lock:
+            self._temperatures.append(float(data.strip()) / 1000)
+
+    def flush_queue(self):
+        """Empties the thread safe temperature queue."""
+        with self._queue_lock:
+            self._temperatures = collections.deque(maxlen=self._queue_len)

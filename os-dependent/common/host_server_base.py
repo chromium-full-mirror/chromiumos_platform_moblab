@@ -57,6 +57,14 @@ class HostServerBase(hostservice_pb2_grpc.MoblabHostServiceServicer):
         context.abort(grpc.StatusCode.UNIMPLEMENTED, "Not Implemented")
         raise NotImplementedError
 
+    def get_cpu_temperature(self, unused_request, context):
+        """Return a float that shows information about average CPU temperature.
+
+        Raises: NotImplementedError
+        """
+        context.abort(grpc.StatusCode.UNIMPLEMENTED, "Not Implemented")
+        raise NotImplementedError
+
     def get_ip(self, unused_request, context):
         """Get the host machines IP address on the network.
 
