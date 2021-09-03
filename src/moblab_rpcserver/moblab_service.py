@@ -55,9 +55,9 @@ _SUITE_TIMEOUT_MAP = {
     "storage_qual_v2_xl": 28800,  # 20 days
     "cts": 2880,  # 2 days
     "gts": 2880,  # 2 days
-    "performance_cuj": 10080, # 7 days
-    "performance_cuj_experimental": 10080, #7 days
-    "mtbf": 14400, # 10 days
+    "performance_cuj": 10080,  # 7 days
+    "performance_cuj_experimental": 10080,  # 7 days
+    "mtbf": 14400,  # 10 days
 }
 
 _STORAGE_QUAL_VARIATIONS = {
@@ -99,10 +99,42 @@ class MoblabRpcError(Exception):
     pass
 
 
+class LabelsParser(object):
+    _model_re = re.compile(r"^model:(.*)")
+    _build_target_re = re.compile(r"^board:(.*)")
+    _pool_re = re.compile(r"^pool:(.*)")
+
+    @classmethod
+    def _extract_from_labels(cls, regexp, labels):
+        result = [
+            m.group(1) for m in [regexp.match(label) for label in labels] if m
+        ]
+        return list(set(result))
+
+    @classmethod
+    def extract_model_from_labels(cls, labels):
+        try:
+            return cls._extract_from_labels(cls._model_re, labels)[0]
+        except IndexError:
+            logging.exception("Failed to parse model from label tags of DUT.")
+            return ""
+
+    @classmethod
+    def extract_build_target_from_labels(cls, labels):
+        try:
+            return cls._extract_from_labels(cls._build_target_re, labels)[0]
+        except IndexError:
+            logging.exception(
+                "Failed to parse build target from label tags of DUT."
+            )
+            return ""
+
+    @classmethod
+    def extract_pool_from_labels(cls, labels):
+        return cls._extract_from_labels(cls._pool_re, labels)
+
+
 class MoblabService(object):
-    model_re = re.compile(r"^model:(.*)")
-    build_target_re = re.compile(r"^board:(.*)")
-    pool_re = re.compile(r"^pool:(.*)")
 
     _last_config_update = None
     _last_build_connector_update = None
@@ -220,31 +252,6 @@ class MoblabService(object):
         bucket = storage.Client().bucket(self.moblab_bucket_name)
         bucket.reload()
         return "asia" in bucket.location.lower()
-
-    def extract_model_from_labels(self, labels):
-        try:
-            return self.extract_from_labels(self.model_re, labels)[0]
-        except IndexError:
-            logging.exception("Failed to parse model from label tags of DUT.")
-            return ""
-
-    def extract_build_target_from_labels(self, labels):
-        try:
-            return self.extract_from_labels(self.build_target_re, labels)[0]
-        except IndexError:
-            logging.exception(
-                "Failed to parse build target from label tags of DUT."
-            )
-            return ""
-
-    def extract_pool_from_labels(self, labels):
-        return self.extract_from_labels(self.pool_re, labels)
-
-    def extract_from_labels(self, regexp, labels):
-        result = [
-            m.group(1) for m in [regexp.match(label) for label in labels] if m
-        ]
-        return list(set(result))
 
     def get_connected_devices(self):
         connected_duts = self.dut_connector.get_connected_duts()
@@ -594,13 +601,13 @@ class MoblabService(object):
         duts = await self.list_duts()
         for dut in duts:
             labels = dut.get("labels", [])
-            pools = self.extract_pool_from_labels(labels)
+            pools = LabelsParser.extract_pool_from_labels(labels)
 
             if pool and pool not in pools:
                 continue
 
-            model = self.extract_model_from_labels(labels)
-            board = self.extract_build_target_from_labels(labels)
+            model = LabelsParser.extract_model_from_labels(labels)
+            board = LabelsParser.extract_build_target_from_labels(labels)
             modelBoardPair = ModelBoard(model=model, board=board)
             if modelBoardPair in boards:
                 boards[modelBoardPair] += 1
@@ -754,9 +761,12 @@ class MoblabService(object):
         afe_hosts = self.afe_connector.get_connected_devices()
         build_targets = set()
         for host in afe_hosts:
-            if self.extract_model_from_labels(host.get("labels", [])) == model:
+            if (
+                LabelsParser.extract_model_from_labels(host.get("labels", []))
+                == model
+            ):
                 build_targets.add(
-                    self.extract_build_target_from_labels(
+                    LabelsParser.extract_build_target_from_labels(
                         host.get("labels", [])
                     )
                 )
@@ -785,7 +795,9 @@ class MoblabService(object):
         build_targets = set()
         for host in afe_hosts:
             build_targets.add(
-                self.extract_build_target_from_labels(host.get("labels", []))
+                LabelsParser.extract_build_target_from_labels(
+                    host.get("labels", [])
+                )
             )
         return list(build_targets)
 

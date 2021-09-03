@@ -29,7 +29,7 @@ class StorageQualCheckService(object):
             return duts
         pool = []
         for dut in duts:
-            dut_pools = self.service.extract_pool_from_labels(
+            dut_pools = moblab_service.LabelsParser.extract_pool_from_labels(
                 dut.get("labels", [])
             )
             if pool_name in dut_pools:
