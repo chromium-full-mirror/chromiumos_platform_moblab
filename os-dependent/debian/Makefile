@@ -28,6 +28,7 @@ local_registry:
 
 init:
 	mkdir -p ${INSTALL_DIR}
+	mkdir -p ${INSTALL_DIR}/utils
 	mkdir -p /var/log/bootup/
 	chmod uog+rw /var/log/bootup
 
