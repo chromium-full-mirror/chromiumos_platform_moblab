@@ -90,7 +90,10 @@ class CpuTemperature(object):
         with self._queue_lock:
             self._temperatures.append(float(data.strip()) / 1000)
 
-    def flush_queue(self):
-        """Empties the thread safe temperature queue."""
+    def flush_stale_queue(self, stale_elem_count):
+        """Removes stale elements from the thread safe temperature
+        queue."""
         with self._queue_lock:
-            self._temperatures = collections.deque(maxlen=self._queue_len)
+            while self._temperatures and stale_elem_count > 0:
+                self._temperatures.popleft()
+                stale_elem_count -= 1
