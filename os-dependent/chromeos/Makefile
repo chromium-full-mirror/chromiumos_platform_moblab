@@ -31,4 +31,5 @@ install:
 	install -t ${DESTDIR}etc/moblab/host_server -D ${PROTO_OUT_DIR}/*
 	install -D host_server_chromeos.py ${DESTDIR}etc/moblab/host_server
 	install -D ../common/host*.py ${DESTDIR}etc/moblab/host_server
+	@mkdir -p ${DESTDIR}etc/moblab/host_server/utils
 	install -D ../common/utils/*.py ${DESTDIR}etc/moblab/host_server/utils
