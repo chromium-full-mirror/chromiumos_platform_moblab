@@ -1643,8 +1643,10 @@ def _load_dummy_test(
     retriever = _ControlFileRetriever(cf_getter,
                                       run_prod_code=run_prod_code,
                                       test_args=test_args)
-    return retriever.retrieve_for_test('dummy_Pass')
-
+    try:
+        return retriever.retrieve_for_test('dummy_Pass')
+    except error.ControlFileNotFound as ex:
+        return retriever.retrieve_for_test('stub_Pass')
 
 class _ComposedPredicate(object):
     """Return the composition of the predicates.
