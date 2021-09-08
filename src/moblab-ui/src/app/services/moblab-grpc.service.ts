@@ -48,6 +48,8 @@ import {
   GetNumJobsResponse,
   GetRemoteAgentConfigurationRequest,
   GetRemoteAgentConfigurationResponse,
+  GetSystemInfoRequest,
+  GetSystemInfoResponse,
   GetVersionInfoRequest,
   GetVersionInfoResponse,
   Job,
@@ -1286,6 +1288,26 @@ export class MoblabGrpcService {
             response.getMoblabMacAddress(),
             response.getIsConnected()
           );
+        }
+      }
+    );
+  }
+
+  get_system_info(
+    callback: (cpu_temperature: number) => void,
+    errorHandlingCallback: (errorMsg: string) => void
+  ) {
+    const request = new GetSystemInfoRequest();
+    this.moblabRpcService.get_system_info(
+      request,
+      {},
+      (err: grpcWeb.Error, response: GetSystemInfoResponse) => {
+        if (err) {
+          errorHandlingCallback(err.message);
+        } else {
+          console.log('SYSTEM INFO RESPONSE: ');
+          console.log(response);
+          callback(response.getCpuTemperature());
         }
       }
     );

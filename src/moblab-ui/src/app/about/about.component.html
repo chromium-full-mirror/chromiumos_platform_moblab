@@ -58,6 +58,22 @@
   </mat-card-content>
 </mat-card>
 
+<mat-card id="system-information-card">
+  <mat-card-header>
+    <mat-card-title>System Information</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="card-table-content">
+      <table>
+        <tr>
+          <td>CPU Temperature:</td>
+          <td>{{moblabCpuTemperature}}&deg;C (average over 30 mins)</td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>
+
 <div class="reboot-button-wrapper">
   <app-reboot-button></app-reboot-button>
 </div>

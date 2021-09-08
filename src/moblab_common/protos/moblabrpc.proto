@@ -58,6 +58,7 @@ service MoblabRpcService {
   rpc remove_attribute_from_duts(RemoveAttributeFromDutsRequest) returns (RemoveAttributeFromDutsResponse) {};
 
   rpc get_network_info(GetNetworkInfoRequest) returns (GetNetworkInfoResponse) {};
+  rpc get_system_info(GetSystemInfoRequest) returns (GetSystemInfoResponse) {};
   rpc get_cloud_configuration(GetCloudConfigurationRequest) returns (GetCloudConfigurationResponse) {};
   rpc set_cloud_configuration(SetCloudConfigurationRequest) returns (SetCloudConfigurationResponse) {};
   rpc get_dut_wifi_info(GetDutWifiInfoRequest) returns (GetDutWifiInfoResponse) {};
@@ -701,6 +702,14 @@ message GetNetworkInfoResponse {
   string moblab_hostname = 1;
   string moblab_mac_address = 3;
   bool is_connected = 2;
+}
+
+// NEXT_TAG = 1;
+message GetSystemInfoRequest {}
+
+// NEXT_TAG = 2;
+message GetSystemInfoResponse {
+  float cpu_temperature = 1;
 }
 
 // NEXT_TAG = 1;

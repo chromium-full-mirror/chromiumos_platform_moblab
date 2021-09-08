@@ -1069,6 +1069,20 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
+    def get_system_info(self, request, _context):
+        """
+            Gets system info of Moblab.
+        Args:
+            request: GetSystemInfoRequest object ( with no parameters )
+            _context: grpc.server.Context
+        Returns:
+            GetSystemInfoResponse
+        """
+        response = moblabrpc_pb2.GetSystemInfoResponse(
+            cpu_temperature=host_connector.HostServicesConnector.get_cpu_temperature(),
+        )
+        return response
+
     def get_dut_wifi_info(self, request, _context):
         """
             Gets DUT wifi info configured for Moblab.
