@@ -23,7 +23,7 @@ export class AppSidebarComponent implements OnInit {
   mobmonitor_port = '9991';
 
   build_access_permission_request_link =
-    'https://b.corp.google.com/issues/new?component=1038089&template=1608353';
+    'https://issuetracker.google.com/issues/new?component=1038089&template=1608353';
   mobmonitor_link = this._format_mobmonitor_link(
     window.location.hostname,
     this.mobmonitor_port
