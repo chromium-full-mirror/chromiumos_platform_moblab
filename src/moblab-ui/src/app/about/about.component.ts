@@ -18,11 +18,14 @@ export class AboutComponent implements OnInit {
   moblabMacAddress = '';
   isConnectedToInternet = false;
 
+  moblabCpuTemperature = 0.0;
+
   constructor(private moblabRpcService: MoblabGrpcService) {}
 
   ngOnInit(): void {
     this.getVersionInfo();
     this.getNetworkInfo();
+    this.getSystemInfo();
   }
 
   refreshShownVersionInfo(
@@ -81,6 +84,18 @@ export class AboutComponent implements OnInit {
       },
       (errorMsg: string) => {
         console.log('Encountered failure getting network info. ', errorMsg);
+      }
+    );
+  }
+
+  getSystemInfo() {
+    this.moblabRpcService.get_system_info(
+      (cpu_temperature: number) => {
+        // Restrict the temperature value to 2 decimal points only.
+        this.moblabCpuTemperature = Number(cpu_temperature.toFixed(2));
+      },
+      (errorMsg: string) => {
+        console.log('Encountered failure getting system info. ', errorMsg);
       }
     );
   }
