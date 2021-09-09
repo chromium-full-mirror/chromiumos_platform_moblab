@@ -107,19 +107,40 @@ class HostServerDebian(host_server_base.HostServerBase):
         Returns:
             string: network address of the host.
         """
-        MOBLAB_SUBNET_ADDR = "192.168.231.1"
         response = hostservice_pb2.IpResponse()
-        response.ip_address = "localhost"
+        ip_addr = self._get_external_interface_addresses().get("inet_addr")
+        response.ip_address = ip_addr if ip_addr else "localhost"
+        return response
+
+    def get_external_mac_address(self, unused_request, context):
+        """Return the external interface's mac address.
+
+        Returns:
+             ExternalMacAddressResponse:
+                 string: mac_address, the external mac address found.
+        """
+        mac_addr = self._get_external_interface_addresses().get("link_addr")
+        return hostservice_pb2.ExternalMacAddressResponse(mac_address=mac_addr)
+
+    def _get_external_interface_addresses(self):
+        """Get the external interface's ip address and mac address."""
+        MOBLAB_SUBNET_ADDR = "192.168.231.1"
+        if_info = {"inet_addr": None, "link_addr": None}
         for iface in netifaces.interfaces():
             if "enp" not in iface:
                 continue
-            addrs = netifaces.ifaddresses(iface).get(netifaces.AF_INET)
-            if not addrs:
+            if_addresses = netifaces.ifaddresses(iface)
+            inet_addrs = if_addresses.get(netifaces.AF_INET)
+            link_addrs = if_addresses.get(netifaces.AF_LINK)
+            if not inet_addrs:
                 continue
-            for addr in addrs:
+            for addr in inet_addrs:
                 if MOBLAB_SUBNET_ADDR != addr.get("addr"):
-                    response.ip_address = addr["addr"]
-        return response
+                    if_info["inet_addr"] = addr["addr"]
+                    if_info["link_addr"] = (
+                        link_addrs[0].get("addr") if link_addrs else None
+                    )
+        return if_info
 
     def get_system_version(self, unused_request, unused_context):
         """Get version string of the host machines OS.

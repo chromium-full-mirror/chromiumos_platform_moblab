@@ -10,6 +10,7 @@ service MoblabHostService {
   rpc get_disk_info(google.protobuf.Empty) returns (DiskInfoResponse) {}
   rpc get_cpu_temperature(google.protobuf.Empty) returns (CpuTemperatureResponse) {}
   rpc get_ip(google.protobuf.Empty) returns (IpResponse) {}
+  rpc get_external_mac_address(google.protobuf.Empty) returns (ExternalMacAddressResponse) {}
   rpc check_for_system_update(google.protobuf.Empty) returns (google.protobuf.Empty) {}
   rpc get_system_update_status(google.protobuf.Empty) returns (SystemUpdateStatusResponse) {}
   rpc install_system_update(google.protobuf.Empty) returns (SystemUpdateInstallResponse) {}
@@ -48,6 +49,11 @@ message CpuTemperatureResponse {
 // NEXT_TAG = 2
 message IpResponse {
   string ip_address = 1;
+}
+
+// NEXT_TAG = 2
+message ExternalMacAddressResponse {
+  string mac_address = 1;
 }
 
 // NEXT_TAG = 6
