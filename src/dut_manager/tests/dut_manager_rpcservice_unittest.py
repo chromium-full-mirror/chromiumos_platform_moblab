@@ -7,12 +7,16 @@
 import unittest
 from unittest import mock
 import grpc
+import asyncio
 import portpicker
 from grpc.framework.foundation import logging_pool
 from google.protobuf.field_mask_pb2 import FieldMask
 
 from dut_manager_storage_connector import DutManagerRpcError
-from dut_manager_rpcservice import DutManagerRpcService
+from dut_manager_rpcservice import (
+    DutManagerRpcService,
+    DutManagerOperationsRpcService,
+)
 from lab.managed_dut_pb2 import ManagedDut, NetworkIdentifier
 from lab.managed_dut_pb2 import (
     ManagedDut,
@@ -21,6 +25,9 @@ from lab.managed_dut_pb2 import (
     Lock,
 )
 from lab.dut_manager_pb2 import (
+    CreateManagedDutRequest,
+    DeleteManagedDutRequest,
+    DeleteManagedDutResponse,
     GetManagedDutRequest,
     GetManagedDutResponse,
     ListManagedDutsRequest,
@@ -36,6 +43,76 @@ from lab.dut_manager_pb2_grpc import (
     add_DutManagerServiceServicer_to_server,
     DutManagerServiceStub,
 )
+from chromiumos.longrunning.operations_pb2_grpc import (
+    add_OperationsServicer_to_server,
+    OperationsStub,
+)
+from chromiumos.longrunning import operations_pb2
+
+
+class DutManagerRpcServiceAsyncTest(unittest.IsolatedAsyncioTestCase):
+    """Testing the DutManagerRpcService code with Async methods."""
+
+    dut_name_1 = "test_ip_address_1"
+    dut_identifier_1 = NetworkIdentifier(ip_address=dut_name_1)
+    create_operation_name_1 = "create_" + dut_name_1
+
+    def setUp(self):
+        super().setUp()
+        port = portpicker.pick_unused_port()
+        server_pool = logging_pool.pool(max_workers=25)
+        self._server = grpc.server(server_pool)
+        self._server.add_insecure_port(
+            "[::]:{port}".format(port=port),
+        )
+        operations_service = DutManagerOperationsRpcService()
+        service = DutManagerRpcService(operations_service)
+        add_DutManagerServiceServicer_to_server(service, self._server)
+        add_OperationsServicer_to_server(operations_service, self._server)
+        self._server.start()
+        self._channel = grpc.aio.insecure_channel(
+            "localhost:{port}".format(port=port)
+        )
+        self._stub = DutManagerServiceStub(self._channel)
+        self._operations_stub = OperationsStub(self._channel)
+
+    async def tearDown(self):
+        await self._channel.close()
+        self._server.stop(None)
+        self._operations_stub = None
+        return super().tearDown()
+
+    @mock.patch(
+        "dut_manager_storage_connector.DutManagerStorageRpcConnector.create_dut"
+    )
+    async def test_create_managed_dut(self, mock_create_dut):
+        request = CreateManagedDutRequest(
+            name=self.dut_identifier_1,
+            display_name=self.dut_name_1,
+        )
+
+        operation = await self._stub.CreateManagedDut(request)
+        operation_request = operations_pb2.GetOperationRequest(
+            name=operation.name
+        )
+        self.assertEqual(
+            operation,
+            operations_pb2.Operation(
+                name=self.create_operation_name_1, done=False
+            ),
+        )
+
+        while not operation.done:
+            operation = await self._operations_stub.GetOperation(
+                operation_request
+            )
+            await asyncio.sleep(0.5)
+
+        mock_create_dut.assert_called_once()
+        self.assertEqual(
+            operation.name,
+            self.create_operation_name_1,
+        )
 
 
 class DutManagerRpcServiceTest(unittest.TestCase):
@@ -69,7 +146,8 @@ class DutManagerRpcServiceTest(unittest.TestCase):
         self._server.add_insecure_port(
             "[::]:{port}".format(port=port),
         )
-        service = DutManagerRpcService()
+        operations_service = DutManagerOperationsRpcService()
+        service = DutManagerRpcService(operations_service)
         add_DutManagerServiceServicer_to_server(service, self._server)
         self._server.start()
         self._channel = grpc.insecure_channel(
@@ -81,6 +159,33 @@ class DutManagerRpcServiceTest(unittest.TestCase):
         self._channel.close()
         self._server.stop(None)
         return super().tearDown()
+
+    @mock.patch(
+        "dut_manager_storage_connector.DutManagerStorageRpcConnector.delete_dut"
+    )
+    def test_delete_managed_dut(self, mock_delete_dut):
+        request = DeleteManagedDutRequest(name=self.dut_identifier_1)
+
+        response = self._stub.DeleteManagedDut(request)
+
+        mock_delete_dut.assert_called_once_with(self.dut_name_1)
+        self.assertEqual(response, DeleteManagedDutResponse())
+
+    @mock.patch(
+        "dut_manager_storage_connector.DutManagerStorageRpcConnector.delete_dut"
+    )
+    def test_delete_managed_dut_with_internal_failure(self, mock_delete_dut):
+        request = DeleteManagedDutRequest(name=self.dut_identifier_1)
+        mock_delete_dut.side_effect = DutManagerRpcError()
+
+        with self.assertRaises(grpc.RpcError) as exception_context:
+            self._stub.DeleteManagedDut(request)
+
+        mock_delete_dut.assert_called_once()
+        self.assertIs(
+            exception_context.exception.code(),
+            grpc.StatusCode.INTERNAL,
+        )
 
     @mock.patch(
         "dut_manager_storage_connector.DutManagerStorageRpcConnector.get_dut"
