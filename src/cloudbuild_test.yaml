@@ -1,0 +1,203 @@
+steps:
+  - name: 'docker:20.10.6'
+    args:
+      - pull
+      - '${_BASE_REGISTRY_URI}/debian:buster-slim'
+    id: buster-slim
+    waitFor:
+      - '-'
+  - name: 'docker:20.10.6'
+    args:
+      - pull
+      - '${_BASE_REGISTRY_URI}/alpine/git'
+    id: alpine-git
+    waitFor:
+      - '-'
+  - name: 'docker:20.10.6'
+    args:
+      - pull
+      - '${_BASE_REGISTRY_URI}/python:3.8-slim-buster'
+    id: python-3.8-slim
+    waitFor:
+      - '-'
+  - name: 'docker:20.10.6'
+    args:
+      - pull
+      - '${_BASE_REGISTRY_URI}/python:2-buster'
+    id: python-2
+    waitFor:
+      - '-'
+  - name: 'docker:20.10.6'
+    args:
+      - pull
+      - '${_BASE_REGISTRY_URI}/python:3.8-buster'
+    id: python-3.8
+    waitFor:
+      - '-'
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - build
+      - '-f'
+      - /workspace/src/dockerfiles/utilities/Dockerfile.protoc
+      - '-t'
+      - '${_IMG_TAG_PREFIX}/protoc:${__BUILD_VERSION}'
+      - /workspace/src/dockerfiles/utilities/
+    id: protoc
+    waitFor:
+      - buster-slim
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - build
+      - '--build-arg'
+      - 'REGISTRY_URI=${_IMG_TAG_PREFIX}'
+      - '--build-arg'
+      - 'LABEL=${__BUILD_VERSION}'
+      - '-f'
+      - /workspace/src/dockerfiles/utilities/Dockerfile.infra_protos
+      - '-t'
+      - '${_IMG_TAG_PREFIX}/infra-protos:${__BUILD_VERSION}'
+      - /workspace/src/dockerfiles/utilities/
+    id: infra-protos
+    waitFor:
+      - protoc
+      - buster-slim
+      - alpine-git
+  - name: '${_IMG_TAG_PREFIX}/protoc:${__BUILD_VERSION}'
+    args:
+      - /workspace/src/moblab_common/protos/protogen.sh
+    id: protogen
+    waitFor:
+      - protoc
+    entrypoint: bash
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - build
+      - '--build-arg'
+      - 'REGISTRY_URI=${_IMG_TAG_PREFIX}'
+      - '--build-arg'
+      - 'LABEL=${__BUILD_VERSION}'
+      - '-f'
+      - /workspace/src/dockerfiles/moblab_common/Dockerfile
+      - '-t'
+      - '${_IMG_TAG_PREFIX}/moblab_common:${__BUILD_VERSION}'
+      - /workspace/
+    id: moblab_common
+    waitFor:
+      - protogen
+      - python-2
+      - buster-slim
+      - python-3.8
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - build
+      - '--build-arg'
+      - 'REGISTRY_URI=${_IMG_TAG_PREFIX}'
+      - '--build-arg'
+      - 'LABEL=${__BUILD_VERSION}'
+      - '-f'
+      - /workspace/src/dockerfiles/dut_manager/Dockerfile
+      - '-t'
+      - '${_IMG_TAG_PREFIX}/dut-manager:${__BUILD_VERSION}'
+      - /workspace/src/
+    id: dut-manager
+    waitFor:
+      - python-3.8-slim
+      - infra-protos
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - build
+      - '--build-arg'
+      - 'REGISTRY_URI=${_IMG_TAG_PREFIX}'
+      - '--build-arg'
+      - 'LABEL=${__BUILD_VERSION}'
+      - '-f'
+      - /workspace/src/dockerfiles/dut_manager_storage/Dockerfile
+      - '-t'
+      - '${_IMG_TAG_PREFIX}/dut-manager-storage:${__BUILD_VERSION}'
+      - /workspace/src/
+    id: dut-manager-storage
+    waitFor:
+      - python-3.8-slim
+      - moblab_common
+      - infra-protos
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - build
+      - '--build-arg'
+      - 'REGISTRY_URI=${_IMG_TAG_PREFIX}'
+      - '--build-arg'
+      - 'LABEL=${__BUILD_VERSION}'
+      - '-f'
+      - /workspace/src/dockerfiles/inventory/Dockerfile
+      - '-t'
+      - '${_IMG_TAG_PREFIX}/inventory:${__BUILD_VERSION}'
+      - /workspace/src/
+    id: inventory
+    waitFor:
+      - python-3.8-slim
+      - infra-protos
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - run
+      - '-i'
+      - '${_IMG_TAG_PREFIX}/dut-manager:${__BUILD_VERSION}'
+      - bash
+      - '-c'
+      - >-
+        coverage run -m unittest discover -p "*_unittest.py" -v ./tests/ &&
+        coverage report
+    id: dut-manager-test
+    waitFor:
+      - dut-manager
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - run
+      - '-i'
+      - '${_IMG_TAG_PREFIX}/dut-manager-storage:${__BUILD_VERSION}'
+      - bash
+      - '-c'
+      - >-
+        coverage run -m unittest discover -p "*_unittest.py" -v ./tests/ &&
+        coverage report
+    id: dut-manager-storage-test
+    waitFor:
+      - dut-manager-storage
+  - name: 'docker:20.10.6'
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - run
+      - '-i'
+      - '${_IMG_TAG_PREFIX}/inventory:${__BUILD_VERSION}'
+      - bash
+      - '-c'
+      - >-
+        coverage run -m unittest discover -p "*_unittest.py" -v ./tests/ &&
+        coverage report
+    id: inventory-test
+    waitFor:
+      - inventory
+timeout: 18000s
+options:
+  machineType: N1_HIGHCPU_32
+  substitutionOption: ALLOW_LOOSE
+substitutions:
+  _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+  _IMG_TAG_PREFIX: dockerized-tests
+  __BUILD_VERSION: test
