@@ -67,30 +67,30 @@ RUN python2.7 -m pip install --upgrade --no-cache-dir -r requirements.txt \
 # Java - required for CTS/GTS
 # TODO - see if we can figure out two versions of the SSP and just load the
 # java one for CTS.
-RUN  wget https://download.java.net/java/GA/jdk9/9.0.4/binaries/openjdk-9.0.4_linux-x64_bin.tar.gz
-RUN  tar xvf openjdk-9.0.4_linux-x64_bin.tar.gz
-RUN  update-alternatives --install /usr/bin/java java \
-    /jdk-9.0.4/bin/java 200000
-RUN  update-alternatives --config java
+RUN  wget https://download.java.net/java/GA/jdk9/9.0.4/binaries/openjdk-9.0.4_linux-x64_bin.tar.gz &&\
+    tar xvf openjdk-9.0.4_linux-x64_bin.tar.gz &&\
+    update-alternatives --install /usr/bin/java java \
+        /jdk-9.0.4/bin/java 200000 &&\
+    update-alternatives --config java
 # Java 9 has a issue where the ca certificates are not correct,
 # get them from v 13
-RUN  wget https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz
-RUN  tar xvf openjdk-13.0.1_linux-x64_bin.tar.gz
-RUN  cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/
-RUN  rm -rf jdk-13.0.1
-RUN  rm -rf *.gz
-RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-RUN mkdir -p /usr/local/tast
-RUN chown moblab:moblab /usr/local/tast
-RUN mkdir -p /tmp/autotest-tradefed-cache
-RUN chown moblab:moblab /tmp/autotest-tradefed-cache
+RUN  wget https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz &&\
+    tar xvf openjdk-13.0.1_linux-x64_bin.tar.gz &&\
+    cp jdk-13.0.1/lib/security/cacerts jdk-9.0.4/lib/security/ &&\
+    rm -rf jdk-13.0.1 &&\
+    rm -rf *.gz &&\
+    echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers &&\
+    mkdir -p /usr/local/tast &&\
+    chown moblab:moblab /usr/local/tast &&\
+    mkdir -p /tmp/autotest-tradefed-cache &&\
+    chown moblab:moblab /tmp/autotest-tradefed-cache
 
 # Used by autotest to detect it is running on a moblab
 RUN echo "moblab" > /etc/lsb-release
 
 # Need to be in docker group to use docker API
-RUN addgroup --gid 412 docker
-RUN usermod -aG docker moblab
+RUN addgroup --gid 412 docker &&\
+    usermod -aG docker moblab
 
 USER moblab
 
@@ -100,6 +100,7 @@ USER moblab
 # the check is for the string lxc
 ENV container=lxc
 ENV AUTOTEST_WEB=autotest-afe:8888
+ENV DOCKER_API_VERSION=1.41
 
 # Unlike lxc containers which you can start and will keep running on their own,
 # docker containers require a running process or they exist.
