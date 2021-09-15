@@ -325,7 +325,7 @@ def _get_job_tests(parser, job, status_log_path):
 
 def _get_build_version(tests):
     release_version_label = "CHROMEOS_RELEASE_VERSION"
-    milestone_label = "MILESTONE"
+    milestone_label = "CHROMEOS_RELEASE_CHROME_MILESTONE"
     for test in tests:
         if not test.subdir:
             continue
