@@ -11,6 +11,7 @@ import sys
 import netifaces
 import hostservice_pb2
 import host_server_base
+import os
 
 
 from utils import cpu_temperature_orchestrator
@@ -33,6 +34,10 @@ class HostServerDebian(host_server_base.HostServerBase):
 
     # CpuTemperatureOrchestrator instance.
     _cpu_temp = cpu_temperature_orchestrator.CpuTemperatureOrchestrator(30, 1)
+
+    def __init__(self):
+        """Initialize variables."""
+        self.docker_dir = ""
 
     def get_host_identifier(self, unused_request, unused_context):
         """Get a stable identifier for the machine.
@@ -202,7 +207,7 @@ class HostServerDebian(host_server_base.HostServerBase):
         # /dev/mmcblk0   790388M 168009M   582163M  23% /
         # ...
         if len(disk_stats) != 1:
-            raise DiskSpaceException(
+            raise host_server_base.DiskSpaceException(
                 "%s stateful partitions found, expected one" % len(disk_stats)
             )
         disk_stats = disk_stats[0]
