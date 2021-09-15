@@ -230,3 +230,9 @@ class HostServerBase(hostservice_pb2_grpc.MoblabHostServiceServicer):
         Raises: NotImplementedError
         """
         raise NotImplementedError
+
+
+class DiskSpaceException(Exception):
+    """Exception thrown by get_disk_space endpoint."""
+
+    pass
