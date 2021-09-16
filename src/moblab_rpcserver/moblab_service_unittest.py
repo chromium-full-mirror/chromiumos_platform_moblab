@@ -20,14 +20,6 @@ class MockClientError(Exception):
     pass
 
 
-MOCKED_DOCKER = MagicMock()
-MOCKED_DOCKER.errors.NotFound = MockNotFoundError
-
-MOCKED_GOOGLE = MagicMock()
-MOCKED_GOOGLE.api_core.exceptions.GoogleAPIError = MockClientError
-
-sys.modules["docker"] = MOCKED_DOCKER
-sys.modules["google"] = MOCKED_GOOGLE
 sys.modules["google.cloud"] = MagicMock()
 sys.modules["google.api_core"] = MagicMock()
 sys.modules["moblab_common"] = MagicMock()
@@ -115,15 +107,17 @@ class MoblabRPCServiceTest(unittest.TestCase):
         is_update_available = self.service.get_is_update_available()
         assert not is_update_available
 
-    @mock.patch("moblab_service.docker.from_env")
-    def test_update_docker(self, mock_docker_from_env):
+    def test_update_docker(self):
+        mock_docker = MagicMock()
         mock_docker_client = MagicMock()
         mock_container_run = MagicMock()
         mock_docker_client.containers.get.side_effect = [MockNotFoundError]
         mock_docker_client.containers.run = mock_container_run
-        mock_docker_from_env.return_value = mock_docker_client
+        mock_docker.from_env.return_value = mock_docker_client
+        mock_docker.errors.NotFound = MockNotFoundError
 
-        result_msg = self.service._update_docker()
+        with mock.patch("moblab_service.docker", new=mock_docker):
+            result_msg = self.service._update_docker()
 
         mock_container_run.assert_called_once_with(
             "gcr.io/chromeos-partner-moblab/watchtower:release",
@@ -286,9 +280,13 @@ class MoblabRPCServiceTest(unittest.TestCase):
         mock_build_connector,
     ):
         # Mocking setup.
-        self._mock_afe_connector_methods(self.mock_afe_connector, True, True, True)
+        self._mock_afe_connector_methods(
+            self.mock_afe_connector, True, True, True
+        )
         # Mock and track call-throughs to re-initialize connectors.
-        MockMoblabBuildConnector = mock_moblab_build_connector.MoblabBuildConnector
+        MockMoblabBuildConnector = (
+            mock_moblab_build_connector.MoblabBuildConnector
+        )
         MockBuildConnector = mock_build_connector.MoblabBuildConnector
         self.mock_afe_connector.get_num_jobs.return_value = 0
 
@@ -407,15 +405,23 @@ class MoblabRPCServiceTest(unittest.TestCase):
             None,
         )  # (job_id, error_msg)
         mock_moblab_build_connector.return_value.check_build_stage_status.side_effect = (
-            MockClientError()
+            MockClientError
         )
+
         mock_build_connector.return_value.get_builds_for_milestone.return_value = [
             "00000.00.0"
         ]
 
-        self.service.run_suite(
-            "mock_build_target", "mock_model", "99", "00000.00.0", "mock_suite"
-        )
+        mock_google = MagicMock()
+        mock_google.api_core.exceptions.GoogleAPIError = MockClientError
+        with mock.patch("moblab_service.google", new=mock_google):
+            self.service.run_suite(
+                "mock_build_target",
+                "mock_model",
+                "99",
+                "00000.00.0",
+                "mock_suite",
+            )
 
         mock_build_connector.return_value.get_builds_for_milestone.assert_called_once()
 
