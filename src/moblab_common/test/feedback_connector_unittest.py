@@ -40,12 +40,12 @@ class MoblabFeedbackConnectorTest(unittest.TestCase):
             feedback="Feedback feedback feedback.",
             files=[("/mock/path/to/tar", "files.tgz")],
         )
-        self.assertEqual(r[0], "feedback/4HBWUSIE15646458/2020-01-01 11:11:11")
+        self.assertEqual(r[0], "feedback/4HBWUSIE15646458/2020-01-01_11:11:11")
         self.assertEqual(
             r[1],
             "https://pantheon.corp.google.com/storage/browser/_details/"
-            "moblab-mock-bucket/feedback%2F4HBWUSIE15646458%2F2020-01-01"
-            "%2011:11:11%2Fscreenshot",
+            "moblab-mock-bucket/feedback/4HBWUSIE15646458/2020-01-01_11:11:11/"
+            "screenshot",
         )
 
 

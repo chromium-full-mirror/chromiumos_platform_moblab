@@ -138,7 +138,8 @@ class AFEConnectorTest(unittest.TestCase):
                 "query_start": 0,
                 "query_limit": 25,
                 "sort_by": ["-created_on"],
-                "id__icontains": 1,
+                "completed_status": None,
+                "id__iexact": 1,
                 "name__icontains": "job_name",
                 "created_on__lte": datetime.fromtimestamp(
                     int(dummy_timestamp)
@@ -190,15 +191,17 @@ class AFEConnectorTest(unittest.TestCase):
     def test_get_host_queue_entries(self, mock_send_rpc_command):
         job_id = 1
         hqes = [{"key1": "value1"}, {"key2": "value2"}]
+        error = ""
         mock_send_rpc_command.return_value = mock.MagicMock(
-            status_code=http.client.OK, text=json.dumps({"result": hqes})
+            status_code=http.client.OK,
+            text=json.dumps({"result": hqes, "error": error}),
         )
         result = self.afe_conn.get_host_queue_entries(job_id)
 
         mock_send_rpc_command.assert_called_once_with(
             "get_host_queue_entries", {"job__id": job_id}
         )
-        self.assertEqual(hqes, result)
+        self.assertEqual((hqes, error), result)
 
     @mock.patch("moblab_common.afe_connector.AFEConnector.send_rpc_command")
     def test_run_suite(self, mock_send_rpc_command):

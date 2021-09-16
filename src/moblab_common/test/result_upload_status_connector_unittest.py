@@ -42,9 +42,7 @@ class ResultUploadStatusConnectorTest(unittest.TestCase):
         connector = ResultUploadStatusConnector()
         result = connector.get_jobs_upload_status([1, 2, 3])
 
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 1)
         self.assertEqual(result[1].last_falure_reason, "E")
         self.assertEqual(result[1].status, Status.UPLOADING.name)
         self.assertEqual(result[1].attempt_number, 4)
-
-        self.assertEqual(result[3].status, Status.NOT_READY.name)

@@ -13,10 +13,12 @@ from unittest.mock import MagicMock
 
 from moblab_common import host_connector
 from moblab_common import moblab_info
+from moblab_common.utils.constants import Constants as MoblabConstants
 
 from moblab_common.proto.hostservice_pb2 import SystemVersionResponse
 
 MOCK_IP = "0.0.0.0"
+MOCK_MAC_ADDRESS = "00:00:00:00:00:00"
 MOCK_ID = "6fcecb39f90348d68ea684280ffe8fbf"
 MOCK_SERIAL_NO = "KKPVLWAI60246530"
 MOCK_ETC_LSB_RELEASE_COMPLETE = [
@@ -28,11 +30,12 @@ MOCK_ETC_LSB_RELEASE_INCOMPLETE = [
 ]
 
 MOCK_VERSION_INFO = {
-    "CHROMEOS_RELEASE_DESCRIPTION": "fizz moblab release R84",
-    "CHROMEOS_RELEASE_TRACK": "Dummy track",
-    "CHROMEOS_RELEASE_VERSION": "R84-13099.19.0",
-    "MOBLAB_ID": MOCK_ID,
-    "MOBLAB_SERIAL_NUMBER": MOCK_SERIAL_NO,
+    MoblabConstants.MOBLAB_INSTALL_ID_NAME: MOCK_ID,
+    MoblabConstants.MOBLAB_HOST_ID_NAME: MOCK_SERIAL_NO,
+    MoblabConstants.MOBLAB_RELEASE_VERSION: "beta",
+    MoblabConstants.DESCRIPTION_NAME: "fizz moblab release R84",
+    MoblabConstants.CHANNEL_NAME: "Dummy track",
+    MoblabConstants.BUILD_VERSION_NAME: "R84-13099.19.0",
 }
 
 
@@ -120,25 +123,46 @@ class MoblabInfoTest(unittest.TestCase):
         )
 
     @mock.patch(
-        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_ip"
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_external_mac_address"
     )
-    def test_get_network_info(self, mock_get_ip):
-        mock_get_ip.return_value = MOCK_IP
-
-        self.assertEqual(
-            moblab_info.get_network_info(),
-            {"server_ip": MOCK_IP, "is_connected": True},
-        )
-
     @mock.patch(
         "moblab_common.moblab_info.host_connector.HostServicesConnector.get_ip"
     )
-    def test_get_network_info_failed(self, mock_get_ip):
+    def test_get_network_info(
+        self, mock_get_ip, mocke_get_external_mac_address
+    ):
+        mock_get_ip.return_value = MOCK_IP
+        mocke_get_external_mac_address.return_value = MOCK_MAC_ADDRESS
+        self.assertEqual(
+            moblab_info.get_network_info(),
+            {
+                "server_ip": MOCK_IP,
+                "server_mac_address": MOCK_MAC_ADDRESS,
+                "is_connected": True,
+            },
+        )
+
+    @mock.patch(
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_external_mac_address"
+    )
+    @mock.patch(
+        "moblab_common.moblab_info.host_connector.HostServicesConnector.get_ip"
+    )
+    def test_get_network_info_failed(
+        self, mock_get_ip, mocke_get_external_mac_address
+    ):
         mock_get_ip.side_effect = [host_connector.HostServicesException]
+        mocke_get_external_mac_address.side_effect = [
+            host_connector.HostServicesException
+        ]
 
         self.assertEqual(
             moblab_info.get_network_info(),
-            {"server_ip": None, "is_connected": False},
+            {
+                "server_ip": None,
+                "server_mac_address": None,
+                "is_connected": False,
+            },
         )
 
     def _get_mock_file(self, src_lsb_release):
@@ -147,6 +171,7 @@ class MoblabInfoTest(unittest.TestCase):
         mock_file.__enter__.return_value.read.return_value = MOCK_ID
         return mock_file
 
+    @mock.patch("moblab_common.moblab_info.docker.from_env")
     @mock.patch(
         "moblab_common.moblab_info.host_connector.HostServicesConnector.get_system_version"
     )
@@ -155,7 +180,11 @@ class MoblabInfoTest(unittest.TestCase):
     )
     @mock.patch("builtins.open")
     def test_get_version_info(
-        self, mock_open, mock_get_host_identifier, mock_get_system_version
+        self,
+        mock_open,
+        mock_get_host_identifier,
+        mock_get_system_version,
+        mock_docker_from_env,
     ):
         mock_open.return_value = self._get_mock_file(
             MOCK_ETC_LSB_RELEASE_COMPLETE
@@ -166,6 +195,13 @@ class MoblabInfoTest(unittest.TestCase):
             track="Dummy track",
             description="fizz moblab release R84",
         )
+
+        mock_docker_client = MagicMock()
+        mock_container = MagicMock()
+        mock_container.name = MoblabConstants.MOBLAB_COMPOSE_CONTAINER_NAME
+        mock_container.labels.get.return_value = "beta"
+        mock_docker_client.containers.get.return_value = mock_container
+        mock_docker_from_env.return_value = mock_docker_client
 
         result = moblab_info.get_version_info()
 

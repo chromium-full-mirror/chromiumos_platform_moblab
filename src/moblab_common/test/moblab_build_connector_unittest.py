@@ -8,7 +8,11 @@ import unittest
 
 from unittest import mock
 
-from moblab_common.moblab_build_connector import MoblabBuildConnector
+from moblab_common.moblab_build_connector import (
+    MoblabBuildConnector,
+    BuildVersion,
+    BuildStatus,
+)
 
 from google.chromeos.moblab_v1beta1.types import build_service
 from google.chromeos.moblab_v1beta1.types import resources
@@ -24,6 +28,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
     BUILD_VERSION = "1234.5.6"
     SOURCE_BUCKET = "source_bucket"
     DESTINATION_BUCKET = "destination bucket"
+    STATUS = "PASS"
 
     def setUp(self):
         self.mock_build_service_client = mock.MagicMock()
@@ -60,6 +65,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
             ),
             milestone=str(self.MILESTONE),
             build_version=self.BUILD_VERSION,
+            status=self.STATUS,
         )
         (
             self.mock_build_service_client.list_builds.return_value
@@ -73,7 +79,14 @@ class MoblabBuildConnectorTest(unittest.TestCase):
             self.BUILD_TARGET, self.MODEL, self.MILESTONE
         )
 
-        self.assertEqual(response, [self.BUILD_VERSION])
+        self.assertEqual(
+            response,
+            [
+                BuildVersion(
+                    version=self.BUILD_VERSION, status=BuildStatus.AVAILABLE
+                )
+            ],
+        )
         self.mock_build_service_client.list_builds.assert_called_once()
 
     def test_check_build_stage_status(self):
