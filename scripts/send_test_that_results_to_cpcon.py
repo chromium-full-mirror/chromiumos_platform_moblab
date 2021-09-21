@@ -45,6 +45,9 @@ GIT_HASH_FILE = "git_hash.txt"
 GIT_COMMAND = ("git log --pretty=format:'%h -%d %s (%ci) <%an>'"
                " --abbrev-commit -20")
 AUTOTEST_DIR = "/mnt/host/source/src/third_party/autotest/files/"
+DEFAULT_SUITE_NAME = "default_suite"
+SUITE_NAME_REGEX = "Fetching suite for suite named (.+?)\.\.\."
+DEBUG_FILE_PATH = "debug/test_that.DEBUG"
 
 
 def parse_arguments(argv):
@@ -94,7 +97,7 @@ def parse_arguments(argv):
         "-s",
         "--suite",
         type=str,
-        default="default_suite",
+        default=None,
         help="The suite is used to identify the type of test results,"
              "e.g. 'power' for platform power team. If not specific, the "
              "default value is 'default_suite'.")
@@ -490,6 +493,34 @@ def print_autotest_git_history(test_dir):
     with open(git_hash_path, "w") as git_hash_file:
         git_hash_file.write(git_hash.decode("utf-8"))
 
+def get_suite_name(results_dir):
+    """Get the suite name from a results directory.
+
+    If we don't find the suite name in the first ten lines of test_that.DEBUG
+    then return None.
+
+    Args:
+        results_dir: The directory specified on the command line.
+    """
+    debug_file = os.path.join(results_dir, DEBUG_FILE_PATH)
+    if not os.path.exists(debug_file) or not os.path.isfile(debug_file):
+        return None
+    exp = re.compile(SUITE_NAME_REGEX)
+    try:
+        with open(debug_file) as f:
+            line_count = 0
+            for line in f:
+                line_count+=1
+                if line_count > 10:
+                    break
+                result = exp.search(line)
+                if not result:
+                    continue
+                else:
+                    return result.group(1)
+    except IOError as e:
+        logging.warning('Error trying to read test_that.DEBUG: %s', e)
+    return None
 
 def main(args):
     parsed_args = parse_arguments(args)
@@ -518,38 +549,47 @@ def main(args):
     # id, moblab install id, suite name and job id. Thus, we need to fake these
     # fields with valid values.
     fake_moblab_id = _get_fake_moblab_id()
-    fake_suite = parsed_args.suite
 
-    test_dirs = set()
-    for directory in parsed_args.directory:
+    result_dirs = map(os.path.normpath, parsed_args.directory)
+    for directory in set(result_dirs):
+        # If suite name is specified on command line, use it.
+        # Otherwise try to get name from result_dir (-d on command line).
+        # Otherwise use the default suite name.
+        if parsed_args.suite:
+            fake_suite = parsed_args.suite
+        else:
+            result_dir_suite_name = get_suite_name(directory)
+            fake_suite = result_dir_suite_name or DEFAULT_SUITE_NAME
+        logging.info("suite name: %s", fake_suite)
+
+        test_dirs = set()
         fetch_test_dirs(directory, test_dirs)
+        for test_dir in test_dirs:
+            # Uses a unique timestamp in milliseconds to fake the afe job id and
+            # skylab job id.
+            if parsed_args.bug:
+                _write_bug_id(test_dir, parsed_args.bug)
+            fake_job_id = str(int(time.time() * 1000))
+            job_keyval = models.job.read_keyval(test_dir)
+            job = parse_test_job(test_dir, job_keyval, fake_job_id, fake_suite)
 
-    for test_dir in test_dirs:
-        # Uses a unique timestamp in milliseconds to fake the afe job id and
-        # skylab job id.
-        if parsed_args.bug:
-            _write_bug_id(test_dir, parsed_args.bug)
-        fake_job_id = str(int(time.time() * 1000))
-        job_keyval = models.job.read_keyval(test_dir)
-        job = parse_test_job(test_dir, job_keyval, fake_job_id, fake_suite)
-
-        if not job:
-            logging.warning("Failed to generate job.serialize file and skipped "
-                            "the test directory: %s", test_dir)
-            continue
-
-        generate_job_serialize(test_dir, job, job_keyval)
-
-        print_autotest_git_history(test_dir)
-
-        if not is_uploaded(test_dir) and not parsed_args.dry_run:
-            try:
-                upload_test_results(parsed_args, test_dir, job_keyval,
-                                    fake_moblab_id, fake_job_id)
-                send_pubsub_message(bucket, fake_moblab_id, fake_job_id)
-            except Exception as e:
-                logging.warning(e)
+            if not job:
+                logging.warning("Failed to generate job.serialize file and "
+                                "skipped the test directory: %s", test_dir)
                 continue
+
+            generate_job_serialize(test_dir, job, job_keyval)
+
+            print_autotest_git_history(test_dir)
+
+            if not is_uploaded(test_dir) and not parsed_args.dry_run:
+                try:
+                    upload_test_results(parsed_args, test_dir, job_keyval,
+                                        fake_moblab_id, fake_job_id)
+                    send_pubsub_message(bucket, fake_moblab_id, fake_job_id)
+                except Exception as e:
+                    logging.warning(e)
+                    continue
 
 
 if __name__ == "__main__":
