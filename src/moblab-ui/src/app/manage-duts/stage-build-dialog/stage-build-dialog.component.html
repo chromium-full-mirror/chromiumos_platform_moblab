@@ -8,10 +8,23 @@
 </mat-card>
 <h2 mat-dialog-title>Access Test Build</h2>
 <mat-dialog-content class="mat-typography">
-    <app-build-select-forms [hidePoolSelector]="true" (allRequiredFieldsSet)="onBuildSet($event)"
-        (formLoading)="updateLoadingOverlay($event.message)" (formLoaded)="hideLoadingOverlay()"
-        (buildVersionUnselected)="onBuildVersionUnselected()">
-    </app-build-select-forms>
+
+    <app-basic-autocomplete-selector #modelSelector [title]="'Select model:'" [options]="models" [isShown]="true"
+        (select)="modelChanged($event.value)">
+    </app-basic-autocomplete-selector>
+
+    <app-basic-autocomplete-selector #buildTargetSelector [title]="'Select build target:'" [options]="buildTargets"
+        [isShown]="true" (select)="buildTargetChanged($event.value)">
+    </app-basic-autocomplete-selector>
+
+    <app-basic-autocomplete-selector #milestoneSelector [title]="'Select milestone:'" [options]="milestones"
+        [isShown]="true" (select)="milestoneChanged($event.value)">
+    </app-basic-autocomplete-selector>
+
+    <app-basic-autocomplete-selector #buildSelector [title]="'Select build:'" [options]="buildVersions" [isShown]="true"
+        (select)="buildVersionChanged($event.value)">
+    </app-basic-autocomplete-selector>
+
 
 </mat-dialog-content>
 <mat-dialog-actions align="end">

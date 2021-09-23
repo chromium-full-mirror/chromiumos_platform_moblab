@@ -42,8 +42,7 @@
       <th class="m-column" mat-header-cell mat-sort-header *matHeaderCellDef>Model</th>
       <td mat-cell *matCellDef="let element">
         {{element.getModel()}}
-        <!--TODO(b/196596941): re-enable when feature is functional-->
-        <button mat-button color="primary" (click)="accessTestBuild()" *ngIf="false">
+        <button mat-button color="primary" (click)="accessTestBuild()" *ngIf="!element.getIsConnected()">
           Access Test Build
         </button>
       </td>

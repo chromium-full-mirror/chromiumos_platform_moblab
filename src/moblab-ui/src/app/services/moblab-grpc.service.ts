@@ -65,8 +65,10 @@ import {
   ListMilestonesResponse,
   ListModelsRequest,
   ListModelsResponse,
+  ListAccessibleModelsRequest,
   ListPoolsRequest,
   ListPoolsResponse,
+  Model,
   RebootMoblabRequest,
   RebootMoblabResponse,
   RemoveAttributeFromDutsRequest,
@@ -906,6 +908,17 @@ export class MoblabGrpcService {
         }
       }
     );
+  }
+
+  async listAccessibleModelsPromise(buildTarget: string): Promise<Model[]> {
+    /** Returns the models(s) that the account has access to as promise.
+     * */
+    const request = new ListAccessibleModelsRequest();
+    request.setBuildTarget(buildTarget);
+    const response = await this.moblabRpcServicePromiseClient.list_accessible_models(
+      request
+    );
+    return response.getModelsList();
   }
 
   listPools(

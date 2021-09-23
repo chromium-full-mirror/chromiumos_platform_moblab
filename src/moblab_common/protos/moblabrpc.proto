@@ -24,6 +24,7 @@ service MoblabRpcService {
   rpc list_milestones (ListMilestonesRequest) returns (ListMilestonesResponse) {}
   rpc list_build_versions (ListBuildVersionsRequest) returns (ListBuildVersionsResponse) {}
   rpc list_models (ListModelsRequest) returns (ListModelsResponse) {}
+  rpc list_accessible_models (ListAccessibleModelsRequest) returns (ListAccessibleModelsResponse) {}
   rpc list_pools (ListPoolsRequest) returns (ListPoolsResponse) {}
 
   rpc enroll_duts (EnrollDutsRequest) returns (EnrollDutsResponse) {}
@@ -310,8 +311,24 @@ message ListModelsRequest {
 }
 
 // NEXT_TAG = 2
+message ListAccessibleModelsRequest {
+  string build_target = 1;
+}
+
+// NEXT_TAG = 2
 message ListModelsResponse {
   repeated string models = 1;
+}
+
+// NEXT_TAG = 3
+message Model {
+  string name = 1;
+  repeated string build_targets = 2;
+}
+
+// NEXT_TAG = 2
+message ListAccessibleModelsResponse {
+  repeated Model models = 1;
 }
 
 message ListPoolsRequest {

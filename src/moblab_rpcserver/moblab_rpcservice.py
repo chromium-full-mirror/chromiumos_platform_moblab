@@ -535,6 +535,18 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         response = moblabrpc_pb2.ListModelsResponse(models=list(models))
         return response
 
+    def list_accessible_models(self, request, context):
+        """Lists all models for a given build target that this account has access to."""
+
+        models_dict = self.service.list_models(request.build_target)
+        response = moblabrpc_pb2.ListAccessibleModelsResponse()
+        for model, build_targets in models_dict.items():
+            model_resp = moblabrpc_pb2.Model(
+                name=model, build_targets=list(build_targets)
+            )
+            response.models.extend([model_resp])
+        return response
+
     async def enroll_duts(self, request, _context):
         await self.service.enroll_duts(request.ips)
         response = moblabrpc_pb2.EnrollDutsResponse()

@@ -15,7 +15,7 @@ import time
 import logging
 import json
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from datetime import datetime
 from google.cloud import storage
 from google.protobuf.field_mask_pb2 import FieldMask
@@ -103,6 +103,7 @@ class LabelsParser(object):
     _model_re = re.compile(r"^model:(.*)")
     _build_target_re = re.compile(r"^board:(.*)")
     _pool_re = re.compile(r"^pool:(.*)")
+    _build_target_model_re = re.compile(r"^buildTargets/(\w+)/models/(\w+)$")
 
     @classmethod
     def _extract_from_labels(cls, regexp, labels):
@@ -132,6 +133,15 @@ class LabelsParser(object):
     @classmethod
     def extract_pool_from_labels(cls, labels):
         return cls._extract_from_labels(cls._pool_re, labels)
+
+    @classmethod
+    def extrat_model_build_target_from_api_path(cls, models):
+        """Extracts model & build target from moblab API listModels path"""
+        build_target, model = None, None
+        match = cls._build_target_model_re.match(models)
+        if match:
+            build_target, model = match.group(1), match.group(2)
+        return (build_target, model)
 
 
 class MoblabService(object):
@@ -773,7 +783,7 @@ class MoblabService(object):
         return list(build_targets)
 
     def list_build_targets(self):
-        """List build targets associated with the given model.
+        """List all build targets that this account has access to.
 
         Returns:
             List of build target strings.
@@ -800,6 +810,33 @@ class MoblabService(object):
                 )
             )
         return list(build_targets)
+
+    def list_models(self, build_target):
+        """Lists all models for the given build target.
+        If build target is set to '*' it will list models for all build targets.
+
+        Returns:
+            Dictionary of models as keys and build targets set as value.
+        """
+        try:
+            models_response = self.moblab_build_connector.list_models(
+                build_target
+            )
+            results = defaultdict(set)
+            for m in models_response:
+                (
+                    build_target,
+                    model,
+                ) = LabelsParser.extrat_model_build_target_from_api_path(m)
+                if model and build_target:
+                    results[model].add(build_target)
+            return results
+        except moblab_build_connector.MoblabBuildConnectorException:
+            logging.exception(
+                "Encountered error trying to list models for build target: {}.".format(
+                    build_target
+                )
+            )
 
     def list_usable_milestones(self, build_target, model):
         """

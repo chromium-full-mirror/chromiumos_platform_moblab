@@ -1,10 +1,16 @@
-import {Component, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ViewChild} from '@angular/core';
 import {
   LoadingOverlayComponent,
   LoadingOverlayStyle,
 } from 'app/widgets/loading-overlay/loading-overlay.component';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
-import {BuildSelectFormsComponent} from 'app/run-suite/common/build-select-forms/build-select-forms.component';
+import {Model} from 'app/services/moblabrpc_pb';
+import {SelectableItem} from 'app/run-suite/common/basic-autocomplete-selector/basic-autocomplete-selector.component';
+
+export interface BuildVersion {
+  version: string;
+  status: string;
+}
 
 export enum StageBuildStatus {
   SUCCESS,
@@ -32,11 +38,18 @@ const GCS_URL = 'https://console.developers.google.com/storage/';
   templateUrl: 'stage-build-dialog.component.html',
   styleUrls: ['stage-build-dialog.component.scss'],
 })
-export class StageBuildDialogComponent {
+export class StageBuildDialogComponent implements AfterViewInit {
+  @ViewChild('modelSelector') modelSelector;
+  @ViewChild('buildTargetSelector') buildTargetSelector;
+  @ViewChild('milestoneSelector') milestoneSelector;
+  @ViewChild('buildSelector') buildSelector;
   @ViewChild(LoadingOverlayComponent) loadingOverlay: LoadingOverlayComponent;
-  @ViewChild(BuildSelectFormsComponent)
-  buildSelectForm: BuildSelectFormsComponent;
 
+  models: SelectableItem[] = [];
+  buildTargets: SelectableItem[] = [];
+  milestones: SelectableItem[] = [];
+  buildVersions: SelectableItem[] = [];
+  accessibleModels: Model[] = [];
   stageBuildNotification: StageBuildNotification;
   stageBuildButtonDisabled = true;
   buildBucketUrl: string;
@@ -49,22 +62,167 @@ export class StageBuildDialogComponent {
 
   constructor(public moblabGrpcService: MoblabGrpcService) {}
 
-  onBuildSet(event) {
-    this.selectedModel = event.model;
-    this.selectedBuildTarget = event.board;
-    this.selectedMilestone = event.milestone;
-    this.selectedBuild = event.build;
-    this.stageBuildButtonDisabled = false;
+  ngAfterViewInit() {
+    this.loadModels();
   }
 
-  onBuildVersionUnselected() {
+  async listAccessibleModels() {
+    try {
+      this.accessibleModels = await this.moblabGrpcService.listAccessibleModelsPromise(
+        '*'
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async loadModels() {
+    this.resetModels('loading');
+    this.updateLoadingOverlay('fetching models...');
+    await this.listAccessibleModels();
+    this.hideLoadingOverlay();
+    this.updateModels();
+  }
+
+  resetModels(message: string) {
+    this.models = [];
+    this.modelSelector.selectFormControl.reset();
+    this.modelSelector.disable(message);
+    this.resetBuildTarget('Please select a model.');
+  }
+
+  updateModels() {
+    const models = this.accessibleModels.map(model => model.getName()).sort();
+    this.models = models.map(m => new SelectableItem(m));
+    if (this.models.length === 0) {
+      this.modelSelector.disable(
+        'No model found, please refresh and try again.'
+      );
+    } else {
+      this.modelSelector.enable();
+    }
+  }
+
+  modelChanged(model: string): void {
     this.stageBuildButtonDisabled = true;
+    this.stageBuildNotification = null;
+    this.selectedModel = model;
+    this.loadBuildTargets();
+  }
+
+  loadBuildTargets(): void {
+    this.resetBuildTarget('loading');
+    const buioldTargets = this.accessibleModels
+      .filter(e => e.getName() === this.selectedModel)[0]
+      .getBuildTargetsList();
+    this.buildTargets = buioldTargets.map(b => new SelectableItem(b));
+    if (this.buildTargets.length === 0) {
+      this.buildTargetSelector.disable('No build target found for this model.');
+    } else {
+      this.buildTargetSelector.enable();
+    }
+  }
+
+  resetBuildTarget(message: string) {
+    this.buildTargets = [];
+    this.buildTargetSelector.selectFormControl.reset();
+    this.buildTargetSelector.disable(message);
+    this.resetMilestones('Please select a build target.');
+  }
+
+  buildTargetChanged(buildTarget: string): void {
+    this.stageBuildButtonDisabled = true;
+    this.stageBuildNotification = null;
+    this.selectedBuildTarget = buildTarget;
+    this.loadMilestones();
+  }
+
+  loadMilestones(): void {
+    this.resetMilestones('loading...');
+    this.updateLoadingOverlay('fetching milestones...');
+    this.moblabGrpcService.listMilestones(
+      this.selectedBuildTarget,
+      this.selectedModel,
+      (milestones: string[]) => {
+        this.updateMilestones(milestones);
+        this.hideLoadingOverlay();
+      },
+      (errorMessage: string) => {
+        this.updateLoadingOverlay(errorMessage);
+      }
+    );
+  }
+
+  resetMilestones(message: string) {
+    this.milestones = [];
+    this.milestoneSelector.selectFormControl.reset();
+    this.milestoneSelector.disable(message);
+    this.resetBuildVersions('Please select milestone.');
+  }
+
+  updateMilestones(milestones: string[]) {
+    this.milestones = milestones.map(m => new SelectableItem(m));
+    if (this.milestones.length === 0) {
+      this.milestoneSelector.disable(
+        'No milestones found for the selected model and build target.'
+      );
+    } else {
+      this.milestoneSelector.enable();
+    }
+  }
+
+  milestoneChanged(milestone: string): void {
+    this.stageBuildButtonDisabled = true;
+    this.stageBuildNotification = null;
+    this.selectedMilestone = milestone;
+    this.loadBuildVersions();
+  }
+
+  loadBuildVersions(): void {
+    this.resetBuildVersions('loading...');
+    this.updateLoadingOverlay('fetching build versions...');
+    this.moblabGrpcService.listBuildVersions(
+      this.selectedBuildTarget,
+      this.selectedModel,
+      this.selectedMilestone,
+      (buildVersions: BuildVersion[]) => {
+        this.updateBuildVersions(buildVersions);
+        this.hideLoadingOverlay();
+      },
+      (errorMessage: string) => {
+        this.updateLoadingOverlay(errorMessage);
+      }
+    );
+  }
+
+  resetBuildVersions(mesage: string) {
+    this.buildVersions = [];
+    this.buildSelector.selectFormControl.reset();
+    this.buildSelector.disable(mesage);
+  }
+
+  updateBuildVersions(buildVersions: BuildVersion[]) {
+    this.buildVersions = buildVersions.map(
+      v => new SelectableItem(v.version, v.status)
+    );
+
+    if (this.buildVersions.length === 0) {
+      this.buildSelector.disable('No builds found for the milestone.');
+    } else {
+      this.buildSelector.enable();
+    }
+  }
+
+  buildVersionChanged(buildVersion: string): void {
+    this.selectedBuild = buildVersion;
+    this.stageBuildNotification = null;
+    this.stageBuildButtonDisabled = false;
   }
 
   async stageBuild() {
     const buildId = this._formatBuildId();
     this.updateLoadingOverlay('Staging the test build...');
-    this.disableAllSelectors();
+    this.disableAllSelectors('Waiting for the stage build.');
     try {
       const buildBucket = await this.moblabGrpcService.stageBuildPromise(
         this.selectedModel,
@@ -80,7 +238,6 @@ export class StageBuildDialogComponent {
       this.buildBucketUrl = this._formatBuildBucketUrl(buildBucket);
       this.returnMessage = `Successfully staged the test build ${buildId} to gcs bucket: ${buildBucket}`;
     } catch (error) {
-      this.enableAllSelectors();
       this.stageBuildNotification = new StageBuildNotification(
         STAGE_BUILD_ERROR_MESSAGE,
         StageBuildStatus.ERROR,
@@ -89,6 +246,7 @@ export class StageBuildDialogComponent {
       );
     }
     this.hideLoadingOverlay();
+    this.enableAllSelectors();
   }
 
   hideLoadingOverlay() {
@@ -102,18 +260,18 @@ export class StageBuildDialogComponent {
 
   enableAllSelectors() {
     this.stageBuildButtonDisabled = false;
-    this.buildSelectForm.modelSelector.enable();
-    this.buildSelectForm.boardSelector.enable();
-    this.buildSelectForm.milestoneSelector.enable();
-    this.buildSelectForm.buildSelector.enable();
+    this.modelSelector.enable();
+    this.buildTargetSelector.enable();
+    this.milestoneSelector.enable();
+    this.buildSelector.enable();
   }
 
-  disableAllSelectors() {
+  disableAllSelectors(message: string) {
     this.stageBuildButtonDisabled = true;
-    this.buildSelectForm.modelSelector.disable();
-    this.buildSelectForm.boardSelector.disable();
-    this.buildSelectForm.milestoneSelector.disable();
-    this.buildSelectForm.buildSelector.disable();
+    this.modelSelector.disable(message);
+    this.buildTargetSelector.disable(message);
+    this.milestoneSelector.disable(message);
+    this.buildSelector.disable(message);
   }
 
   isStageBuildSucceeded(): boolean {

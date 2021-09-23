@@ -130,6 +130,14 @@ class MoblabBuildConnector(object):
                 "Encountered API error when attempting to list build targets."
             ) from e
 
+    def _list_models(self, request):
+        try:
+            return self.build_service_client.list_models(request).models
+        except GoogleAPICallError as e:
+            raise MoblabBuildConnectorException(
+                "Encountered API error when attempting to list models."
+            ) from e
+
     def list_available_milestones(
         self, build_target, model, page_size=DEFAULT_PAGE_SIZE, page_token=None
     ):
@@ -303,3 +311,34 @@ class MoblabBuildConnector(object):
 
         build_targets = self._list_build_targets(request)
         return [build_target.name for build_target in build_targets]
+
+    def list_models(
+        self,
+        build_target="*",
+        page_size=DEFAULT_PAGE_SIZE,
+        page_token=None,
+    ):
+        """List all models for a given build targets that an account has access to.
+
+        If the build target is not provided or set to '*',
+            it lists models for all build targets.
+
+        Args:
+            build_target (str): The build target name.
+            page_size (int): The number of milestones to return in the response.
+                The default size is DEFAULT_PAGE_SIZE.
+            page_token (str): The page token, received from a previous
+                ``ListBuilds`` call. Provide this to retrieve the subsequent
+                page.
+
+        Returns:
+            list of string representating the models path.
+        """
+        request = build_service.ListModelsRequest(
+            parent=self.build_target_path(build_target),
+            page_size=page_size,
+            page_token=page_token,
+        )
+
+        models = self._list_models(request)
+        return [model.name for model in models]
