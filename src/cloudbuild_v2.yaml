@@ -757,7 +757,7 @@ steps:
       - "infra-protos"
 
   - id: inventory
-    name: "docker:19.03.8"
+    name: "docker:20.10.6"
     args:
       [
         "build",
