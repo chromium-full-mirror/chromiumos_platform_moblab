@@ -7,7 +7,7 @@ import {DUT, ManageDutsPage} from './manage-duts.po';
 
 describe('Selecting an unenrolled DUT', () => {
   const page = new ManageDutsPage(),
-    dut = page.getUnenrolled(),
+    unenrolled_dut = page.getUnenrolled(),
     enrollButton = element(by.buttonText('Enroll Selected')),
     unenrollButton = element(by.buttonText('Unenroll Selected')),
     reverifyButton = element(by.buttonText('Reverify Selected'));
@@ -19,29 +19,47 @@ describe('Selecting an unenrolled DUT', () => {
   });
 
   it('enables the buttons "Enroll", "Unenroll" and "Reverify", as TC No.23', () => {
-    dut.toggleSelection();
+    unenrolled_dut.toggleSelection();
     expect(enrollButton.isEnabled()).toBeTruthy();
     expect(unenrollButton.isEnabled()).toBeTruthy();
     expect(reverifyButton.isEnabled()).toBeTruthy();
   });
 
   describe('then clicking on "Enroll Selected"', () => {
-    let enrolled: DUT;
+    let dut: DUT;
 
     beforeAll(async () => {
-      enrolled = page.getByAddr(await dut.macAddr());
+      dut = page.getByAddr(await unenrolled_dut.macAddr());
       enrollButton.click();
       browser.wait(page.isLoaded);
     });
 
     it('changes the DUT\'s to "Ready"', async () => {
-      expect(await enrolled.status()).toBe('Ready');
+      expect(await dut.status()).toBe('Ready');
     });
 
     it("shows the DUT's build target, model and labels information", async () => {
-      expect(await enrolled.buildTarget()).not.toBe('');
-      expect(await enrolled.model()).not.toBe('');
-      expect(await enrolled.labels()).not.toBe([]);
+      expect(await dut.buildTarget()).not.toBe('');
+      expect(await dut.model()).not.toBe('');
+      expect(await dut.labels()).not.toEqual([]);
+    });
+
+    describe('then clicking on "Unenroll Selected"', () => {
+      beforeAll(() => {
+        dut.toggleSelection();
+        unenrollButton.click();
+        browser.wait(page.isLoaded);
+      });
+
+      it('changes the DUT\'s status to "Not Enrolled", as TC No.24', async () => {
+        expect(await dut.status()).toBe('Not Enrolled');
+      });
+
+      it("removes the DUT's build target, model and labels", async () => {
+        expect(await dut.buildTarget()).toBe('');
+        expect(await dut.model()).toBe('');
+        expect(await dut.labels()).toEqual([]);
+      });
     });
   });
 });
