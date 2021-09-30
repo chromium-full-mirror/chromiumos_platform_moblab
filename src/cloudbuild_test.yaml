@@ -1,4 +1,58 @@
 steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - '-c'
+      - >-
+        docker pull ${_REGISTRY_URI}/moblab-rpcserver:${__CACHED_BUILD_VERSION}
+        || exit 0
+    id: moblab-rpcserver-cache
+    entrypoint: bash
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - '-c'
+      - >-
+        docker pull ${_REGISTRY_URI}/inventory:${__CACHED_BUILD_VERSION} || exit
+        0
+    id: inventory-cache
+    entrypoint: bash
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - '-c'
+      - >-
+        docker pull ${_REGISTRY_URI}/moblab_common:${__CACHED_BUILD_VERSION} ||
+        exit 0
+    id: moblab_common-cache
+    entrypoint: bash
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - '-c'
+      - >-
+        docker pull ${_REGISTRY_URI}/infra-protos:${__CACHED_BUILD_VERSION} ||
+        exit 0
+    id: infra-protos-cache
+    entrypoint: bash
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - '-c'
+      - 'docker pull ${_REGISTRY_URI}/protoc:${__CACHED_BUILD_VERSION} || exit 0'
+    id: protoc-cache
+    entrypoint: bash
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - '-c'
+      - >-
+        docker pull ${_REGISTRY_URI}/dut-manager:${__CACHED_BUILD_VERSION} ||
+        exit 0
+    id: dut-manager-cache
+    entrypoint: bash
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - '-c'
+      - >-
+        docker pull
+        ${_REGISTRY_URI}/dut-manager-storage:${__CACHED_BUILD_VERSION} || exit 0
+    id: dut-manager-storage-cache
+    entrypoint: bash
   - name: 'docker:20.10.6'
     args:
       - pull
@@ -44,9 +98,12 @@ steps:
       - '-t'
       - '${_IMG_TAG_PREFIX}/protoc:${__BUILD_VERSION}'
       - /workspace/src/dockerfiles/utilities/
+      - '--cache-from'
+      - '${_REGISTRY_URI}/protoc:${__CACHED_BUILD_VERSION}'
     id: protoc
     waitFor:
       - buster-slim
+      - protoc-cache
   - name: 'docker:20.10.6'
     env:
       - DOCKER_BUILDKIT=1
@@ -61,11 +118,14 @@ steps:
       - '-t'
       - '${_IMG_TAG_PREFIX}/infra-protos:${__BUILD_VERSION}'
       - /workspace/src/dockerfiles/utilities/
+      - '--cache-from'
+      - '${_REGISTRY_URI}/infra-protos:${__CACHED_BUILD_VERSION}'
     id: infra-protos
     waitFor:
       - protoc
       - buster-slim
       - alpine-git
+      - infra-protos-cache
   - name: '${_IMG_TAG_PREFIX}/protoc:${__BUILD_VERSION}'
     args:
       - /workspace/src/moblab_common/protos/protogen.sh
@@ -87,12 +147,15 @@ steps:
       - '-t'
       - '${_IMG_TAG_PREFIX}/moblab_common:${__BUILD_VERSION}'
       - /workspace/
+      - '--cache-from'
+      - '${_REGISTRY_URI}/moblab_common:${__CACHED_BUILD_VERSION}'
     id: moblab_common
     waitFor:
       - protogen
       - python-2
       - buster-slim
       - python-3.8
+      - moblab_common-cache
   - name: 'docker:20.10.6'
     env:
       - DOCKER_BUILDKIT=1
@@ -110,6 +173,8 @@ steps:
       - python3-test
       - /workspace/
     id: moblab_common_test_py3
+    waitFor:
+      - protogen
   - name: 'docker:20.10.6'
     env:
       - DOCKER_BUILDKIT=1
@@ -124,10 +189,13 @@ steps:
       - '-t'
       - '${_IMG_TAG_PREFIX}/dut-manager:${__BUILD_VERSION}'
       - /workspace/src/
+      - '--cache-from'
+      - '${_REGISTRY_URI}/dut-manager:${__CACHED_BUILD_VERSION}'
     id: dut-manager
     waitFor:
       - python-3.8-slim
       - infra-protos
+      - dut-manager-cache
   - name: 'docker:20.10.6'
     env:
       - DOCKER_BUILDKIT=1
@@ -142,11 +210,14 @@ steps:
       - '-t'
       - '${_IMG_TAG_PREFIX}/dut-manager-storage:${__BUILD_VERSION}'
       - /workspace/src/
+      - '--cache-from'
+      - '${_REGISTRY_URI}/dut-manager-storage:${__CACHED_BUILD_VERSION}'
     id: dut-manager-storage
     waitFor:
       - python-3.8-slim
       - moblab_common
       - infra-protos
+      - dut-manager-storage-cache
   - name: 'docker:20.10.6'
     env:
       - DOCKER_BUILDKIT=1
@@ -161,10 +232,13 @@ steps:
       - '-t'
       - '${_IMG_TAG_PREFIX}/inventory:${__BUILD_VERSION}'
       - /workspace/src/
+      - '--cache-from'
+      - '${_REGISTRY_URI}/inventory:${__CACHED_BUILD_VERSION}'
     id: inventory
     waitFor:
       - python-3.8-slim
       - infra-protos
+      - inventory-cache
   - name: 'docker:20.10.6'
     env:
       - DOCKER_BUILDKIT=1
@@ -179,12 +253,15 @@ steps:
       - '-t'
       - '${_IMG_TAG_PREFIX}/moblab-rpcserver:${__BUILD_VERSION}'
       - /workspace/
+      - '--cache-from'
+      - '${_REGISTRY_URI}/moblab-rpcserver:${__CACHED_BUILD_VERSION}'
     id: rpcserver
     waitFor:
       - python-3.8
       - python-3.8-slim
       - moblab_common
       - infra-protos
+      - moblab-rpcserver-cache
   - name: 'docker:20.10.6'
     env:
       - DOCKER_BUILDKIT=1
@@ -261,6 +338,8 @@ options:
   machineType: N1_HIGHCPU_32
   substitutionOption: ALLOW_LOOSE
 substitutions:
-  _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
-  _IMG_TAG_PREFIX: dockerized-tests
   __BUILD_VERSION: test
+  __CACHED_BUILD_VERSION: autopush
+  _BASE_REGISTRY_URI: us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+  _REGISTRY_URI: gcr.io/chromeos-partner-moblab
+  _IMG_TAG_PREFIX: dockerized-tests
