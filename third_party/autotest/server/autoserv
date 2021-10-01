@@ -290,101 +290,7 @@ def correct_results_folder_permission(results):
     utils.run(' chown -R %s "%s"' % (os.getuid(), results))
     utils.run(' chgrp -R %s "%s"' % (os.getgid(), results))
 
-@timeout_util.TimeoutDecorator(120)
-def _start_servod(machine):
-    """Try to start servod in moblab if it's not already running or running with
-    different board or port.
 
-    @param machine: Name of the dut used for test.
-    """
-    afe = server_frontend.AFE()
-    hosts = afe.get_hosts(hostname=machine)
-    board = server_utils.get_board_from_afe(machine, afe)
-    model = hosts[0].attributes.get("model", None)
-    servo_host = hosts[0].attributes.get("servo_host", None)
-    servo_port = hosts[0].attributes.get("servo_port", 9999)
-    servo_serial = hosts[0].attributes.get("servo_serial", None)
-
-    if not servo_host:
-        return
-
-    label = os.environ.get('LABEL', 'release')
-    registry = os.environ.get('REGISTRY_URI', 'gcr.io/chromeos-partner-moblab')
-    client = docker.from_env(timeout=300)
-    cont = None
-    try:
-        cont = client.containers.get(servo_host)
-        (exit_code, output) = cont.exec_run("ps")
-        logging.info("Is Up output %s", output)
-        if b"servod" not in output:
-            cont.remove(force=True)
-        else:
-            logging.warning("Container already exists - not starting")
-            return
-    except docker.errors.NotFound:
-        pass
-    except docker.errors.APIError:
-        # Container exists but is not running
-        logging.info("Cleanup of non functional container.")
-        cont.remove(force=True)
-
-    image = "%s/servod:%s" % (registry, label)
-    logging.info("Image %s", image)
-    try:
-        client.images.pull(image)
-    except docker.errors.APIError:
-        logging.exception('Failed to pull image')
-
-    label = os.environ.get("LABEL", "release")
-    registry = os.environ.get(
-        "REGISTRY_URI", "gcr.io/chromeos-partner-moblab"
-    )
-    image = "%s/servod:%s" % (registry, label)
-    logging.info("Image %s", image)
-
-    try:
-        client.images.pull(image)
-    except docker.errors.APIError:
-        logging.exception("Failed to pull image")
-
-    environment = [
-                "BOARD=%s" % board,
-                "MODEL=%s" % model,
-                "SERIAL=%s" % servo_serial,
-                "PORT=%s" % servo_port,
-    ]
-    logging.info('Autoserv Servo container environment: %s', environment)
-    try:
-        cont = client.containers.run(
-            image,
-            remove=False,
-            privileged=True,
-            name=servo_host,
-            hostname=servo_host,
-            network="default_moblab",
-            cap_add=["NET_ADMIN"],
-            detach=True,
-            volumes=["/dev:/dev"],
-            environment=environment,
-            command=["bash", "/start_servod.sh"],
-        )
-        log_lines = cont.logs(stream=True, follow=True)
-        started = False
-        while log_lines and not started:
-            for line in log_lines:
-                logging.info(line.decode('utf-8').strip())
-                if b'servod - INFO - Listening on 0.0.0.0 port' in line:
-                    started = True
-                    logging.info("Detected servod has started.")
-                    break
-
-    except docker.errors.ContainerError as e:
-        logging.exception("Failed to start servod")
-        for line in str(e).split(b'\n'):
-            print(line)
-        raise
-    except docker.errors.ImageNotFound:
-        logging.exception("Image not found")
 
 def _control_path_on_disk(control_name):
     """Find the control file corresponding to the given control name, on disk.
@@ -647,15 +553,11 @@ def run_autoserv(pid_file_manager, results, parser, ssp_url, use_ssp):
 
     # run the job
     exit_code = 0
-    auto_start_servod = _CONFIG.get_config_value(
-        "AUTOSERV", "auto_start_servod", type=bool, default=False
-    )
+
 
     try:
         try:
             if repair:
-                if auto_start_servod and len(machines) == 1:
-                    _start_servod(machines[0])
                 job.repair(job_labels)
             elif verify:
                 job.verify(job_labels)
@@ -666,8 +568,6 @@ def run_autoserv(pid_file_manager, results, parser, ssp_url, use_ssp):
             elif cleanup:
                 job.cleanup(job_labels)
             else:
-                if auto_start_servod and len(machines) == 1:
-                    _start_servod(machines[0])
                 if use_ssp:
                     try:
                         _run_with_ssp(
