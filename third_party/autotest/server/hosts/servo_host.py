@@ -20,6 +20,7 @@ import json
 import time
 import six
 import xmlrpc.client
+from collections import defaultdict
 
 import docker
 import tempfile
@@ -51,6 +52,8 @@ class ServoHost(base_servohost.BaseServoHost):
 
      @type _servo: servo.Servo | None
      """
+
+    start_counter = defaultdict(int)
 
     DEFAULT_PORT = int(os.getenv('SERVOD_PORT', '9999'))
 
@@ -585,6 +588,7 @@ class ServoHost(base_servohost.BaseServoHost):
     @timeout_util.TimeoutDecorator(INITIALIZE_SERVO_TIMEOUT_SECS)
     def start_servod(self, quick_startup=False):
         """Start the servod process on servohost."""
+        ServoHost.start_counter[self.hostname] += 1
         client = docker.from_env(timeout=300)
         try:
             if self.is_up():
@@ -660,11 +664,18 @@ class ServoHost(base_servohost.BaseServoHost):
 
     def stop_servod(self):
         """Stop the servod process on servohost."""
+        if ServoHost.start_counter[self.hostname] > 1:
+            ServoHost.start_counter[self.hostname] -= 1
+        if ServoHost.start_counter[self.hostname] != 0:
+            logging.debug("Not stopping servod container %s, count is %d",
+                          self.hostname, ServoHost.start_counter[
+                                self.hostname])
+            return
         client = docker.from_env(timeout=300)
         try:
             cont = client.containers.get(self.hostname)
         except docker.errors.NotFound:
-            logging.info("Container does not exist no need to stop it.")
+            logging.debug("Container does not exist no need to stop it.")
         else:
             cont.remove(force=True)
 
