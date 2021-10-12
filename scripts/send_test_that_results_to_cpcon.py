@@ -40,6 +40,7 @@ STATUS_FILE = "status"
 KEYVAL_FILE = "keyval"
 NEW_KEYVAL_FILE = "new_keyval"
 UPLOADED_STATUS_FILE = ".uploader_status"
+STATUS_GOOD = "PUBSUB_SENT"
 FAKE_MOBLAB_ID_FILE = "fake_moblab_id_do_not_delete.txt"
 GIT_HASH_FILE = "git_hash.txt"
 GIT_COMMAND = ("git log --pretty=format:'%h -%d %s (%ci) <%an>'"
@@ -200,10 +201,9 @@ def generate_job_serialize(test_dir, job, job_keyval):
     logging.info("Successfully generated the job.serialize for: %s",
                  job_serialize_file)
 
-
-def is_uploaded(test_dir):
+def is_pubsub_sent(test_dir):
     """
-       Checks if the given test directory has been uploaded to GCS bucket.
+       Checks if the message for the uploaded bucket has been sent.
 
     Args:
         test_dir: The test directory for non-moblab test results.
@@ -215,14 +215,13 @@ def is_uploaded(test_dir):
         return False
 
     with open(upload_status_file, "r") as upload_status:
-        if upload_status.read() == "UPLOADED":
-            logging.warn("The test directory: %s has already been uploaded "
-                         "to GCS bucket and the .uploader_status file has "
-                         "been set to UPLOADED.", test_dir)
+        if upload_status.read() == STATUS_GOOD:
+            logging.warn("The test directory: %s status has already been "
+                         "sent to CPCon and the .upload_status file has "
+                         "been set to PUBSUB_SENT.", test_dir)
             return True
         else:
-            logging.debug("The upload status file exists but upload was not "
-                          "completed.")
+            logging.debug("The pubsub message was not successful")  
     return False
 
 
@@ -274,7 +273,7 @@ def upload_test_results(args, test_dir, job_keyval, moblab_id, job_id):
                         (test_dir, gcs_bucket_path, e))
 
 
-def send_pubsub_message(bucket, moblab_id, job_id):
+def send_pubsub_message(test_dir, bucket, moblab_id, job_id):
     """
         Send pubsub messages to trigger CPCon pipeline to process non-moblab
         test results in the specific GCS bucket path.
@@ -295,7 +294,11 @@ def send_pubsub_message(bucket, moblab_id, job_id):
         message_id = \
             console_client.send_test_job_offloaded_message(gsuri,
                                                            moblab_id,
-                                                           moblab_install_id)
+                                                           moblab_install_id)                                      
+        upload_status_file = os.path.join(test_dir, UPLOADED_STATUS_FILE)
+        with open(upload_status_file, "w") as upload_status:
+            upload_status.write(STATUS_GOOD)
+
         logging.info(
             "Successfully sent the pubsub message with message id: %s to GCS "
             "path: %s", message_id[0], gsuri)
@@ -582,11 +585,16 @@ def main(args):
 
             print_autotest_git_history(test_dir)
 
-            if not is_uploaded(test_dir) and not parsed_args.dry_run:
+            if parsed_args.dry_run:
+                return
+                
+            # This process run is not a dry run
+            if not is_pubsub_sent(test_dir):
                 try:
                     upload_test_results(parsed_args, test_dir, job_keyval,
                                         fake_moblab_id, fake_job_id)
-                    send_pubsub_message(bucket, fake_moblab_id, fake_job_id)
+                    send_pubsub_message(test_dir, bucket, fake_moblab_id,
+                                       fake_job_id)
                 except Exception as e:
                     logging.warning(e)
                     continue
