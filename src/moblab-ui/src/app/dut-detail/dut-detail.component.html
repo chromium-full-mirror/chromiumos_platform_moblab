@@ -1,87 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <body>
-<div id="dut-query-form">
-  <p><b>Fetch DUT details:</b></p>
-  <mat-form-field id="query-dut-by-id-box" class="filter"
-                  floatLabel="never">
-    <input id="dut-query-input" matInput [formControl]="dutQuery">
-  </mat-form-field>
-  <button id="dut-query-button" mat-raised-button color="primary" (click)="fetchDutDetails()"
-          [disabled]="!this.dutQuery.value"> Go
+  <div id="dut-query-form">
+    <p><b>Fetch DUT details:</b></p>
+    <mat-form-field id="query-dut-by-id-box" class="filter" floatLabel="never">
+      <mat-label>DUT IP Address:</mat-label>
+      <input id="dut-query-input" matInput [formControl]="dutQuery">
+    </mat-form-field>
+    <button id="dut-query-button" mat-raised-button color="primary" (click)="fetchDutDetails()"
+      [disabled]="!this.dutQuery.value"> Go
+    </button>
+  </div>
+
+  <button mat-raised-button color="primary" id="repair-button" [disabled]="isDutInfoTableEmpty()" (click)="repairDut()">
+    Repair DUT
   </button>
-</div>
 
-<button mat-raised-button color="primary"
-        id="repair-button"
-        [disabled]="isDutInfoTableEmpty()"
-        (click)="repairDut()"> Repair DUT
-</button>
+  <button mat-raised-button color="primary" id="reverify-button" [disabled]="isDutInfoTableEmpty()"
+    (click)="reverifyDut()"> Reverify DUT
+  </button>
 
-<button mat-raised-button color="primary"
-        id="reverify-button"
-        [disabled]="isDutInfoTableEmpty()"
-        (click)="reverifyDut()"> Reverify DUT
-</button>
+  <mat-form-field class="set-servo-serial-box">
+    <mat-label>Servo Serial Number:</mat-label>
+    <input id="set-servo-serial-input" matInput [formControl]="servoSerialNumber">
+    <mat-error *ngIf="this.servoSerialNumber.hasError('pattern')">
+      Invalid serial number, check the label on your servo.
+    </mat-error>
+  </mat-form-field>
 
-<mat-form-field class="set-servo-serial-box" >
-  <mat-label>Servo Serial Number</mat-label>
-  <input id="set-servo-serial-input" matInput [formControl]="servoSerialNumber">
-  <mat-error *ngIf="this.servoSerialNumber.hasError('pattern')">
-    Invalid serial number, check the label on your servo.
-  </mat-error>
-</mat-form-field>
+  <button mat-raised-button color="primary" id="add-servo-serial-number-button" (click)="addServo()"
+    [disabled]="!this.servoSerialNumber.value || !this.servoSerialNumber.valid" class="edit-box-contents">
+    Set
+  </button>
 
-<button mat-raised-button color="primary" id="add-servo-serial-number-button" (click)="addServo()"
-  [disabled]="!this.servoSerialNumber.value || !this.servoSerialNumber.valid" class="edit-box-contents">
-  Set
-</button>
-
-<button
-  id="dut-refresh-button"
-  matTooltip="Refresh"
-  mat-icon-button
-  [disabled]="isDutInfoTableEmpty()"
-  (click)="fetchDutDetails()">
-  <mat-icon>refresh</mat-icon>
-</button>
-<mat-divider></mat-divider>
-<div id="dut-detail-table-wrapper">
-  <div id="loading-overlay" *ngIf="isDutInfoTableEmpty()">
+  <button id="dut-refresh-button" matTooltip="Refresh" mat-icon-button [disabled]="isDutInfoTableEmpty()"
+    (click)="fetchDutDetails()">
+    <mat-icon>refresh</mat-icon>
+  </button>
+  <mat-divider></mat-divider>
+  <div id="dut-detail-table-wrapper">
+    <div id="loading-overlay" *ngIf="isDutInfoTableEmpty()">
+    </div>
+    <div id="dut-not-found-label" *ngIf="isDutInfoTableEmpty()">
+      <p>No DUT data fetched.</p>
+    </div>
+    <app-keyval-table #dut_info_table></app-keyval-table>
+    <mat-divider></mat-divider>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <b>Jobs Associated with this DUT</b>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <app-view-jobs #associated_jobs_table manualPopulate=true hideActionBar=true hideFilters=false
+          hideSelectors=true pageSizeOverride=10>
+        </app-view-jobs>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <mat-divider></mat-divider>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <b>DUT Actions History</b>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <app-dut-task-table #dut_task_table></app-dut-task-table>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <mat-divider></mat-divider>
   </div>
-  <div id="dut-not-found-label" *ngIf="isDutInfoTableEmpty()">
-    <p>No DUT data fetched.</p>
-  </div>
-  <app-keyval-table #dut_info_table></app-keyval-table>
-  <mat-divider></mat-divider>
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <b>Jobs Associated with this DUT</b>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <app-view-jobs #associated_jobs_table
-        manualPopulate=true
-        hideActionBar=true
-        hideFilters=false
-        hideSelectors=true
-        pageSizeOverride=10>
-      </app-view-jobs>
-    </mat-expansion-panel>
-  </mat-accordion>
-  <mat-divider></mat-divider>
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <b>DUT Actions History</b>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <app-dut-task-table #dut_task_table></app-dut-task-table>
-    </mat-expansion-panel>
-  </mat-accordion>
-  <mat-divider></mat-divider>
-</div>
 </body>
+
 </html>
