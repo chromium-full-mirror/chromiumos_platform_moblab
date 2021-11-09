@@ -103,6 +103,7 @@ export class ConfigurationComponent
   pauseStatusSubscription: Subscription = null;
 
   faftEnabled = false;
+  pvsEnabled = false;
   panelOpenState = true;
 
   stableBuildVersionLoading = false;
@@ -142,6 +143,7 @@ export class ConfigurationComponent
       this.getResultsRetentionPeriod(),
     ]);
     this.faftEnabled = this.globalInfo.isFeatureEnabled(Feature.FAFT_TESTING);
+    this.pvsEnabled = this.globalInfo.isFeatureEnabled(Feature.PVS_TESTING);
   }
 
   ngOnDestroy(): void {
@@ -577,6 +579,14 @@ export class ConfigurationComponent
       this.globalInfo.enableFeature(Feature.FAFT_TESTING);
     } else {
       this.globalInfo.disableFeature(Feature.FAFT_TESTING);
+    }
+  }
+
+  savePVSSetting(newValue) {
+    if (newValue === true) {
+      this.globalInfo.enableFeature(Feature.PVS_TESTING);
+    } else {
+      this.globalInfo.disableFeature(Feature.PVS_TESTING);
     }
   }
 }

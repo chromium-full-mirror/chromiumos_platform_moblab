@@ -34,6 +34,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
 import {NewUpdateNotifierComponent} from './common/new-update-notifier/new-update-notifier.component';
 import {NewUpdateModule} from '../directives/new-update/new-update.module';
 import {FAFTRunComponent} from './custom-run-suite/faft/faft.component';
+import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import {FAFTRunComponent} from './custom-run-suite/faft/faft.component';
     StorageQualV2Component,
     NewUpdateNotifierComponent,
     FAFTRunComponent,
+    PvsComponent,
   ],
   exports: [
     BasicAutocompleteSelectorComponent,

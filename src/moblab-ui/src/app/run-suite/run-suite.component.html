@@ -5,8 +5,7 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-cts-run
-              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-cts-run (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-cts-run>
           </div>
         </ng-template>
@@ -15,8 +14,7 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-gts-run
-              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-gts-run (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-gts-run>
           </div>
         </ng-template>
@@ -25,8 +23,7 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-memory-qual
-              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-memory-qual (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-memory-qual>
           </div>
         </ng-template>
@@ -35,8 +32,7 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-storage-qual
-              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-storage-qual (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-storage-qual>
           </div>
         </ng-template>
@@ -45,9 +41,17 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-storage-qual-v2
-              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-storage-qual-v2 (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-storage-qual-v2>
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="PVS" *ngIf="isPVSTestEnabled()">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper">
+            <app-loading-overlay></app-loading-overlay>
+            <app-pvs (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            </app-pvs>
           </div>
         </ng-template>
       </mat-tab>
@@ -55,8 +59,7 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-faft
-              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-faft (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-faft>
           </div>
         </ng-template>
@@ -65,8 +68,7 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-run-any-suite
-              (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-run-any-suite (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-run-any-suite>
           </div>
         </ng-template>

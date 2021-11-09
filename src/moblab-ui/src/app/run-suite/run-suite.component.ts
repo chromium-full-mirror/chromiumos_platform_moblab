@@ -51,6 +51,9 @@ export class RunSuiteComponent {
     return this.isTestEnabled(Feature.FAFT_TESTING);
   }
 
+  isPVSTestEnabled() {
+    return this.isTestEnabled(Feature.PVS_TESTING);
+  }
   isTestEnabled(feature: Feature) {
     return this.globalInfo.isFeatureEnabled(feature);
   }

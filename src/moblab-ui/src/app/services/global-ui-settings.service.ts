@@ -28,6 +28,7 @@ export enum Feature {
   DUT_DETAIL,
   FAFT_TESTING,
   ABOUT,
+  PVS_TESTING,
 }
 
 @Injectable()
