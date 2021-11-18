@@ -17,7 +17,6 @@ import {NotificationsService} from 'app/services/notifications.service';
   styleUrls: ['./pvs.component.scss'],
 })
 export class PvsComponent extends BaseSuite implements AfterViewInit {
-  @ViewChild('suiteInput') suiteInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
   public suiteList: string[] = [
@@ -50,14 +49,12 @@ export class PvsComponent extends BaseSuite implements AfterViewInit {
   /** Sets initial form enable/disable states.
    * */
   ngAfterViewInit(): void {
-    this.suiteInput.disable('Please select build.');
     this.changeDetector.detectChanges();
   }
 
   /** Method triggered on change of suite input form.
    * */
   suiteChanged() {
-    this.suiteName = this.suiteInput.getInput();
     this.suiteSelected = this.suiteName ? true : false;
     this.isReadyToRun();
   }
@@ -65,7 +62,6 @@ export class PvsComponent extends BaseSuite implements AfterViewInit {
   /** Method triggered on change of suite input form.
    * */
   suiteDropdownChanged(suiteName: string) {
-    this.suiteInput.disable('Please select build.');
     this.suiteName = suiteName;
 
     this.suiteSelected = this.suiteName ? true : false;
@@ -85,7 +81,6 @@ export class PvsComponent extends BaseSuite implements AfterViewInit {
    * */
   onBuildSetCustom(event) {
     this.buildSelected = true;
-    this.suiteInput.enable();
     this.isReadyToRun();
   }
 
