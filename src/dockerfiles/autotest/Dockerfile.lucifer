@@ -22,7 +22,7 @@ RUN rm -rf lucifer/.git
 FROM ${BASE_REGISTRY_URI}/alpine/git as downloads
 
 WORKDIR /
-RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
+RUN wget https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz
 
 ######################################################################
 
@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 	wget unzip git ca-certificates sed
 
 #Install Go
-RUN tar -xvf go1.14.2.linux-amd64.tar.gz
+RUN tar -xvf go1.17.3.linux-amd64.tar.gz
 RUN mv go /usr/local
 
 COPY --from=source /lucifer /lucifer
@@ -47,18 +47,15 @@ ENV GOROOT=/usr/local/go
 ENV GOPATH=/lucifer
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-RUN sed -i 's#go.opencensus.io/exporter/stackdriver#contrib.go.opencensus.io/exporter/stackdriver#g' lucifer/metrics/metrics.go
-RUN sed -i 's#trace.SetDefaultSampler(trace.AlwaysSample())#//trace.SetDefaultSampler(trace.AlwaysSample())#g' lucifer/metrics/metrics.go
-RUN sed -i 's#c.span.End()#//c.span.End()#g' lucifer/metrics/metrics.go
-RUN sed -i 's#ctx, cl.span = trace.StartSpan(ctx, programName)#//ctx, cl.span = trace.StartSpan(ctx, programName)#g' lucifer/metrics/metrics.go
 
-RUN go get -v go.chromium.org/chromiumos/infra/proto/go/test_platform/side_effects
+RUN git clone https://chromium.googlesource.com/chromiumos/infra/proto
 RUN protoc \
-	--proto_path /lucifer/src/go.chromium.org/chromiumos/infra/proto/src/test_platform/side_effects \
+	--proto_path /lucifer/src/proto/src/test_platform/side_effects \
 	--python_out=/ \
-	/lucifer/src/go.chromium.org/chromiumos/infra/proto/src/test_platform/side_effects/config.proto
-RUN go get -v lucifer/cmd/lucifer
-RUN go build -i -o /usr/bin/lucifer lucifer/cmd/lucifer
+	/lucifer/src/proto/src/test_platform/side_effects/config.proto
+
+WORKDIR /lucifer/src/lucifer 
+RUN go build -o /usr/bin/lucifer ./cmd/lucifer/
 
 ####################################################################
 
