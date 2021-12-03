@@ -61,7 +61,7 @@ def _results_filter_type(config_file_path):
     """Load the results filter configuration."""
     try:
         with open(config_file_path) as config_file:
-            filters = yaml.load(config_file, Loader=yaml.BaseLoader)
+            filters = yaml.safe_load(config_file)
     except (PermissionError, FileNotFoundError) as err:
         raise argparse.ArgumentTypeError(str(err))
 

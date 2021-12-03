@@ -79,7 +79,7 @@ class Scheduler(Constants):
             A map representing the scheduler configuration.
         """
         with open(self.SCHEDULER_CONFIG_PATH) as file:
-            return yaml.load(file, Loader=yaml.FullLoader)
+            return yaml.safe_load(file)
 
     def collect_and_upload(self, msg_type, attr_type):
         """Collects and uploads moblab or duts data at the required frequency.
