@@ -635,7 +635,19 @@ class Dispatcher(object):
         orphans = _drone_manager.get_orphaned_autoserv_processes()
 
         for agent_task in agent_tasks:
-            agent_task.recover()
+            # if we got here - there is a job in running state
+            # but there is no lucifer process that tracks it.
+            # (most likely due to reboot)
+            # The best we can do is to abort the job, this will
+            # let the rest of queued tasks to continue.
+            if not isinstance(agent_task, HostlessQueueTask):
+                hqes = models.HostQueueEntry.objects.filter(
+                    id=agent_task.queue_entries[0].id,
+                    complete=False, aborted=False).all()
+                models.HostQueueEntry.abort_host_queue_entries(hqes)
+            else:
+                agent_task.recover()
+
             if agent_task.monitor and agent_task.monitor.has_process():
                 orphans.discard(agent_task.monitor.get_process())
             self.add_agent_task(agent_task)
