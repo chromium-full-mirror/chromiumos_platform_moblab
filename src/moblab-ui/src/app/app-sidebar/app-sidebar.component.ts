@@ -4,7 +4,7 @@ import {MoblabSettingsService} from 'app/services/moblab-settings.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
 import {BuildTargetAccessService} from 'app/services/build-target-access.service';
 import {Feature} from 'app/services/services.module';
-import {MoblabSettingsConstains} from '../constants';
+import {MoblabSettingsConstains, build_access_request_link} from '../constants';
 import {
   Notification,
   NotificationsService,
@@ -16,14 +16,13 @@ import {
   styleUrls: ['./app-sidebar.component.scss'],
 })
 export class AppSidebarComponent implements OnInit {
+  readonly build_access_request_link = build_access_request_link;
   appErrorMessage = 'This is where error messages go';
 
   // TODO(crbug.com/1111126) Reference actual Dockerfile var for these port numbers
   // (so we don't hardcode these numbers in multiple places)
   mobmonitor_port = '9991';
 
-  build_access_permission_request_link =
-    'https://issuetracker.google.com/issues/new?component=1038089&template=1608353';
   mobmonitor_link = this._format_mobmonitor_link(
     window.location.hostname,
     this.mobmonitor_port

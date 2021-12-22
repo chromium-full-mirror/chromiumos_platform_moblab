@@ -6,6 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 
 import {leadingTrailingWhitespaceValidator} from '../utils/validators';
@@ -14,14 +15,15 @@ import {MoblabConfigurationGrpcService} from '../services/moblab-configuration-g
 import {MoblabSettingsService} from '../services/moblab-settings.service';
 import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
 import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
-import {MoblabSettingsConstains} from '../constants';
+import {StageBuildDialogComponent} from '../manage-duts/stage-build-dialog/stage-build-dialog.component';
+import {MoblabSettingsConstains, build_access_request_link} from '../constants';
 import {NotificationsService} from '../services/notifications.service';
 import {Subscription} from 'rxjs';
 import {
   Feature,
   GlobalInfoService,
 } from 'app/services/global-ui-settings.service';
-import {BuildTargetStableVersion} from './../services/moblab_configuration_rpc_pb';
+import {BuildTargetStableVersion} from '../services/moblab_configuration_rpc_pb';
 
 function gsURLValidator(control) {
   if (!control.value) {
@@ -51,6 +53,9 @@ export class ConfigurationComponent
   implements OnInit, OnDestroy, AfterContentInit {
   @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
   @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
+
+  readonly build_access_request_link = build_access_request_link;
+
   errors = false;
 
   canUpdateCloudConfig = false;
@@ -120,7 +125,8 @@ export class ConfigurationComponent
     private moblabConfigurationRpcService: MoblabConfigurationGrpcService,
     private configSetupService: ConfigSetupService,
     private notificationsService: NotificationsService,
-    private globalInfo: GlobalInfoService
+    private globalInfo: GlobalInfoService,
+    private dialog: MatDialog
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -577,6 +583,18 @@ export class ConfigurationComponent
       this.globalInfo.enableFeature(Feature.FAFT_TESTING);
     } else {
       this.globalInfo.disableFeature(Feature.FAFT_TESTING);
+    }
+  }
+
+  async stageTestBuild() {
+    const dialogRef = this.dialog.open(StageBuildDialogComponent);
+    try {
+      const responseMessage = await dialogRef.afterClosed().toPromise();
+      if (responseMessage) {
+        this.notificationsService.notify(responseMessage);
+      }
+    } catch (error) {
+      this.notificationsService.error(error);
     }
   }
 }

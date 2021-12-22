@@ -141,6 +141,27 @@
   </mat-card-content>
 </mat-card>
 
+<mat-card id="test-runner">
+  <mat-card-header>
+    <mat-card-title>DUT builds access</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-list>
+      <mat-list-item>
+        <span>Copy build to partner bucket for manual operations with images.</span>
+        <button mat-raised-button color="primary" (click)="stageTestBuild()">
+          Copy build
+        </button>
+      </mat-list-item>
+      <mat-list-item>
+        <span>File request to access builds for a board
+          <a href="{{build_access_request_link}}" target="_blank">here.</a>
+        </span>
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
+</mat-card>
+
 <mat-card id="dut-os-version">
   <div class="loading-overlay" *ngIf="stableBuildVersionLoading">
     <div class="loading-spinner-wrapper">

@@ -12,3 +12,6 @@ export enum NewUpdateStatus {
   UPDATE_AVAILABLE,
   UPDATE_AVAILABLE_WITH_JOBS_RUNNING,
 }
+
+export const build_access_request_link =
+'https://issuetracker.google.com/issues/new?component=1038089&template=1608353';
