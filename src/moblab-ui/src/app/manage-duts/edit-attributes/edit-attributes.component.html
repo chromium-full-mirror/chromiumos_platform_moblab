@@ -3,9 +3,15 @@
     <b class="edit-box-contents">Attribute:</b>
     <mat-form-field class="filter edit-box-contents key-form-field" floatLabel="never">
       <input id="attribute-key-input" matInput [formControl]="attribute_key" placeholder='key'>
+      <mat-error *ngIf="this.attribute_key.hasError('leadingTrailingwhitespace')">
+        Leading/trailing spaces will be trimmed on adding.
+      </mat-error>
     </mat-form-field>
     <mat-form-field class="filter edit-box-contents value-form-field" floatLabel="never">
       <input id="attribute-value-input" matInput [formControl]="attribute_value" placeholder='value'>
+      <mat-error *ngIf="this.attribute_value.hasError('leadingTrailingwhitespace')">
+        Leading/trailing spaces will be trimmed on adding.
+      </mat-error>
     </mat-form-field>
 
     <button mat-raised-button color="primary" id="add-attribute-button" (click)="doEdit(addAttribute)"
@@ -22,6 +28,9 @@
     <b class="edit-box-contents"> Pool: </b>
     <mat-form-field class="edit-box-contents filter key-form-field" floatLabel="never">
       <input id="pool-input" matInput [formControl]="pool">
+      <mat-error *ngIf="this.pool.hasError('leadingTrailingwhitespace')">
+        Leading/trailing spaces will be trimmed on adding.
+      </mat-error>
     </mat-form-field>
 
     <button mat-raised-button color="primary" id="add-pool-button" (click)="doEdit(addPool)"
@@ -38,6 +47,9 @@
     <b class="edit-box-contents"> Label: </b>
     <mat-form-field class="edit-box-contents filter key-form-field" floatLabel="never">
       <input id="label-input" matInput [formControl]="label">
+      <mat-error *ngIf="this.label.hasError('leadingTrailingwhitespace')">
+        Leading/trailing spaces will be trimmed on adding.
+      </mat-error>
     </mat-form-field>
 
     <button mat-raised-button color="primary" id="add-label-button" (click)="doEdit(addLabel)"

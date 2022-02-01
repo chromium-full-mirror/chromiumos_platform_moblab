@@ -1,6 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
+import {leadingTrailingWhitespaceValidator} from '../../utils/validators';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
 import {NotificationsService} from 'app/services/notifications.service';
@@ -13,10 +14,18 @@ import {NotificationsService} from 'app/services/notifications.service';
 export class EditAttributesComponent {
   @ViewChild(ViewDutsComponent) dutsTableRef: ViewDutsComponent;
 
-  attribute_key = new FormControl('');
-  attribute_value = new FormControl('');
-  label = new FormControl('');
-  pool = new FormControl('');
+  attribute_key = new FormControl('', {
+    validators: [leadingTrailingWhitespaceValidator],
+  });
+  attribute_value = new FormControl('', {
+    validators: [leadingTrailingWhitespaceValidator],
+  });
+  label = new FormControl('', {
+    validators: [leadingTrailingWhitespaceValidator],
+  });
+  pool = new FormControl('', {
+    validators: [leadingTrailingWhitespaceValidator],
+  });
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
@@ -80,8 +89,8 @@ export class EditAttributesComponent {
         context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
-      context.attribute_key.value,
-      context.attribute_value.value
+      context.attribute_key.value.trim(),
+      context.attribute_value.value.trim()
     );
   }
 
@@ -123,7 +132,7 @@ export class EditAttributesComponent {
         context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
-      context.label.value
+      context.label.value.trim()
     );
   }
 
@@ -171,7 +180,7 @@ export class EditAttributesComponent {
         context.notificationsService.error(message);
       },
       context.dutsTableRef.getSelectedDutHostnames(),
-      context.pool.value
+      context.pool.value.trim()
     );
   }
 
