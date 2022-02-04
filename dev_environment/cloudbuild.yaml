@@ -10,7 +10,7 @@ steps:
     waitFor: ['-']
   - id: node-buster
     name: "docker:19.03.8"
-    args: ["pull", "${_BASE_REGISTRY_URI}/node:15-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:16-buster"]
     waitFor: ['-']
   - id: hadolint
     name: "docker:19.03.8"
@@ -20,7 +20,7 @@ steps:
     name: "docker:19.03.8"
     args: ["pull", "${_BASE_REGISTRY_URI}/bufbuild/buf"]
     waitFor: ['-']
-  
+
   - id: protoc
     name: "docker:19.03.8"
     args:
@@ -37,7 +37,7 @@ steps:
     waitFor:
       - "buster-slim"
 
-  
+
 
   - id: moblab-dev-environment
     name: "docker:19.03.8"

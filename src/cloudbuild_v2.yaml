@@ -84,11 +84,11 @@ steps:
     waitFor: ['-']
   - id: node-buster
     name: "docker:20.10.6"
-    args: ["pull", "${_BASE_REGISTRY_URI}/node:15-buster"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:16-buster"]
     waitFor: ['-']
-  - id: node15
+  - id: node16
     name: "docker:20.10.6"
-    args: ["pull", "${_BASE_REGISTRY_URI}/node:15"]
+    args: ["pull", "${_BASE_REGISTRY_URI}/node:16"]
     waitFor: ['-']
   - id: alpine-edge
     name: "docker:20.10.6"
@@ -649,7 +649,7 @@ steps:
       ]
     waitFor:
       - "protogen-ui"
-      - "node15"
+      - "node16"
       - "nginx-alpine"
       - "moblab-ui-cache"
     env:
@@ -917,7 +917,7 @@ steps:
     env:
       - "DOCKER_BUILDKIT=1"
     waitFor:
-      - "node15"
+      - "node16"
       - "python-3.8-slim"
       - "moblab_common"
       - "mobmonitor-cache"
