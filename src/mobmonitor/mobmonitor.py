@@ -150,7 +150,7 @@ class MobMonitorRoot(object):
         )
         return (
             "Your logs have been uploaded to your Google Cloud bucket "
-            '<a href="https://console.developers.google.com/storage/%s/%s">Link to Logs</a>'
+            '<a href="https://console.developers.google.com/storage/browser/%s/%s">Link to Logs</a>'
             % (conf.get_cloud_bucket(), feedback_dir_path)
         )
 
