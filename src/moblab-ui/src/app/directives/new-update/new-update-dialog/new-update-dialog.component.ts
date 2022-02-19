@@ -24,24 +24,24 @@ const data = {
     title: 'A new update is available!',
     blurb: [
       "There's a new update available for your Moblab.",
-      `To install the update, you will need to "Pause" the Job Scheduler, 
-      and then click on the "Update" button on the Configuration Page.`,
+      `To install the update, you will need to "Pause" the Job Scheduler,
+      and then click on the "Update" button on the About Page.`,
     ],
     cancelLabel: 'NOT NOW',
-    sendLabel: 'GO TO CONFIGURATION',
+    sendLabel: 'GO TO THE ABOUT PAGE',
     showCancelLabelOnly: false,
   },
   [NewUpdateStatus.UPDATE_AVAILABLE_WITH_JOBS_RUNNING]: {
     title: 'A new update is available!',
     blurb: [
-      `There's a new update available for your Moblab but it can only 
+      `There's a new update available for your Moblab but it can only
       be installed once all the running jobs are done.`,
-      `To install the update, you will need to "Pause" the Job Scheduler, 
-      wait for all running jobs to finish, and then click on the 
-      "Update" button on the Configuration Page.`,
+      `To install the update, you will need to "Pause" the Job Scheduler,
+      wait for all running jobs to finish, and then click on the
+      "Update" button on the About Page.`,
     ],
     cancelLabel: 'NOT NOW',
-    sendLabel: 'GO TO CONFIGURATION',
+    sendLabel: 'GO TO THE ABOUT PAGE',
     showCancelLabelOnly: false,
   },
 };
@@ -60,8 +60,8 @@ export class NewUpdateDialogComponent implements OnInit {
   public sendLabel: string = data[this.updateStatus].sendLabel;
   public showCancelLabelOnly: boolean =
     data[this.updateStatus].showCancelLabelOnly;
-  private error = `This error message should never show on screen. 
-                          If it does, please report feedback with detailing 
+  private error = `This error message should never show on screen.
+                          If it does, please report feedback with detailing
                           this error message.`;
 
   constructor(
