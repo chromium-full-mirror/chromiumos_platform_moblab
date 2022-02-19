@@ -29,7 +29,7 @@ export class ViewDutsComponent implements OnInit {
   duts = new MatTableDataSource<ConnectedDutInfo>();
   displayedColumns: string[] = [
     'select',
-    'name',
+    'ip',
     'mac',
     'buildtarget',
     'model',
@@ -61,8 +61,8 @@ export class ViewDutsComponent implements OnInit {
 
   sortingDataAccessor(item, property) {
     switch (property) {
-      case 'name':
-        return item.getName();
+      case 'ip':
+        return item.getIp();
       case 'mac':
         return item.getMacAddr();
       case 'buildtarget':
