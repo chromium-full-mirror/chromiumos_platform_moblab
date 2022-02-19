@@ -60,7 +60,6 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
     this.dutInfoTableRef.loadRows([
       ['DUT', dutInfo.getIp()],
       ['MAC', dutInfo.getMacAddr()],
-      ['Name', dutInfo.getName()],
       ['Status', INT_TO_DUT_STATUS[dutInfo.getStatus()]],
       ['Labels', dutInfo.getLabelsList().toString()],
       ['Attributes', dutInfo.getAttributesList().toString()],
