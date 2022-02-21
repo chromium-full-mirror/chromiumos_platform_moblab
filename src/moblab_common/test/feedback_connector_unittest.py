@@ -43,9 +43,8 @@ class MoblabFeedbackConnectorTest(unittest.TestCase):
         self.assertEqual(r[0], "feedback/4HBWUSIE15646458/2020-01-01_11:11:11")
         self.assertEqual(
             r[1],
-            "https://pantheon.corp.google.com/storage/browser/_details/"
-            "moblab-mock-bucket/feedback/4HBWUSIE15646458/2020-01-01_11:11:11/"
-            "screenshot",
+            "https://pantheon.corp.google.com/storage/browser/"
+            "moblab-mock-bucket/feedback/4HBWUSIE15646458/2020-01-01_11:11:11"
         )
 
 

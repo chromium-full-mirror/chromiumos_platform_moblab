@@ -19,7 +19,7 @@ from moblab_common.utils.cli import CopyFile
 class FeedbackPath:
     FEEDBACK = "feedback"
     SCREENSHOT = "screenshot"
-    GCS_URL = "https://pantheon.corp.google.com/storage/browser/_details"
+    GCS_URL = "https://pantheon.corp.google.com/storage/browser"
 
 
 class MoblabFeedbackConnector(object):
@@ -67,13 +67,16 @@ class MoblabFeedbackConnector(object):
                 base64.b64decode(screenshot), content_type="image/png"
             )
 
+        contact_and_feedback = ""
+        if contact_email:
+            contact_and_feedback += "Contact email: " + contact_email + "\n"
         if feedback:
+            contact_and_feedback += feedback + "\n"
+        if contact_and_feedback:
             feedback_blob = storage.Blob(
                 feedback_dir_path + "/" + FeedbackPath.FEEDBACK, bucket
             )
-            feedback_blob.upload_from_string(
-                "Contact email: " + contact_email + "\n" + feedback
-            )
+            feedback_blob.upload_from_string(contact_and_feedback)
 
         for path, filename in files:
             filename_blob = storage.Blob(
@@ -91,8 +94,6 @@ class MoblabFeedbackConnector(object):
             + moblab_info.get_serial_number()
             + "/"
             + timestamp_str
-            + "/"
-            + FeedbackPath.SCREENSHOT
         )
 
         return feedback_dir_path, url

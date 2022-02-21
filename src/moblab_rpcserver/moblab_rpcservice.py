@@ -126,8 +126,8 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         response = moblabrpc_pb2.SendMoblabScreenshotResponse(
             message=(
-                "Feedback uploaded to bucket {} under {}. "
-                "URL to screenshot: {}"
+                "Thank you! Feedback uploaded to bucket {} under {}. "
+                "URL to feedback: {}"
             ).format(moblab_bucket_name, path, url)
         )
         return response

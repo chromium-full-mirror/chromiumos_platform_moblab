@@ -150,7 +150,11 @@ export class MoblabGrpcService {
     const request = new SendMoblabScreenshotRequest();
     request.setContactEmail(contact_email);
     request.setDescription(description);
-    request.setScreenshot(screenshot.substring(screenshot.indexOf(',') + 1));
+
+    if(screenshot) {
+      // screenshot is optional in the feedback modal
+      request.setScreenshot(screenshot.substring(screenshot.indexOf(',') + 1));
+    }
 
     this.moblabRpcService.send_moblab_screenshot(
       request,
