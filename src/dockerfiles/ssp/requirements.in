@@ -7,7 +7,7 @@ crcmod
 grpcio
 lxml
 mock
-numpy
+numpy==1.16.6
 pip
 protobuf
 pyparsing
@@ -15,3 +15,4 @@ python-dateutil
 setuptools
 wheel
 docker
+chardet
