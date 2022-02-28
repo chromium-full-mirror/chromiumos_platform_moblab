@@ -20,7 +20,7 @@ RUN rm -rf .git
 
 ###############################################################################
 
-FROM ${BASE_REGISTRY_URI}/debian:buster-slim as run
+FROM ${BASE_REGISTRY_URI}/python:3.7-slim-buster as run
 
 WORKDIR /
 
@@ -35,7 +35,8 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     curl \
     gnupg \
     lsb-release \
-    python \
+    python2.7 \
+    python-pip \
     rsync \
     ssh \
     sudo \
@@ -61,8 +62,11 @@ RUN rm -rf /usr/lib/google-cloud-sdk/bin/anthoscli \
 RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py \
     && python2.7 /tmp/get-pip.py --target /usr/lib/python2.7/dist-packages
 COPY requirements.txt .
+COPY requirements_py3.txt .
 RUN python2.7 -m pip install --upgrade --no-cache-dir -r requirements.txt \
     --target /usr/local/lib/python2.7/dist-packages
+
+RUN pip3 install -r requirements_py3.txt
 
 # Java - required for CTS/GTS
 # TODO - see if we can figure out two versions of the SSP and just load the
