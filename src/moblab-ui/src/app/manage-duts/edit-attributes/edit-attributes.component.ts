@@ -1,7 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
-import {leadingTrailingWhitespaceValidator} from '../../utils/validators';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {ViewDutsComponent} from '../view-duts/view-duts.component';
 import {NotificationsService} from 'app/services/notifications.service';
@@ -14,18 +13,10 @@ import {NotificationsService} from 'app/services/notifications.service';
 export class EditAttributesComponent {
   @ViewChild(ViewDutsComponent) dutsTableRef: ViewDutsComponent;
 
-  attribute_key = new FormControl('', {
-    validators: [leadingTrailingWhitespaceValidator],
-  });
-  attribute_value = new FormControl('', {
-    validators: [leadingTrailingWhitespaceValidator],
-  });
-  label = new FormControl('', {
-    validators: [leadingTrailingWhitespaceValidator],
-  });
-  pool = new FormControl('', {
-    validators: [leadingTrailingWhitespaceValidator],
-  });
+  attribute_key = new FormControl('');
+  attribute_value = new FormControl('');
+  label = new FormControl('');
+  pool = new FormControl('');
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
