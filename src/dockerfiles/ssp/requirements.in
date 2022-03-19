@@ -4,7 +4,7 @@
 
 PyYAML
 crcmod
-grpcio
+grpcio==1.40.0
 lxml
 mock
 numpy==1.16.6
