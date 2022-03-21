@@ -245,7 +245,7 @@ async def _run_upload_status_backfill_migration(registry, status_checker):
 
 
 def _is_job_finished(job_status):
-    # SUCCESS = 5
+    # COMPLETE = 5
     # FAILED = 6
     # ABORTED = 7
     return job_status in {5, 6, 8}
