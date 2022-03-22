@@ -641,10 +641,11 @@ class Dispatcher(object):
             # The best we can do is to abort the job, this will
             # let the rest of queued tasks to continue.
             if not isinstance(agent_task, HostlessQueueTask):
-                hqes = models.HostQueueEntry.objects.filter(
-                    id=agent_task.queue_entries[0].id,
-                    complete=False, aborted=False).all()
-                models.HostQueueEntry.abort_host_queue_entries(hqes)
+                if agent_task.queue_entry_ids:
+                    hqes = models.HostQueueEntry.objects.filter(
+                        id=agent_task.queue_entry_ids[0],
+                        complete=False, aborted=False).all()
+                    models.HostQueueEntry.abort_host_queue_entries(hqes)
             else:
                 agent_task.recover()
 
