@@ -41,7 +41,7 @@ AFE_TO_MOBLAB_STATUS_MAPPINGS = {
     "Queued": moblabrpc_pb2.Job.QUEUED,
     "Provisioning": moblabrpc_pb2.Job.PROVISIONING,
     "Running": moblabrpc_pb2.Job.RUNNING,
-    "Completed": moblabrpc_pb2.Job.SUCCESS,
+    "Completed": moblabrpc_pb2.Job.COMPLETE,
     "Failed": moblabrpc_pb2.Job.FAILED,
     "Aborted": moblabrpc_pb2.Job.ABORTED,
     "Starting": moblabrpc_pb2.Job.STARTING,

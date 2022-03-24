@@ -429,7 +429,7 @@ message Job {
     QUEUED = 2;
     PROVISIONING = 3;
     RUNNING = 4;
-    SUCCESS = 5;
+    COMPLETE = 5;
     FAILED = 6;
     TIMED_OUT = 7;
     ABORTED = 8;
