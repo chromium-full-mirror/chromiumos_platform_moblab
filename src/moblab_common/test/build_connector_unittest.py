@@ -27,6 +27,8 @@ class BuildConnectorTest(unittest.TestCase):
         mock_blob_itr = mock.MagicMock()
         if not prefix:
             mock_blob_itr.prefixes = [self.BUILD_TARGET + "-release/"]
+        elif "local" in prefix:
+            mock_blob_itr.prefixes = []
         elif prefix == self.BUILD_TARGET + "-release/R":
             mock_blob_itr.prefixes = [
                 self.BUILD_TARGET + "-release/R" + milestone + delimiter
