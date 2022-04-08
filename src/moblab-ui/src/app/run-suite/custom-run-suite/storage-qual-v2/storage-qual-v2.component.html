@@ -17,6 +17,9 @@
   <app-basic-checkbox #dualNamespace [name]="'Dual-namespace device (optional)'">
   </app-basic-checkbox>
 
+  <app-basic-checkbox #isPreQualified [name]="'Part has been previously qualified (optional)'">
+  </app-basic-checkbox>
+
   <mat-divider></mat-divider>
 
   <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'" [isNumeric]="true" (update)="avlInputChanged()">

@@ -78,6 +78,7 @@ HARDWARE_AVL_PART_NO = "part_id"
 STORAGE_QUAL_DISK_SIZE_GB = "tast_disk_size_gb"
 STORAGE_QUAL_DUAL_NAMESPACE = "tast_storage_slc_qual"
 
+STORAGE_QUAL_BLOCK_TIMEOUT = "tast_stress_block_timeout"
 MOBLAB_DOCKER_REGISTRY = "gcr.io/chromeos-partner-moblab/"
 
 MAX_BUILD_STAGING_SECONDS = 300  # 5 minutes
@@ -346,6 +347,7 @@ class MoblabService(object):
         pool=None,
         disk_size_gb=0,
         is_dual_namespace=False,
+        is_pre_qualified=False,
     ):
         """Starts storage qual suite run. Formats arguments s.t. they can be
         ingested by AFE.
@@ -371,7 +373,9 @@ class MoblabService(object):
             STORAGE_QUAL_DISK_SIZE_GB: disk_size_gb,
             STORAGE_QUAL_DUAL_NAMESPACE: is_dual_namespace,
         }
-
+        # reduce the time block if the component is pre-qualified
+        if is_pre_qualified:
+            avl_args[STORAGE_QUAL_BLOCK_TIMEOUT] = "30m"
         return self.run_suite(
             build_target,
             model,

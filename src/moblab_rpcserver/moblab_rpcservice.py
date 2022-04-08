@@ -309,6 +309,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 request.pool,
                 request.disk_size_gb,
                 request.is_dual_namespace,
+                request.is_pre_qualified,
             )
         )
 

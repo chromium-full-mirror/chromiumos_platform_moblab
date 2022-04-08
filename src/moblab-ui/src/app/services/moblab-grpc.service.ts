@@ -151,7 +151,7 @@ export class MoblabGrpcService {
     request.setContactEmail(contact_email);
     request.setDescription(description);
 
-    if(screenshot) {
+    if (screenshot) {
       // screenshot is optional in the feedback modal
       request.setScreenshot(screenshot.substring(screenshot.indexOf(',') + 1));
     }
@@ -328,7 +328,8 @@ export class MoblabGrpcService {
     avl_part_number: string,
     variation: number,
     disk_size_gb: number,
-    dual_namespace: boolean
+    dual_namespace: boolean,
+    is_pre_qualified: boolean
   ) {
     const request = new RunStorageQualificationSuiteRequest();
     request.setBuildVersion(build);
@@ -341,6 +342,7 @@ export class MoblabGrpcService {
     request.setVariation(variation);
     request.setDiskSizeGb(disk_size_gb);
     request.setIsDualNamespace(dual_namespace);
+    request.setIsPreQualified(is_pre_qualified);
 
     this.moblabRpcService.run_storage_qualification_suite(
       request,

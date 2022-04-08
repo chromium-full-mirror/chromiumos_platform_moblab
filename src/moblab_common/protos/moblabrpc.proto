@@ -154,7 +154,7 @@ message RunGtsSuiteRequest {
   repeated string specific_modules = 6;
 }
 
-// NEXT_TAG = 11;
+// NEXT_TAG = 12;
 message RunStorageQualificationSuiteRequest {
   // NEXT_TAG = 8;
   enum Variation {
@@ -178,6 +178,7 @@ message RunStorageQualificationSuiteRequest {
   Variation variation = 8;
   int32 disk_size_gb = 9;
   bool is_dual_namespace = 10;
+  bool is_pre_qualified = 11;
 }
 
 // NEXT_TAG = 8

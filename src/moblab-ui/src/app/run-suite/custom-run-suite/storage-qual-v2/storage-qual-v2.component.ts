@@ -26,6 +26,7 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
   @ViewChild('diskSizeInput') diskSizeInput;
   @ViewChild('suiteSelector') suiteSelector;
   @ViewChild('dualNamespace') dualNamespace;
+  @ViewChild('isPreQualified') isPreQualified;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
   readonly suiteOptions = [
@@ -61,6 +62,7 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
     this.diskSizeInput.enable();
     this.suiteSelector.enable();
     this.dualNamespace.enable();
+    this.isPreQualified.enable();
   }
 
   diskInputChanged() {
@@ -99,6 +101,7 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
     this.diskSizeInput.disable('Please select build.');
     this.suiteSelector.disable('Please select build.');
     this.dualNamespace.disable('Please select build.');
+    this.isPreQualified.disable('Please select build.');
   }
 
   /** Method triggered on run-suite button press. Invokes
@@ -125,7 +128,8 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
       this.suiteIndex +
         Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2),
       this.diskSizeInput.getInput(),
-      this.dualNamespace.getChecked()
+      this.dualNamespace.getChecked(),
+      this.isPreQualified.getChecked()
     );
   }
 }

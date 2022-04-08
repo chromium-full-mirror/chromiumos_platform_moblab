@@ -105,7 +105,8 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
       this.partNumberInput.getInput(),
       this.variationSelection,
       0, // Disk size in GB.
-      false // Test dual namespace devices.
+      false, // Test dual namespace devices.
+      false // this feature is not available in v1 version of storage_qual
     );
   }
 
