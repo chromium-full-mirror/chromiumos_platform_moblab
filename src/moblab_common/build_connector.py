@@ -88,7 +88,7 @@ class MoblabBuildConnector(object):
         builds = [build[len(prefix) : -1] for build in builds]
         builds.sort(key=lambda x: x)
         # local builds are advised to be kept in separate folder
-        # {board}-local-build/*
+        # {board}-local/*
         local_prefix = "%s-local/%s-" % (board, "R%s" % milestone)
         local_builds = self._get_partial_object_path(local_prefix, "/")
         local_builds = [

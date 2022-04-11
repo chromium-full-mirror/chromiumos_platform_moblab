@@ -280,6 +280,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             variation: RunStorageQualificationSuiteRequest.Variation
             disk_size_gb: Size of main storage disk (in whole GB).
             is_dual_namespace: Dual-namespace test requested.
+            is_pre_qualified: Has the component been previously qualified.
           _context: grpc.server.Context
         Returns:
           RunSuiteResponse object with a string result message.

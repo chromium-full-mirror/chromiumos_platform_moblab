@@ -77,8 +77,8 @@ HARDWARE_AVL_PART_NO = "part_id"
 
 STORAGE_QUAL_DISK_SIZE_GB = "tast_disk_size_gb"
 STORAGE_QUAL_DUAL_NAMESPACE = "tast_storage_slc_qual"
-
 STORAGE_QUAL_BLOCK_TIMEOUT = "tast_stress_block_timeout"
+
 MOBLAB_DOCKER_REGISTRY = "gcr.io/chromeos-partner-moblab/"
 
 MAX_BUILD_STAGING_SECONDS = 300  # 5 minutes
@@ -364,6 +364,7 @@ class MoblabService(object):
             pool: String identifier for which pool of DUT's to run tests with.
             disk_size_gb: Size of main storage disk (in whole GB).
             is_dual_namespace: Dual-namespace test requested.
+            is_pre_qualified: Has the component been previously qualified.
         Returns:
           String response message.
         """
