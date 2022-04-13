@@ -30,7 +30,7 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
     'bvt-cq',
     'bvt-inline',
     'bvt-tast-cq',
-    'usb-camera',
+    'camera-usb-qual',
     'wifi_matfunc',
     'wifi_perf',
     'labqual',
