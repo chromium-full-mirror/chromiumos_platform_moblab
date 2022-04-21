@@ -58,10 +58,6 @@ RUN echo \
 RUN rm -rf /usr/lib/google-cloud-sdk/bin/anthoscli \
     /usr/lib/google-cloud-sdk/bin/kuberun
 
-# Point /usr/bin/python3 to usr/local/bin/python3. See b/191884161
-RUN sudo rm /usr/bin/python3*; exit 0
-RUN sudo ln -s /usr/local/bin/python3 /usr/bin/python3
-
 # Install the official pip
 RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py \
     && python2.7 /tmp/get-pip.py --target /usr/lib/python2.7/dist-packages
@@ -71,6 +67,10 @@ RUN python2.7 -m pip install --upgrade --no-cache-dir -r requirements.txt \
     --target /usr/local/lib/python2.7/dist-packages
 
 RUN pip3 install -r requirements_py3.txt
+
+# Point /usr/bin/python3 to /usr/local/bin/python3. See b/191884161
+RUN sudo rm /usr/bin/python3*; exit 0
+RUN sudo ln -s /usr/local/bin/python3 /usr/bin/python3
 
 # Java - required for CTS/GTS
 # TODO - see if we can figure out two versions of the SSP and just load the
