@@ -4,7 +4,10 @@
 
 # NOTE 1: This script requires board as a parameter
 # NOTE 2: The second parameter is additional user_tag for the output
-
+#
+# EXAMPLE USAGE: 
+# ./construct_local_build_artifacts.sh board_name additional_tag
+#
 # NOTE 3: This script is a general guidance for
 # the user on the steps to be followed
 # and might have to be tweaked as per user settings.
