@@ -78,6 +78,7 @@ HARDWARE_AVL_PART_NO = "part_id"
 STORAGE_QUAL_DISK_SIZE_GB = "tast_disk_size_gb"
 STORAGE_QUAL_DUAL_NAMESPACE = "tast_storage_slc_qual"
 STORAGE_QUAL_BLOCK_TIMEOUT = "tast_stress_block_timeout"
+STORAGE_QUAL_FOLLOW_UP = "tast_followup_qual"
 
 MOBLAB_DOCKER_REGISTRY = "gcr.io/chromeos-partner-moblab/"
 
@@ -374,9 +375,12 @@ class MoblabService(object):
             STORAGE_QUAL_DISK_SIZE_GB: disk_size_gb,
             STORAGE_QUAL_DUAL_NAMESPACE: is_dual_namespace,
         }
-        # reduce the time block if the component is pre-qualified
+        # reduce the time block and specify to tast that it is follow up
+        # if the component is pre-qualified
         if is_pre_qualified:
             avl_args[STORAGE_QUAL_BLOCK_TIMEOUT] = "30m"
+            avl_args[STORAGE_QUAL_FOLLOW_UP] = True
+
         return self.run_suite(
             build_target,
             model,
