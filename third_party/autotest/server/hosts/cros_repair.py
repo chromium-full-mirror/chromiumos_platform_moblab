@@ -1985,7 +1985,7 @@ class ECTypeVerifier(hosts.Verifier):
     @timeout_util.TimeoutDecorator(cros_constants.VERIFY_TIMEOUT_SEC)
     def verify(self, host):
         result = host.run(
-            "test -f /dev/cros_ec", ignore_status=True
+            "test -c /dev/cros_ec", ignore_status=True
         ).exit_status
         if result == 0:
             host_info = host.host_info_store.get()
