@@ -28,7 +28,7 @@ from autotest_lib.client.bin import test
 mytest = test.test(job, '', %r)
 job.sysinfo.log_before_each_test(mytest)
 sysinfo_pickle = os.path.join(mytest.outputdir, 'sysinfo.pickle')
-pickle.dump(job.sysinfo, open(sysinfo_pickle, 'w'))
+pickle.dump(job.sysinfo, open(sysinfo_pickle, 'wb'))
 job.record('GOOD', '', 'sysinfo.before')
 """
 
@@ -60,7 +60,7 @@ if os.path.exists(sysinfo_pickle):
     job.sysinfo = pickle.load(open(sysinfo_pickle))
     job.sysinfo.__init__(job.resultdir)
 job.sysinfo.%s(mytest, iteration=%d)
-pickle.dump(job.sysinfo, open(sysinfo_pickle, 'w'))
+pickle.dump(job.sysinfo, open(sysinfo_pickle, 'wb'))
 job.record('GOOD', '', 'sysinfo.iteration.%s')
 """
 
