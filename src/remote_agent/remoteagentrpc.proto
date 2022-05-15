@@ -43,7 +43,7 @@ message NetworkStats {
   optional uint32 broken_connections = 4;
 }
 
-// NEXT TAG: 13
+// NEXT TAG: 14
 message MoblabHost {
   string moblab_host_id = 1;
   string moblab_install_id = 2;
@@ -59,9 +59,10 @@ message MoblabHost {
   // Average CPU temperature for 30 minutes.
   // In degree Celsius.
   optional float cpu_temperature = 12;
+  optional string moblab_release_version = 13;
 }
 
-// NEXT TAG: 13
+// NEXT TAG: 14
 message MoblabDut {
   string moblab_host_id = 1;
   string moblab_install_id = 2;
@@ -75,4 +76,5 @@ message MoblabDut {
   optional bool is_locked = 10;
   optional string lock_reason = 11;
   optional uint64 last_update_time = 12; // in millisecond
+  optional string moblab_release_version = 13;
 }
