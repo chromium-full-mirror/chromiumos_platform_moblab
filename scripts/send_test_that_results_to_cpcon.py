@@ -49,6 +49,8 @@ AUTOTEST_DIR = "/mnt/host/source/src/third_party/autotest/files/"
 DEFAULT_SUITE_NAME = "default_suite"
 SUITE_NAME_REGEX = "Fetching suite for suite named (.+?)\.\.\."
 DEBUG_FILE_PATH = "debug/test_that.DEBUG"
+IGNORED_TEST_NAMES = ["CLIENT_JOB.0", "SERVER_JOB"]
+LABEL_REGEX = r"(.*)results-\d*-(.*)"
 
 
 def parse_arguments(argv):
@@ -160,7 +162,10 @@ def parse_test_job(test_dir, job_keyval, job_id, suite):
 
     job = parser.make_job(test_dir)
     job.tests = _get_job_tests(parser, job, status_log_path)
-
+    if job.label == None:
+        match = re.match(LABEL_REGEX, test_dir)
+        job.label = "chroot/" + match.group(2)
+            
     # The job id and suite name are necessary for CPCon pipeline. Since
     # non-moblab test results don't have these fields, the values here are fake.
     # Set a different afe_paren_job_id so that the test won't be regarded as a
