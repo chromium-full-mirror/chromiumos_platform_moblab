@@ -114,7 +114,8 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
         environment=[
             "MOBLAB=1",
             "LABEL=%s" % label,
-            "REGISTRY_URI=%s" % registry
+            "REGISTRY_URI=%s" % registry,
+            "DOCKER_DEFAULT_NETWORK=default_moblab"
         ]
 
     )
