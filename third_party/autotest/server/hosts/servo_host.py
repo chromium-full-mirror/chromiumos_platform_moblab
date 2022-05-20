@@ -602,9 +602,10 @@ class ServoHost(base_servohost.BaseServoHost):
             logging.info("Cleanup of non functional container.")
             self.stop_servod()
 
-        label = os.environ.get("LABEL", "release")
+        # TODO(b/233816446): Configure these env vars as EXTRA_ARGS in common.mk  
+        label = os.environ.get("SERVOD_CONTAINER_LABEL", "release")
         registry = os.environ.get(
-            "REGISTRY_URI", "us-docker.pkg.dev/chromeos-partner-moblab/common-core"
+            "SERVOD_REGISTRY_URI", "us-docker.pkg.dev/chromeos-partner-moblab/common-core"
         )
         image = "%s/servod:%s" % (registry, label)
         logging.info("Servo container image: %s", image)
