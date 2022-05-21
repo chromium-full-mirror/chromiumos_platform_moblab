@@ -60,6 +60,7 @@ class CollectService(Constants):
         self.moblab_host_id = None
         self.moblab_install_id = None
         self.bucket_name = None
+        self.moblab_release_version = None
 
     # TODO(chromium:1116710):Rewrite unit test for this function because the way of getting
     # cloud bucket name is changed.
@@ -97,11 +98,15 @@ class CollectService(Constants):
             self.moblab_install_id = self.moblab_version_info[
                 MoblabConstants.MOBLAB_INSTALL_ID_NAME
             ].rstrip()
+            self.moblab_release_version = self.moblab_version_info[
+                MoblabConstants.MOBLAB_RELEASE_VERSION
+            ].rstrip()
             _LOGGER.info(
                 "Successfully collected moblab host id: %s, moblab "
-                "install id: %s and moblab version info: %s",
+                "install id: %s and moblab release version %s from moblab version info: %s",
                 self.moblab_host_id,
                 self.moblab_install_id,
+                self.moblab_release_version,
                 self.moblab_version_info,
             )
             return True
@@ -119,6 +124,7 @@ class CollectService(Constants):
         if None in (
             self.moblab_host_id,
             self.moblab_install_id,
+            self.moblab_release_version,
             self.bucket_name,
         ):
             err_msg_1 = (
@@ -127,13 +133,19 @@ class CollectService(Constants):
             err_msg_2 = (
                 " moblab_install_id" if self.moblab_install_id is None else ""
             )
-            err_msg_3 = " bucket_name" if self.bucket_name is None else ""
+            err_msg_3 = (
+                " moblab_release_version"
+                if self.moblab_release_version is None
+                else ""
+            )
+            err_msg_4 = " bucket_name" if self.bucket_name is None else ""
             _LOGGER.exception(
                 "Failed to initiate moblab message because"
-                "%s%s%s is/are none.",
+                "%s%s%s%s is/are none.",
                 err_msg_1,
                 err_msg_2,
                 err_msg_3,
+                err_msg_4,
             )
             return None
 
@@ -141,6 +153,7 @@ class CollectService(Constants):
         moblab.moblab_host_id = self.moblab_host_id
         moblab.moblab_install_id = self.moblab_install_id
         moblab.bucket_name = self.bucket_name
+        moblab.moblab_release_version = self.moblab_release_version
         return moblab
 
     def create_moblab_basic_message(self):
@@ -335,18 +348,26 @@ class CollectService(Constants):
             err_msg_2 = (
                 " moblab_install_id" if self.moblab_install_id is None else ""
             )
-            err_msg_3 = " bucket_name" if self.bucket_name is None else ""
+            err_msg_3 = (
+                " moblab_release_version"
+                if self.moblab_release_version is None
+                else ""
+            )
+            err_msg_4 = " bucket_name" if self.bucket_name is None else ""
             _LOGGER.exception(
-                "Failed to initiate dut message because" "%s%s%s is/are none.",
+                "Failed to initiate dut message because"
+                "%s%s%s%s is/are none.",
                 err_msg_1,
                 err_msg_2,
                 err_msg_3,
+                err_msg_4,
             )
             return None
 
         moblab_dut = remoteagentrpc_pb2.MoblabDut()
         moblab_dut.moblab_host_id = self.moblab_host_id
         moblab_dut.moblab_install_id = self.moblab_install_id
+        moblab_dut.moblab_release_version = self.moblab_release_version
         moblab_dut.ip_address = dut_ip
         moblab_dut.bucket_name = self.bucket_name
         return moblab_dut
