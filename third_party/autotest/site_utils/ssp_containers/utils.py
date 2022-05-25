@@ -81,6 +81,8 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
     """
     label = os.environ.get('LABEL', 'release')
     registry = os.environ.get('REGISTRY_URI', 'gcr.io/chromeos-partner-moblab')
+    servod_label = os.environ.get('SERVOD_CONTAINER_LABEL', 'release')
+    servod_registry = os.environ.get('SERVOD_REGISTRY_URI', 'us-docker.pkg.dev/chromeos-partner-moblab/common-core')
     client = docker.from_env(timeout=300)
     image = "%s/moblab-ssp:%s" % (registry, label)
     logging.info("Image %s", image)
@@ -114,7 +116,8 @@ def clone(ssp_container_path, src_name, new_path, dst_name, snapshot, hostname):
         environment=[
             "MOBLAB=1",
             "LABEL=%s" % label,
-            "REGISTRY_URI=%s" % registry,
+            "REGISTRY_URI=%s" % servod_registry,
+            "SERVOD_CONTAINER_LABEL=%s" % servod_label,
             "DOCKER_DEFAULT_NETWORK=default_moblab"
         ]
 
