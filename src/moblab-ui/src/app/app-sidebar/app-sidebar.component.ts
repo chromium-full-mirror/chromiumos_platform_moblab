@@ -5,6 +5,7 @@ import {ConfigSetupService} from '../services/moblab-configuration-alerting.serv
 import {BuildTargetAccessService} from 'app/services/build-target-access.service';
 import {Feature} from 'app/services/services.module';
 import {MoblabSettingsConstains, build_access_request_link} from '../constants';
+import {MoblabRebootCheckService} from '../services/moblab-reboot-check.service';
 import {
   Notification,
   NotificationsService,
@@ -35,13 +36,15 @@ export class AppSidebarComponent implements OnInit {
   cloudConfigError: boolean;
   notificationsList: Notification[] = [];
   modelsWithoutAccess: string[] = [];
+  moblabUptime: string;
 
   constructor(
     private globalInfo: GlobalInfoService,
     private settingsService: MoblabSettingsService,
     private configSetupService: ConfigSetupService,
     private notificationsService: NotificationsService,
-    private buildTargetAccessService: BuildTargetAccessService
+    private buildTargetAccessService: BuildTargetAccessService,
+    private rebootCheckService: MoblabRebootCheckService
   ) {
     this.addSidebarEntry(Feature.DUT_MANAGEMENT, this.navTabs, {
       route: '/manage_dut',
@@ -148,6 +151,17 @@ export class AppSidebarComponent implements OnInit {
     this.buildTargetAccessService.modelsWithoutAccessObservable.subscribe(
       models => {
         this.modelsWithoutAccess = models;
+      }
+    );
+    this.rebootCheckService.getMoblabUptime().then(
+      uptime => {
+        this.moblabUptime = uptime;
+      },
+      (errorMsg: string) => {
+        console.log(
+          'Encountered failure getting moblab timing info. ',
+          errorMsg
+        );
       }
     );
   }

@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
+import {MoblabRebootCheckService} from 'app/services/moblab-reboot-check.service';
 
 @Component({
   selector: 'app-about',
@@ -18,9 +19,13 @@ export class AboutComponent implements OnInit {
   moblabMacAddress = '';
   isConnectedToInternet = false;
 
+  moblabStartTime = '';
   moblabCpuTemperature = 0.0;
 
-  constructor(private moblabRpcService: MoblabGrpcService) {}
+  constructor(
+    private moblabRpcService: MoblabGrpcService,
+    private rebootCheckService: MoblabRebootCheckService
+  ) {}
 
   ngOnInit(): void {
     this.getVersionInfo();
@@ -89,6 +94,17 @@ export class AboutComponent implements OnInit {
   }
 
   getSystemInfo() {
+    this.rebootCheckService.getMoblabStartTime().then(
+      startTime => {
+        this.moblabStartTime = startTime;
+      },
+      (errorMsg: string) => {
+        console.log(
+          'Encountered failure getting moblab timing info. ',
+          errorMsg
+        );
+      }
+    );
     this.moblabRpcService.get_system_info(
       (cpu_temperature: number) => {
         // Restrict the temperature value to 2 decimal points only.

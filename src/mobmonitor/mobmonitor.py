@@ -6,7 +6,10 @@
 
 """The Mob* Monitor web interface."""
 
+from datetime import datetime
+from datetime import timedelta
 import cherrypy
+import docker
 import json
 import os
 import sys
@@ -59,6 +62,39 @@ class MobMonitorRoot(object):
           A list of the monitored services.
         """
         return json.dumps(self.checkfile_manager.GetServiceList())
+
+    @cherrypy.expose
+    def GetMoblabStartTime(self):
+        """Returns moblab startTime and uptime information in a displayable format"""
+        client = docker.APIClient()
+        container = client.inspect_container("moblab-rpcserver")
+        timestamp = container.get("State").get("StartedAt").split(".")[0]
+        startTime = timestamp.replace("T", " ")
+        uptime = self.formatTimeDelta(
+            datetime.now() - datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
+        )
+        return json.dumps(
+            {"startTime": startTime, "uptime": "Moblab Start Time: " + uptime}
+        )
+
+    def formatTimeDelta(self, delta):
+        """Formats timeDelta object for display
+
+        Returns:
+            A string (X days/hours/minutes ago) that represents how long the moblab as been continuously running
+        """
+        timeMap = {"day": 86400, "hour": 3600, "minute": 60}
+        totalSeconds = delta.total_seconds()
+        if totalSeconds > timeMap["day"]:
+            count = totalSeconds // timeMap["day"]
+            return str(count).split(".")[0] + " day(s) ago"
+        if totalSeconds > timeMap["hour"]:
+            count = totalSeconds // timeMap["hour"]
+            return str(count).split(".")[0] + " hour(s) ago"
+        if totalSeconds > timeMap["minute"]:
+            count = totalSeconds // timeMap["minute"]
+            return str(count).split(".")[0] + " minute(s) ago"
+        return "less than a minute ago"
 
     @cherrypy.expose
     def GetStatus(self, service=None):
