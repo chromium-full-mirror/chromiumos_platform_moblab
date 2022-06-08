@@ -21,7 +21,7 @@ import {
   HostListener,
   Renderer2,
 } from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {FormControl, Validators} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 
 import {Feedback} from '../entity/feedback';
@@ -95,6 +95,15 @@ export class FeedbackDialogComponent implements AfterViewInit {
     this.feedback.description = '';
     this.feedback.contactEmail = '';
     this.vars = this.feedbackService.initialVariables;
+  }
+
+  ngOnInit() {
+    this.emailFormControl
+    	.setValidators([
+	  // Regex source is from https://www.regular-expressions.info/email.html
+	  Validators.pattern(/[a-z0-9!#$%&'*+/=?^_<E2><80><98>{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_<E2><80><98>{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/),
+	  Validators.required,
+	]);
   }
 
   public ngAfterViewInit() {
