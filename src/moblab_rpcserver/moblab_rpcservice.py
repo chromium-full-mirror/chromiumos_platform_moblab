@@ -513,15 +513,18 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
-    def list_pools(self, _request, _context):
+    def list_pools(self, request, _context):
         afe_hosts = self.afe_connector.get_connected_devices()
         pools = set()
+        model = request.model
+
         for host in afe_hosts:
-            pools = pools.union(
-                moblab_service.LabelsParser.extract_pool_from_labels(
-                    host.get("labels", [])
-                )
-            )
+            labels = host.get('labels', [])
+            dut_model = moblab_service.LabelsParser.extract_model_from_labels(labels)
+            if model == "" or model.lower() == dut_model.lower():
+                pool_names = moblab_service.LabelsParser.extract_pool_from_labels(labels)
+                pools = pools.union(pool_names)
+
         response = moblabrpc_pb2.ListPoolsResponse(pools=list(pools))
         return response
 

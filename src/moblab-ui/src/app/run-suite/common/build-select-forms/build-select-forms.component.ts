@@ -220,11 +220,11 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     if (!this.hidePoolSelector) {
       this.poolSelector.enable();
     }
-    this.buildChanged(this.getBuildFormattedString(), this.buildTargetName);
+    this.buildChanged(this.getBuildFormattedString(), this.selectedModel);
     this.emitBuildSelections();
   }
 
-  buildChanged(build: string, board: string) {
+  buildChanged(build: string, model: string) {
     if (build) {
       this.selectedBuild = build;
       if (this.hidePoolSelector) {
@@ -236,7 +236,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
         },
         (error_msg: string) => {
           this.setErrorReason(this.poolSelector, error_msg);
-        }
+        },
+	model,
       );
     }
   }

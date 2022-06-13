@@ -333,6 +333,7 @@ message ListAccessibleModelsResponse {
 }
 
 message ListPoolsRequest {
+  string model = 1;
 }
 
 // NEXT_TAG = 2

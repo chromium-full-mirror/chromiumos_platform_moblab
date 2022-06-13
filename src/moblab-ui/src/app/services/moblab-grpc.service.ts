@@ -929,9 +929,11 @@ export class MoblabGrpcService {
 
   listPools(
     callback: (x: string[]) => void,
-    errorHandlingCallback: (err_msg: string) => void
+    errorHandlingCallback: (err_msg: string) => void,
+    model: string | null,
   ) {
     const request = new ListPoolsRequest();
+    request.setModel((model == null) ? "" : model)
 
     this.moblabRpcService.list_pools(
       request,
