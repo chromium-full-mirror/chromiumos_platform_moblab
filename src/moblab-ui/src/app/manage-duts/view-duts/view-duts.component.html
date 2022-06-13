@@ -54,12 +54,12 @@
     </ng-container>
 
     <ng-container matColumnDef="pools">
-      <th class="m-column" mat-header-cell mat-sort-header *matHeaderCellDef>Pools</th>
+      <th class="m-column" mat-header-cell *matHeaderCellDef>Pools</th>
       <td mat-cell *matCellDef="let element">{{element.getPoolsList()}}</td>
     </ng-container>
 
     <ng-container matColumnDef="labels">
-      <th class="xl-column" mat-header-cell mat-sort-header *matHeaderCellDef>Labels/Attributes</th>
+      <th class="xl-column" mat-header-cell *matHeaderCellDef>Labels/Attributes</th>
       <td mat-cell *matCellDef="let element">
         <mat-chip-list>
           <mat-chip class="label-mat-chip" *ngFor="let label of element.getLabelsList()">

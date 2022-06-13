@@ -50,6 +50,8 @@ export class ViewDutsComponent implements OnInit {
   selection = new SelectionModel<ConnectedDutInfo>(true, []);
   buildTargets: string[] = [];
 
+  @ViewChild(MatSort, {}) matSort: MatSort;
+  
   constructor(
     public moblabGrpcService: MoblabGrpcService,
     public dialog: MatDialog,
@@ -57,7 +59,6 @@ export class ViewDutsComponent implements OnInit {
     private buildTargetAccessService: BuildTargetAccessService
   ) {}
 
-  @ViewChild(MatSort, {}) sort: MatSort;
 
   sortingDataAccessor(item, property) {
     switch (property) {
@@ -85,6 +86,8 @@ export class ViewDutsComponent implements OnInit {
 
   assignDuts(duts: ConnectedDutInfo[]) {
     this.duts = new MatTableDataSource<ConnectedDutInfo>(duts);
+    this.duts.sortingDataAccessor = this.sortingDataAccessor;
+    this.duts.sort = this.matSort;
   }
 
   getConnectedDuts() {
