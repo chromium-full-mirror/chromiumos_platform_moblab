@@ -74,7 +74,7 @@ class MobMonitorRoot(object):
             datetime.now() - datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
         )
         return json.dumps(
-            {"startTime": startTime, "uptime": "Moblab Start Time: " + uptime}
+            {"startTime": startTime, "uptime": "Moblab Up Time: " + uptime}
         )
 
     def formatTimeDelta(self, delta):
