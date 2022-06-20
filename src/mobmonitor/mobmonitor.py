@@ -7,7 +7,8 @@
 """The Mob* Monitor web interface."""
 
 from datetime import datetime
-from datetime import timedelta
+import dateutil.parser
+import math
 import cherrypy
 import docker
 import json
@@ -69,13 +70,13 @@ class MobMonitorRoot(object):
         client = docker.APIClient()
         container = client.inspect_container("moblab-rpcserver")
         timestamp = container.get("State").get("StartedAt").split(".")[0]
-        startTime = timestamp.replace("T", " ")
-        uptime = self.formatTimeDelta(
-            datetime.now() - datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
+        formattedTimestamp = dateutil.parser.parse(timestamp + "+00:00")
+        uptime = "Moblab Uptime: " + self.formatTimeDelta(
+            datetime.now(formattedTimestamp.tzinfo) - formattedTimestamp
         )
-        return json.dumps(
-            {"startTime": startTime, "uptime": "Moblab Up Time: " + uptime}
-        )
+        startTime = timestamp.replace("T", " ") + " UTC"
+
+        return json.dumps({"startTime": startTime, "uptime": uptime})
 
     def formatTimeDelta(self, delta):
         """Formats timeDelta object for display
@@ -83,18 +84,21 @@ class MobMonitorRoot(object):
         Returns:
             A string (X days/hours/minutes ago) that represents how long the moblab as been continuously running
         """
-        timeMap = {"day": 86400, "hour": 3600, "minute": 60}
-        totalSeconds = delta.total_seconds()
-        if totalSeconds > timeMap["day"]:
-            count = totalSeconds // timeMap["day"]
-            return str(count).split(".")[0] + " day(s) ago"
-        if totalSeconds > timeMap["hour"]:
-            count = totalSeconds // timeMap["hour"]
-            return str(count).split(".")[0] + " hour(s) ago"
-        if totalSeconds > timeMap["minute"]:
-            count = totalSeconds // timeMap["minute"]
-            return str(count).split(".")[0] + " minute(s) ago"
-        return "less than a minute ago"
+        days, remainder = divmod(delta.total_seconds(), 86400)  # Get Day
+        hours, remainder = divmod(remainder, 3600)  # Get Hour
+        minutes, seconds = divmod(remainder, 60)  # Get Minute & Second
+        # if less than 2 days show in hours
+        if days == 1:
+            hours += 24
+            days = 0
+
+        if days:
+            return str(math.trunc(days)) + "day(s)"
+        if hours:
+            return str(math.trunc(hours)) + " hour(s)"
+        if minutes:
+            return str(math.trunc(minutes)) + " minute(s)"
+        return "less than a minute"
 
     @cherrypy.expose
     def GetStatus(self, service=None):
