@@ -102,6 +102,8 @@ pycparser==2.20
     # via cffi
 pyparsing==2.4.7
     # via packaging
+python-dateutil==2.8.2
+    # via -r requirements.in
 python-nmap==0.6.4
     # via -r requirements.in
 pytz==2021.1
