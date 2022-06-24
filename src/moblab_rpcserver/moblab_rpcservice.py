@@ -379,27 +379,27 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def _get_connected_dut_from_dict(self, dut_dict):
         return moblabrpc_pb2.ConnectedDutInfo(
-            name=dut_dict.get("platform", ""),
-            ip=dut_dict.get("hostname", ""),
-            mac_addr=dut_dict.get("mac", ""),
-            model=moblab_service.LabelsParser.extract_model_from_labels(
+            name = dut_dict.get("platform", ""),
+            ip = dut_dict.get("hostname", ""),
+            mac_addr = dut_dict.get("mac", ""),
+            model = moblab_service.LabelsParser.extract_model_from_labels(
                 dut_dict.get("labels", [])
             ),
-            build_target=moblab_service.LabelsParser.extract_build_target_from_labels(
+            build_target = moblab_service.LabelsParser.extract_build_target_from_labels(
                 dut_dict.get("labels", [])
             ),
-            pools=moblab_service.LabelsParser.extract_pool_from_labels(
+            pools = sorted(moblab_service.LabelsParser.extract_pool_from_labels(
                 dut_dict.get("labels", [])
-            ),
-            status=AFE_TO_DUT_STATUS_MAPPINGS[dut_dict["status"]],
-            is_enrolled=dut_dict.get("enrolled", False),
-            is_connected=dut_dict.get("isConnected", True),
-            labels=dut_dict.get("labels", []),
-            attributes=[
+            )),
+            status = AFE_TO_DUT_STATUS_MAPPINGS[dut_dict["status"]],
+            is_enrolled = dut_dict.get("enrolled", False),
+            is_connected = dut_dict.get("isConnected", True),
+            labels = sorted(dut_dict.get("labels", [])),
+            attributes = sorted([
                 "%s: %s" % (key, value)
                 for key, value in dut_dict.get("attributes", {}).items()
-            ],
-            error=dut_dict.get("error", ""),
+            ]),
+            error = dut_dict.get("error", ""),
         )
 
     async def list_connected_duts(self, _request, _context):
