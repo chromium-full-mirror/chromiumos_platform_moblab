@@ -8,7 +8,6 @@
 
 from datetime import datetime
 import dateutil.parser
-import math
 import cherrypy
 import docker
 import json
@@ -93,11 +92,11 @@ class MobMonitorRoot(object):
             days = 0
 
         if days:
-            return str(math.trunc(days)) + "day(s)"
+            return f"{days:.0f} day(s)"
         if hours:
-            return str(math.trunc(hours)) + " hour(s)"
+            return f"{hours:.0f} hour(s)"
         if minutes:
-            return str(math.trunc(minutes)) + " minute(s)"
+            return f"{minutes:.0f} minute(s)"
         return "less than a minute"
 
     @cherrypy.expose
