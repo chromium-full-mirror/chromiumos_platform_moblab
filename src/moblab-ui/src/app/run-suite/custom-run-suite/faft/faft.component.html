@@ -3,7 +3,7 @@
     (formLoaded)="onFormLoaded()" (buildVersionUnselected)="onBuildVersionUnselected()">
   </app-build-select-forms>
   <app-basic-selector #versionSelector [title]="'Select FAFT suite'" [placeholder]="['Pick suite']"
-    [options]="['faft_setup', 'faft_bios', 'faft_ec', 'faft_pd']" [isShown]="true" (select)="faftSuiteChanged($event.value)">
+    [options]="suiteList" [isShown]="true" (select)="faftSuiteChanged($event.value)">
   </app-basic-selector>
 
   <app-basic-text-form></app-basic-text-form>

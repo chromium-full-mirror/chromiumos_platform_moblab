@@ -60,6 +60,7 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
   ],
   exports: [
     BasicAutocompleteSelectorComponent,
+    BasicSelectorComponent,
     BuildSelectFormsComponent,
     BvtComponent,
     CtsRunComponent,
