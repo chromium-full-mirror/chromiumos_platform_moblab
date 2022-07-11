@@ -7,6 +7,9 @@
     {{ stageBuildNotification.message }}
 </mat-card>
 <h2 mat-dialog-title>Access Test Build</h2>
+<div>
+  <p class="mat-caption">If your DUT does not appear below, request for board access <a href="{{build_access_request_link}}" target="_blank">here.</a> </p>
+</div>
 <mat-dialog-content class="mat-typography">
 
     <app-basic-autocomplete-selector #modelSelector [title]="'Select model:'" [options]="models" [isShown]="true"
