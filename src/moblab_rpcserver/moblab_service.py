@@ -660,7 +660,24 @@ class MoblabService(object):
                 messages.append(str(ex))
         return ", ".join(messages)
 
+    """
+    Check duts doesn't flash a test image.
+    If there has one dut without test image, it will raise exception. Otherwise, this function does nothings.
+    """
+    def check_duts_without_test_image(self, ips):
+        disconnected_dut_ips = list(map(lambda dut: dut['ip'], filter(lambda dut: not dut['isConnected'], self.get_connected_devices())))
+        for ip in ips:
+            if ip in disconnected_dut_ips:
+                raise MoblabRpcError("dut (ip: %s) without test image" % ip)
+
+
     async def enroll_duts(self, ip_addresses):
+        """
+        There have two ways to handle dut without test image.
+        1. rasie exception.
+        2. filter dut without test image from request ips.
+        """
+        self.check_duts_without_test_image(ip_addresses)
         if _USE_DUT_MANAGER_FEATURE_FLAG:
             tasks = [
                 DutManagerRpcConnectorAsync.create_managed_dut(ip)

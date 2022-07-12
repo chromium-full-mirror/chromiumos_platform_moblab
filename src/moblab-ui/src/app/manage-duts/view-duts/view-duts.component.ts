@@ -168,12 +168,12 @@ export class ViewDutsComponent implements OnInit {
 
   selectionChanged(event) {
     if (event.selection === 'All') {
-      this.duts.data.forEach(row => this.selection.select(row));
+      this.duts.data.filter(e => e.getIsConnected()).forEach(row => this.selection.select(row));
     } else if (event.selection === 'None') {
       this.selection.clear();
     } else if (event.selection === this.selectOptions[0]) {
       this.duts.data.filter(row => {
-        if (row.getIsEnrolled()) {
+        if (row.getIsEnrolled() && row.getIsConnected()) {
           this.selection.select(row);
         } else {
           this.selection.deselect(row);
@@ -181,7 +181,7 @@ export class ViewDutsComponent implements OnInit {
       });
     } else if (event.selection === this.selectOptions[1]) {
       this.duts.data.filter(row => {
-        if (!row.getIsEnrolled()) {
+        if (!row.getIsEnrolled() && row.getIsConnected()) {
           this.selection.select(row);
         } else {
           this.selection.deselect(row);
@@ -190,8 +190,7 @@ export class ViewDutsComponent implements OnInit {
     } else if (event.selection === this.selectOptions[2]) {
       this.duts.data.filter(row => {
         if (
-          row.getStatus() ===
-          ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED
+          row.getStatus() === ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED && row.getIsConnected()
         ) {
           this.selection.select(row);
         } else {
