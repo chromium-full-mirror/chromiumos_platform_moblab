@@ -7,5 +7,4 @@ WORKDIR /
 RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 WORKDIR /chromite
 RUN git fetch
-RUN git reset --hard 7cbd88cde4d7ff0fbf2d49f1fe2be64441330c92
 RUN rm -rf .git
