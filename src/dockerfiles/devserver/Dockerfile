@@ -17,7 +17,6 @@ FROM ${BASE_REGISTRY_URI}/alpine/git as source
 WORKDIR /devserver-src
 RUN git clone https://chromium.googlesource.com/chromiumos/platform/dev-util
 WORKDIR /devserver-src/dev-util
-RUN git reset --hard 624b7aeeab7c2a10f67178272abf6bb05f5cca03
 WORKDIR /devserver-src
 RUN rm -rf .git
 
@@ -76,7 +75,7 @@ WORKDIR /devserver-src/dev-util
 RUN install -m 0755 host/start_devserver "/usr/bin"
 
 RUN mkdir /usr/lib/devserver
-RUN install -m 0755 devserver.py strip_package.py /usr/lib/devserver
+RUN install -m 0755 devserver.py /usr/lib/devserver
 RUN install -m 0644  \
         autoupdate.py \
         builder.py \
