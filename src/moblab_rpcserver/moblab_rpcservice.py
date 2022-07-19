@@ -58,7 +58,7 @@ AFE_TO_MOBLAB_STATUS_MAPPINGS = {
 MOBLAB_TO_AFE_JOBS_STATUS_MAPPINGS = {
     moblabrpc_pb2.Job.FAILED_JOBS: "Failed",
     moblabrpc_pb2.Job.ABORTED_JOBS: "Aborted",
-    moblabrpc_pb2.Job.SUCCEEDED_JOBS: "Completed",
+    moblabrpc_pb2.Job.COMPLETED_JOBS: "Completed",
 }
 
 AFE_TO_DUT_STATUS_MAPPINGS = {
@@ -596,7 +596,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.rel_filter == moblabrpc_pb2.Job.SUITE,
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
-            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            False,
             self._extract_afe_jobs_status(request.status_filter),
             request.parent_id_filter,
             request.dut_hostname_filter,
@@ -681,7 +681,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.rel_filter == moblabrpc_pb2.Job.SUITE,
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
-            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            False,
             self._extract_afe_jobs_status(request.status_filter),
             request.parent_id_filter,
             request.dut_hostname_filter,
@@ -749,7 +749,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.rel_filter == moblabrpc_pb2.Job.SUITE,
             request.status_filter == moblabrpc_pb2.Job.QUEUED_JOBS,
             request.status_filter == moblabrpc_pb2.Job.JOBS_RUNNING,
-            request.status_filter == moblabrpc_pb2.Job.FINISHED_JOBS,
+            False,
             self._extract_afe_jobs_status(request.status_filter),
             request.parent_id_filter,
             request.dut_hostname_filter,
