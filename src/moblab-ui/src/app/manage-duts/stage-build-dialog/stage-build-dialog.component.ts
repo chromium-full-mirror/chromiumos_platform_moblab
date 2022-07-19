@@ -6,6 +6,7 @@ import {
 import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
 import {Model} from 'app/services/moblabrpc_pb';
 import {SelectableItem} from 'app/run-suite/common/basic-autocomplete-selector/basic-autocomplete-selector.component';
+import {build_access_request_link} from '../../constants';
 
 export interface BuildVersion {
   version: string;
@@ -59,6 +60,8 @@ export class StageBuildDialogComponent implements AfterViewInit {
   selectedBuildTarget = '';
   selectedMilestone = '';
   selectedModel = '';
+
+  readonly build_access_request_link = build_access_request_link;
 
   constructor(public moblabGrpcService: MoblabGrpcService) {}
 
