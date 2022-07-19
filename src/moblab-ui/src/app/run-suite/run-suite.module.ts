@@ -28,7 +28,6 @@ import {PowerComponent} from './custom-run-suite/power/power.component';
 import {RunAnySuiteComponent} from './run-any-suite/run-any-suite.component';
 import {RunSuiteButtonComponent} from './common/run-suite-button/run-suite-button.component';
 import {RunSuiteComponent} from './run-suite.component';
-import {StorageQualComponent} from './custom-run-suite/storage-qual/storage-qual.component';
 import {StorageQualV2Component} from './custom-run-suite/storage-qual-v2/storage-qual-v2.component';
 import {WidgetsModule} from './../widgets/widgets.module';
 import {NewUpdateNotifierComponent} from './common/new-update-notifier/new-update-notifier.component';
@@ -52,7 +51,6 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
     RunAnySuiteComponent,
     RunSuiteButtonComponent,
     RunSuiteComponent,
-    StorageQualComponent,
     StorageQualV2Component,
     NewUpdateNotifierComponent,
     FAFTRunComponent,
@@ -67,7 +65,6 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
     PowerComponent,
     RunAnySuiteComponent,
     RunSuiteComponent,
-    StorageQualComponent,
     StorageQualV2Component,
     FAFTRunComponent,
   ],

@@ -9,7 +9,7 @@ import {JobDetailComponent} from './job-detail/job-detail.component';
 import {ManageDutsComponent} from './manage-duts/manage-duts.component';
 import {MobmonitorComponent} from './mobmonitor/mobmonitor.component';
 import {RunSuiteComponent} from './run-suite/run-suite.component';
-import {StorageQualComponent} from './run-suite/custom-run-suite/storage-qual/storage-qual.component';
+import {StorageQualV2Component} from './run-suite/custom-run-suite/storage-qual-v2/storage-qual-v2.component';
 import {ViewJobsComponent} from './view-jobs/view-jobs.component';
 import {ConfigGuard} from './guards/moblab-configuration-guard';
 import {HealthCheckComponent} from './health-check/health-check.component';
@@ -38,11 +38,11 @@ const routes: Routes = [
             component: RunSuiteComponent,
             children: [
               {path: 'cts', component: CtsRunComponent},
-              {path: 'storagequal', component: StorageQualComponent},
-              {path: 'memoryqual', component: StorageQualComponent},
-              {path: 'bvtqual', component: StorageQualComponent},
-              {path: 'powerqual', component: StorageQualComponent},
-              {path: 'runsuite', component: StorageQualComponent},
+              {path: 'storagequal', component: StorageQualV2Component},
+              {path: 'memoryqual', component: StorageQualV2Component},
+              {path: 'bvtqual', component: StorageQualV2Component},
+              {path: 'powerqual', component: StorageQualV2Component},
+              {path: 'runsuite', component: StorageQualV2Component},
             ],
           },
           {path: 'manage_dut', component: ManageDutsComponent},
