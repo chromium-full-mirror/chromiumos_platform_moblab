@@ -32,15 +32,6 @@
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
             <app-loading-overlay></app-loading-overlay>
-            <app-storage-qual (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
-            </app-storage-qual>
-          </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="Storage Qualification (new)">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
-            <app-loading-overlay></app-loading-overlay>
             <app-storage-qual-v2 (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
             </app-storage-qual-v2>
           </div>
