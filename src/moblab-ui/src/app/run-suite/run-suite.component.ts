@@ -47,10 +47,6 @@ export class RunSuiteComponent {
     this.loadingOverlay.updateStatus(current_state);
   }
 
-  isFaftTestEnabled() {
-    return this.isTestEnabled(Feature.FAFT_TESTING);
-  }
-
   isTestEnabled(feature: Feature) {
     return this.globalInfo.isFeatureEnabled(feature);
   }

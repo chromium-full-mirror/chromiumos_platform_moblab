@@ -107,7 +107,6 @@ export class ConfigurationComponent
 
   pauseStatusSubscription: Subscription = null;
 
-  faftEnabled = false;
   panelOpenState = true;
 
   stableBuildVersionLoading = false;
@@ -147,7 +146,6 @@ export class ConfigurationComponent
       this.listStableBuildVersions(),
       this.getResultsRetentionPeriod(),
     ]);
-    this.faftEnabled = this.globalInfo.isFeatureEnabled(Feature.FAFT_TESTING);
   }
 
   ngOnDestroy(): void {
@@ -575,14 +573,6 @@ export class ConfigurationComponent
       );
     } finally {
       this.resumeButton.setIsLoadingStatus(false);
-    }
-  }
-
-  saveFAFTSetting(newValue) {
-    if (newValue === true) {
-      this.globalInfo.enableFeature(Feature.FAFT_TESTING);
-    } else {
-      this.globalInfo.disableFeature(Feature.FAFT_TESTING);
     }
   }
 

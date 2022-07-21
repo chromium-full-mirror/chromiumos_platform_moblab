@@ -26,7 +26,6 @@ export enum Feature {
   TOOLBAR_PAGE_INFORMATION,
   JOB_DETAIL,
   DUT_DETAIL,
-  FAFT_TESTING,
   ABOUT,
 }
 
