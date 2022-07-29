@@ -59,6 +59,7 @@ export class EditAttributesComponent {
     this.attribute_key.setValue('');
     this.attribute_value.setValue('');
     this.label.setValue('');
+    this.pool.setValue('');
   }
 
   addAttribute(dut_hostnames: string[], context: EditAttributesComponent) {
