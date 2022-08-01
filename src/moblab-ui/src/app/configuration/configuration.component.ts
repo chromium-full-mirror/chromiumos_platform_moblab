@@ -24,6 +24,7 @@ import {
   GlobalInfoService,
 } from 'app/services/global-ui-settings.service';
 import {BuildTargetStableVersion} from '../services/moblab_configuration_rpc_pb';
+import {MatTableDataSource} from "@angular/material/table";
 
 function gsURLValidator(control) {
   if (!control.value) {
@@ -32,6 +33,16 @@ function gsURLValidator(control) {
   const forbidden = !new RegExp('^gs:\\/\\/.*').test(control.value);
   return forbidden ? {notAGSUrl: {value: control.value}} : null;
 }
+
+function validChromeosBuildPattern(control) {
+    if (!control.value) {
+      return null;
+    }
+    const value = control.value.trim();
+    const forbidden = !new RegExp(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/).test(value);
+    return forbidden ? {validChromeosBuildPattern: {value: control.value}} : null;
+}
+
 
 class CloudConfiguration {
   constructor(
@@ -78,8 +89,7 @@ export class ConfigurationComponent
   });
 
   userCrOSVersionForm = new FormControl(
-    '',
-    Validators.pattern(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/)
+    '', {validators: [validChromeosBuildPattern],}
   );
   resultsRetentionPeriodForm = new FormControl('', [
     Validators.required,
@@ -110,7 +120,7 @@ export class ConfigurationComponent
   panelOpenState = true;
 
   stableBuildVersionLoading = false;
-  stableBuildVersions: BuildTargetStableVersion[] = [];
+  stableBuildVersions: MatTableDataSource<BuildTargetStableVersion> = new MatTableDataSource<BuildTargetStableVersion>([]);
   displayedColumns: string[] = [
     'build_target',
     'default_version',
@@ -153,16 +163,19 @@ export class ConfigurationComponent
   }
 
   async listStableBuildVersions() {
-    this.userCrOSVersionForm.disable();
+    console.log(this.stableBuildVersions)
+    this.userCrOSVersionForm.disable({emitEvent: false});
     this.stableBuildVersionLoading = true;
+    console.log(this.stableBuildVersions)
     try {
-      this.stableBuildVersions = await this.moblabConfigurationRpcService.listStableBuildVersions();
+      const data = await this.moblabConfigurationRpcService.listStableBuildVersions();
+      this.stableBuildVersions = new MatTableDataSource(data);
 
       // User override stable build version is the same for all build targets
-      if (this.stableBuildVersions.length !== 0) {
-        this.userCrOSVersionValue = this.stableBuildVersions[0]
-          .getStableVersion()
-          .getOverrideVersion();
+      if (data.length !== 0) {
+       this.userCrOSVersionValue = data[0]
+         .getStableVersion()
+         .getOverrideVersion();
       }
     } catch (error) {
       console.log('listStableBuildVersions call failed with:' + error);
@@ -170,7 +183,9 @@ export class ConfigurationComponent
         'Failed to fetch stable build versions: ' + error.message
       );
     } finally {
-      this.userCrOSVersionForm.enable();
+      if (this.isAnyDutEnrolled()) {
+        this.userCrOSVersionForm.enable({emitEvent: false});
+      }
       this.stableBuildVersionLoading = false;
     }
   }
@@ -221,22 +236,21 @@ export class ConfigurationComponent
     }
   }
 
+  isAnyDutEnrolled = () => this.stableBuildVersions.data.length != 0
+  
   public async setStableCrOSVersion(override_value: string) {
-    this.userCrOSVersionForm.disable();
     this.stableBuildVersionLoading = true;
+    this.userCrOSVersionForm.setErrors(null);
     try {
       await this.moblabConfigurationRpcService.setStableBuildVersion(
         override_value
       );
-      this.userCrOSVersionForm.setValue('');
       await this.listStableBuildVersions();
+      this.userCrOSVersionForm.reset();
     } catch (error) {
+      this.userCrOSVersionForm.setErrors({apiResponseError: error.message}, {emitEvent: true});
       console.log('setStableBuildVersion call failed with:' + error);
-      this.notificationsService.error(
-        'Failed to set stable Chrome OS version: ' + error.message
-      );
     } finally {
-      this.userCrOSVersionForm.enable();
       this.stableBuildVersionLoading = false;
     }
   }
@@ -350,6 +364,8 @@ export class ConfigurationComponent
 
   isStableCrOsVersionValidForSubmit() {
     return (
+      this.stableBuildVersions.data.length != 0 &&
+      this.userCrOSVersionForm.value &&
       this.userCrOSVersionForm.value.length &&
       this.userCrOSVersionForm.value !== this.userCrOSVersionValue &&
       !this.userCrOSVersionForm.errors
