@@ -43,7 +43,7 @@ export class BasicInputFormComponent extends BaseForm implements OnInit {
 
   enable() {
     super.enable();
-    this.input.enable();
+    this.input.enable({ emitEvent: false });
   }
 
   disable(message?: string) {
