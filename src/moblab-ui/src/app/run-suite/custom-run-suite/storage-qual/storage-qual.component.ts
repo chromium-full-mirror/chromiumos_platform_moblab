@@ -137,7 +137,9 @@ export class StorageQualComponent extends BaseSuite implements AfterViewInit {
         this.inputChanged();
         this.onFormLoaded();
       },
-      this.selectedPool
+      this.selectedModel,
+      this.selectedBoard,
+      this.selectedPool,
     );
   }
 }

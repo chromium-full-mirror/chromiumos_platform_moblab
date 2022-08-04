@@ -1593,9 +1593,13 @@ export class MoblabGrpcService {
   validateStorageQualSetup(
     callback: () => void,
     errorHandlingCallback: (errorMsg: string) => void,
-    pool_name: string = null
+    model: string,
+    board: string,
+    pool_name: string = null,
   ) {
     const request = new ValidateStorageQualSetupRequest();
+    request.setModel(model);
+    request.setBoard(board);
     request.setPoolName(pool_name);
 
     this.moblabRpcService.validate_storage_qual_setup(

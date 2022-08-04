@@ -17,46 +17,66 @@ class StorageQualCheckService(object):
             per pool
     """
 
-    REQUIRED_LABELS = ["retention", "trim", "suspend"]
+    REQUIRED_LABELS = ["dut:1", "dut:2", "dut:3"]
 
     def __init__(self):
         self.service = moblab_service.MoblabService()
 
-    async def _get_pool(self, pool_name):
-        duts = await self.service.list_duts()
-        duts = [dut for dut in duts if dut["enrolled"] is True]
-        if pool_name is None:
-            return duts
-        pool = []
-        for dut in duts:
-            dut_pools = moblab_service.LabelsParser.extract_pool_from_labels(
-                dut.get("labels", [])
-            )
-            if pool_name in dut_pools:
-                pool.append(dut)
-        return pool
+    async def _get_duts(self, model, board, pool_name):
+        """
+        Model   Board     Pool    Label
+        Leona   Rammus    P1      dut:1
+        Leona   Rammus    P1      dut:2
+        Leona   Rammus    P1      dut:3
+        Cozmo   Jacuzzi   P1
+    
+        In this scenario, if Cosmo-Jacuzzi is selected with P1 for pool without checking for model & board match, the Suite will kick off with the 3 Leona-Rammus DUTs.
+    
+        With the model & board match, the Suite cannot be kicked off. Under the pool field, users will see "Pool: P1 requires 3 DUTs with matching board and model as selected above".        
+        """
+        def _filters(dut):
+            labels = dut.get('labels', None)
+            if not labels:
+                return False
 
-    async def check_setup(
-        self, pool_name, variation=0
-    ):  # 0 - VARIATION_NOT_SET
-        """Tests the moblab's connected DUTs to see if the current
+            pools = set(moblab_service.LabelsParser.extract_pool_from_labels(labels))
+            board_from_labels = moblab_service.LabelsParser.extract_build_target_from_labels(labels)
+            model_from_labels = moblab_service.LabelsParser.extract_model_from_labels(labels)
+
+            return (dut['enrolled'] is True 
+                    and model_from_labels 
+                    and model.lower() == model_from_labels.lower() 
+                    and board_from_labels 
+                    and board.lower() == board_from_labels.lower() 
+                    and pool_name in pools)
+
+        duts = await self.service.list_duts()
+        duts_in_pool = list(filter(_filters, duts))
+
+        return duts_in_pool
+
+    async def check_setup(self, model, board, pool_name):  
+        """
+        Tests the moblab's connected DUTs to see if the current
         configuration is valid for storage qual run.
         """
 
-        logging.info("Checking storage qual setup on pool '%s'", pool_name)
-
-        if variation >= 2:  # variation > Variation.REMOVABLE
-            # Only regular (VARIATION_NOT_SET) and quick storage quals
-            # rely on DUT labels.
-            return
+        logging.info("Checking storage qual setup on model: %s, board: %s, pool '%s'" % (model, board, pool_name))
 
         if not pool_name:
-            raise StorageQualCheckError(
-                "Storage qualification suite has to be run within a pool."
-            )
+            raise StorageQualCheckError("Storage qualification suite has to be run within a pool.")
+
+        if not model:
+            raise StorageQualCheckError("Please select model first.")
+
+        if not board:
+            raise StorageQualCheckError("Please select board first.")
 
         # get the pool of the host this test is running on
-        pool = await self._get_pool(pool_name)
+        duts_in_pool = await self._get_duts(model, board, pool_name)
+
+        if len(duts_in_pool) < 3:
+            raise StorageQualCheckError("Pool: %s requires 3 DUTs with matching board and model as selected above." % pool_name)
 
         # verify that the pool is set up to run storage qual, with correct
         # number of DUTs and correct labels
@@ -64,17 +84,18 @@ class StorageQualCheckService(object):
         for required_label in self.REQUIRED_LABELS:
             duts_with_label = [
                 dut["hostname"]
-                for dut in pool
+                for dut in duts_in_pool
                 if required_label in [label.lower() for label in dut["labels"]]
             ]
+            duts_count = len(duts_with_label)
 
-            if len(duts_with_label) > 1:
+            if duts_count > 1:
                 raise StorageQualCheckError(
                     ("Multiple DUTs %s are assigned label '%s' in pool '%s'")
                     % (duts_with_label, required_label, pool_name)
                 )
 
-            if len(duts_with_label) == 0:
+            if duts_count == 0:
                 raise StorageQualCheckError(
                     ("Pool '%s' is missing a DUT with required label '%s'")
                     % (pool_name, required_label)
