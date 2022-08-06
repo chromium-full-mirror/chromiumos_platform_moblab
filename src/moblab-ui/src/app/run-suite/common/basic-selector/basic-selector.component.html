@@ -5,13 +5,16 @@
   <mat-label class="moblab-selector-label"> {{title}} </mat-label>
   <mat-select (selectionChange)="onChange($event)"
               [disabled]="this.isDisabled()"
-              [ngModel]="selected"
+              [(ngModel)]="selected"
               disableOptionCentering
               placeholder="{{placeholder}}"
   >
 
-    <mat-option *ngFor="let option of options" [value]="option">
-      {{option}}
+    <mat-option *ngFor="let option of selectableItems" [value]="option.text" [disabled]="option.status !==''">
+      {{option.text}}
+      <span *ngIf="option.status !== ''">
+        <span class="chip {{ option.status | lowercase }}-chip">{{ option.status }}</span>
+      </span>
     </mat-option>
   </mat-select>
 </div>

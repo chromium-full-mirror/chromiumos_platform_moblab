@@ -66,6 +66,7 @@ export class StageBuildDialogComponent implements AfterViewInit {
   constructor(public moblabGrpcService: MoblabGrpcService) {}
 
   ngAfterViewInit() {
+    this.disableAllSelectors("Loading...");
     this.loadModels();
   }
 
@@ -80,8 +81,9 @@ export class StageBuildDialogComponent implements AfterViewInit {
   }
 
   async loadModels() {
-    this.resetModels('loading');
-    this.updateLoadingOverlay('fetching models...');
+    const message = "Loading models...";
+    this.resetModels(message);
+    this.updateLoadingOverlay(message);
     await this.listAccessibleModels();
     this.hideLoadingOverlay();
     this.updateModels();
@@ -89,9 +91,8 @@ export class StageBuildDialogComponent implements AfterViewInit {
 
   resetModels(message: string) {
     this.models = [];
-    this.modelSelector.selectFormControl.reset();
     this.modelSelector.disable(message);
-    this.resetBuildTarget('Please select a model.');
+    this.resetBuildTarget("Please select a model.");
   }
 
   updateModels() {
@@ -107,14 +108,17 @@ export class StageBuildDialogComponent implements AfterViewInit {
   }
 
   modelChanged(model: string): void {
-    this.stageBuildButtonDisabled = true;
-    this.stageBuildNotification = null;
-    this.selectedModel = model;
-    this.loadBuildTargets();
+    if (model !== this.selectedModel) {
+      this.stageBuildButtonDisabled = true;
+      this.stageBuildNotification = null;
+      this.unselectBuildTarget();
+      this.selectedModel = model;
+      this.loadBuildTargets();
+    }
   }
 
   loadBuildTargets(): void {
-    this.resetBuildTarget('loading');
+    this.resetBuildTarget("Loading build targets...");
     const buioldTargets = this.accessibleModels
       .filter(e => e.getName() === this.selectedModel)[0]
       .getBuildTargetsList();
@@ -128,21 +132,24 @@ export class StageBuildDialogComponent implements AfterViewInit {
 
   resetBuildTarget(message: string) {
     this.buildTargets = [];
-    this.buildTargetSelector.selectFormControl.reset();
     this.buildTargetSelector.disable(message);
-    this.resetMilestones('Please select a build target.');
+    this.resetMilestones("Please select a build target.");
   }
 
   buildTargetChanged(buildTarget: string): void {
-    this.stageBuildButtonDisabled = true;
-    this.stageBuildNotification = null;
-    this.selectedBuildTarget = buildTarget;
-    this.loadMilestones();
+    if (buildTarget !== this.selectedBuildTarget) {
+      this.stageBuildButtonDisabled = true;
+      this.stageBuildNotification = null;
+      this.unselectMilestone();
+      this.selectedBuildTarget = buildTarget;
+      this.loadMilestones();
+    }
   }
 
   loadMilestones(): void {
-    this.resetMilestones('loading...');
-    this.updateLoadingOverlay('fetching milestones...');
+    const message = "Loading milestones...";
+    this.resetMilestones(message);
+    this.updateLoadingOverlay(message);
     this.moblabGrpcService.listMilestones(
       this.selectedBuildTarget,
       this.selectedModel,
@@ -158,9 +165,8 @@ export class StageBuildDialogComponent implements AfterViewInit {
 
   resetMilestones(message: string) {
     this.milestones = [];
-    this.milestoneSelector.selectFormControl.reset();
     this.milestoneSelector.disable(message);
-    this.resetBuildVersions('Please select milestone.');
+    this.resetBuildVersions("Please select a milestone.");
   }
 
   updateMilestones(milestones: string[]) {
@@ -175,15 +181,19 @@ export class StageBuildDialogComponent implements AfterViewInit {
   }
 
   milestoneChanged(milestone: string): void {
-    this.stageBuildButtonDisabled = true;
-    this.stageBuildNotification = null;
-    this.selectedMilestone = milestone;
-    this.loadBuildVersions();
+    if (milestone !== this.selectedMilestone) {
+      this.stageBuildButtonDisabled = true;
+      this.stageBuildNotification = null;
+      this.unselectBuildVersion();
+      this.selectedMilestone = milestone;
+      this.loadBuildVersions();
+    }
   }
 
   loadBuildVersions(): void {
-    this.resetBuildVersions('loading...');
-    this.updateLoadingOverlay('fetching build versions...');
+    const message = "Loading build versions..."
+    this.resetBuildVersions(message);
+    this.updateLoadingOverlay(message);
     this.moblabGrpcService.listBuildVersions(
       this.selectedBuildTarget,
       this.selectedModel,
@@ -198,10 +208,9 @@ export class StageBuildDialogComponent implements AfterViewInit {
     );
   }
 
-  resetBuildVersions(mesage: string) {
+  resetBuildVersions(message: string) {
     this.buildVersions = [];
-    this.buildSelector.selectFormControl.reset();
-    this.buildSelector.disable(mesage);
+    this.buildSelector.disable(message);
   }
 
   updateBuildVersions(buildVersions: BuildVersion[]) {
@@ -296,5 +305,30 @@ export class StageBuildDialogComponent implements AfterViewInit {
 
   _formatBuildId(): string {
     return `R${this.selectedMilestone}-${this.selectedBuild}`;
+  }
+
+  unselectModel(): void {
+    this.selectedModel = null;
+    this.unselectBuildTarget();
+    this.buildTargetSelector.disable("Please select a model.");
+  }
+
+  unselectBuildTarget(): void {
+    this.selectedBuildTarget = null;
+    this.buildTargetSelector.clearSelection();
+    this.unselectMilestone();
+    this.milestoneSelector.disable("Please select a build target.");
+  }
+
+  unselectMilestone(): void {
+    this.selectedMilestone = null;
+    this.milestoneSelector.clearSelection();
+    this.unselectBuildVersion();
+    this.buildSelector.disable("Please select a milestone.");
+  }
+
+  unselectBuildVersion(): void {
+    this.selectedBuild = null;
+    this.buildSelector.clearSelection();
   }
 }

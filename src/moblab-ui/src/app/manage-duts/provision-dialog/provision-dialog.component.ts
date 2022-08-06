@@ -41,13 +41,16 @@ export class ProvisionDialogComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
+    this.milestoneSelector.disable('Please select milestone.');
+    this.buildSelector.disable('Please select build version.');
     this.loadPools();
   }
 
   loadPools(): void {
-    this.resetPools();
+    const message = "Loading pools...";
+    this.resetPools(message);
     this.loadingOverlay.updateStatus(
-      'Loading pools ...',
+      message,
       LoadingOverlayStyle.Top
     );
     this.moblabGrpcService.listPools(
@@ -63,10 +66,10 @@ export class ProvisionDialogComponent implements AfterViewInit {
     );
   }
 
-  resetPools() {
+  resetPools(message: string) {
     this.pools = [];
-    this.poolSelector.disable('loading...');
-    this.resetMilestones('Please select pool.');
+    this.poolSelector.disable(message);
+    this.resetMilestones("Please select a pool.");
   }
 
   updatePools(pools: string[]) {
@@ -75,22 +78,26 @@ export class ProvisionDialogComponent implements AfterViewInit {
   }
 
   poolChanged(pool: string): void {
-    if (pool === '<all>') {
-      pool = '';
+    if (pool !== this.build.pool) {
+      this.unselectMilestone();
+      if (pool === '<all>') {
+        pool = '';
+      }
+      this.build.pool = pool;
+      const chosenDut = this.data.duts.find(
+        d => !pool || d.getPoolsList()?.includes(pool)
+      );
+      this.model = chosenDut.getModel();
+      this.board = chosenDut.getBuildTarget();
+      this.loadMilestones();
     }
-    this.build.pool = pool;
-    const chosenDut = this.data.duts.find(
-      d => !pool || d.getPoolsList()?.includes(pool)
-    );
-    this.model = chosenDut.getModel();
-    this.board = chosenDut.getBuildTarget();
-    this.loadMilestones();
   }
 
   loadMilestones(): void {
-    this.resetMilestones('loading...');
+    const message = "Loading milestones...";
+    this.resetMilestones(message);
     this.loadingOverlay.updateStatus(
-      'Loading milestones ...',
+      message,
       LoadingOverlayStyle.Top
     );
     this.moblabGrpcService.listMilestones(
@@ -108,13 +115,13 @@ export class ProvisionDialogComponent implements AfterViewInit {
 
   resetMilestones(message: string) {
     this.milestones = [];
-    this.milestoneSelector.selectFormControl.reset();
     this.milestoneSelector.disable(message);
-    this.resetBuildVersions('Please select milestone.');
+    this.resetBuildVersions("Please select a milestone.");
   }
 
   updateMilestones(newMilestones: string[]) {
     this.milestones = newMilestones.map(m => new SelectableItem(m));
+
     if (this.milestones.length === 0) {
       this.milestoneSelector.disable('No milestones found for the model.');
     } else {
@@ -123,14 +130,18 @@ export class ProvisionDialogComponent implements AfterViewInit {
   }
 
   milestoneChanged(milestone: string): void {
-    this.build.milestone = milestone;
-    this.loadBuildVersions();
+    if (milestone !== this.build.milestone) {
+      this.unselectBuildVersion();
+      this.build.milestone = milestone;
+      this.loadBuildVersions();
+    }
   }
 
   loadBuildVersions(): void {
-    this.resetBuildVersions('loading...');
+    const message = "Loading build version...";
+    this.resetBuildVersions(message);
     this.loadingOverlay.updateStatus(
-      'Loading build versions ...',
+      message,
       LoadingOverlayStyle.Top
     );
     this.moblabGrpcService.listBuildVersions(
@@ -147,10 +158,9 @@ export class ProvisionDialogComponent implements AfterViewInit {
     );
   }
 
-  resetBuildVersions(mesage: string) {
+  resetBuildVersions(message: string) {
     this.buildVersions = [];
-    this.buildSelector.selectFormControl.reset();
-    this.buildSelector.disable(mesage);
+    this.buildSelector.disable(message);
     this.canStart = false;
   }
 
@@ -178,5 +188,17 @@ export class ProvisionDialogComponent implements AfterViewInit {
 
   showErrorMessage(message: string) {
     this.loadingOverlay.updateStatus(message, LoadingOverlayStyle.Top);
+  }
+
+  unselectMilestone(): void {
+    this.build.milestone = null;
+    this.milestoneSelector.clearSelection();
+    this.unselectBuildVersion();
+    this.buildSelector.disable('Please select milestone.');
+  }
+
+  unselectBuildVersion(): void {
+    this.build.buildVersion = null;
+    this.buildSelector.clearSelection();
   }
 }

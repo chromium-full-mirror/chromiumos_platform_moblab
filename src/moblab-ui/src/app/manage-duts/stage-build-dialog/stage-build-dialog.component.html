@@ -12,21 +12,21 @@
 </div>
 <mat-dialog-content class="mat-typography">
 
-    <app-basic-autocomplete-selector #modelSelector [title]="'Select model:'" [options]="models" [isShown]="true"
-        (select)="modelChanged($event.value)">
-    </app-basic-autocomplete-selector>
+    <app-basic-selector #modelSelector [title]="'Select model:'" [options]="models" [isShown]="true"
+        (select)="modelChanged($event.value)" [placeholder]="['Please select a model.']">
+    </app-basic-selector>
 
-    <app-basic-autocomplete-selector #buildTargetSelector [title]="'Select build target:'" [options]="buildTargets"
-        [isShown]="true" (select)="buildTargetChanged($event.value)">
-    </app-basic-autocomplete-selector>
+    <app-basic-selector #buildTargetSelector [title]="'Select build target:'" [options]="buildTargets"
+        [isShown]="true" (select)="buildTargetChanged($event.value)" [placeholder]="['Please select a build target.']">
+    </app-basic-selector>
 
-    <app-basic-autocomplete-selector #milestoneSelector [title]="'Select milestone:'" [options]="milestones"
-        [isShown]="true" (select)="milestoneChanged($event.value)">
-    </app-basic-autocomplete-selector>
+    <app-basic-selector #milestoneSelector [title]="'Select milestone:'" [options]="milestones"
+        [isShown]="true" (select)="milestoneChanged($event.value)" [placeholder]="['Please select a molestone.']">
+    </app-basic-selector>
 
-    <app-basic-autocomplete-selector #buildSelector [title]="'Select build:'" [options]="buildVersions" [isShown]="true"
-        (select)="buildVersionChanged($event.value)">
-    </app-basic-autocomplete-selector>
+    <app-basic-selector #buildSelector [title]="'Select build:'" [options]="buildVersions" [isShown]="true"
+        (select)="buildVersionChanged($event.value)" [placeholder]="['Please select a build version.']">
+    </app-basic-selector>
 
 
 </mat-dialog-content>

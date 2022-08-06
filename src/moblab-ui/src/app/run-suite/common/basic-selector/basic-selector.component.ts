@@ -11,6 +11,7 @@ import {
 import {BaseForm} from '../base-form/base-form.component';
 import {EventEmitter} from '@angular/core';
 import {MatSelect, MatSelectChange} from '@angular/material/select';
+import {SelectableItem} from '../basic-autocomplete-selector/basic-autocomplete-selector.component';
 
 /**
  * Selector to be used in run suite forms. Contains logic that should be
@@ -27,13 +28,14 @@ export class BasicSelectorComponent
   @ViewChild(MatSelect) selector: MatSelect;
 
   @Input() autoselect = true;
-  @Input() options: string[] = [];
+  @Input() options: SelectableItem[] | string[] = [];
   @Input() placeholder = '';
   @Input() title = '';
 
   @Output() select = new EventEmitter();
 
-  selected = '';
+  selected: string = '';
+  selectableItems: SelectableItem[] = [];
 
   ngOnInit() {
     this.autoSelectedSingleOption();
@@ -42,7 +44,19 @@ export class BasicSelectorComponent
   ngOnChanges(changes: SimpleChanges) {
     if (changes.options) {
       this.options = changes.options.currentValue;
+      this.parseOptionsToSelectableItems();
       this.autoSelectedSingleOption();
+    }
+  }
+
+  parseOptionsToSelectableItems() {
+    if (Array.isArray(this.options) && this.options.length >= 1) {
+        if (this.options[0] instanceof SelectableItem) {
+            this.selectableItems = this.options as SelectableItem[];
+        }
+        else if (typeof this.options[0] === 'string'){
+            this.selectableItems = (this.options as string[]).map(e => new SelectableItem(e));
+        }
     }
   }
 
@@ -53,8 +67,8 @@ export class BasicSelectorComponent
 
   autoSelectedSingleOption() {
     // If the drop down only has one item - auto select it.
-    if (this.autoselect && this.options.length === 1) {
-      this.selected = this.options[0];
+    if (this.autoselect && this.selectableItems.length === 1) {
+      this.selected = this.selectableItems[0].text;
       this.select.emit({value: this.selected});
     }
   }
@@ -64,8 +78,8 @@ export class BasicSelectorComponent
   }
 
   selectOption(optionIndex) {
-    if (optionIndex >= 0 && optionIndex < this.options.length) {
-      this.selected = this.options[optionIndex];
+    if (optionIndex >= 0 && optionIndex < this.selectableItems.length) {
+      this.selected = this.selectableItems[optionIndex].text;
       this.select.emit({value: this.selected});
     }
   }

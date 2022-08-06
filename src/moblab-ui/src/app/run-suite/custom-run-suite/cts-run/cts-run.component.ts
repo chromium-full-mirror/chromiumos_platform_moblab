@@ -23,6 +23,8 @@ export class CtsRunComponent extends BaseSuite implements AfterContentInit {
   @ViewChild(BasicTextFormComponent) modulesTextForm;
   @ViewChild(BasicSelectorComponent) ctsVersionSelectorForm;
 
+  readonly suiteList: string[] = ['cts', 'cts_hardware'];
+
   suiteName: string;
 
   constructor(
