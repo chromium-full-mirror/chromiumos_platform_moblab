@@ -65,3 +65,12 @@
 .expansion-panel-content {
   width:100%;
 }
+
+::ng-deep .mat-expansion-panel-body {
+  overflow: auto;
+}
+
+td.mat-cell, th.mat-header-cell {
+  white-space: nowrap;
+  padding: 0 0.75rem;
+}
