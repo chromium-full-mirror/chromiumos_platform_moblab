@@ -49,7 +49,7 @@ export class BuildTargetAccessService {
       this.buildTargets = await this.moblabGrpcService.listBuildTargetsPromise();
       this.buildTargetSubject.next(this.buildTargets);
     } catch (error) {
-      this.notificationsService.error(error);
+      this.notificationsService.error(error.message);
     }
   }
 
