@@ -20,7 +20,7 @@ docker==5.0.0
     # via -r requirements.in
 future==0.18.2
     # via -r requirements.in
-gevent==21.1.2
+gevent==21.12.0
     # via parallel-ssh
 google-api-core[grpc]==1.27.0
     # via
