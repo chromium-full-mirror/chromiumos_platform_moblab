@@ -518,11 +518,22 @@ class AFEConnector(object):
         return result, error
 
     def enroll_duts(self, ip_addresses):
+        """
+        Enroll dut by ip addresses. 
+        If more than one ip addresses need to be enrolled, using multiprocessing to do.
+        Otherwise, just call the enroll_dut directly.
+        """
         _LOGGER.debug("Enroll hosts %s", ip_addresses)
-        p = multiprocessing.Pool(20)
-        p.map(enroll_dut, ip_addresses)
-        p.close()
-        p.join()
+        ip_count = len(ip_addresses)
+        if ip_count > 1:
+            p = multiprocessing.Pool(20)
+            p.map(enroll_dut, ip_addresses)
+            p.close()
+            p.join()
+        elif ip_count == 1:
+            enroll_dut(ip_address=ip_addresses[0])
+        else:
+            logging.error("We can't enroll duts without any ip address")
 
     def unenroll_duts(self, ip_addresses):
         hosts = self.get_connected_devices()

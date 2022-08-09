@@ -20,6 +20,7 @@ from server.hosts import host_info
 #from server.hosts import gce_host
 from server.hosts import ssh_host
 from server.hosts import file_store
+from server.hosts import ssh_multiplex
 
 
 CONFIG = global_config.global_config
@@ -44,7 +45,7 @@ OS_HOST_DICT = {'cros': cros_host.CrosHost}
 _CONNECTIVITY_CHECK_TIMEOUT_S = 10
 
 
-def _get_host_arguments(machine):
+def _get_host_arguments(machine, use_connection_pool=False):
     """Get parameters to construct a host object.
 
     There are currently 2 use cases for creating a host.
@@ -55,12 +56,15 @@ def _get_host_arguments(machine):
        the same defaults as used in the server job to create a host.
 
     @param machine: machine dict
+    @param use_connection_pool: if True, it creates a ssh coonection pool when it can't get connection pool from machine.
     @return: A dictionary containing arguments for host specifically hostname,
               afe_host, user, password, port, ssh_verbosity_flag and
               ssh_options.
     """
     hostname, afe_host = server_utils.get_host_info_from_machine(machine)
     connection_pool = server_utils.get_connection_pool_from_machine(machine)
+    if connection_pool is None and use_connection_pool:
+        connection_pool = ssh_multiplex.ConnectionPool()
     host_info_store = host_info.get_store_from_machine(machine)
     info = host_info_store.get()
 
@@ -180,7 +184,9 @@ def create_host(machine, host_class=None, connectivity_class=None, **args):
         deprecation.warn('server.create_hosts:connectivity_class')
         connectivity_class = None
 
-    detected_args = _get_host_arguments(machine)
+    # force use ssh connection pool to send the command.
+    # it can save create ssh connection time.
+    detected_args = _get_host_arguments(machine, use_connection_pool=True)
     hostname = detected_args.pop('hostname')
     afe_host = detected_args['afe_host']
     info_store = detected_args['host_info_store'].get()

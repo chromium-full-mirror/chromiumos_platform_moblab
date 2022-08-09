@@ -173,8 +173,14 @@ class MoblabDUTConnector(object):
         return list(set(connected_ip_addresses))
 
     def get_connected_duts(self):
-        command_results = self.run_command_on_connected_duts(
-            "timeout 2 cat /etc/lsb-release | grep CHROMEOS_RELEASE_TRACK | awk -F '=' '{print $2}'", timeout=10
+        self.find_duts()
+        return self.get_duts(ip_addresses=self.connected_ip_addresses)
+
+    def get_duts(self, ip_addresses):
+        command_results = self.run_command_on_ips(
+            command="timeout 2 cat /etc/lsb-release | grep CHROMEOS_RELEASE_TRACK | awk -F '=' '{print $2}'",
+            ip_addresses=ip_addresses,
+            timeout=10
         )
 
         def is_dut_connected(output):

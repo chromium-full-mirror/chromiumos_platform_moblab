@@ -677,11 +677,10 @@ class MoblabService(object):
     If there has one dut without test image, it will raise exception. Otherwise, this function does nothings.
     """
     def check_duts_without_test_image(self, ips):
-        disconnected_dut_ips = list(map(lambda dut: dut['ip'], filter(lambda dut: not dut['isConnected'], self.get_connected_devices())))
-        for ip in ips:
-            if ip in disconnected_dut_ips:
-                raise MoblabRpcError("dut (ip: %s) without test image" % ip)
-
+        # test duts by given ips. Saving call `find_duts` time.
+        disconnected_dut_ips = list(map(lambda dut: dut[0], filter(lambda dut: not dut[1], self.dut_connector.get_duts(ip_addresses=ips))))
+        for ip in disconnected_dut_ips:
+            raise MoblabRpcError("dut (ip: %s) without test image" % ip)
 
     async def enroll_duts(self, ip_addresses):
         """

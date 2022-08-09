@@ -89,7 +89,7 @@ class DutManagerRpcConnectorAsync(object):
                     operation_request
                 )
                 logging.debug("tick: Operation returned: %s", operation)
-                await asyncio.sleep(2)
+                await asyncio.sleep(1)
             return operation.response
         except grpc.RpcError:
             cls.disconnect()  # Force reconnect on retry
