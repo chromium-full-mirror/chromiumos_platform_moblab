@@ -829,7 +829,7 @@ message GetRemoteAgentConfigurationResponse {
 
 // NEXT_TAG = 2;
 message SetRemoteAgentConfigurationRequest {
-  bool is_enabled = 1;;
+  bool is_enabled = 1;
 }
 
 // NEXT_TAG = 2;
