@@ -1005,7 +1005,7 @@ class ServoHost(base_servohost.BaseServoHost):
             return None
         fname = os.path.basename(self._to_str(res.stdout.strip()))
         # From the fname, ought to extract the timestamp using the TS_EXTRACTOR
-        ts_match = self.TS_EXTRACTOR.match(fname.decode('utf-8'))
+        ts_match = self.TS_EXTRACTOR.match(fname)
         if not ts_match:
             logging.warning('Failed to extract timestamp from servod log file '
                             '%r. Skipping. The servo host is using outdated '
