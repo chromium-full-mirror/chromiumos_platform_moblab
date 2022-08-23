@@ -12,6 +12,8 @@ ARG REGISTRY_URI
 
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
+ARG GID=412
+
 RUN apt-get update && apt-get install --no-install-recommends -yq \
     apache2 \
     apache2-utils \
@@ -84,7 +86,7 @@ RUN ln -s /usr/local/lib/python3.7/site-packages/* /usr/local/autotest/site-pack
 COPY afe_startup.sh /
 RUN chmod uog+rx /afe_startup.sh
 
-RUN addgroup --gid 412 docker
+RUN addgroup --gid $GID docker
 USER moblab
 ENV USER=moblab
 
