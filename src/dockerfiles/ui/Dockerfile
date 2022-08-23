@@ -47,7 +47,9 @@ RUN ng build --output-path=dist --output-hashing=all --configuration=production
 # base image
 FROM ${BASE_REGISTRY_URI}/nginx:alpine
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+ARG UID=246
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID \
      --disabled-password --gecos "" moblab
 
 RUN mkdir -p /var/cache/nginx/client_temp

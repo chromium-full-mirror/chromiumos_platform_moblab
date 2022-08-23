@@ -15,7 +15,10 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+ARG UID=246
+ARG GID=412
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID \
     --disabled-password --gecos "" moblab
 
 COPY --chown=moblab src/remote_agent/ /etc/moblab/remote_agent
@@ -62,7 +65,7 @@ RUN apt autoremove -yq
 RUN apt-get clean
 
 # Need to be in docker group to use docker API
-RUN addgroup --gid 412 docker
+RUN addgroup --gid $GID docker
 RUN usermod -aG docker moblab
 
 RUN mkdir /moblab

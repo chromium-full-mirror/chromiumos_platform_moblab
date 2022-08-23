@@ -24,7 +24,10 @@ FROM ${BASE_REGISTRY_URI}/python:3.6.9-slim-buster as run
 
 WORKDIR /
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+ARG UID=246
+ARG GID=412
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID \
     --disabled-password --gecos "" moblab
 
 COPY --from=chromite --chown=moblab /chromite /chromite
@@ -97,7 +100,7 @@ RUN  wget https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae6
 RUN echo "moblab" > /etc/lsb-release
 
 # Need to be in docker group to use docker API
-RUN addgroup --gid 412 docker &&\
+RUN addgroup --gid $GID docker &&\
     usermod -aG docker moblab
 
 USER moblab

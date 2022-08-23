@@ -14,7 +14,9 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+ARG UID=246
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID \
     --disabled-password --gecos "" moblab
 
 

@@ -31,7 +31,9 @@ FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
 WORKDIR /
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+ARG UID=246
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID \
     --disabled-password --gecos "" moblab
 RUN apt-get update && apt-get install -yq \
     cmake \

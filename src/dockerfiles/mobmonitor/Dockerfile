@@ -46,7 +46,10 @@ FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
 WORKDIR /
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
+ARG UID=246
+ARG GID=412
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID --disabled-password --gecos "" moblab
 RUN apt-get update && apt-get install -yq gcc iputils-ping usbutils procps
 
 RUN apt-get update && apt-get install -yq \
@@ -74,7 +77,7 @@ COPY --chown=moblab --from=build /app/dist /etc/moblab/mobmonitor/static/
 RUN mkdir -p /var/log/mobmonitor/
 RUN chown -R moblab /var/log/mobmonitor
 
-RUN addgroup --gid 412 docker
+RUN addgroup --gid $GID docker
 RUN usermod -aG docker moblab
 
 RUN apt purge -yq cmake zlib1g-dev gcc-multilib
