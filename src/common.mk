@@ -8,6 +8,8 @@ EXTRA_ARGS+= --build-arg LABEL=${LABEL}
 EXTRA_ARGS+= --build-arg WATCHTOWER_CMD="${WATCHTOWER_CMD}"
 EXTRA_ARGS+= --build-arg SSH_PORT="${SSH_PORT}"
 EXTRA_ARGS+= --build-arg BASE_REGISTRY_URI="${BASE_REGISTRY_URI}"
+EXTRA_ARGS+= --build-arg UID=${UID}
+EXTRA_ARGS+= --build-arg GID=${GID}
 
 
 all:	autotest \
