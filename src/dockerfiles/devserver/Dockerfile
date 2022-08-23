@@ -94,10 +94,12 @@ RUN install  \
 
 EXPOSE 8080
 
+ARG UID=246
+
 ## Add moblab user
-RUN addgroup --gid 246 moblab && \
+RUN addgroup --gid $UID moblab && \
         adduser --gecos "" --ingroup moblab \
-        --disabled-password --uid 246 moblab
+        --disabled-password --uid $UID moblab
 RUN echo "moblab     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN mkdir -p /static/cache

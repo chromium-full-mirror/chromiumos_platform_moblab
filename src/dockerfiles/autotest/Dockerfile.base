@@ -35,8 +35,10 @@ RUN protoc --proto_path /usr/local/autotest/tko \
 
 FROM ${BASE_REGISTRY_URI}/python:3.7-slim-buster
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
-    --uid 246 --disabled-password --gecos "" moblab
+ARG UID=246
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab \
+    --uid $UID --disabled-password --gecos "" moblab
 
 COPY --chown=moblab ./third_party/autotest /usr/local/autotest
 COPY --chown=moblab --from=protobuild /usr/local/autotest/tko/*pb2* /usr/local/autotest/tko/

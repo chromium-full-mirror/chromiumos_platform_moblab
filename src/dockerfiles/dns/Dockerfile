@@ -6,6 +6,8 @@ ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 
 FROM ${BASE_REGISTRY_URI}/alpine:edge
 
+ARG UID=246
+
 # fetch dnsmasq
 RUN apk update \
     && apk --no-cache add dnsmasq libcap
@@ -18,8 +20,8 @@ COPY dnsmasq.conf /etc/dnsmasq.conf
 # params to the command in startup.sh.
 COPY startup.sh /
 RUN chmod u+x /startup.sh
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab \
-    --uid 246 --disabled-password --gecos "" moblab
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab \
+    --uid $UID --disabled-password --gecos "" moblab
 
 RUN mkdir -p /var/log
 RUN chown -R moblab:moblab /var/log
