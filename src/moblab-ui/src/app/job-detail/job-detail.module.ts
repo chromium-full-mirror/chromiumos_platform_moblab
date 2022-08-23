@@ -9,6 +9,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
+import {PipesModule} from '../pipes/pipes.module';
 
 import {JobDetailComponent} from './job-detail.component';
 
@@ -30,6 +31,7 @@ import {WidgetsModule} from '../widgets/widgets.module';
     ReactiveFormsModule,
     ViewJobsModule,
     WidgetsModule,
+    PipesModule,
   ],
   declarations: [JobDetailComponent],
   exports: [JobDetailComponent],
