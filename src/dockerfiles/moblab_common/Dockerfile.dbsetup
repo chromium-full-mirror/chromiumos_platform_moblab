@@ -10,6 +10,8 @@ ARG LABEL=autopush
 
 FROM ${BASE_REGISTRY_URI}/python:3.8-buster as python3
 
+ARG UID=246
+
 RUN apt-get update && apt-get install --no-install-recommends -yq \
     mariadb-client
 
@@ -21,7 +23,7 @@ COPY moblab_common/ /workdir/moblab_common/
 
 COPY dockerfiles/moblab_common/moblab_db_migrate.sh /workdir/moblab_common/database_models/
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID \
     --disabled-password --gecos "" moblab
 
 RUN chown -R moblab:moblab /workdir

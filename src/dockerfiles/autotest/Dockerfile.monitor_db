@@ -23,6 +23,8 @@ ARG LABEL
 
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
+ARG GID=412
+
 RUN apt-get update && apt-get install --no-install-recommends -yq    \
     iputils-ping \
     libcap2-bin \
@@ -46,7 +48,7 @@ RUN mkdir -p /usr/local/autotest/server/cros/faft
 COPY --chown=moblab --from=fw-testing-configs /fw-testing-configs/ /usr/local/autotest/server/cros/faft/fw-testing-configs/
 
 # Need to be in docker group to use docker API
-RUN addgroup --gid 412 docker
+RUN addgroup --gid $GID docker
 RUN usermod -aG docker moblab
 
 RUN apt purge -yq python-pip libcap2-bin

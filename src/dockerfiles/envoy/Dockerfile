@@ -9,7 +9,9 @@ ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 
 FROM ${BASE_REGISTRY_URI}/envoyproxy/envoy:v1.15.2
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 --disabled-password --gecos "" moblab
+ARG UID=246
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID --disabled-password --gecos "" moblab
 
 COPY --chown=moblab envoy.yaml /etc/envoy/envoy.yaml
 

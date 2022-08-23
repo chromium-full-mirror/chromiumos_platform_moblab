@@ -20,7 +20,10 @@ FROM ${REGISTRY_URI}/moblab_common:${LABEL} as common
 
 FROM ${BASE_REGISTRY_URI}/python:3.8-slim-buster
 
-RUN addgroup --gid 246 moblab && adduser --ingroup moblab --uid 246 \
+ARG UID=246
+ARG GID=412
+
+RUN addgroup --gid $UID moblab && adduser --ingroup moblab --uid $UID \
     --disabled-password --gecos "" moblab
 
 # Needed for dut_connector
@@ -39,7 +42,7 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Need to be in docker group to use docker API
-RUN addgroup --gid 412 docker
+RUN addgroup --gid $GID docker
 RUN usermod -aG docker moblab
 
 RUN mkdir -p /var/log/moblab
