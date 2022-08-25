@@ -7,6 +7,7 @@ set -x
 set -e
 
 BUILD_CONTAINER_REGISTRY=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
+BUILD_CONTAINER_REGISTRY_DEV=us-docker.pkg.dev/chromeos-partner-moblab-dev/base-containers
 CONTAINERS=(
     alpine/git
     alpine:edge
@@ -29,11 +30,14 @@ CONTAINERS=(
     python:3.7-slim-buster
     python:3.8-buster
     python:3.8-slim-buster
-    v2tec/watchtower:latest)
+    v2tec/watchtower:latest
+    )
 
 for container in ${CONTAINERS[@]}
 do
     docker pull "${container}"
     docker tag "${container}" "${BUILD_CONTAINER_REGISTRY}/${container}"
     docker push "${BUILD_CONTAINER_REGISTRY}/${container}"
+    docker tag "${container}" "${BUILD_CONTAINER_REGISTRY_DEV}/${container}"
+    docker push "${BUILD_CONTAINER_REGISTRY_DEV}/${container}"
 done
