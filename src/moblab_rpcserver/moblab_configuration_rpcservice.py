@@ -168,9 +168,9 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
                     seconds=int(settings[0].value.double_value)
                 )
             )
-        # default to 3 days local results retention
+        # default to 1 hour local results retention
         return GetLocalResultsRetentionDurationResponse(
-            duration=duration_pb2.Duration(seconds=(3 * 24 * 60 * 60))
+            duration=duration_pb2.Duration(seconds=(1 * 60 * 60))
         )
 
     def _get_stable_build_version(self, board):
