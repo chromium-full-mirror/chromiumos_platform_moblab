@@ -288,10 +288,14 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
         try:
             pool_name = request.pool
+            model = request.model
+            board = request.build_target
             if pool_name == "":
                 pool_name = None
             await self.storage_qual_check_service.check_setup(
-                pool_name, request.variation
+                model,
+                board,
+                pool_name, 
             )
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)
@@ -1304,10 +1308,12 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         """
 
         pool_name = request.pool_name
+        model = request.model
+        board = request.board
         if pool_name == "":
             pool_name = None
         try:
-            await self.storage_qual_check_service.check_setup(pool_name)
+            await self.storage_qual_check_service.check_setup(model, board, pool_name)
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)
             _context.set_details(str(ex))

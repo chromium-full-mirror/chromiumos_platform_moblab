@@ -840,6 +840,8 @@ message SetRemoteAgentConfigurationResponse {
 // NEXT_TAG = 2
 message ValidateStorageQualSetupRequest {
   string pool_name = 1;
+  string model = 2;
+  string board = 3;
 }
 
 // NEXT_TAG = 3

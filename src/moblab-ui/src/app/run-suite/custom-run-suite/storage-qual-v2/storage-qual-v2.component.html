@@ -1,9 +1,12 @@
 <mat-card>
-  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)" (allRequiredFieldsSet)="avlInputChanged()"
+  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)" (allRequiredFieldsSet)="validateStorageQualSetup()"
     (buildVersionUnselected)="onBuildVersionUnselected()" (formLoading)="onFormLoading($event.message)"
     (formLoaded)="onFormLoaded()">
   </app-build-select-forms>
 
+  <div class=storage-check-validation>
+    <mat-error *ngIf="storageQualCheckError">{{storageQualCheckError}}</mat-error>
+  </div>
   <mat-divider></mat-divider>
 
   <app-basic-input #diskSizeInput [name]="'Disk drive total size [GB]'" [isNumeric]="true"

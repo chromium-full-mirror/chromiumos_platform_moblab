@@ -18,20 +18,25 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
     """Testing the StorageQualCheckService code."""
 
     async def test_check_works(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["pool:{}".format(pool), "model:{}".format(model), "board:{}".format(board)]
+        # v1
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["retention", "pool:p1"],
+                    "labels": ["dut:1"] + labels,
                     "hostname": "A",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["trim", "pool:p1"],
+                    "labels": ["dut:2"] + labels,
                     "hostname": "B",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["suspend", "pool:p1"],
+                    "labels": ["dut:3"] + labels,
                     "hostname": "C",
                     "enrolled": True,
                 },
@@ -39,19 +44,27 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
         )
 
         service = StorageQualCheckService()
-        await service.check_setup("p1")
+        await service.check_setup(model, board, pool)
 
     async def test_check_no_pool_raises_exception(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["model:{}".format(model), "board:{}".format(board)]
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["retention"],
+                    "labels": ["dut:1"] + labels,
                     "hostname": "A",
                     "enrolled": True,
                 },
-                {"labels": ["trim"], "hostname": "B", "enrolled": True},
                 {
-                    "labels": ["suspend"],
+                    "labels": ["dut:2"] + labels,
+                    "hostname": "B",
+                    "enrolled": True
+                },
+                {
+                    "labels": ["dut:3"] + labels,
                     "hostname": "C",
                     "enrolled": True,
                 },
@@ -60,23 +73,86 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            await service.check_setup(None)
+            await service.check_setup(model, board, None)
+
+    async def test_check_raises_exception_without_model(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["board:{}".format(board), "pool:{}".format(pool)]
+        mock_service.return_value.list_duts.return_value = self.future_wrapper(
+            [
+                {
+                    "labels": [ "dut:1"] + labels,
+                    "hostname": "A",
+                    "enrolled": True,
+                },
+                {
+                    "labels": ["dut:2"] + labels,
+                    "hostname": "B", 
+                    "enrolled": True
+                },
+                {
+                    "labels": ["dut:3"] + labels,
+                    "hostname": "C",
+                    "enrolled": True,
+                },
+            ]
+        )
+
+        service = StorageQualCheckService()
+        with self.assertRaises(StorageQualCheckError):
+            await service.check_setup(None, board, pool)
+
+    async def test_check_raises_exception_without_board(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["model:{}".format(board), "pool:{}".format(pool)]
+        mock_service.return_value.list_duts.return_value = self.future_wrapper(
+            [
+                {
+                    "labels": ["dut:1"] + labels,
+                    "hostname": "A",
+                    "enrolled": True,
+                },
+                {
+                    "labels": ["dut:2"] + labels,
+                    "hostname": "B", 
+                    "enrolled": True
+                },
+                {
+                    "labels": ["dut:3"] + labels,
+                    "hostname": "C",
+                    "enrolled": True,
+                },
+            ]
+        )
+
+        service = StorageQualCheckService()
+        with self.assertRaises(StorageQualCheckError):
+            await service.check_setup(model, None, pool)
+
 
     async def test_check_case_insensitive(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["pool:{}".format(pool), "model:{}".format(model), "board:{}".format(board)]
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["RETENTION", "pool:p1"],
+                    "labels": ["DUT:1"] + labels,
                     "hostname": "A",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["TRIM", "pool:p1"],
+                    "labels": ["dut:2"] + labels,
                     "hostname": "B",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["suspend", "pool:p1"],
+                    "labels": ["DUT:3"] + labels,
                     "hostname": "C",
                     "enrolled": True,
                 },
@@ -84,23 +160,27 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
         )
 
         service = StorageQualCheckService()
-        await service.check_setup("p1")
+        await service.check_setup(model, board, pool)
 
     async def test_check_duplicated_labels(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["pool:{}".format(pool), "model:{}".format(model), "board:{}".format(board)]
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["trim", "pool:p1"],
+                    "labels": ["dut:2"] + labels,
                     "hostname": "A",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["trim", "pool:p1"],
+                    "labels": ["dut:2"] + labels,
                     "hostname": "B",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["suspend", "pool:p1"],
+                    "labels": ["dut:3"] + labels,
                     "hostname": "C",
                     "enrolled": True,
                 },
@@ -109,18 +189,22 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            await service.check_setup("p1")
+            await service.check_setup(model, board, pool)
 
     async def test_check_multiple_labels_on_one_dut(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["pool:{}".format(pool), "model:{}".format(model), "board:{}".format(board)]
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["retention", "trim", "pool:p1"],
+                    "labels": ["trim", "dut:1", "dut:2"] + labels,
                     "hostname": "A",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["suspend", "pool:p1"],
+                    "labels": ["dut:3"] + labels,
                     "hostname": "C",
                     "enrolled": True,
                 },
@@ -129,23 +213,27 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            await service.check_setup("p1")
+            await service.check_setup(model, board, pool)
 
     async def test_check_missing_label(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["pool:{}".format(pool), "model:{}".format(model), "board:{}".format(board)]
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["trim", "pool:p1"],
+                    "labels": ["dut:2"] + labels,
                     "hostname": "A",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["label1", "pool:p1"],
+                    "labels": ["dut"] + labels,
                     "hostname": "B",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["suspend", "pool:p1"],
+                    "labels": ["dut:3"] + labels,
                     "hostname": "C",
                     "enrolled": True,
                 },
@@ -154,23 +242,27 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            await service.check_setup("p1")
+            await service.check_setup(model, board, pool)
 
     async def test_check_excludes_not_enrolled(self, mock_service):
+        model = "Dirinboz"
+        board = "zork"
+        pool = "p1"
+        labels = ["pool:{}".format(pool), "model:{}".format(model), "board:{}".format(board)]
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["retention", "pool:1"],
+                    "labels": ["dut:1"] + labels,
                     "hostname": "A1",
                     "enrolled": False,
                 },
                 {
-                    "labels": ["trim", "pool:1"],
+                    "labels": ["dut:2"] + labels,
                     "hostname": "B2",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["suspend", "pool:1"],
+                    "labels": ["dut:3"] + labels,
                     "hostname": "C",
                     "enrolled": True,
                 },
@@ -179,27 +271,80 @@ class StorageQualCheckServiceTest(IsolatedAsyncioTestCase):
 
         service = StorageQualCheckService()
         with self.assertRaises(StorageQualCheckError):
-            await service.check_setup("1", 1)
+            await service.check_setup(model, board, pool)
 
-    async def test_check_bypassed_for_new_storage_qual(self, mock_service):
+    async def test_check_there_has_enough_same_model_and_board_duts(self, mock_service):
+        model_1 = "Dirinboz"
+        board_1 = "zork"
+        model_2 = "rammus"
+        board_2 = "Leona"
+        pool = "p1"
+        first_labels = ["pool:{}".format(pool), "model:{}".format(model_1), "board:{}".format(board_1)]
+        second_labels = ["pool:{}".format(pool), "model:{}".format(model_2), "board:{}".format(board_2)]
         mock_service.return_value.list_duts.return_value = self.future_wrapper(
             [
                 {
-                    "labels": ["retention", "pool:1"],
+                    "labels": [ "dut:1"] + first_labels,
                     "hostname": "A1",
                     "enrolled": True,
                 },
                 {
-                    "labels": ["trim", "pool:1"],
-                    "hostname": "B1",
+                    "labels": ["dut:2"] + first_labels,
+                    "hostname": "B2",
                     "enrolled": True,
                 },
-                {"labels": ["suspend"], "hostname": "C", "enrolled": True},
+                {
+                    "labels": ["dut:3"] + first_labels,
+                    "hostname": "C",
+                    "enrolled": True,
+                },
+                {
+                    "labels": ["dut:1"] + second_labels,
+                    "hostname": "A1",
+                    "enrolled": True,
+                }
             ]
         )
 
         service = StorageQualCheckService()
-        await service.check_setup("1", 4)
+        await service.check_setup(model_1, board_1, pool)    
+    
+    async def test_check_there_has_not_enough_same_model_and_board_duts(self, mock_service):
+        model_1 = "Dirinboz"
+        board_1 = "zork"
+        model_2 = "rammus"
+        board_2 = "Leona"
+        pool = "p1"
+        first_labels = ["pool:{}".format(pool), "model:{}".format(model_1), "board:{}".format(board_1)]
+        second_labels = ["pool:{}".format(pool), "model:{}".format(model_2), "board:{}".format(board_2)]
+        mock_service.return_value.list_duts.return_value = self.future_wrapper(
+            [
+                {
+                    "labels": ["dut:1"] + first_labels,
+                    "hostname": "A1",
+                    "enrolled": True,
+                },
+                {
+                    "labels": ["dut:2"] + first_labels,
+                    "hostname": "B2",
+                    "enrolled": True,
+                },
+                {
+                    "labels": ["dut:3"] + first_labels,
+                    "hostname": "C",
+                    "enrolled": True,
+                },
+                {
+                    "labels": ["dut:1"] + second_labels,
+                    "hostname": "A1",
+                    "enrolled": True,
+                }
+            ]
+        )
+
+        service = StorageQualCheckService()
+        with self.assertRaises(StorageQualCheckError):
+            await service.check_setup(model_2, board_2, pool)
 
     def future_wrapper(self, value):
         f = asyncio.Future()

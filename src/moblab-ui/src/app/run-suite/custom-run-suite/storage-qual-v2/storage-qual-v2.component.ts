@@ -39,6 +39,9 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
   ];
   suiteIndex = 0; // Index of currently seleted suite.
 
+  isStorageQualSetupValid: boolean = false;
+  storageQualCheckError: string = '';
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
@@ -76,7 +79,7 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
   /** Method triggered on change of either bug ID or part number.
    * */
   avlInputChanged() {
-    if (this.bugIdInput.getInput() && this.partNumberInput.getInput()) {
+    if (this.bugIdInput.getInput() && this.partNumberInput.getInput() && this.isStorageQualSetupValid) {
       this.runSuiteButton.enable();
     } else {
       this.runSuiteButton.disable();
@@ -130,6 +133,45 @@ export class StorageQualV2Component extends BaseSuite implements AfterViewInit {
       this.diskSizeInput.getInput(),
       this.dualNamespace.getChecked(),
       this.isPreQualified.getChecked()
+    );
+  }
+
+  validateStorageQualSetup() {
+    this.storageQualCheckError = '';
+    this.isStorageQualSetupValid = false;
+    this.avlInputChanged();
+
+    const variationsToCheck = [
+      RunStorageQualificationSuiteRequest.Variation.QUICK_V2,
+      RunStorageQualificationSuiteRequest.Variation.XS,
+      RunStorageQualificationSuiteRequest.Variation.S,
+      RunStorageQualificationSuiteRequest.Variation.M,
+      RunStorageQualificationSuiteRequest.Variation.L,
+      RunStorageQualificationSuiteRequest.Variation.XL,
+    ];
+    const variation = this.suiteIndex + Number(RunStorageQualificationSuiteRequest.Variation.QUICK_V2);
+
+    if (!variationsToCheck.includes(variation)) {
+      this.isStorageQualSetupValid = true;
+      return;
+    }
+
+    this.onFormLoading('validating storage qual setup ...');
+    this.moblabGrpcService.validateStorageQualSetup(
+      () => {
+        this.isStorageQualSetupValid = true;
+        this.storageQualCheckError = '';
+       this.avlInputChanged();
+        this.onFormLoaded();
+      },
+      (msg: string) => {
+        this.storageQualCheckError = msg;
+        this.avlInputChanged();
+        this.onFormLoaded();
+      },
+      this.selectedModel,
+      this.selectedBoard,
+      this.selectedPool,
     );
   }
 }
