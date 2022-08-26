@@ -174,12 +174,12 @@ class MoblabDUTConnector(object):
 
     def get_connected_duts(self):
         command_results = self.run_command_on_connected_duts(
-            "timeout 2 cat /etc/lsb-release", timeout=10
+            "timeout 2 cat /etc/lsb-release | grep CHROMEOS_RELEASE_TRACK | awk -F '=' '{print $2}'", timeout=10
         )
 
         def is_dut_connected(output):
             if output:
-                return output is not None
+                return output is not None and output.strip().lower() == 'testimage-channel'
             return False
 
         results = []
