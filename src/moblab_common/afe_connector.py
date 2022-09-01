@@ -417,7 +417,12 @@ class AFEConnector(object):
         return self.decode_response(response, "result")
 
     def get_host_queue_entries(
-        self, job_id=None, host_id=None, query_start=None, query_limit=None
+        self,
+        job_id=None,
+        host_id=None,
+        query_start=None,
+        query_limit=None,
+        sort_by=None
     ):
         """Get attributes of all HQE of given id.
 
@@ -427,11 +432,20 @@ class AFEConnector(object):
             query_start(int): Parameter specifying index on where to start when
                 returning paged results.
             query_limit(int): Upper limit on number of results to return.
+            sort_by: parameter for specifying jobs ordering.
 
         Returns:
             A list of dict. The dict is the information about the HQE.
         """
         params = {}
+
+        """
+        For ordering the afe_jobs table, we add the prefix to sort_by.
+        """
+        if sort_by and sort_by.startswith("-"):
+            params["sort_by"] = ["-afe_jobs.%s" % (sort_by[1:])]
+        elif sort_by:
+            params["sort_by"] = ["afe_jobs.%s" % sort_by]
 
         if query_start is not None and query_limit is not None:
             params["query_start"] = query_start
