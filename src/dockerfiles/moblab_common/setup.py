@@ -17,7 +17,7 @@ setuptools.setup(
         "docker",
         "parallel-ssh",
         "python-nmap",
-        "protobuf",
+        "protobuf==3.17.0",
         "sqlalchemy",
         "pymysql",
     ],
