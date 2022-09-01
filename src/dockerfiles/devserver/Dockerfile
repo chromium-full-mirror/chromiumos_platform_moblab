@@ -72,7 +72,7 @@ COPY apache2 /bin
 
 WORKDIR /devserver-src/dev-util
 
-RUN install -m 0755 host/start_devserver "/usr/bin"
+RUN ln -sfT /usr/lib/devserver/devserver.py "${DESTDIR}/usr/bin/start_devserver"
 
 RUN mkdir /usr/lib/devserver
 RUN install -m 0755 devserver.py /usr/lib/devserver
