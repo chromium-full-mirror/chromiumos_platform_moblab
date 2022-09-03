@@ -7,6 +7,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
+import {MatRadioModule} from '@angular/material/radio';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -33,6 +34,7 @@ import {WidgetsModule} from './../widgets/widgets.module';
 import {NewUpdateNotifierComponent} from './common/new-update-notifier/new-update-notifier.component';
 import {NewUpdateModule} from '../directives/new-update/new-update.module';
 import {FAFTRunComponent} from './custom-run-suite/faft/faft.component';
+import {CUJRunComponent} from './custom-run-suite/cuj/cuj.component';
 import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
 
 @NgModule({
@@ -54,6 +56,7 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
     StorageQualV2Component,
     NewUpdateNotifierComponent,
     FAFTRunComponent,
+    CUJRunComponent,
     PvsComponent,
   ],
   exports: [
@@ -68,6 +71,7 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
     RunSuiteComponent,
     StorageQualV2Component,
     FAFTRunComponent,
+    CUJRunComponent,
   ],
   imports: [
     BrowserModule,
@@ -79,6 +83,7 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
     MatDividerModule,
     MatIconModule,
     MatInputModule,
+    MatRadioModule,
     MatSelectModule,
     MatTabsModule,
     MatTooltipModule,
