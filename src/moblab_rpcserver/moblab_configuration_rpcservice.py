@@ -5,9 +5,11 @@
 # found in the LICENSE file.
 import logging
 import asyncio
+import re
 from google.protobuf import duration_pb2, empty_pb2
 
 import moblab_service
+
 from moblab_common.proto.moblab_configuration_rpc_pb2 import (
     GetLocalResultsRetentionDurationResponse,
     PauseHostSchedulerResponse,
@@ -33,6 +35,12 @@ from moblab_common.proto.moblab_settings_pb2 import (
 )
 from moblab_common import moblab_build_connector
 
+import time
+import grpc
+
+class InvalidBuildVersion(Exception):
+    def __init__(self, message):
+        self.message = message
 
 class ConfigurationRpcService(MoblabConfigurationServiceServicer):
     def __init__(self):
@@ -122,9 +130,38 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
             )
         return response
 
-    def set_stable_build_version(self, request, context):
+    async def set_stable_build_version(self, request, context):
         """Update stable build version configuration"""
-        if request.stable_version.override_version is not None:
+
+        async def _validate():
+            osversion_re = re.compile("R([0-9]{2,3})-([0-9]{5,}\.[0-9]{1,}\.[0-9]{1,})")
+            match = osversion_re.match(str(request.stable_version.override_version).strip())
+            target_milestone, target_build_version = match.group(1), match.group(2)
+            
+            duts = await self.moblab_service._list_duts_from_dut_manager()
+            for dut in duts:
+                model, board = moblab_service.LabelsParser.extract_model_and_build_target_from_labels(dut["labels"])
+                try:
+                    build_versions = self.moblab_build_connector.list_builds_for_milestone(
+                        board,
+                        model,
+                        target_milestone,
+                    )
+                except: 
+                    raise InvalidBuildVersion("Invalid Milestone")
+                    
+                if target_build_version not in [build.version for build in build_versions]:
+                    raise InvalidBuildVersion("Invalid Build Version")
+
+        if request.stable_version.override_version is not None :
+            if request.stable_version.override_version:
+                try:
+                    await _validate()
+                except InvalidBuildVersion as e:
+                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                    context.set_details(e.message)
+                    return context
+
             setting = MoblabSetting(
                 key=MoblabSettingKey.STABLE_CROS_VERSION_OVERRIDE,
                 value=Value(

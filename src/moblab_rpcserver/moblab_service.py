@@ -145,6 +145,18 @@ class LabelsParser(object):
             build_target, model = match.group(1), match.group(2)
         return (build_target, model)
 
+    @classmethod
+    def extract_model_and_build_target_from_labels(cls, labels):
+        """ Extract model & build target from labels """
+        model = None
+        board = None
+
+        for label in labels:
+            model = cls._model_re.match(label).group(1) if cls._model_re.match(label) else model
+            board = cls._build_target_re.match(label).group(1) if cls._build_target_re.match(label) else board
+        
+        return(model, board)
+
 
 class MoblabService(object):
 
