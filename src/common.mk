@@ -10,7 +10,10 @@ EXTRA_ARGS+= --build-arg SSH_PORT="${SSH_PORT}"
 EXTRA_ARGS+= --build-arg BASE_REGISTRY_URI="${BASE_REGISTRY_URI}"
 EXTRA_ARGS+= --build-arg UID=${UID}
 EXTRA_ARGS+= --build-arg GID=${GID}
-
+# uncomment the below line to add -no-cache to all your make
+# commands while building locally.
+# This is not be pushed to prod
+# EXTRA_ARGS+= --no-cache
 
 all:	autotest \
 		compose \
