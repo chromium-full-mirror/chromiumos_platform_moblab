@@ -215,13 +215,14 @@ class MoblabDUTConnector(object):
         results = []
         for (host, stdout, stderr, exit_code) in command_results:
             if exit_code:
-                results.append((host, stderr, stderr))
+                # don't append the host when exit_code is not None
+                # we log the stderr and stdout.
+                logging.exception("Failed to connect to dut exit code: %s, details: %s" % (exit_code, stdout))
             else:
                 try:
                     parsed_results = json.loads(stdout)
                 except json.JSONDecodeError as e:
                     logging.exception("Failed to decode fw details %s", stdout)
-                    results.append((host, e.msg, stderr))
                     continue
                 model = parsed_results["model"]
                 current_firmware = parsed_results["fwid"]
