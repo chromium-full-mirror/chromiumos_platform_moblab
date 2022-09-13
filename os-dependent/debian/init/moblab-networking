@@ -27,8 +27,8 @@ case "$1" in
         # sudo ip addr will show all the interfaces on your machine
         # Pick the correct values for EXT_IFACE and INT_IFACE
         ##################################################################
-        EXT_IFACE=enp8s0   # Interface that is connected to the internet
-        INT_IFACE=enp10s0  # Interface that is connected to DUT
+        EXT_IFACE=EXTERNAL_PORT_TO_INTERNET   # Interface that is connected to the internet
+        INT_IFACE=INTERNAL_PORT_TO_DUTS  # Interface that is connected to DUT
         ##################################################################
         # Do not edit below this line.
 

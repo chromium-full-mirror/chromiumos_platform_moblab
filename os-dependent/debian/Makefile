@@ -4,6 +4,8 @@
 
 PROTO := hostservice.proto
 INSTALL_DIR := /etc/moblab/host_server
+CONFIG = moblab_setup_configuration.conf
+include ${CONFIG}
 
 .PHONY: all init clean
 
@@ -63,6 +65,8 @@ network-dependencies:
 	apt install bridge-utils net-tools
 
 networking: network-dependencies
+	sed -i "s|EXTERNAL_PORT_TO_INTERNET|${EXTERNAL_PORT_TO_INTERNET}|g" init/moblab-networking
+	sed -i "s|INTERNAL_PORT_TO_DUTS|${INTERNAL_PORT_TO_DUTS}|g" init/moblab-networking
 	cp init/moblab-networking /etc/init.d
 	systemctl daemon-reload
 	systemctl enable moblab-networking.service
