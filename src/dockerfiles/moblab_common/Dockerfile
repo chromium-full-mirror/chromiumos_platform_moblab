@@ -40,6 +40,8 @@ RUN curl https://storage.googleapis.com/moblab-api-distribution/python-client-li
 RUN tar -xvzf google-chromeos-moblab-python-1.3.0-beta.tar.gz
 RUN python3 -m pip install .
 RUN rm -rf /tmp/moblab_api_client_library
+# workaround for https://github.com/googleapis/python-api-core/issues/447
+RUN pip install google-api-core[grpc]==1.32.0
 
 WORKDIR /test
 RUN python3 -m pip install /src/moblab_common/dist/*.whl
