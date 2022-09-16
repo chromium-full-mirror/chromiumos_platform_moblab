@@ -23,7 +23,6 @@ class MockClientError(Exception):
 sys.modules["google.cloud"] = MagicMock()
 sys.modules["google.api_core"] = MagicMock()
 sys.modules["moblab_common"] = MagicMock()
-sys.modules["requests"] = MagicMock()
 
 from moblab_service import MoblabService, MoblabRpcError
 

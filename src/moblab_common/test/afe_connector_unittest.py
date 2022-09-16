@@ -16,7 +16,6 @@ from unittest.mock import MagicMock
 from moblab_common import afe_connector
 
 sys.modules["docker"] = MagicMock()
-sys.modules["requests"] = MagicMock()
 
 
 class AFEConnectorTest(unittest.TestCase):
