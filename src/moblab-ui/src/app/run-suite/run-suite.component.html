@@ -55,6 +55,15 @@
           </div>
         </ng-template>
       </mat-tab>
+      <mat-tab label="CUJ">
+        <ng-template matTabContent>
+          <div class="suite-form-wrapper">
+            <app-loading-overlay></app-loading-overlay>
+            <app-cuj (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            </app-cuj>
+          </div>
+        </ng-template>
+      </mat-tab>
       <mat-tab label="PVS">
         <ng-template matTabContent>
           <div class="suite-form-wrapper">
