@@ -37,6 +37,7 @@ from host_scheduler_pause_service import HostSchedulerPauseService
 
 from lab.managed_dut_pb2 import ManagedDut, Pool
 from chromiumos.test.api.dut_attribute_pb2 import DutAttribute
+from cache import Cache
 
 MilestonePair = namedtuple("MilestonePair", ["milestone", "is_staged"])
 BuildVersionPair = namedtuple(
@@ -175,6 +176,8 @@ class MoblabService(object):
         self.upload_status_connector = (
             result_upload_status_connector.ResultUploadStatusConnector()
         )
+        self.milestone_cache = Cache(maxsize=50)
+        self.build_version_cache = Cache(maxsize=30)
 
     def _find_dut_id_given_ip(self, dut_hostname):
         """Given an ip address, will return the id given to the DUT by AFE.
@@ -886,7 +889,18 @@ class MoblabService(object):
                 )
             )
 
-    def list_usable_milestones(self, build_target, model):
+    def _key_getter(self, data):
+        s = ''
+        if 'model' in data:
+            s += data['model']
+        if 'build_target' in data:
+            s += data['build_target']
+        if 'milestone' in data:
+            s += data['milestone']
+        return hash(s)
+
+
+    def list_usable_milestones(self, build_target, model, force_update=False):
         """
         Returns milestones available for a given model/build_target, both
         staged and unstaged (if target bucket is in US, otherwise will only
@@ -900,54 +914,62 @@ class MoblabService(object):
             build_target(string): build_target (AKA board) to fetch milestones
               for.
             model(string): model to fetch milestones for.
+            force_update: force update the cache.
         Returns:
             A list of tuples where the first item is the milestone and the
             second is a boolean which is true iff at least one build of the
             milestone is staged.
         """
-        bucket_milestones = self.build_connector.get_milestones_available(
-            build_target
-        )
+        def _list_usable_milestones():
+            bucket_milestones = self.build_connector.get_milestones_available(
+                build_target
+            )
 
-        remote_milestones = []
-        if not self._is_moblab_bucket_in_asia():
-            try:
-                remote_milestones = (
-                    self.moblab_build_connector.list_available_milestones(
-                        build_target,
-                        model,
+            remote_milestones = []
+            if not self._is_moblab_bucket_in_asia():
+                try:
+                    remote_milestones = (
+                        self.moblab_build_connector.list_available_milestones(
+                            build_target,
+                            model,
+                        )
                     )
-                )
-            except moblab_build_connector.MoblabBuildConnectorException:
-                logging.exception(
-                    "Encountered error trying to fetch remote milestones."
-                )
+                except moblab_build_connector.MoblabBuildConnectorException:
+                    logging.exception(
+                        "Encountered error trying to fetch remote milestones."
+                    )
 
-        milestone_results = [
-            MilestonePair(milestone=milestone, is_staged=True)
-            for milestone in bucket_milestones
-        ]
-        milestone_results.extend(
-            [
-                MilestonePair(milestone=milestone, is_staged=False)
-                for milestone in list(
-                    set(remote_milestones).difference(set(bucket_milestones))
-                )
+            milestone_results = [
+                MilestonePair(milestone=milestone, is_staged=True)
+                for milestone in bucket_milestones
             ]
-        )
+            milestone_results.extend(
+                [
+                    MilestonePair(milestone=milestone, is_staged=False)
+                    for milestone in list(
+                        set(remote_milestones).difference(set(bucket_milestones))
+                    )
+                ]
+            )
 
-        milestone_results.sort(
-            key=lambda x: int(x[0].strip("R")), reverse=True
-        )
-        return BuildResults(
-            results=milestone_results,
-            is_incomplete=(
-                len(remote_milestones)
-                == moblab_build_connector.DEFAULT_PAGE_SIZE
-            ),
-        )
+            milestone_results.sort(
+                key=lambda x: int(x[0].strip("R")), reverse=True
+            )
+            return BuildResults(
+                results=milestone_results,
+                is_incomplete=(
+                    len(remote_milestones)
+                    == moblab_build_connector.DEFAULT_PAGE_SIZE
+                ),
+            )
 
-    def list_usable_build_versions(self, build_target, milestone, model):
+        return self.milestone_cache.get(
+                key=self._key_getter({'model': model, 'build_target': build_target}),
+                or_default=_list_usable_milestones,
+                force_update=force_update,
+            )
+
+    def list_usable_build_versions(self, build_target, milestone, model, force_update=False):
         """
         Returns build versions available for a given
         model/build_target/milestone, both staged and unstaged (if target
@@ -966,53 +988,61 @@ class MoblabService(object):
             A list of tuples where the first item is the build_version and the
             second is a boolean which is true iff the build is staged.
         """
-        bucket_build_versions = self.build_connector.get_builds_for_milestone(
-            build_target, milestone
-        )
-
-        build_version_results = [
-            BuildVersionPair(
-                build_version=build_version,
-                status=moblab_build_connector.BuildStatus.AVAILABLE,
-                is_staged=True,
+        def _list_usable_build_versions():
+            bucket_build_versions = self.build_connector.get_builds_for_milestone(
+                build_target, milestone
             )
-            for build_version in bucket_build_versions
-        ]
 
-        remote_build_versions = []
-        if not self._is_moblab_bucket_in_asia():
-            try:
-                remote_build_versions = (
-                    self.moblab_build_connector.list_builds_for_milestone(
-                        build_target, model, milestone
+            build_version_results = [
+                BuildVersionPair(
+                    build_version=build_version,
+                    status=moblab_build_connector.BuildStatus.AVAILABLE,
+                    is_staged=True,
+                )
+                for build_version in bucket_build_versions
+            ]
+
+            remote_build_versions = []
+            if not self._is_moblab_bucket_in_asia():
+                try:
+                    remote_build_versions = (
+                        self.moblab_build_connector.list_builds_for_milestone(
+                            build_target, model, milestone
+                        )
                     )
-                )
-            except moblab_build_connector.MoblabBuildConnectorException:
-                logging.exception(
-                    "Encountered error trying to fetch remote build versions."
-                )
-
-        staged_builds_set = set(bucket_build_versions)
-        for build_version in remote_build_versions:
-            if build_version.version not in staged_builds_set:
-                build_version_results.append(
-                    BuildVersionPair(
-                        build_version=build_version.version,
-                        status=build_version.status,
-                        is_staged=False,
+                except moblab_build_connector.MoblabBuildConnectorException:
+                    logging.exception(
+                        "Encountered error trying to fetch remote build versions."
                     )
-                )
 
-        build_version_results.sort(
-            key=lambda x: distutils.version.LooseVersion(x[0]), reverse=True
-        )
-        return BuildResults(
-            results=build_version_results,
-            is_incomplete=(
-                len(remote_build_versions)
-                == moblab_build_connector.DEFAULT_PAGE_SIZE
-            ),
-        )
+            staged_builds_set = set(bucket_build_versions)
+            for build_version in remote_build_versions:
+                if build_version.version not in staged_builds_set:
+                    build_version_results.append(
+                        BuildVersionPair(
+                            build_version=build_version.version,
+                            status=build_version.status,
+                            is_staged=False,
+                        )
+                    )
+
+            build_version_results.sort(
+                key=lambda x: distutils.version.LooseVersion(x[0]), reverse=True
+            )
+            return BuildResults(
+                results=build_version_results,
+                is_incomplete=(
+                    len(remote_build_versions)
+                    == moblab_build_connector.DEFAULT_PAGE_SIZE
+                ),
+            )
+
+        data = {'model': model, 'build_target': build_target, 'milestone': milestone}
+        return self.build_version_cache.get(
+                key=self._key_getter(data),
+                or_default=_list_usable_build_versions,
+                force_update=force_update
+            )
 
     def get_num_jobs(
         self,
