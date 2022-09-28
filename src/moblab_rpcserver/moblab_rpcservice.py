@@ -296,6 +296,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                 model,
                 board,
                 pool_name, 
+                request.variation
             )
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)

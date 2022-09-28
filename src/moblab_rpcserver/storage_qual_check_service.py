@@ -55,7 +55,7 @@ class StorageQualCheckService(object):
 
         return duts_in_pool
 
-    async def check_setup(self, model, board, pool_name):  
+    async def check_setup(self, model, board, pool_name, variation=0):  
         """
         Tests the moblab's connected DUTs to see if the current
         configuration is valid for storage qual run.
@@ -71,6 +71,9 @@ class StorageQualCheckService(object):
 
         if not board:
             raise StorageQualCheckError("Please select board first.")
+
+        if variation == 2:  # variation == Variation.REMOVABLE
+            return
 
         # get the pool of the host this test is running on
         duts_in_pool = await self._get_duts(model, board, pool_name)
