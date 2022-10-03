@@ -70,7 +70,8 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       ['Current DUT Task', dutInfo.getCurrentDutTask()],
     ]);
     this.dutTaskTableRef.setDutIp(this.dutQuery.value);
-    this.associatedJobsTableRef.refreshJobs(undefined, this.dutQuery.value);
+    this.associatedJobsTableRef.setDutIp(this.dutQuery.value);
+    this.associatedJobsTableRef.refreshJobs();
   }
 
   fetchDutDetails() {

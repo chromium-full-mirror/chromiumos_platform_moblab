@@ -130,7 +130,8 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
       job.getAssociatedDutsList()
     );
     this.serverControlFile = job.getServerControlFile();
-    this.childViewJobsTableRef.refreshJobs(this.jobQuery.value);
+    this.childViewJobsTableRef.setParentJobId(this.jobQuery.value);
+    this.childViewJobsTableRef.refreshJobs();
   }
 
   getLogsLink(execution: Execution) {

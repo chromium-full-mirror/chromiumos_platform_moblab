@@ -116,7 +116,6 @@ export class UploadStatus {
   providers: [DatePipe],
 })
 export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
-  @Input() input = '';
   @Input() manualPopulate = false;
   @Input() hideActionBar = false;
   @Input() hideFilters = false;
@@ -264,6 +263,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       : 0;
     const parent_id_filter = this.filters.getFormValue(PARENT_JOB_ID);
     const dut_filter = this.filters.getFormValue(DUT_RUN_ON);
+    
     return [
       job_id_filter,
       job_name_filter,
@@ -440,9 +440,15 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     this.filters.reset();
   }
 
+  public setDutIp(ip: string) {
+    this.filters.setFormValue(DUT_RUN_ON, ip);
+  }
+
+  public setParentJobId(id: string) {
+    this.filters.setFormValue(PARENT_JOB_ID, id);
+  }
+
   refreshJobs(parentJobId?: string, dutRunOn?: string) {
-    this.filters.setFormValue(PARENT_JOB_ID, parentJobId);
-    this.filters.setFormValue(DUT_RUN_ON, dutRunOn);
     this.resetPagination();
     this.getNextPageJobs();
   }

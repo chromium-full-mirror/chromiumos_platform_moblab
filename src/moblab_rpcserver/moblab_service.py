@@ -1106,6 +1106,7 @@ class MoblabService(object):
                 host_id=dut_id,
                 query_start=query_start,
                 query_limit=query_limit,
+                sort_by=sort_by
             )
 
             # Extracting jobs information from HQE entries.
