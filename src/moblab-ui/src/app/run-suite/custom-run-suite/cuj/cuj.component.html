@@ -12,15 +12,17 @@
   </app-basic-input>
 
   <div class="basic-radio-button" style="text-align: center;">
-    <mat-radio-group #labelSelector [disabled]="labelSelectDisabled" (change)="suiteLabelChanged($event.value)">
-      <mat-radio-button value="basic">Basic</mat-radio-button>
-      <mat-radio-button value="plus">Plus</mat-radio-button>
-      <mat-radio-button value="premium">Premium</mat-radio-button>
+    <mat-radio-group #labelSelector [disabled]="labelSelectDisabled" (change)="suiteLabelChanged($event.value)" [(ngModel)]="suiteLabel">
+      <mat-radio-button *ngFor="let op of options" [value]="op[0]" >{{ op[1] }}</mat-radio-button>
     </mat-radio-group>
   </div>
 
   <app-basic-checkbox #externalDisplayToggle [name]="'Include external display tests'">
   </app-basic-checkbox>
+
+  <div style="padding: 0 0 20px 10px">
+      <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+  </div>
 
   <app-new-update-notifier></app-new-update-notifier>
   

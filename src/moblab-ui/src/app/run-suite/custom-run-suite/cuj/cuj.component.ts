@@ -9,6 +9,10 @@ import {BasicSelectorComponent} from '../../common/basic-selector/basic-selector
 import {NotificationsService} from 'app/services/notifications.service';
 import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 
+const BASIC = 'basic';
+const PLUS = 'plus';
+const PREMIUM = 'premium';
+
 /** Component owns logic for CUJ suite run form.
  * */
 @Component({
@@ -32,13 +36,21 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   ];
 
   public suiteName = '';
-  public suiteLabel = '';
+  public suiteLabel = BASIC;
   public cujCheckError = '';
   public hideCustomInput = true;
+  options: [string,string][] = [
+      [BASIC, 'Basic'],
+      [PLUS, 'Plus'],
+      [PREMIUM, 'Premium']
+  ];
+  errorMessage: string | null = null;
 
-  labelSelectDisabled = true;
+  labelSelectDisabled = false;
   duts = new Array<ConnectedDutInfo>();
   dutHostnames = new Array<string>();
+  
+  private buildSelected = false;
 
   constructor(
     moblabGrpcService: MoblabGrpcService,
@@ -53,8 +65,9 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   ngAfterContentInit(): void {
     setTimeout(() => {
       this.getConnectedDuts();
-      this.suiteSelectForm.disable('Please select build.');
-      this.externalDisplayToggle.disable();
+      // These two enable can make the tooptips `This form is disable` disappear.
+      this.suiteSelectForm.enable();
+      this.externalDisplayToggle.enable();
     });
   }
 
@@ -110,15 +123,15 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
    * build version selected.
    * */
   onBuildVersionUnselected() {
-    this.basicSelectorComponent.clearSelection();
-    this.basicSelectorComponent.disable();
-    this.runSuiteButton.disable();
+    this.buildSelected = false;
+    this._isReadyToRun();
   }
 
   /** Method triggered on change of custom suite input form.
    * */
   suiteChanged() {
-    this.suiteName = this.suiteInput.getInput();
+    this.suiteName = this.suiteInput.getInput().trim();
+    this._isReadyToRun();
   }
 
   /** Method triggered on change of suite dropdown.
@@ -133,22 +146,22 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
       this.suiteInput.enable();
       this.suiteName = this.suiteInput.getInput();
     }
-    this.labelSelectDisabled = false;
+    this._isReadyToRun();
   }
 
   /** Method triggered on change of custom suite input form.
    * */
   suiteLabelChanged(suiteLabel: string) {
     this.suiteLabel = suiteLabel;
-    this.externalDisplayToggle.enable();
-    this.runSuiteButton.enable();
+    this._isReadyToRun();
   }
 
   /** Method triggered on complete setting of build-related arguments.
    * ( model, build-target, milestone, build-version ).
    * */
   onBuildSetCustom(event) {
-    this.suiteSelectForm.enable();
+    this.buildSelected = true;
+    this._isReadyToRun();
   }
 
   /**
@@ -157,15 +170,15 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
    */
   handleDutSetup() {
     switch (this.suiteLabel) {
-      case 'basic':
+      case BASIC:
         this.removeLabel(this.dutHostnames, 'plus');
         this.removeLabel(this.dutHostnames, 'premium');
         break;
-      case 'plus':
+      case PLUS:
         this.addLabel(this.dutHostnames, 'plus');
         this.removeLabel(this.dutHostnames, 'premium');
         break;
-      case 'premium':
+      case PREMIUM:
         this.addLabel(this.dutHostnames, 'plus');
         this.addLabel(this.dutHostnames, 'premium');
         break;
@@ -177,10 +190,40 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     }
   }
 
+  private _isReadyToRun() {
+    if (this.buildSelected && this._validate()) {
+        this.runSuiteButton.enable();
+    } else {
+        this.runSuiteButton.disable();
+    }
+  }
+
+  private _validate(): boolean {
+    this.reset();
+    if (!this.suiteLabel) {
+        this.errorMessage = "Please select the suite label.";
+        return false;
+    }
+    if (!this.suiteName) {
+        this.errorMessage = "Please input a suite name.";
+        return false;
+    }
+
+    return true;
+  }
+
+  reset(): void {
+      this.errorMessage = null;
+  }
+
   /** Method triggered on run-suite button press. Invokes runSuite RPC call.
    * */
   onRunSuiteClick() {
     super.onRunSuiteClick('Starting CUJ suite run.');
+    if (!this._validate()) {
+        this.onFormLoaded();
+        return ;
+    }
     this.handleDutSetup();
 
     this.moblabGrpcService.runSuite(
