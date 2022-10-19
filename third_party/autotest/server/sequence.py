@@ -167,7 +167,7 @@ parallel_simple(run, machines)
                     parse_failed_repair=None,
                     hostless=False, keyvals=None,
                     drone_set=None, image=None,
-                    parent_job_id=current_job_id, test_retry=0, run_reset=False,
+                    parent_job_id=current_job_id, run_reset=False,
                     require_ssp=utils.is_in_container())
         return runtime_mins * self._iteration
 

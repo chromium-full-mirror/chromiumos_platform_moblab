@@ -120,7 +120,6 @@ export class JobDetailComponent implements OnInit, AfterContentInit {
         'Max Runtime',
         (job.getMaxRuntime() / 60 / 1000).toString() + ' minutes',
       ],
-      ['Test Retries', job.getTestRetries().toString()],
     ]);
 
     this.jobHistoryTable = new MatTableDataSource<Execution>(

@@ -829,8 +829,6 @@ def create_job_common(
                    keyvals=keyvals,
                    drone_set=drone_set,
                    parent_job_id=parent_job_id,
-                   # TODO(crbug.com/873716) DEPRECATED. Remove entirely.
-                   test_retry=0,
                    run_reset=run_reset,
                    require_ssp=require_ssp)
 

@@ -1172,8 +1172,6 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
     its results parsed as part of the job.
     drone_set: The set of drones to run this job on
     parent_job: Parent job (optional)
-    test_retry: Number of times to retry test if the test did not complete
-                successfully. (optional, default: 0)
     require_ssp: Require server-side packaging unless require_ssp is set to
                  False. (optional, default: None)
     """
@@ -1343,8 +1341,6 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
 
     parent_job = dbmodels.ForeignKey('self', blank=True, null=True, on_delete=dbmodels.CASCADE)
 
-    test_retry = dbmodels.IntegerField(blank=True, default=0)
-
     run_reset = dbmodels.BooleanField(default=True)
 
     timeout_mins = dbmodels.IntegerField(default=DEFAULT_TIMEOUT_MINS)
@@ -1417,7 +1413,6 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
             parse_failed_repair=options.get('parse_failed_repair'),
             created_on=datetime.utcnow(),
             parent_job=options.get('parent_job_id'),
-            test_retry=options.get('test_retry'),
             run_reset=options.get('run_reset'),
             require_ssp=options.get('require_ssp'))
 

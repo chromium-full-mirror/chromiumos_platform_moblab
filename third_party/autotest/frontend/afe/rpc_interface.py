@@ -1038,7 +1038,6 @@ def create_job(
     drone_set=None,
     image=None,
     parent_job_id=None,
-    test_retry=0,
     run_reset=True,
     require_ssp=None,
     test_args=None,
@@ -1075,7 +1074,6 @@ def create_job(
     @param drone_set The name of the drone set to run this test on.
     @param image OS image to install before running job.
     @param parent_job_id id of a job considered to be parent of created job.
-    @param test_retry DEPRECATED
     @param run_reset Should the host be reset before running the test?
     @param require_ssp Set to True to require server-side packaging to run the
                        test. If it's set to None, drone will still try to run
@@ -2525,9 +2523,6 @@ def get_tests_by_build(build, ignore_invalid_tests=True):
         test_object["run_reset"] = True
         test_object["description"] = test_object.get("doc", "")
         test_object["test_time"] = test_object.get("time", 0)
-
-        # TODO(crbug.com/873716) DEPRECATED. Remove entirely.
-        test_object["test_retry"] = 0
 
         # Fix the test name to be consistent with the current presentation
         # of test names in the AFE.

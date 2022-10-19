@@ -43,8 +43,6 @@ class Job(declarative_base()):
     its results parsed as part of the job.
     drone_set: The set of drones to run this job on
     parent_job: Parent job (optional)
-    test_retry: Number of times to retry test if the test did not complete
-                successfully. (optional, default: 0)
     require_ssp: Require server-side packaging unless require_ssp is set to
                  False. (optional, default: None)
     """
@@ -147,7 +145,6 @@ class Job(declarative_base()):
     drone_set_id = Column(Integer, default=None)
     parameterized_job_id = Column(Integer, default=None)
     parent_job_id = Column(Integer, default=None)
-    test_retry = Column(Integer, nullable=False, default=0)
     run_reset = Column(SmallInteger, nullable=False, default=1)
     timeout_mins = Column(Integer, nullable=False)
     shard_id = Column(Integer, default=None)

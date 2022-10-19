@@ -918,8 +918,7 @@ class Job(DBObject):
                'run_verify', 'email_list', 'reboot_before', 'reboot_after',
                'parse_failed_repair', 'max_runtime_hrs', 'drone_set_id',
                'parameterized_job_id', 'max_runtime_mins', 'parent_job_id',
-               'test_retry', 'run_reset', 'timeout_mins', 'shard_id',
-               'require_ssp')
+               'run_reset', 'timeout_mins', 'shard_id', 'require_ssp')
 
     # TODO(gps): On scheduler start/recovery we need to call HQE.on_pending() on
     # all status='Pending' atomic group HQEs incase a delay was running when the

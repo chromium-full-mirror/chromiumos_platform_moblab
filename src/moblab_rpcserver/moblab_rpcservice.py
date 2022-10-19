@@ -860,7 +860,6 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                     timeout=self._convert_timedelta_to_miliseconds(
                         minutes=job.get("timeout_mins", "")
                     ),
-                    test_retries=job.get("test_retry", None),
                     execution_history=execution_history,
                     associated_duts=associated_duts,
                 )
