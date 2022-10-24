@@ -404,6 +404,7 @@ message Execution {
 
 // NEXT_TAG = 17
 message Job {
+  reserved 13;
   // NEXT_TAG = 90
   enum Priority {
     PRIORITY_NOT_SET = 0;
@@ -490,7 +491,6 @@ message Job {
   string server_control_file = 10;
   int64 timeout = 11;
   int64 max_runtime = 12;
-  int32 test_retries = 13;
   repeated Execution execution_history = 14;
   repeated Execution associated_duts = 15;
 
