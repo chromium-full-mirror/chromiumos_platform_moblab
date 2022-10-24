@@ -15,6 +15,9 @@ import {TableHeaderSelectorComponent} from '../../widgets/table-header-selector/
 const NOT_CONNECTED_MESSAGE = 'DUT not reachable by SSH';
 const NO_ACCESS_MESSAGE =
   'The account does not have access to this build target';
+const ALL_ENROLLED = 'All Enrolled';
+const ALL_UNENROLLED = 'All Unenrolled';
+const REPAIR_FAILED = 'Repair Failed';
 
 @Component({
   selector: 'app-view-duts',
@@ -42,8 +45,6 @@ export class ViewDutsComponent implements OnInit {
 
   // Create a local copy as we need to use it in view-duts.component.html.
   intToDutStatus = INT_TO_DUT_STATUS;
-
-  selectOptions: string[] = ['All Enrolled', 'All Unenrolled', 'Repair Failed'];
 
   filterLabels = true;
 
@@ -168,10 +169,12 @@ export class ViewDutsComponent implements OnInit {
 
   selectionChanged(event) {
     if (event.selection === 'All') {
-      this.duts.data.filter(e => e.getIsConnected()).forEach(row => this.selection.select(row));
+      this.duts.data.filter(e => {
+        return e.getIsConnected() && (this.hideUnenrolledDuts ? e.getIsEnrolled() : true);
+      }).forEach(row => this.selection.select(row));
     } else if (event.selection === 'None') {
       this.selection.clear();
-    } else if (event.selection === this.selectOptions[0]) {
+    } else if (event.selection === ALL_ENROLLED) {
       this.duts.data.filter(row => {
         if (row.getIsEnrolled() && row.getIsConnected()) {
           this.selection.select(row);
@@ -179,7 +182,7 @@ export class ViewDutsComponent implements OnInit {
           this.selection.deselect(row);
         }
       });
-    } else if (event.selection === this.selectOptions[1]) {
+    } else if (!this.hideUnenrolledDuts && event.selection === ALL_UNENROLLED) {
       this.duts.data.filter(row => {
         if (!row.getIsEnrolled() && row.getIsConnected()) {
           this.selection.select(row);
@@ -187,7 +190,7 @@ export class ViewDutsComponent implements OnInit {
           this.selection.deselect(row);
         }
       });
-    } else if (event.selection === this.selectOptions[2]) {
+    } else if (event.selection === REPAIR_FAILED) {
       this.duts.data.filter(row => {
         if (
           row.getStatus() === ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED && row.getIsConnected()
@@ -210,5 +213,15 @@ export class ViewDutsComponent implements OnInit {
     } catch (error) {
       this.notificationsService.error(error);
     }
+  }
+
+  public getSelectOptions() {
+    const selectOptions: string[] = [
+      ALL_ENROLLED,
+      ...(this.hideUnenrolledDuts ? [] : [ALL_UNENROLLED]),
+      REPAIR_FAILED
+    ];
+
+    return selectOptions;
   }
 }
