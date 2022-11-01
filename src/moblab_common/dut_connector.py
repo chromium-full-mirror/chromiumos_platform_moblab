@@ -204,7 +204,7 @@ class MoblabDUTConnector(object):
         command_results = self.run_command_on_connected_duts(
             (
                 "fwid=`timeout 5 crossystem fwid`;"
-                "model=`timeout 5 mosys platform model`;"
+                "model=`timeout 5 cros_config / name`;"
                 "fw_update=`timeout 5 chromeos-firmwareupdate --manifest`;"
                 'printf "{\\"fwid\\": \\"%s\\",\\"model\\": \\"%s\\",'
                 '\\"fw_update\\":%s}" $fwid $model "$fw_update"'
