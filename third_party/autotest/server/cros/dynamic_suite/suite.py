@@ -861,6 +861,7 @@ class _BaseSuite(object):
             tag,
             builds,
             board,
+            model=None,
             afe=None,
             tko=None,
             pool=None,
@@ -887,6 +888,7 @@ class _BaseSuite(object):
         @param tag: a string with which to tag jobs run in this suite.
         @param builds: the builds on which we're running this suite.
         @param board: the board on which we're running this suite.
+        @param model: the model on which we're running this suite.
         @param afe: an instance of AFE as defined in server/frontend.py.
         @param tko: an instance of TKO as defined in server/frontend.py.
         @param pool: Specify the pool of machines to use for scheduling
@@ -958,6 +960,8 @@ class _BaseSuite(object):
         extra_deps.append(board)
         if pool:
             extra_deps.append(pool)
+        if model:
+            extra_deps.append(model)
         extra_deps.extend(child_dependencies)
         self._dependencies = tuple(extra_deps)
 
@@ -1423,6 +1427,7 @@ class Suite(_BaseSuite):
             board,
             cf_getter,
             run_prod_code=False,
+            model=None,
             afe=None,
             tko=None,
             pool=None,
@@ -1455,6 +1460,7 @@ class Suite(_BaseSuite):
         @param tag: a string with which to tag jobs run in this suite.
         @param builds: the builds on which we're running this suite.
         @param board: the board on which we're running this suite.
+        @param model: the model on which we're running this suite.
         @param cf_getter: a control_file_getter.ControlFileGetter
         @param afe: an instance of AFE as defined in server/frontend.py.
         @param tko: an instance of TKO as defined in server/frontend.py.
@@ -1513,6 +1519,7 @@ class Suite(_BaseSuite):
                 tag=tag,
                 builds=builds,
                 board=board,
+                model=model,
                 afe=afe,
                 tko=tko,
                 pool=pool,
