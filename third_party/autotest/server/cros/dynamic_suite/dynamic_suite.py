@@ -216,6 +216,7 @@ class _SuiteSpec(object):
             self,
             builds=None,
             board=None,
+            model=None,
             name=None,
             job=None,
             devserver_url=None,
@@ -249,7 +250,8 @@ class _SuiteSpec(object):
         @param builds: the builds to install e.g.
                        {'cros-version:': 'x86-alex-release/R18-1655.0.0',
                         'fwrw-version:': 'x86-alex-firmware/R36-5771.50.0'}
-        @param board: which kind of devices to reimage.
+        @param board: which kind of board to reimage.
+        @param model: which kind of model to reimage.
         @param name: a value of the SUITE control file variable to search for.
         @param job: an instance of client.common_lib.base_job representing the
                     currently running suite job.
@@ -315,6 +317,7 @@ class _SuiteSpec(object):
                 devserver_url=devserver_url)
 
         self.board = 'board:%s' % board
+        self.model = 'model:%s' % model if model else model
         self.builds = builds
         self.name = name
         self.job = job
@@ -542,6 +545,7 @@ def _perform_reimage_and_run(spec, afe, tko, suite_job_id=None):
             name=spec.name,
             builds=spec.builds,
             board=spec.board,
+            model=spec.model,
             devserver=spec.devserver,
             afe=afe,
             tko=tko,

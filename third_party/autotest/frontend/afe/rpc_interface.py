@@ -1952,6 +1952,7 @@ def _get_control_file_by_suite(suite_name):
 
 def create_suite_job(
     name="",
+    model=None,
     board="",
     pool="",
     child_dependencies=(),
@@ -1986,7 +1987,8 @@ def create_suite_job(
 
     @param name: The test name if control_file is supplied, otherwise the name
                  of the test suite to run, e.g. 'bvt'.
-    @param board: the kind of device to run the tests on.
+    @param board: the kind of board to run the tests on.
+    @param model: the kind of model to run the tests on.
     @param builds: the builds to install e.g.
                    {'cros-version:': 'x86-alex-release/R18-1655.0.0',
                     'fwrw-version:':  'x86-alex-firmware/R36-5771.50.0',
@@ -2101,6 +2103,7 @@ def create_suite_job(
         suite_args = dict()
 
     inject_dict = {
+        "model": model,
         "board": board,
         # `build` is needed for suites like AU to stage image inside suite
         # control file.
