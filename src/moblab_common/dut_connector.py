@@ -23,7 +23,7 @@ _DHCPD_LEASES = "/leases/dnsmasq.leases"
 # -p is the interval between ping packets to a single target.
 # -i is the interval between sending ping packets.
 FIND_DUT_CMD = [
-    "cat %s | awk -F ' ' '{print $3}' | /usr/bin/fping -a" % _DHCPD_LEASES
+    "cat %s | awk -F ' ' '{print $3}' | /usr/bin/fping -a -t200 -B1.0 -r2" % _DHCPD_LEASES
 ]
 
 SUBNET_DUT_SEARCH_RE = r"(?P<ip>192\.168\.231\.[0-9][0-9]*[0-9]*).*"
