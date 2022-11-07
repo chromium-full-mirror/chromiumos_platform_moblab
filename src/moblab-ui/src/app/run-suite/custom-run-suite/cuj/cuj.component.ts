@@ -87,6 +87,17 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     );
   }
 
+  /** Method to get which duts need to be applied to the labels
+   * */
+  getSelectedDutHostnames() {
+    return this.duts.filter(dut => {
+        const sameModel = dut.getModel() == this.selectedModel;
+        const sameBoard = dut.getBuildTarget() == this.selectedBoard;
+        const inPool = !this.selectedPool || dut.getPoolsList().includes(this.selectedPool);
+        return sameModel && sameBoard && inPool;
+    }).map(dut => dut.getIp());
+  }
+
   /**
    * Add specified label to list of DUT IPs
    */
@@ -169,6 +180,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
    * If no suiteVersion is chosen, suite will be run using current labels.
    */
   handleDutSetup() {
+    this.dutHostnames = this.getSelectedDutHostnames();
     switch (this.suiteLabel) {
       case BASIC:
         this.removeLabel(this.dutHostnames, 'plus');
