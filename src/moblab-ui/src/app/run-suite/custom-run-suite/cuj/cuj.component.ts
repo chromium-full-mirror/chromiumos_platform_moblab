@@ -12,6 +12,8 @@ import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 const BASIC = 'basic';
 const PLUS = 'plus';
 const PREMIUM = 'premium';
+const ESSENTIAL = 'essential';
+const ADVANCED = 'advanced';
 
 /** Component owns logic for CUJ suite run form.
  * */
@@ -31,6 +33,8 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   MANUAL_SUITE_ENTRY_DESC = '>> Enter suite name';
   readonly suiteList: string[] = [
     this.MANUAL_SUITE_ENTRY_DESC,
+    'performance_cuj_v2',
+    'performance_cuj_quick_v2',
     'performance_cuj',
     'performance_cuj_quick',
   ];
@@ -39,17 +43,22 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   public suiteLabel = BASIC;
   public cujCheckError = '';
   public hideCustomInput = true;
-  options: [string,string][] = [
-      [BASIC, 'Basic'],
-      [PLUS, 'Plus'],
-      [PREMIUM, 'Premium']
+  options: [string, string][] = [];
+  options_v1: [string, string][] = [
+    [BASIC, 'Basic'],
+    [PLUS, 'Plus'],
+    [PREMIUM, 'Premium'],
+  ];
+  options_v2: [string, string][] = [
+    [ESSENTIAL, 'Essential'],
+    [ADVANCED, 'Advanced'],
   ];
   errorMessage: string | null = null;
 
   labelSelectDisabled = false;
   duts = new Array<ConnectedDutInfo>();
   dutHostnames = new Array<string>();
-  
+
   private buildSelected = false;
 
   constructor(
@@ -90,12 +99,15 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   /** Method to get which duts need to be applied to the labels
    * */
   getSelectedDutHostnames() {
-    return this.duts.filter(dut => {
-        const sameModel = dut.getModel() == this.selectedModel;
-        const sameBoard = dut.getBuildTarget() == this.selectedBoard;
-        const inPool = !this.selectedPool || dut.getPoolsList().includes(this.selectedPool);
+    return this.duts
+      .filter(dut => {
+        const sameModel = dut.getModel() === this.selectedModel;
+        const sameBoard = dut.getBuildTarget() === this.selectedBoard;
+        const inPool =
+          !this.selectedPool || dut.getPoolsList().includes(this.selectedPool);
         return sameModel && sameBoard && inPool;
-    }).map(dut => dut.getIp());
+      })
+      .map(dut => dut.getIp());
   }
 
   /**
@@ -152,12 +164,24 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
       this.hideCustomInput = true;
       this.suiteInput.disable('Please select build.');
       this.suiteName = suiteName;
+      this.updateLabelList();
     } else {
       this.hideCustomInput = false;
       this.suiteInput.enable();
       this.suiteName = this.suiteInput.getInput();
+      this.options = [];
     }
     this._isReadyToRun();
+  }
+
+  /** Method to update display of label options
+   * */
+  updateLabelList() {
+    if (this.suiteName.includes('_v2')) {
+      this.options = this.options_v2;
+    } else {
+      this.options = this.options_v1;
+    }
   }
 
   /** Method triggered on change of custom suite input form.
@@ -194,6 +218,14 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
         this.addLabel(this.dutHostnames, 'plus');
         this.addLabel(this.dutHostnames, 'premium');
         break;
+      case ESSENTIAL:
+        this.addLabel(this.dutHostnames, 'essential');
+        this.removeLabel(this.dutHostnames, 'advanced');
+        break;
+      case ADVANCED:
+        this.addLabel(this.dutHostnames, 'advanced');
+        this.removeLabel(this.dutHostnames, 'essential');
+        break;
     }
     if (this.externalDisplayToggle.getChecked()) {
       this.addLabel(this.dutHostnames, 'external_display');
@@ -204,28 +236,28 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
 
   private _isReadyToRun() {
     if (this.buildSelected && this._validate()) {
-        this.runSuiteButton.enable();
+      this.runSuiteButton.enable();
     } else {
-        this.runSuiteButton.disable();
+      this.runSuiteButton.disable();
     }
   }
 
   private _validate(): boolean {
     this.reset();
     if (!this.suiteLabel) {
-        this.errorMessage = "Please select the suite label.";
-        return false;
+      this.errorMessage = 'Please select the suite label.';
+      return false;
     }
     if (!this.suiteName) {
-        this.errorMessage = "Please input a suite name.";
-        return false;
+      this.errorMessage = 'Please input a suite name.';
+      return false;
     }
 
     return true;
   }
 
   reset(): void {
-      this.errorMessage = null;
+    this.errorMessage = null;
   }
 
   /** Method triggered on run-suite button press. Invokes runSuite RPC call.
@@ -233,8 +265,8 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   onRunSuiteClick() {
     super.onRunSuiteClick('Starting CUJ suite run.');
     if (!this._validate()) {
-        this.onFormLoaded();
-        return ;
+      this.onFormLoaded();
+      return;
     }
     this.handleDutSetup();
 

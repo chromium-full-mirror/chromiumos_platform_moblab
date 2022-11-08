@@ -36,6 +36,8 @@ export class RunAnySuiteComponent extends BaseSuite implements AfterViewInit {
     'labqual',
     'thermal_qual_fast',
     'thermal_qual_full',
+    'performance_cuj_v2',
+    'performance_cuj_quick_v2',
     'performance_cuj',
     'performance_cuj_quick',
     'mtbf',
