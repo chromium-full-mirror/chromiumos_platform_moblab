@@ -26,6 +26,7 @@ from moblab_common import config_connector
 from moblab_common import feedback_connector
 from moblab_common.monitoring import collect_logs
 from moblab_common.utils.cli import CopyFile
+import docker_manager.manager as do_manager
 
 
 STATICDIR = "/etc/moblab/mobmonitor/static/"
@@ -311,6 +312,7 @@ def main(argv):
     # Setup the mobmonitor
     checkfile_manager = cf_manager.CheckFileManager(checkdir=options.checkdir)
     diagnostic_manager = dc_manager.DiagnosticCheckManager()
+    docker_manager = do_manager.DockerMonitor(containers=['moblab-rpcserver', 'mobmonitor'])
     diagnostic_manager.init_checks()
     mobmonitor = MobMonitorRoot(
         checkfile_manager, diagnostic_manager, staticdir=options.staticdir
@@ -318,6 +320,9 @@ def main(argv):
 
     # Start the checkfile collection and execution background task.
     checkfile_manager.StartCollectionExecution()
+
+    # Start docker manager
+    docker_manager.startCollection(run_immediately_when_start=True)
 
     # Start the Mob* Monitor.
     cherrypy.quickstart(mobmonitor, config=mobmon_appconfig)
