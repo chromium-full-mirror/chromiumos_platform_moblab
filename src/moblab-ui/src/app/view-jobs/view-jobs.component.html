@@ -33,6 +33,13 @@
               Not a number.
             </mat-error>
           </mat-form-field>
+          <mat-form-field id="parentIdInputFormField" appearance="outline" class="filter" floatLabel="never">
+            <mat-label>Suite ID</mat-label>
+            <input id="parentIdInput" matInput [formControl]="filters.getFormControl(parentJobId)">
+            <mat-error *ngIf="filters.getFormControl(parentJobId).hasError('notANonnegativeNumber')">
+              Not a number.
+            </mat-error>
+          </mat-form-field>
           <mat-form-field appearance="outline" class="filter header-entry" floatLabel="never">
             <mat-label>Name</mat-label>
             <input id="nameInput" matInput [formControl]="filters.getFormControl(jobName)">
