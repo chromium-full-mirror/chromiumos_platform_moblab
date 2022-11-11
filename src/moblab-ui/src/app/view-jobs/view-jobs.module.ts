@@ -20,6 +20,7 @@ import {RouterModule} from '@angular/router';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatBadgeModule} from '@angular/material/badge';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 import {JobActionComponent} from './job-action/job-action.component';
 import {ViewJobsComponent} from './view-jobs.component';
@@ -34,6 +35,7 @@ import {WidgetsModule} from '../widgets/widgets.module';
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
+    MatButtonToggleModule,
     MatChipsModule,
     MatExpansionModule,
     MatFormFieldModule,

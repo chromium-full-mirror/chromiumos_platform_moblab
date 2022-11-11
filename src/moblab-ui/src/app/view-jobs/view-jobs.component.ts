@@ -159,6 +159,12 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   jobStartTimeFromFilter: string = JOB_START_TIME_FROM_FILTER;
   jobStartTimeToFilter: string = JOB_START_TIME_TO_FILTER;
 
+  jobs_queued = 0;
+  jobs_running = 0;
+  jobs_completed = 0;
+  jobs_aborted = 0;
+  jobs_total = 0;
+
   normalizeTimestamp = normalizeTimestamp;
 
   private getJobsSubscription: Subscription;
@@ -217,6 +223,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     this.paginator.page.subscribe(() => this.getNextPageJobs());
 
     this.changeDetectorRefs.detectChanges();
+    this.getJobsProgress();
   }
 
   applyFilters(params: {[x: string]: any}) {
@@ -264,7 +271,6 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
       : 0;
     const parent_id_filter = this.filters.getFormValue(PARENT_JOB_ID);
     const dut_filter = this.filters.getFormValue(DUT_RUN_ON);
-    
     return [
       job_id_filter,
       job_name_filter,
@@ -352,6 +358,60 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     this.getNextPageJobs();
   }
 
+  async getJobsProgress() {
+    this.jobs_queued = await this.getNumJobsPromise(
+      Number(Job.QueueStatus.QUEUED_JOBS)
+    );
+    this.jobs_running = await this.getNumJobsPromise(
+      Number(Job.QueueStatus.JOBS_RUNNING)
+    );
+    this.jobs_completed = await this.getNumJobsPromise(
+      Number(Job.QueueStatus.COMPLETED_JOBS)
+    );
+    this.jobs_aborted = await this.getNumJobsPromise(
+      Number(Job.QueueStatus.ABORTED_JOBS)
+    );
+    this.jobs_total = await this.getNumJobsPromise();
+  }
+
+  getNumJobsPromise(statusFilter?): Promise<number> {
+    /**
+     * Convert the getNumJobs function into a Promise.
+     */
+    const [
+      job_id_filter,
+      job_name_filter,
+      job_start_lt_filter,
+      job_start_gt_filter,
+      job_queue_status_filter,
+      job_relationship_filter,
+      parent_id_filter,
+      dut_filter,
+    ] = this.getJobFilters();
+
+    if (job_queue_status_filter && job_queue_status_filter !== statusFilter) {
+      return new Promise((resolve, _) => {
+        resolve(0);
+      });
+    }
+
+    return new Promise((resolve, _) => {
+      this.moblabGrpcService.getNumJobs(
+        (numJobs: number) => {
+          resolve(numJobs);
+        },
+        job_id_filter,
+        job_name_filter,
+        job_start_lt_filter,
+        job_start_gt_filter,
+        statusFilter,
+        job_relationship_filter,
+        parent_id_filter,
+        dut_filter
+      );
+    });
+  }
+
   getPriorityFromNum(priorityNum: string | number) {
     return INT_TO_PRIORITY[priorityNum];
   }
@@ -432,9 +492,17 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     }
   }
 
+  filterByStatus(status) {
+    if (status !== 'ALL_JOBS') {
+      this.filters.getFormControl(QUEUE_STATUS).setValue(status.value);
+    }
+    this.filterSubmission();
+  }
+
   filterSubmission() {
     this.resetPagination();
     this.getNextPageJobs();
+    this.getJobsProgress();
   }
 
   clearFilters() {
@@ -452,6 +520,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   refreshJobs(parentJobId?: string, dutRunOn?: string) {
     this.resetPagination();
     this.getNextPageJobs();
+    this.getJobsProgress();
   }
 
   getNextPageJobs() {
@@ -563,6 +632,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     this.autoRefresh = toggle.checked;
     if (toggle.checked) {
       this.getNextPageJobs();
+      this.getJobsProgress();
     }
   }
 

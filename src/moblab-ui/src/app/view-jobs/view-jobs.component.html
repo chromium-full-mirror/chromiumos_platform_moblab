@@ -2,7 +2,7 @@
   <div>
     <div class="time-filter-form-wrapper">
       <div *ngIf="!hideFilters" class="filter-box">
-        <mat-card class="time_filters" style="padding:8px;">
+        <mat-card class="time_filters" style="padding: 8px;">
           <b> Start Time </b>
           <span> from: </span>
           <mat-form-field id="dateInputFormField" appearance="outline" class="filter" floatLabel="never">
@@ -78,6 +78,13 @@
         (change)="updateAutoRefresh($event)">Auto Refresh</mat-slide-toggle>
       <app-job-action *ngIf="!hideActionBar" (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
       </app-job-action>
+      <mat-button-toggle-group id="statusFilterGroup" (change)="filterByStatus($event)" value="ALL_JOBS">
+        <mat-button-toggle value="QUEUED_JOBS">Queued Jobs: {{this.jobs_queued}}</mat-button-toggle>
+        <mat-button-toggle value="JOBS_RUNNING">Running Jobs: {{this.jobs_running}}</mat-button-toggle>
+        <mat-button-toggle value="COMPLETED_JOBS">Completed Jobs: {{this.jobs_completed}}</mat-button-toggle>
+        <mat-button-toggle value="ABORTED_JOBS">Aborted Jobs: {{this.jobs_aborted}}</mat-button-toggle>
+        <mat-button-toggle value="ALL_JOBS" id="allJobsToggle">All Jobs: {{this.jobs_total}}</mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
     <mat-divider></mat-divider>
     <div style="position: relative;">

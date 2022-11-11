@@ -84,6 +84,22 @@
   width: 100px;
 }
 
+#statusFilterGroup {
+  scale: 80%;
+}
+
+#allJobsToggle {
+  font-size: larger;
+}
+
+.mat-button-toggle:hover {
+  background-color: #edededaf !important;
+}
+
+.mat-button-toggle-checked {
+  background-color: #cedcf6fb;
+}
+
 .mat-form-field-infix {
   border-top: 0;
 }
