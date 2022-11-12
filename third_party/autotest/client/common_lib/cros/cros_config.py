@@ -36,11 +36,11 @@ import common
 from client.common_lib import error
 
 FALLBACKS = {
-        '/firmware image-name': 'mosys platform model',
-        '/ name': 'mosys platform model',
-        '/ brand-code': 'mosys platform brand',
-        '/identity sku-id': 'mosys platform sku',
-        '/identity platform-name': 'mosys platform name'
+    "/firmware image-name": "mosys platform model",
+    "/ name": "mosys platform model",
+    "/ brand-code": "mosys platform brand",
+    "/identity sku-id": "mosys platform sku",
+    "/identity platform-name": "mosys platform name",
 }
 
 
@@ -82,28 +82,28 @@ def call_cros_config_with_fallback(cros_config_args, run, **run_kwargs):
             2. the fallback command raised one
 
     """
-    cros_config_cmd = 'cros_config %s' % cros_config_args
+    cros_config_cmd = "cros_config %s" % cros_config_args
     fallback_cmd = get_fallback(cros_config_args)
     try:
         result = run(cros_config_cmd, **run_kwargs)
     except error.CmdError as e:
         if fallback_cmd:
-            logging.debug('<%s> raised an error.', cros_config_cmd)
+            logging.debug("<%s> raised an error.", cros_config_cmd)
             result = e.result_obj
         else:
             raise
     else:
         if result.exit_status:
-            logging.debug('<%s> returned with an exit code.', cros_config_cmd)
+            logging.debug("<%s> returned with an exit code.", cros_config_cmd)
         else:
             return result
     if fallback_cmd:
-        logging.debug('Trying fallback cmd: <%s>', fallback_cmd)
+        logging.debug("Trying fallback cmd: <%s>", fallback_cmd)
         result = run(fallback_cmd, **run_kwargs)
-        if result.stdout and result.stdout[-1] == '\n':
+        if result.stdout and result.stdout[-1] == "\n":
             result.stdout = result.stdout[:-1]
     else:
-        logging.debug('No fallback command found for <%s>.', cros_config_cmd)
+        logging.debug("No fallback command found for <%s>.", cros_config_cmd)
     return result
 
 
@@ -124,10 +124,11 @@ def call_cros_config_get_output(cros_config_args, run, **run_kwargs):
 
     """
     try:
-        result = call_cros_config_with_fallback(cros_config_args, run,
-                                                **run_kwargs)
+        result = call_cros_config_with_fallback(
+            cros_config_args, run, **run_kwargs
+        )
     except error.CmdError:
-        return ''
+        return ""
     if result.exit_status:
-        return ''
+        return ""
     return result.stdout
