@@ -152,6 +152,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   filters = new MultiFilterForm(FILTER_PARAMETERS);
   jobId: string = JOB_ID;
   jobName: string = JOB_NAME;
+  parentJobId: string = PARENT_JOB_ID;
   jobPriority: string = JOB_PRIORITY;
   queueStatus: string = QUEUE_STATUS;
   jobRelationship: string = JOB_RELATIONSHIP;

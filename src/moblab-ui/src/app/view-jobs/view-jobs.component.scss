@@ -2,7 +2,7 @@
 
 #root-container {
   /* Ensures that loading spinner is not clipped, even when table is empty. */
-  min-height : 300px;
+  min-height: 300px;
 }
 
 .table-checkbox-col {
@@ -20,7 +20,7 @@
   border: 1px solid #ebebeb;
   grid-template-columns: 40px 50px auto 50px 40px;
   grid-template-rows: 25% 100px auto;
-  margin: 5px 0px 5px 0px;
+  margin: 5px 0 5px 0;
 }
 
 .time-filter-form-wrapper {
@@ -29,7 +29,7 @@
 }
 
 .job-refresh-button {
-  margin-left:16px;
+  margin-left: 16px;
 }
 
 .table-action-header {
@@ -39,7 +39,7 @@
 
 .auto-refresh-toggle {
   margin-top: 8px;
-  margin-right:18px;
+  margin-right: 18px;
   float: right;
 }
 
@@ -68,6 +68,10 @@
   width: 60px;
 }
 
+#parentIdInputFormField {
+  width: 80px;
+}
+
 #dateInputFormField {
   width: 180px;
 }
@@ -81,7 +85,7 @@
 }
 
 .mat-form-field-infix {
-  border-top: 0px;
+  border-top: 0;
 }
 
 .mat-cell {
@@ -107,7 +111,7 @@
 /* The hidden job detail panels are also 'mat-cells', so without this override,
    these 'hidden' panels would have padding even when in invisible mode. */
 .mat-column-expandedDetail {
-  padding: 0px;
+  padding: 0;
 }
 
 .mat-header-cell {
@@ -118,9 +122,9 @@
 #loading-overlay {
   background-color: #fafafa;
   height: 100%;
-  opacity: .8;
+  opacity: 0.8;
   position: absolute;
-  top: 0px;
+  top: 0;
   width: 100%;
   z-index: 100;
 }
@@ -131,31 +135,32 @@
   margin-top: 10px;
   overflow: hidden;
   position: absolute;
-  top:50%;
-  /*min-height: 300px;*/
+  top: 50%;
+
+  /* min-height: 300px; */
   width: 100%;
   z-index: 101;
 }
 
 .mat-spinner {
-  /*centers spinner*/
+  /* centers spinner */
   left: 50%;
   margin-left: -50px;
 }
 
 #no-jobs-label {
-  color: #000000;
-  padding-top:40px;
-  padding-bottom:40px;
-  font-size:30px;
-  font-family:Roboto, sans-serif;
+  color: #000;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  font-size: 30px;
+  font-family: Roboto, sans-serif;
   text-align: center;
 }
 
 a.logbutton {
-  padding-left: 0px;
-  padding-right: 0px;
-  min-width: 0px;
+  padding-left: 0;
+  padding-right: 0;
+  min-width: 0;
   line-height: 20px;
 }
 
@@ -163,7 +168,9 @@ a.logbutton {
   width: 15px;
 }
 
-.norm-icon, .progress-icon, .error-icon {
+.norm-icon,
+.progress-icon,
+.error-icon {
   vertical-align: middle;
   text-align: center !important;
   width: 18px;
@@ -173,7 +180,8 @@ a.logbutton {
   color: red;
 }
 
-.norm-icon, .progress-icon {
+.norm-icon,
+.progress-icon {
   color: gray;
 }
 
@@ -182,8 +190,9 @@ a.logbutton {
 }
 
 @keyframes blink {
-  from, to { opacity: 1 }
-  50% { opacity: 0.5 }
+  from,
+  to { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 table {
