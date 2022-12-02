@@ -2,7 +2,6 @@
 # pylint: disable-msg=C0111
 # Copyright 2008 Google Inc. Released under the GPL v2
 
-
 import ast
 import logging
 import textwrap
@@ -13,7 +12,9 @@ from client.common_lib import autotest_enum
 from client.common_lib import global_config
 from client.common_lib import priorities
 
-REQUIRED_VARS = set(['author', 'doc', 'name', 'time', 'test_type'])
+
+REQUIRED_VARS = set(['name', 'test_type'])
+# TODO: move author and doc to obsolete_vars when metadata is required
 OBSOLETE_VARS = set(['experimental'])
 
 CONTROL_TYPE = autotest_enum.AutotestEnum('Server', 'Client', start_value=1)
@@ -64,7 +65,7 @@ def _validate_control_file_fields(control_file_path, control_file_vars,
 class ControlData(object):
     # Available TIME settings in control file, the list must be in lower case
     # and in ascending order, test running faster comes first.
-    TEST_TIME_LIST = ['fast', 'short', 'medium', 'long', 'lengthy']
+    TEST_TIME_LIST = ['fast', 'short', 'default', 'medium', 'long', 'lengthy']
     TEST_TIME = autotest_enum.AutotestEnum(*TEST_TIME_LIST,
                                            string_values=False)
 
@@ -87,6 +88,7 @@ class ControlData(object):
         # Defaults
         self.path = path
         self.dependencies = set()
+        self.metadata = {}
         # TODO(jrbarnette): This should be removed once outside
         # code that uses can be changed.
         self.experimental = False
@@ -104,6 +106,7 @@ class ControlData(object):
         self.max_result_size_KB = DEFAULT_MAX_RESULT_SIZE_KB
         self.priority = priorities.Priority.DEFAULT
         self.fast = False
+        self.time = 'default'
 
         _validate_control_file_fields(self.path, vars, raise_warnings)
 
@@ -214,6 +217,9 @@ class ControlData(object):
         setattr(self, attr, set(items))
 
 
+    def _set_dict(self, attr, val):
+        setattr(self, attr, val)
+
     def set_author(self, val):
         self._set_string('author', val)
 
@@ -221,6 +227,9 @@ class ControlData(object):
     def set_dependencies(self, val):
         self._set_set('dependencies', val)
 
+
+    def set_metadata(self, val):
+        self._set_dict('metadata', val)
 
     def set_doc(self, val):
         self._set_string('doc', val)
