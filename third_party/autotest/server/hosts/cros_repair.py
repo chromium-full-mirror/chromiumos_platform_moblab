@@ -1614,7 +1614,7 @@ def _cros_verify_extended_dag():
     """Return the extended verification DAG for a `CrosHost`."""
     return (
             (StopStartUIVerifier, 'stop_start_ui', ('ssh', )),
-            (DUTStorageVerifier, 'storage', ('ssh', )),
+            # (DUTStorageVerifier, 'storage', ('ssh', )),
             (AuditBattery, 'audit_battery', ()),
             (GscToolPresentVerifier, 'dut_gsctool', ('ssh', )),
             (ServoKeyboardMapVerifier, 'dut_servo_keyboard', ('ssh', )),
