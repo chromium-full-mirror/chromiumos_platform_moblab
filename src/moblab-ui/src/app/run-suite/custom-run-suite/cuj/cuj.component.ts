@@ -76,7 +76,6 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
       this.getConnectedDuts();
       // These two enable can make the tooptips `This form is disable` disappear.
       this.suiteSelectForm.enable();
-      this.externalDisplayToggle.enable();
     });
   }
 
@@ -179,8 +178,10 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   updateLabelList() {
     if (this.suiteName.includes('_v2')) {
       this.options = this.options_v2;
+      this.externalDisplayToggle.disable()
     } else {
       this.options = this.options_v1;
+      this.externalDisplayToggle.enable()
     }
   }
 
