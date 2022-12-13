@@ -496,7 +496,8 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     if (status !== 'ALL_JOBS') {
       this.filters.getFormControl(QUEUE_STATUS).setValue(status.value);
     }
-    this.filterSubmission();
+    this.resetPagination();
+    this.getNextPageJobs();
   }
 
   filterSubmission() {
