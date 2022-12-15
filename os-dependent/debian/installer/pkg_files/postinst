@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set e
+
+echo "##################################"
+echo "Install Moblab"
+echo "##################################"
+echo "Preparing Moblab to use"
+
+/usr/bin/bash moblab_prepare
+
+echo "Please restart after installing Moblab to finish initialization."

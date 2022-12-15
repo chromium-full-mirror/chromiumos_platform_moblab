@@ -1,0 +1,16 @@
+# main commands used to control moblab 
+# moblab_* --> moblab_start/stop/reset/prepare_docker
+./scripts/moblab_* /usr/bin
+
+# configuration script
+moblab_setup_configuration.conf /etc/moblab
+
+# network and host-server services automatically started on the box
+./init/moblab-networking /etc/init.d
+./init/moblab-host-server /etc/init.d
+
+# host-server service for monitoring. 
+./scripts/host_server_debian.py /etc/moblab/host_server
+./scripts/common/*.py /etc/moblab/host_server
+./scripts/common/utils/*.py /etc/moblab/host_server/utils
+# TODO: move this to a better folder which is not /etc/moblab

@@ -1,0 +1,33 @@
+#!bin/bash
+echo "Prepare Docker on this machine"
+sudo usermod -aG docker $USER
+sudo chmod 666 /var/run/docker.sock
+sudo systemctl start docker.service
+sudo systemctl enable docker.service
+
+# Create required folder and file to run docker for all users.
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo cat > /etc/systemd/system/docker.service.d/override.conf <<'EOT'
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// -H unix:///var/run/docker.sock
+EOT
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker.service
+
+echo "Let's configure the network ports"
+/usr/bin/bash moblab_configure
+
+
+echo "Start the moblab networking service"
+sudo systemctl start moblab-networking.service
+sudo systemctl enable moblab-networking.service
+sudo systemctl daemon-reload
+sudo systemctl restart moblab-networking.service
+
+echo "Start the moblab-host-server service"
+sudo systemctl start moblab-host-server.service
+sudo systemctl enable moblab-host-server.service
+sudo systemctl daemon-reload
+sudo systemctl restart moblab-host-server.service

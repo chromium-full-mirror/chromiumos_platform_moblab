@@ -1,0 +1,9 @@
+# Generated folders.
+/moblab_not_to_push
+
+# Created install packages.
+*.deb
+*.build
+*.buildinfo
+*.changes
+*.dsc

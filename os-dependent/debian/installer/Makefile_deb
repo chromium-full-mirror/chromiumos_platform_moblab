@@ -1,0 +1,38 @@
+# Copyright 2022 The Chromium OS Authors.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+PROTO := hostservice.proto
+INSTALL_DIR := /etc/moblab/host_server
+CONFIG = moblab_setup_configuration.conf
+include ${CONFIG}
+
+.PHONY: all init clean
+
+all: init dependencies proto
+
+dependencies:
+	apt install python3-pip
+	pip3 install --upgrade grpcio-tools netifaces protobuf
+
+init:
+	mkdir -p ${INSTALL_DIR}
+	mkdir -p ${INSTALL_DIR}/utils
+	mkdir -p /var/log/bootup/
+	chmod uog+rw /var/log/bootup
+
+clean:
+	rm -rf ${INSTALL_DIR}
+
+proto: init
+	mkdir -p /tmp/proto_bin
+	docker run -u root -t -v /tmp/proto_bin:/tmp \
+		gcr.io/chromeos-partner-moblab/protoc:release cp -R /protoc /tmp
+	PATH=/tmp/proto_bin/protoc:${PATH}
+	rm -f /etc/moblab/host_server/*pb2*
+	python3 -m grpc_tools.protoc \
+		-I="scripts/common" \
+		--python_out="scripts/common" \
+		--grpc_python_out="scripts/common" \
+	        scripts/common/${PROTO}
+	rm -rf /tmp/proto_bin

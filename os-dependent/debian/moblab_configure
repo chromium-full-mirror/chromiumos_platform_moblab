@@ -1,0 +1,25 @@
+#!bin/bash
+# configuration script to get and set the port values from a configuration file
+
+CONFIG="/etc/moblab/moblab_setup_configuration.conf"
+source $CONFIG
+
+function set_config(){
+    sudo sed -i "s/^\($1\s*=\s*\).*\$/\1$2/" $CONFIG
+}
+
+network_interfaces=$(find /sys/class/net -mindepth 1 -maxdepth 1 -lname '*virtual*' -prune -o -printf '%f\n')
+select_network_interface(){
+    local portname=$1
+    local curr_value=$2
+
+    1>&2 echo "Please specify port connected to $portname ($curr_value):"
+    new_value=$(select opt in $network_interfaces;do echo $opt; break;done)
+    if [ -z "$new_value" ]; then 1>&2 echo "Using $curr_value as default value" ; else curr_value="$new_value" ;fi
+    set_config $portname $curr_value
+}
+# Collect some data from user
+source $CONFIG
+
+$(select_network_interface "EXTERNAL_PORT_TO_INTERNET" "$EXTERNAL_PORT_TO_INTERNET")
+$(select_network_interface "INTERNAL_PORT_TO_DUTS" "$INTERNAL_PORT_TO_DUTS")
