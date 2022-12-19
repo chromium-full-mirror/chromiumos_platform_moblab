@@ -132,7 +132,9 @@ class HostServerDebian(host_server_base.HostServerBase):
         MOBLAB_SUBNET_ADDR = "192.168.231.1"
         if_info = {"inet_addr": None, "link_addr": None}
         for iface in netifaces.interfaces():
-            if "enp" not in iface:
+            # logic expects the physical interfaces
+            # to be starting with "en"
+            if not iface.startswith("en"):
                 continue
             if_addresses = netifaces.ifaddresses(iface)
             inet_addrs = if_addresses.get(netifaces.AF_INET)
@@ -141,6 +143,7 @@ class HostServerDebian(host_server_base.HostServerBase):
                 continue
             for addr in inet_addrs:
                 if MOBLAB_SUBNET_ADDR != addr.get("addr"):
+                    _LOGGER.info(f"adding interface info of {iface}: {addr}")
                     if_info["inet_addr"] = addr["addr"]
                     if_info["link_addr"] = (
                         link_addrs[0].get("addr") if link_addrs else None

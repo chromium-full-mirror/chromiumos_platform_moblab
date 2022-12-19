@@ -26,6 +26,10 @@ sudo systemctl enable moblab-networking.service
 sudo systemctl daemon-reload
 sudo systemctl restart moblab-networking.service
 
+echo "install pip packages necessary for the functioning of moblab-host-server"
+sudo pip install protobuf
+sudo pip install grpcio
+
 echo "Start the moblab-host-server service"
 sudo systemctl start moblab-host-server.service
 sudo systemctl enable moblab-host-server.service

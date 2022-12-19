@@ -38,3 +38,16 @@ cd ${SOURCE_DIR}
 debuild -us -uc
 cd ..
 echo "Moblab package successfully created!"
+
+upload_package()
+{
+  echo "---== starting upload packages ==---"
+  # Before try to upload run this commands.
+  # sudo apt install apt-transport-artifact-registry
+  # echo 'deb ar+https://us-central1-apt.pkg.dev/projects/chromeos-partner-moblab moblab-linux main' | sudo tee -a  /etc/apt/sources.list.d/artifact-registry.list
+  gcloud artifacts apt upload moblab-linux --source="moblab_0.0-5_all.deb" --project=chromeos-partner-moblab
+}
+
+if [[ $1 == upload ]]; then
+    upload_package
+fi
