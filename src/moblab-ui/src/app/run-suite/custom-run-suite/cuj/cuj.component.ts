@@ -33,8 +33,6 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   MANUAL_SUITE_ENTRY_DESC = '>> Enter suite name';
   readonly suiteList: string[] = [
     this.MANUAL_SUITE_ENTRY_DESC,
-    'performance_cuj_v2',
-    'performance_cuj_quick_v2',
     'performance_cuj',
     'performance_cuj_quick',
   ];
