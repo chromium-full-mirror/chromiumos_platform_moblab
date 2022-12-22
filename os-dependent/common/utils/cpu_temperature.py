@@ -71,7 +71,7 @@ class CpuTemperature(object):
                 # value to zero if the file does not exist
                 self._thermal_zone_filepath = "file_not_available"
                 return self._thermal_zone_filepath
-                
+
             self._thermal_zone_filepath = os.path.join(
                 thermal_zone_dirpath, self._THERMAL_ZONE_TEMP
             )
@@ -83,7 +83,8 @@ class CpuTemperature(object):
         try:
             thermal_file = self.thermal_zone_filepath
             if thermal_file == "file_not_available":
-                data = "0"
+                # large negative value to make it clear it is a dummy value
+                data = "-1000000"
             else:
                 with open(thermal_file, "r") as f:
                     data = f.read()

@@ -62,7 +62,7 @@ class HostServerDebian(host_server_base.HostServerBase):
             if cmd_result and cmd_result.returncode == 0 and cmd_result.stdout:
                 response.identifier = cmd_result.stdout.decode("utf-8").strip()
         except subprocess.SubprocessError:
-            logging.exception("Error retrieving machine id")
+            _LOGGER.exception("Error retrieving machine id")
         return response
 
     def get_disk_info(self, unused_request, unused_context):
@@ -163,7 +163,7 @@ class HostServerDebian(host_server_base.HostServerBase):
             with open("/etc/debian_version") as f:
                 response.version = "".join(f.readlines()).strip()
         except (FileNotFoundError, IOError):
-            logging.exception("Error retrieving version number")
+            _LOGGER.exception("Error retrieving version number")
 
         response.track = ""
         response.description = ""
@@ -182,7 +182,7 @@ class HostServerDebian(host_server_base.HostServerBase):
                     "PRETTY_NAME", "No Name Found"
                 )
         except (FileNotFoundError, IOError):
-            logging.exception("Error retrieving version information")
+            _LOGGER.exception("Error retrieving version information")
 
         return response
 

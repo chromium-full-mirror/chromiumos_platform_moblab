@@ -48,6 +48,10 @@ while [ ${reps} -lt 100 ] && \
   sleep 1
 done
 
+# TODO: have a better way to sort the permissions that "moblab_user"
+# (user_id:246) requires while running the moblab
+sudo chmod 666 /var/run/docker.sock
+
 docker run --restart unless-stopped --name compose \
   --label=com.centurylinklabs.watchtower.lifecycle.pre-update="docker-compose down" \
   --label=com.centurylinklabs.watchtower.stop-signal=KILL \

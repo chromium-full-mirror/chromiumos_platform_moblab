@@ -216,10 +216,9 @@ class HostServerBase(hostservice_pb2_grpc.MoblabHostServiceServicer):
             )
 
             server.add_insecure_port("[::]:7002")
-            logging.info("Starting server on 7002")
+            _LOGGER.info("Starting server on 7002")
             server.start()
             while True:
-                logging.info("Server sleeping")
                 time.sleep(60 * 60 * 24)
         except KeyboardInterrupt:
             server.stop(0)
