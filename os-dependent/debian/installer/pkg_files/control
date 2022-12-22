@@ -13,7 +13,7 @@ Homepage: https://www.chromium.org/chromium-os/testing/moblab/
 Package: moblab
 Architecture: all
 Depends:
- ${misc:Depends}, net-tools, docker.io, make, vim, openssh-server
+ ${misc:Depends}, bridge-utils, net-tools, docker.io, make, vim, openssh-server, python3-pip
 Description: apt package that installs 
  chromeOS Moblab software on a generic Linux box.
  Please check with chromeOS team on hardware requirements

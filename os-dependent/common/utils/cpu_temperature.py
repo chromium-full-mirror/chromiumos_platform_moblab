@@ -65,10 +65,13 @@ class CpuTemperature(object):
                         thermal_zone_dirpath = subdir.path
                         break
             else:
-                raise CpuTemperatureException(
-                    "Could not find %s thermal zone "
-                    "file" % self._THERMAL_ZONE
-                )
+                # it could happen that file does not exist in the linux systems
+                # So don't raise an exception at this point.
+                # We are expecting to read if the file exists, and set the
+                # value to zero if the file does not exist
+                self._thermal_zone_filepath = "file_not_available"
+                return self._thermal_zone_filepath
+                
             self._thermal_zone_filepath = os.path.join(
                 thermal_zone_dirpath, self._THERMAL_ZONE_TEMP
             )
@@ -78,8 +81,12 @@ class CpuTemperature(object):
         """Read thermal_zone file to get CPU temperature and update
         the thread safe temperature queue."""
         try:
-            with open(self.thermal_zone_filepath, "r") as f:
-                data = f.read()
+            thermal_file = self.thermal_zone_filepath
+            if thermal_file == "file_not_available":
+                data = "0"
+            else:
+                with open(thermal_file, "r") as f:
+                    data = f.read()
         except CpuTemperatureException:
             raise
         except Exception as e:
