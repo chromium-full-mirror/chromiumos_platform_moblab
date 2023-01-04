@@ -49,10 +49,10 @@ _DEFAULT_SUITE_TIMEOUT_MINS = 1440
 _SUITE_TIMEOUT_MAP = {
     "hardware_storagequal": 40320,
     "hardware_storagequal_quick": 40320,
-    "storage_qual_v2_xs": 720,  # 12 hours
-    "storage_qual_v2_s": 2880,  # 2 days
-    "storage_qual_v2_m": 5760,  # 4 days
-    "storage_qual_v2_l": 14400,  # 10 days
+    "storage_qual_v2_xs": 2160,  # 1.5 days
+    "storage_qual_v2_s": 4320,  # 3 days
+    "storage_qual_v2_m": 7200,  # 5 days
+    "storage_qual_v2_l": 15840,  # 11 days
     "storage_qual_v2_xl": 28800,  # 20 days
     "cts": 2880,  # 2 days
     "gts": 2880,  # 2 days
