@@ -275,10 +275,7 @@ class MoblabService(object):
                     " been configured."
                 )
             )
-
-        bucket = storage.Client().bucket(self.moblab_bucket_name)
-        bucket.reload()
-        return "asia" in bucket.location.lower()
+        return self._build_connector.is_moblab_bucket_in_asia(self.moblab_bucket_name)
 
     def get_connected_devices(self):
         connected_duts = self.dut_connector.get_connected_duts()
