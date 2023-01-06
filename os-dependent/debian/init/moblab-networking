@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 ### BEGIN INIT INFO
@@ -15,6 +15,7 @@ set -e
 
 . /lib/lsb/init-functions
 
+source /etc/moblab/moblab_setup_configuration.conf
 # Some things that run always
 
 # Carry out specific functions when asked to by the system
@@ -27,8 +28,8 @@ case "$1" in
         # sudo ip addr will show all the interfaces on your machine
         # Pick the correct values for EXT_IFACE and INT_IFACE
         ##################################################################
-        EXT_IFACE=EXTERNAL_PORT_TO_INTERNET   # Interface that is connected to the internet
-        INT_IFACE=INTERNAL_PORT_TO_DUTS  # Interface that is connected to DUT
+        EXT_IFACE=$EXTERNAL_PORT_TO_INTERNET   # Interface that is connected to the internet
+        INT_IFACE=$INTERNAL_PORT_TO_DUTS  # Interface that is connected to DUT
         ##################################################################
         # Do not edit below this line.
 
@@ -50,6 +51,9 @@ case "$1" in
         docker stop dhcp || true
         docker rm dhcp || true
         docker pull gcr.io/chromeos-partner-moblab/moblab-dhcp:release
+        # TODO: have a better way to sort the permissions that "moblab_user"
+        # (user_id:246) requires while running the moblab
+        sudo chmod 666 /var/run/docker.sock
         docker run --name dhcp -v leases:/var/lib/misc -d --restart always --cap-add=NET_ADMIN --network host gcr.io/chromeos-partner-moblab/moblab-dhcp:release --interface ${DHCPD_IFACE} --bind-interfaces
 
         brctl addif ${DHCPD_IFACE} ${INT_IFACE}
