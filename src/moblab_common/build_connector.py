@@ -8,6 +8,7 @@ import logging
 
 # pylint: disable=no-name-in-module, import-error
 from google.cloud.storage import Client as GcsClient
+from moblab_common.moblab_build_connector import exception_handler
 
 # pylint: disable=no-name-in-module, import-error
 from google.auth import exceptions as auth_exceptions
@@ -36,6 +37,7 @@ class MoblabBuildConnector(object):
                 logging.info("No credentials loaded")
                 raise MoblabBuildConnectorException("Invalid Credentials")
 
+    @exception_handler(unhandled_exception_message="Encountered API error when getting partial object path.")
     def _get_partial_object_path(self, prefix, delimiter):
         blob_itr = self.storage_client.bucket(
             self.moblab_bucket_name
@@ -95,3 +97,17 @@ class MoblabBuildConnector(object):
             local_build[len(local_prefix) : -1] for local_build in local_builds
         ]
         return builds + local_builds
+
+    @exception_handler(unhandled_exception_message="Encountered API error when checking moblab bucket is in asia.")
+    def is_moblab_bucket_in_asia(self, bucket_name: str) -> bool:
+        """Check the bucket is in Asia.
+        Args:
+            bucket_name(str): Bucket name.
+        Returns:
+            Boolean
+        """
+        if not bucket_name:
+            raise ArgumentException("Missing the bucket name")
+        bucket = GcsClient().bucket(bucket_name)
+        bucket.reload()
+        return "asia" in bucket.location.lower()

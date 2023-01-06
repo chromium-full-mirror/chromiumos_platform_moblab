@@ -14,20 +14,28 @@ import re
 
 import google.api_core.path_template
 
-from google.api_core.exceptions import GoogleAPICallError
+from google.api_core import exceptions as api_exceptions
 from google.auth import exceptions as auth_exceptions
 from google.chromeos.moblab_v1beta1.services.build_service.client import (
     BuildServiceClient,
 )
 from google.chromeos.moblab_v1beta1.types import build_service, resources
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
+from functools import wraps
 
 DEFAULT_PAGE_SIZE = 500
 
 
 class MoblabBuildConnectorException(Exception):
     """Generic exception for this module."""
+    pass
 
+
+class ArgumentException(Exception):
+    pass
+
+
+class GoogleApiException(Exception):
     pass
 
 
@@ -43,6 +51,45 @@ API_TO_INTERNAL_BUILD_STATUS_MAP = {
     resources.Build.BuildStatus.RUNNING: BuildStatus.RUNNING,
     resources.Build.BuildStatus.ABORTED: BuildStatus.ABORTED,
 }
+
+
+def exception_handler(unhandled_exception_message: str):
+    def decorator(func):
+        @wraps(func)
+        def result(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except auth_exceptions.DefaultCredentialsError as e:
+                msg = "Invalid Credentials"
+                logging.info(msg + f" reason: {e}")
+                raise MoblabBuildConnectorException(msg)
+            except api_exceptions.Forbidden as e:
+                msg = "Request to gcs bucket got Forbidden error"
+                logging.info(msg + f" reason: {e}")
+                raise GoogleApiException(msg)
+            except api_exceptions.ResourceExhausted as e:
+                msg = "Request to gcs bucket got ResourceExhausted error"
+                logging.info(msg + f" reason: {e}")
+                raise GoogleApiException(msg)
+            except (api_exceptions.Unauthorized, api_exceptions.Unauthenticated) as e:
+                msg = "Request to gcs bucket got an Unauthorized error"
+                logging.info(msg + f" reason: {e}")
+                raise GoogleApiException(msg)
+            except ArgumentException as e:
+                raise
+            except GoogleApiException as e:
+                raise
+            except api_exceptions.GoogleAPICallError as e:
+                msg = "Request to gcs bucket failed."
+                logging.info(msg + f" reason: {e}")
+                raise MoblabBuildConnectorException(msg)
+            except Exception as e:
+                msg = f"Request to gcs bucket caught an unknown exception: {e}"
+                logging.info(msg)
+                raise MoblabBuildConnectorException(unhandled_exception_message)
+        return result
+    return decorator
+
 
 
 class MoblabBuildConnector(object):
@@ -102,41 +149,21 @@ class MoblabBuildConnector(object):
         except auth_exceptions.DefaultCredentialsError as e:
             raise MoblabBuildConnectorException("No credentials loaded") from e
 
+    @exception_handler(unhandled_exception_message="Encountered API error when attempting to list builds.")
     def _list_builds(self, request):
-        try:
-            return self.build_service_client.list_builds(request).builds
-        except GoogleAPICallError as e:
-            raise MoblabBuildConnectorException(
-                "Encountered API error when attempting to list builds."
-            ) from e
+        return self.build_service_client.list_builds(request).builds
 
+    @exception_handler(unhandled_exception_message="Encountered API error when attempting to find the most stable build.")
     def _find_most_stable_build(self, request):
-        try:
-            return self.build_service_client.find_most_stable_build(
-                request
-            ).build
-        except GoogleAPICallError as e:
-            raise MoblabBuildConnectorException(
-                "Encountered API error when attempting to find the most stable build."
-            ) from e
+        return self.build_service_client.find_most_stable_build(request).build
 
+    @exception_handler(unhandled_exception_message="Encountered API error when attempting to list build targets.")
     def _list_build_targets(self, request):
-        try:
-            return self.build_service_client.list_build_targets(
-                request
-            ).build_targets
-        except GoogleAPICallError as e:
-            raise MoblabBuildConnectorException(
-                "Encountered API error when attempting to list build targets."
-            ) from e
+        return self.build_service_client.list_build_targets(request).build_targets
 
+    @exception_handler(unhandled_exception_message="Encountered API error when attempting to list models.")
     def _list_models(self, request):
-        try:
-            return self.build_service_client.list_models(request).models
-        except GoogleAPICallError as e:
-            raise MoblabBuildConnectorException(
-                "Encountered API error when attempting to list models."
-            ) from e
+        return self.build_service_client.list_models(request).models
 
     def list_available_milestones(
         self, build_target, model, page_size=DEFAULT_PAGE_SIZE, page_token=None
@@ -231,6 +258,7 @@ class MoblabBuildConnector(object):
             for build in build_results
         ]
 
+    @exception_handler(unhandled_exception_message="Encountered API error when attempting to check build stage status.")
     def check_build_stage_status(
         self, build_target, model, build, bucket_name
     ):
@@ -258,6 +286,7 @@ class MoblabBuildConnector(object):
             request
         ).is_build_staged
 
+    @exception_handler(unhandled_exception_message="Encountered API error when attempting to stage build.")
     def stage_build(self, build_target, model, build, bucket_name):
         # TODO(zhihuixie): Long running operation cannot returned correctly in
         # the python client library.
