@@ -840,6 +840,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             logging.error(error_msg)
             _context.set_code(grpc.StatusCode.NOT_FOUND)
             _context.set_details(error_msg)
+            return 
         else:
             execution_history = []
             job_history_dicts = self.service.get_job_history(request.id)
