@@ -163,6 +163,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   jobs_running = 0;
   jobs_completed = 0;
   jobs_aborted = 0;
+  jobs_failed = 0;
   jobs_total = 0;
 
   normalizeTimestamp = normalizeTimestamp;
@@ -370,6 +371,9 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
     );
     this.jobs_aborted = await this.getNumJobsPromise(
       Number(Job.QueueStatus.ABORTED_JOBS)
+    );
+    this.jobs_failed = await this.getNumJobsPromise(
+      Number(Job.QueueStatus.FAILED_JOBS)
     );
     this.jobs_total = await this.getNumJobsPromise();
   }
