@@ -15,7 +15,7 @@ const PREMIUM = 'premium';
 const ESSENTIAL = 'essential';
 const ADVANCED = 'advanced';
 
-/** Component owns logic for CUJ suite run form.
+/** Component owns logic for CUJ suite run form. 
  * */
 @Component({
   selector: 'app-cuj',
@@ -71,7 +71,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
    * */
   ngAfterContentInit(): void {
     setTimeout(() => {
-      this.getConnectedDuts();
+      this.getConnectedDuts(() => {});
       // These two enable can make the tooptips `This form is disable` disappear.
       this.suiteSelectForm.enable();
     });
@@ -80,11 +80,12 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   /**
    * Fetches DUTs for use and label modification
    */
-  getConnectedDuts() {
+  getConnectedDuts(callback: () => void) {
     this.moblabGrpcService.listConnectedDuts(
       (connectedDuts: ConnectedDutInfo[]) => {
         this.duts = connectedDuts;
         this.dutHostnames = connectedDuts.map(dut => dut.getIp());
+        callback()
       },
       (message: string) => {
         this.duts = [];
@@ -110,15 +111,15 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   /**
    * Add specified label to list of DUT IPs
    */
-  addLabel(dut_hostnames: string[], label: string) {
+  addLabel(label: string, callback: () => void) {
     this.moblabGrpcService.addLabelToDuts(
       message => {
-        this.getConnectedDuts();
+        this.getConnectedDuts(callback);
       },
       message => {
         this.cujCheckError = message;
       },
-      dut_hostnames,
+      this.dutHostnames,
       label
     );
   }
@@ -126,15 +127,15 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   /**
    * Remove specified label from list of DUT IPs
    */
-  removeLabel(dut_hostnames: string[], label) {
+  removeLabel(label, callback: () => void) {
     this.moblabGrpcService.removeLabelFromDuts(
       message => {
-        this.getConnectedDuts();
+        this.getConnectedDuts(callback);
       },
       message => {
         this.cujCheckError = message;
       },
-      dut_hostnames,
+      this.dutHostnames,
       label
     );
   }
@@ -202,34 +203,46 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
    * Method to validate DUT label setting based on chosen suiteVersion.
    * If no suiteVersion is chosen, suite will be run using current labels.
    */
-  handleDutSetup() {
+  handleDutSetupAndTriggerRunSuiute() {
     this.dutHostnames = this.getSelectedDutHostnames();
     switch (this.suiteLabel) {
       case BASIC:
-        this.removeLabel(this.dutHostnames, 'plus');
-        this.removeLabel(this.dutHostnames, 'premium');
+        // First remove plus label, then remove premium label and last 
+        // trigger the actual suite
+        this.removeLabel('plus', () => {
+          this.removeLabel('premium', () =>{
+            this.triggerRunSuite();
+          });
+        });
         break;
       case PLUS:
-        this.addLabel(this.dutHostnames, 'plus');
-        this.removeLabel(this.dutHostnames, 'premium');
+        this.addLabel('plus',  () => {
+          this.removeLabel('premium', () => {
+            this.triggerRunSuite();
+          });
+        });
         break;
       case PREMIUM:
-        this.addLabel(this.dutHostnames, 'plus');
-        this.addLabel(this.dutHostnames, 'premium');
+        this.addLabel('plus', () => {
+          this.addLabel('premium', () => {
+            this.triggerRunSuite();
+          });
+        });
         break;
       case ESSENTIAL:
-        this.addLabel(this.dutHostnames, 'essential');
-        this.removeLabel(this.dutHostnames, 'advanced');
+        this.addLabel('essential', () => {
+          this.removeLabel('advanced', () => {
+            this.triggerRunSuite();
+          });
+        });
         break;
       case ADVANCED:
-        this.addLabel(this.dutHostnames, 'advanced');
-        this.removeLabel(this.dutHostnames, 'essential');
+        this.addLabel('advanced', () => {
+          this.removeLabel('essential', () => {
+            this.triggerRunSuite();
+          });
+        });
         break;
-    }
-    if (this.externalDisplayToggle.getChecked()) {
-      this.addLabel(this.dutHostnames, 'external_display');
-    } else {
-      this.removeLabel(this.dutHostnames, 'external_display');
     }
   }
 
@@ -259,16 +272,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     this.errorMessage = null;
   }
 
-  /** Method triggered on run-suite button press. Invokes runSuite RPC call.
-   * */
-  onRunSuiteClick() {
-    super.onRunSuiteClick('Starting CUJ suite run.');
-    if (!this._validate()) {
-      this.onFormLoaded();
-      return;
-    }
-    this.handleDutSetup();
-
+  triggerRunSuite(){
     this.moblabGrpcService.runSuite(
       _ => {
         this.onSuiteStarted();
@@ -284,5 +288,24 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
       this.selectedModel,
       this.selectedPool
     );
+  }
+  /** Method triggered on run-suite button press. Invokes runSuite RPC call.
+   * */
+  onRunSuiteClick() {
+    super.onRunSuiteClick('Starting CUJ suite run.');
+    if (!this._validate()) {
+      this.onFormLoaded();
+      return;
+    }
+    // this needs to be handled differently as suite is triggered already
+    if (this.externalDisplayToggle.getChecked()) {
+      this.addLabel('external_display', () =>{
+        this.handleDutSetupAndTriggerRunSuiute();
+      });
+    } else {
+      this.removeLabel('external_display', () => {
+        this.handleDutSetupAndTriggerRunSuiute();
+      });
+    }
   }
 }
