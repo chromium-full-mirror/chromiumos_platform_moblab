@@ -37,6 +37,7 @@ import {NewUpdateModule} from '../directives/new-update/new-update.module';
 import {FAFTRunComponent} from './custom-run-suite/faft/faft.component';
 import {CUJRunComponent} from './custom-run-suite/cuj/cuj.component';
 import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
+import {FWUPDRunComponent} from './custom-run-suite/fwupd/fwupd.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
     FAFTRunComponent,
     CUJRunComponent,
     PvsComponent,
+    FWUPDRunComponent,
   ],
   exports: [
     BasicAutocompleteSelectorComponent,
@@ -75,6 +77,7 @@ import {PvsComponent} from './custom-run-suite/pvs/pvs.component';
     StorageQualV2Component,
     FAFTRunComponent,
     CUJRunComponent,
+    FWUPDRunComponent,
   ],
   imports: [
     BrowserModule,

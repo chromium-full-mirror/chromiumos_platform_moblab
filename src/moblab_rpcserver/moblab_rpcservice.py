@@ -24,6 +24,7 @@ from moblab_common import feedback_connector
 from moblab_common import host_connector
 from moblab_common import moblab_info
 from moblab_common import moblab_build_connector
+from moblab_common import dut_connector_for_fwupd
 
 # pylint: disable=import-error
 from moblab_common.proto import moblabrpc_pb2
@@ -93,6 +94,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         self.service = moblab_service.MoblabService()
         self.storage_qual_check_service = StorageQualCheckService()
+        self.dut_connector_for_fwupd = (
+            dut_connector_for_fwupd.MoblabDUTConnectorForFwupd()
+        )
 
     def send_moblab_screenshot(self, request, context):
         """Uploads image and feedback text to GCS.
@@ -293,10 +297,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             if pool_name == "":
                 pool_name = None
             await self.storage_qual_check_service.check_setup(
-                model,
-                board,
-                pool_name, 
-                request.variation
+                model, board, pool_name, request.variation
             )
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)
@@ -382,29 +383,66 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         )
         return response
 
+    def run_fwupd_suite(self, request, _context):
+        """Sets off FWUPD suite run.
+
+        Args:
+          request: RunFWUPDSuiteRequest object with parameters describing suite
+            to be
+          run and arguments for suite run:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            suite: A string specifying which suite to
+             run ( Ex. faft_setup )
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            test_args: args string of specific test names
+            to run, just part of the suite.
+          _context: grpc.server.Context
+        Returns:
+          RunFWUPDSuiteResponse object with a string result message.
+        """
+        response = moblabrpc_pb2.RunFWUPDSuiteResponse(
+            message=self.service.run_fwupd_suite(
+                request.build_target,
+                request.model,
+                request.milestone,
+                request.build_version,
+                request.suite,
+                request.pool,
+                request.test_args,
+            )
+        )
+        return response
+
     def _get_connected_dut_from_dict(self, dut_dict):
         return moblabrpc_pb2.ConnectedDutInfo(
-            name = dut_dict.get("platform", ""),
-            ip = dut_dict.get("hostname", ""),
-            mac_addr = dut_dict.get("mac", ""),
-            model = moblab_service.LabelsParser.extract_model_from_labels(
+            name=dut_dict.get("platform", ""),
+            ip=dut_dict.get("hostname", ""),
+            mac_addr=dut_dict.get("mac", ""),
+            model=moblab_service.LabelsParser.extract_model_from_labels(
                 dut_dict.get("labels", [])
             ),
-            build_target = moblab_service.LabelsParser.extract_build_target_from_labels(
+            build_target=moblab_service.LabelsParser.extract_build_target_from_labels(
                 dut_dict.get("labels", [])
             ),
-            pools = sorted(moblab_service.LabelsParser.extract_pool_from_labels(
-                dut_dict.get("labels", [])
-            )),
-            status = AFE_TO_DUT_STATUS_MAPPINGS[dut_dict["status"]],
-            is_enrolled = dut_dict.get("enrolled", False),
-            is_connected = dut_dict.get("isConnected", True),
-            labels = sorted(dut_dict.get("labels", [])),
-            attributes = sorted([
-                "%s: %s" % (key, value)
-                for key, value in dut_dict.get("attributes", {}).items()
-            ]),
-            error = dut_dict.get("error", ""),
+            pools=sorted(
+                moblab_service.LabelsParser.extract_pool_from_labels(
+                    dut_dict.get("labels", [])
+                )
+            ),
+            status=AFE_TO_DUT_STATUS_MAPPINGS[dut_dict["status"]],
+            is_enrolled=dut_dict.get("enrolled", False),
+            is_connected=dut_dict.get("isConnected", True),
+            labels=sorted(dut_dict.get("labels", [])),
+            attributes=sorted(
+                [
+                    "%s: %s" % (key, value)
+                    for key, value in dut_dict.get("attributes", {}).items()
+                ]
+            ),
+            error=dut_dict.get("error", ""),
         )
 
     async def list_connected_duts(self, _request, _context):
@@ -524,10 +562,16 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         model = request.model
 
         for host in afe_hosts:
-            labels = host.get('labels', [])
-            dut_model = moblab_service.LabelsParser.extract_model_from_labels(labels)
+            labels = host.get("labels", [])
+            dut_model = moblab_service.LabelsParser.extract_model_from_labels(
+                labels
+            )
             if model == "" or model.lower() == dut_model.lower():
-                pool_names = moblab_service.LabelsParser.extract_pool_from_labels(labels)
+                pool_names = (
+                    moblab_service.LabelsParser.extract_pool_from_labels(
+                        labels
+                    )
+                )
                 pools = pools.union(pool_names)
 
         response = moblabrpc_pb2.ListPoolsResponse(pools=list(pools))
@@ -1313,7 +1357,9 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         if pool_name == "":
             pool_name = None
         try:
-            await self.storage_qual_check_service.check_setup(model, board, pool_name)
+            await self.storage_qual_check_service.check_setup(
+                model, board, pool_name
+            )
         except StorageQualCheckError as ex:
             _context.set_code(grpc.StatusCode.INTERNAL)
             _context.set_details(str(ex))
@@ -1330,3 +1376,22 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             request.dut_hostname, request.servo_serial_number
         )
         return moblabrpc_pb2.AddServoResponse()
+
+    def get_peripheral_information(self, request, _context):
+        """Get information regarding the peripherals connected to the DUT
+
+        Figure out the set of peripherals that are connected to the particular
+        DUT and send this information back to the UI
+        """
+        dut_hostname = request.dut_hostname
+        logging.debug(
+            f"obtained {dut_hostname} as dut_hostname for \
+                get_peripheral_information rpc call"
+        )
+        result = self.dut_connector_for_fwupd.get_peripheral_information(
+            dut_hostname
+        )
+        # now ssh to the dut and run the commands
+        return moblabrpc_pb2.GetPeripheralInformationResponse(
+            json_info=str(result)
+        )

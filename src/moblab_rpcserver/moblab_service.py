@@ -148,15 +148,23 @@ class LabelsParser(object):
 
     @classmethod
     def extract_model_and_build_target_from_labels(cls, labels):
-        """ Extract model & build target from labels """
+        """Extract model & build target from labels"""
         model = None
         board = None
 
         for label in labels:
-            model = cls._model_re.match(label).group(1) if cls._model_re.match(label) else model
-            board = cls._build_target_re.match(label).group(1) if cls._build_target_re.match(label) else board
-        
-        return(model, board)
+            model = (
+                cls._model_re.match(label).group(1)
+                if cls._model_re.match(label)
+                else model
+            )
+            board = (
+                cls._build_target_re.match(label).group(1)
+                if cls._build_target_re.match(label)
+                else board
+            )
+
+        return (model, board)
 
 
 class MoblabService(object):
@@ -275,7 +283,9 @@ class MoblabService(object):
                     " been configured."
                 )
             )
-        return self._build_connector.is_moblab_bucket_in_asia(self.moblab_bucket_name)
+        return self._build_connector.is_moblab_bucket_in_asia(
+            self.moblab_bucket_name
+        )
 
     def get_connected_devices(self):
         connected_duts = self.dut_connector.get_connected_duts()
@@ -555,6 +565,49 @@ class MoblabService(object):
             suite_args=suite_args,
         )
 
+    def run_fwupd_suite(
+        self,
+        build_target,
+        model,
+        milestone,
+        build_version,
+        suite,
+        pool=None,
+        test_args=None,
+    ):
+        """Starts fwupd suite run. Formats arguments s.t. they can be ingested by
+        AFE.
+
+        Args:
+            build_target: Ex. octopus
+            milestone: Ex. R80
+            build_version: A numeric version string of the form: '00000.00.0'
+            model: String identfier for the specific model to be run.
+            pool: String identifier for which pool of DUT's to run tests with.
+            test_args: List of strings of specific test names to
+            run.
+        Returns:
+          String response message.
+        """
+
+        autotest_args = {}
+        # this is expected to work, but is tested for now
+        if test_args and len(test_args):
+            for test_arg in test_args:
+                [key, val] = test_arg.split("=", 1)
+                autotest_args[key] = val
+
+        return self.run_suite(
+            build_target,
+            model,
+            milestone,
+            build_version,
+            suite,
+            pool,
+            suite_args=autotest_args,
+            test_args=autotest_args,
+        )
+
     def run_suite(
         self,
         build_target,
@@ -679,9 +732,18 @@ class MoblabService(object):
     Check duts doesn't flash a test image.
     If there has one dut without test image, it will raise exception. Otherwise, this function does nothings.
     """
+
     def check_duts_without_test_image(self, ips):
         # test duts by given ips. Saving call `find_duts` time.
-        disconnected_dut_ips = list(map(lambda dut: dut[0], filter(lambda dut: not dut[1], self.dut_connector.get_duts(ip_addresses=ips))))
+        disconnected_dut_ips = list(
+            map(
+                lambda dut: dut[0],
+                filter(
+                    lambda dut: not dut[1],
+                    self.dut_connector.get_duts(ip_addresses=ips),
+                ),
+            )
+        )
         for ip in disconnected_dut_ips:
             raise MoblabRpcError("dut (ip: %s) without test image" % ip)
 
@@ -890,15 +952,14 @@ class MoblabService(object):
             )
 
     def _key_getter(self, data):
-        s = ''
-        if 'model' in data:
-            s += data['model']
-        if 'build_target' in data:
-            s += data['build_target']
-        if 'milestone' in data:
-            s += data['milestone']
+        s = ""
+        if "model" in data:
+            s += data["model"]
+        if "build_target" in data:
+            s += data["build_target"]
+        if "milestone" in data:
+            s += data["milestone"]
         return hash(s)
-
 
     def list_usable_milestones(self, build_target, model, force_update=False):
         """
@@ -920,6 +981,7 @@ class MoblabService(object):
             second is a boolean which is true iff at least one build of the
             milestone is staged.
         """
+
         def _list_usable_milestones():
             bucket_milestones = self.build_connector.get_milestones_available(
                 build_target
@@ -947,7 +1009,9 @@ class MoblabService(object):
                 [
                     MilestonePair(milestone=milestone, is_staged=False)
                     for milestone in list(
-                        set(remote_milestones).difference(set(bucket_milestones))
+                        set(remote_milestones).difference(
+                            set(bucket_milestones)
+                        )
                     )
                 ]
             )
@@ -964,12 +1028,16 @@ class MoblabService(object):
             )
 
         return self.milestone_cache.get(
-                key=self._key_getter({'model': model, 'build_target': build_target}),
-                or_default=_list_usable_milestones,
-                force_update=force_update,
-            )
+            key=self._key_getter(
+                {"model": model, "build_target": build_target}
+            ),
+            or_default=_list_usable_milestones,
+            force_update=force_update,
+        )
 
-    def list_usable_build_versions(self, build_target, milestone, model, force_update=False):
+    def list_usable_build_versions(
+        self, build_target, milestone, model, force_update=False
+    ):
         """
         Returns build versions available for a given
         model/build_target/milestone, both staged and unstaged (if target
@@ -988,9 +1056,12 @@ class MoblabService(object):
             A list of tuples where the first item is the build_version and the
             second is a boolean which is true iff the build is staged.
         """
+
         def _list_usable_build_versions():
-            bucket_build_versions = self.build_connector.get_builds_for_milestone(
-                build_target, milestone
+            bucket_build_versions = (
+                self.build_connector.get_builds_for_milestone(
+                    build_target, milestone
+                )
             )
 
             build_version_results = [
@@ -1027,7 +1098,8 @@ class MoblabService(object):
                     )
 
             build_version_results.sort(
-                key=lambda x: distutils.version.LooseVersion(x[0]), reverse=True
+                key=lambda x: distutils.version.LooseVersion(x[0]),
+                reverse=True,
             )
             return BuildResults(
                 results=build_version_results,
@@ -1037,12 +1109,16 @@ class MoblabService(object):
                 ),
             )
 
-        data = {'model': model, 'build_target': build_target, 'milestone': milestone}
+        data = {
+            "model": model,
+            "build_target": build_target,
+            "milestone": milestone,
+        }
         return self.build_version_cache.get(
-                key=self._key_getter(data),
-                or_default=_list_usable_build_versions,
-                force_update=force_update
-            )
+            key=self._key_getter(data),
+            or_default=_list_usable_build_versions,
+            force_update=force_update,
+        )
 
     def get_num_jobs(
         self,
@@ -1135,7 +1211,7 @@ class MoblabService(object):
                 host_id=dut_id,
                 query_start=query_start,
                 query_limit=query_limit,
-                sort_by=sort_by
+                sort_by=sort_by,
             )
 
             # Extracting jobs information from HQE entries.

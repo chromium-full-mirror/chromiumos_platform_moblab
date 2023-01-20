@@ -209,20 +209,22 @@
 
       <div class="stable-build-card-content">
         <mat-form-field class="configuration-input" appearance="legacy">
-          <mat-label [style]="!isAnyDutEnrolled() ? 'color: red;' : '' ">{{ isAnyDutEnrolled() ? 'User Override' : 'Please enroll at least one DUT' }}</mat-label>
+          <mat-label [style]="!isAnyDutEnrolled() ? 'color: red;' : '' ">{{ isAnyDutEnrolled() ? 'User Override' :
+            'Please enroll at least one DUT' }}</mat-label>
           <input matInput placeholder="Rxx-yyyyy.zz.0" [formControl]="userCrOSVersionForm">
           <mat-error *ngIf="this.userCrOSVersionForm.hasError('validChromeosBuildPattern')">
             Must follow the correct OS version format e.g. R88-13597.105.0
           </mat-error>
-          <mat-error *ngIf="this.userCrOSVersionForm.hasError('apiResponseError')">{{ this.userCrOSVersionForm.errors['apiResponseError'] }}</mat-error>
+          <mat-error *ngIf="this.userCrOSVersionForm.hasError('apiResponseError')">{{
+            this.userCrOSVersionForm.errors['apiResponseError'] }}</mat-error>
         </mat-form-field>
       </div>
       <div class="stable-build-card-content">
         <button mat-raised-button color="primary" [disabled]="!isStableCrOsVersionValidForSubmit()"
           type="submit">Override All
         </button>
-        <button type="button" class="secondary-button-wrapper" mat-raised-button color="primary" (click)="setStableCrOSVersion('')"
-          matTooltip="Undo the user override and use the system defaults">
+        <button type="button" class="secondary-button-wrapper" mat-raised-button color="primary"
+          (click)="setStableCrOSVersion('')" matTooltip="Undo the user override and use the system defaults">
           Restore Defaults
         </button>
       </div>
@@ -284,6 +286,8 @@
       not enable these features.
       <br><br>Google will not answer questions about these features until they are released for all users.
     </mat-card-subtitle>
+    <mat-checkbox class="example-margin" [(ngModel)]="fwupdEnabled" (ngModelChange)="saveFWUPDSetting($event)">FWUPD
+      Tests</mat-checkbox>
   </mat-card>
   <mat-card id="advanced-card">
     <mat-card-header>

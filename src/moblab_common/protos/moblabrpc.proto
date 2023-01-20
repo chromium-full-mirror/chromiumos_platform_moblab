@@ -15,6 +15,8 @@ service MoblabRpcService {
     returns (RunSuiteResponse) {}
   rpc run_faft_suite (RunFAFTSuiteRequest)
     returns (RunSuiteResponse) {}
+    rpc run_fwupd_suite (RunFWUPDSuiteRequest)
+      returns (RunSuiteResponse) {}
   rpc provision_duts (ProvisionDutsRequest) returns (google.protobuf.Empty) {}
   rpc stage_build (StageBuildRequest) returns (StageBuildResponse) {}
 
@@ -67,6 +69,7 @@ service MoblabRpcService {
   rpc get_version_info(GetVersionInfoRequest) returns (GetVersionInfoResponse) {};
   rpc get_remote_agent_configuration(GetRemoteAgentConfigurationRequest) returns (GetRemoteAgentConfigurationResponse) {};
   rpc set_remote_agent_configuration(SetRemoteAgentConfigurationRequest) returns (SetRemoteAgentConfigurationResponse) {};
+  rpc get_peripheral_information(GetPeripheralInformationRequest) returns(GetPeripheralInformationResponse) {};
 
   // Sends screenshot and feedback information to GCS bucket.
   rpc send_moblab_screenshot(SendMoblabScreenshotRequest) returns (SendMoblabScreenshotResponse) {};
@@ -202,6 +205,17 @@ message RunFAFTSuiteRequest {
   string pool = 6;
   // Comma separated list of tests, if specified only these tests will run.
   repeated string specific_tests = 7;
+}
+
+// NEXT_TAG = 8
+message RunFWUPDSuiteRequest {
+  string suite = 1;
+  string build_target = 2;
+  string build_version = 3;
+  string milestone = 4;
+  string model = 5;
+  string pool = 6;
+  repeated string test_args = 7;
 }
 
 // NEXT_TAG = 17
@@ -852,4 +866,14 @@ message AddServoRequest {
 
 // NEXT_TAG = 1
 message AddServoResponse {
+}
+
+// NEXT_TAG = 1
+message GetPeripheralInformationRequest{
+  string dut_hostname = 1;
+}
+
+// NEXT_TAG = 2
+message GetPeripheralInformationResponse{
+  string json_info = 1;
 }

@@ -23,7 +23,8 @@ _DHCPD_LEASES = "/leases/dnsmasq.leases"
 # -p is the interval between ping packets to a single target.
 # -i is the interval between sending ping packets.
 FIND_DUT_CMD = [
-    "cat %s | awk -F ' ' '{print $3}' | /usr/bin/fping -a -t200 -B1.0 -r2" % _DHCPD_LEASES
+    "cat %s | awk -F ' ' '{print $3}' | /usr/bin/fping -a -t200 -B1.0 -r2"
+    % _DHCPD_LEASES
 ]
 
 SUBNET_DUT_SEARCH_RE = r"(?P<ip>192\.168\.231\.[0-9][0-9]*[0-9]*).*"
@@ -180,12 +181,15 @@ class MoblabDUTConnector(object):
         command_results = self.run_command_on_ips(
             command="timeout 2 cat /etc/lsb-release | grep CHROMEOS_RELEASE_TRACK | awk -F '=' '{print $2}'",
             ip_addresses=ip_addresses,
-            timeout=10
+            timeout=10,
         )
 
         def is_dut_connected(output):
             if output:
-                return output is not None and output.strip().lower() == 'testimage-channel'
+                return (
+                    output is not None
+                    and output.strip().lower() == "testimage-channel"
+                )
             return False
 
         results = []
@@ -223,7 +227,10 @@ class MoblabDUTConnector(object):
             if exit_code:
                 # don't append the host when exit_code is not None
                 # we log the stderr and stdout.
-                logging.exception("Failed to connect to dut exit code: %s, details: %s" % (exit_code, stdout))
+                logging.exception(
+                    "Failed to connect to dut exit code: %s, details: %s"
+                    % (exit_code, stdout)
+                )
             else:
                 try:
                     parsed_results = json.loads(stdout)
