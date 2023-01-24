@@ -53,6 +53,7 @@ const FILTER_VALIDATORS = {};
 FILTER_VALIDATORS[JOB_START_TIME_FROM_FILTER] = [forbiddenDateValidator];
 FILTER_VALIDATORS[JOB_START_TIME_TO_FILTER] = [forbiddenDateValidator];
 FILTER_VALIDATORS[JOB_ID] = [forbiddenIDValidator];
+FILTER_VALIDATORS[PARENT_JOB_ID] = [forbiddenIDValidator];
 
 const DEFAULT_PAGE_SIZE = 20;
 
