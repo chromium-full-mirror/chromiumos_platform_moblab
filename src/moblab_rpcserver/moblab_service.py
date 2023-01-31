@@ -586,11 +586,6 @@ class MoblabService(object):
           String response message.
         """
 
-        if not self._is_build_staged(
-            build_version, build_target, milestone, model
-        ):
-            self._stage_build(model, build_target, build_version)
-
         # additional tags -d/-a will appear in the build_version for the local
         # builds. Quick way to check if it is local build
         # Example for local build: R102-14590.0.0-d022_03_22_2322-a1
@@ -605,6 +600,12 @@ class MoblabService(object):
             build = "{}-release/R{}-{}".format(
                 build_target, milestone, build_version
             )
+
+            if not self._is_build_staged(
+                build_version, build_target, milestone, model
+            ):
+                self._stage_build(model, build_target, build_version)
+
         builds = {"cros-version": build}
 
         builds.update(extra_builds)
