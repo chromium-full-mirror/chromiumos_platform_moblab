@@ -75,9 +75,7 @@ def exception_handler(unhandled_exception_message: str):
                 msg = "Request to gcs bucket got an Unauthorized error"
                 logging.info(msg + f" reason: {e}")
                 raise GoogleApiException(msg)
-            except ArgumentException as e:
-                raise
-            except GoogleApiException as e:
+            except ArgumentException:
                 raise
             except api_exceptions.GoogleAPICallError as e:
                 msg = "Request to gcs bucket failed."
