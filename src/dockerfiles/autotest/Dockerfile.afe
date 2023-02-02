@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=autopush
 
@@ -9,6 +10,7 @@ ARG LABEL=autopush
 
 ARG LABEL
 ARG REGISTRY_URI
+FROM ${BASE_REGISTRY_URI}/partner-testing-rsa:latest as partner_key_image
 
 FROM ${REGISTRY_URI}/moblab-autotest-base:${LABEL}
 
@@ -94,6 +96,9 @@ RUN mkdir -p /home/moblab
 RUN mkdir -p /home/moblab/.ssh
 
 RUN cp /chromite/ssh_keys/* /home/moblab/.ssh/
+# add partner_testing_rsa from the container stored in a separate location
+COPY --chown=moblab --from=partner_key_image /partner_testing_rsa /home/moblab/.ssh/partner_testing_rsa
+
 RUN chmod -R 600 /home/moblab/.ssh/*
 COPY ssh_config /home/moblab/.ssh/config
 RUN touch /home/moblab/.boto

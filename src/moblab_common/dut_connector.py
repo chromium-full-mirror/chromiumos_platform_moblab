@@ -89,15 +89,26 @@ class MoblabDUTConnector(object):
         )
 
     def run_command_on_ips(self, command, ip_addresses, timeout=10):
-        client = ParallelSSHClient(
-            ip_addresses,
-            pool_size=20,
-            user="root",
-            num_retries=1,
-            keepalive_seconds=timeout,
-            timeout=timeout,
-            pkey="/home/moblab/.ssh/testing_rsa",
-        )
+        try:
+            client = ParallelSSHClient(
+                ip_addresses,
+                pool_size=20,
+                user="root",
+                num_retries=1,
+                keepalive_seconds=timeout,
+                timeout=timeout,
+                pkey="/home/moblab/.ssh/partner_testing_rsa",
+            )
+        except:
+            client = ParallelSSHClient(
+                ip_addresses,
+                pool_size=20,
+                user="root",
+                num_retries=1,
+                keepalive_seconds=timeout,
+                timeout=timeout,
+                pkey="/home/moblab/.ssh/testing_rsa",
+            )
         command_results = []
 
         output = client.run_command(
