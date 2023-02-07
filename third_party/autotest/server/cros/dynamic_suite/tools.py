@@ -220,7 +220,10 @@ def inject_vars(vars, control_file_in):
     """
     control_file = ''
     control_file += _INJECT_BEGIN + '\n'
+    inject_args = []
     for key, value in six.iteritems(vars):
+        if key and value:
+            inject_args.append(repr(f"{key}={value}"))
         # None gets injected as 'None' without this check; same for digits.
         if isinstance(value, str):
             control_file += "%s=%s\n" % (key, repr(value))
@@ -228,7 +231,12 @@ def inject_vars(vars, control_file_in):
             control_file += "%s=%r\n" % (key, value)
 
     args_dict_str = "%s=%s\n" % ('args_dict', repr(vars))
-    return control_file + args_dict_str + _INJECT_END + '\n' + control_file_in
+    extend_args = ''
+    if len(inject_args) > 0:
+        list_str = "[" + ",".join(inject_args) + "]"
+        extend_args = f"try:\n  args.extend({list_str})\nexcept NameError:\n  args = {list_str}\n"
+
+    return control_file + args_dict_str + extend_args + _INJECT_END + '\n' + control_file_in
 
 
 def is_usable(host):
