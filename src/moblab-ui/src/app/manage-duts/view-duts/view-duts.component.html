@@ -10,7 +10,7 @@
   <table mat-table id="view-duts-table" [dataSource]="duts" matSort>
     <ng-container matColumnDef="select">
       <th class="select-column-header" mat-header-cell *matHeaderCellDef>
-        <app-table-header-selector [options]="getSelectOptions()" (update)="selectionChanged($event)">
+        <app-table-header-selector [options]="selectOptions" (update)="selectionChanged($event)">
         </app-table-header-selector>
       </th>
       <td mat-cell *matCellDef="let row">

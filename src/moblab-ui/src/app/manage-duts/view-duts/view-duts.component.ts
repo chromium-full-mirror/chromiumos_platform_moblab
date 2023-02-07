@@ -51,6 +51,8 @@ export class ViewDutsComponent implements OnInit {
   selection = new SelectionModel<ConnectedDutInfo>(true, []);
   buildTargets: string[] = [];
 
+  public selectOptions: string[] = [];
+
   @ViewChild(MatSort, {}) matSort: MatSort;
   
   constructor(
@@ -77,12 +79,27 @@ export class ViewDutsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.setupSelectOptions();
     this.getConnectedDuts();
     this.buildTargetAccessService.buildTargetsObservable.subscribe(
       buildTargets => {
         this.buildTargets = buildTargets;
       }
     );
+  }
+
+  ngOnChanges(changes) {
+    if (changes.hideUnenrolledDuts) {
+      this.setupSelectOptions();
+    }
+  }
+
+  private setupSelectOptions() {
+    this.selectOptions = [
+      ALL_ENROLLED,
+      ...(this.hideUnenrolledDuts ? [] : [ALL_UNENROLLED]),
+      REPAIR_FAILED
+    ];
   }
 
   assignDuts(duts: ConnectedDutInfo[]) {
@@ -213,15 +230,5 @@ export class ViewDutsComponent implements OnInit {
     } catch (error) {
       this.notificationsService.error(error);
     }
-  }
-
-  public getSelectOptions() {
-    const selectOptions: string[] = [
-      ALL_ENROLLED,
-      ...(this.hideUnenrolledDuts ? [] : [ALL_UNENROLLED]),
-      REPAIR_FAILED
-    ];
-
-    return selectOptions;
   }
 }
