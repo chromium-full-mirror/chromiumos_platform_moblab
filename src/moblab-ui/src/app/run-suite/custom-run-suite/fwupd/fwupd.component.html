@@ -16,7 +16,7 @@
     [placeholder]="['Select a device']" [isShown]="suiteSelected" (select)="deviceIdChanged($event)">
   </app-basic-selector>
 
-  <app-basic-input #deviceInput [hidden]="(suiteName !== FWUPD_INSTALL_VERSION && suiteName !== FWUPD_INSTALL_FILE)" [name]="'Version'" (update)="deviceInputChanged()">
+  <app-basic-input #deviceInput [hidden]="(suiteName !== FWUPD_INSTALL_VERSION && suiteName !== FWUPD_INSTALL_FILE)" [name]="suiteName === FWUPD_INSTALL_FILE ? 'File' : 'Version'" (update)="deviceInputChanged()">
   </app-basic-input>
 
 
