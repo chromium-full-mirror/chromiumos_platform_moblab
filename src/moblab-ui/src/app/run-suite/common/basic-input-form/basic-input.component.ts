@@ -37,6 +37,10 @@ export class BasicInputFormComponent extends BaseForm implements OnInit {
     return this.input.value;
   }
 
+  clear() {
+    this.input.reset();
+  }
+
   getInputFormControl() {
     return this.input;
   }

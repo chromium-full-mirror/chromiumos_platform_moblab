@@ -14,7 +14,7 @@ import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 
 export class SelectableItem {
-  constructor(public text: string, public status: string = '') {}
+  constructor(public text: string, public status: string = '', public value: string | null = null) {}
 }
 
 /**

@@ -62,7 +62,7 @@ export class BasicSelectorComponent
 
   clearSelection() {
     this.selected = '';
-    this.selector.writeValue(null);
+    this.selector?.writeValue(null);
   }
 
   autoSelectedSingleOption() {

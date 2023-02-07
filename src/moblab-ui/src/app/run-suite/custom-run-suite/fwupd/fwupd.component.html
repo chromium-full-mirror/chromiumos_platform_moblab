@@ -12,10 +12,15 @@
     [isShown]="true" (select)="suiteDropdownChanged($event.value)">
   </app-basic-selector>
 
+  <app-basic-selector #deviceIdSelector [title]="'Select a device id'" [options]="data"
+    [placeholder]="['Select a device']" [isShown]="suiteSelected" (select)="deviceIdChanged($event)">
+  </app-basic-selector>
+
+  <app-basic-input #deviceInput [hidden]="(suiteName !== FWUPD_INSTALL_VERSION && suiteName !== FWUPD_INSTALL_FILE)" [name]="'Version'" (update)="deviceInputChanged()">
+  </app-basic-input>
+
+
   <app-new-update-notifier></app-new-update-notifier>
 
   <app-run-suite-button (onClick)="onRunSuiteClick()"></app-run-suite-button>
 </mat-card>
-<div class="basic-json-info" style="text-align: center;">
-  <p *ngIf="peripherals_info_stringified">{{peripherals_info_stringified}}</p>
-</div>

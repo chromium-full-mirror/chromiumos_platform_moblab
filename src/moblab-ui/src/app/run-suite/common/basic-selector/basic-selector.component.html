@@ -10,7 +10,7 @@
               placeholder="{{placeholder}}"
   >
 
-    <mat-option *ngFor="let option of selectableItems" [value]="option.text" [disabled]="option.status !==''">
+    <mat-option *ngFor="let option of selectableItems" [value]="option.value === null ? option.text : option.value" [disabled]="option.status !==''">
       {{option.text}}
       <span *ngIf="option.status !== ''">
         <span class="chip {{ option.status | lowercase }}-chip">{{ option.status }}</span>

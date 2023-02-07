@@ -403,7 +403,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
         Returns:
           RunFWUPDSuiteResponse object with a string result message.
         """
-        response = moblabrpc_pb2.RunFWUPDSuiteResponse(
+        response = moblabrpc_pb2.RunSuiteResponse(
             message=self.service.run_fwupd_suite(
                 request.build_target,
                 request.model,
