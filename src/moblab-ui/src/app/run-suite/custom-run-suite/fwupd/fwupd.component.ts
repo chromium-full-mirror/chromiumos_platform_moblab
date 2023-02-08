@@ -77,27 +77,13 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
     this.dutSelectForm.disable('Please select build');
   }
 
-  filterEnrolledDuts(connectedDuts: ConnectedDutInfo[]) {
-    const enrolledDuts = connectedDuts;
-    this.dutIPs = connectedDuts
-      .filter(Dut => Dut.getIsEnrolled())
-      .filter(dut => {
-        const sameModel = dut.getModel() === this.selectedModel;
-        const sameBoard = dut.getBuildTarget() === this.selectedBoard;
-        const inPool =
-          !this.selectedPool || dut.getPoolsList().includes(this.selectedPool);
-        return sameModel && sameBoard && inPool;
-      })
-      .map(Dut => Dut.getIp());;
-  }
-
   getConnectedDuts() {
     this.moblabGrpcService.listConnectedDuts(
       (connectedDuts: ConnectedDutInfo[]) => {
-        this.filterEnrolledDuts(connectedDuts);
+	this.dutIPs = this.getSelectedDutHostnames(connectedDuts);
       },
       (message: string) => {
-        this.filterEnrolledDuts([]);
+	this.dutIPs = [];
         this.onRunSuiteFailed(message);
       }
     );

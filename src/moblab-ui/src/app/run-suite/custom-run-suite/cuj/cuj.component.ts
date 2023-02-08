@@ -86,7 +86,6 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     this.moblabGrpcService.listConnectedDuts(
       (connectedDuts: ConnectedDutInfo[]) => {
         this.duts = connectedDuts;
-        this.dutHostnames = connectedDuts.map(dut => dut.getIp());
         callback()
       },
       (message: string) => {
@@ -94,20 +93,6 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
         this.cujCheckError = message;
       }
     );
-  }
-
-  /** Method to get which duts need to be applied to the labels
-   * */
-  getSelectedDutHostnames() {
-    return this.duts
-      .filter(dut => {
-        const sameModel = dut.getModel() === this.selectedModel;
-        const sameBoard = dut.getBuildTarget() === this.selectedBoard;
-        const inPool =
-          !this.selectedPool || dut.getPoolsList().includes(this.selectedPool);
-        return sameModel && sameBoard && inPool;
-      })
-      .map(dut => dut.getIp());
   }
 
   /**
@@ -206,7 +191,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
    * If no suiteVersion is chosen, suite will be run using current labels.
    */
   handleDutSetupAndTriggerRunSuiute() {
-    this.dutHostnames = this.getSelectedDutHostnames();
+    this.dutHostnames = this.getSelectedDutHostnames(this.duts);
     switch (this.suiteLabel) {
       case BASIC:
         // First remove plus label, then remove premium label and last 

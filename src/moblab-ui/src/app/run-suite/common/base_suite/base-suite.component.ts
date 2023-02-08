@@ -6,6 +6,7 @@ import {JOB_START_TIME_FROM_FILTER} from '../../../view-jobs/view-jobs.component
 import {MoblabGrpcService} from '../../../services/moblab-grpc.service';
 import {normalizeTimestamp} from '../../../utils/date';
 import {NotificationsService} from '../../../services/notifications.service';
+import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
 
 export interface BuildSettings {
   build: string;
@@ -96,5 +97,17 @@ export abstract class BaseSuite {
       new Date().setTime(new Date().getTime() - 1000 /* 1 second */)
     );
     this.router.navigate(['/view_jobs'], {queryParams: params});
+  }
+
+  public getSelectedDutHostnames(duts: ConnectedDutInfo[]) {
+      return duts
+      .filter(dut => dut.getIsEnrolled())
+      .filter(dut => {
+        const sameModel = dut.getModel() === this.selectedModel;
+        const sameBoard = dut.getBuildTarget() === this.selectedBoard;
+        const inPool = !this.selectedPool || dut.getPoolsList().includes(this.selectedPool);
+        return sameModel && sameBoard && inPool;
+      })
+      .map(dut => dut.getIp());
   }
 }
