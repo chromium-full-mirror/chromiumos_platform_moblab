@@ -10,6 +10,7 @@ import logging
 import math
 import sys
 import time
+import re
 
 import common
 from client.common_lib import error
@@ -29,6 +30,7 @@ from server.cros.repair import mac_address_helper
 from server.hosts import cros_constants
 from server.hosts import cros_firmware
 from server.hosts import repair_utils
+from server.hosts import cros_host
 from site_utils.admin_audit import verifiers as audit_verify
 from site_utils.admin_audit import constants as audit_const
 from site_utils.admin_audit import battery_validator
@@ -264,16 +266,33 @@ class ProvisioningLabelsVerifier(hosts.Verifier):
 
     def _verify_job_repo_url(self, host):
         """Verify that job_repo_url match version on the host."""
+        pattern = re.compile("R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}([-da0-9_.]*)?")
         info = host.host_info_store.get()
         job_repo_url = info.attributes.get(ds_constants.JOB_REPO_URL, '')
         if not job_repo_url:
             logging.debug('job_repo_url is empty. Skip check.')
             return
         os_from_host = host.get_release_builder_path()
-        if not os_from_host in job_repo_url:
+        # Assume we have a job url: http://xxxx/static/<board>/milestone-build_version/xx/xx/xx
+        # we use regex to find the `milestone-build_version` first, and then extract the `<board>/milestone-build_version` from url.
+        # use `cros_host` to compare the `from_host` and `from_label`.
+        try:
+            partial_part = job_repo_url.split("/")
+            # find the milestone and build_version
+            idx = [i for i, v in enumerate(partial_part) if pattern.fullmatch(v)]
+            # it should be exists once in the job url.
+            if len(idx) != 1:
+                raise Exception()
+            idx = idx[0]
+            # get the board, and milestone-build_version
+            os_from_url = '/'.join(partial_part[idx - 1: idx + 1])
+            # use the compare function to check is the same.
+            if not cros_host.compare_os_from_label_and_host(os_from_url, os_from_host):
+                raise Exception()
+        except Exception:
             raise hosts.AutoservVerifyError('ChromeOS image on the host'
-                                            ' does not match to job_repo_url'
-                                            ' label.')
+                                            f' does not match to job_repo_url: {job_repo_url}'
+                                            f' label {os_from_host}')
 
     @property
     def description(self):

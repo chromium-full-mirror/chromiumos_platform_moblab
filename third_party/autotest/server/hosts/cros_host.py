@@ -51,6 +51,43 @@ metrics = utils.metrics_mock
 
 CONFIG = global_config.global_config
 
+def compare_os_from_label_and_host(from_label: str, from_host: str) -> bool:
+    """ Compare the board, milestone, and build-version is the same.
+    If from_label is end with "-release", we use default comparsion `from_label == from_host`.
+    If from_label is end with "-local", we sperate the `from_host` and `from_label` by '/'.
+    1. from_label -> <board>, milestone-build_version
+    2. from_host  -> xxx-<board>-xxx, milestone-build_version.
+    So we use `=` to compare the latest part `milestone-build_version`, and we use `in` to check
+    if the board exist in `from_host`.
+
+    @param from_label: the board, milestone, and build-version from the machine label.
+                       For example: (<board>-local/milestone-build_version) or
+                       (<board>-release/milestone-build_version)
+    @param from_host: the board, milestone, and build-version from the machine.
+                       For example: (<board>-release/milestone-build_version) or
+                       (<board>-local/milestone-build_version) or (xxx-<board>-xxx/milestone-build_version)
+
+    @returns: boolean if the board, milestone, and build_version is the same.
+
+    """
+    # if the `from_label` is not a custom image. we use default compare `from_label == from_host`
+    if "-local" in from_label:
+        # We try to split the os by '/'
+        from_label_part = from_label.split("/")
+        from_host_part = from_host.split("/")
+        # We assume the os from label pattern is `<board>-local/milestone-build_verison` and
+        # from host pattern is `xxx-<board>-xxx/milestone-build_version`.
+        # if the pattern is not match, we use default comparsion.
+        if len(from_host_part) == 2 and len(from_label_part) == 2:
+            # compare the milestone and build_version
+            is_milestone_build_version_same = from_label_part[1] == from_host_part[1]
+            # extract the board from label
+            board = from_label_part[0].split("-local")[0]
+            # check the board is exist in `from_host`
+            is_board_same = board in from_host_part[0]
+            return is_milestone_build_version_same and is_board_same
+    return from_label == from_host
+
 class FactoryImageCheckerException(error.AutoservError):
     """Exception raised when an image is a factory image."""
     pass
@@ -1667,7 +1704,10 @@ class CrosHost(abstract_ssh.AbstractSSHHost):
             os_from_label = os_from_label[:-len(provision.CHEETS_SUFFIX)]
         logging.debug('OS version from host: %s; OS verision cached in '
                       'label: %s', os_from_host, os_from_label)
-        return os_from_label == os_from_host
+        if not os_from_host:
+            logging.debug('No existing label detected on host')
+            return False
+        return compare_os_from_label_and_host(os_from_label, os_from_host)
 
 
     def cleanup_services(self):
