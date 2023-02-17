@@ -22,5 +22,23 @@
 
   <app-new-update-notifier></app-new-update-notifier>
 
+  <mat-divider></mat-divider>
+  <div *ngIf="device !== null" style="width: 310px">
+    <div>
+      <h4>Device Info:</h4>
+    </div>
+    <ul style="padding-inline-start: 1rem;">
+      <li><strong>DeviceId:</strong> {{ device.DeviceId }}</li>
+      <li><strong>Name:</strong> {{ device.Name }}</li>
+      <li><strong>Vendor:</strong> {{ device.Vendor }}</li>
+      <li><strong>Current FW version:</strong> {{ device.Version }}</li>
+      <li><strong>Current bootloader FW version:</strong> {{ device.VersionBootloader }}</li>
+      <li><strong>Guid:</strong> {{ device.Guid[0] }}</li>
+      <li><strong>Flags:</strong> {{ device.Flags.join(', ') }}</li>
+    </ul>
+    <mat-divider></mat-divider>
+    <br />
+  </div>
+
   <app-run-suite-button (onClick)="onRunSuiteClick()"></app-run-suite-button>
 </mat-card>

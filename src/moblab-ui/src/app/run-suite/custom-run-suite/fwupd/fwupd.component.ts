@@ -57,6 +57,7 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
 
   public data: SelectableItem[] = [];
   public device_id: string | null = null;
+  public device: object | null = null;
   public device_file_or_version: string | null = null;
   
   constructor(
@@ -112,6 +113,10 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
   /** Method triggered on changing of device id **/
   public deviceIdChanged(event: MatSelectChange) {
       this.device_id = event.value;
+      if (this.peripherals_info_json['Devices'] !== null) {
+          this.device = this.peripherals_info_json['Devices']
+                        .find(device => device.DeviceId === this.device_id) ?? null;
+      }
       this.isReadyToRun();
   }
 
@@ -137,7 +142,7 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
         if (this.peripherals_info_json['Devices'] !== null) {
             this.data = this.peripherals_info_json['Devices'].map(device => {
                 return new SelectableItem(
-                    `${device.Name}-${device.DeviceId}`,
+                    `${device.Name}`,
                     device.Flags.includes('updatable') ? '' : '(not-updatable)',
                     `${device.DeviceId}`
                 );
