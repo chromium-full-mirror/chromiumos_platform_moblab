@@ -12,7 +12,7 @@
     [isShown]="true" (select)="suiteDropdownChanged($event.value)">
   </app-basic-selector>
 
-  <app-basic-selector #deviceIdSelector [title]="'Select a device id'" [options]="data"
+  <app-basic-selector #deviceIdSelector [title]="'Select a device'" [options]="data"
     [placeholder]="['Select a device']" [isShown]="suiteSelected" (select)="deviceIdChanged($event)">
   </app-basic-selector>
 

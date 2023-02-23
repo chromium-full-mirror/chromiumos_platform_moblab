@@ -19,6 +19,10 @@ import {BuildTargetAccessService} from '../../../services/build-target-access.se
 import {ConnectedDutInfo, GetPeripheralInformationResponse} from '../../../services/moblabrpc_pb';
 import {SelectableItem} from "../../common/basic-autocomplete-selector/basic-autocomplete-selector.component";
 
+interface keyable {
+  [key: string]: any
+}
+
 /** Component owns logic for fwupd form. This component allows for the
  *  execution of any runnable suite, but without custom arguments.
  * */
@@ -57,9 +61,9 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
 
   public data: SelectableItem[] = [];
   public device_id: string | null = null;
-  public device: object | null = null;
+  public device: keyable | null = null;
   public device_file_or_version: string | null = null;
-  
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     moblabGrpcService: MoblabGrpcService,
@@ -108,14 +112,14 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
   private resetDeviceInput() {
     this.deviceIdSelector?.clearSelection();
     this.deviceInput?.clear();
+    this.device = null;
   }
 
   /** Method triggered on changing of device id **/
   public deviceIdChanged(event: MatSelectChange) {
       this.device_id = event.value;
       if (this.peripherals_info_json['Devices'] !== null) {
-          this.device = this.peripherals_info_json['Devices']
-                        .find(device => device.DeviceId === this.device_id) ?? null;
+          this.device = this.getDeviceBy(this.device_id);
       }
       this.isReadyToRun();
   }
@@ -129,7 +133,7 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
 
   /** Method triggered on change of DUT IP input.
    * */
-   dutIPDropdownChanged(dut_ip: string) {
+  dutIPDropdownChanged(dut_ip: string) {
     this.dut_IP = dut_ip
     this.data = [];
     this.resetDeviceInput();
@@ -195,13 +199,21 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
     this.isReadyToRun();
   }
 
+  /** Method to get the device */
+  private getDeviceBy(device_id: string): keyable | null {
+    return this.peripherals_info_json['Devices']
+                        .find(device => device.DeviceId === device_id) ?? null;
+  }
+
   /** Method is getting the `test_args` **/
   private getTestArgs(): string[] {
-      return [
-          `device_id=${this.device_id}`,
-          ... (this.suiteName === this.FWUPD_INSTALL_VERSION) ? [`version=${this.device_file_or_version}`] : [],
-          ... (this.suiteName === this.FWUPD_INSTALL_FILE) ? [`fwfile=${this.device_file_or_version}`] : [],
-      ];
+    let id = (this.device?.Guid[0] ?? this.getDeviceBy(this.device_id)?.Guid[0]) || this.device_id;
+
+    return [
+      `device_id=${id}`,
+      ... (this.suiteName === this.FWUPD_INSTALL_VERSION) ? [`version=${this.device_file_or_version}`] : [],
+      ... (this.suiteName === this.FWUPD_INSTALL_FILE) ? [`fwfile=${this.device_file_or_version}`] : [],
+    ];
   }
 
 
