@@ -29,7 +29,7 @@ DATABASES = {
         'USER': 'chromeosqa-admin',
         'PASSWORD': 'moblab_db_passwd',
         'OPTIONS': {'init_command':
-                    "SET sql_mode='STRICT_TRANS_TABLES',innodb_strict_mode=1;SET default_storage_engine=INNODB",
+                    "SET sql_mode='STRICT_TRANS_TABLES',innodb_strict_mode=1,default_storage_engine=INNODB",
                     'isolation_level': 'read committed'
                    },
         'CONN_MAX_AGE': 3600
