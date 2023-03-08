@@ -119,8 +119,15 @@ class ConfigurationRpcService(MoblabConfigurationServiceServicer):
         """List stable build versions for all boards."""
         response = ListStableBuildVersionsResponse()
         build_targets = self.moblab_service.list_connected_build_targets()
+        try:
+            available_boards = self.moblab_build_connector.list_build_targets()
+        except:
+            available_boards = []
 
         for build_target in build_targets:
+            # filter boards don't have permission
+            if build_target not in available_boards:
+                continue
             stable_version = self._get_stable_build_version(build_target)
             build_target_stable_version = BuildTargetStableVersion(
                 build_target=build_target, stable_version=stable_version

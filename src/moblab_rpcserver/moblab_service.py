@@ -697,15 +697,23 @@ class MoblabService(object):
 
         boards = {}
         duts = await self.list_duts()
+        # filter only enrolled duts. Red dut shouldn't be enrolled.
+        duts = filter(lambda x: x.get('enrolled'), duts)
+        available_boards = self.list_build_targets()
+
         for dut in duts:
             labels = dut.get("labels", [])
             pools = LabelsParser.extract_pool_from_labels(labels)
+            model = LabelsParser.extract_model_from_labels(labels)
+            board = LabelsParser.extract_build_target_from_labels(labels)
+
+            # filter yellow duts.
+            if not board or (board and board not in available_boards):
+                continue
 
             if pool and pool not in pools:
                 continue
 
-            model = LabelsParser.extract_model_from_labels(labels)
-            board = LabelsParser.extract_build_target_from_labels(labels)
             modelBoardPair = ModelBoard(model=model, board=board)
             if modelBoardPair in boards:
                 boards[modelBoardPair] += 1
@@ -1026,6 +1034,13 @@ class MoblabService(object):
                     == moblab_build_connector.DEFAULT_PAGE_SIZE
                 ),
             )
+
+        # filter boards don't have a permission
+        if build_target not in self.list_build_targets():
+            return BuildResults(
+                    results=[],
+                    is_incomplete=False
+                )
 
         return self.milestone_cache.get(
             key=self._key_getter(
