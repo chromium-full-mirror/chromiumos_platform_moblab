@@ -12,8 +12,8 @@ import subprocess
 import re
 
 from pssh.clients.native.parallel import ParallelSSHClient
+from pssh.config import HostConfig
 import pssh
-
 
 # Location where dhcp leases are stored.
 _DHCPD_LEASES = "/leases/dnsmasq.leases"
@@ -89,26 +89,32 @@ class MoblabDUTConnector(object):
         )
 
     def run_command_on_ips(self, command, ip_addresses, timeout=10):
-        try:
-            client = ParallelSSHClient(
-                ip_addresses,
-                pool_size=20,
+        host_configs = []
+        partner_key_path = "/home/moblab/.ssh/partner_testing_rsa"
+        origin_key_path = "/home/moblab/.ssh/testing_rsa"
+
+        if os.path.exists(partner_key_path):
+            ips = list(ip_addresses) * 2
+            host_configs.extend([HostConfig(
                 user="root",
-                num_retries=1,
-                keepalive_seconds=timeout,
-                timeout=timeout,
-                pkey="/home/moblab/.ssh/partner_testing_rsa",
-            )
-        except:
-            client = ParallelSSHClient(
-                ip_addresses,
-                pool_size=20,
-                user="root",
-                num_retries=1,
-                keepalive_seconds=timeout,
-                timeout=timeout,
-                pkey="/home/moblab/.ssh/testing_rsa",
-            )
+                private_key=partner_key_path
+            )] * len(ip_addresses))
+        else:
+            ips = ip_addresses
+        host_configs.extend([HostConfig(
+            user="root",
+            private_key=origin_key_path
+        )] * len(ip_addresses))
+
+        client = ParallelSSHClient(
+            ips,
+            host_config=host_configs,
+            pool_size=40,
+            num_retries=1,
+            keepalive_seconds=timeout,
+            timeout=timeout,
+        )
+
         command_results = []
 
         output = client.run_command(
@@ -116,7 +122,9 @@ class MoblabDUTConnector(object):
         )
         try:
             client.join(output)
+            already_append = set()
             for host_output in output:
+                is_auth_failed = False
                 stdout = (
                     "{}".format("\n".join(host_output.stdout))
                     if host_output.stdout
@@ -139,6 +147,8 @@ class MoblabDUTConnector(object):
                         exception_msg = host_output.exception.args[0]
                         exception_args = host_output.exception.args[1:]
                         stderr += exception_msg % exception_args
+                        if len(exception_args) > 0:
+                            is_auth_failed = isinstance(exception_args[-1], ssh2.exceptions.AuthenticationError)
                 except IndexError:
                     logging.exception(
                         "Failed to extract information from "
@@ -152,9 +162,11 @@ class MoblabDUTConnector(object):
                         host_output.exception,
                     )
 
-                command_results.append(
-                    (host_output.host, stdout, stderr, host_output.exit_code)
-                )
+                if not is_auth_failed and host_output.host not in already_append:
+                    command_results.append(
+                        (host_output.host, stdout, stderr, host_output.exit_code)
+                    )
+                    already_append.add(host_output.host)
             logging.info(
                 "Running command %s on %s resulted in %s",
                 command,
@@ -198,8 +210,8 @@ class MoblabDUTConnector(object):
         def is_dut_connected(output):
             if output:
                 return (
-                    output is not None
-                    and output.strip().lower() == "testimage-channel"
+                        output is not None
+                        and output.strip().lower() == "testimage-channel"
                 )
             return False
 
