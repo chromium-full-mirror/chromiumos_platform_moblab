@@ -25,6 +25,7 @@ const REPAIR_FAILED = 'Repair Failed';
   styleUrls: ['./view-duts.component.css'],
 })
 export class ViewDutsComponent implements OnInit {
+  @Input() hideEnrolledDuts = false;
   @Input() hideUnenrolledDuts = false;
   @ViewChild(TableHeaderSelectorComponent)
   headerSelectorRef: TableHeaderSelectorComponent;
@@ -89,14 +90,14 @@ export class ViewDutsComponent implements OnInit {
   }
 
   ngOnChanges(changes) {
-    if (changes.hideUnenrolledDuts) {
+    if (changes.hideUnenrolledDuts || changes.hideEnrolledDuts) {
       this.setupSelectOptions();
     }
   }
 
   private setupSelectOptions() {
     this.selectOptions = [
-      ALL_ENROLLED,
+      ...(this.hideEnrolledDuts ? []: [ALL_ENROLLED]),
       ...(this.hideUnenrolledDuts ? [] : [ALL_UNENROLLED]),
       REPAIR_FAILED
     ];
