@@ -95,9 +95,9 @@ ENV USER=moblab
 RUN mkdir -p /home/moblab
 RUN mkdir -p /home/moblab/.ssh
 
-RUN cp /chromite/ssh_keys/* /home/moblab/.ssh/
 # add partner_testing_rsa from the container stored in a separate location
-COPY --chown=moblab --from=partner_key_image /partner_testing_rsa /home/moblab/.ssh/partner_testing_rsa
+COPY --chown=moblab --from=partner_key_image /partner_testing_rsa /chromite/ssh_keys/
+RUN cp /chromite/ssh_keys/* /home/moblab/.ssh/
 
 RUN chmod -R 600 /home/moblab/.ssh/*
 COPY ssh_config /home/moblab/.ssh/config
