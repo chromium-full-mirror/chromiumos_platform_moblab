@@ -4,6 +4,10 @@
 # found in the LICENSE file.
 set -x
 
+# If needed, update the new partner testing key into shared volume
+cp --update /chromite/ssh_keys/partner_testing_rsa /home/moblab/.ssh/
+chmod -R 600 /home/moblab/.ssh/partner_testing_rsa
+
 passwd=moblab_db_passwd
 
 DB_UP=$(mysql -h db -u root -p${passwd} \
