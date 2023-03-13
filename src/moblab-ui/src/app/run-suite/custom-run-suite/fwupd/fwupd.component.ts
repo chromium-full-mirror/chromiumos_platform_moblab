@@ -83,13 +83,16 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
   }
 
   getConnectedDuts() {
+    this.onFormLoading("fetching DUT IPs...");
     this.moblabGrpcService.listConnectedDuts(
       (connectedDuts: ConnectedDutInfo[]) => {
 	this.dutIPs = this.getSelectedDutHostnames(connectedDuts);
+	this.onFormLoaded();
       },
       (message: string) => {
 	this.dutIPs = [];
         this.onRunSuiteFailed(message);
+	this.onFormLoaded();
       }
     );
   }
@@ -137,6 +140,7 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
     this.dut_IP = dut_ip
     this.data = [];
     this.resetDeviceInput();
+    this.onFormLoading("fetching devices...");
     this.moblabGrpcService.getPeripheralInformation(
       dut_ip,
       (response: GetPeripheralInformationResponse) => {
@@ -152,9 +156,11 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
                 );
             });
         }
+	this.onFormLoaded();
         this.suiteSelectForm.enable();
       },
       (message: string) => {
+	this.onFormLoaded();
         this.onRunSuiteFailed(message);
       }
     )
