@@ -97,6 +97,8 @@ RUN mkdir -p /home/moblab/.ssh
 
 # add partner_testing_rsa from the container stored in a separate location
 COPY --chown=moblab --from=partner_key_image /partner_testing_rsa /chromite/ssh_keys/
+# add ssh config into a separate location that will not be overlayed by docker mounts
+COPY ssh_config /chromite/ssh_config/config
 RUN cp /chromite/ssh_keys/* /home/moblab/.ssh/
 
 RUN chmod -R 600 /home/moblab/.ssh/*

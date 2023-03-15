@@ -4,9 +4,11 @@
 # found in the LICENSE file.
 set -x
 
-# If needed, update the new partner testing key into shared volume
-cp --update /chromite/ssh_keys/partner_testing_rsa /home/moblab/.ssh/
+# Update the new partner testing key into shared volume
+cp /chromite/ssh_keys/partner_testing_rsa /home/moblab/.ssh/
 chmod -R 600 /home/moblab/.ssh/partner_testing_rsa
+# Update the ssh config into shared volume
+cp /chromite/ssh_config/config /home/moblab/.ssh/
 
 passwd=moblab_db_passwd
 
