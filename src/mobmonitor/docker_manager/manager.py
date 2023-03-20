@@ -5,20 +5,24 @@ import logging
 
 CHECK_INTERVAL_SEC = 3600
 
+
 class DockerMonitor(object):
     def __init__(self, containers=None):
         if containers:
-            self.containers = list(map(lambda name: DockerContainer(name), containers))
+            self.containers = list(
+                map(lambda name: DockerContainer(name), containers)
+            )
         else:
             self.containers = []
 
-    def startCollection(self, interval=CHECK_INTERVAL_SEC, run_immediately_when_start=False):
+    def startCollection(
+        self, interval=CHECK_INTERVAL_SEC, run_immediately_when_start=False
+    ):
         if self.containers:
             self.monitor = plugins.Monitor(
                 cherrypy.engine,
                 self._collect,
                 frequency=interval,
-
             )
             self.monitor.subscribe()
             if run_immediately_when_start:
@@ -33,7 +37,7 @@ class ContainerNotExist(Exception):
     pass
 
 
-def checkConrainerIsExist(name):
+def checkContainerExists(name):
     try:
         client = docker.from_env()
         container = client.containers.get(name)
@@ -47,7 +51,7 @@ class DockerContainer(object):
         self.container_name = container_name
 
     def container(self):
-        if checkConrainerIsExist(self.container_name):
+        if checkContainerExists(self.container_name):
             client = docker.APIClient()
             container = client.inspect_container(self.container_name)
             return container
@@ -69,7 +73,8 @@ class DockerContainer(object):
         try:
             startTimestamp = self.started_at()
             status = self.status()
-            logging.info(f"{self.container_name} start time is {startTimestamp}, status: {status}")
+            logging.info(
+                f"{self.container_name} start time is {startTimestamp}, status: {status}"
+            )
         except ContainerNotExist as e:
-                logging.error(f"{self.container_name} doesn't exist.")
-
+            logging.error(f"{self.container_name} doesn't exist.")
