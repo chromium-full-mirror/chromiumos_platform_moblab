@@ -63,6 +63,7 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
   public device_id: string | null = null;
   public device: keyable | null = null;
   public device_file_or_version: string | null = null;
+  public peripheral_error: boolean = false;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -139,6 +140,8 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
   dutIPDropdownChanged(dut_ip: string) {
     this.dut_IP = dut_ip
     this.data = [];
+    this.peripheral_error = false;
+    this.peripherals_info_json = null;
     this.resetDeviceInput();
     this.onFormLoading("fetching devices...");
     this.moblabGrpcService.getPeripheralInformation(
@@ -161,9 +164,15 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
       },
       (message: string) => {
 	this.onFormLoaded();
-        this.onRunSuiteFailed(message);
+	this.peripheral_error = true;
       }
     )
+  }
+
+  public refresh_peripheral_information() {
+    if (this.dut_IP) {
+      this.dutIPDropdownChanged(this.dut_IP);
+    }
   }
 
   isReadyToRun() {

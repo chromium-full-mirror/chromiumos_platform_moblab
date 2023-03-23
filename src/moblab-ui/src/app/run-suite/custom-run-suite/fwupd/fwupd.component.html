@@ -8,12 +8,16 @@
     [placeholder]="['Select an IP']" [isShown]="true" (select)="dutIPDropdownChanged($event.value)">
   </app-basic-selector>
 
+  <div *ngIf="peripheral_error">
+    <span style="color: red; padding-left: 10px;">Failed to get devices <strong style="color: blue; text-decoration: underline; cursor: pointer;" (click)="refresh_peripheral_information()">refresh</strong></span>
+  </div>
+
   <app-basic-selector #suiteSelector [title]="'Select suite:'" [options]="suiteList" [placeholder]="['Select a suite']"
     [isShown]="true" (select)="suiteDropdownChanged($event.value)">
   </app-basic-selector>
 
   <app-basic-selector #deviceIdSelector [title]="'Select a device'" [options]="data"
-    [placeholder]="['Select a device']" [isShown]="suiteSelected" (select)="deviceIdChanged($event)">
+    [placeholder]="['Select a device']" [isShown]="suiteSelected && !peripheral_error" (select)="deviceIdChanged($event)">
   </app-basic-selector>
 
   <app-basic-input #deviceInput [hidden]="(suiteName !== FWUPD_INSTALL_VERSION && suiteName !== FWUPD_INSTALL_FILE)" [name]="suiteName === FWUPD_INSTALL_FILE ? 'File' : 'Version'" (update)="deviceInputChanged()">
