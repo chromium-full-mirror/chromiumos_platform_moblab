@@ -117,7 +117,6 @@ export class ConfigurationComponent
 
   pauseStatusSubscription: Subscription = null;
 
-  fwupdEnabled = true;
   panelOpenState = true;
 
   stableBuildVersionLoading = false;
@@ -157,7 +156,6 @@ export class ConfigurationComponent
       this.listStableBuildVersions(),
       this.getResultsRetentionPeriod(),
     ]);
-    this.fwupdEnabled = this.globalInfo.isFeatureEnabled(Feature.FWUPD_TESTING);
   }
 
   ngOnDestroy(): void {
@@ -605,13 +603,4 @@ export class ConfigurationComponent
       this.notificationsService.error(error);
     }
   }
-
-  saveFWUPDSetting(newValue) {
-    if (newValue === true) {
-      this.globalInfo.enableFeature(Feature.FWUPD_TESTING);
-    } else {
-      this.globalInfo.disableFeature(Feature.FWUPD_TESTING);
-    }
-  }
-
 }
