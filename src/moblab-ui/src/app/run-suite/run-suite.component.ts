@@ -47,10 +47,6 @@ export class RunSuiteComponent {
     this.loadingOverlay.updateStatus(current_state);
   }
   
-  isFwupdTestEnabled() {
-    return this.isTestEnabled(Feature.FWUPD_TESTING);
-  }
-
   isTestEnabled(feature: Feature) {
     return this.globalInfo.isFeatureEnabled(feature);
   }
