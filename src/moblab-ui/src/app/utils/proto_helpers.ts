@@ -10,6 +10,7 @@ export const BUILD_STATUS_MAPPINGS: {[key: number]: string} = {
   1: 'Failed',
   2: 'Running',
   3: 'Aborted',
+  4: 'Recommended',
 };
 
 const DUT_STATUS_MAPPINGS: {[key: string]: string} = {

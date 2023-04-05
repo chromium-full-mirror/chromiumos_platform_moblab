@@ -1,6 +1,6 @@
 <mat-card>
   <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)" (formLoading)="onFormLoading($event.message)"
-    (formLoaded)="onFormLoaded()" (buildVersionUnselected)="onBuildVersionUnselected()">
+    (formLoaded)="onFormLoaded()" (buildVersionUnselected)="onBuildVersionUnselected()" [recommendedBuildLabel]="recommendedBuildTag">
   </app-build-select-forms>
   <app-basic-selector #suiteSelector [title]="'Select CUJ suite:'" [options]="suiteList"
     [placeholder]="['Select a suite']" [isShown]="true" (select)="suiteDropdownChanged($event.value)">

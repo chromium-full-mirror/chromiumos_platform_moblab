@@ -906,6 +906,8 @@ export class MoblabGrpcService {
     buildtarget: string,
     model: string,
     milestone: string,
+    label: string,
+    labelName: string,
     callback: (
       buildVersions: {version: string; status: string}[],
       isIncomplete: boolean
@@ -916,6 +918,7 @@ export class MoblabGrpcService {
     request.setBuildTarget(buildtarget);
     request.setModel(model);
     request.setMilestone(milestone);
+    request.setLabel(label);
     this.moblabRpcService.list_build_versions(
       request,
       {},
@@ -935,6 +938,8 @@ export class MoblabGrpcService {
                 // updated.
                 buildStatus = 'Unknown';
               }
+            } else if (item.getLabelsList().length !== 0 && item.getLabelsList().includes(labelName)) { // if buildVersion is labeled, set status to recommended
+              buildStatus = BUILD_STATUS_MAPPINGS[BuildItem.BuildStatus.BUILD_STATUS_RECOMMENDED];
             }
             buildVersionNames.push({
               version: item.getValue(),

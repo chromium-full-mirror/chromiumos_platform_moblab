@@ -32,8 +32,10 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   @ViewChild('boardSelector') boardSelector;
   @ViewChild('buildSelector') buildSelector;
   @ViewChild('poolSelector') poolSelector;
+  @ViewChild('buildDisplayToggle') buildDisplayToggle;
 
   @Input() hidePoolSelector?: boolean = false;
+  @Input() recommendedBuildLabel?: string = '';
   @Output() formLoading = new EventEmitter();
   @Output() formLoaded = new EventEmitter();
   @Output() allRequiredFieldsSet = new EventEmitter();
@@ -53,6 +55,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   private buildTargetName = '';
   private milestone = '';
   private buildVersionName = '';
+  public showRecommendedBuilds = this.recommendedBuildLabel;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -175,18 +178,34 @@ export class BuildSelectFormsComponent implements AfterViewInit {
 
   milestoneChanged(newMilestone: string): void {
     if (this.milestone !== newMilestone) {
-      this.unselectBuildVersion();
       this.milestone = newMilestone;
-      this.getBuildVersions();
+      if(this.buildDisplayToggle) {
+        this.buildDisplayChanged()
+      } else {
+        this.unselectBuildVersion();
+        this.getBuildVersions();
+      }
     }
   }
 
+  buildDisplayChanged() {
+    this.unselectBuildVersion();
+    this.showRecommendedBuilds = this.buildDisplayToggle.checked ? this.recommendedBuildLabel : '';
+    this.getBuildVersions();
+  }
+
   getBuildVersions() {
-    this.formLoading.emit({message: 'fetching build versions...'});
+    if (this.showRecommendedBuilds !== '') {
+      this.formLoading.emit({message: 'fetching recommended build versions...'});
+    } else {
+      this.formLoading.emit({message: 'fetching build versions...'});
+    }
     this.moblabGrpcService.listBuildVersions(
       this.buildTargetName,
       this.selectedModel,
       this.milestone,
+      this.showRecommendedBuilds,
+      this.recommendedBuildLabel,
       (builds: {version: string; status: string}[]) => {
         this.updateBuildVersions(builds);
         this.formLoaded.emit();
@@ -207,11 +226,13 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     this.buildVersions = newBuildVersions.map(
       v => new SelectableItem(v.version, v.status)
     );
-
     if (this.buildVersions.length === 0) {
       this.buildSelector.disable('No builds found in configured bucket.');
     } else {
       this.buildSelector.enable();
+    }
+    if(this.buildDisplayToggle) {
+      this.buildDisplayToggle.disabled = false;
     }
   }
 
@@ -284,6 +305,9 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     this.milestoneSelector.clearSelection();
     this.unselectBuildVersion();
     this.buildSelector.disable(SELECT_MILESTONE_PROMPT);
+    if(this.buildDisplayToggle) {
+      this.buildDisplayToggle.disabled = true
+    }
   }
 
   unselectBuildVersion() {

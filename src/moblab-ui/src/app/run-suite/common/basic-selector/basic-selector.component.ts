@@ -31,6 +31,7 @@ export class BasicSelectorComponent
   @Input() options: SelectableItem[] | string[] = [];
   @Input() placeholder = '';
   @Input() title = '';
+  @Input() recommendedBuild = false;
 
   @Output() select = new EventEmitter();
 
@@ -75,6 +76,10 @@ export class BasicSelectorComponent
 
   onChange(event: MatSelectChange): void {
     this.select.emit(event);
+  }
+
+  updateStatus(status): void {
+    this.recommendedBuild = status == 'Recommended';
   }
 
   selectOption(optionIndex) {

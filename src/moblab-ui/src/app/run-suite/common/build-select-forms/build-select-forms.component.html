@@ -13,9 +13,15 @@
     (select)="milestoneChanged($event.value)">
 </app-basic-selector>
 
+<div class="basic-moblab-checkbox" *ngIf="this.recommendedBuildLabel !== ''">
+    <mat-checkbox #buildDisplayToggle (change)="buildDisplayChanged()" [checked]="true" [disabled]="true">
+        Show Only Recommended Builds
+    </mat-checkbox>
+</div>
+
 <app-basic-selector #buildSelector id="buildSelector" [title]="'Select build:'"
     [placeholder]="['Pick from available builds']" [options]="buildVersions" [isShown]="true"
-    (select)="buildVersionChanged($event.value)">
+    (select)="buildVersionChanged($event.value)" [recommendedBuild]="this.showRecommendedBuilds !== ''">
 </app-basic-selector>
 
 <app-basic-selector #poolSelector id="poolSelector" [title]="'Pool (Optional):'"

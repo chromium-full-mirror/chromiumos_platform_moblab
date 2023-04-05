@@ -41,7 +41,7 @@ from cache import Cache
 
 MilestonePair = namedtuple("MilestonePair", ["milestone", "is_staged"])
 BuildVersionPair = namedtuple(
-    "BuildVersionPair", ["build_version", "status", "is_staged"]
+    "BuildVersionPair", ["build_version", "status", "is_staged", "labels"]
 )
 BuildResults = namedtuple("BuildResults", ["results", "is_incomplete"])
 
@@ -967,6 +967,8 @@ class MoblabService(object):
             s += data["build_target"]
         if "milestone" in data:
             s += data["milestone"]
+        if "label" in data:
+            s += data["label"]
         return hash(s)
 
     def list_usable_milestones(self, build_target, model, force_update=False):
@@ -1051,7 +1053,7 @@ class MoblabService(object):
         )
 
     def list_usable_build_versions(
-        self, build_target, milestone, model, force_update=False
+        self, build_target, milestone, model, label, force_update=False
     ):
         """
         Returns build versions available for a given
@@ -1084,6 +1086,7 @@ class MoblabService(object):
                     build_version=build_version,
                     status=moblab_build_connector.BuildStatus.AVAILABLE,
                     is_staged=True,
+                    labels=[],
                 )
                 for build_version in bucket_build_versions
             ]
@@ -1093,7 +1096,7 @@ class MoblabService(object):
                 try:
                     remote_build_versions = (
                         self.moblab_build_connector.list_builds_for_milestone(
-                            build_target, model, milestone
+                            build_target, model, milestone, label,
                         )
                     )
                 except moblab_build_connector.MoblabBuildConnectorException:
@@ -1101,6 +1104,8 @@ class MoblabService(object):
                         "Encountered error trying to fetch remote build versions."
                     )
 
+            if label:
+                build_version_results = []
             staged_builds_set = set(bucket_build_versions)
             for build_version in remote_build_versions:
                 if build_version.version not in staged_builds_set:
@@ -1109,6 +1114,7 @@ class MoblabService(object):
                             build_version=build_version.version,
                             status=build_version.status,
                             is_staged=False,
+                            labels=build_version.labels,
                         )
                     )
 
@@ -1128,6 +1134,7 @@ class MoblabService(object):
             "model": model,
             "build_target": build_target,
             "milestone": milestone,
+            "label": label,
         }
         return self.build_version_cache.get(
             key=self._key_getter(data),

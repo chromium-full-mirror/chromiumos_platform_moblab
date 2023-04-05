@@ -43,7 +43,7 @@ BuildStatus = enum.Enum(
     "BuildStatus", ["AVAILABLE", "FAILED", "RUNNING", "ABORTED"]
 )
 
-BuildVersion = collections.namedtuple("BuildVersion", ["version", "status"])
+BuildVersion = collections.namedtuple("BuildVersion", ["version", "status", "labels"])
 
 API_TO_INTERNAL_BUILD_STATUS_MAP = {
     resources.Build.BuildStatus.PASS: BuildStatus.AVAILABLE,
@@ -220,6 +220,7 @@ class MoblabBuildConnector(object):
         build_target,
         model,
         milestone,
+        label,
         page_size=DEFAULT_PAGE_SIZE,
         page_token=None,
     ):
@@ -240,6 +241,8 @@ class MoblabBuildConnector(object):
             List of strings representing build versions.
         """
         milestone_filter = "milestone=milestones/" + str(milestone)
+        if label:
+            milestone_filter = milestone_filter + "+label=" + label
 
         request = build_service.ListBuildsRequest(
             parent=self.model_path(build_target, model),
@@ -251,6 +254,7 @@ class MoblabBuildConnector(object):
         return [
             BuildVersion(
                 version=build.build_version,
+                labels=build.labels,
                 status=self._convert_to_internal_build_status(build.status),
             )
             for build in build_results

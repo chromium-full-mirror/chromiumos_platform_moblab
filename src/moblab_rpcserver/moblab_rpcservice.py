@@ -533,7 +533,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
 
     def list_build_versions(self, request, _context):
         build_versions = self.service.list_usable_build_versions(
-            request.build_target, request.milestone, request.model
+            request.build_target, request.milestone, request.model, request.label,
         )
 
         logging.debug(
@@ -547,6 +547,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
             build_versions=[
                 moblabrpc_pb2.BuildItem(
                     value=i.build_version,
+                    labels=i.labels,
                     is_staged=i.is_staged,
                     status=self._convert_build_version_to_grpc(i.status),
                 )

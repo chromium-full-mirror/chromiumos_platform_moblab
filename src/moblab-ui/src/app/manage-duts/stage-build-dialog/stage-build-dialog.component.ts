@@ -198,6 +198,8 @@ export class StageBuildDialogComponent implements AfterViewInit {
       this.selectedBuildTarget,
       this.selectedModel,
       this.selectedMilestone,
+      '',
+      '',
       (buildVersions: BuildVersion[]) => {
         this.updateBuildVersions(buildVersions);
         this.hideLoadingOverlay();

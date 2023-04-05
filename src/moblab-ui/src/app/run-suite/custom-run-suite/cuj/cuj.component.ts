@@ -43,6 +43,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   public suiteLabel = BASIC;
   public cujCheckError = '';
   public hideCustomInput = true;
+  public recommendedBuildTag = 'Spera:GoodBuild';
   options: [string, string][] = [];
   options_v1: [string, string][] = [
     [BASIC, 'Basic'],

@@ -29,6 +29,7 @@ class MoblabBuildConnectorTest(unittest.TestCase):
     SOURCE_BUCKET = "source_bucket"
     DESTINATION_BUCKET = "destination bucket"
     STATUS = "PASS"
+    LABEL = ""
 
     def setUp(self):
         self.mock_build_service_client = mock.MagicMock()
@@ -76,14 +77,14 @@ class MoblabBuildConnectorTest(unittest.TestCase):
         )
 
         response = self.moblab_build_connector.list_builds_for_milestone(
-            self.BUILD_TARGET, self.MODEL, self.MILESTONE
+            self.BUILD_TARGET, self.MODEL, self.MILESTONE, self.LABEL
         )
 
         self.assertEqual(
             response,
             [
                 BuildVersion(
-                    version=self.BUILD_VERSION, status=BuildStatus.AVAILABLE
+                    version=self.BUILD_VERSION, status=BuildStatus.AVAILABLE, labels=[]
                 )
             ],
         )

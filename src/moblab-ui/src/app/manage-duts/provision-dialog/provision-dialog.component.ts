@@ -148,6 +148,8 @@ export class ProvisionDialogComponent implements AfterViewInit {
       this.board,
       this.model,
       this.build.milestone,
+      '',
+      '',
       (buildVersions: {version: string; status: string}[], _) => {
         this.updateBuildVersions(buildVersions);
         this.loadingOverlay.hide();
