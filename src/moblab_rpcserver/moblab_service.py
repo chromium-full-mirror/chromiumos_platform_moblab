@@ -410,7 +410,6 @@ class MoblabService(object):
             build_version,
             _STORAGE_QUAL_VARIATIONS[variation],
             pool,
-            suite_args=avl_args,
             test_args=avl_args,
         )
 
@@ -446,7 +445,6 @@ class MoblabService(object):
             build_version,
             "hardware_memoryqual",  # suite
             pool,
-            suite_args=avl_args,
             test_args=avl_args,
         )
 
