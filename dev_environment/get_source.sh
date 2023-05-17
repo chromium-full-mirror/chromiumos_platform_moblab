@@ -9,22 +9,24 @@ git clone https://chromium.googlesource.com/chromiumos/platform/xolabs-common-co
 git clone https://chromium.googlesource.com/chromiumos/config
 git clone https://chromium.googlesource.com/chromiumos/infra/proto
 
+set -euo pipefail
 
 function setup_git() {
-    cd "${1}"
-    git config --global user.email "${2}"
-    git config --global user.name "${3}"
+    pushd "${1}"
+    git config --local user.email "${2}"
+    git config --local user.name "${3}"
     git config --local remote.origin.review https://chromium-review.googlesource.com
     f=`git rev-parse --git-dir`/hooks/commit-msg ; mkdir -p $(dirname $f)
     curl -Lo $f https://gerrit-review.googlesource.com/tools/hooks/commit-msg
     chmod +x $f
+    popd
 }
 
 read -p "Enter Your Email (chromium.org if you have otherwise google.com): "  email
 read -p "Enter your first and last name for Git to use in reviews "  name
 
-for repo in [ "moblab" "satlab" "xolabs-common-code" "config" "proto" ]; do
-    setup_git "moblab" "${email}" "${name}"
+for repo in "moblab" "satlab" "xolabs-common-core" "config" "proto"; do
+    setup_git "$repo" "${email}" "${name}"
 done
 
 # Set up all the git hooks on moblab ( moblab presubmit checks )
