@@ -13,7 +13,7 @@ all: reset_usb proto
 
 reset_usb:
 	$(CC) $(CFLAGS) $(INCLUDES) -c r_usb.c -o $(TMPDIR)/r_usb.o
-	$(CC) $(CFLAGS) $(LFLAGS) -lusb $(TMPDIR)/r_usb.o -o $(TMPDIR)/reset_usb
+	$(CC) $(CFLAGS) $(LFLAGS) $(TMPDIR)/r_usb.o -lusb -o $(TMPDIR)/reset_usb
 
 
 proto:
