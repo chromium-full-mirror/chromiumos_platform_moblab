@@ -181,7 +181,7 @@ python-dateutil==2.8.1
     # via -r requirements.in
 python-gflags==3.1.2
     # via -r requirements.in
-python-nmap==0.6.4
+python-nmap==0.7.1
     # via -r requirements.in
 python-uinput==0.11.2
     # via -r requirements.in
