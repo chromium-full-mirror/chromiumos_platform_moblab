@@ -10,6 +10,7 @@ ARG UID=246
 
 # fetch dnsmasq
 RUN apk update \
+    && apk upgrade --no-cache \
     && apk --no-cache add dnsmasq libcap
 #configure dnsmasq
 RUN mkdir -p /etc/default/

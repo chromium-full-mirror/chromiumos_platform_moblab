@@ -104,7 +104,7 @@ pyparsing==2.4.7
     # via packaging
 python-dateutil==2.8.2
     # via -r requirements.in
-python-nmap==0.6.4
+python-nmap==0.7.1
     # via -r requirements.in
 pytz==2021.1
     # via

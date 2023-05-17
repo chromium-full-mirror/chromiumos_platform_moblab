@@ -77,7 +77,7 @@ pycparser==2.20
     # via cffi
 pyparsing==2.4.7
     # via packaging
-python-nmap==0.6.4
+python-nmap==0.7.1
     # via -r requirements.in
 pytz==2021.1
     # via google-api-core

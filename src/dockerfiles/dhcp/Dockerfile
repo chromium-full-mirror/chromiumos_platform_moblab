@@ -8,6 +8,7 @@ FROM ${BASE_REGISTRY_URI}/alpine:edge
 
 # fetch dnsmasq and webproc binary
 RUN apk update \
+    && apk upgrade --no-cache \
     && apk --no-cache add dnsmasq libcap
 
 #configure dnsmasq

@@ -153,7 +153,7 @@ python-dateutil==2.8.1
     #   alembic
 python-editor==1.0.4
     # via alembic
-python-nmap==0.6.4
+python-nmap==0.7.1
     # via -r requirements.in
 pytz==2021.1
     # via google-api-core
