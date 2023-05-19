@@ -55,6 +55,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
   private buildTargetName = '';
   private milestone = '';
   private buildVersionName = '';
+  private disabledReasonMessage = '';
   public showRecommendedBuilds = this.recommendedBuildLabel;
 
   constructor(
@@ -180,7 +181,7 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     if (this.milestone !== newMilestone) {
       this.milestone = newMilestone;
       if(this.buildDisplayToggle) {
-        this.buildDisplayChanged()
+        this.enableBuildToggle();
       } else {
         this.unselectBuildVersion();
         this.getBuildVersions();
@@ -231,8 +232,8 @@ export class BuildSelectFormsComponent implements AfterViewInit {
     } else {
       this.buildSelector.enable();
     }
-    if(this.buildDisplayToggle) {
-      this.buildDisplayToggle.disabled = false;
+    if (this.buildVersions.length === 0 && this.buildDisplayToggle.checked) {
+      this.disableBuildToggle();
     }
   }
 
@@ -317,5 +318,22 @@ export class BuildSelectFormsComponent implements AfterViewInit {
       this.poolSelector.disable(SELECT_BUILD_VERSION_PROMPT);
     }
     this.buildVersionUnselected.emit();
+  }
+
+  enableBuildToggle() {
+    this.buildDisplayToggle.disabled = false;
+    this.disabledReasonMessage = '';
+    this.buildDisplayChanged();
+  }
+
+  disableBuildToggle() {
+    this.buildDisplayToggle.disabled = true;
+    this.buildDisplayToggle.checked = false;
+    this.disabledReasonMessage = 'No recommended builds for this milestone';
+    this.buildDisplayChanged();
+  }
+
+  getDisabledReason() {
+    return this.disabledReasonMessage;
   }
 }
