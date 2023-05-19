@@ -13,7 +13,7 @@
     (select)="milestoneChanged($event.value)">
 </app-basic-selector>
 
-<div class="basic-moblab-checkbox" *ngIf="this.recommendedBuildLabel !== ''">
+<div class="basic-moblab-checkbox" *ngIf="this.recommendedBuildLabel !== ''" matTooltip="{{this.getDisabledReason()}}">
     <mat-checkbox #buildDisplayToggle (change)="buildDisplayChanged()" [checked]="true" [disabled]="true">
         Show Only Recommended Builds
     </mat-checkbox>
