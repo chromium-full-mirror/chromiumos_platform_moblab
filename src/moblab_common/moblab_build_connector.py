@@ -220,7 +220,7 @@ class MoblabBuildConnector(object):
         build_target,
         model,
         milestone,
-        label,
+        label=None,
         page_size=DEFAULT_PAGE_SIZE,
         page_token=None,
     ):
@@ -231,6 +231,7 @@ class MoblabBuildConnector(object):
             model (str): The model name. For non-unibuilds, set the model name as
                 the same as build target name.
             milestone (int): The milestone number.
+            label (string): The label of build version.
             page_size (int): The number of milestones to return in the response.
                 The default size is DEFAULT_PAGE_SIZE.
             page_token (str): The page token, received from a previous
