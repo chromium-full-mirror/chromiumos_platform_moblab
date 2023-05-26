@@ -17,14 +17,14 @@
     </mat-radio-group>
   </div>
 
-  <app-basic-checkbox #externalDisplayToggle [name]="'Include external display tests'">
-  </app-basic-checkbox>
-
-  <div style="padding: 0 0 20px 10px">
+  <div style="padding: 0 0 20px 10px; margin-top: -20px">
       <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
   </div>
 
+  <app-basic-checkbox #externalDisplayToggle [name]="'Include external display tests'">
+  </app-basic-checkbox>
+
   <app-new-update-notifier></app-new-update-notifier>
-  
+
   <app-run-suite-button (onClick)="onRunSuiteClick()"></app-run-suite-button>
 </mat-card>

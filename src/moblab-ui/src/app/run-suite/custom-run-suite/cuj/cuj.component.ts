@@ -249,7 +249,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
       return false;
     }
     if (!this.suiteName) {
-      this.errorMessage = 'Please input a suite name.';
+      this.errorMessage = this.hideCustomInput ? '' : 'Please input a suite name.';
       return false;
     }
 
