@@ -74,6 +74,7 @@ from site_utils import stable_version_utils
 
 _CONFIG = global_config.global_config
 
+
 # Definition of LabHealthIndicator
 LabHealthIndicator = collections.namedtuple(
     "LabHealthIndicator",
@@ -1282,8 +1283,19 @@ def get_jobs(
     models.Job.objects.populate_relationships(
         jobs, models.JobKeyval, "keyvals"
     )
+
+    job_id_hostname_mapping = {}
+    host_queue_entries = get_host_queue_entries()
+    for entry in filter(lambda x: x and x.get('job') and x.get('host'), host_queue_entries):
+        job_id = entry.get('job').get('id', None)
+        hostname = entry.get('host').get('hostname', None)
+        if job_id and hostname:
+            job_id_hostname_mapping[job_id] = hostname
+
+
     for job in jobs:
         job_dict = job.get_object_dict()
+        job_dict["hostname"] = job_id_hostname_mapping.get(job_dict.get('id'), '--')
         job_dict["dependencies"] = ",".join(
             label.name for label in job.dependencies
         )
@@ -1291,6 +1303,7 @@ def get_jobs(
             (keyval.key, keyval.value) for keyval in job.keyvals
         )
         job_dicts.append(job_dict)
+
     return rpc_utils.prepare_for_serialization(job_dicts)
 
 

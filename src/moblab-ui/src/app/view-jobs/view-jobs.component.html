@@ -112,6 +112,15 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="hostname" *ngIf="displayColumn('hostname')">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <div>Hostname</div>
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <span>{{element.getHostname()}}</span>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="name" *ngIf="displayColumn('name')">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             <div>Name</div>

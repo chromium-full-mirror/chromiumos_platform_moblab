@@ -129,6 +129,7 @@ export class ViewJobsComponent implements OnDestroy, OnInit, AfterViewInit {
   tableHeadSelectorRef: TableHeaderSelectorComponent;
   displayedColumns: string[] = [
     'job_id',
+    'hostname',
     'name',
     'priority',
     'created_time_sec_utc',

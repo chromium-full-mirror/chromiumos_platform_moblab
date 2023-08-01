@@ -1237,6 +1237,9 @@ class MoblabService(object):
             # Extracting jobs information from HQE entries.
             for hqe in hqes:
                 job = hqe["job"]
+                host = hqe.get("host")
+                if host:
+                    job["hostname"] = host.get("hostname", "--")
                 job["status"] = hqe.get("status")
                 jobs.append(job)
 

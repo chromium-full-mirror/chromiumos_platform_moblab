@@ -757,6 +757,7 @@ class MoblabRpcService(moblabrpc_pb2_grpc.MoblabRpcServiceServicer):
                         attempts_number=job.get("attempt_number", 0),
                         last_error=job.get("last_falure_reason", None),
                     ),
+                    hostname=job.get("hostname", "--"),
                 )
                 response.jobs.extend([job_proto])
         return response

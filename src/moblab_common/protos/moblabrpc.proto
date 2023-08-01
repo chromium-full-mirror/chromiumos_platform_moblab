@@ -419,7 +419,7 @@ message Execution {
   string dut_status = 8;
 }
 
-// NEXT_TAG = 17
+// NEXT_TAG = 18
 message Job {
   reserved 13;
   // NEXT_TAG = 90
@@ -512,6 +512,7 @@ message Job {
   repeated Execution associated_duts = 15;
 
   UploadState upload_state = 16;
+  string hostname = 17;
 }
 
 // NEXT_TAG = 11
