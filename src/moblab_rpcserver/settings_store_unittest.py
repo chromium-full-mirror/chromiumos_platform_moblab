@@ -12,16 +12,20 @@ import settings_store
 class SettingsStoreTest(unittest.TestCase):
     """Testing the MoblabSettingsStore code."""
 
-    @mock.patch("settings_store.MoblabSettings.key.in_", new=mock.MagicMock)
     def test_get_settings(self, mock_get_session):
-        session_mock = mock.MagicMock()
-        mock_get_session.return_value = session_mock
+        def mock_fn(key):
+            return key
 
-        store = settings_store.MoblabSettingsStore()
-        store.get_settings("some_key")
+        with mock.patch("settings_store.MoblabSettings.key", new=mock.MagicMock) as settings_mock:
+            settings_mock.in_ = mock_fn
+            session_mock = mock.MagicMock()
+            mock_get_session.return_value = session_mock
 
-        session_mock.close.assert_called_once()
-        mock_get_session.assert_called_once()
+            store = settings_store.MoblabSettingsStore()
+            store.get_settings("some_key")
+
+            session_mock.close.assert_called_once()
+            mock_get_session.assert_called_once()
 
     def test_set_settings(self, mock_get_session):
         session_mock = mock.MagicMock()
