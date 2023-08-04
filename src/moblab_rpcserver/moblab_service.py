@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 import asyncio
-import distutils
 import docker
 import google.api_core
 import os
@@ -19,6 +18,8 @@ from collections import namedtuple, defaultdict
 from datetime import datetime
 from google.cloud import storage
 from google.protobuf.field_mask_pb2 import FieldMask
+
+from packaging.version import Version
 
 from moblab_common import build_connector
 from moblab_common import dut_connector
@@ -641,13 +642,14 @@ class MoblabService(object):
         # builds. Quick way to check if it is local build
         # Example for local build: R102-14590.0.0-d022_03_22_2322-a1
         # try jobs does not have these -d/-a tags. So moving to a less
-        # stricter check 
+        # stricter check
         if "-" in build_version or "_" in build_version:
             build = "{}-local/R{}-{}".format(
                 build_target, milestone, build_version
             )
             logging.info(
-                "maybe this is a local build version, going to check in folder:" + build
+                "maybe this is a local build version, going to check in folder:"
+                + build
             )
         else:
             build = "{}-release/R{}-{}".format(
@@ -696,7 +698,7 @@ class MoblabService(object):
         boards = {}
         duts = await self.list_duts()
         # filter only enrolled duts. Red dut shouldn't be enrolled.
-        duts = filter(lambda x: x.get('enrolled'), duts)
+        duts = filter(lambda x: x.get("enrolled"), duts)
         available_boards = self.list_build_targets()
 
         for dut in duts:
@@ -1037,10 +1039,7 @@ class MoblabService(object):
 
         # filter boards don't have a permission
         if build_target not in self.list_build_targets():
-            return BuildResults(
-                    results=[],
-                    is_incomplete=False
-                )
+            return BuildResults(results=[], is_incomplete=False)
 
         return self.milestone_cache.get(
             key=self._key_getter(
@@ -1094,7 +1093,10 @@ class MoblabService(object):
                 try:
                     remote_build_versions = (
                         self.moblab_build_connector.list_builds_for_milestone(
-                            build_target, model, milestone, label,
+                            build_target,
+                            model,
+                            milestone,
+                            label,
                         )
                     )
                 except moblab_build_connector.MoblabBuildConnectorException:
@@ -1117,7 +1119,7 @@ class MoblabService(object):
                     )
 
             build_version_results.sort(
-                key=lambda x: distutils.version.LooseVersion(x[0]),
+                key=lambda x: Version(x[0]),
                 reverse=True,
             )
             return BuildResults(
