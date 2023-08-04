@@ -86,7 +86,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       errorMsg => {
         this.notificationsService.error(errorMsg);
       },
-      this.dutQuery.value
+      this.dutQuery.value.trim()
     );
   }
 
