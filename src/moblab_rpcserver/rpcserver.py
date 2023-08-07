@@ -42,7 +42,7 @@ def setup_logging(level):
     """
     logging.getLogger().handlers = []
     logging.getLogger().setLevel(level)
-    fh = logging.FileHandler("/var/log/moblab/moblab_rpc.log")
+    fh = logging.FileHandler("/var/log/moblab/moblab_rpcserver.log")
     fh.setLevel(level)
     # create formatter and add it to the handlers
     formatter = logging.Formatter(

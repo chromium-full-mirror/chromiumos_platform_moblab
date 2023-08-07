@@ -30,7 +30,7 @@ from lucifer import leasing
 from lucifer import loglib
 
 logger = logging.getLogger(__name__)
-handler = logging.FileHandler('/var/log/moblab/aborter.log')
+handler = logging.FileHandler('/var/log/moblab/autotest_job_aborter.log')
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 

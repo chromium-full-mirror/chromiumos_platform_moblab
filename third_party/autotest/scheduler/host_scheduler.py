@@ -402,7 +402,7 @@ def initialize(testing=False):
     _db_manager = scheduler_lib.ConnectionManager()
     scheduler_lib.setup_logging(
             os.environ.get('AUTOTEST_SCHEDULER_LOG_DIR', None),
-            None, timestamped_logfile_prefix='host_scheduler')
+            None, timestamped_logfile_prefix='autotest_hostscheduler')
     logging.info("Setting signal handler")
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)

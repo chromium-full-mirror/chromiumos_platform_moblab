@@ -98,7 +98,7 @@ def main():
 def main_without_exception_handling():
     scheduler_lib.setup_logging(
             os.environ.get('AUTOTEST_SCHEDULER_LOG_DIR', None),
-            os.environ.get('AUTOTEST_SCHEDULER_LOG_NAME', None))
+            os.environ.get('AUTOTEST_SCHEDULER_LOG_NAME', None), timestamped_logfile_prefix="autotest_monitor_db")
     usage = 'usage: %prog [options] results_dir'
     parser = optparse.OptionParser(usage)
     parser.add_option('--recover-hosts', help='Try to recover dead hosts',
