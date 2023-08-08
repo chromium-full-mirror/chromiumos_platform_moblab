@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 import asyncio
-from distutils import version as distutils_version
 import docker
 import google.api_core
 import os
@@ -1120,7 +1119,7 @@ class MoblabService(object):
                     )
 
             build_version_results.sort(
-                key=lambda x: distutils_version.LooseVersion(x[0]),
+                key=lambda x: Version(x[0]),
                 reverse=True,
             )
             return BuildResults(
