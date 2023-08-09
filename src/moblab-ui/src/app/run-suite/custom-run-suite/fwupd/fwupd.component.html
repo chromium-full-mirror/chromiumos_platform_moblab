@@ -23,6 +23,8 @@
   <app-basic-input #deviceInput [hidden]="(suiteName !== FWUPD_INSTALL_VERSION && suiteName !== FWUPD_INSTALL_FILE)" [name]="suiteName === FWUPD_INSTALL_FILE ? 'File' : 'Version'" (update)="deviceInputChanged()">
   </app-basic-input>
 
+  <app-basic-input #certificateIdInput [title]="'If not set the existing key will be used'" [name]="'Certificate ID for signed reports'" (update)="certificateIdInputChanged()">
+  </app-basic-input>
 
   <app-new-update-notifier></app-new-update-notifier>
 

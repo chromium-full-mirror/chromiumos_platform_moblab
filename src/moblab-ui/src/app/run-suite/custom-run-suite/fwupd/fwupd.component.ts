@@ -36,6 +36,7 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
   @ViewChild('dutSelector') dutSelectForm;
   @ViewChild('deviceIdSelector') deviceIdSelector;
   @ViewChild('deviceInput') deviceInput;
+  @ViewChild('certificateIdInput') certificateIdInput;
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
 
   readonly FWUPD_UPDATE = 'fwupd_update';
@@ -56,6 +57,8 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
   public suiteName = '';
   public suiteSelected = false;
   private buildSelected = false;
+
+  public cert_id: string | null = null;
 
   public dut_IP = '';
 
@@ -134,6 +137,11 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
       this.isReadyToRun();
   }
 
+  /** Method triggered on changing of certificate ID **/
+  public certificateIdInputChanged() {
+      this.cert_id = this.certificateIdInput?.getInput()?.trim();
+      this.isReadyToRun();
+  }
 
   /** Method triggered on change of DUT IP input.
    * */
@@ -228,6 +236,7 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
       `device_id=${id}`,
       ... (this.suiteName === this.FWUPD_INSTALL_VERSION) ? [`version=${this.device_file_or_version}`] : [],
       ... (this.suiteName === this.FWUPD_INSTALL_FILE) ? [`fwfile=${this.device_file_or_version}`] : [],
+      ... (this.cert_id) ? [`cert_id=${this.cert_id}`] : [],
     ];
   }
 
