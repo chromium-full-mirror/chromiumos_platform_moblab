@@ -1,0 +1,86 @@
+#job-query-form {
+  p {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+  }
+}
+
+.detail-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.a {
+  margin: 10px;
+}
+
+#job-detail-table {
+  width: 100%;
+  box-shadow: none !important;
+}
+
+#job-not-found-label {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  font-size: 30px;
+  font-family: Roboto, sans-serif;
+  text-align: center;
+}
+
+#control-file-view {
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+.links-wrapper {
+  float: right;
+}
+
+#loading-overlay {
+  background-color: #fafafa;
+  height: 100%;
+  opacity: 0.7;
+  position: absolute;
+  width: 100%;
+  z-index: 100;
+}
+
+.mat-expansion-panel {
+  box-shadow: none !important;
+}
+
+.expansion-panel-content {
+  width: 100%;
+}
+
+::ng-deep .mat-expansion-panel-body {
+  overflow: auto;
+}
+
+.mat-expansion-panel-header {
+  padding: 0 16px;
+}
+
+::ng-deep .mat-expansion-indicator {
+  &:after {
+    border-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.input-box-container {
+  &.without-border {
+    > .mat-mdc-form-field {
+      border: none;
+    }
+
+    > .mat-mdc-form-field.mat-form-field-invalid {
+      border: none;
+    }
+  }
+
+  .mat-mdc-form-field {
+    height: 100%;
+    padding: 0.25rem 0;
+  }
+}
