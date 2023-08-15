@@ -1,6 +1,7 @@
-<div fxLayout="row">
-  <app-button-with-progress #updateBUtton
-    caption="{{!getUpdateStatusFailed && isUpdateAvailable ? 'Update' : 'Force Update'}}" (buttonClick)="updateClick()">
+<div class="flex flex-row space-x-4">
+  <app-button-with-progress #updateBUtton caption="{{
+      !getUpdateStatusFailed && isUpdateAvailable ? 'Update' : 'Force Update'
+    }}" (buttonClick)="updateClick()">
   </app-button-with-progress>
-  <p class="update-status-message"> {{getUpdateStatusMessage()}} </p>
+  <p class="text-sm leading-9">{{ statusMessage }}</p>
 </div>

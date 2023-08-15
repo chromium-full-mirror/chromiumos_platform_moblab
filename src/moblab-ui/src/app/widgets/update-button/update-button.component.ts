@@ -10,12 +10,13 @@ import {NotificationsService} from 'app/services/notifications.service';
 @Component({
   selector: 'app-update-button',
   templateUrl: './update-button.component.html',
-  styleUrls: ['./update-button.component.css'],
+  styleUrls: ['./update-button.component.scss'],
 })
 export class UpdateButtonComponent implements OnInit {
   @ViewChild('updateBUtton') updateButton: ButtonWithProgressComponent;
   isUpdateAvailable = false;
   getUpdateStatusFailed = false;
+  statusMessage = 'No updates found';
 
   constructor(
     private moblabGrpcService: MoblabGrpcService,
@@ -30,6 +31,7 @@ export class UpdateButtonComponent implements OnInit {
       },
       (msg: string) => {
         this.getUpdateStatusFailed = true;
+        this.statusMessage = this.getUpdateStatusMessage();
         this.notificationsService.error(msg);
       }
     );
