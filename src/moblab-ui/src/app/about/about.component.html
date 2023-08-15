@@ -1,106 +1,74 @@
-<mat-card id="moblab-about-card">
-  <mat-card-header>
-    <mat-card-title>Moblab Information</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="card-table-content">
-      <table>
-        <tr>
-          <td>Moblab Version:</td>
-          <td>{{moblabReleaseVersion}}</td>
-        </tr>
-        <tr>
-          <td>Chrome OS Version:</td>
-          <td>{{chromeosReleaseVersion}}</td>
-        </tr>
-        <tr>
-          <td>Track:</td>
-          <td>{{chromeosReleaseTrack}}</td>
-        </tr>
-        <tr>
-          <td>Description:</td>
-          <td>{{chromeosReleaseDescription}}</td>
-        </tr>
-        <tr>
-          <td>Moblab Install Id:</td>
-          <td>{{moblabInstallId}}</td>
-        </tr>
-        <tr>
-          <td>Moblab Host Id:</td>
-          <td>{{moblabSerialNumber}}</td>
-        </tr>
-      </table>
+<div class="wrapper">
+  <div class="container-wrapper" id="moblab-about-card">
+    <div class="title">Moblab Information</div>
+    <div class="grid grid-cols-3 gap-x-1.5">
+      <div>Moblab Version:</div>
+      <div class="col-span-2 justify-items-start">
+        {{ moblabReleaseVersion }}
+      </div>
+      <div>Chrome OS Version:</div>
+      <div class="col-span-2 justify-items-start">
+        {{ chromeosReleaseVersion }}
+      </div>
+      <div>Track:</div>
+      <div class="col-span-2 justify-items-start">
+        {{ chromeosReleaseTrack }}
+      </div>
+      <div>Description:</div>
+      <div class="col-span-2 justify-items-start">
+        {{ chromeosReleaseDescription }}
+      </div>
+      <div>Moblab Install Id:</div>
+      <div class="col-span-2 justify-items-start">{{ moblabInstallId }}</div>
+      <div>Moblab Host Id:</div>
+      <div class="col-span-2 justify-items-start">{{ moblabSerialNumber }}</div>
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
 
-<mat-card id="network-information-card">
-  <mat-card-header>
-    <mat-card-title>Network Information</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="card-table-content">
-      <table>
-        <tr>
-          <td>Moblab Hostname:</td>
-          <td>{{moblabHostname}}</td>
-        </tr>
-        <tr>
-          <td>Moblab MAC Address:</td>
-          <td>{{moblabMacAddress}}</td>
-        </tr>
-        <tr>
-          <td>Connected to Internet:</td>
-          <td>{{isConnectedToInternet}}</td>
-        </tr>
-      </table>
+  <div class="container-wrapper" id="network-informaion-card">
+    <div class="title">Network Information</div>
+    <div class="grid grid-cols-3 gap-x-1.5">
+      <div>Moblab Hostname:</div>
+      <div class="col-span-2 justify-items-start">{{ moblabHostname }}</div>
+      <div>Moblab MAC Address:</div>
+      <div class="col-span-2 justify-items-start">{{ moblabMacAddress }}</div>
+      <div>Connected to Internet:</div>
+      <div class="col-span-2 justify-items-start">
+        {{ isConnectedToInternet }}
+      </div>
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
 
-<mat-card id="system-information-card">
-  <mat-card-header>
-    <mat-card-title>System Information</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="card-table-content">
-      <table>
-        <tr>
-          <td>Moblab Start Time:</td>
-          <td>{{moblabStartTime}}</td>
-        </tr>
-        <tr>
-          <td>CPU Temperature:</td>
-          <td>{{moblabCpuTemperature}}&deg;C (average over 30 mins)</td>
-        </tr>
-      </table>
+  <div class="container-wrapper" id="system-informaion-card">
+    <div class="title">System Information</div>
+    <div class="grid grid-cols-3 gap-x-1.5">
+      <div>Moblab Start Time:</div>
+      <div class="col-span-2 justify-items-start">{{ moblabStartTime }}</div>
+      <div>CPU Temperature:</div>
+      <div class="col-span-2 justify-items-start">
+        {{ moblabCpuTemperature }}&deg;C (average over 30mins)
+      </div>
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
 
-<mat-card id="useful-links">
-  <mat-card-header>
-    <mat-card-title>Useful Links</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="card-table-content">
-      <table>
-        <tr>
-          <td><a href="https://docs.google.com/document/d/e/2PACX-1vQKDTDTQFKjNxJatFkFUSjCPdVzgry9vkLLvxL8vwqasrKMP2KReEMZ3iva9GX8EzQYo-kANnzPlFG_/pub?urp=gmail_link">Instruction Manual</a></td>
-        </tr>
-        <tr>
-          <td><a href="https://issuetracker.google.com/issues/new?component=1038089&template=1569787">Report a Bug</a></td>
-        </tr>
-      </table>
+  <div class="container-wrapper flex flex-col" id="useful-links">
+    <div class="title">Useful Links</div>
+    <div>
+      <a
+        href="https://docs.google.com/document/d/e/2PACX-1vQKDTDTQFKjNxJatFkFUSjCPdVzgry9vkLLvxL8vwqasrKMP2KReEMZ3iva9GX8EzQYo-kANnzPlFG_/pub?urp=gmail_link">Instruction
+        Manual</a>
     </div>
-  </mat-card-content>
-</mat-card>
+    <div>
+      <a href="https://issuetracker.google.com/issues/new?component=1038089&template=1569787">Report a Bug</a>
+    </div>
+  </div>
 
-<div class="reboot-button-wrapper">
-  <app-reboot-button></app-reboot-button>
-</div>
-
-
-<div class="update-button-wrapper">
-  <app-update-button></app-update-button>
+  <div class="flex flex-row space-x-4 button-wrapper">
+    <div>
+      <app-reboot-button></app-reboot-button>
+    </div>
+    <div>
+      <app-update-button></app-update-button>
+    </div>
+  </div>
 </div>
