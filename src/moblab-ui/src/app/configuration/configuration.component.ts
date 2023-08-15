@@ -6,41 +6,38 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {FormControl, Validators} from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { FormControl, Validators } from '@angular/forms';
 
-import {leadingTrailingWhitespaceValidator} from '../utils/validators';
-import {MoblabGrpcService} from '../services/moblab-grpc.service';
-import {MoblabConfigurationGrpcService} from '../services/moblab-configuration-grpc.service';
-import {MoblabSettingsService} from '../services/moblab-settings.service';
-import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
-import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
-import {StageBuildDialogComponent} from '../manage-duts/stage-build-dialog/stage-build-dialog.component';
-import {MoblabSettingsConstains, build_access_request_link} from '../constants';
-import {NotificationsService} from '../services/notifications.service';
-import {Subscription} from 'rxjs';
-import {
-  Feature,
-  GlobalInfoService,
-} from 'app/services/global-ui-settings.service';
-import {BuildTargetStableVersion} from '../services/moblab_configuration_rpc_pb';
-import {MatTableDataSource} from "@angular/material/table";
+import { leadingTrailingWhitespaceValidator } from '../utils/validators';
+import { MoblabGrpcService } from '../services/moblab-grpc.service';
+import { MoblabConfigurationGrpcService } from '../services/moblab-configuration-grpc.service';
+import { MoblabSettingsService } from '../services/moblab-settings.service';
+import { ConfigSetupService } from '../services/moblab-configuration-alerting.service';
+import { ButtonWithProgressComponent } from '../widgets/button-with-progress/button-with-progress.component';
+import { StageBuildDialogComponent } from '../manage-duts/stage-build-dialog/stage-build-dialog.component';
+import { MoblabSettingsConstains, build_access_request_link } from '../constants';
+import { NotificationsService } from '../services/notifications.service';
+import { Subscription } from 'rxjs';
+import { GlobalInfoService } from 'app/services/global-ui-settings.service';
+import { BuildTargetStableVersion } from '../services/moblab_configuration_rpc_pb';
+import { MatTableDataSource } from "@angular/material/table";
 
 function gsURLValidator(control) {
   if (!control.value) {
     return null;
   }
   const forbidden = !new RegExp('^gs:\\/\\/.*').test(control.value);
-  return forbidden ? {notAGSUrl: {value: control.value}} : null;
+  return forbidden ? { notAGSUrl: { value: control.value } } : null;
 }
 
 function validChromeosBuildPattern(control) {
-    if (!control.value) {
-      return null;
-    }
-    const value = control.value.trim();
-    const forbidden = !new RegExp(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/).test(value);
-    return forbidden ? {validChromeosBuildPattern: {value: control.value}} : null;
+  if (!control.value) {
+    return null;
+  }
+  const value = control.value.trim();
+  const forbidden = !new RegExp(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/).test(value);
+  return forbidden ? { validChromeosBuildPattern: { value: control.value } } : null;
 }
 
 
@@ -52,7 +49,7 @@ class CloudConfiguration {
     public botoKeyID: string = '',
     public botoKeySecret: string = '',
     public bucketURL: string = ''
-  ) {}
+  ) { }
 }
 
 @Component({
@@ -89,7 +86,7 @@ export class ConfigurationComponent
   });
 
   userCrOSVersionForm = new FormControl(
-    '', {validators: [validChromeosBuildPattern],}
+    '', { validators: [validChromeosBuildPattern], }
   );
   resultsRetentionPeriodForm = new FormControl('', [
     Validators.required,
@@ -115,7 +112,7 @@ export class ConfigurationComponent
   lastFetchedDutWifiName = '';
   lastFetchedDutWifiPassword = '';
 
-  pauseStatusSubscription: Subscription = null;
+  pauseStatusSubscription: Subscription | null = null;
 
   panelOpenState = true;
 
@@ -136,7 +133,7 @@ export class ConfigurationComponent
     private notificationsService: NotificationsService,
     private globalInfo: GlobalInfoService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     this.bucketURLForm.valueChanges.subscribe(value => {
@@ -159,12 +156,12 @@ export class ConfigurationComponent
   }
 
   ngOnDestroy(): void {
-    this.pauseStatusSubscription.unsubscribe();
+    this.pauseStatusSubscription?.unsubscribe();
   }
 
   async listStableBuildVersions() {
     console.log(this.stableBuildVersions)
-    this.userCrOSVersionForm.disable({emitEvent: false});
+    this.userCrOSVersionForm.disable({ emitEvent: false });
     this.stableBuildVersionLoading = true;
     console.log(this.stableBuildVersions)
     try {
@@ -173,18 +170,20 @@ export class ConfigurationComponent
 
       // User override stable build version is the same for all build targets
       if (data.length !== 0) {
-       this.userCrOSVersionValue = data[0]
-         .getStableVersion()
-         .getOverrideVersion();
+        this.userCrOSVersionValue = data[0]
+          .getStableVersion()
+          .getOverrideVersion();
       }
     } catch (error) {
       console.log('listStableBuildVersions call failed with:' + error);
-      this.notificationsService.error(
-        'Failed to fetch stable build versions: ' + error.message
-      );
+      if (typeof error === 'object' && 'message' in error) {
+        this.notificationsService.error(
+          'Failed to fetch stable build versions: ' + error.message
+        );
+      }
     } finally {
       if (this.isAnyDutEnrolled()) {
-        this.userCrOSVersionForm.enable({emitEvent: false});
+        this.userCrOSVersionForm.enable({ emitEvent: false });
       }
       this.stableBuildVersionLoading = false;
     }
@@ -211,9 +210,11 @@ export class ConfigurationComponent
       this.resultsRetentionPeriodForm.setValue(period_days);
     } catch (error) {
       console.log('getResultsRetentionPeriod call failed with:' + error);
-      this.notificationsService.error(
-        'Failed to fetch results retention duration: ' + error.message
-      );
+      if (typeof error === 'object' && 'message' in error) {
+        this.notificationsService.error(
+          'Failed to fetch results retention duration: ' + error.message
+        );
+      }
     } finally {
       this.resultsRetentionPeriodForm.enable();
     }
@@ -228,16 +229,18 @@ export class ConfigurationComponent
       this.getResultsRetentionPeriod();
     } catch (error) {
       console.log('setStableBuildVersion call failed with:' + error);
-      this.notificationsService.error(
-        'Failed to set stable Chrome OS version: ' + error.message
-      );
+      if (typeof error === 'object' && 'message' in error) {
+        this.notificationsService.error(
+          'Failed to set stable Chrome OS version: ' + error.message
+        );
+      }
     } finally {
       this.resultsRetentionPeriodForm.enable();
     }
   }
 
   isAnyDutEnrolled = () => this.stableBuildVersions.data.length != 0
-  
+
   public async setStableCrOSVersion(override_value: string) {
     this.stableBuildVersionLoading = true;
     this.userCrOSVersionForm.setErrors(null);
@@ -248,8 +251,10 @@ export class ConfigurationComponent
       await this.listStableBuildVersions();
       this.userCrOSVersionForm.reset();
     } catch (error) {
-      this.userCrOSVersionForm.setErrors({apiResponseError: error.message}, {emitEvent: true});
       console.log('setStableBuildVersion call failed with:' + error);
+      if (typeof error === 'object' && 'message' in error) {
+        this.userCrOSVersionForm.setErrors({ apiResponseError: error.message }, { emitEvent: true });
+      }
     } finally {
       this.stableBuildVersionLoading = false;
     }
@@ -342,13 +347,13 @@ export class ConfigurationComponent
     return (
       this.lastFetchedCloudConfig.botoKeyID !== this.botoKeyIDForm.value ||
       this.lastFetchedCloudConfig.botoKeySecret !==
-        this.botoKeySecretForm.value ||
+      this.botoKeySecretForm.value ||
       this.lastFetchedCloudConfig.bucketURL !== this.bucketURLForm.value ||
       this.lastFetchedCloudConfig.isCloudEnabled !== this.isCloudEnabled ||
       this.lastFetchedCloudConfig.isRemoteConsoleEnabled !==
-        this.isRemoteConsoleEnabled ||
+      this.isRemoteConsoleEnabled ||
       this.lastFetchedCloudConfig.isRemoteCommandEnabled !==
-        this.isRemoteCommandEnabled
+      this.isRemoteCommandEnabled
     );
   }
 
@@ -514,7 +519,7 @@ export class ConfigurationComponent
         this.bucketURLForm.value)
     ) {
       this.showUncheckWarning = true;
-      const clearError = {clearWarning: true};
+      const clearError = { clearWarning: true };
 
       this.botoKeyIDForm.setErrors(clearError);
       this.botoKeySecretForm.setErrors(clearError);

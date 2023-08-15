@@ -11,13 +11,14 @@
     "lib": [
       "es6",
       "ES2017",
-      "dom"
+      "dom",
+      "es2022"
     ],
     "mapRoot": "./",
     "module": "esnext",
     "moduleResolution": "node",
     "sourceMap": true,
-    "target": "es2015",
+    "target": "es2022",
     "typeRoots": [
       "../node_modules/@types"
     ],

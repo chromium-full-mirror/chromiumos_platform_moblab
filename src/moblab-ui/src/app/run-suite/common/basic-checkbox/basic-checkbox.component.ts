@@ -15,10 +15,11 @@ export class BasicCheckboxFormComponent extends BaseForm implements OnInit {
   @Input() name: string;
   @Output() update = new EventEmitter();
 
-  checkForm = new FormControl('');
+  checkForm = new FormControl(false);
 
   ngOnInit(): void {
     this.checkForm.setValue(false);
+    this.checkForm.disable();
     this.checkForm.valueChanges.subscribe(value => {
       this.update.emit(this.checkForm.value);
     });

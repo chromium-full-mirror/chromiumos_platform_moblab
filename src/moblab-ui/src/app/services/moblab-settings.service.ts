@@ -23,7 +23,7 @@ export class MoblabSettingsService {
     try {
       this.pauseRequestorsSubject.next(pauseRequesters);
     } catch (ex) {
-      console.log('UpdateHostSchedulingStatus error: ' + ex.message);
+      console.log(`UpdateHostSchedulingStatus error: ${ex}`);
     }
   }
 }

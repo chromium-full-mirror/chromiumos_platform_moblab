@@ -32,9 +32,18 @@ export class NotificationsService {
     this.hideInfoMessage(notification.id);
   }
 
-  public error(message: string) {
-    this.notifications.push(new Notification(message, NotificationType.Error));
-    this.pushNotificationsUpdate();
+  public error(error: unknown) {
+    let notification = null;
+    if (typeof error === 'string') {
+      notification = new Notification(error, NotificationType.Error);
+    } else if (typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+      notification = new Notification(error.message, NotificationType.Error);
+    }
+
+    if (notification) {
+      this.notifications.push(notification);
+      this.pushNotificationsUpdate();
+    }
   }
 
   public dismiss(id: string) {

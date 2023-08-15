@@ -47,7 +47,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
   public showToolbarTips = true;
   @ViewChild('screenshotParent')
   public screenshotParent: ElementRef;
-  public drawColor: string = this.feedbackService.highlightedColor;
+  public drawColor: string;
   public rectangles: Rectangle[] = [];
   private scrollWidth = document.documentElement.scrollWidth;
   private scrollHeight = document.documentElement.scrollHeight;
@@ -98,6 +98,7 @@ export class FeedbackDialogComponent implements AfterViewInit {
   }
 
   ngOnInit() {
+    this.drawColor = this.feedbackService.highlightedColor;
     this.emailFormControl
     	.setValidators([
 	  // Regex source is from https://www.regular-expressions.info/email.html

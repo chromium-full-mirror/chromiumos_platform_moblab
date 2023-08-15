@@ -16,6 +16,12 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.json",
+            "allowedCommonJsDependencies": [
+              "core-js",
+              "moment",
+              "html2canvas",
+              "zone.js"
+            ],
             "assets": [
               "src/assets",
               "src/favicon.ico"

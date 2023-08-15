@@ -1,5 +1,4 @@
 import {Component, OnInit, EventEmitter, Input, Output} from '@angular/core';
-import {emit} from 'cluster';
 
 export const CHECKBOX_ID = 'inner-checkbox';
 

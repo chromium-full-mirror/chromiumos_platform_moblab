@@ -30,7 +30,6 @@ import {NewUpdateDirective} from './new-update.directive';
     ReactiveFormsModule,
   ],
   exports: [NewUpdateDirective],
-  entryComponents: [NewUpdateDialogComponent],
   providers: [],
 })
 export class NewUpdateModule {}

@@ -1,7 +1,6 @@
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BrowserModule} from '@angular/platform-browser';
 import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {LayoutModule} from '@angular/cdk/layout';
@@ -63,7 +62,6 @@ import {AboutComponent} from './about/about.component';
     BrowserModule,
     CommonModule,
     DutDetailModule,
-    FlexLayoutModule,
     FormsModule,
     HttpClientModule,
     JobDetailModule,

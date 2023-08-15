@@ -1,24 +1,16 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700,400italic&amp;subset=latin-ext');
 @import url('https://fonts.googleapis.com/css?family=Arimo:300,400,500,700,400italic&amp;subset=latin-ext');
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 
 
+$sans-display-family: 'Open Sans, "Arimo", sans-serif';
 $general-typography: mat-typography-config(
-  $font-family: '"Open Sans", "Arimo", sans-serif',
-  $body-2:        mat-typography-level(14px, 24px, 600)
+  $font-family: $sans-display-family,
+  $body-2: mat-typography-level(14px, 24px, 600)
 );
-
-
-$secondary-typography: mat-typography-config(
-  $font-family: 'Roboto, sans-serif'
-);
-
 
 // Be sure that you only ever include this mixin once!
-@include mat-core($general-typography);
-
-
-$sans-display-family: 'Google Sans Display, "Arimo", sans-serif';
+@include mat-core();
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
@@ -30,7 +22,13 @@ $accent:  mat-palette($mat-indigo, A200, A100, A400);
 $warn:    mat-palette($mat-red);
 
 // Create the theme object (a Sass map containing all of the palettes).
-$theme: mat-light-theme($primary, $accent, $warn);
+$theme: mat-light-theme(
+  (
+    color: (primary: $primary, accent: $accent, warn: $warn),
+    density: 0,
+    typography: $general-typography,
+  )
+);
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
@@ -48,5 +46,5 @@ $moblab-colors-status-unknown: #d3d3d3;
 $moblab-colors-status-recommended: lightgreen;
 
 .mat-tooltip {
-  font-size: 12px!important;
+  font-size: 12px !important;
 }

@@ -38,7 +38,6 @@ import {FeedbackDirective} from './feedback.directive';
     ReactiveFormsModule,
   ],
   exports: [FeedbackDirective],
-  entryComponents: [FeedbackDialogComponent],
   providers: [FeedbackService],
 })
 export class FeedbackModule {}
