@@ -2,29 +2,34 @@
 @import url('https://fonts.googleapis.com/css?family=Arimo:300,400,500,700,400italic&amp;subset=latin-ext');
 @import '@angular/material/theming';
 
-
-$sans-display-family: 'Open Sans, "Arimo", sans-serif';
-$general-typography: mat-typography-config(
-  $font-family: $sans-display-family,
-  $body-2: mat-typography-level(14px, 24px, 600)
-);
-
 // Be sure that you only ever include this mixin once!
 @include mat-core();
+
+$sans-display-family: 'Open Sans, "Arimo", sans-serif';
+
+$general-typography: mat-typography-config(
+  $font-family: $sans-display-family,
+  $body-2: mat-typography-level(14px, 24px, 400),
+);
+
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $primary: mat-palette($mat-blue, 700, A100, A400);
-$accent:  mat-palette($mat-indigo, A200, A100, A400);
+$accent: mat-palette($mat-indigo, A200, A100, A400);
 
 // The warn palette is optional (defaults to red).
-$warn:    mat-palette($mat-red);
+$warn: mat-palette($mat-red);
 
 // Create the theme object (a Sass map containing all of the palettes).
 $theme: mat-light-theme(
   (
-    color: (primary: $primary, accent: $accent, warn: $warn),
+    color: (
+      primary: $primary,
+      accent: $accent,
+      warn: $warn,
+    ),
     density: 0,
     typography: $general-typography,
   )
@@ -34,7 +39,6 @@ $theme: mat-light-theme(
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include angular-material-theme($theme);
-
 
 $moblab-colors-attention: #fbbc04;
 

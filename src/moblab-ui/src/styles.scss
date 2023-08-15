@@ -14,5 +14,49 @@ $material-icons-font-path: '~material-icons/iconfont/';
 @tailwind components;
 @tailwind utilities;
 
-@import "./theme.scss";
+@import './theme.scss';
 
+.mat-mdc-text-field-wrapper {
+  &.mdc-text-field {
+    background-color: transparent !important;
+  }
+
+  .mat-mdc-form-field-focus-overlay {
+    background-color: transparent !important;
+  }
+}
+
+.input-box-container {
+  position: relative;
+  height: 4rem;
+
+  > .mat-mdc-form-field {
+    border: 1px solid #ebebeb;
+    border-radius: 0.25rem;
+  }
+
+  > .mat-mdc-form-field.mat-form-field-invalid {
+    border-color: #f44336;
+  }
+
+  .without-underline .mdc-line-ripple {
+    display: none;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    position: absolute;
+    top: 3.5rem;
+
+    .mat-mdc-form-field-error-wrapper {
+      padding: 0 0.75rem;
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.no-wrap {
+  white-space: nowrap;
+}
