@@ -90,10 +90,8 @@ mat-toolbar {
 }
 
 .menu-button {
-  padding: 0px;
-  margin-right: 20px;
-  width: 24px;
-  min-width: 16px;
+  font-size: 1.5rem;
+  line-height: 2rem;
 }
 
 .toolbar-icon {
@@ -106,4 +104,38 @@ mat-toolbar {
   pointer-events: none;
   top: 0px;
   width: 100%;
+}
+
+.topbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+a {
+  text-decoration: underline;
+  color: -webkit-link;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.chip-wrapper {
+  display: inline-block;
+  background-color: #3f51b5;
+  margin: 0 4px;
+  padding: 0 8px;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: white;
+}
+
+.chip-wrapper.warn {
+  background-color: #f44336;
+}
+
+.sidenav-wrapper {
+  width: 12rem;
 }

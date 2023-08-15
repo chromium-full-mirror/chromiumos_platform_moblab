@@ -1,35 +1,38 @@
-<div class="notifications-panel" fxLayout="column">
-  <app-notification-banner *ngFor="let n of notificationsList; trackBy: trackByFn" [notification]="n"
-    (dismissClick)="dismissNotification(n)">
+<div class="notifications-panel flex flex-col">
+  <app-notification-banner
+    *ngFor="let n of notificationsList; trackBy: trackByFn"
+    [notification]="n"
+    (dismissClick)="dismissNotification(n)"
+  >
   </app-notification-banner>
 </div>
 
-<div fxLayout="column">
-  <mat-toolbar fxLayout="row" color="primary" opened="true" #topToolbar>
-    <div fxFlex fxLayout="row" fxLayoutAlign="start center">
+<div>
+  <mat-toolbar color="primary" opened="true" #topToolbar class="topbar">
+    <div class="flex flex-row gap-2 items-center">
       <button class="menu-button" mat-button (click)="mainSideNav.toggle()">
-        <mat-icon>menu</mat-icon>
+        <mat-icon [inline]="true">menu</mat-icon>
       </button>
       <div class="toolbar-icon">
         <mat-icon class="moblab-logo-icon" svgIcon="moblab"></mat-icon>
       </div>
-      <div class="toolbar-title">
-        Moblab
-      </div>
+      <div class="toolbar-title">Moblab</div>
     </div>
-    <div fxFlex="nogrow">
-      <div *ngIf="this.isPageInformationEnabled()" class="toolbar-item" fxFlex="40">
+    <div class="flex flex-row gap-2 items-center">
+      <div *ngIf="this.isPageInformationEnabled()" class="toolbar-item">
         Page Information Here
         <mat-icon class="problem-icon">report_problem</mat-icon>
       </div>
 
       <span id="links-box">
         <div class="link-box-item">
-          {{moblabUptime}}
+          {{ moblabUptime }}
         </div>
         |
         <div class="link-box-item">
-          <a style="color: white;" href="{{mobmonitor_link}}" target="_blank">Mobmonitor</a>
+          <a style="color: white" href="{{ mobmonitor_link }}" target="_blank"
+            >Mobmonitor</a
+          >
         </div>
         |
         <div class="link-box-item feedback-icon-wrapper">
@@ -43,54 +46,91 @@
     </div>
   </mat-toolbar>
 
-  <mat-toolbar class="mat-toolbar-warn" *ngIf="this.modelsWithoutAccess?.length">
-    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+  <mat-toolbar
+    class="mat-toolbar-warn"
+    *ngIf="this.modelsWithoutAccess?.length"
+  >
+    <div class="flex flex-row items-center">
       <span> This account does not have permission to run tests on </span>
-      <mat-chip-list>
-        <mat-chip *ngFor="let model of this.modelsWithoutAccess" color="primary" selected="true">
-          {{ model }}
-        </mat-chip>
-      </mat-chip-list>
-      <span> devices, please request access
-        <a href="{{build_access_request_link}}" target="_blank">here.</a>
+      <div
+        *ngFor="let model of this.modelsWithoutAccess"
+        color="primary"
+        selected="true"
+        class="chip-wrapper"
+      >
+        {{ model }}
+      </div>
+      <span>
+        devices, please request access
+        <a href="{{ build_access_request_link }}" target="_blank">here.</a>
       </span>
     </div>
   </mat-toolbar>
 
   <mat-toolbar class="mat-toolbar-warn" *ngIf="this.pauseRequestors?.length">
-    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+    <div class="flex flex-row items-center">
       <span>Job Scheduler is paused due to:</span>
-      <mat-chip-list>
-        <mat-chip *ngFor="let message of getPausedDueToUser()" color="primary" selected="true"
-          matTooltip="Resume job scheduler on Configurations page." matTooltipPosition="above">
-          {{ message }}
-        </mat-chip>
-        <mat-chip *ngFor="let message of getPausedDueToLowDisk()" color="warn" selected="true"
-          matTooltip="Free up disk space to resume job scheduler." matTooltipPosition="above">
-          {{ message }}
-        </mat-chip>
-      </mat-chip-list>
+      <div
+        class="chip-wrapper"
+        *ngFor="let message of getPausedDueToUser()"
+        selected="true"
+        matTooltip="Resume job scheduler on Configurations page."
+        matTooltipPosition="above"
+      >
+        {{ message }}
+      </div>
+      <div
+        *ngFor="let message of getPausedDueToLowDisk()"
+        class="chip-wrapper"
+        selected="true"
+        matTooltip="Free up disk space to resume job scheduler."
+        matTooltipPosition="above"
+      >
+        {{ message }}
+      </div>
     </div>
   </mat-toolbar>
 
-  <mat-sidenav-container fxFlex="95" class="sidenav-container">
-    <mat-sidenav #mainSideNav mode="side" opened="{{ enableNavBar ? true : false }}">
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav
+      #mainSideNav
+      mode="side"
+      opened="{{ enableNavBar ? true : false }}"
+      class="sidenav-wrapper"
+    >
       <mat-nav-list>
-        <a *ngFor="let tab of navTabs" mat-list-item class="sidebar-items" routerLink="{{ tab.route }}"
-          routerLinkActive="active-route" #routerLinkActiveInstance="routerLinkActive"
-          [class.list-item-disabled]="!enableNavBar || (!cloudConfigEnabled && tab.label !== 'Configuration')"
-          [class.list-item-active]="routerLinkActiveInstance.isActive" [routerLinkActiveOptions]="{ exact: true }"
-          [matTooltip]="getSideNavTooltip()" [matTooltipDisabled]="isSideNavEnabled()">
-          <mat-icon class="moblab-sidebar-icon">{{ tab.icon }} </mat-icon>
-          {{ tab.label }}
-          <mat-icon color="warn" matTooltip="Could not verify if cloud integration has been enabled."
-            *ngIf="cloudConfigError && (tab.label === 'Configuration')">
-            warning
-          </mat-icon>
+        <a
+          *ngFor="let tab of navTabs"
+          mat-list-item
+          class="sidebar-items"
+          routerLink="{{ tab.route }}"
+          routerLinkActive="active-route"
+          #routerLinkActiveInstance="routerLinkActive"
+          [class.list-item-disabled]="
+            !enableNavBar ||
+            (!cloudConfigEnabled && tab.label !== 'Configuration')
+          "
+          [class.list-item-active]="routerLinkActiveInstance.isActive"
+          [routerLinkActiveOptions]="{exact: true}"
+          [matTooltip]="getSideNavTooltip()"
+          [matTooltipDisabled]="isSideNavEnabled()"
+        >
+          <div class="flex flex-row items-center gap-2">
+            <mat-icon class="moblab-sidebar-icon">{{ tab.icon }} </mat-icon>
+            {{ tab.label }}
+            <mat-icon
+              color="warn"
+              matTooltip="Could not verify if cloud integration has been enabled."
+              *ngIf="cloudConfigError && tab.label === 'Configuration'"
+            >
+              warning
+            </mat-icon>
+
+          </div>
         </a>
       </mat-nav-list>
     </mat-sidenav>
-    <mat-sidenav-content fxFlex="100">
+    <mat-sidenav-content>
       <router-outlet></router-outlet>
     </mat-sidenav-content>
   </mat-sidenav-container>
