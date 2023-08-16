@@ -7,10 +7,11 @@ import {
 } from '../widgets/loading-overlay/loading-overlay.component';
 import {GlobalInfoService} from 'app/services/services.module';
 import {Feature} from 'app/services/services.module';
+
 @Component({
   selector: 'app-run-suite',
   templateUrl: './run-suite.component.html',
-  styleUrls: ['./run-suite.component.css'],
+  styleUrls: ['./run-suite.component.scss'],
 })
 export class RunSuiteComponent {
   @ViewChild(LoadingOverlayComponent) loadingOverlay: LoadingOverlayComponent;
@@ -23,6 +24,10 @@ export class RunSuiteComponent {
   }
 
   onSuiteFormChange(changeType: SuiteChangeType, message: string = null) {
+    if (!this.loadingOverlay) {
+      return;
+    }
+
     if (changeType === SuiteChangeType.RunSuiteStart) {
       this.onSuiteStatusUpdate('submitting');
       this.loadingOverlay.show();
@@ -46,7 +51,7 @@ export class RunSuiteComponent {
   onSuiteStatusUpdate(current_state: string) {
     this.loadingOverlay.updateStatus(current_state);
   }
-  
+
   isTestEnabled(feature: Feature) {
     return this.globalInfo.isFeatureEnabled(feature);
   }

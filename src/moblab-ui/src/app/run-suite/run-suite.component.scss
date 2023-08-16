@@ -1,0 +1,22 @@
+.suite-wrapper {
+  display: flex;
+  justify-content: center;
+  font-size: 1rem;
+  margin-top: 4rem;
+  position: relative;
+  width: 100%;
+
+  .suite-content {
+    display: flex;
+    flex-direction: column;
+    width: 26rem;
+    position: relative;
+    padding: 2rem 0.75rem;
+    border: 1px solid #ebebeb;
+    border-radius: 0.25rem;
+  }
+}
+
+::ng-deep .mat-mdc-tab-labels div[role='tab'] {
+  min-width: 10rem;
+}

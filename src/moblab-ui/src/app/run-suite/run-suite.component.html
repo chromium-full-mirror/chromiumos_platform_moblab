@@ -1,87 +1,139 @@
-<div id="card-wrapper">
-  <mat-card id="outer-card">
-    <mat-tab-group>
-      <mat-tab label="CTS">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+<div id="card-wrapper" class="card-wrapper">
+  <mat-tab-group>
+    <mat-tab label="CTS">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-cts-run (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-cts-run
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-cts-run>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="CUJ">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="CUJ">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-cuj (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-cuj
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-cuj>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="FAFT">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="FAFT">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-faft (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-faft
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-faft>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="FWUPD">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="FWUPD">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-fwupd (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-fwupd
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-fwupd>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="GTS">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="GTS">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-gts-run (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-gts-run
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-gts-run>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="Memory Qualification">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Memory Qualification">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-memory-qual (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-memory-qual
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-memory-qual>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="Storage Qualification">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Storage Qualification">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-storage-qual-v2 (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-storage-qual-v2
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-storage-qual-v2>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="Storage Qual (Removable)">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Storage Qual (Removable)">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-storage-qual (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-storage-qual
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-storage-qual>
           </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="Other">
-        <ng-template matTabContent>
-          <div class="suite-form-wrapper">
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Other">
+      <ng-template matTabContent>
+        <div class="suite-wrapper">
+          <div class="suite-content">
             <app-loading-overlay></app-loading-overlay>
-            <app-run-any-suite (suiteFormChange)="onSuiteFormChange($event.changeType, $event.message)">
+            <app-run-any-suite
+              (suiteFormChange)="
+                onSuiteFormChange($event.changeType, $event.message)
+              "
+            >
             </app-run-any-suite>
           </div>
-        </ng-template>
-      </mat-tab>
-    </mat-tab-group>
-  </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
 </div>
