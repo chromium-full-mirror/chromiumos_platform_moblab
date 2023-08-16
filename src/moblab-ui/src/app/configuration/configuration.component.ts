@@ -6,29 +6,29 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { FormControl, Validators } from '@angular/forms';
+import {MatDialog} from '@angular/material/dialog';
+import {FormControl, Validators} from '@angular/forms';
 
-import { leadingTrailingWhitespaceValidator } from '../utils/validators';
-import { MoblabGrpcService } from '../services/moblab-grpc.service';
-import { MoblabConfigurationGrpcService } from '../services/moblab-configuration-grpc.service';
-import { MoblabSettingsService } from '../services/moblab-settings.service';
-import { ConfigSetupService } from '../services/moblab-configuration-alerting.service';
-import { ButtonWithProgressComponent } from '../widgets/button-with-progress/button-with-progress.component';
-import { StageBuildDialogComponent } from '../manage-duts/stage-build-dialog/stage-build-dialog.component';
-import { MoblabSettingsConstains, build_access_request_link } from '../constants';
-import { NotificationsService } from '../services/notifications.service';
-import { Subscription } from 'rxjs';
-import { GlobalInfoService } from 'app/services/global-ui-settings.service';
-import { BuildTargetStableVersion } from '../services/moblab_configuration_rpc_pb';
-import { MatTableDataSource } from "@angular/material/table";
+import {leadingTrailingWhitespaceValidator} from '../utils/validators';
+import {MoblabGrpcService} from '../services/moblab-grpc.service';
+import {MoblabConfigurationGrpcService} from '../services/moblab-configuration-grpc.service';
+import {MoblabSettingsService} from '../services/moblab-settings.service';
+import {ConfigSetupService} from '../services/moblab-configuration-alerting.service';
+import {ButtonWithProgressComponent} from '../widgets/button-with-progress/button-with-progress.component';
+import {StageBuildDialogComponent} from '../manage-duts/stage-build-dialog/stage-build-dialog.component';
+import {MoblabSettingsConstains, build_access_request_link} from '../constants';
+import {NotificationsService} from '../services/notifications.service';
+import {Subscription} from 'rxjs';
+import {GlobalInfoService} from 'app/services/global-ui-settings.service';
+import {BuildTargetStableVersion} from '../services/moblab_configuration_rpc_pb';
+import {MatTableDataSource} from '@angular/material/table';
 
 function gsURLValidator(control) {
   if (!control.value) {
     return null;
   }
   const forbidden = !new RegExp('^gs:\\/\\/.*').test(control.value);
-  return forbidden ? { notAGSUrl: { value: control.value } } : null;
+  return forbidden ? {notAGSUrl: {value: control.value}} : null;
 }
 
 function validChromeosBuildPattern(control) {
@@ -36,10 +36,11 @@ function validChromeosBuildPattern(control) {
     return null;
   }
   const value = control.value.trim();
-  const forbidden = !new RegExp(/^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/).test(value);
-  return forbidden ? { validChromeosBuildPattern: { value: control.value } } : null;
+  const forbidden = !new RegExp(
+    /^R[0-9]{2,3}-[0-9]{5,}\.[0-9]{1,}\.[0-9]{1,}$/
+  ).test(value);
+  return forbidden ? {validChromeosBuildPattern: {value: control.value}} : null;
 }
-
 
 class CloudConfiguration {
   constructor(
@@ -49,7 +50,7 @@ class CloudConfiguration {
     public botoKeyID: string = '',
     public botoKeySecret: string = '',
     public bucketURL: string = ''
-  ) { }
+  ) {}
 }
 
 @Component({
@@ -58,7 +59,8 @@ class CloudConfiguration {
   styleUrls: ['./configuration.component.scss'],
 })
 export class ConfigurationComponent
-  implements OnInit, OnDestroy, AfterContentInit {
+  implements OnInit, OnDestroy, AfterContentInit
+{
   @ViewChild('pauseButton') pauseButton: ButtonWithProgressComponent;
   @ViewChild('resumeButton') resumeButton: ButtonWithProgressComponent;
 
@@ -85,9 +87,9 @@ export class ConfigurationComponent
     validators: [Validators.required, gsURLValidator],
   });
 
-  userCrOSVersionForm = new FormControl(
-    '', { validators: [validChromeosBuildPattern], }
-  );
+  userCrOSVersionForm = new FormControl('', {
+    validators: [validChromeosBuildPattern],
+  });
   resultsRetentionPeriodForm = new FormControl('', [
     Validators.required,
     Validators.pattern(/^(([01]?[1-9]|2[0-3])h)$|^([1-7]d)$/),
@@ -117,7 +119,8 @@ export class ConfigurationComponent
   panelOpenState = true;
 
   stableBuildVersionLoading = false;
-  stableBuildVersions: MatTableDataSource<BuildTargetStableVersion> = new MatTableDataSource<BuildTargetStableVersion>([]);
+  stableBuildVersions: MatTableDataSource<BuildTargetStableVersion> =
+    new MatTableDataSource<BuildTargetStableVersion>([]);
   displayedColumns: string[] = [
     'build_target',
     'default_version',
@@ -133,19 +136,18 @@ export class ConfigurationComponent
     private notificationsService: NotificationsService,
     private globalInfo: GlobalInfoService,
     private dialog: MatDialog
-  ) { }
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.bucketURLForm.valueChanges.subscribe(value => {
       this.formatBucketLink();
     });
-    this.pauseStatusSubscription = this.settingsService.pauseRequestorsObservable.subscribe(
-      requestors => {
+    this.pauseStatusSubscription =
+      this.settingsService.pauseRequestorsObservable.subscribe(requestors => {
         this.isHostSchedulerPauseRequested =
           requestors &&
           requestors.includes(MoblabSettingsConstains.USER_REQUEST_STRING);
-      }
-    );
+      });
     this.getCloudConfiguration();
     this.getDutWifiInfo();
     this.initCanUpdateCloudConfigFlag();
@@ -160,12 +162,13 @@ export class ConfigurationComponent
   }
 
   async listStableBuildVersions() {
-    console.log(this.stableBuildVersions)
-    this.userCrOSVersionForm.disable({ emitEvent: false });
+    console.log(this.stableBuildVersions);
+    this.userCrOSVersionForm.disable({emitEvent: false});
     this.stableBuildVersionLoading = true;
-    console.log(this.stableBuildVersions)
+    console.log(this.stableBuildVersions);
     try {
-      const data = await this.moblabConfigurationRpcService.listStableBuildVersions();
+      const data =
+        await this.moblabConfigurationRpcService.listStableBuildVersions();
       this.stableBuildVersions = new MatTableDataSource(data);
 
       // User override stable build version is the same for all build targets
@@ -183,7 +186,7 @@ export class ConfigurationComponent
       }
     } finally {
       if (this.isAnyDutEnrolled()) {
-        this.userCrOSVersionForm.enable({ emitEvent: false });
+        this.userCrOSVersionForm.enable({emitEvent: false});
       }
       this.stableBuildVersionLoading = false;
     }
@@ -205,7 +208,8 @@ export class ConfigurationComponent
   public async getResultsRetentionPeriod() {
     this.resultsRetentionPeriodForm.disable();
     try {
-      const period_days = await this.moblabConfigurationRpcService.getResultsRetentionPeriod();
+      const period_days =
+        await this.moblabConfigurationRpcService.getResultsRetentionPeriod();
       this.resultsRetentionPeriod = period_days;
       this.resultsRetentionPeriodForm.setValue(period_days);
     } catch (error) {
@@ -239,7 +243,7 @@ export class ConfigurationComponent
     }
   }
 
-  isAnyDutEnrolled = () => this.stableBuildVersions.data.length != 0
+  isAnyDutEnrolled = () => this.stableBuildVersions.data.length != 0;
 
   public async setStableCrOSVersion(override_value: string) {
     this.stableBuildVersionLoading = true;
@@ -253,7 +257,10 @@ export class ConfigurationComponent
     } catch (error) {
       console.log('setStableBuildVersion call failed with:' + error);
       if (typeof error === 'object' && 'message' in error) {
-        this.userCrOSVersionForm.setErrors({ apiResponseError: error.message }, { emitEvent: true });
+        this.userCrOSVersionForm.setErrors(
+          {apiResponseError: error.message},
+          {emitEvent: true}
+        );
       }
     } finally {
       this.stableBuildVersionLoading = false;
@@ -347,13 +354,13 @@ export class ConfigurationComponent
     return (
       this.lastFetchedCloudConfig.botoKeyID !== this.botoKeyIDForm.value ||
       this.lastFetchedCloudConfig.botoKeySecret !==
-      this.botoKeySecretForm.value ||
+        this.botoKeySecretForm.value ||
       this.lastFetchedCloudConfig.bucketURL !== this.bucketURLForm.value ||
       this.lastFetchedCloudConfig.isCloudEnabled !== this.isCloudEnabled ||
       this.lastFetchedCloudConfig.isRemoteConsoleEnabled !==
-      this.isRemoteConsoleEnabled ||
+        this.isRemoteConsoleEnabled ||
       this.lastFetchedCloudConfig.isRemoteCommandEnabled !==
-      this.isRemoteCommandEnabled
+        this.isRemoteCommandEnabled
     );
   }
 
@@ -519,7 +526,7 @@ export class ConfigurationComponent
         this.bucketURLForm.value)
     ) {
       this.showUncheckWarning = true;
-      const clearError = { clearWarning: true };
+      const clearError = {clearWarning: true};
 
       this.botoKeyIDForm.setErrors(clearError);
       this.botoKeySecretForm.setErrors(clearError);
@@ -570,7 +577,8 @@ export class ConfigurationComponent
   public async pauseClick() {
     this.pauseButton.setIsLoadingStatus(true);
     try {
-      const pauseRequesters = await this.moblabConfigurationRpcService.pauseHostScheduling();
+      const pauseRequesters =
+        await this.moblabConfigurationRpcService.pauseHostScheduling();
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
       console.log('pauseHostScheduling call failed with:' + error);
@@ -585,7 +593,8 @@ export class ConfigurationComponent
   public async resumeClick() {
     this.resumeButton.setIsLoadingStatus(true);
     try {
-      const pauseRequesters = await this.moblabConfigurationRpcService.resumeHostScheduler();
+      const pauseRequesters =
+        await this.moblabConfigurationRpcService.resumeHostScheduler();
       this.settingsService.updateHostSchedulingStatus(pauseRequesters);
     } catch (error) {
       console.log('resumeHostScheduler call failed with:' + error);

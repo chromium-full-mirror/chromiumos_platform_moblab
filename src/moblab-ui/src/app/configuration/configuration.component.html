@@ -1,227 +1,237 @@
-<mat-card id="configuration-information-card">
-  <mat-card-header>
-    <mat-card-title>Cloud Configuration</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
+<div class="wrapper">
+  <div class="container outside">
+    <ng-container *ngIf="configurationLoading">
+      <div class="loading-overlay">
+        <mat-spinner></mat-spinner>
+      </div>
+    </ng-container>
+
+    <p class="title">Clould Configuration</p>
+
     <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
-      <div id="cloud-checkbox-form" class="form-text">
+      <div class="row">
         <mat-checkbox id="cloud-checkbox" (mouseenter)="cloudCheckboxHoverStart()"
           (mouseleave)="cloudCheckboxHoverStop()" (change)="isCloudEnabledCheckboxChange()"
           [checked]="this.isCloudEnabled" [disabled]="this.lastFetchedCloudConfig.isCloudEnabled">
+          Enable Moblab cloud integration
         </mat-checkbox>
-        <span id="cloud-checkbox-label" class="checkbox-label"> Enable Moblab cloud integration </span>
-        <br>
-        <div class="checkbox-description">
-          Cloud integration is necessary for Moblab to fetch Chrome OS test images as well as upload test results for
-          CPCon ingestion. ( The boto and GCS bucket forms below are cloud configurations )
-        </div>
       </div>
-      <hr>
-      <div class="loading-overlay" *ngIf="configurationLoading">
-        <div class="loading-spinner-wrapper">
-          <mat-spinner></mat-spinner>
-        </div>
+
+      <p class="text-xs font-normal grey row">
+        Cloud integration is necessary for Moblab to fetch Chrome OS test images
+        as well as upload test results for CPCon ingestion. ( The boto and GCS
+        bucket forms below are cloud configurations )
+      </p>
+
+      <div class="row">
+        <mat-divider></mat-divider>
       </div>
-      <mat-list>
-        <div [hidden]="!this.isCloudEnabled">
-          <mat-card *ngIf="!this.canUpdateCloudConfig">
-            <div fxLayout="row">
-              <div>
-                <div>
-                  Changes to the Boto and GCS Bucket configuration are not allowed.
-                  Please powerwash the Moblab to update the account info.
-                </div>
-                <div class="checkbox-description">After tests were ran with a given account
-                  updates to the account configuration are not allowed.
-                </div>
-              </div>
-            </div>
-          </mat-card>
-          <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy" matTooltipPosition="after">
-              <input id="boto-key-id-input" matInput required placeholder="Boto Key ID" [formControl]="botoKeyIDForm"
-                name="botoKeyId">
-              <mat-error *ngIf="this.botoKeyIDForm.hasError('required')">
-                Boto key ID not set.
-              </mat-error>
-              <mat-error *ngIf="this.botoKeyIDForm.hasError('clearWarning')">
-                Unchecking Enable Moblab cloud integration will result in boto key value being cleared.
-              </mat-error>
-            </mat-form-field>
-          </mat-list-item>
-          <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy"
-              [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="after">
-              <input id="boto-key-secret-input" matInput type="password" required password placeholder="Boto Key Secret"
-                [formControl]="botoKeySecretForm" name="botoKeySecret">
-              <mat-error *ngIf="this.botoKeySecretForm.hasError('required')">
-                Boto key secret not set.
-              </mat-error>
-              <mat-error *ngIf="this.botoKeySecretForm.hasError('clearWarning')">
-                Unchecking cloud enable will result in boto secret value being cleared.
-              </mat-error>
-            </mat-form-field>
-          </mat-list-item>
-          <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy"
-              [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="after">
-              <input id="image-storage-url-input" matInput required placeholder="GCS Bucket Root"
-                [formControl]="bucketURLForm" name="imageStorageUrl">
-              <mat-error *ngIf="this.bucketURLForm.hasError('required')">
-                GCS bucket not set.
-              </mat-error>
-              <mat-error *ngIf="this.bucketURLForm.hasError('notAGSUrl')">
-                GCS bucket path malformed ( correct syntax: 'gs://bucket_name/' )
-              </mat-error>
-              <mat-error *ngIf="this.bucketURLForm.hasError('clearWarning')">
-                Unchecking cloud enable will result in GCS bucket value being cleared.
-              </mat-error>
-            </mat-form-field>
-            <mat-icon id="link-off-icon" *ngIf="!enableLink()">link_off</mat-icon>
-            <a *ngIf="enableLink()" id="gcs-link" href={{bucketLink}} target="_blank" [disabled]="!this.isCloudEnabled">
-              <mat-icon id="link-on-icon" *ngIf="enableLink()">link</mat-icon>
-            </a>
-          </mat-list-item>
-          <hr style="margin-top: 0; margin-bottom: 30px;">
-          <mat-list-item>
-            <div id="console-checkbox-wrapper" class="form-text">
-              <mat-checkbox id="console-checkbox" (change)="isRemoteConsoleEnabledCheckboxChange()"
-                [checked]="this.isRemoteConsoleEnabled"
-                [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="below">
-              </mat-checkbox>
-              <span id="cloud-checkbox-description" class="checkbox-label" [class.disabled]="!this.isCloudEnabled">
-                Enable remote console </span>
-              <br>
-              <div class="checkbox-description">
-                Remote Console sends data in the background to Chrome OS Partner Console (CPCon) about your Moblab and
-                DUTs to make it easier to manage your fleet. See <a
-                  href="https://chromeos.google.com/partner/dlm/docs/infrastructure/moblab-remote-console-user-guides.html">here</a>
-                for more information.
-              </div>
-            </div>
-          </mat-list-item>
-          <mat-list-item>
-            <div id="command-checkbox-wrapper" class="form-text">
-              <mat-checkbox id="command-checkbox" (change)="isRemoteCommandEnabledCheckboxChange()"
-                [checked]="this.isRemoteCommandEnabled"
-                [matTooltip]="!this.isCloudEnabled ? cloudConfigDisabledMessage : ''" matTooltipPosition="below">
-              </mat-checkbox>
-              <span id="command-checkbox-description" class="checkbox-label" [class.disabled]="!this.isCloudEnabled">
-                Enable remote commands </span>
-            </div>
-          </mat-list-item>
+
+      <ng-container *ngIf="this.isCloudEnabled && !this.canUpdateCloudConfig">
+        <div class="container inside flex flex-col w-full">
+          <div class="text-sm">
+            Changes to the Boto and GCS Bucket configuration are not allowed.
+            Please powerwash the Moblab to update the account info.
+          </div>
+          <div class="text-xs grey">
+            After tests were ran with a given account updates to the account
+            configuration are not allowed.
+          </div>
         </div>
-        <mat-list-item>
+
+        <div class="row">
+          <mat-form-field matTooltipPosition="after">
+            <input id="boto-key-id-input" matInput required placeholder="Boto Key ID" [formControl]="botoKeyIDForm"
+              name="botoKeyId" />
+            <mat-label>Boto Key ID</mat-label>
+            <mat-error *ngIf="this.botoKeyIDForm.hasError('required')">
+              Boto key ID not set.
+            </mat-error>
+            <mat-error *ngIf="this.botoKeyIDForm.hasError('clearWarning')">
+              Unchecking Enable Moblab cloud integration will result in boto key
+              value being cleared.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-form-field [matTooltip]="
+              !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
+            " matTooltipPosition="after">
+            <mat-label>Boto Key Secret</mat-label>
+            <input id="boto-key-secret-input" matInput type="password" required password placeholder="Boto Key Secret"
+              [formControl]="botoKeySecretForm" name="botoKeySecret" />
+            <mat-error *ngIf="this.botoKeySecretForm.hasError('required')">
+              Boto key secret not set.
+            </mat-error>
+            <mat-error *ngIf="this.botoKeySecretForm.hasError('clearWarning')">
+              Unchecking cloud enable will result in boto secret value being
+              cleared.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-form-field [matTooltip]="
+              !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
+            " matTooltipPosition="after">
+            <mat-label>GCS Bucket Root</mat-label>
+            <input id="image-storage-url-input" matInput required placeholder="GCS Bucket Root"
+              [formControl]="bucketURLForm" name="imageStorageUrl" />
+            <mat-error *ngIf="this.bucketURLForm.hasError('required')">
+              GCS bucket not set.
+            </mat-error>
+            <mat-error *ngIf="this.bucketURLForm.hasError('notAGSUrl')">
+              GCS bucket path malformed ( correct syntax: 'gs://bucket_name/' )
+            </mat-error>
+            <mat-error *ngIf="this.bucketURLForm.hasError('clearWarning')">
+              Unchecking cloud enable will result in GCS bucket value being
+              cleared.
+            </mat-error>
+          </mat-form-field>
+          <mat-icon id="link-off-icon" *ngIf="!enableLink()">link_off</mat-icon>
+          <a *ngIf="enableLink()" id="gcs-link" href="{{ bucketLink }}" target="_blank"
+            [disabled]="!this.isCloudEnabled">
+            <mat-icon id="link-on-icon" *ngIf="enableLink()">link</mat-icon>
+          </a>
+        </div>
+
+        <div class="row">
+          <mat-divider></mat-divider>
+        </div>
+
+        <div class="row">
+          <mat-checkbox id="command-checkbox" (change)="isRemoteCommandEnabledCheckboxChange()"
+            [checked]="this.isRemoteCommandEnabled" [matTooltip]="
+              !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
+            " matTooltipPosition="below">
+            Enable remote commands
+          </mat-checkbox>
+        </div>
+
+        <p class="text-xs grey w-full mb-3 pl-3">
+          Remote Console sends data in the background to Chrome OS Partner
+          Console (CPCon) about your Moblab and DUTs to make it easier to manage
+          your fleet. See
+          <a
+            href="https://chromeos.google.com/partner/dlm/docs/infrastructure/moblab-remote-console-user-guides.html">here</a>
+          for more information.
+        </p>
+
+        <div class="row">
+          <mat-checkbox id="command-checkbox" (change)="isRemoteCommandEnabledCheckboxChange()"
+            [checked]="this.isRemoteCommandEnabled" [matTooltip]="
+              !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
+            " matTooltipPosition="below">
+            Enable remote commands
+          </mat-checkbox>
+        </div>
+
+        <div>
           <button id="cloud-config-submit-button" mat-raised-button color="primary"
-            [disabled]="disableCloudConfigSubmissionButton()" type="submit">Submit Changes
+            [disabled]="disableCloudConfigSubmissionButton()" type="submit">
+            Submit Changes
           </button>
-        </mat-list-item>
-      </mat-list>
+        </div>
+      </ng-container>
     </form>
-  </mat-card-content>
-</mat-card>
+  </div>
 
-<mat-card id="test-runner">
-  <mat-card-header>
-    <mat-card-title>Test Runner Configuration</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="card-table-content">
-      <div id="test-runner-config" fxLayout="row" fxLayoutAlign="space-between center">
-        <span>Job Scheduler status:</span>
-        <span><b>{{isHostSchedulerPauseRequested ? 'Paused' : "Active"}}</b></span>
-        <app-button-with-progress #pauseButton *ngIf="!isHostSchedulerPauseRequested" caption="Pause"
-          (buttonClick)="pauseClick()">
-        </app-button-with-progress>
-        <app-button-with-progress #resumeButton *ngIf="isHostSchedulerPauseRequested" caption="Resume"
-          (buttonClick)="resumeClick()">
-        </app-button-with-progress>
-      </div>
-    </div>
-  </mat-card-content>
-</mat-card>
-
-<mat-card id="test-runner">
-  <mat-card-header>
-    <mat-card-title>DUT builds access</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="card-table-content">
-      <div fxLayout="row" fxLayoutAlign="space-between center">
-        <span>Copy build to partner bucket for manual operations with images:</span>
-        <button mat-raised-button color="primary" (click)="stageTestBuild()">
-          Copy build
-        </button>
-      </div>
-      <div>
-        <span>File request to access builds for a board
-          <a href="{{build_access_request_link}}" target="_blank">here.</a>
-        </span>
-      </div>
-    </div>
-  </mat-card-content>
-</mat-card>
-
-<mat-card id="dut-os-version">
-  <div class="loading-overlay" *ngIf="stableBuildVersionLoading">
-    <div class="loading-spinner-wrapper">
-      <mat-spinner></mat-spinner>
+  <div class="container outside mt-5">
+    <p class="title">Test Runner Configuration</p>
+    <div class="row justify-between">
+      <span>Job Scheduler status:</span>
+      <span><b>{{ isHostSchedulerPauseRequested ? 'Paused' : 'Active' }}</b></span>
+      <app-button-with-progress #pauseButton *ngIf="!isHostSchedulerPauseRequested" caption="Pause"
+        (buttonClick)="pauseClick()">
+      </app-button-with-progress>
+      <app-button-with-progress #resumeButton *ngIf="isHostSchedulerPauseRequested" caption="Resume"
+        (buttonClick)="resumeClick()">
+      </app-button-with-progress>
     </div>
   </div>
-  <mat-card-header>
-    <mat-card-title>Known Good DUT OS Version</mat-card-title>
-  </mat-card-header>
-  <mat-card-subtitle class="stable-build-card-content">
-    This build may be used to attempt to recover repaired failed DUTs, it is
-    not used for running tests.
-  </mat-card-subtitle>
-  <mat-card-content>
-    <form #formRef="ngForm" (ngSubmit)="setStableCrOSVersion(userCrOSVersionForm.value)">
-      <div class="stable-build-card-content">
-        <table mat-table [dataSource]="stableBuildVersions">
-          <ng-container matColumnDef="build_target">
-            <th mat-header-cell *matHeaderCellDef>Build Target</th>
-            <td mat-cell *matCellDef="let element">{{element.getBuildTarget()}}
-            </td>
-          </ng-container>
 
-          <ng-container matColumnDef="default_version">
-            <th mat-header-cell *matHeaderCellDef>In-use Version
-            </th>
-            <td mat-cell *matCellDef="let element">
-              <span><b>{{getStableBuildVersion(element)}}
-                </b><i>{{getStableBuildVersionDefault(element)}}</i></span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="override_version">
-            <th mat-header-cell *matHeaderCellDef>Default Version
-            </th>
-            <td mat-cell *matCellDef="let element">
-              <span class='default-version-text'>{{element.getStableVersion().getDefaultVersion()}}</span>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+  <div class="container outside mt-5 text-sm">
+    <p class="title">DUT builds access</p>
+    <div class="row justify-between">
+      <div class="flex flex-col">
+        <p>Copy build to partner bucket for manual operations with images:</p>
+        <p>
+          File request to access builds for a board
+          <a href="{{ build_access_request_link }}" target="_blank">here.</a>
+        </p>
       </div>
 
-      <div class="stable-build-card-content">
-        <mat-form-field class="configuration-input" appearance="legacy">
-          <mat-label [style]="!isAnyDutEnrolled() ? 'color: red;' : '' ">{{ isAnyDutEnrolled() ? 'User Override' :
-            'Please enroll at least one DUT' }}</mat-label>
-          <input matInput placeholder="Rxx-yyyyy.zz.0" [formControl]="userCrOSVersionForm">
-          <mat-error *ngIf="this.userCrOSVersionForm.hasError('validChromeosBuildPattern')">
+      <button mat-raised-button color="primary" (click)="stageTestBuild()">
+        Copy build
+      </button>
+    </div>
+  </div>
+
+  <div class="container outside mt-5">
+    <ng-container *ngIf="stableBuildVersionLoading">
+      <div class="loading-overlay">
+        <mat-spinner></mat-spinner>
+      </div>
+    </ng-container>
+
+    <p class="title">Known Good DUT OS Version</p>
+    <p class="text-sm grey">
+      This build may be used to attempt to recover repaired failed DUTs, it is
+      not used for running tests.
+    </p>
+
+    <form #formRef="ngForm" (ngSubmit)="setStableCrOSVersion(userCrOSVersionForm.value)">
+      <table mat-table [dataSource]="stableBuildVersions">
+        <ng-container matColumnDef="build_target">
+          <th mat-header-cell *matHeaderCellDef>Build Target</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.getBuildTarget() }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="default_version">
+          <th mat-header-cell *matHeaderCellDef>In-use Version</th>
+          <td mat-cell *matCellDef="let element">
+            <span><b>{{ getStableBuildVersion(element) }} </b><i>{{ getStableBuildVersionDefault(element) }}</i></span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="override_version">
+          <th mat-header-cell *matHeaderCellDef>Default Version</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="default-version-text">{{
+              element.getStableVersion().getDefaultVersion()
+              }}</span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <div class="input-box-container without-border w-72">
+        <mat-form-field class="without-underline full-width">
+          <mat-label [style]="!isAnyDutEnrolled() ? 'color: red;' : ''">{{
+            isAnyDutEnrolled()
+            ? 'User Override'
+            : 'Please enroll at least one DUT'
+            }}</mat-label>
+          <input matInput placeholder="Rxx-yyyyy.zz.0" [formControl]="userCrOSVersionForm" />
+          <mat-error *ngIf="
+              this.userCrOSVersionForm.hasError('validChromeosBuildPattern')
+            ">
             Must follow the correct OS version format e.g. R88-13597.105.0
           </mat-error>
           <mat-error *ngIf="this.userCrOSVersionForm.hasError('apiResponseError')">{{
-            this.userCrOSVersionForm.errors['apiResponseError'] }}</mat-error>
+            this.userCrOSVersionForm.errors['apiResponseError']
+            }}</mat-error>
         </mat-form-field>
       </div>
-      <div class="stable-build-card-content">
-        <button mat-raised-button color="primary" [disabled]="!isStableCrOsVersionValidForSubmit()"
-          type="submit">Override All
+
+      <div class="flex flex-row gap-4 mt-8">
+        <button mat-raised-button color="primary" [disabled]="!isStableCrOsVersionValidForSubmit()" type="submit">
+          Override All
         </button>
         <button type="button" class="secondary-button-wrapper" mat-raised-button color="primary"
           (click)="setStableCrOSVersion('')" matTooltip="Undo the user override and use the system defaults">
@@ -229,86 +239,73 @@
         </button>
       </div>
     </form>
-  </mat-card-content>
-</mat-card>
-
-<mat-card id="dut-wifi-card">
-  <div class="loading-overlay" *ngIf="dutWifiInfoLoading">
-    <div class="loading-spinner-wrapper">
-      <mat-spinner></mat-spinner>
-    </div>
   </div>
-  <mat-card-header>
-    <mat-card-title>DUT Wi-Fi Configuration</mat-card-title>
-  </mat-card-header>
-  <mat-card-content layout-padding>
+
+  <div class="container outside mt-5">
+    <ng-container *ngIf="dutWifiInfoLoading">
+      <div class="loading-overlay">
+        <mat-spinner></mat-spinner>
+      </div>
+    </ng-container>
+    <p class="title">DUT Wi-Fi Configuration</p>
+
     <form #formRef="ngForm" (ngSubmit)="onDutWifiInfoSubmit(formRef.value)">
-      <mat-list>
-        <div class="listrow" flex-direction="row">
-          <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy">
-              <input id="dut-wifi-name-input" matInput placeholder="Wi-Fi Name (SSID)" [formControl]="dutWifiNameForm"
-                name="dutWifiName" [disabled]="true">
-              <mat-error *ngIf="this.dutWifiNameForm.hasError('leadingTrailingwhitespace')">
-                Wi-Fi name cannot have leading or trailing whitespace characters.
-              </mat-error>
-            </mat-form-field>
-
-          </mat-list-item>
-        </div>
-        <div class="listrow" flex-direction="row">
-          <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy">
-              <input id="dut-wifi-password-input" matInput type="password" password placeholder="Wi-Fi Password"
-                [formControl]="dutWifiPasswordForm" name="dutWifiPassword">
-            </mat-form-field>
-          </mat-list-item>
-        </div>
-        <mat-list-item>
-          <button id="dut-wifi-info-submit-button" mat-raised-button color="primary"
-            [disabled]="!isDutWifiInfoValidForSubmit()" type="submit">Submit Changes
-          </button>
-        </mat-list-item>
-      </mat-list>
+      <div class="flex flex-col gap-4 w-full">
+        <mat-form-field class="configuration-input" appearance="legacy">
+          <input id="dut-wifi-name-input" matInput placeholder="Wi-Fi Name (SSID)" [formControl]="dutWifiNameForm"
+            name="dutWifiName" [disabled]="true" />
+          <mat-error *ngIf="this.dutWifiNameForm.hasError('leadingTrailingwhitespace')">
+            Wi-Fi name cannot have leading or trailing whitespace characters.
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="configuration-input" appearance="legacy">
+          <input id="dut-wifi-password-input" matInput type="password" password placeholder="Wi-Fi Password"
+            [formControl]="dutWifiPasswordForm" name="dutWifiPassword" />
+        </mat-form-field>
+        <button id="dut-wifi-info-submit-button" mat-raised-button color="primary"
+          [disabled]="!isDutWifiInfoValidForSubmit()" type="submit" class="w-36">
+          Submit Changes
+        </button>
+      </div>
     </form>
-  </mat-card-content>
-</mat-card>
+  </div>
 
-<mat-expansion-panel id="advanced" (opened)="panelOpenState = true" (closed)="panelOpenState = false">
-  <mat-expansion-panel-header>
-    <mat-panel-title>Advanced</mat-panel-title>
-  </mat-expansion-panel-header>
-  <mat-card id="advanced-card">
-    <mat-card-header>
-      <mat-card-title>Experimental Features</mat-card-title>
-    </mat-card-header>
-    <mat-card-subtitle>The following list of features are experimental. Unless someone from Google requests please do
-      not enable these features.
-      <br><br>Google will not answer questions about these features until they are released for all users.
-    </mat-card-subtitle>
-  </mat-card>
-  <mat-card id="advanced-card">
-    <mat-card-header>
-      <mat-card-title>Results retention period (locally on Moblab) </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form #formRef="ngForm" (ngSubmit)="setResultsRetentionPeriod(resultsRetentionPeriodForm.value)">
-        <mat-list>
-          <mat-list-item>
-            <mat-form-field class="configuration-input" appearance="legacy">
-              <mat-label>Retention period (days or hours)</mat-label>
-              <input matInput placeholder="7h or 7d" [formControl]="resultsRetentionPeriodForm">
-              <mat-error *ngIf="this.resultsRetentionPeriodForm.hasError('pattern')">
-                Must be either 1-23 hours or 1-7 days e.g. 12h or 3d
-              </mat-error>
-            </mat-form-field>
-          </mat-list-item>
-          <mat-list-item>
-            <button mat-raised-button color="primary" [disabled]="!isRetentionPeriodValidForSubmit()" type="submit">Save
+  <div class="expansion-panel mt-5">
+    <mat-expansion-panel id="advanced" (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Advanced</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="container inside">
+        <p class="title">Experimental Features</p>
+        <p class="text-sm grey mt-3">
+          The following list of features are experimental. Unless someone from
+          Google requests please do not enable these features.
+          <br />Google will not answer questions about these features
+          until they are released for all users.
+        </p>
+      </div>
+      <div class="container inside mt-5">
+        <p class="title">Results retention period (locally on Moblab)</p>
+        <form #formRef="ngForm" (ngSubmit)="
+            setResultsRetentionPeriod(resultsRetentionPeriodForm.value)
+          ">
+          <div class="flex flex-col gap-4">
+            <div class="input-box-container without-border">
+              <mat-form-field class="full-width">
+                <mat-label>Retention period (days or hours)</mat-label>
+                <input matInput placeholder="7h or 7d" [formControl]="resultsRetentionPeriodForm" />
+                <mat-error *ngIf="this.resultsRetentionPeriodForm.hasError('pattern')">
+                  Must be either 1-23 hours or 1-7 days e.g. 12h or 3d
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <button class="w-36" mat-raised-button color="primary" [disabled]="!isRetentionPeriodValidForSubmit()"
+              type="submit">
+              Save
             </button>
-          </mat-list-item>
-        </mat-list>
-      </form>
-    </mat-card-content>
-  </mat-card>
-</mat-expansion-panel>
+          </div>
+        </form>
+      </div>
+    </mat-expansion-panel>
+  </div>
+</div>
