@@ -9,7 +9,7 @@ export interface KeyVal {
 @Component({
   selector: 'app-keyval-table',
   templateUrl: './keyval-table.component.html',
-  styleUrls: ['./keyval-table.component.css'],
+  styleUrls: ['./keyval-table.component.scss'],
 })
 export class KeyValTableComponent {
   infoTable = new MatTableDataSource<KeyVal>();

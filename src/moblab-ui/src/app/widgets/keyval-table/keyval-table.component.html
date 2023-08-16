@@ -1,7 +1,7 @@
 <table id="keyval-table" mat-table [dataSource]="infoTable">
   <ng-container matColumnDef="key">
     <th mat-header-cell *matHeaderCellDef>Key</th>
-    <td mat-cell *matCellDef="let infoRow"><b> {{infoRow.key}} </b></td>
+    <td mat-cell *matCellDef="let infoRow" class="no-wrap"><b> {{infoRow.key}} </b></td>
   </ng-container>
   <ng-container matColumnDef="value">
     <th mat-header-cell *matHeaderCellDef>Value</th>
