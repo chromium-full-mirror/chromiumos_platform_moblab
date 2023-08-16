@@ -3,7 +3,7 @@ import {Component, OnInit} from '@angular/core';
 @Component({
   selector: 'app-manage-duts',
   templateUrl: './manage-duts.component.html',
-  styleUrls: [],
+  styleUrls: ['/manage-duts.component.scss'],
 })
 export class ManageDutsComponent implements OnInit {
   selectedTabIndex = 0;
