@@ -6,8 +6,7 @@ ARG BASE_REGISTRY_URI=us-docker.pkg.dev/chromeos-partner-moblab/base-containers
 ARG REGISTRY_URI=gcr.io/chromeos-partner-moblab
 ARG LABEL=autopush
 ######################################################################
-
-FROM ${BASE_REGISTRY_URI}/node:16 as build
+FROM ${BASE_REGISTRY_URI}/node:18 as build
 
 # install chrome for protractor tests
 # RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
