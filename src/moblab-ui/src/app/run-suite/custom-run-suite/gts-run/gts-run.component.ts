@@ -1,16 +1,16 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ViewChild,
 } from '@angular/core';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 
-import {BaseSuite} from '../../common/base_suite/base-suite.component';
-import {BasicTextFormComponent} from '../../common/basic-text-form/basic-text-form.component';
-import {MoblabGrpcService} from './../../../services/moblab-grpc.service';
-import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
-import {NotificationsService} from 'app/services/notifications.service';
+import { BaseSuite } from '../../common/base_suite/base-suite.component';
+import { BasicTextFormComponent } from '../../common/basic-text-form/basic-text-form.component';
+import { MoblabGrpcService } from './../../../services/moblab-grpc.service';
+import { RunSuiteButtonComponent } from '../../common/run-suite-button/run-suite-button.component';
+import { NotificationsService } from 'app/services/notifications.service';
 
 /** Component owns logic for GTS suite run form.
  * */
@@ -19,7 +19,7 @@ import {NotificationsService} from 'app/services/notifications.service';
   templateUrl: './gts-run.component.html',
   styleUrls: ['./gts-run.component.css'],
 })
-export class GtsRunComponent extends BaseSuite implements AfterContentInit {
+export class GtsRunComponent extends BaseSuite implements AfterViewInit {
   @ViewChild(RunSuiteButtonComponent) runSuiteButton;
   @ViewChild(BasicTextFormComponent) modulesTextForm;
 
@@ -32,9 +32,7 @@ export class GtsRunComponent extends BaseSuite implements AfterContentInit {
     super(moblabGrpcService, router, notificationsService);
   }
 
-  /** Sets initial form enable/disable states.
-   * */
-  ngAfterContentInit(): void {
+  ngAfterViewInit(): void {
     this.modulesTextForm.disable('Please select build.');
     this.changeDetector.detectChanges();
   }

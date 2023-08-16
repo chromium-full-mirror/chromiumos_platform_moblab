@@ -1,13 +1,13 @@
-import {AfterContentInit, Component, ViewChild} from '@angular/core';
+import { AfterContentInit, Component, ViewChild } from '@angular/core';
 
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 
-import {BaseSuite} from '../../common/base_suite/base-suite.component';
-import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
-import {RunSuiteButtonComponent} from '../../common/run-suite-button/run-suite-button.component';
-import {BasicSelectorComponent} from '../../common/basic-selector/basic-selector.component';
-import {NotificationsService} from 'app/services/notifications.service';
-import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
+import { BaseSuite } from '../../common/base_suite/base-suite.component';
+import { MoblabGrpcService } from 'app/services/moblab-grpc.service';
+import { RunSuiteButtonComponent } from '../../common/run-suite-button/run-suite-button.component';
+import { BasicSelectorComponent } from '../../common/basic-selector/basic-selector.component';
+import { NotificationsService } from 'app/services/notifications.service';
+import { ConnectedDutInfo } from 'app/services/moblabrpc_pb';
 
 const BASIC = 'basic';
 const PLUS = 'plus';
@@ -15,7 +15,7 @@ const PREMIUM = 'premium';
 const ESSENTIAL = 'essential';
 const ADVANCED = 'advanced';
 
-/** Component owns logic for CUJ suite run form. 
+/** Component owns logic for CUJ suite run form.
  * */
 @Component({
   selector: 'app-cuj',
@@ -74,7 +74,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
    * */
   ngAfterContentInit(): void {
     setTimeout(() => {
-      this.getConnectedDuts(() => {});
+      this.getConnectedDuts(() => { });
       // These two enable can make the tooptips `This form is disable` disappear.
       this.suiteSelectForm.enable();
     });
@@ -87,7 +87,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     this.moblabGrpcService.listConnectedDuts(
       (connectedDuts: ConnectedDutInfo[]) => {
         this.duts = connectedDuts;
-        callback()
+        callback();
       },
       (message: string) => {
         this.duts = [];
@@ -165,10 +165,10 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
   updateLabelList() {
     if (this.suiteName.includes('_v2')) {
       this.options = this.options_v2;
-      this.externalDisplayToggle.disable()
+      this.externalDisplayToggle.disable();
     } else {
       this.options = this.options_v1;
-      this.externalDisplayToggle.enable()
+      this.externalDisplayToggle.enable();
     }
   }
 
@@ -195,16 +195,16 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     this.dutHostnames = this.getSelectedDutHostnames(this.duts);
     switch (this.suiteLabel) {
       case BASIC:
-        // First remove plus label, then remove premium label and last 
+        // First remove plus label, then remove premium label and last
         // trigger the actual suite
         this.removeLabel('plus', () => {
-          this.removeLabel('premium', () =>{
+          this.removeLabel('premium', () => {
             this.triggerRunSuite();
           });
         });
         break;
       case PLUS:
-        this.addLabel('plus',  () => {
+        this.addLabel('plus', () => {
           this.removeLabel('premium', () => {
             this.triggerRunSuite();
           });
@@ -249,7 +249,9 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
       return false;
     }
     if (!this.suiteName) {
-      this.errorMessage = this.hideCustomInput ? '' : 'Please input a suite name.';
+      this.errorMessage = this.hideCustomInput
+        ? ''
+        : 'Please input a suite name.';
       return false;
     }
 
@@ -260,7 +262,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     this.errorMessage = null;
   }
 
-  triggerRunSuite(){
+  triggerRunSuite() {
     this.moblabGrpcService.runSuite(
       _ => {
         this.onSuiteStarted();
@@ -287,7 +289,7 @@ export class CUJRunComponent extends BaseSuite implements AfterContentInit {
     }
     // this needs to be handled differently as suite is triggered already
     if (this.externalDisplayToggle.getChecked()) {
-      this.addLabel('external_display', () =>{
+      this.addLabel('external_display', () => {
         this.handleDutSetupAndTriggerRunSuiute();
       });
     } else {

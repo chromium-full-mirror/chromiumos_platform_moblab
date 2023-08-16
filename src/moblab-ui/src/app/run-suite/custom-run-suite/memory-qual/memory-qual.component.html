@@ -1,16 +1,29 @@
-<mat-card>
-  <app-build-select-forms (allRequiredFieldsSet)="onBuildSet($event)" (allRequiredFieldsSet)="avlInputChanged()"
-    (buildVersionUnselected)="onBuildVersionUnselected()" (formLoading)="onFormLoading($event.message)"
-    (formLoaded)="onFormLoaded()">
+<div>
+  <app-build-select-forms
+    (allRequiredFieldsSet)="onBuildSet($event)"
+    (allRequiredFieldsSet)="avlInputChanged()"
+    (buildVersionUnselected)="onBuildVersionUnselected()"
+    (formLoading)="onFormLoading($event.message)"
+    (formLoaded)="onFormLoaded()"
+  >
   </app-build-select-forms>
 
-  <app-basic-input #bugIdInput [name]="'AVL Process Bug ID'" [isNumeric]="true" (update)="avlInputChanged()">
+  <app-basic-input
+    #bugIdInput
+    [name]="'AVL Process Bug ID'"
+    [isNumeric]="true"
+    (update)="avlInputChanged()"
+  >
   </app-basic-input>
 
-  <app-basic-input #partNumberInput [name]="'AVL Part Number'" (update)="avlInputChanged()">
+  <app-basic-input
+    #partNumberInput
+    [name]="'AVL Part Number'"
+    (update)="avlInputChanged()"
+  >
   </app-basic-input>
 
   <app-new-update-notifier></app-new-update-notifier>
 
   <app-run-suite-button (onClick)="onRunSuiteClick()"></app-run-suite-button>
-</mat-card>
+</div>
