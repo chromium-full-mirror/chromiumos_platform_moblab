@@ -1,0 +1,16 @@
+.input-box-container {
+  &.without-border {
+    > .mat-mdc-form-field {
+      border: none;
+    }
+
+    > .mat-mdc-form-field.mat-form-field-invalid {
+      border: none;
+    }
+  }
+
+  .mat-mdc-form-field {
+    height: 100%;
+    padding: 0.25rem 0;
+  }
+}

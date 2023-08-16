@@ -8,7 +8,7 @@ import {NotificationsService} from 'app/services/notifications.service';
 @Component({
   selector: 'app-edit-attributes',
   templateUrl: './edit-attributes.component.html',
-  styleUrls: ['./edit-attributes.component.css'],
+  styleUrls: ['./edit-attributes.component.scss'],
 })
 export class EditAttributesComponent {
   @ViewChild(ViewDutsComponent) dutsTableRef: ViewDutsComponent;
@@ -17,6 +17,7 @@ export class EditAttributesComponent {
   attribute_value = new FormControl('');
   label = new FormControl('');
   pool = new FormControl('');
+  isDUTSelected = false;
 
   constructor(
     public moblabGrpcService: MoblabGrpcService,
@@ -201,5 +202,9 @@ export class EditAttributesComponent {
       context.dutsTableRef.getSelectedDutHostnames(),
       context.pool.value
     );
+  }
+
+  selectedDUTsChanged() {
+    this.isDUTSelected = this.dutsTableRef?.selection.selected.length > 0;
   }
 }

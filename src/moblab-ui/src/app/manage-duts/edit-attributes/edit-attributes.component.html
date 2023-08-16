@@ -1,53 +1,108 @@
-<mat-card>
-  <div class="form-wrapper">
-    <b class="edit-box-contents">Attribute:</b>
-    <mat-form-field class="filter edit-box-contents key-form-field" floatLabel="never">
-      <input id="attribute-key-input" matInput [formControl]="attribute_key" placeholder='key'>
-    </mat-form-field>
-    <mat-form-field class="filter edit-box-contents value-form-field" floatLabel="never">
-      <input id="attribute-value-input" matInput [formControl]="attribute_value" placeholder='value'>
-    </mat-form-field>
+<div class="flex flex-row gap-x-1 p-4 flex-wrap">
+  <div class="flex flex-row gap-2 items-center border rounded m-2 w-min px-4">
+    <b>Attribute:</b>
+    <div class="input-box-container without-border w-20">
+      <mat-form-field class="without-underline full-width" floatLabel="never">
+        <input
+          id="attribute-key-input"
+          matInput
+          [formControl]="attribute_key"
+          placeholder="key"
+        />
+      </mat-form-field>
+    </div>
+    <div class="input-box-container without-border w-32">
+      <mat-form-field floatLabel="never" class="without-underline full-width">
+        <input
+          id="attribute-value-input"
+          matInput
+          [formControl]="attribute_value"
+          placeholder="value"
+        />
+      </mat-form-field>
+    </div>
 
-    <button mat-raised-button color="primary" id="add-attribute-button" (click)="doEdit(addAttribute)"
-      [disabled]="attribute_key.value === '' || attribute_value.value === ''" class="edit-box-contents">
+    <button
+      mat-raised-button
+      color="primary"
+      id="add-attribute-button"
+      (click)="doEdit(addAttribute)"
+      [disabled]="!(isDUTSelected && attribute_key.value)"
+    >
       Add
     </button>
-    <button mat-raised-button id="remove-attribute-button" (click)="doEdit(removeAttribute)"
-      [disabled]="attribute_key.value === '' || attribute_value.value !== ''" class="edit-box-contents">
+
+    <button
+      mat-raised-button
+      id="remove-attribute-button"
+      (click)="doEdit(removeAttribute)"
+      [disabled]="!(attribute_key.value && isDUTSelected)"
+      class="edit-box-contents"
+    >
       Remove
     </button>
   </div>
 
-  <div class="filter edit-box-contents form-wrapper">
-    <b class="edit-box-contents"> Pool: </b>
-    <mat-form-field class="edit-box-contents filter key-form-field" floatLabel="never">
-      <input id="pool-input" matInput [formControl]="pool">
-    </mat-form-field>
+  <div class="flex flex-row gap-2 items-center border rounded m-2 w-min px-4">
+    <b>Pool: </b>
+    <div class="input-box-container without-border w-48">
+      <mat-form-field class="without-underline full-width" floatLabel="never">
+        <input id="pool-input" matInput [formControl]="pool" />
+      </mat-form-field>
+    </div>
 
-    <button mat-raised-button color="primary" id="add-pool-button" (click)="doEdit(addPool)"
-      [disabled]="pool.value === ''" class="edit-box-contents">
+    <button
+      mat-raised-button
+      color="primary"
+      id="add-pool-button"
+      (click)="doEdit(addPool)"
+      [disabled]="!(pool.value && isDUTSelected)"
+      class="edit-box-contents"
+    >
       Add
     </button>
-    <button mat-raised-button id="remove-pool-button" (click)="doEdit(removePool)" [disabled]="pool.value === ''"
-      class="edit-box-contents">
+    <button
+      mat-raised-button
+      id="remove-pool-button"
+      (click)="doEdit(removePool)"
+      [disabled]="!(pool.value && isDUTSelected)"
+      class="edit-box-contents"
+    >
       Remove
     </button>
   </div>
 
-  <div class="filter edit-box-contents form-wrapper">
-    <b class="edit-box-contents"> Label: </b>
-    <mat-form-field class="edit-box-contents filter key-form-field" floatLabel="never">
-      <input id="label-input" matInput [formControl]="label">
-    </mat-form-field>
+  <div class="flex flex-row gap-2 items-center border rounded m-2 w-min px-4">
+    <b>Label: </b>
+    <div class="input-box-container without-border w-48">
+      <mat-form-field class="without-underline full-width" floatLabel="never">
+        <input id="label-input" matInput [formControl]="label" />
+      </mat-form-field>
+    </div>
 
-    <button mat-raised-button color="primary" id="add-label-button" (click)="doEdit(addLabel)"
-      [disabled]="label.value === ''" class="edit-box-contents">
+    <button
+      mat-raised-button
+      color="primary"
+      id="add-label-button"
+      (click)="doEdit(addLabel)"
+      [disabled]="!(label.value && isDUTSelected)"
+      class="edit-box-contents"
+    >
       Add
     </button>
-    <button mat-raised-button id="remove-label-button" (click)="doEdit(removeLabel)" [disabled]="label.value === ''"
-      class="edit-box-contents">
+    <button
+      mat-raised-button
+      id="remove-label-button"
+      (click)="doEdit(removeLabel)"
+      [disabled]="!(label.value && isDUTSelected)"
+      class="edit-box-contents"
+    >
       Remove
     </button>
   </div>
-</mat-card>
-<app-view-duts hideUnenrolledDuts=true hideEnrolledDuts=true></app-view-duts>
+</div>
+<app-view-duts
+  hideUnenrolledDuts="true"
+  hideEnrolledDuts="true"
+  (selectedDUTsChanged)="selectedDUTsChanged()"
+></app-view-duts>
