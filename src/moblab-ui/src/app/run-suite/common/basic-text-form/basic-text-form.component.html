@@ -1,5 +1,5 @@
-<div matTooltip="{{this.getDisabledReason()}}">
-  <mat-form-field appearance="standard">
+<div matTooltip="{{this.getDisabledReason()}}" class="pb-4">
+  <mat-form-field appearance="standard" class="full-width">
     <mat-label>Limit to just these modules (Optional)</mat-label>
     <textarea id="textInput" matInput [disabled]="this.isDisabled()" type="text" matInput rows="10" cols="80"
       [formControl]="this.getTextFormControl()" placeholder="">

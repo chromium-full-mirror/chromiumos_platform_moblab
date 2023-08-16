@@ -1,23 +1,20 @@
-import {
-  Component,
-  EventEmitter,
-  OnInit,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'app-run-suite-button',
   template: `
-    <button
-      #runSuiteButton
-      mat-raised-button
-      color="primary"
-      [disabled]="this.isDisabled()"
-      (click)="clicked()"
-    >
-      Run Suite
-    </button>
+    <div class="flex flex-row justify-center">
+      <button
+        #runSuiteButton
+        class="w-44"
+        mat-raised-button
+        color="primary"
+        [disabled]="this.isDisabled()"
+        (click)="clicked()"
+      >
+        Run Suite
+      </button>
+    </div>
   `,
   styleUrls: [],
 })
