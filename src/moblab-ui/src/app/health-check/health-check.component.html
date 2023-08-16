@@ -1,42 +1,49 @@
-<p class="header"><mat-icon aria-hidden="false" aria-label="Service is loading">hourglass_top</mat-icon>Moblab service is loading, please wait. </p>
-<mat-card *ngIf="!isMobMonitorHealthy">
-  <mat-card-header>
-    <mat-card-title>Mobmonitor is loading...</mat-card-title>
-  </mat-card-header>
-  <mat-progress-bar mode="query"></mat-progress-bar>
-</mat-card>
+<div class="w-[50vw]">
+  <p class="header"><mat-icon aria-hidden="false" aria-label="Service is loading">hourglass_top</mat-icon>Moblab service
+    is loading, please wait. </p>
+  <mat-card *ngIf="!isMobMonitorHealthy">
+    <mat-card-header>
+      <mat-card-title>Mobmonitor is loading...</mat-card-title>
+    </mat-card-header>
+    <mat-progress-bar mode="query"></mat-progress-bar>
+  </mat-card>
 
-<mat-card *ngIf="moblabServiceHealth">
-  <mat-card-header>
-    <mat-card-title>
-      <mat-icon [ngClass]="failedHealthChecks.length > 0 ? 'icon-error' : 'icon-warning' " aria-hidden="false" aria-label="Service has errors">error</mat-icon>
-      {{moblabServiceHealth.service}}
-    </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
+  <mat-card *ngIf="moblabServiceHealth">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon [ngClass]="failedHealthChecks.length > 0 ? 'icon-error' : 'icon-warning' " aria-hidden="false"
+          aria-label="Service has errors">error</mat-icon>
+        {{moblabServiceHealth.service}}
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
 
-    <div class="card-content-side-padding">
-      <p><b>{{expectedContainers - loadingContainers.length}} / {{expectedContainers}}</b> containers are up and running!</p>
-      <mat-progress-bar mode="determinate" value={{loadingPercentage}}></mat-progress-bar>
-    </div>
+      <div class="card-content-side-padding">
+        <p><b>{{expectedContainers - loadingContainers.length}} / {{expectedContainers}}</b> containers are up and
+          running!</p>
+        <mat-progress-bar mode="determinate" value={{loadingPercentage}}></mat-progress-bar>
+      </div>
 
-    <mat-list *ngIf="failedHealthChecks.length > 0">
-      <hr style="margin-top:10px; margin-bottom: 10px;">
-      <p class="card-content">Errors</p>
-      <mat-list-item *ngFor="let failedHealthCheck of failedHealthChecks">
-        <p class="card-content-error"><b>{{failedHealthCheck.name}}:</b> {{failedHealthCheck.description}}</p>
-      </mat-list-item>
-    </mat-list>
+      <mat-list *ngIf="failedHealthChecks.length > 0">
+        <hr style="margin-top:10px; margin-bottom: 10px;">
+        <p class="card-content">Errors</p>
+        <mat-list-item *ngFor="let failedHealthCheck of failedHealthChecks">
+          <p class="card-content-error"><b>{{failedHealthCheck.name}}:</b> {{failedHealthCheck.description}}</p>
+        </mat-list-item>
+      </mat-list>
 
-    <mat-list>
-      <hr style="margin-top:0px; margin-bottom: 10px;">
-      <p class="card-content">Please wait for the following to load.</p>
-      <mat-list-item *ngFor="let container of loadingContainers">
-        <mat-spinner [diameter]="16"></mat-spinner>
-        <p class="container-name">{{container.name}}</p>
-      </mat-list-item>
-    </mat-list>
+      <mat-list>
+        <hr style="margin-top:0px; margin-bottom: 10px;">
+        <p class="card-content">Please wait for the following to load.</p>
+        <mat-list-item *ngFor="let container of loadingContainers">
+          <div class="flex flex-row gap-2 items-center">
+            <mat-spinner [diameter]="16"></mat-spinner>
+            <p class="container-name">{{container.name}}</p>
+          </div>
+        </mat-list-item>
+      </mat-list>
 
-    <p>*for more information, visit <a href="{{mobmonitorLink}}" target="_blank">mobmonitor</a></p>
-  </mat-card-content>
-</mat-card>
+      <p>*for more information, visit <a href="{{mobmonitorLink}}" target="_blank">mobmonitor</a></p>
+    </mat-card-content>
+  </mat-card>
+</div>
