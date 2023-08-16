@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import {
   Notification,
   NotificationType,
@@ -9,24 +9,23 @@ import {
   templateUrl: './notification-banner.component.html',
   styleUrls: ['./notification-banner.component.scss'],
 })
-export class NotificationBannerComponent {
+export class NotificationBannerComponent implements OnInit {
   @Input() notification: Notification;
   @Output() dismissClick = new EventEmitter<Notification>();
 
-  constructor() {}
+  cssClasses = 'info-notification'
+  isBtnDisabled = false;
+
+  constructor() { }
+
+  ngOnInit() {
+    if (this.notification.type === NotificationType.Error) {
+      this.cssClasses = 'error-notification';
+      this.isBtnDisabled = this.notification.type === NotificationType.Error;
+    }
+  }
 
   onDismissClicked(): void {
     this.dismissClick.emit(this.notification);
-  }
-
-  getCssClass() {
-    if (this.notification.type === NotificationType.Error) {
-      return 'error-notification';
-    }
-    return 'info-notification';
-  }
-
-  isDismissable() {
-    return this.notification.type === NotificationType.Error;
   }
 }
