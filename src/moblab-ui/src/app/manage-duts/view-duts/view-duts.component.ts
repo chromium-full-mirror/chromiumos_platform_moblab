@@ -1,16 +1,25 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {MatSort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatDialog} from '@angular/material/dialog';
-import {SelectionModel} from '@angular/cdk/collections';
-import {ConnectedDutInfo} from 'app/services/moblabrpc_pb';
-import {MoblabGrpcService} from 'app/services/moblab-grpc.service';
-import {NotificationsService} from 'app/services/notifications.service';
-import {BuildTargetAccessService} from 'app/services/build-target-access.service';
-import {StageBuildDialogComponent} from '../stage-build-dialog/stage-build-dialog.component';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
+import { SelectionModel } from '@angular/cdk/collections';
+import { ConnectedDutInfo } from 'app/services/moblabrpc_pb';
+import { MoblabGrpcService } from 'app/services/moblab-grpc.service';
+import { NotificationsService } from 'app/services/notifications.service';
+import { BuildTargetAccessService } from 'app/services/build-target-access.service';
+import { StageBuildDialogComponent } from '../stage-build-dialog/stage-build-dialog.component';
 
-import {INT_TO_DUT_STATUS} from '../../utils/proto_helpers';
-import {TableHeaderSelectorComponent} from '../../widgets/table-header-selector/table-header-selector.component';
+import { INT_TO_DUT_STATUS } from '../../utils/proto_helpers';
+import { TableHeaderSelectorComponent } from '../../widgets/table-header-selector/table-header-selector.component';
+import { Subscription, distinctUntilChanged, map } from 'rxjs';
 
 const NOT_CONNECTED_MESSAGE = 'DUT not reachable by SSH';
 const NO_ACCESS_MESSAGE =
@@ -22,11 +31,14 @@ const REPAIR_FAILED = 'Repair Failed';
 @Component({
   selector: 'app-view-duts',
   templateUrl: './view-duts.component.html',
-  styleUrls: ['./view-duts.component.css'],
+  styleUrls: ['./view-duts.component.scss'],
 })
-export class ViewDutsComponent implements OnInit {
+export class ViewDutsComponent implements OnInit, OnDestroy {
   @Input() hideEnrolledDuts = false;
   @Input() hideUnenrolledDuts = false;
+  // The event emitter wants to notfiy the parent
+  // component has been changed
+  @Output() selectedDUTsChanged: EventEmitter<void> = new EventEmitter();
   @ViewChild(TableHeaderSelectorComponent)
   headerSelectorRef: TableHeaderSelectorComponent;
 
@@ -55,14 +67,17 @@ export class ViewDutsComponent implements OnInit {
   public selectOptions: string[] = [];
 
   @ViewChild(MatSort, {}) matSort: MatSort;
-  
+
+  // The subscriptions that we need to dispose after
+  // the component destory.
+  private disposers: Subscription[] = [];
+
   constructor(
     public moblabGrpcService: MoblabGrpcService,
     public dialog: MatDialog,
     private notificationsService: NotificationsService,
     private buildTargetAccessService: BuildTargetAccessService
   ) {}
-
 
   sortingDataAccessor(item, property) {
     switch (property) {
@@ -87,9 +102,23 @@ export class ViewDutsComponent implements OnInit {
         this.buildTargets = buildTargets;
       }
     );
+    this.disposers.push(
+      this.selection.changed
+        .pipe(
+          map(e => e.source.selected.length),
+          distinctUntilChanged()
+        )
+        .subscribe(_ => {
+          this.selectedDUTsChanged.emit();
+        })
+    );
   }
 
-  ngOnChanges(changes) {
+  ngOnDestroy(): void {
+    this.disposers.forEach(e => e.unsubscribe());
+  }
+
+  ngOnChanges(changes: any) {
     if (changes.hideUnenrolledDuts || changes.hideEnrolledDuts) {
       this.setupSelectOptions();
     }
@@ -97,9 +126,9 @@ export class ViewDutsComponent implements OnInit {
 
   private setupSelectOptions() {
     this.selectOptions = [
-      ...(this.hideEnrolledDuts ? []: [ALL_ENROLLED]),
+      ...(this.hideEnrolledDuts ? [] : [ALL_ENROLLED]),
       ...(this.hideUnenrolledDuts ? [] : [ALL_UNENROLLED]),
-      REPAIR_FAILED
+      REPAIR_FAILED,
     ];
   }
 
@@ -187,9 +216,14 @@ export class ViewDutsComponent implements OnInit {
 
   selectionChanged(event) {
     if (event.selection === 'All') {
-      this.duts.data.filter(e => {
-        return e.getIsConnected() && (this.hideUnenrolledDuts ? e.getIsEnrolled() : true);
-      }).forEach(row => this.selection.select(row));
+      this.duts.data
+        .filter(e => {
+          return (
+            e.getIsConnected() &&
+            (this.hideUnenrolledDuts ? e.getIsEnrolled() : true)
+          );
+        })
+        .forEach(row => this.selection.select(row));
     } else if (event.selection === 'None') {
       this.selection.clear();
     } else if (event.selection === ALL_ENROLLED) {
@@ -211,7 +245,9 @@ export class ViewDutsComponent implements OnInit {
     } else if (event.selection === REPAIR_FAILED) {
       this.duts.data.filter(row => {
         if (
-          row.getStatus() === ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED && row.getIsConnected()
+          row.getStatus() ===
+          ConnectedDutInfo.DutStatus.DUT_STATUS_REPAIR_FAILED &&
+          row.getIsConnected()
         ) {
           this.selection.select(row);
         } else {
@@ -229,7 +265,9 @@ export class ViewDutsComponent implements OnInit {
         this.notificationsService.notify(responseMessage);
       }
     } catch (error) {
-      this.notificationsService.error(error);
+      if (typeof error === 'string') {
+        this.notificationsService.error(error);
+      }
     }
   }
 }

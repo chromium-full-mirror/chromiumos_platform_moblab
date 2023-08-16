@@ -1,27 +1,36 @@
-<mat-card>
-  <div fxLayout="row" fxLayoutAlign="start stretch" fxLayoutGap="25px">
-    <div>
-      <button mat-raised-button color="primary" (click)="enrollSelected()" [disabled]="!hasSelectedDuts()">
-        Enroll Selected
-      </button>
-    </div>
-    <div>
-      <button mat-raised-button (click)="unenrollSelected()" [disabled]="!hasSelectedDuts()">
-        Unenroll Selected
-      </button>
-    </div>
-    <div>
-      <button mat-raised-button (click)="reverifySelected()" [disabled]="!hasSelectedDuts()">
-        Reverify Selected
-      </button>
-    </div>
-    <mat-divider [vertical]="true"></mat-divider>
-    <div>
-      <button mat-raised-button (click)="provisionDuts()">
-        Provision DUTs
-      </button>
-    </div>
+<div class="flex flex-row gap-4 px-2 py-4">
+  <div>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="enrollSelected()"
+      [disabled]="!isDUTSelected"
+    >
+      Enroll Selected
+    </button>
   </div>
-</mat-card>
+  <div>
+    <button
+      mat-raised-button
+      (click)="unenrollSelected()"
+      [disabled]="!isDUTSelected"
+    >
+      Unenroll Selected
+    </button>
+  </div>
+  <div>
+    <button
+      mat-raised-button
+      (click)="reverifySelected()"
+      [disabled]="!isDUTSelected"
+    >
+      Reverify Selected
+    </button>
+  </div>
+  <mat-divider [vertical]="true"></mat-divider>
+  <div>
+    <button mat-raised-button (click)="provisionDuts()">Provision DUTs</button>
+  </div>
+</div>
 
-<app-view-duts></app-view-duts>
+<app-view-duts (selectedDUTsChanged)="selectedDUTsChanged()"></app-view-duts>
