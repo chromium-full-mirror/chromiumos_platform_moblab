@@ -19,7 +19,7 @@ import {ViewJobsComponent} from '../view-jobs/view-jobs.component';
 @Component({
   selector: 'app-dut-detail',
   templateUrl: './dut-detail.component.html',
-  styleUrls: ['./dut-detail.component.css'],
+  styleUrls: ['./dut-detail.component.scss'],
   animations: [],
 })
 export class DutDetailComponent implements OnInit, AfterContentInit {
@@ -35,6 +35,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       '(SERVOV4P1-)?[CGS](-)?[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[0-9]{4}'
     )
   );
+  isDutInfoEmpty = true;
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -57,6 +58,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
   }
 
   setDutDetails(dutInfo: ConnectedDutInfo) {
+    this.isDutInfoEmpty = false;
     this.dutInfoTableRef.loadRows([
       ['DUT', dutInfo.getIp()],
       ['MAC', dutInfo.getMacAddr()],
@@ -78,6 +80,7 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
     if (this.dutTaskTableRef) {
       this.dutTaskTableRef.setDutIp(this.dutQuery.value);
     }
+    this.isDutInfoEmpty = true;
 
     this.moblabGrpcService.getDutDetails(
       (dutInfo: ConnectedDutInfo) => {
@@ -131,9 +134,5 @@ export class DutDetailComponent implements OnInit, AfterContentInit {
       this.dutQuery.value,
       this.servoSerialNumber.value
     );
-  }
-
-  isDutInfoTableEmpty() {
-    return !this.dutInfoTableRef || this.dutInfoTableRef.isEmpty();
   }
 }
