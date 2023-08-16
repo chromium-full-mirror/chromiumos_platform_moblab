@@ -1,226 +1,417 @@
 <div id="root-container">
-  <div>
-    <div class="time-filter-form-wrapper">
-      <div *ngIf="!hideFilters" class="filter-box">
-        <mat-card class="time_filters" style="padding: 8px;">
-          <b> Start Time </b>
-          <span> from: </span>
-          <mat-form-field id="dateInputFormField" appearance="outline" class="filter" floatLabel="never">
-            <input id="startFromTimeInput" matInput [formControl]="filters.getFormControl(jobStartTimeFromFilter)"
-              placeholder='yyyy-MM-dd HH:mm:ss'>
-            <mat-error *ngIf="filters.getFormControl(jobStartTimeFromFilter).hasError('failedDateParse')">
-              Invalid datestring parsed.
-            </mat-error>
-            <mat-error *ngIf="filters.getFormControl(jobStartTimeFromFilter).hasError('dateOutOfBounds')">
-              Date entered out of bounds.
-            </mat-error>
-          </mat-form-field>
-          <span> to: </span>
-          <mat-form-field id="dateInputFormField" appearance="outline" class="filter" floatLabel="never">
-            <input id="startToTimeInput" matInput [formControl]="filters.getFormControl(jobStartTimeToFilter)"
-              placeholder='yyyy-MM-dd HH:mm:ss'>
-            <mat-error *ngIf="filters.getFormControl(jobStartTimeToFilter).hasError('failedDateParse')">
-              Invalid datestring parsed.
-            </mat-error>
-            <mat-error *ngIf="filters.getFormControl(jobStartTimeToFilter).hasError('dateOutOfBounds')">
-              Date entered out of bounds.
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field id="idInputFormField" appearance="outline" class="filter" floatLabel="never">
-            <mat-label> ID</mat-label>
-            <input id="idInput" matInput [formControl]="filters.getFormControl(jobId)">
-            <mat-error *ngIf="filters.getFormControl(jobId).hasError('notANonnegativeNumber')">
-              Not a number.
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field id="parentIdInputFormField" appearance="outline" class="filter" floatLabel="never">
-            <mat-label>Suite ID</mat-label>
-            <input id="parentIdInput" matInput [formControl]="filters.getFormControl(parentJobId)">
-            <mat-error *ngIf="filters.getFormControl(parentJobId).hasError('notANonnegativeNumber')">
-              Not a number.
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="filter header-entry" floatLabel="never">
-            <mat-label>Name</mat-label>
-            <input id="nameInput" matInput [formControl]="filters.getFormControl(jobName)">
-          </mat-form-field>
-          <mat-form-field id="relationshipInputFormField" appearance="outline">
-            <mat-label>Parent/Child</mat-label>
-            <mat-select id="prioritySelector" class="filter" [formControl]="filters.getFormControl(jobRelationship)">
-              <mat-option id="priorityOptions" *ngFor="let relationshipOption of relationshipFilterOptions"
-                value="{{ relationshipOption }}">
-                {{ relationshipOption }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field id="statusInputFormField" appearance="outline">
-            <mat-label>Jobs Status</mat-label>
-            <mat-select id="queueStatusSelector" class="filter" [formControl]="filters.getFormControl(queueStatus)">
-              <mat-option *ngFor="let queueStatusOption of queueStatusFilterOptions" value="{{ queueStatusOption }}">
-                {{queueStatusOption}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <button id="filter-button" mat-raised-button color="primary"
-            [disabled]="this.filters.anyErrors() || this.loading" (click)="filterSubmission()"> Filter
-          </button>
-          <button mat-raised-button id="clear-filters-button" [disabled]="this.loading" (click)="clearFilters()"> Clear
-          </button>
-        </mat-card>
+  <div class="filter-form-wrapper" *ngIf="!hideFilters">
+    <div class="flex flex-row gap-x-2 gap-y-4 flex-wrap items-center">
+      <b> Start Time </b>
+      <span> from: </span>
+      <div class="w-48 input-box-container">
+        <mat-form-field
+          id="dateInputFormField"
+          class="without-underline full-width"
+        >
+          <input
+            id="startFromTimeInput"
+            matInput
+            [formControl]="filters.getFormControl(jobStartTimeFromFilter)"
+            placeholder="yyyy-MM-dd HH:mm:ss"
+          />
+          <mat-error
+            *ngIf="
+              filters
+                .getFormControl(jobStartTimeFromFilter)
+                .hasError('failedDateParse')
+            "
+          >
+            Invalid datestring parsed.
+          </mat-error>
+          <mat-error
+            *ngIf="
+              filters
+                .getFormControl(jobStartTimeFromFilter)
+                .hasError('dateOutOfBounds')
+            "
+          >
+            Date entered out of bounds.
+          </mat-error>
+        </mat-form-field>
       </div>
-      <mat-divider></mat-divider>
-    </div>
-    <div class="table-action-header">
-      <button class="job-refresh-button" color="primary" matTooltip="Refresh" mat-icon-button (click)="refreshJobs()">
-        <mat-icon>refresh</mat-icon>
+      <span> to: </span>
+      <div class="w-48 input-box-container">
+        <mat-form-field
+          id="dateInputFormField"
+          class="full-width without-underline"
+        >
+          <input
+            id="startToTimeInput"
+            matInput
+            [formControl]="filters.getFormControl(jobStartTimeToFilter)"
+            placeholder="yyyy-MM-dd HH:mm:ss"
+          />
+          <mat-error
+            *ngIf="
+              filters
+                .getFormControl(jobStartTimeToFilter)
+                .hasError('failedDateParse')
+            "
+          >
+            Invalid datestring parsed.
+          </mat-error>
+          <mat-error
+            *ngIf="
+              filters
+                .getFormControl(jobStartTimeToFilter)
+                .hasError('dateOutOfBounds')
+            "
+          >
+            Date entered out of bounds.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="w-20 input-box-container">
+        <mat-form-field
+          id="idInputFormField"
+          class="without-underline full-width"
+        >
+          <mat-label> ID</mat-label>
+          <input
+            id="idInput"
+            matInput
+            [formControl]="filters.getFormControl(jobId)"
+          />
+          <mat-error
+            *ngIf="
+              filters.getFormControl(jobId).hasError('notANonnegativeNumber')
+            "
+          >
+            Not a number.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="w-24 input-box-container">
+        <mat-form-field
+          id="parentIdInputFormField"
+          class="full-width without-underline"
+        >
+          <mat-label>Suite ID</mat-label>
+          <input
+            id="parentIdInput"
+            matInput
+            [formControl]="filters.getFormControl(parentJobId)"
+          />
+          <mat-error
+            *ngIf="
+              filters
+                .getFormControl(parentJobId)
+                .hasError('notANonnegativeNumber')
+            "
+          >
+            Not a number.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="w-52 input-box-container">
+        <mat-form-field class="full-width without-underline">
+          <mat-label>Name</mat-label>
+          <input
+            id="nameInput"
+            matInput
+            [formControl]="filters.getFormControl(jobName)"
+          />
+        </mat-form-field>
+      </div>
+      <div class="w-32 input-box-container">
+        <mat-form-field
+          id="relationshipInputFormField"
+          class="full-width without-underline"
+        >
+          <mat-label>Parent/Child</mat-label>
+          <mat-select
+            id="prioritySelector"
+            class="filter"
+            [formControl]="filters.getFormControl(jobRelationship)"
+          >
+            <mat-option
+              id="priorityOptions"
+              *ngFor="let relationshipOption of relationshipFilterOptions"
+              value="{{ relationshipOption }}"
+            >
+              {{ relationshipOption }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="w-44 input-box-container">
+        <mat-form-field
+          id="statusInputFormField"
+          class="full-width without-underline"
+        >
+          <mat-label>Jobs Status</mat-label>
+          <mat-select
+            id="queueStatusSelector"
+            class="filter"
+            [formControl]="filters.getFormControl(queueStatus)"
+          >
+            <mat-option
+              *ngFor="let queueStatusOption of queueStatusFilterOptions"
+              value="{{ queueStatusOption }}"
+            >
+              {{ queueStatusOption }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <button
+        id="filter-button"
+        mat-raised-button
+        color="primary"
+        [disabled]="this.filters.anyErrors() || this.loading"
+        (click)="filterSubmission()"
+      >
+        Filter
       </button>
-      <mat-slide-toggle class="auto-refresh-toggle" matTooltip="Auto refresh every minute" [checked]="autoRefresh"
-        (change)="updateAutoRefresh($event)">Auto Refresh</mat-slide-toggle>
-      <app-job-action *ngIf="!hideActionBar" (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)">
-      </app-job-action>
-      <mat-button-toggle-group id="statusFilterGroup" (change)="filterByStatus($event)" value="ALL_JOBS">
-        <mat-button-toggle value="QUEUED_JOBS">Queued Jobs: {{this.jobs_queued}}</mat-button-toggle>
-        <mat-button-toggle value="JOBS_RUNNING">Running Jobs: {{this.jobs_running}}</mat-button-toggle>
-        <mat-button-toggle value="COMPLETED_JOBS">Completed Jobs: {{this.jobs_completed}}</mat-button-toggle>
-        <mat-button-toggle value="ABORTED_JOBS">Aborted Jobs: {{this.jobs_aborted}}</mat-button-toggle>
-        <mat-button-toggle value="FAILED_JOBS">Failed Jobs: {{this.jobs_failed}}</mat-button-toggle>
-        <mat-button-toggle value="ALL_JOBS" id="allJobsToggle">All Jobs: {{this.jobs_total}}</mat-button-toggle>
-      </mat-button-toggle-group>
+      <button
+        mat-raised-button
+        id="clear-filters-button"
+        [disabled]="this.loading"
+        (click)="clearFilters()"
+      >
+        Clear
+      </button>
     </div>
-    <mat-divider></mat-divider>
-    <div style="position: relative;">
-      <table mat-table [dataSource]="jobs" multiTemplateDataRows class="jobs-table" matSort
-        (matSortChange)="sortData($event)">
-        <ng-container *ngIf="!hideSelectors" matColumnDef="job_checkboxes">
-          <th mat-header-cell *matHeaderCellDef>
-            <app-table-header-selector [options]="jobSelectOptions" (update)="selectionChanged($event)">
-            </app-table-header-selector>
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <mat-checkbox (click)="checkboxClick($event)" (change)="jobActionRef.toggleJobSelection(element)"
-              [checked]="jobActionRef.isSelected(element)">
-            </mat-checkbox>
-          </td>
-        </ng-container>
+  </div>
+  <div class="table-action-header flex flex-row items-center p-x-4">
+    <button
+      class="job-refresh-button"
+      color="primary"
+      matTooltip="Refresh"
+      mat-icon-button
+      (click)="refreshJobs()"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <div class="grow">
+      <app-job-action
+        *ngIf="!hideActionBar"
+        (actionSubmitted)="tableHeadSelectorRef.setCheckboxState(false)"
+      >
+      </app-job-action>
+    </div>
+    <mat-slide-toggle
+      matTooltip="Auto refresh every minute"
+      [checked]="autoRefresh"
+      (change)="updateAutoRefresh($event)"
+      >Auto Refresh</mat-slide-toggle
+    >
+  </div>
+  <div class="flex justify-center flex-row items-center">
+    <mat-button-toggle-group
+      id="statusFilterGroup"
+      (change)="filterByStatus($event)"
+      value="ALL_JOBS"
+    >
+      <mat-button-toggle value="QUEUED_JOBS"
+        >Queued Jobs: {{ this.jobs_queued }}</mat-button-toggle
+      >
+      <mat-button-toggle value="JOBS_RUNNING"
+        >Running Jobs: {{ this.jobs_running }}</mat-button-toggle
+      >
+      <mat-button-toggle value="COMPLETED_JOBS"
+        >Completed Jobs: {{ this.jobs_completed }}</mat-button-toggle
+      >
+      <mat-button-toggle value="ABORTED_JOBS"
+        >Aborted Jobs: {{ this.jobs_aborted }}</mat-button-toggle
+      >
+      <mat-button-toggle value="FAILED_JOBS"
+        >Failed Jobs: {{ this.jobs_failed }}</mat-button-toggle
+      >
+      <mat-button-toggle value="ALL_JOBS" id="allJobsToggle"
+        >All Jobs: {{ this.jobs_total }}</mat-button-toggle
+      >
+    </mat-button-toggle-group>
+  </div>
+  <mat-divider></mat-divider>
+  <div style="position: relative">
+    <table
+      mat-table
+      [dataSource]="jobs"
+      multiTemplateDataRows
+      class="jobs-table"
+      matSort
+      (matSortChange)="sortData($event)"
+    >
+      <ng-container *ngIf="!hideSelectors" matColumnDef="job_checkboxes">
+        <th mat-header-cell *matHeaderCellDef>
+          <app-table-header-selector
+            [options]="jobSelectOptions"
+            (update)="selectionChanged($event)"
+          >
+          </app-table-header-selector>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <mat-checkbox
+            (click)="checkboxClick($event)"
+            (change)="jobActionRef.toggleJobSelection(element)"
+            [checked]="jobActionRef.isSelected(element)"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="job_id" *ngIf="displayColumn('job_id')">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <div>Job ID</div>
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span>{{element.getJobId()}}</span>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="job_id" *ngIf="displayColumn('job_id')">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div>Job ID</div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <span>{{ element.getJobId() }}</span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="hostname" *ngIf="displayColumn('hostname')">
-          <th mat-header-cell *matHeaderCellDef>
-            <div>Hostname</div>
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span>{{element.getHostname()}}</span>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="hostname" *ngIf="displayColumn('hostname')">
+        <th mat-header-cell *matHeaderCellDef>
+          <div>Hostname</div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <span>{{ element.getHostname() }}</span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="name" *ngIf="displayColumn('name')">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <div>Name</div>
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span>{{element.getName()}}</span>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="name" *ngIf="displayColumn('name')">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div>Name</div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <span>{{ element.getName() }}</span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="priority" *ngIf="displayColumn('priority')">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <div>Priority</div>
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span>{{getPriorityFromNum(element.getPriority())}}</span>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="priority" *ngIf="displayColumn('priority')">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div>Priority</div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <span>{{ getPriorityFromNum(element.getPriority()) }}</span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="created_time_sec_utc" *ngIf="displayColumn('created_time_sec_utc')">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created Time</th>
-          <td mat-cell *matCellDef="let element">
-            <span>
-              {{normalizeTimestamp(element.getCreatedTimeSecUtc())}}
-            </span>
-          </td>
-        </ng-container>
+      <ng-container
+        matColumnDef="created_time_sec_utc"
+        *ngIf="displayColumn('created_time_sec_utc')"
+      >
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created Time</th>
+        <td mat-cell *matCellDef="let element">
+          <span>
+            {{ normalizeTimestamp(element.getCreatedTimeSecUtc()) }}
+          </span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="start_time_sec_utc" *ngIf="displayColumn('start_time_sec_utc')">
-          <th mat-header-cell *matHeaderCellDef>Start Time</th>
-          <td mat-cell *matCellDef="let element">
-            <span>
-              {{normalizeTimestamp(element.getStartTimeSecUtc())}}
-            </span>
-          </td>
-        </ng-container>
+      <ng-container
+        matColumnDef="start_time_sec_utc"
+        *ngIf="displayColumn('start_time_sec_utc')"
+      >
+        <th mat-header-cell *matHeaderCellDef>Start Time</th>
+        <td mat-cell *matCellDef="let element">
+          <span>
+            {{ normalizeTimestamp(element.getStartTimeSecUtc()) }}
+          </span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="finished_time_sec_utc" *ngIf="displayColumn('finished_time_sec_utc')">
-          <th mat-header-cell *matHeaderCellDef>Finished Time</th>
-          <td mat-cell *matCellDef="let element">
-            <span>
-              {{normalizeTimestamp(element.getFinishedTimeSecUtc())}}
-            </span>
-          </td>
-        </ng-container>
+      <ng-container
+        matColumnDef="finished_time_sec_utc"
+        *ngIf="displayColumn('finished_time_sec_utc')"
+      >
+        <th mat-header-cell *matHeaderCellDef>Finished Time</th>
+        <td mat-cell *matCellDef="let element">
+          <span>
+            {{ normalizeTimestamp(element.getFinishedTimeSecUtc()) }}
+          </span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="job_status" *ngIf="displayColumn('job_status')">
-          <th mat-header-cell *matHeaderCellDef>
-            <div>Job Status</div>
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <span>{{getStatusFromNum(element.getStatus())}}</span>
-          </td>
-        </ng-container>
+      <ng-container
+        matColumnDef="job_status"
+        *ngIf="displayColumn('job_status')"
+      >
+        <th mat-header-cell *matHeaderCellDef>
+          <div>Job Status</div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <span>{{ getStatusFromNum(element.getStatus()) }}</span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="logs" *ngIf="displayColumn('job_id')">
-          <th mat-header-cell *matHeaderCellDef>
-            <div>Logs</div>
-          </th>
-          <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()">
-            <span>
-              <a class="logbutton" mat-button target="_blank" href="{{ constructJobLogsLink(element) }}">
-                <mat-icon class="norm-icon">text_snippet</mat-icon>
-                <mat-icon *ngIf="isResultsDeleted(element)" class="additional-icon material-icons-outlined"
-                  color="primary">cloud</mat-icon>
-              </a>
-            </span>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="logs" *ngIf="displayColumn('job_id')">
+        <th mat-header-cell *matHeaderCellDef>
+          <div>Logs</div>
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let element"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="icon-group-wrapper">
+            <a
+              class="logbutton"
+              mat-button
+              target="_blank"
+              href="{{ constructJobLogsLink(element) }}"
+            >
+              <mat-icon class="norm-icon">text_snippet</mat-icon>
+              <mat-icon
+                *ngIf="isResultsDeleted(element)"
+                class="additional-icon material-icons-outlined"
+                color="primary"
+                >cloud</mat-icon
+              >
+            </a>
+          </div>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="job_upload_status" *ngIf="displayColumn('job_upload_status')">
-          <th width=40px; mat-header-cell *matHeaderCellDef>
-            <div>Upload Status</div>
-          </th>
-          <td mat-cell *matCellDef="let element" class="upload-status-td">
-            <mat-icon #tooltip="matTooltip" matTooltip="{{ getUploadStatus(element).tooltip }}"
-              class="{{ getUploadStatus(element).iconStyle }}" matBadge="{{ getUploadStatus(element).attemptNumber }}"
-              matBadgeColor="warn" matBadgeSize="small">
-              {{ getUploadStatus(element).icon }}
-            </mat-icon>
-          </td>
-        </ng-container>
+      <ng-container
+        matColumnDef="job_upload_status"
+        *ngIf="displayColumn('job_upload_status')"
+      >
+        <th width="40px;" mat-header-cell *matHeaderCellDef>
+          <div>Upload Status</div>
+        </th>
+        <td mat-cell *matCellDef="let element" class="upload-status-td">
+          <mat-icon
+            #tooltip="matTooltip"
+            matTooltip="{{ getUploadStatus(element).tooltip }}"
+            class="{{ getUploadStatus(element).iconStyle }}"
+            matBadge="{{ getUploadStatus(element).attemptNumber }}"
+            matBadgeColor="warn"
+            matBadgeSize="small"
+          >
+            {{ getUploadStatus(element).icon }}
+          </mat-icon>
+        </td>
+      </ng-container>
 
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let element; columns: displayedColumns;"
-          [routerLink]="['/job_detail',element.getJobId()]">
-        </tr>
-      </table>
-      <div id="no-jobs-label" *ngIf="jobs.data.length === 0 && !loading">
-        <p>No Jobs fetched.</p>
-      </div>
-      <div>
-        <mat-paginator [length]="numJobs" [pageSize]="startingPageSize" [pageSizeOptions]=[10,20,100,1000]
-          [showFirstLastButtons]="true">
-        </mat-paginator>
-      </div>
-      <div id="loading-overlay" *ngIf="loading">
-        <div class="loading-spinner-wrapper">
-          <mat-spinner></mat-spinner>
-        </div>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr
+        mat-row
+        *matRowDef="let element; columns: displayedColumns"
+        [routerLink]="['/job_detail', element.getJobId()]"
+      ></tr>
+    </table>
+    <div id="no-jobs-label" *ngIf="jobs.data.length === 0 && !loading">
+      <p>No Jobs fetched.</p>
+    </div>
+    <div>
+      <mat-paginator
+        [length]="numJobs"
+        [pageSize]="startingPageSize"
+        [pageSizeOptions]="[10, 20, 100, 1000]"
+        [showFirstLastButtons]="true"
+      >
+      </mat-paginator>
+    </div>
+    <div id="loading-overlay" *ngIf="loading">
+      <div class="loading-spinner-wrapper">
+        <mat-spinner></mat-spinner>
       </div>
     </div>
   </div>
+</div>

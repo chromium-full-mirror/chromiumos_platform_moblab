@@ -10,12 +10,6 @@
   width: 10px;
 }
 
-.filter-box {
-  border: 1px solid #ebebeb;
-  grid-template-columns: 40px 50px auto 50px 40px;
-  grid-template-rows: 25% 100px auto;
-}
-
 .action-box {
   border: 1px solid #ebebeb;
   grid-template-columns: 40px 50px auto 50px 40px;
@@ -23,9 +17,11 @@
   margin: 5px 0 5px 0;
 }
 
-.time-filter-form-wrapper {
-  margin-left: 16px;
-  margin-right: 16px;
+.filter-form-wrapper {
+  margin: 1rem;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 0 0.5rem 0 #ebebeb;
+  border-radius: 0.25rem;
 }
 
 .job-refresh-button {
@@ -35,12 +31,7 @@
 .table-action-header {
   margin-top: 16px;
   margin-bottom: 4px;
-}
-
-.auto-refresh-toggle {
-  margin-top: 8px;
-  margin-right: 18px;
-  float: right;
+  padding-right: 2rem;
 }
 
 .jobs-table {
@@ -62,26 +53,6 @@
 .mat-form-field {
   padding-left: 5px;
   padding-right: 5px;
-}
-
-#idInputFormField {
-  width: 60px;
-}
-
-#parentIdInputFormField {
-  width: 80px;
-}
-
-#dateInputFormField {
-  width: 180px;
-}
-
-#statusInputFormField {
-  width: 140px;
-}
-
-#relationshipInputFormField {
-  width: 100px;
 }
 
 #statusFilterGroup {
@@ -178,6 +149,7 @@ a.logbutton {
   padding-right: 0;
   min-width: 0;
   line-height: 20px;
+  width: 100%;
 }
 
 .select-cb {
@@ -187,9 +159,9 @@ a.logbutton {
 .norm-icon,
 .progress-icon,
 .error-icon {
-  vertical-align: middle;
-  text-align: center !important;
-  width: 18px;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
 }
 
 .error-icon {
@@ -207,8 +179,12 @@ a.logbutton {
 
 @keyframes blink {
   from,
-  to { opacity: 1; }
-  50% { opacity: 0.5; }
+  to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 table {
@@ -219,8 +195,19 @@ table {
   text-align: center;
 }
 
+.icon-group-wrapper {
+  display: flex;
+  position: relative;
+  width: 3rem;
+  align-items: center;
+  justify-content: center;
+}
+
 .additional-icon {
-  vertical-align: top;
-  transform: scale(0.7);
-  line-height: 0px;
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  position: absolute;
+  top: 0;
+  right: -0.5rem;
 }
