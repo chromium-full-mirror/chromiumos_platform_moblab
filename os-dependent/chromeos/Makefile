@@ -7,13 +7,18 @@ PROTO := "hostservice.proto"
 WORKDIR := "/tmp"
 PROTO_OUT_DIR := ${WORKDIR}/host_service
 
+PKG_CONFIG ?= pkg-config
+PKG_DEPS = libusb-1.0
+PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKG_DEPS))
+PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKG_DEPS))
+
 .PHONY: all
 
 all: reset_usb proto
 
 reset_usb:
-	$(CC) $(CFLAGS) $(INCLUDES) -c r_usb.c -o $(TMPDIR)/r_usb.o
-	$(CC) $(CFLAGS) $(LFLAGS) $(TMPDIR)/r_usb.o -lusb -o $(TMPDIR)/reset_usb
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(PKG_CFLAGS) -c r_usb.c -o $(TMPDIR)/r_usb.o
+	$(CC) $(CFLAGS) $(LFLAGS) $(TMPDIR)/r_usb.o $(PKG_LIBS) -o $(TMPDIR)/reset_usb
 
 
 proto:

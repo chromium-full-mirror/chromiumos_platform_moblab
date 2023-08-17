@@ -2,50 +2,51 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <err.h>
+#include <libusb.h>
+#include <stdint.h>
 #include <stdio.h>
-#include <usb.h>
 
-void reset_usb_devices_on_bus(struct usb_bus *p_usb_bus) {
-    if (p_usb_bus == NULL) {
-        return;
+int main(int argc, const char *argv[]) {
+  libusb_device **devs;
+  int ret;
+  ssize_t cnt;
+
+  if (argc > 1) {
+    printf("Reset all USB devices.\n\nUsage: %s\n", argv[0]);
+    return 1;
+  }
+
+  ret = libusb_init(NULL);
+  if (ret < 0)
+    errx(1, "libusb_init failed");
+
+  cnt = libusb_get_device_list(NULL, &devs);
+  if (cnt < 0)
+    errx(1, "libusb_get_device_list failed");
+
+  for (ssize_t i = 0; i < cnt; ++i) {
+    libusb_device *dev = devs[i];
+    libusb_device_handle *handle;
+    int buflen;
+    unsigned char buf[1024];
+
+    ret = libusb_open(dev, &handle);
+    if (ret < 0) {
+      warnx("opening %p failed", dev);
+      continue;
     }
-    struct usb_device *p_usb_device;
-    for (p_usb_device = p_usb_bus->devices;
-         p_usb_device;
-         p_usb_device = p_usb_device->next) {
-        char buf[1024];
-        int ret;
-        usb_dev_handle *usb_handler = usb_open(p_usb_device);
-        if (usb_handler) {
-            int buf_len = usb_get_string_simple(usb_handler, 2, buf, 1023);
-            ret = usb_reset(usb_handler);
-            if (buf_len > 0) {
-                printf("resetting %p %d (%s)\n", p_usb_device, ret, buf);
-            }
-            usb_close(usb_handler);
-        } else {
-            printf("Can't open %p\n", p_usb_device);
-        }
-    }
-}
 
-struct usb_bus *get_usb_busses() {
-    /*refer libusb_dev*/
-    usb_init();
-    usb_find_busses();
-    usb_find_devices();
-    return usb_get_busses();
-}
+    buflen =
+        libusb_get_string_descriptor_ascii(handle, 2, buf, sizeof(buf) - 1);
+    ret = libusb_reset_device(handle);
+    if (buflen)
+      printf("resetting %p %d (%s)\n", dev, ret, buf);
 
-int main(void)
-{
-    struct usb_bus *p_usb_buses = get_usb_busses();
-    if (p_usb_buses) {
-        struct usb_bus *p_usb_bus = p_usb_buses;
-        for (; p_usb_bus; p_usb_bus = p_usb_bus->next) {
-            reset_usb_devices_on_bus(p_usb_bus);
-        }
-    }
-    return 0;
-}
+    libusb_close(handle);
+  }
 
+  libusb_free_device_list(devs, 1);
+  libusb_exit(NULL);
+  return 0;
+}
