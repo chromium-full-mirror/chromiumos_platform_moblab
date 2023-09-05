@@ -24,8 +24,8 @@ CONTAINERS=(
     linuxserver/openssh-server:latest
     mariadb:10.5
     nginx:alpine
-    node:16-buster
-    node:16
+    node:18-buster
+    node:18
     python:3.7-buster
     python:3.7-slim-buster
     python:3.8-buster
