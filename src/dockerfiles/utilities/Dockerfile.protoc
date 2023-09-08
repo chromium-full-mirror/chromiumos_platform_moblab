@@ -27,8 +27,7 @@ RUN chmod uog+x /usr/local/bin/protoc-gen-grpc-web
 # install grpc_python_plugin
 RUN git clone https://github.com/grpc/grpc.git
 WORKDIR /grpc
-RUN git fetch
-RUN git reset --hard ee5b762f33a42170144834f5ab7efda9d76c480b
+RUN git fetch && git reset --hard ee5b762f33a42170144834f5ab7efda9d76c480b
 RUN git submodule update --init
 RUN rm -rf .git
 RUN make -j32 grpc_python_plugin

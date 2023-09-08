@@ -6,11 +6,10 @@ WORKDIR /
 
 RUN git clone https://chromium.googlesource.com/chromiumos/chromite
 WORKDIR /chromite
-RUN git fetch
 # https://chromium.googlesource.com/chromiumos/chromite/+/70a13952f62ec514f0ef79d7344ad0083d1e97b4
 # changes are removing the necessary lib, which are needed for
 # functioning of devserver in Moblab. If something is needed from devserver beyond
 # this point (before Satlab migration), someone has to take a closer look at
 # copying over the files to relevant place in Moblab
-RUN git reset --hard 17fcbc7f155af78fe93f563eab1a81ce0a398692
+RUN git fetch && git reset --hard 17fcbc7f155af78fe93f563eab1a81ce0a398692
 RUN rm -rf .git
