@@ -19,8 +19,7 @@ WORKDIR /
 RUN git clone https://chromium.googlesource.com/chromiumos/infra/proto
 RUN git clone https://chromium.googlesource.com/chromiumos/config
 WORKDIR /config
-RUN git fetch
-RUN git reset --hard 2a23f0c11ed3f1c3e7f3ce73529ebad6a6863b0f
+RUN git fetch && git reset --hard 2a23f0c11ed3f1c3e7f3ce73529ebad6a6863b0f
 WORKDIR /
 
 ######################################################################
