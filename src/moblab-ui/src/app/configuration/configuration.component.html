@@ -27,17 +27,19 @@
         <mat-divider></mat-divider>
       </div>
 
-      <ng-container *ngIf="this.isCloudEnabled && !this.canUpdateCloudConfig">
-        <div class="container inside flex flex-col w-full">
-          <div class="text-sm">
-            Changes to the Boto and GCS Bucket configuration are not allowed.
-            Please powerwash the Moblab to update the account info.
+      <div [hidden]="!this.isCloudEnabled">
+        <ng-container *ngIf="!this.canUpdateCloudConfig">
+          <div class="container inside flex flex-col w-full">
+            <div class="text-sm">
+              Changes to the Boto and GCS Bucket configuration are not allowed.
+              Please powerwash the Moblab to update the account info.
+            </div>
+            <div class="text-xs grey">
+              After tests were ran with a given account updates to the account
+              configuration are not allowed.
+            </div>
           </div>
-          <div class="text-xs grey">
-            After tests were ran with a given account updates to the account
-            configuration are not allowed.
-          </div>
-        </div>
+        </ng-container>
 
         <div class="row">
           <mat-form-field matTooltipPosition="after">
@@ -133,7 +135,7 @@
             Submit Changes
           </button>
         </div>
-      </ng-container>
+      </div>
     </form>
   </div>
 
