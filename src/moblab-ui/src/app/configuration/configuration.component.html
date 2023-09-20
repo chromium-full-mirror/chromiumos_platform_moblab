@@ -10,9 +10,14 @@
 
     <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
       <div class="row">
-        <mat-checkbox id="cloud-checkbox" (mouseenter)="cloudCheckboxHoverStart()"
-          (mouseleave)="cloudCheckboxHoverStop()" (change)="isCloudEnabledCheckboxChange()"
-          [checked]="this.isCloudEnabled" [disabled]="this.lastFetchedCloudConfig.isCloudEnabled">
+        <mat-checkbox
+          id="cloud-checkbox"
+          (mouseenter)="cloudCheckboxHoverStart()"
+          (mouseleave)="cloudCheckboxHoverStop()"
+          (change)="isCloudEnabledCheckboxChange()"
+          [checked]="this.isCloudEnabled"
+          [disabled]="this.lastFetchedCloudConfig.isCloudEnabled"
+        >
           Enable Moblab cloud integration
         </mat-checkbox>
       </div>
@@ -43,8 +48,14 @@
 
         <div class="row">
           <mat-form-field matTooltipPosition="after">
-            <input id="boto-key-id-input" matInput required placeholder="Boto Key ID" [formControl]="botoKeyIDForm"
-              name="botoKeyId" />
+            <input
+              id="boto-key-id-input"
+              matInput
+              required
+              placeholder="Boto Key ID"
+              [formControl]="botoKeyIDForm"
+              name="botoKeyId"
+            />
             <mat-label>Boto Key ID</mat-label>
             <mat-error *ngIf="this.botoKeyIDForm.hasError('required')">
               Boto key ID not set.
@@ -57,12 +68,23 @@
         </div>
 
         <div class="row">
-          <mat-form-field [matTooltip]="
+          <mat-form-field
+            [matTooltip]="
               !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
-            " matTooltipPosition="after">
+            "
+            matTooltipPosition="after"
+          >
             <mat-label>Boto Key Secret</mat-label>
-            <input id="boto-key-secret-input" matInput type="password" required password placeholder="Boto Key Secret"
-              [formControl]="botoKeySecretForm" name="botoKeySecret" />
+            <input
+              id="boto-key-secret-input"
+              matInput
+              type="password"
+              required
+              password
+              placeholder="Boto Key Secret"
+              [formControl]="botoKeySecretForm"
+              name="botoKeySecret"
+            />
             <mat-error *ngIf="this.botoKeySecretForm.hasError('required')">
               Boto key secret not set.
             </mat-error>
@@ -74,12 +96,21 @@
         </div>
 
         <div class="row">
-          <mat-form-field [matTooltip]="
+          <mat-form-field
+            [matTooltip]="
               !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
-            " matTooltipPosition="after">
+            "
+            matTooltipPosition="after"
+          >
             <mat-label>GCS Bucket Root</mat-label>
-            <input id="image-storage-url-input" matInput required placeholder="GCS Bucket Root"
-              [formControl]="bucketURLForm" name="imageStorageUrl" />
+            <input
+              id="image-storage-url-input"
+              matInput
+              required
+              placeholder="GCS Bucket Root"
+              [formControl]="bucketURLForm"
+              name="imageStorageUrl"
+            />
             <mat-error *ngIf="this.bucketURLForm.hasError('required')">
               GCS bucket not set.
             </mat-error>
@@ -92,8 +123,13 @@
             </mat-error>
           </mat-form-field>
           <mat-icon id="link-off-icon" *ngIf="!enableLink()">link_off</mat-icon>
-          <a *ngIf="enableLink()" id="gcs-link" href="{{ bucketLink }}" target="_blank"
-            [disabled]="!this.isCloudEnabled">
+          <a
+            *ngIf="enableLink()"
+            id="gcs-link"
+            href="{{ bucketLink }}"
+            target="_blank"
+            [disabled]="!this.isCloudEnabled"
+          >
             <mat-icon id="link-on-icon" *ngIf="enableLink()">link</mat-icon>
           </a>
         </div>
@@ -103,10 +139,15 @@
         </div>
 
         <div class="row">
-          <mat-checkbox id="command-checkbox" (change)="isRemoteCommandEnabledCheckboxChange()"
-            [checked]="this.isRemoteCommandEnabled" [matTooltip]="
+          <mat-checkbox
+            id="command-checkbox"
+            (change)="isRemoteCommandEnabledCheckboxChange()"
+            [checked]="this.isRemoteCommandEnabled"
+            [matTooltip]="
               !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
-            " matTooltipPosition="below">
+            "
+            matTooltipPosition="below"
+          >
             Enable remote commands
           </mat-checkbox>
         </div>
@@ -116,22 +157,34 @@
           Console (CPCon) about your Moblab and DUTs to make it easier to manage
           your fleet. See
           <a
-            href="https://chromeos.google.com/partner/dlm/docs/infrastructure/moblab-remote-console-user-guides.html">here</a>
+            href="https://chromeos.google.com/partner/dlm/docs/infrastructure/moblab-remote-console-user-guides.html"
+            >here</a
+          >
           for more information.
         </p>
 
         <div class="row">
-          <mat-checkbox id="command-checkbox" (change)="isRemoteCommandEnabledCheckboxChange()"
-            [checked]="this.isRemoteCommandEnabled" [matTooltip]="
+          <mat-checkbox
+            id="command-checkbox"
+            (change)="isRemoteCommandEnabledCheckboxChange()"
+            [checked]="this.isRemoteCommandEnabled"
+            [matTooltip]="
               !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
-            " matTooltipPosition="below">
+            "
+            matTooltipPosition="below"
+          >
             Enable remote commands
           </mat-checkbox>
         </div>
 
         <div>
-          <button id="cloud-config-submit-button" mat-raised-button color="primary"
-            [disabled]="disableCloudConfigSubmissionButton()" type="submit">
+          <button
+            id="cloud-config-submit-button"
+            mat-raised-button
+            color="primary"
+            [disabled]="disableCloudConfigSubmissionButton()"
+            type="submit"
+          >
             Submit Changes
           </button>
         </div>
@@ -143,12 +196,22 @@
     <p class="title">Test Runner Configuration</p>
     <div class="row justify-between">
       <span>Job Scheduler status:</span>
-      <span><b>{{ isHostSchedulerPauseRequested ? 'Paused' : 'Active' }}</b></span>
-      <app-button-with-progress #pauseButton *ngIf="!isHostSchedulerPauseRequested" caption="Pause"
-        (buttonClick)="pauseClick()">
+      <span
+        ><b>{{ isHostSchedulerPauseRequested ? 'Paused' : 'Active' }}</b></span
+      >
+      <app-button-with-progress
+        #pauseButton
+        *ngIf="!isHostSchedulerPauseRequested"
+        caption="Pause"
+        (buttonClick)="pauseClick()"
+      >
       </app-button-with-progress>
-      <app-button-with-progress #resumeButton *ngIf="isHostSchedulerPauseRequested" caption="Resume"
-        (buttonClick)="resumeClick()">
+      <app-button-with-progress
+        #resumeButton
+        *ngIf="isHostSchedulerPauseRequested"
+        caption="Resume"
+        (buttonClick)="resumeClick()"
+      >
       </app-button-with-progress>
     </div>
   </div>
@@ -164,7 +227,7 @@
         </p>
       </div>
 
-      <button mat-raised-button color="primary" (click)="stageTestBuild()">
+      <button mat-raised-button color="primary" (click)="stageTestBuild()" style="white-space: nowrap;">
         Copy build
       </button>
     </div>
@@ -183,7 +246,10 @@
       not used for running tests.
     </p>
 
-    <form #formRef="ngForm" (ngSubmit)="setStableCrOSVersion(userCrOSVersionForm.value)">
+    <form
+      #formRef="ngForm"
+      (ngSubmit)="setStableCrOSVersion(userCrOSVersionForm.value)"
+    >
       <table mat-table [dataSource]="stableBuildVersions">
         <ng-container matColumnDef="build_target">
           <th mat-header-cell *matHeaderCellDef>Build Target</th>
@@ -195,7 +261,10 @@
         <ng-container matColumnDef="default_version">
           <th mat-header-cell *matHeaderCellDef>In-use Version</th>
           <td mat-cell *matCellDef="let element">
-            <span><b>{{ getStableBuildVersion(element) }} </b><i>{{ getStableBuildVersionDefault(element) }}</i></span>
+            <span
+              ><b>{{ getStableBuildVersion(element) }} </b
+              ><i>{{ getStableBuildVersionDefault(element) }}</i></span
+            >
           </td>
         </ng-container>
 
@@ -204,7 +273,7 @@
           <td mat-cell *matCellDef="let element">
             <span class="default-version-text">{{
               element.getStableVersion().getDefaultVersion()
-              }}</span>
+            }}</span>
           </td>
         </ng-container>
 
@@ -216,27 +285,47 @@
         <mat-form-field class="without-underline full-width">
           <mat-label [style]="!isAnyDutEnrolled() ? 'color: red;' : ''">{{
             isAnyDutEnrolled()
-            ? 'User Override'
-            : 'Please enroll at least one DUT'
-            }}</mat-label>
-          <input matInput placeholder="Rxx-yyyyy.zz.0" [formControl]="userCrOSVersionForm" />
-          <mat-error *ngIf="
+              ? 'User Override'
+              : 'Please enroll at least one DUT'
+          }}</mat-label>
+          <input
+            matInput
+            placeholder="Rxx-yyyyy.zz.0"
+            [formControl]="userCrOSVersionForm"
+          />
+          <mat-error
+            *ngIf="
               this.userCrOSVersionForm.hasError('validChromeosBuildPattern')
-            ">
+            "
+          >
             Must follow the correct OS version format e.g. R88-13597.105.0
           </mat-error>
-          <mat-error *ngIf="this.userCrOSVersionForm.hasError('apiResponseError')">{{
-            this.userCrOSVersionForm.errors['apiResponseError']
-            }}</mat-error>
+          <mat-error
+            *ngIf="this.userCrOSVersionForm.hasError('apiResponseError')"
+            >{{
+              this.userCrOSVersionForm.errors['apiResponseError']
+            }}</mat-error
+          >
         </mat-form-field>
       </div>
 
       <div class="flex flex-row gap-4 mt-8">
-        <button mat-raised-button color="primary" [disabled]="!isStableCrOsVersionValidForSubmit()" type="submit">
+        <button
+          mat-raised-button
+          color="primary"
+          [disabled]="!isStableCrOsVersionValidForSubmit()"
+          type="submit"
+        >
           Override All
         </button>
-        <button type="button" class="secondary-button-wrapper" mat-raised-button color="primary"
-          (click)="setStableCrOSVersion('')" matTooltip="Undo the user override and use the system defaults">
+        <button
+          type="button"
+          class="secondary-button-wrapper"
+          mat-raised-button
+          color="primary"
+          (click)="setStableCrOSVersion('')"
+          matTooltip="Undo the user override and use the system defaults"
+        >
           Restore Defaults
         </button>
       </div>
@@ -254,18 +343,39 @@
     <form #formRef="ngForm" (ngSubmit)="onDutWifiInfoSubmit(formRef.value)">
       <div class="flex flex-col gap-4 w-full">
         <mat-form-field class="configuration-input" appearance="legacy">
-          <input id="dut-wifi-name-input" matInput placeholder="Wi-Fi Name (SSID)" [formControl]="dutWifiNameForm"
-            name="dutWifiName" [disabled]="true" />
-          <mat-error *ngIf="this.dutWifiNameForm.hasError('leadingTrailingwhitespace')">
+          <input
+            id="dut-wifi-name-input"
+            matInput
+            placeholder="Wi-Fi Name (SSID)"
+            [formControl]="dutWifiNameForm"
+            name="dutWifiName"
+            [disabled]="true"
+          />
+          <mat-error
+            *ngIf="this.dutWifiNameForm.hasError('leadingTrailingwhitespace')"
+          >
             Wi-Fi name cannot have leading or trailing whitespace characters.
           </mat-error>
         </mat-form-field>
         <mat-form-field class="configuration-input" appearance="legacy">
-          <input id="dut-wifi-password-input" matInput type="password" password placeholder="Wi-Fi Password"
-            [formControl]="dutWifiPasswordForm" name="dutWifiPassword" />
+          <input
+            id="dut-wifi-password-input"
+            matInput
+            type="password"
+            password
+            placeholder="Wi-Fi Password"
+            [formControl]="dutWifiPasswordForm"
+            name="dutWifiPassword"
+          />
         </mat-form-field>
-        <button id="dut-wifi-info-submit-button" mat-raised-button color="primary"
-          [disabled]="!isDutWifiInfoValidForSubmit()" type="submit" class="w-36">
+        <button
+          id="dut-wifi-info-submit-button"
+          mat-raised-button
+          color="primary"
+          [disabled]="!isDutWifiInfoValidForSubmit()"
+          type="submit"
+          class="w-36"
+        >
           Submit Changes
         </button>
       </div>
@@ -273,36 +383,54 @@
   </div>
 
   <div class="expansion-panel mt-5">
-    <mat-expansion-panel id="advanced" (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+    <mat-expansion-panel
+      id="advanced"
+      (opened)="panelOpenState = true"
+      (closed)="panelOpenState = false"
+    >
       <mat-expansion-panel-header>
         <mat-panel-title>Advanced</mat-panel-title>
       </mat-expansion-panel-header>
       <div class="container inside">
         <p class="title">Experimental Features</p>
-        <p class="text-sm grey mt-3">
+        <p class="text-sm grey">
           The following list of features are experimental. Unless someone from
           Google requests please do not enable these features.
-          <br />Google will not answer questions about these features
+          <br /><br />Google will not answer questions about these features
           until they are released for all users.
         </p>
       </div>
       <div class="container inside mt-5">
         <p class="title">Results retention period (locally on Moblab)</p>
-        <form #formRef="ngForm" (ngSubmit)="
+        <form
+          #formRef="ngForm"
+          (ngSubmit)="
             setResultsRetentionPeriod(resultsRetentionPeriodForm.value)
-          ">
+          "
+        >
           <div class="flex flex-col gap-4">
             <div class="input-box-container without-border">
               <mat-form-field class="full-width">
                 <mat-label>Retention period (days or hours)</mat-label>
-                <input matInput placeholder="7h or 7d" [formControl]="resultsRetentionPeriodForm" />
-                <mat-error *ngIf="this.resultsRetentionPeriodForm.hasError('pattern')">
+                <input
+                  matInput
+                  placeholder="7h or 7d"
+                  [formControl]="resultsRetentionPeriodForm"
+                />
+                <mat-error
+                  *ngIf="this.resultsRetentionPeriodForm.hasError('pattern')"
+                >
                   Must be either 1-23 hours or 1-7 days e.g. 12h or 3d
                 </mat-error>
               </mat-form-field>
             </div>
-            <button class="w-36" mat-raised-button color="primary" [disabled]="!isRetentionPeriodValidForSubmit()"
-              type="submit">
+            <button
+              class="w-36"
+              mat-raised-button
+              color="primary"
+              [disabled]="!isRetentionPeriodValidForSubmit()"
+              type="submit"
+            >
               Save
             </button>
           </div>
