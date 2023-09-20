@@ -1,25 +1,45 @@
 <div class="loading-overlay-wrapper">
-    <app-loading-overlay></app-loading-overlay>
+  <app-loading-overlay></app-loading-overlay>
 </div>
-<h2 mat-dialog-title>Provision DUTs</h2>
-<mat-dialog-content class="mat-typography">
-
-    <app-basic-selector #poolSelector [title]="'Pool:'" [placeholder]="['Select a pool']" [options]="pools"
-        [isShown]="true" (select)="poolChanged($event.value)">
+<div class="wrapper">
+  <div class="title">
+    <h2 mat-dialog-title>Provision DUTs</h2>
+  </div>
+  <mat-dialog-content class="mat-typography">
+    <app-basic-selector
+      #poolSelector
+      [title]="'Pool:'"
+      [placeholder]="['Select a pool']"
+      [options]="pools"
+      [isShown]="true"
+      (select)="poolChanged($event.value)"
+    >
     </app-basic-selector>
 
-    <app-basic-selector #milestoneSelector [title]="'Select milestone:'"
-        [placeholder]="['Pick from milestones']" [options]="milestones" [isShown]="true"
-        (select)="milestoneChanged($event.value)">
+    <app-basic-selector
+      #milestoneSelector
+      [title]="'Select milestone:'"
+      [placeholder]="['Pick from milestones']"
+      [options]="milestones"
+      [isShown]="true"
+      (select)="milestoneChanged($event.value)"
+    >
     </app-basic-selector>
 
-    <app-basic-selector #buildSelector [title]="'Select build:'"
-        [placeholder]="['Pick from available builds']" [options]="buildVersions" [isShown]="true"
-        (select)="buildVersionChanged($event.value)">
+    <app-basic-selector
+      #buildSelector
+      [title]="'Select build:'"
+      [placeholder]="['Pick from available builds']"
+      [options]="buildVersions"
+      [isShown]="true"
+      (select)="buildVersionChanged($event.value)"
+    >
     </app-basic-selector>
-
-</mat-dialog-content>
-<mat-dialog-actions align="end">
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-button [mat-dialog-close]="build" [disabled]="!this.canStart">Start</button>
-</mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="build" [disabled]="!this.canStart">
+      Start
+    </button>
+  </mat-dialog-actions>
+</div>
