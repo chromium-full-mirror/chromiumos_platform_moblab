@@ -1,39 +1,88 @@
 <div class="loading-overlay-wrapper">
-    <app-loading-overlay></app-loading-overlay>
+  <app-loading-overlay></app-loading-overlay>
 </div>
-<mat-card *ngIf="stageBuildNotification" class="notification-banner {{ stageBuildNotification.cssClass }}">
-    <mat-icon class="notification-icon {{ stageBuildNotification.cssClass }}">{{ stageBuildNotification.icon }}
+<div class="wrapper">
+  <mat-card
+    *ngIf="stageBuildNotification"
+    class="notification-banner {{ stageBuildNotification.cssClass }}"
+  >
+    <mat-icon class="notification-icon {{ stageBuildNotification.cssClass }}"
+      >{{ stageBuildNotification.icon }}
     </mat-icon>
     {{ stageBuildNotification.message }}
-</mat-card>
-<h2 mat-dialog-title>Access Test Build</h2>
-<div>
-  <p class="mat-caption">If your DUT does not appear below, request for board access <a href="{{build_access_request_link}}" target="_blank">here.</a> </p>
-</div>
-<mat-dialog-content class="mat-typography">
-
-    <app-basic-selector #modelSelector [title]="'Select model:'" [options]="models" [isShown]="true"
-        (select)="modelChanged($event.value)" [placeholder]="['Please select a model.']">
+  </mat-card>
+  <div class="title">
+    <h2 mat-dialog-title>Access Test Build</h2>
+  </div>
+  <div style="display: inline-block; padding: 0 20px;">
+    <p class="mat-caption">
+      If your DUT does not appear below, request for board access
+      <a
+        href="{{ build_access_request_link }}"
+        target="_blank"
+        style="color: blue"
+        >here.</a
+      >
+    </p>
+  </div>
+  <mat-dialog-content class="mat-typography">
+    <app-basic-selector
+      #modelSelector
+      [title]="'Select model:'"
+      [options]="models"
+      [isShown]="true"
+      (select)="modelChanged($event.value)"
+      [placeholder]="['Please select a model.']"
+    >
     </app-basic-selector>
 
-    <app-basic-selector #buildTargetSelector [title]="'Select build target:'" [options]="buildTargets"
-        [isShown]="true" (select)="buildTargetChanged($event.value)" [placeholder]="['Please select a build target.']">
+    <app-basic-selector
+      #buildTargetSelector
+      [title]="'Select build target:'"
+      [options]="buildTargets"
+      [isShown]="true"
+      (select)="buildTargetChanged($event.value)"
+      [placeholder]="['Please select a build target.']"
+    >
     </app-basic-selector>
 
-    <app-basic-selector #milestoneSelector [title]="'Select milestone:'" [options]="milestones"
-        [isShown]="true" (select)="milestoneChanged($event.value)" [placeholder]="['Please select a milestone.']">
+    <app-basic-selector
+      #milestoneSelector
+      [title]="'Select milestone:'"
+      [options]="milestones"
+      [isShown]="true"
+      (select)="milestoneChanged($event.value)"
+      [placeholder]="['Please select a milestone.']"
+    >
     </app-basic-selector>
 
-    <app-basic-selector #buildSelector [title]="'Select build:'" [options]="buildVersions" [isShown]="true"
-        (select)="buildVersionChanged($event.value)" [placeholder]="['Please select a build version.']">
+    <app-basic-selector
+      #buildSelector
+      [title]="'Select build:'"
+      [options]="buildVersions"
+      [isShown]="true"
+      (select)="buildVersionChanged($event.value)"
+      [placeholder]="['Please select a build version.']"
+    >
     </app-basic-selector>
-
-
-</mat-dialog-content>
-<mat-dialog-actions align="end">
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancel</button>
-    <button *ngIf="!isStageBuildSucceeded()" mat-button (click)="stageBuild()"
-        [disabled]="this.stageBuildButtonDisabled">Start</button>
-    <a href="{{buildBucketUrl}}" target="_blank" *ngIf="isStageBuildSucceeded()" [mat-dialog-close]="returnMessage"
-        mat-button>Go to Build Bucket</a>
-</mat-dialog-actions>
+    <button
+      *ngIf="!isStageBuildSucceeded()"
+      mat-button
+      (click)="stageBuild()"
+      [disabled]="this.stageBuildButtonDisabled"
+    >
+      Start
+    </button>
+    <a
+      href="{{ buildBucketUrl }}"
+      target="_blank"
+      *ngIf="isStageBuildSucceeded()"
+      [mat-dialog-close]="returnMessage"
+      mat-button
+      >Go to Build Bucket</a
+    >
+  </mat-dialog-actions>
+</div>
