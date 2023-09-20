@@ -1,9 +1,20 @@
 .loading-overlay-wrapper {
   display: block;
   font-size: 13px;
-  position: relative;
-  margin-bottom: 35px;
-  margin-top: 0px;
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 32px;
+}
+
+.wrapper {
+  min-width: 360px;
+
+  .title {
+    margin-top: 20px;
+   }
 }
 
 .notification-banner {
@@ -11,11 +22,11 @@
 }
 
 .notification-banner.success {
-  background-color: #CEEAD6;
+  background-color: #ceead6;
 }
 
 .notification-banner.error {
-  background-color: #FAD2CF;
+  background-color: #fad2cf;
 }
 
 .notification-icon {
@@ -23,10 +34,10 @@
 }
 
 .notification-icon.success {
-  color: #0D652D;
+  color: #0d652d;
   vertical-align: middle;
 }
 
 .notification-icon.error {
-  color: #A50E0E;
+  color: #a50e0e;
 }
