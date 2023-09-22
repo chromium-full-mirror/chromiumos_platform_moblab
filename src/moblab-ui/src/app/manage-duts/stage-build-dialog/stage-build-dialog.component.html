@@ -6,10 +6,12 @@
     *ngIf="stageBuildNotification"
     class="notification-banner {{ stageBuildNotification.cssClass }}"
   >
+    <div class="flex flex-row p-4 justify-center">
     <mat-icon class="notification-icon {{ stageBuildNotification.cssClass }}"
       >{{ stageBuildNotification.icon }}
     </mat-icon>
     {{ stageBuildNotification.message }}
+    </div>
   </mat-card>
   <div class="title">
     <h2 mat-dialog-title>Access Test Build</h2>
