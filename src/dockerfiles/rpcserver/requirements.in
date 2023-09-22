@@ -9,7 +9,7 @@ requests
 google-cloud-storage
 google-cloud-pubsub
 docker
-parallel-ssh
+parallel-ssh==2.8.0
 python-nmap
 grpcio-reflection
 sqlalchemy
