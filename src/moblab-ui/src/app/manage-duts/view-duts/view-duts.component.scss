@@ -48,16 +48,18 @@
   outline: none;
 }
 
-.mat-row[notConnected='true'] {
+.mat-mdc-row[notConnected='true'] {
   background: #FFEBEE;
 }
 
-.mat-row[noAccessToBuildTarget='true'] {
+.mat-mdc-row[noAccessToBuildTarget='true'] {
   background: #FEF7E0;
 }
 
-.mat-row:hover {
-  background-color: #f5f5f5;
+.mat-mdc-row {
+  &:hover {
+    background-color: #f5f5f5 !important;
+  }
 }
 
 .spinner {
@@ -90,11 +92,11 @@
 }
 
 /* make some space around cells */
-td.mat-cell {
+::ng-deep .mat-mdc-cell {
   padding: 6px 6px;
 }
 
-th.mat-header-cell {
+th.mat-mdc-header-cell {
   padding: 6px;
 }
 
