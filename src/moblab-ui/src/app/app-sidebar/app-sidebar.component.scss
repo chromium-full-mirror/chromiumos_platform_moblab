@@ -79,9 +79,9 @@ mat-toolbar {
   margin-top: 10px;
 }
 
-.list-item-active {
-  font-weight: bold;
-  color: mat-color($accent, darker) !important;
+::ng-deep .list-item-active .mat-mdc-list-item-unscoped-content {
+    font-weight: bold;
+    color: mat-color($accent, darker) !important;
 }
 
 .list-item-disabled{
