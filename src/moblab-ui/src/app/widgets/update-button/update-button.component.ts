@@ -28,6 +28,7 @@ export class UpdateButtonComponent implements OnInit {
     this.moblabGrpcService.get_is_update_available(
       (is_update_available: boolean) => {
         this.isUpdateAvailable = is_update_available;
+        this.statusMessage = this.getUpdateStatusMessage();
       },
       (msg: string) => {
         this.getUpdateStatusFailed = true;

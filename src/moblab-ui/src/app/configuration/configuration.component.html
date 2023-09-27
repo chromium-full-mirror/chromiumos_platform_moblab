@@ -6,7 +6,7 @@
       </div>
     </ng-container>
 
-    <p class="title">Clould Configuration</p>
+    <p class="title">Cloud Configuration</p>
 
     <form #formRef="ngForm" (ngSubmit)="onCloudConfigSubmit(formRef.value)">
       <div class="row">
@@ -140,15 +140,15 @@
 
         <div class="row">
           <mat-checkbox
-            id="command-checkbox"
-            (change)="isRemoteCommandEnabledCheckboxChange()"
-            [checked]="this.isRemoteCommandEnabled"
+            id="console-checkbox"
+            (change)="isRemoteConsoleEnabledCheckboxChange()"
+            [checked]="this.isRemoteConsoleEnabled"
             [matTooltip]="
               !this.isCloudEnabled ? cloudConfigDisabledMessage : ''
             "
             matTooltipPosition="below"
           >
-            Enable remote commands
+            Enable remote console
           </mat-checkbox>
         </div>
 
