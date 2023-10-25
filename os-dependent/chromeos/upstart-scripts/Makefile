@@ -5,4 +5,4 @@
 all:
 
 install:
-	install -m 0644 -t ${DESTDIR}etc/init -D *.conf
+	install -m 0644 -t $(DESTDIR)/etc/init -D *.conf

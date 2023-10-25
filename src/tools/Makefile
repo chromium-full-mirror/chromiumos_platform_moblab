@@ -5,5 +5,5 @@
 all:
 
 install:
-	install -t ${DESTDIR}etc/moblab/tools/ -D *.py
+	install -t $(DESTDIR)/etc/moblab/tools/ -D *.py
 
