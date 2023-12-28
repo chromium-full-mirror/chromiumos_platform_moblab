@@ -13,9 +13,6 @@ FROM ${BASE_REGISTRY_URI}/node:18 as build
 # RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 # RUN apt-get update && apt-get install -yq google-chrome-stable
 
-RUN npm install -g gts eslint
-ENV NODE_PATH=/usr/local/lib/node_modules/gts/node_modules:/usr/local/lib/node_modules
-
 WORKDIR /app
 
 # add `/app/node_modules/.bin` to $PATH

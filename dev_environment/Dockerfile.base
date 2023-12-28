@@ -16,8 +16,15 @@ FROM ${BASE_REGISTRY_URI}/hadolint/hadolint:latest-debian as hadolint
 
 FROM ${BASE_REGISTRY_URI}/node:16-buster as base
 
-RUN npm install -g gts eslint @angular/cli
+RUN mkdir -p /usr/local/node_packages/
+COPY package.json /usr/local/node_packages/
+COPY package-lock.json /usr/local/node_packages/
+WORKDIR /usr/local/node_packages/
+# install modules and put them where we expect them to be
+RUN npm install && mv /usr/local/node_packages/node_modules/* /usr/local/lib/node_modules/
 ENV NODE_PATH=/usr/local/lib/node_modules/gts/node_modules:/usr/local/lib/node_modules
+# workdir back to original
+WORKDIR /
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
     https://packages.cloud.google.com/apt cloud-sdk main" | \
