@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     mariadb-client
 
 COPY dockerfiles/moblab_common/requirements.txt ./
-RUN pip3 install --upgrade pip && pip3 install --no-cache-dir -r requirements.txt
+# Using legacy resolver https://github.com/pypa/pip/issues/9644
+RUN pip3 install --no-cache-dir --use-deprecated=legacy-resolver \
+    --require-hashes -r requirements.txt
 
 RUN mkdir -p /workdir/moblab_common/database_models
 WORKDIR /workdir/moblab_common/database_models

@@ -64,8 +64,7 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ \
 RUN apt-get -yq update && apt-get install -yq google-chrome-stable
 
 COPY requirements.txt ./
-RUN python3 -m pip install -U pip && python3 -m pip install --no-cache-dir -r \
-    requirements.txt
+RUN python3 -m pip install --require-hashes --no-cache-dir -r requirements.txt
 
 # Install vscode
 RUN wget -O code.deb https://go.microsoft.com/fwlink/?LinkID=760868
