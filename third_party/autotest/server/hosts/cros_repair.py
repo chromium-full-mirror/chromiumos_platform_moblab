@@ -581,6 +581,8 @@ class HWIDVerifier(hosts.Verifier):
                 # update serial_number for VPD
                 cmd = 'vpd -s serial_number=%s'
                 host.run(cmd % serial_number, ignore_status=True)
+                # TODO(b/77594752): remove once dump_vpd_log consumers are
+                # gone.
                 host.run('dump_vpd_log --force', ignore_status=True)
                 # reading from VPD to see what we updated
                 req = host.run('vpd -g serial_number', ignore_status=True)
@@ -606,8 +608,8 @@ class EnrollmentStateVerifier(hosts.Verifier):
              /home/.shadow/install_attributes.pb
 
     Flag 2 - The value of "check_enrollment" from VPD. Can be obtained by
-             reading the cache file in
-             /mnt/stateful_partition/unencrypted/cache/vpd/full-v2.txt
+    running
+             vpd -g check_enrollment -i RW_VPD
 
     The states:
     State 1 - Device is enrolled, means flag 1 is true and in
@@ -637,12 +639,12 @@ class EnrollmentStateVerifier(hosts.Verifier):
 
     def _get_enrollment_state(self, host):
         logging.debug('checking enrollment state from VPD cache...')
-        response = host.run('grep "check_enrollment" %s' % self.VPD_CACHE,
+        response = host.run('vpd -g check_enrollment -i RW_VPD',
                             ignore_status=True)
         if response.exit_status == 0:
             result = response.stdout.strip()
             logging.info('Enrollment state in VPD cache: %s', result)
-            return result == '"check_enrollment"="1"'
+            return result == '1'
 
         logging.error('Unexpected error occured during verify enrollment state'
                       ' in VPD cache, skipping verify process.')
