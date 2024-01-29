@@ -65,7 +65,7 @@ RUN apk del \
     libffi-dev
 
 RUN echo "chown \"\$USER_NAME\":\"\$USER_NAME\" /home/\"\$USER_NAME\"" >> /etc/cont-init.d/10-adduser
-RUN echo "export \$HOME=/home/\"\$USER_NAME\"" >> /etc/cont-init.d/10-adduser
+RUN echo "export HOME=/home/\"\$USER_NAME\"" >> /etc/cont-init.d/10-adduser
 RUN echo "addgroup --gid 412 docker" >> /etc/cont-init.d/10-adduser
 RUN echo "usermod -aG docker moblab" >> /etc/cont-init.d/10-adduser
 
