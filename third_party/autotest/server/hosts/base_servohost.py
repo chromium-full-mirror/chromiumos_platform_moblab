@@ -226,9 +226,10 @@ class BaseServoHost(ssh_host.SSHHost):
         """
         client = docker.from_env(timeout=300)
         try:
-            (exit_code, output) = client.containers.get(self.hostname).exec_run("ps")
+            (exit_code, output) = client.containers.get(self.hostname).exec_run(
+                "servodtool instance wait-for-active -p 9999")
             logging.info("Is Up output %s", output)
-            if b"servod" not in output:
+            if exit_code != 0:
                 return False
         except docker.errors.NotFound:
             return False
