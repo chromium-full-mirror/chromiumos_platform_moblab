@@ -24,7 +24,6 @@ export class FAFTRunComponent extends BaseSuite implements AfterContentInit {
   @ViewChild(BasicSelectorComponent) ctsVersionSelectorForm;
 
   readonly suiteList: string[] = [
-    'faft_setup',
     'faft_bios',
     'faft_ec',
     'faft_pd',
