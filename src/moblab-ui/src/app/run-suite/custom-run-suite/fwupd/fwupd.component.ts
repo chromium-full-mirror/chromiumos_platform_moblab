@@ -1,8 +1,8 @@
 import {
-  AfterContentInit, 
-  AfterViewInit, 
-  ChangeDetectorRef, 
-  Component, 
+  AfterContentInit,
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
   ViewChild
 } from '@angular/core';
 
@@ -228,12 +228,13 @@ export class FWUPDRunComponent extends BaseSuite implements AfterViewInit {
                         .find(device => device.DeviceId === device_id) ?? null;
   }
 
-  /** Method is getting the `test_args` **/
+  /** Method is getting the `test_args`
+  * device_id argument should point to the unique device ID rather than
+  * GUID to update the exact device.
+  * */
   private getTestArgs(): string[] {
-    let id = (this.device?.Guid[0] ?? this.getDeviceBy(this.device_id)?.Guid[0]) || this.device_id;
-
     return [
-      `device_id=${id}`,
+      `device_id=${this.device_id}`,
       ... (this.suiteName === this.FWUPD_INSTALL_VERSION) ? [`version=${this.device_file_or_version}`] : [],
       ... (this.suiteName === this.FWUPD_INSTALL_FILE) ? [`fwfile=${this.device_file_or_version}`] : [],
       ... (this.cert_id) ? [`cert_id=${this.cert_id}`] : [],
