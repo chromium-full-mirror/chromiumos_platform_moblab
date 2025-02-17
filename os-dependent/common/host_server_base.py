@@ -230,6 +230,13 @@ class HostServerBase(hostservice_pb2_grpc.MoblabHostServiceServicer):
         """
         raise NotImplementedError
 
+    def stop_ui(self, unused_request, context):
+        """Stop ui of the host machines OS.
+
+        Raises: NotImplementedError
+        """
+        context.abort(grpc.StatusCode.UNIMPLEMENTED, "Not Implemented")
+        raise NotImplementedError
 
 class DiskSpaceException(Exception):
     """Exception thrown by get_disk_space endpoint."""

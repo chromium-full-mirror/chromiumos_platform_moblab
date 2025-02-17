@@ -284,6 +284,22 @@ class HostServicesConnector(object):
             logging.exception("Error getting version number")
             raise HostServicesException("Error getting version number")
 
+    @classmethod
+    def stop_ui(cls):
+        """Stop ui of the host machine OS.
+
+        This may not be implemented on all hosts.
+
+        Raises:
+            HostServicesException: if there is an issue with the host server.
+        """
+        cls.connect()
+        try:
+            cls.stub.stop_ui(empty_pb2.Empty())
+        except grpc.RpcError as e:
+            cls.disconnect()  # Force reconnect on retry
+            logging.exception("Error stop ui")
+            raise HostServicesException("Error stop ui: " + str(e))
 
 class AsyncHostServicesConnector(object):
     """Abstract away the server connect/disconnect/host/port details."""

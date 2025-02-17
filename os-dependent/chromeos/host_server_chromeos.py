@@ -350,6 +350,16 @@ class HostServerChromeOS(host_server_base.HostServerBase):
         response.total_MB = int(disk_stats[1].rstrip("M"))
         return response
 
+    def stop_ui(self, unused_request, unused_context):
+        """Stop ui of the chromeos.
+
+        Call the stop ui for the chromeos device.
+
+        Returns:
+            Nothing, return will never be called.
+        """
+        subprocess.check_call(["/sbin/stop", "ui"])
+        return empty_pb2.Empty()
 
 if __name__ == "__main__":
     host_server = HostServerChromeOS()

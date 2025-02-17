@@ -19,6 +19,7 @@ service MoblabHostService {
   rpc get_system_version(google.protobuf.Empty) returns (SystemVersionResponse) {}
   rpc get_api_version(google.protobuf.Empty) returns (GetApiVersionResponse) {}
   rpc get_disk_usage_stats(google.protobuf.Empty) returns (GetDiskUsageStatsResponse) {}
+  rpc stop_ui(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 }
 
 // NEXT_TAG = 2
