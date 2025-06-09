@@ -48,7 +48,7 @@ RUN echo "AuthorizedKeysFile      /config/.ssh/authorized_keys" >> /etc/ssh/sshd
 
 COPY requirements.txt ./
 
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN curl https://bootstrap.pypa.io/pip/3.8/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
