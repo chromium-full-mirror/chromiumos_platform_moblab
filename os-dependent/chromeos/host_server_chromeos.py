@@ -311,14 +311,14 @@ class HostServerChromeOS(host_server_base.HostServerBase):
                 x.split("=")[0]: x.split("=")[1] for x in lines if "=" in x
             }
 
-            response.version = "R%s-%s" % (
+            response.version = "ChromeOS M-%s" % (
                 version_response["CHROMEOS_RELEASE_CHROME_MILESTONE"].strip(),
-                version_response["CHROMEOS_RELEASE_VERSION"].strip(),
             )
             response.track = version_response["CHROMEOS_RELEASE_TRACK"]
-            response.description = version_response[
-                "CHROMEOS_RELEASE_DESCRIPTION"
-            ]
+            response.description = "R%s-%s" % (
+                version_response["CHROMEOS_RELEASE_CHROME_MILESTONE"].strip(),
+                version_response["CHROMEOS_RELEASE_DESCRIPTION"]
+            )
 
         return response
 
