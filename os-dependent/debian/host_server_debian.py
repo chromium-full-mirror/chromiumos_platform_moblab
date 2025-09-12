@@ -158,15 +158,19 @@ class HostServerDebian(host_server_base.HostServerBase):
         """
         response = hostservice_pb2.SystemVersionResponse()
 
-        response.version = "No Version Number"
-        try:
-            with open("/etc/debian_version") as f:
-                response.version = "".join(f.readlines()).strip()
-        except (FileNotFoundError, IOError):
-            _LOGGER.exception("Error retrieving version number")
-
+        response.version = ""
         response.track = ""
         response.description = ""
+
+        try:
+            with open("/etc/satlab/satlab.conf") as f:
+                out = f.readlines()
+                for line in out:
+                    if line.startswith("LABEL"):
+                        _, _, value = line.partition("=")
+                        response.track = value if value else "Track not found"
+        except (FileNotFoundError, IOError):
+            _LOGGER.exception("Error retrieving the track")
 
         try:
             with open("/etc/os-release") as f:
@@ -175,11 +179,12 @@ class HostServerDebian(host_server_base.HostServerBase):
                 for line in output:
                     (key, value) = line.split("=")
                     os_release_info[key] = value.strip('"\n')
-                response.track = os_release_info.get(
-                    "VERSION_CODENAME", "No Track Found"
+                response.version = "%s %s" % (
+                    os_release_info.get("NAME", "Version not found"),
+                    os_release_info.get("VERSION_ID")
                 )
                 response.description = os_release_info.get(
-                    "PRETTY_NAME", "No Name Found"
+                    "VERSION", "Description not found"
                 )
         except (FileNotFoundError, IOError):
             _LOGGER.exception("Error retrieving version information")
