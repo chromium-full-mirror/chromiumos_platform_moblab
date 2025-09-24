@@ -11,6 +11,7 @@ import sys
 import netifaces
 import hostservice_pb2
 import host_server_base
+from google.protobuf import empty_pb2
 import os
 
 
@@ -22,7 +23,7 @@ _LOGGER = logging.getLogger("host-server")
 class HostServerDebian(host_server_base.HostServerBase):
     """Implementation for the hostservice contract on debian.
 
-    It has been specifically chosen to not implement reboot, reset or update
+    It has been specifically chosen to not implement reset or update
     as on debian these should be performed outside of the moblab software.
 
     As debian machines can serve other functions than just running moblab like
@@ -225,6 +226,17 @@ class HostServerDebian(host_server_base.HostServerBase):
         response.total_MB = int(disk_stats[1].rstrip("M"))
         return response
 
+    def reboot(self, unused_request, context):
+        """Reboot the host machine.
+
+        This is an optionally implemented method to reboot the host os
+        device.  Integrators into a new OS can decide if it is appropriate
+        for moblab software to be allowed to reboot the host.
+
+        Raises: NotImplementedError
+        """
+        subprocess.check_call(["reboot"])
+        return empty_pb2.Empty()
 
 if __name__ == "__main__":
     host_server = HostServerDebian()
